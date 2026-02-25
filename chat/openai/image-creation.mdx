@@ -1,0 +1,152 @@
+---
+title: "聊天创作图"
+description: "通过 Chat Completions API 使用支持图片生成的模型在对话中创作图片"
+---
+
+# 聊天创作图
+
+部分模型（如 `gpt-4o`、`gpt-4o-image`）支持在聊天对话中直接生成图片。模型会根据对话内容自动判断是否需要生成图片，并在回复中返回图片。
+
+<Note>
+  聊天创作图与独立的 Images API（`/v1/images/generations`）不同。这里是通过聊天对话的方式让模型生成图片，模型可以同时返回文字和图片。
+</Note>
+
+## 基本用法
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      {
+        "role": "user",
+        "content": "画一只在月光下奔跑的猫，赛博朋克风格"
+      }
+    ],
+    "max_tokens": 4096
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {
+            "role": "user",
+            "content": "画一只在月光下奔跑的猫，赛博朋克风格"
+        }
+    ],
+    max_tokens=4096
+)
+
+message = response.choices[0].message
+
+# 回复可能包含文字和图片
+for part in message.content:
+    if isinstance(part, dict):
+        if part.get("type") == "text":
+            print(part["text"])
+        elif part.get("type") == "image_url":
+            print("图片 URL:", part["image_url"]["url"])
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const response = await client.chat.completions.create({
+  model: "gpt-4o",
+  messages: [
+    {
+      role: "user",
+      content: "画一只在月光下奔跑的猫，赛博朋克风格",
+    },
+  ],
+  max_tokens: 4096,
+});
+
+console.log(response.choices[0].message.content);
+```
+
+</CodeGroup>
+
+## 响应格式
+
+当模型生成图片时，`content` 字段会返回包含图片的多部分内容：
+
+```json
+{
+  "id": "chatcmpl-abc123",
+  "object": "chat.completion",
+  "created": 1709123456,
+  "model": "gpt-4o",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": [
+          {
+            "type": "text",
+            "text": "这是我为你创作的赛博朋克风格月光猫："
+          },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg..."
+            }
+          }
+        ]
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 20,
+    "completion_tokens": 1024,
+    "total_tokens": 1044
+  }
+}
+```
+
+## 图片编辑
+
+你也可以发送一张图片并要求模型对其进行修改：
+
+```python Python
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "把这张图片改成水彩画风格"},
+                {
+                    "type": "image_url",
+                    "image_url": {"url": "https://example.com/photo.jpg"}
+                }
+            ]
+        }
+    ],
+    max_tokens=4096
+)
+```
+
+<Warning>
+  图片生成会消耗较多 Token。生成的图片以 Base64 格式返回，请注意响应体积可能较大。
+</Warning>

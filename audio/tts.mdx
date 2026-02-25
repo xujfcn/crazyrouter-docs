@@ -1,0 +1,111 @@
+---
+title: "文本转语音 (TTS)"
+description: "使用 POST /v1/audio/speech 将文本转换为语音"
+---
+
+# 文本转语音 (TTS)
+
+```
+POST /v1/audio/speech
+```
+
+将文本转换为自然语音，兼容 OpenAI TTS API 格式。
+
+## 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `model` | string | 是 | 模型名称：`gpt-4o-mini-tts`、`tts-1`、`tts-1-hd` |
+| `input` | string | 是 | 要转换的文本，最长 4096 字符 |
+| `voice` | string | 是 | 语音角色 |
+| `response_format` | string | 否 | 输出格式：`mp3`（默认）、`opus`、`aac`、`flac`、`wav`、`pcm` |
+| `speed` | number | 否 | 语速，0.25-4.0，默认 1.0 |
+
+### 可用语音
+
+| 语音 | 特点 |
+|------|------|
+| `alloy` | 中性、平衡 |
+| `echo` | 男性、沉稳 |
+| `fable` | 男性、温暖 |
+| `onyx` | 男性、深沉 |
+| `nova` | 女性、活泼 |
+| `shimmer` | 女性、柔和 |
+
+## 请求示例
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/audio/speech \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o-mini-tts",
+    "input": "你好，欢迎使用 Crazyrouter API。今天天气真不错！",
+    "voice": "nova",
+    "response_format": "mp3",
+    "speed": 1.0
+  }' \
+  --output speech.mp3
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.audio.speech.create(
+    model="gpt-4o-mini-tts",
+    input="你好，欢迎使用 Crazyrouter API。今天天气真不错！",
+    voice="nova",
+    response_format="mp3",
+    speed=1.0
+)
+
+response.stream_to_file("speech.mp3")
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+import fs from "fs";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const response = await client.audio.speech.create({
+  model: "gpt-4o-mini-tts",
+  input: "你好，欢迎使用 Crazyrouter API。",
+  voice: "nova",
+});
+
+const buffer = Buffer.from(await response.arrayBuffer());
+fs.writeFileSync("speech.mp3", buffer);
+```
+
+</CodeGroup>
+
+响应为音频文件的二进制流，直接保存即可。
+
+---
+
+## 模型对比
+
+| 模型 | 质量 | 延迟 | 说明 |
+|------|------|------|------|
+| `tts-1` | 标准 | 低 | 适合实时场景 |
+| `tts-1-hd` | 高清 | 中 | 更自然的语音 |
+| `gpt-4o-mini-tts` | 最高 | 中 | 最新模型，支持更多语言和情感 |
+
+<Note>
+  `gpt-4o-mini-tts` 支持多语言，会自动识别输入文本的语言并使用对应的发音。
+</Note>
+
+<Warning>
+  响应为二进制音频流，不是 JSON。请使用 `--output` 或流式写入文件。
+</Warning>

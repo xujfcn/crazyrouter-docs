@@ -1,0 +1,119 @@
+---
+title: 'Python 识图'
+description: 'Python 实现 GPT-4o 和 Claude 视觉识图'
+---
+
+## GPT-4o 识图 - URL 方式
+
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "描述这张图片的内容"},
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": "https://example.com/photo.jpg"
+                }
+            }
+        ]
+    }]
+)
+
+print(response.choices[0].message.content)
+```
+
+## GPT-4o 识图 - 本地图片
+
+```python
+import base64
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+
+# 读取本地图片并转为 base64
+with open("photo.jpg", "rb") as f:
+    image_data = base64.b64encode(f.read()).decode("utf-8")
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "这张图片里有什么？"},
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/jpeg;base64,{image_data}"
+                }
+            }
+        ]
+    }]
+)
+
+print(response.choices[0].message.content)
+```
+
+## 多图对比
+
+```python
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "对比这两张图片的区别"},
+            {"type": "image_url", "image_url": {"url": "https://example.com/img1.jpg"}},
+            {"type": "image_url", "image_url": {"url": "https://example.com/img2.jpg"}}
+        ]
+    }]
+)
+
+print(response.choices[0].message.content)
+```
+
+## Claude 识图
+
+Claude 模型同样支持通过 OpenAI 兼容格式进行识图：
+
+```python
+response = client.chat.completions.create(
+    model="claude-sonnet-4-20250514",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "详细描述这张图片"},
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/png;base64,{image_data}"
+                }
+            }
+        ]
+    }],
+    max_tokens=1024
+)
+
+print(response.choices[0].message.content)
+```
+
+## 支持的识图模型
+
+| 模型 | 说明 |
+|------|------|
+| `gpt-4o` | OpenAI 旗舰多模态模型 |
+| `gpt-4o-mini` | 轻量版，速度更快 |
+| `claude-sonnet-4-20250514` | Anthropic Claude Sonnet |
+| `claude-opus-4-20250514` | Anthropic Claude Opus |
+| `gemini-2.5-pro` | Google Gemini Pro |
+| `gemini-2.5-flash` | Google Gemini Flash |
+
+<Note>
+  图片大小建议不超过 20MB。Base64 编码会增加约 33% 的数据量，大图建议使用 URL 方式。
+</Note>

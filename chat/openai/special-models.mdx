@@ -1,0 +1,159 @@
+---
+title: "特殊模型"
+description: "特殊用途模型的使用方法，包括翻译模型和 OCR 识别模型"
+---
+
+# 特殊模型
+
+Crazyrouter 提供一些具有特殊能力的模型，它们通过标准的 Chat Completions API 调用，但有特定的使用方式。
+
+---
+
+## qwen-mt-turbo（翻译模型）
+
+通义千问机器翻译模型，专为高质量翻译优化。通过 `translation` 参数指定源语言和目标语言。
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "qwen-mt-turbo",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a translation assistant."
+      },
+      {
+        "role": "user",
+        "content": "将以下内容翻译成英文：人工智能正在改变我们的生活方式，从医疗健康到交通出行，无处不在。"
+      }
+    ],
+    "translation": {
+      "source_lang": "zh",
+      "target_lang": "en"
+    }
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/v1/chat/completions",
+    headers={
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Content-Type": "application/json"
+    },
+    json={
+        "model": "qwen-mt-turbo",
+        "messages": [
+            {"role": "system", "content": "You are a translation assistant."},
+            {"role": "user", "content": "将以下内容翻译成英文：人工智能正在改变我们的生活方式。"}
+        ],
+        "translation": {
+            "source_lang": "zh",
+            "target_lang": "en"
+        }
+    }
+)
+
+print(response.json()["choices"][0]["message"]["content"])
+```
+
+</CodeGroup>
+
+### 支持的语言代码
+
+| 代码 | 语言 | 代码 | 语言 |
+|------|------|------|------|
+| `zh` | 中文 | `en` | 英文 |
+| `ja` | 日文 | `ko` | 韩文 |
+| `fr` | 法文 | `de` | 德文 |
+| `es` | 西班牙文 | `ru` | 俄文 |
+| `pt` | 葡萄牙文 | `it` | 意大利文 |
+
+---
+
+## deepseek-ocr（OCR 识别）
+
+DeepSeek OCR 模型，专为文档和图片中的文字识别优化。通过发送图片让模型提取其中的文字内容。
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "deepseek-ocr",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {"type": "text", "text": "识别图片中的所有文字"},
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "https://example.com/document.png"
+            }
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="deepseek-ocr",
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "识别图片中的所有文字"},
+                {
+                    "type": "image_url",
+                    "image_url": {"url": "https://example.com/document.png"}
+                }
+            ]
+        }
+    ]
+)
+
+print(response.choices[0].message.content)
+```
+
+</CodeGroup>
+
+### 响应示例
+
+```json
+{
+  "id": "chatcmpl-abc123",
+  "object": "chat.completion",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "图片中的文字内容：\n\n发票号码：12345678\n开票日期：2026年2月20日\n金额：¥1,280.00\n..."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}
+```
+
+<Note>
+  特殊模型的额外参数（如 `translation`）是 Crazyrouter 扩展的非标准参数，标准 OpenAI SDK 可能不直接支持。可以通过 `extra_body` 或直接使用 HTTP 请求传入。
+</Note>

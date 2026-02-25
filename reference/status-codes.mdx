@@ -1,0 +1,118 @@
+---
+title: '状态码'
+description: '所有 API 类型的状态码参考'
+---
+
+## HTTP 状态码
+
+| 状态码 | 说明 | 处理建议 |
+|--------|------|----------|
+| 200 | 请求成功 | - |
+| 400 | 请求参数错误 | 检查请求体格式和参数 |
+| 401 | 认证失败 | 检查 API Key 是否正确 |
+| 403 | 权限不足 | 检查令牌是否有权限访问该模型 |
+| 404 | 资源不存在 | 检查 URL 路径 |
+| 429 | 请求频率超限 | 降低请求频率或联系管理员 |
+| 500 | 服务器内部错误 | 稍后重试 |
+| 502 | 上游服务错误 | 上游渠道异常，系统会自动重试 |
+| 503 | 服务不可用 | 系统维护中 |
+
+## Chat Completions 状态码
+
+```json
+{
+  "error": {
+    "message": "错误描述",
+    "type": "error_type",
+    "code": "error_code"
+  }
+}
+```
+
+| code | 说明 |
+|------|------|
+| `invalid_api_key` | API Key 无效或已过期 |
+| `insufficient_quota` | 余额不足 |
+| `model_not_found` | 模型不存在或未启用 |
+| `context_length_exceeded` | 输入超过模型上下文长度限制 |
+| `rate_limit_exceeded` | 请求频率超限 |
+| `content_filter` | 内容被安全过滤器拦截 |
+
+## Midjourney 任务状态码
+
+| 状态 | 说明 |
+|------|------|
+| `NOT_START` | 任务未开始 |
+| `SUBMITTED` | 已提交 |
+| `IN_PROGRESS` | 生成中 |
+| `SUCCESS` | 生成成功 |
+| `FAILURE` | 生成失败 |
+| `CANCEL` | 已取消 |
+
+### MJ 错误码
+
+| code | 说明 |
+|------|------|
+| 1 | 提交成功 |
+| 21 | 任务已存在 |
+| 22 | 排队中 |
+| 23 | 队列已满 |
+| 24 | 提交失败 |
+
+## Kling 视频状态码
+
+| 状态 | 说明 |
+|------|------|
+| `submitted` | 已提交 |
+| `processing` | 处理中 |
+| `succeed` | 生成成功 |
+| `failed` | 生成失败 |
+
+## Luma 视频状态码
+
+| 状态 | 说明 |
+|------|------|
+| `pending` | 等待中 |
+| `processing` | 处理中 |
+| `completed` | 完成 |
+| `failed` | 失败 |
+
+## Suno 音乐状态码
+
+| 状态 | 说明 |
+|------|------|
+| `submitted` | 已提交 |
+| `processing` | 生成中 |
+| `complete` | 完成 |
+| `error` | 错误 |
+
+## Runway 视频状态码
+
+| 状态 | 说明 |
+|------|------|
+| `PENDING` | 等待中 |
+| `RUNNING` | 生成中 |
+| `SUCCEEDED` | 成功 |
+| `FAILED` | 失败 |
+
+## 通用错误处理建议
+
+<Warning>
+  遇到 429 错误时，请勿立即重试。建议使用指数退避策略（Exponential Backoff），初始等待 1 秒，每次翻倍。
+</Warning>
+
+```python
+import time
+import requests
+
+def request_with_retry(url, headers, json_data, max_retries=3):
+    for i in range(max_retries):
+        response = requests.post(url, headers=headers, json=json_data)
+        if response.status_code == 429:
+            wait = 2 ** i
+            print(f"频率限制，等待 {wait} 秒后重试...")
+            time.sleep(wait)
+            continue
+        return response
+    return response
+```

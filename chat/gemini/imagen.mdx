@@ -1,0 +1,134 @@
+---
+title: "Imagen 4"
+description: "Google Imagen 4 图片生成模型，通过 Gemini API 调用"
+---
+
+# Imagen 4
+
+Google Imagen 4 是专业的图片生成模型，通过 Gemini API 端点调用。
+
+<Warning>
+  Imagen 4 目前处于开发阶段，功能和可用性可能会变化。
+</Warning>
+
+```
+POST /v1beta/models/imagen-4:generateContent
+```
+
+---
+
+## 基本用法
+
+<CodeGroup>
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/imagen-4:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "一只金色的拉布拉多犬在阳光明媚的草地上奔跑，摄影级画质，浅景深"}
+        ]
+      }
+    ],
+    "generationConfig": {
+      "responseModalities": ["IMAGE"],
+      "imageGenerationConfig": {
+        "numberOfImages": 1,
+        "aspectRatio": "16:9"
+      }
+    }
+  }'
+```
+
+```python Python
+import google.generativeai as genai
+import base64
+
+genai.configure(
+    api_key="YOUR_API_KEY",
+    transport="rest",
+    client_options={"api_endpoint": "https://crazyrouter.com"}
+)
+
+model = genai.GenerativeModel("imagen-4")
+
+response = model.generate_content(
+    "一只金色的拉布拉多犬在阳光明媚的草地上奔跑，摄影级画质",
+    generation_config=genai.GenerationConfig(
+        response_modalities=["IMAGE"],
+        image_generation_config={
+            "number_of_images": 1,
+            "aspect_ratio": "16:9"
+        }
+    )
+)
+
+for part in response.candidates[0].content.parts:
+    if hasattr(part, "inline_data"):
+        with open("imagen_output.png", "wb") as f:
+            f.write(base64.b64decode(part.inline_data.data))
+        print("图片已保存")
+```
+
+</CodeGroup>
+
+### 响应格式
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "inlineData": {
+              "mimeType": "image/png",
+              "data": "iVBORw0KGgoAAAANSUhEUg..."
+            }
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP"
+    }
+  ]
+}
+```
+
+---
+
+## 参数说明
+
+### imageGenerationConfig
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `numberOfImages` | integer | 生成图片数量，1-4 |
+| `aspectRatio` | string | 宽高比：`1:1`、`16:9`、`9:16`、`4:3`、`3:4` |
+
+---
+
+## 批量生成
+
+```json
+{
+  "generationConfig": {
+    "responseModalities": ["IMAGE"],
+    "imageGenerationConfig": {
+      "numberOfImages": 4,
+      "aspectRatio": "1:1"
+    }
+  }
+}
+```
+
+<Note>
+  Imagen 4 是纯图片生成模型，`responseModalities` 应设为 `["IMAGE"]`。如果需要同时返回文字说明，可以使用 Gemini 图片生成模型。
+</Note>
+
+<Note>
+  Imagen 4 的提示词建议使用详细的描述性语言，包括风格、光线、构图等信息，以获得更好的生成效果。
+</Note>

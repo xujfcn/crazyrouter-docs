@@ -1,0 +1,103 @@
+---
+title: '上传图片'
+description: '上传图片到内置图床或自建图床'
+api: 'POST /api/upload'
+---
+
+## 概述
+
+Crazyrouter 提供图片上传接口，支持将图片上传到内置图床。上传后返回可访问的图片 URL，可用于识图、图像编辑等 API 调用。
+
+## 内置图床
+
+### 请求
+
+```
+POST /api/upload
+Content-Type: multipart/form-data
+Authorization: Bearer sk-xxx
+```
+
+<ParamField body="file" type="file" required>
+  图片文件，支持 JPG、PNG、GIF、WebP 格式
+</ParamField>
+
+### 响应
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": "https://crazyrouter.com/uploads/2026/01/abc123.png"
+}
+```
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+url = "https://crazyrouter.com/api/upload"
+headers = {
+    "Authorization": "Bearer sk-xxx"
+}
+
+with open("image.png", "rb") as f:
+    response = requests.post(
+        url,
+        headers=headers,
+        files={"file": ("image.png", f, "image/png")}
+    )
+
+data = response.json()
+image_url = data["data"]
+print(f"图片地址: {image_url}")
+```
+
+```bash cURL
+curl -X POST https://crazyrouter.com/api/upload \
+  -H "Authorization: Bearer sk-xxx" \
+  -F "file=@image.png"
+```
+
+</CodeGroup>
+
+## 配合识图使用
+
+上传图片后，可以将返回的 URL 用于 GPT-4o 识图：
+
+```python
+# 先上传图片
+upload_resp = requests.post(
+    "https://crazyrouter.com/api/upload",
+    headers={"Authorization": "Bearer sk-xxx"},
+    files={"file": open("photo.jpg", "rb")}
+)
+image_url = upload_resp.json()["data"]
+
+# 再调用识图
+from openai import OpenAI
+client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "描述这张图片"},
+            {"type": "image_url", "image_url": {"url": image_url}}
+        ]
+    }]
+)
+print(response.choices[0].message.content)
+```
+
+## 自建图床
+
+如果需要使用自建图床，可在系统设置中配置图床 API 地址。支持兼容 S3 协议的对象存储服务。
+
+<Note>
+  上传文件大小限制为 20MB。建议在上传前压缩图片以节省存储空间和加快传输速度。
+</Note>

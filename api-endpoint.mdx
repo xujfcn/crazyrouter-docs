@@ -1,0 +1,68 @@
+---
+title: '代理接口调用地址'
+description: 'API 端点地址说明'
+---
+
+## API Base URL
+
+```
+https://crazyrouter.com
+```
+
+## 主要端点
+
+### 聊天 API
+
+| 端点 | 方法 | 说明 |
+|------|------|------|
+| `/v1/chat/completions` | POST | OpenAI Chat 格式 |
+| `/v1/messages` | POST | Anthropic Claude 格式 |
+| `/v1/responses` | POST | OpenAI Responses API |
+| `/v1/completions` | POST | Legacy Completions |
+
+### Gemini 原生格式
+
+| 端点 | 方法 | 说明 |
+|------|------|------|
+| `/v1beta/models/{model}:generateContent` | POST | 文本生成 |
+| `/v1beta/models/{model}:streamGenerateContent` | POST | 流式生成 |
+
+### 图像 API
+
+| 端点 | 方法 | 说明 |
+|------|------|------|
+| `/v1/images/generations` | POST | OpenAI 图像生成 |
+| `/v1/images/edits` | POST | 图像编辑 |
+| `/mj/submit/imagine` | POST | Midjourney 绘图 |
+| `/ideogram/v1/ideogram-v3/generate` | POST | Ideogram V3 |
+
+### 视频 API
+
+| 端点 | 方法 | 说明 |
+|------|------|------|
+| `/v1/video/create` | POST | 统一视频创建 |
+| `/v1/video/query` | GET | 统一视频查询 |
+| `/kling/v1/videos/text2video` | POST | Kling 文生视频 |
+| `/luma/generations` | POST | Luma 视频生成 |
+| `/runwayml/v1/tasks` | POST | Runway 视频生成 |
+
+### 音频 API
+
+| 端点 | 方法 | 说明 |
+|------|------|------|
+| `/v1/audio/speech` | POST | 文本转语音 (TTS) |
+| `/v1/audio/transcriptions` | POST | 语音转文字 (STT) |
+| `/suno/submit/music` | POST | Suno 音乐生成 |
+
+### 其他 API
+
+| 端点 | 方法 | 说明 |
+|------|------|------|
+| `/v1/embeddings` | POST | 嵌入向量 |
+| `/v1/rerank` | POST | 重排序 |
+| `/v1/models` | GET | 模型列表 |
+| `/api/upload` | POST | 图片上传 |
+
+<Note>
+所有端点均支持 HTTPS。使用 OpenAI 兼容客户端时，只需将 `base_url` 设置为 `https://crazyrouter.com/v1`。
+</Note>

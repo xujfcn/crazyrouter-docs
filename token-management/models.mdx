@@ -1,0 +1,74 @@
+---
+title: '获取令牌支持模型'
+description: '查询指定令牌可使用的模型列表'
+api: 'GET /api/token/models'
+---
+
+## 接口说明
+
+获取当前令牌（API Key）可以调用的模型列表。如果令牌未限制模型，则返回系统所有已启用模型。
+
+## 认证方式
+
+使用 API Key（sk-xxx）进行认证：
+
+```
+Authorization: Bearer sk-xxx
+```
+
+## 响应格式
+
+```json
+{
+  "success": true,
+  "data": [
+    "gpt-4o",
+    "gpt-4o-mini",
+    "claude-sonnet-4-20250514",
+    "gemini-2.5-pro",
+    "text-embedding-3-large"
+  ]
+}
+```
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1"
+)
+
+# 通过 OpenAI SDK 获取模型列表
+models = client.models.list()
+for model in models.data:
+    print(model.id)
+```
+
+```python Python (requests)
+import requests
+
+response = requests.get(
+    "https://crazyrouter.com/v1/models",
+    headers={"Authorization": "Bearer sk-xxx"}
+)
+
+models = response.json()["data"]
+for model in models:
+    print(model["id"])
+```
+
+```bash cURL
+curl https://crazyrouter.com/v1/models \
+  -H "Authorization: Bearer sk-xxx"
+```
+
+</CodeGroup>
+
+<Note>
+  也可以通过 OpenAI 兼容的 `GET /v1/models` 端点获取模型列表，效果相同。
+</Note>

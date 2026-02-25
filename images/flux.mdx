@@ -1,0 +1,132 @@
+---
+title: "Flux"
+description: "使用 Flux 模型生成高质量图像，支持 OpenAI 格式和 Replicate 原生格式"
+---
+
+# Flux
+
+Flux 是 Black Forest Labs 开发的高质量图像生成模型，支持多种变体。
+
+## 通过 OpenAI 格式调用
+
+```
+POST /v1/images/generations
+```
+
+使用 OpenAI 兼容格式调用 Flux 模型。
+
+### 支持的模型
+
+| 模型 | 说明 |
+|------|------|
+| `flux-1.1-pro` | Flux 1.1 Pro，高质量生成 |
+| `flux-1.1-pro-ultra` | Flux 1.1 Pro Ultra，超高质量 |
+| `flux-dev` | Flux Dev，开发版本 |
+| `flux-schnell` | Flux Schnell，快速生成 |
+| `flux-kontext-pro` | Flux Kontext Pro，上下文感知 |
+| `flux-kontext-dev` | Flux Kontext Dev |
+
+### 请求示例
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "flux-1.1-pro",
+    "prompt": "A photorealistic portrait of a woman with flowing red hair in golden hour lighting",
+    "n": 1,
+    "size": "1024x1024"
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.images.generate(
+    model="flux-1.1-pro",
+    prompt="A photorealistic portrait of a woman with flowing red hair in golden hour lighting",
+    n=1,
+    size="1024x1024"
+)
+
+print(response.data[0].url)
+```
+
+</CodeGroup>
+
+### 分辨率选项
+
+| 尺寸 | 宽高比 |
+|------|--------|
+| `1024x1024` | 1:1 |
+| `1024x768` | 4:3 |
+| `768x1024` | 3:4 |
+| `1024x576` | 16:9 |
+| `576x1024` | 9:16 |
+| `1536x1024` | 3:2 |
+| `1024x1536` | 2:3 |
+
+### 响应示例
+
+```json
+{
+  "created": 1709123456,
+  "data": [
+    {
+      "url": "https://crazyrouter.com/files/flux_abc123.png"
+    }
+  ]
+}
+```
+
+---
+
+## 通过 Replicate 格式调用
+
+```
+POST /replicate/v1/models/black-forest-labs/flux-kontext-dev/predictions
+```
+
+使用 Replicate 原生格式调用 Flux Kontext 模型，支持更多高级参数。
+
+### 请求示例
+
+```bash cURL
+curl -X POST https://crazyrouter.com/replicate/v1/models/black-forest-labs/flux-kontext-dev/predictions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Prefer: wait" \
+  -d '{
+    "input": {
+      "prompt": "Change the background to a tropical beach",
+      "image": "https://example.com/photo.jpg",
+      "aspect_ratio": "16:9",
+      "safety_tolerance": 2,
+      "output_format": "webp"
+    }
+  }'
+```
+
+### 响应示例
+
+```json
+{
+  "id": "prediction_abc123",
+  "status": "succeeded",
+  "output": [
+    "https://replicate.delivery/pbxt/.../output.webp"
+  ]
+}
+```
+
+<Note>
+  Flux 模型在写实风格和人像生成方面表现出色。Flux Kontext 系列支持基于参考图的编辑和风格转换。
+</Note>

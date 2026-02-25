@@ -1,0 +1,79 @@
+---
+title: 'HTTP 状态码及错误处理'
+description: '了解 API 返回的状态码和错误信息'
+---
+
+## HTTP 状态码
+
+| 状态码 | 说明 |
+|--------|------|
+| 200 | 请求成功 |
+| 400 | 请求参数错误 |
+| 401 | 认证失败，API Key 无效或缺失 |
+| 403 | 权限不足，Token 无权访问该模型 |
+| 429 | 请求频率超限 |
+| 500 | 服务器内部错误 |
+| 502 | 上游服务不可用 |
+| 503 | 服务暂时不可用 |
+
+## 错误响应格式
+
+```json
+{
+  "error": {
+    "message": "错误描述信息",
+    "type": "error_type",
+    "code": "error_code"
+  }
+}
+```
+
+## 常见错误
+
+### 401 - 认证失败
+
+```json
+{
+  "error": {
+    "message": "Invalid API key",
+    "type": "authentication_error",
+    "code": "invalid_api_key"
+  }
+}
+```
+
+**解决方案**：检查 API Key 是否正确，确保以 `sk-` 开头。
+
+### 429 - 频率限制
+
+```json
+{
+  "error": {
+    "message": "Rate limit exceeded",
+    "type": "rate_limit_error",
+    "code": "rate_limit_exceeded"
+  }
+}
+```
+
+**解决方案**：降低请求频率，或联系客服提升限额。
+
+### 403 - 余额不足
+
+```json
+{
+  "error": {
+    "message": "Insufficient quota",
+    "type": "insufficient_quota",
+    "code": "insufficient_quota"
+  }
+}
+```
+
+**解决方案**：前往 [充值页面](https://crazyrouter.com/topup) 充值。
+
+## 重试建议
+
+- 对于 429 错误，建议使用指数退避重试
+- 对于 500/502/503 错误，建议等待几秒后重试
+- 对于 400/401/403 错误，请检查请求参数和认证信息

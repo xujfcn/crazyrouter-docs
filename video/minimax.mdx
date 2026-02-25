@@ -1,0 +1,116 @@
+---
+title: "MiniMax 视频"
+description: "使用 MiniMax/海螺 API 生成视频"
+---
+
+# MiniMax 视频
+
+MiniMax（海螺）提供高质量的视频生成能力。
+
+## 创建视频
+
+```
+POST /minimax/v1/video_generation
+```
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `model` | string | 是 | 模型名称，如 `video-01`、`video-01-live2d` |
+| `prompt` | string | 是 | 视频描述提示词 |
+| `first_frame_image` | string | 否 | 首帧图片 URL |
+
+### 请求示例
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/minimax/v1/video_generation \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "video-01",
+    "prompt": "一只小猫在阳光下打盹，微风吹动它的毛发"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/minimax/v1/video_generation",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "video-01",
+        "prompt": "一只小猫在阳光下打盹，微风吹动它的毛发"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### 响应示例
+
+```json
+{
+  "task_id": "minimax_video_abc123",
+  "base_resp": {
+    "status_code": 0,
+    "status_msg": "success"
+  }
+}
+```
+
+---
+
+## 图生视频
+
+```json
+{
+  "model": "video-01",
+  "prompt": "图片中的人物开始微笑",
+  "first_frame_image": "https://example.com/portrait.jpg"
+}
+```
+
+---
+
+## 查询任务
+
+```
+GET /minimax/v1/query/video_generation?task_id={task_id}
+```
+
+```bash cURL
+curl "https://crazyrouter.com/minimax/v1/query/video_generation?task_id=minimax_video_abc123" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### 响应示例（已完成）
+
+```json
+{
+  "task_id": "minimax_video_abc123",
+  "status": "Success",
+  "file_id": "file_abc123",
+  "base_resp": {
+    "status_code": 0,
+    "status_msg": "success"
+  }
+}
+```
+
+### 任务状态
+
+| 状态 | 说明 |
+|------|------|
+| `Queueing` | 排队中 |
+| `Processing` | 处理中 |
+| `Success` | 成功 |
+| `Fail` | 失败 |

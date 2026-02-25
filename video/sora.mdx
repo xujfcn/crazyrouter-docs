@@ -1,0 +1,171 @@
+---
+title: "Sora"
+description: "使用 OpenAI Sora 模型生成视频，支持多种调用格式"
+---
+
+# Sora
+
+OpenAI Sora 支持多种调用格式：统一视频 API、OpenAI 视频格式和原生格式。
+
+## 通过统一视频 API
+
+```
+POST /v1/video/create
+```
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/video/create \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "sora",
+    "prompt": "A cat playing piano in a jazz club, cinematic lighting",
+    "aspect_ratio": "16:9"
+  }'
+```
+
+---
+
+## 通过 OpenAI 视频格式
+
+```
+POST /v1/videos
+```
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/videos \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "sora",
+    "prompt": "A cat playing piano in a jazz club, cinematic lighting",
+    "size": "1920x1080",
+    "duration": 10
+  }'
+```
+
+### 响应示例
+
+```json
+{
+  "id": "sora_task_abc123",
+  "status": "processing",
+  "created_at": 1709123456
+}
+```
+
+---
+
+## 图生视频
+
+传入参考图片生成视频：
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/videos \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "sora",
+    "prompt": "The person in the image starts dancing",
+    "image_url": "https://example.com/portrait.jpg",
+    "size": "1920x1080"
+  }'
+```
+
+---
+
+## Pro 模式
+
+使用 `sora-pro` 获得更高质量的输出：
+
+```json
+{
+  "model": "sora-pro",
+  "prompt": "An epic battle scene in a fantasy world",
+  "size": "1920x1080",
+  "duration": 20
+}
+```
+
+---
+
+## 角色创建
+
+```
+POST /sora/v1/characters
+```
+
+创建可复用的角色，在后续视频中保持一致性。
+
+```bash cURL
+curl -X POST https://crazyrouter.com/sora/v1/characters \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "name": "Luna",
+    "description": "A young woman with long silver hair and blue eyes",
+    "reference_images": ["https://example.com/character_ref.jpg"]
+  }'
+```
+
+---
+
+## Storyboard 支持
+
+通过 storyboard 定义多个场景的视频：
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/videos \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "sora",
+    "storyboard": [
+      {
+        "prompt": "A sunrise over the mountains",
+        "duration": 5
+      },
+      {
+        "prompt": "Camera pans down to reveal a village",
+        "duration": 5
+      },
+      {
+        "prompt": "Close-up of a farmer starting their day",
+        "duration": 5
+      }
+    ],
+    "size": "1920x1080"
+  }'
+```
+
+---
+
+## 查询任务
+
+```
+GET /v1/videos/{task_id}
+```
+
+```bash cURL
+curl https://crazyrouter.com/v1/videos/sora_task_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### 响应示例
+
+```json
+{
+  "id": "sora_task_abc123",
+  "status": "completed",
+  "video": {
+    "url": "https://crazyrouter.com/files/sora_abc123.mp4",
+    "duration": 10,
+    "width": 1920,
+    "height": 1080
+  }
+}
+```
+
+<Note>
+  Sora Pro 模式生成时间较长但质量更高。Storyboard 模式适合需要多场景连贯叙事的视频。
+</Note>

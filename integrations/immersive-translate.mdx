@@ -1,0 +1,48 @@
+---
+title: '沉浸式翻译配置教程'
+description: '在沉浸式翻译浏览器扩展中配置 Crazyrouter API'
+---
+
+## 概述
+
+沉浸式翻译是一款浏览器翻译扩展，支持使用 AI 模型进行高质量网页翻译。
+
+## 配置步骤
+
+<Steps>
+  <Step title="安装扩展">
+    从 Chrome 网上应用店或 Firefox 附加组件安装「沉浸式翻译」。
+  </Step>
+  <Step title="打开设置">
+    点击扩展图标 → `设置` → `翻译服务`
+  </Step>
+  <Step title="选择 OpenAI">
+    在翻译服务列表中选择 `OpenAI`。
+  </Step>
+  <Step title="配置 API">
+    - **API Key**: `sk-xxx`
+    - **自定义 API 接口地址**: `https://crazyrouter.com/v1/chat/completions`
+    - **模型**: `gpt-4o-mini`（推荐，性价比高）
+  </Step>
+  <Step title="设为默认">
+    将 OpenAI 设为默认翻译服务。
+  </Step>
+</Steps>
+
+## 推荐模型
+
+| 模型 | 特点 |
+|------|------|
+| `gpt-4o-mini` | 速度快、成本低，日常翻译首选 |
+| `gpt-4o` | 翻译质量更高，适合专业文档 |
+| `claude-sonnet-4-20250514` | 文学性翻译效果好 |
+
+## 省钱技巧
+
+- 使用 `gpt-4o-mini` 可以大幅降低翻译成本
+- 在设置中开启「仅翻译选中区域」避免不必要的翻译
+- 设置翻译缓存，避免重复翻译相同内容
+
+<Note>
+  沉浸式翻译的 API 地址需要填写完整路径（包含 `/chat/completions`），与其他工具不同。
+</Note>

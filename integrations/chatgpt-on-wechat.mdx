@@ -1,0 +1,61 @@
+---
+title: 'ChatGPT on WeChat 配置教程'
+description: '在 ChatGPT on WeChat 项目中配置 Crazyrouter API'
+---
+
+## 概述
+
+ChatGPT on WeChat 是一个开源项目，可以将 AI 对话能力接入微信。
+
+## 配置方法
+
+### 修改配置文件
+
+编辑 `config.json`：
+
+```json
+{
+  "open_ai_api_key": "sk-xxx",
+  "open_ai_api_base": "https://crazyrouter.com/v1",
+  "model": "gpt-4o",
+  "proxy": "",
+  "single_chat_prefix": [""],
+  "single_chat_reply_prefix": "",
+  "group_chat_prefix": ["@bot"],
+  "group_name_white_list": ["AI交流群"]
+}
+```
+
+### 环境变量方式
+
+```bash
+export OPEN_AI_API_KEY=sk-xxx
+export OPEN_AI_API_BASE=https://crazyrouter.com/v1
+export MODEL=gpt-4o
+```
+
+### Docker 部署
+
+```yaml
+services:
+  chatgpt-on-wechat:
+    image: zhayujie/chatgpt-on-wechat
+    environment:
+      - OPEN_AI_API_KEY=sk-xxx
+      - OPEN_AI_API_BASE=https://crazyrouter.com/v1
+      - MODEL=gpt-4o
+    volumes:
+      - ./config.json:/app/config.json
+```
+
+## 推荐模型
+
+| 场景 | 模型 | 说明 |
+|------|------|------|
+| 日常聊天 | `gpt-4o-mini` | 响应快、成本低 |
+| 高质量回复 | `gpt-4o` | 回复质量更高 |
+| 长文分析 | `claude-sonnet-4-20250514` | 上下文窗口大 |
+
+<Warning>
+  微信机器人项目需要遵守微信使用规范，避免频繁发送消息导致账号受限。
+</Warning>

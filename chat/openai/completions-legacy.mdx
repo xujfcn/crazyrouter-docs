@@ -1,0 +1,94 @@
+---
+title: "创建完成 (Legacy)"
+description: "POST /v1/completions 旧版文本补全端点，已被 Chat Completions 取代"
+---
+
+# 创建完成 (Legacy)
+
+```
+POST /v1/completions
+```
+
+<Warning>
+  此端点已弃用，建议使用 `/v1/chat/completions` 替代。新模型可能不再支持此端点。
+</Warning>
+
+旧版 Completions API 接受一个文本提示，返回模型的文本补全结果。与 Chat Completions 不同，它不使用消息列表格式。
+
+## 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `model` | string | 是 | 模型名称 |
+| `prompt` | string\|array | 是 | 输入提示文本 |
+| `max_tokens` | integer | 否 | 最大生成 Token 数，默认 16 |
+| `temperature` | number | 否 | 采样温度，0-2 |
+| `top_p` | number | 否 | 核采样参数 |
+| `n` | integer | 否 | 生成数量 |
+| `stream` | boolean | 否 | 是否流式输出 |
+| `stop` | string\|array | 否 | 停止标记 |
+| `echo` | boolean | 否 | 是否回显输入 |
+| `suffix` | string | 否 | 补全后缀 |
+
+## 示例
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-3.5-turbo-instruct",
+    "prompt": "写一首关于春天的诗：\n",
+    "max_tokens": 200,
+    "temperature": 0.7
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.completions.create(
+    model="gpt-3.5-turbo-instruct",
+    prompt="写一首关于春天的诗：\n",
+    max_tokens=200,
+    temperature=0.7
+)
+
+print(response.choices[0].text)
+```
+
+</CodeGroup>
+
+## 响应格式
+
+```json
+{
+  "id": "cmpl-abc123",
+  "object": "text_completion",
+  "created": 1709123456,
+  "model": "gpt-3.5-turbo-instruct",
+  "choices": [
+    {
+      "text": "\n春风拂面暖意浓，\n桃花朵朵映日红。\n燕子归来寻旧巢，\n柳絮飘飘入碧空。",
+      "index": 0,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 12,
+    "completion_tokens": 36,
+    "total_tokens": 48
+  }
+}
+```
+
+<Note>
+  如果你正在开发新应用，请直接使用 [Chat Completions API](/chat/openai/completions)。它功能更强大，支持更多模型。
+</Note>

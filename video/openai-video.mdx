@@ -1,0 +1,175 @@
+---
+title: "OpenAI 视频格式"
+description: "使用 OpenAI 兼容的视频 API 格式创建、查询和下载视频"
+---
+
+# OpenAI 视频格式
+
+Crazyrouter 支持 OpenAI 官方的视频 API 格式，兼容 OpenAI SDK。
+
+## 创建视频
+
+```
+POST /v1/videos
+```
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `model` | string | 是 | 模型名称，如 `sora`、`sora-pro` |
+| `prompt` | string | 是 | 视频描述提示词 |
+| `size` | string | 否 | 视频尺寸：`1920x1080`、`1080x1920`、`1080x1080` |
+| `duration` | integer | 否 | 视频时长（秒） |
+| `image_url` | string | 否 | 参考图片 URL |
+| `storyboard` | array | 否 | 分镜脚本 |
+| `private` | boolean | 否 | 是否为私密模式 |
+
+### 请求示例
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/videos \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "sora",
+    "prompt": "A timelapse of a city skyline from day to night, clouds moving quickly",
+    "size": "1920x1080",
+    "duration": 10
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/v1/videos",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "sora",
+        "prompt": "A timelapse of a city skyline from day to night",
+        "size": "1920x1080",
+        "duration": 10
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### 响应示例
+
+```json
+{
+  "id": "video_abc123",
+  "object": "video",
+  "status": "processing",
+  "created_at": 1709123456
+}
+```
+
+---
+
+## 查询视频
+
+```
+GET /v1/videos/{id}
+```
+
+```bash cURL
+curl https://crazyrouter.com/v1/videos/video_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### 响应示例（已完成）
+
+```json
+{
+  "id": "video_abc123",
+  "object": "video",
+  "status": "completed",
+  "created_at": 1709123456,
+  "video": {
+    "url": "https://crazyrouter.com/files/video_abc123.mp4",
+    "duration": 10,
+    "width": 1920,
+    "height": 1080
+  }
+}
+```
+
+---
+
+## 下载视频
+
+```
+GET /v1/videos/{id}/content
+```
+
+直接下载视频文件。
+
+```bash cURL
+curl -o output.mp4 https://crazyrouter.com/v1/videos/video_abc123/content \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+---
+
+## 编辑视频
+
+在创建请求中传入 `image_url` 进行图生视频：
+
+```json
+{
+  "model": "sora",
+  "prompt": "The scene comes to life with gentle movement",
+  "image_url": "https://example.com/scene.jpg",
+  "size": "1920x1080",
+  "duration": 5
+}
+```
+
+---
+
+## Storyboard 分镜
+
+```json
+{
+  "model": "sora",
+  "storyboard": [
+    {"prompt": "Wide shot of a forest at dawn", "duration": 3},
+    {"prompt": "A deer walks into frame", "duration": 4},
+    {"prompt": "Close-up of the deer looking at camera", "duration": 3}
+  ],
+  "size": "1920x1080"
+}
+```
+
+---
+
+## 私密模式
+
+设置 `private: true` 使生成的视频不会出现在公开画廊中：
+
+```json
+{
+  "model": "sora",
+  "prompt": "A confidential product demo video",
+  "size": "1920x1080",
+  "private": true
+}
+```
+
+### 任务状态
+
+| 状态 | 说明 |
+|------|------|
+| `processing` | 处理中 |
+| `completed` | 已完成 |
+| `failed` | 失败 |

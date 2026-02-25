@@ -1,0 +1,155 @@
+---
+title: "Suno 生成歌曲"
+description: "使用 Suno API 生成歌曲，支持灵感模式、自定义模式、续写和歌手风格"
+---
+
+# Suno 生成歌曲
+
+```
+POST /suno/submit/music
+```
+
+使用 Suno 生成歌曲，支持多种创作模式。
+
+## 灵感模式
+
+通过简单描述自动生成歌曲。
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `gpt_description_prompt` | string | 是 | 歌曲描述，如 "一首关于夏天的欢快流行歌曲" |
+| `mv` | string | 否 | 模型版本，如 `chirp-v3-5`、`chirp-v4` |
+| `make_instrumental` | boolean | 否 | 是否为纯音乐（无人声） |
+
+### 请求示例
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/suno/submit/music \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "gpt_description_prompt": "一首关于夏天海边的欢快流行歌曲，带有吉他和鼓点",
+    "mv": "chirp-v4",
+    "make_instrumental": false
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/suno/submit/music",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "gpt_description_prompt": "一首关于夏天海边的欢快流行歌曲",
+        "mv": "chirp-v4",
+        "make_instrumental": False
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### 响应示例
+
+```json
+{
+  "code": 1,
+  "description": "提交成功",
+  "result": "suno_task_abc123"
+}
+```
+
+---
+
+## 自定义模式
+
+自行编写歌词和设置风格标签。
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `prompt` | string | 是 | 歌词内容 |
+| `title` | string | 是 | 歌曲标题 |
+| `tags` | string | 是 | 风格标签，如 `pop, upbeat, summer` |
+| `mv` | string | 否 | 模型版本 |
+| `make_instrumental` | boolean | 否 | 是否纯音乐 |
+
+```bash cURL
+curl -X POST https://crazyrouter.com/suno/submit/music \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "[Verse]\n阳光洒在海面上\n微风轻轻吹过脸庞\n\n[Chorus]\n这个夏天 我们一起\n在海边唱歌跳舞",
+    "title": "夏日海边",
+    "tags": "pop, chinese, upbeat, summer",
+    "mv": "chirp-v4"
+  }'
+```
+
+---
+
+## 续写模式
+
+从已有歌曲的某个时间点继续创作。
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `prompt` | string | 是 | 续写的歌词 |
+| `continue_clip_id` | string | 是 | 要续写的歌曲 clip ID |
+| `continue_at` | number | 是 | 续写起始时间（秒） |
+| `tags` | string | 否 | 风格标签 |
+| `mv` | string | 否 | 模型版本 |
+
+```json
+{
+  "prompt": "[Bridge]\n回忆像海浪一样\n一波又一波涌来\n\n[Outro]\n再见了 这个夏天",
+  "continue_clip_id": "clip_abc123",
+  "continue_at": 60,
+  "tags": "pop, chinese, emotional"
+}
+```
+
+---
+
+## 歌手风格
+
+指定歌手风格进行创作：
+
+```json
+{
+  "gpt_description_prompt": "一首深情的R&B情歌",
+  "mv": "chirp-v4",
+  "singer_style": "smooth male vocal, R&B"
+}
+```
+
+---
+
+## 上传音频再创作
+
+基于上传的音频进行再创作：
+
+```json
+{
+  "prompt": "在这段旋律的基础上添加歌词",
+  "audio_url": "https://example.com/melody.mp3",
+  "tags": "pop, chinese"
+}
+```
+
+<Note>
+  每次提交会生成 2 首歌曲变体。提交后通过 [任务查询](/audio/suno/query) 接口获取结果。
+</Note>

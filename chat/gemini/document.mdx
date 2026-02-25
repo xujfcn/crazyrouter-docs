@@ -1,0 +1,193 @@
+---
+title: "Gemini 文档理解"
+description: "使用 Gemini 原生格式进行文档理解和格式化输出"
+---
+
+# Gemini 文档理解
+
+Gemini 模型支持理解 PDF 文档和其他文档格式，并可以按照指定格式输出结构化结果。
+
+```
+POST /v1beta/models/{model}:generateContent
+```
+
+---
+
+## PDF 文档理解
+
+<CodeGroup>
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "总结这份文档的核心内容"},
+          {
+            "inlineData": {
+              "mimeType": "application/pdf",
+              "data": "JVBERi0xLjQKMSAwIG9iago..."
+            }
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+```python Python
+import google.generativeai as genai
+
+genai.configure(
+    api_key="YOUR_API_KEY",
+    transport="rest",
+    client_options={"api_endpoint": "https://crazyrouter.com"}
+)
+
+model = genai.GenerativeModel("gemini-2.5-flash")
+
+with open("document.pdf", "rb") as f:
+    pdf_data = f.read()
+
+response = model.generate_content([
+    "总结这份文档的核心内容",
+    {"mime_type": "application/pdf", "data": pdf_data}
+])
+
+print(response.text)
+```
+
+</CodeGroup>
+
+---
+
+## 格式化输出
+
+使用 `responseMimeType` 和 `responseSchema` 控制输出格式：
+
+### JSON 格式输出
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "从这份简历中提取关键信息"},
+          {
+            "inlineData": {
+              "mimeType": "application/pdf",
+              "data": "JVBERi0xLjQK..."
+            }
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "responseMimeType": "application/json",
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "email": {"type": "string"},
+          "phone": {"type": "string"},
+          "education": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "school": {"type": "string"},
+                "degree": {"type": "string"},
+                "year": {"type": "string"}
+              }
+            }
+          },
+          "experience": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "company": {"type": "string"},
+                "position": {"type": "string"},
+                "duration": {"type": "string"}
+              }
+            }
+          },
+          "skills": {
+            "type": "array",
+            "items": {"type": "string"}
+          }
+        }
+      }
+    }
+  }'
+```
+
+### 响应
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\"name\":\"张三\",\"email\":\"zhangsan@example.com\",\"phone\":\"138xxxx0000\",\"education\":[{\"school\":\"北京大学\",\"degree\":\"计算机科学硕士\",\"year\":\"2020\"}],\"experience\":[{\"company\":\"某科技公司\",\"position\":\"高级工程师\",\"duration\":\"2020-2024\"}],\"skills\":[\"Python\",\"Go\",\"Kubernetes\"]}"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP"
+    }
+  ]
+}
+```
+
+---
+
+## 表格数据提取
+
+```python Python
+response = model.generate_content(
+    [
+        "提取文档中所有表格的数据，以 JSON 格式返回",
+        {"mime_type": "application/pdf", "data": pdf_data}
+    ],
+    generation_config=genai.GenerationConfig(
+        response_mime_type="application/json"
+    )
+)
+
+import json
+tables = json.loads(response.text)
+```
+
+---
+
+## 文档对比
+
+```python Python
+with open("v1.pdf", "rb") as f:
+    v1_data = f.read()
+with open("v2.pdf", "rb") as f:
+    v2_data = f.read()
+
+response = model.generate_content([
+    "对比这两个版本的文档，列出所有修改内容",
+    {"mime_type": "application/pdf", "data": v1_data},
+    {"mime_type": "application/pdf", "data": v2_data}
+])
+```
+
+<Note>
+  使用 `responseSchema` 可以确保模型输出严格符合指定的 JSON 结构，非常适合数据提取和自动化处理场景。
+</Note>
+
+<Warning>
+  大型 PDF 文档会消耗大量 Token。建议对超过 50 页的文档进行分段处理。
+</Warning>

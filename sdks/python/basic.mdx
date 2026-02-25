@@ -1,0 +1,140 @@
+---
+title: 'Python 基础对话'
+description: 'Python 实现基础聊天、连续对话和流式输出'
+---
+
+## 安装依赖
+
+```bash
+pip install openai requests
+```
+
+## 基础对话
+
+<CodeGroup>
+
+```python OpenAI SDK
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {"role": "system", "content": "你是一个有帮助的助手。"},
+        {"role": "user", "content": "用一句话解释什么是人工智能"}
+    ]
+)
+
+print(response.choices[0].message.content)
+```
+
+```python requests
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/v1/chat/completions",
+    headers={
+        "Authorization": "Bearer sk-xxx",
+        "Content-Type": "application/json"
+    },
+    json={
+        "model": "gpt-4o",
+        "messages": [
+            {"role": "user", "content": "用一句话解释什么是人工智能"}
+        ]
+    }
+)
+
+data = response.json()
+print(data["choices"][0]["message"]["content"])
+```
+
+</CodeGroup>
+
+## 连续对话
+
+通过维护 `messages` 列表实现多轮对话：
+
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+
+messages = [
+    {"role": "system", "content": "你是一个 Python 编程助手。"}
+]
+
+def chat(user_input):
+    messages.append({"role": "user", "content": user_input})
+
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=messages
+    )
+
+    reply = response.choices[0].message.content
+    messages.append({"role": "assistant", "content": reply})
+    return reply
+
+# 多轮对话
+print(chat("如何读取 CSV 文件？"))
+print(chat("如果文件很大怎么办？"))
+print(chat("能用 pandas 实现吗？"))
+```
+
+## 流式输出
+
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "写一首关于编程的诗"}],
+    stream=True
+)
+
+for chunk in stream:
+    if chunk.choices[0].delta.content:
+        print(chunk.choices[0].delta.content, end="", flush=True)
+print()
+```
+
+## 使用 requests 实现流式
+
+```python
+import requests
+import json
+
+response = requests.post(
+    "https://crazyrouter.com/v1/chat/completions",
+    headers={
+        "Authorization": "Bearer sk-xxx",
+        "Content-Type": "application/json"
+    },
+    json={
+        "model": "gpt-4o",
+        "messages": [{"role": "user", "content": "你好"}],
+        "stream": True
+    },
+    stream=True
+)
+
+for line in response.iter_lines():
+    if line:
+        line = line.decode("utf-8")
+        if line.startswith("data: ") and line != "data: [DONE]":
+            data = json.loads(line[6:])
+            content = data["choices"][0]["delta"].get("content", "")
+            print(content, end="", flush=True)
+print()
+```
+
+<Note>
+  所有示例中的 `model` 参数可替换为 Crazyrouter 支持的任意模型，如 `claude-sonnet-4-20250514`、`gemini-2.5-pro` 等。
+</Note>

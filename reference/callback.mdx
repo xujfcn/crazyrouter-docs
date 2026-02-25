@@ -1,0 +1,139 @@
+---
+title: 'Callback 协议'
+description: '异步任务的 Webhook 回调协议'
+---
+
+## 概述
+
+对于异步任务（Midjourney 绘图、视频生成、音乐生成等），Crazyrouter 支持通过 Webhook 回调通知任务状态变更。
+
+## 回调 URL 配置
+
+在提交任务时，通过 `notifyHook` 参数指定回调地址：
+
+```json
+{
+  "prompt": "a beautiful sunset",
+  "notifyHook": "https://your-server.com/api/callback"
+}
+```
+
+## 回调请求格式
+
+Crazyrouter 会向你的回调 URL 发送 POST 请求：
+
+```
+POST https://your-server.com/api/callback
+Content-Type: application/json
+```
+
+### Midjourney 回调
+
+```json
+{
+  "id": "task_abc123",
+  "action": "IMAGINE",
+  "status": "SUCCESS",
+  "prompt": "a beautiful sunset",
+  "imageUrl": "https://cdn.example.com/image.png",
+  "progress": "100%",
+  "failReason": "",
+  "submitTime": 1706000000000,
+  "startTime": 1706000010000,
+  "finishTime": 1706000060000
+}
+```
+
+### 视频生成回调（Kling/Luma/Runway）
+
+```json
+{
+  "id": "task_xyz789",
+  "status": "succeed",
+  "type": "video",
+  "output": {
+    "video_url": "https://cdn.example.com/video.mp4",
+    "cover_url": "https://cdn.example.com/cover.jpg",
+    "duration": 5.0
+  },
+  "created_at": 1706000000,
+  "updated_at": 1706000120
+}
+```
+
+### Suno 音乐回调
+
+```json
+{
+  "id": "task_music456",
+  "status": "complete",
+  "output": {
+    "audio_url": "https://cdn.example.com/song.mp3",
+    "title": "My Song",
+    "duration": 180
+  }
+}
+```
+
+## 回调状态流转
+
+```
+提交 → NOT_START → IN_PROGRESS → SUCCESS / FAILURE
+```
+
+每次状态变更都会触发一次回调。
+
+## 回调服务端示例
+
+<CodeGroup>
+
+```python Python (Flask)
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+@app.route("/api/callback", methods=["POST"])
+def callback():
+    data = request.json
+    task_id = data["id"]
+    status = data["status"]
+
+    print(f"任务 {task_id} 状态更新: {status}")
+
+    if status == "SUCCESS":
+        image_url = data.get("imageUrl")
+        print(f"图片地址: {image_url}")
+
+    return jsonify({"success": True})
+
+app.run(port=8080)
+```
+
+```javascript Node.js (Express)
+const express = require('express');
+const app = express();
+app.use(express.json());
+
+app.post('/api/callback', (req, res) => {
+  const { id, status, imageUrl } = req.body;
+  console.log(`任务 ${id} 状态: ${status}`);
+
+  if (status === 'SUCCESS') {
+    console.log(`图片: ${imageUrl}`);
+  }
+
+  res.json({ success: true });
+});
+
+app.listen(8080);
+```
+
+</CodeGroup>
+
+<Warning>
+  回调 URL 必须是公网可访问的地址。请确保你的服务器能接收 POST 请求，并在 5 秒内返回 200 状态码。
+</Warning>
+
+<Note>
+  如果回调失败，系统会重试最多 3 次，间隔分别为 10 秒、30 秒、60 秒。
+</Note>

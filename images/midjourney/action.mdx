@@ -1,0 +1,155 @@
+---
+title: "执行操作"
+description: "执行 Midjourney 后续操作：放大、变体、混合、描述等"
+---
+
+# 执行操作
+
+## Action - 放大 / 变体
+
+```
+POST /mj/submit/action
+```
+
+对已完成的 Imagine 任务执行后续操作，如放大（Upscale）、变体（Variation）等。
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `taskId` | string | 是 | 原始任务 ID |
+| `customId` | string | 是 | 操作按钮的 `customId`，从任务的 `buttons` 字段获取 |
+| `notifyHook` | string | 否 | 回调地址 |
+| `state` | string | 否 | 自定义状态 |
+
+### 请求示例
+
+```bash cURL
+curl -X POST https://crazyrouter.com/mj/submit/action \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "taskId": "task_1234567890",
+    "customId": "MJ::JOB::upsample::1::abc123"
+  }'
+```
+
+### 响应示例
+
+```json
+{
+  "code": 1,
+  "description": "提交成功",
+  "result": "task_action_001",
+  "properties": {}
+}
+```
+
+---
+
+## Blend - 混合图片
+
+```
+POST /mj/submit/blend
+```
+
+将多张图片混合生成新图像。
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `botType` | string | 否 | `MID_JOURNEY`（默认）或 `NIJI_JOURNEY` |
+| `base64Array` | array | 是 | Base64 编码的图片数组，2-5 张 |
+| `dimensions` | string | 否 | 输出尺寸：`PORTRAIT`、`SQUARE`、`LANDSCAPE` |
+| `notifyHook` | string | 否 | 回调地址 |
+| `state` | string | 否 | 自定义状态 |
+
+### 请求示例
+
+```bash cURL
+curl -X POST https://crazyrouter.com/mj/submit/blend \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "base64Array": [
+      "data:image/png;base64,iVBORw0KGgo...",
+      "data:image/png;base64,iVBORw0KGgo..."
+    ],
+    "dimensions": "SQUARE"
+  }'
+```
+
+### 响应示例
+
+```json
+{
+  "code": 1,
+  "description": "提交成功",
+  "result": "task_blend_001"
+}
+```
+
+---
+
+## Describe - 图片描述
+
+```
+POST /mj/submit/describe
+```
+
+上传图片，让 Midjourney 生成对应的提示词描述。
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `botType` | string | 否 | `MID_JOURNEY`（默认）或 `NIJI_JOURNEY` |
+| `base64` | string | 是 | Base64 编码的图片 |
+| `notifyHook` | string | 否 | 回调地址 |
+| `state` | string | 否 | 自定义状态 |
+
+### 请求示例
+
+```bash cURL
+curl -X POST https://crazyrouter.com/mj/submit/describe \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "base64": "data:image/png;base64,iVBORw0KGgo..."
+  }'
+```
+
+---
+
+## Modal - 弹窗确认
+
+```
+POST /mj/submit/modal
+```
+
+提交 Midjourney 弹窗确认操作（如 Region Vary 等需要二次确认的操作）。
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `taskId` | string | 是 | 原始任务 ID |
+| `prompt` | string | 否 | 弹窗中的提示词 |
+| `maskBase64` | string | 否 | 遮罩图片的 Base64 编码 |
+
+### 请求示例
+
+```bash cURL
+curl -X POST https://crazyrouter.com/mj/submit/modal \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "taskId": "task_1234567890",
+    "prompt": "add a rainbow in the sky"
+  }'
+```
+
+<Note>
+  所有操作提交后都会返回新的任务 ID，需通过 [查询任务状态](/images/midjourney/query) 接口获取结果。
+</Note>

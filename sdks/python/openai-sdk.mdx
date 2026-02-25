@@ -1,0 +1,142 @@
+---
+title: 'Python OpenAI SDK'
+description: '使用 OpenAI 官方 SDK、LangChain、LlamaIndex 接入 Crazyrouter'
+---
+
+## OpenAI 官方 SDK
+
+```bash
+pip install openai
+```
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1"
+)
+
+# 同步调用
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "你好"}],
+    temperature=0.7,
+    max_tokens=1000
+)
+print(response.choices[0].message.content)
+```
+
+### 异步调用
+
+```python
+from openai import AsyncOpenAI
+import asyncio
+
+client = AsyncOpenAI(
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1"
+)
+
+async def main():
+    response = await client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": "你好"}]
+    )
+    print(response.choices[0].message.content)
+
+asyncio.run(main())
+```
+
+## LangChain 集成
+
+```bash
+pip install langchain-openai
+```
+
+```python
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(
+    model="gpt-4o",
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1",
+    temperature=0.7
+)
+
+# 简单调用
+response = llm.invoke("用 Python 写一个快速排序")
+print(response.content)
+```
+
+### LangChain 链式调用
+
+```python
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+
+llm = ChatOpenAI(
+    model="gpt-4o",
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1"
+)
+
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "你是一个{role}。"),
+    ("user", "{input}")
+])
+
+chain = prompt | llm
+response = chain.invoke({"role": "Python 专家", "input": "解释装饰器"})
+print(response.content)
+```
+
+### LangChain Embeddings
+
+```python
+from langchain_openai import OpenAIEmbeddings
+
+embeddings = OpenAIEmbeddings(
+    model="text-embedding-3-large",
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1"
+)
+
+vectors = embeddings.embed_documents(["文本一", "文本二"])
+print(f"向量维度: {len(vectors[0])}")
+```
+
+## LlamaIndex 集成
+
+```bash
+pip install llama-index-llms-openai llama-index-embeddings-openai
+```
+
+```python
+from llama_index.llms.openai import OpenAI
+from llama_index.embeddings.openai import OpenAIEmbedding
+
+# LLM 配置
+llm = OpenAI(
+    model="gpt-4o",
+    api_key="sk-xxx",
+    api_base="https://crazyrouter.com/v1"
+)
+
+response = llm.complete("什么是 RAG？")
+print(response.text)
+
+# Embedding 配置
+embed_model = OpenAIEmbedding(
+    model="text-embedding-3-large",
+    api_key="sk-xxx",
+    api_base="https://crazyrouter.com/v1"
+)
+
+vector = embed_model.get_text_embedding("测试文本")
+print(f"维度: {len(vector)}")
+```
+
+<Note>
+  Crazyrouter 完全兼容 OpenAI API 格式，所有基于 OpenAI SDK 的框架和工具都可以通过修改 `base_url` 和 `api_key` 直接接入。
+</Note>

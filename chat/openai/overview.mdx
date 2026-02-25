@@ -1,0 +1,120 @@
+---
+title: "聊天完成对象"
+description: "Chat Completion 对象和 Chat Completion Chunk 流式对象的结构说明"
+---
+
+# 聊天完成对象
+
+聊天完成 API 返回两种对象类型：非流式响应返回 `ChatCompletion` 对象，流式响应返回 `ChatCompletionChunk` 对象。
+
+## Chat Completion 对象
+
+非流式请求返回的完整响应对象。
+
+```json
+{
+  "id": "chatcmpl-abc123",
+  "object": "chat.completion",
+  "created": 1709123456,
+  "model": "gpt-4o",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "你好！有什么可以帮助你的吗？"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 12,
+    "completion_tokens": 15,
+    "total_tokens": 27
+  },
+  "system_fingerprint": "fp_abc123"
+}
+```
+
+### 字段说明
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `id` | string | 本次补全的唯一标识符 |
+| `object` | string | 固定为 `chat.completion` |
+| `created` | integer | 创建时间的 Unix 时间戳 |
+| `model` | string | 实际使用的模型名称 |
+| `choices` | array | 补全结果列表，长度由请求参数 `n` 决定 |
+| `choices[].index` | integer | 结果在列表中的索引 |
+| `choices[].message` | object | 模型生成的消息 |
+| `choices[].message.role` | string | 固定为 `assistant` |
+| `choices[].message.content` | string\|null | 消息文本内容 |
+| `choices[].message.tool_calls` | array\|null | 模型请求调用的工具列表 |
+| `choices[].finish_reason` | string | 停止原因：`stop`、`length`、`tool_calls`、`content_filter` |
+| `usage` | object | Token 用量统计 |
+| `usage.prompt_tokens` | integer | 输入 Token 数 |
+| `usage.completion_tokens` | integer | 输出 Token 数 |
+| `usage.total_tokens` | integer | 总 Token 数 |
+| `system_fingerprint` | string\|null | 系统指纹 |
+
+---
+
+## Chat Completion Chunk 对象（流式）
+
+流式请求时，服务器以 SSE（Server-Sent Events）格式逐块返回 `ChatCompletionChunk` 对象。
+
+```json
+{
+  "id": "chatcmpl-abc123",
+  "object": "chat.completion.chunk",
+  "created": 1709123456,
+  "model": "gpt-4o",
+  "choices": [
+    {
+      "index": 0,
+      "delta": {
+        "role": "assistant",
+        "content": "你"
+      },
+      "finish_reason": null
+    }
+  ]
+}
+```
+
+### 字段说明
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `id` | string | 本次补全的唯一标识符，所有 chunk 共享同一 id |
+| `object` | string | 固定为 `chat.completion.chunk` |
+| `created` | integer | 创建时间的 Unix 时间戳 |
+| `model` | string | 实际使用的模型名称 |
+| `choices` | array | 增量结果列表 |
+| `choices[].index` | integer | 结果在列表中的索引 |
+| `choices[].delta` | object | 增量消息内容 |
+| `choices[].delta.role` | string | 仅在第一个 chunk 中出现，值为 `assistant` |
+| `choices[].delta.content` | string | 增量文本内容 |
+| `choices[].delta.tool_calls` | array | 增量工具调用 |
+| `choices[].finish_reason` | string\|null | 最后一个 chunk 中为停止原因，其余为 `null` |
+| `usage` | object\|null | 仅在 `stream_options.include_usage` 为 `true` 时，最后一个 chunk 包含用量 |
+
+### 流式传输格式
+
+流式响应遵循 SSE 协议，每个事件以 `data: ` 前缀开头，流结束时发送 `data: [DONE]`：
+
+```
+data: {"id":"chatcmpl-abc123","object":"chat.completion.chunk","created":1709123456,"model":"gpt-4o","choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-abc123","object":"chat.completion.chunk","created":1709123456,"model":"gpt-4o","choices":[{"index":0,"delta":{"content":"你好"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-abc123","object":"chat.completion.chunk","created":1709123456,"model":"gpt-4o","choices":[{"index":0,"delta":{"content":"！"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-abc123","object":"chat.completion.chunk","created":1709123456,"model":"gpt-4o","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
+data: [DONE]
+```
+
+<Note>
+  Crazyrouter 兼容 OpenAI 的完整 Chat Completion 对象格式，支持所有标准字段。上游模型返回的额外字段也会透传给客户端。
+</Note>

@@ -1,0 +1,259 @@
+---
+title: "聊天识图"
+description: "通过 Chat Completions API 发送图片进行视觉理解，支持 URL 和 Base64 格式"
+---
+
+# 聊天识图
+
+通过 `/v1/chat/completions` 端点发送图片，让模型理解和描述图片内容。支持 URL 引用和 Base64 编码两种方式。
+
+## 支持的模型
+
+`gpt-4o`、`gpt-4o-mini`、`claude-sonnet-4-20250514`、`gemini-2.5-flash`、`gemini-2.5-pro` 等支持视觉的模型。
+
+---
+
+## 通过 URL 发送图片
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {"type": "text", "text": "描述一下这张图片的内容"},
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "https://example.com/photo.jpg",
+              "detail": "high"
+            }
+          }
+        ]
+      }
+    ],
+    "max_tokens": 500
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "描述一下这张图片的内容"},
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": "https://example.com/photo.jpg",
+                        "detail": "high"
+                    }
+                }
+            ]
+        }
+    ],
+    max_tokens=500
+)
+
+print(response.choices[0].message.content)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const response = await client.chat.completions.create({
+  model: "gpt-4o",
+  messages: [
+    {
+      role: "user",
+      content: [
+        { type: "text", text: "描述一下这张图片的内容" },
+        {
+          type: "image_url",
+          image_url: {
+            url: "https://example.com/photo.jpg",
+            detail: "high",
+          },
+        },
+      ],
+    },
+  ],
+  max_tokens: 500,
+});
+
+console.log(response.choices[0].message.content);
+```
+
+</CodeGroup>
+
+---
+
+## 通过 Base64 发送图片
+
+将图片编码为 Base64 字符串，使用 `data:` URI 格式传入。
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {"type": "text", "text": "这张图片里有什么？"},
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg..."
+            }
+          }
+        ]
+      }
+    ],
+    "max_tokens": 500
+  }'
+```
+
+```python Python
+import base64
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+with open("image.png", "rb") as f:
+    image_base64 = base64.b64encode(f.read()).decode("utf-8")
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "这张图片里有什么？"},
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:image/png;base64,{image_base64}"
+                    }
+                }
+            ]
+        }
+    ],
+    max_tokens=500
+)
+
+print(response.choices[0].message.content)
+```
+
+</CodeGroup>
+
+---
+
+## 流式识图
+
+<CodeGroup>
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "详细描述这张图片"},
+                {
+                    "type": "image_url",
+                    "image_url": {"url": "https://example.com/photo.jpg"}
+                }
+            ]
+        }
+    ],
+    max_tokens=1000,
+    stream=True
+)
+
+for chunk in stream:
+    if chunk.choices[0].delta.content is not None:
+        print(chunk.choices[0].delta.content, end="")
+```
+
+</CodeGroup>
+
+---
+
+## 多图理解
+
+可以在一条消息中发送多张图片：
+
+```python Python
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "比较这两张图片的区别"},
+                {
+                    "type": "image_url",
+                    "image_url": {"url": "https://example.com/image1.jpg"}
+                },
+                {
+                    "type": "image_url",
+                    "image_url": {"url": "https://example.com/image2.jpg"}
+                }
+            ]
+        }
+    ],
+    max_tokens=1000
+)
+```
+
+## detail 参数
+
+| 值 | 说明 |
+|------|------|
+| `low` | 低分辨率模式，消耗更少 Token，适合快速识别 |
+| `high` | 高分辨率模式，消耗更多 Token，适合细节分析 |
+| `auto` | 默认值，由模型自动选择 |
+
+<Note>
+  图片会消耗额外的 Token。高分辨率图片消耗的 Token 更多，建议根据实际需求选择合适的 `detail` 级别。
+</Note>
+
+<Warning>
+  Base64 编码会使图片体积增大约 33%。对于大图片，建议使用 URL 方式传入以减少请求体积。
+</Warning>

@@ -1,0 +1,159 @@
+---
+title: "Responses Web 搜索"
+description: "通过 Responses API 使用 Web 搜索工具获取实时信息"
+---
+
+# Responses Web 搜索
+
+Responses API 内置了 Web 搜索工具，让模型能够搜索互联网获取实时信息。
+
+```
+POST /v1/responses
+```
+
+---
+
+## 基本用法
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o",
+    "input": "今天有什么重要的科技新闻？",
+    "tools": [
+      {
+        "type": "web_search_preview"
+      }
+    ]
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.responses.create(
+    model="gpt-4o",
+    input="今天有什么重要的科技新闻？",
+    tools=[
+        {"type": "web_search_preview"}
+    ]
+)
+
+print(response.output_text)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const response = await client.responses.create({
+  model: "gpt-4o",
+  input: "今天有什么重要的科技新闻？",
+  tools: [{ type: "web_search_preview" }],
+});
+
+console.log(response.output_text);
+```
+
+</CodeGroup>
+
+---
+
+## 搜索配置
+
+可以配置搜索上下文大小：
+
+```json
+{
+  "model": "gpt-4o",
+  "input": "2026年最新的 AI 模型发布情况",
+  "tools": [
+    {
+      "type": "web_search_preview",
+      "search_context_size": "medium"
+    }
+  ]
+}
+```
+
+| 参数 | 值 | 说明 |
+|------|------|------|
+| `search_context_size` | `low` | 较少搜索上下文，速度快 |
+| `search_context_size` | `medium` | 默认，平衡速度和信息量 |
+| `search_context_size` | `high` | 更多搜索上下文，信息更全面 |
+
+---
+
+## 流式搜索
+
+```python Python
+stream = client.responses.create(
+    model="gpt-4o",
+    input="比较 React 和 Vue 的最新版本特性",
+    tools=[{"type": "web_search_preview"}],
+    stream=True
+)
+
+for event in stream:
+    if event.type == "response.output_text.delta":
+        print(event.delta, end="")
+```
+
+---
+
+## 响应格式
+
+搜索结果会包含在响应的 output 中：
+
+```json
+{
+  "id": "resp_abc123",
+  "object": "response",
+  "output": [
+    {
+      "type": "web_search_call",
+      "id": "ws_abc123",
+      "status": "completed"
+    },
+    {
+      "type": "message",
+      "role": "assistant",
+      "content": [
+        {
+          "type": "output_text",
+          "text": "根据最新的搜索结果，今天的主要科技新闻包括...",
+          "annotations": [
+            {
+              "type": "url_citation",
+              "start_index": 10,
+              "end_index": 20,
+              "url": "https://example.com/news"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+<Note>
+  Web 搜索结果中的 `annotations` 字段包含了引用来源的 URL，可以用于展示参考链接。
+</Note>
+
+<Warning>
+  Web 搜索会增加响应延迟和 Token 消耗。模型会自动判断是否需要搜索，只在需要实时信息时触发。
+</Warning>

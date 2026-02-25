@@ -1,0 +1,67 @@
+---
+title: 'GPTs 对话'
+description: '通过 API 调用 OpenAI GPTs 应用'
+---
+
+## 概述
+
+Crazyrouter 支持通过标准 Chat Completions API 调用 OpenAI GPTs（自定义 GPT 应用）。只需将模型名称设置为 GPTs 的特定格式即可。
+
+## 模型名称格式
+
+```
+gpt-4-gizmo-{gizmo_id}
+```
+
+其中 `gizmo_id` 是 GPTs 的唯一标识符，可以从 GPTs 的 URL 中获取。
+
+## 获取 Gizmo ID
+
+1. 访问 [ChatGPT GPTs 商店](https://chatgpt.com/gpts)
+2. 打开目标 GPT 应用
+3. 从 URL 中提取 ID：`https://chatgpt.com/g/g-B3hgivKK9-xxx` → ID 为 `g-B3hgivKK9`
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1"
+)
+
+# 使用 GPTs 对话
+response = client.chat.completions.create(
+    model="gpt-4-gizmo-g-B3hgivKK9",
+    messages=[
+        {"role": "user", "content": "你好，请介绍一下你自己"}
+    ]
+)
+
+print(response.choices[0].message.content)
+```
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/chat/completions \
+  -H "Authorization: Bearer sk-xxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4-gizmo-g-B3hgivKK9",
+    "messages": [
+      {"role": "user", "content": "你好，请介绍一下你自己"}
+    ]
+  }'
+```
+
+</CodeGroup>
+
+<Warning>
+  GPTs 调用需要上游渠道支持。并非所有 GPTs 都可用，具体取决于渠道配置。
+</Warning>
+
+<Note>
+  GPTs 对话支持流式输出，设置 `stream: true` 即可。计费按照 GPT-4 模型价格计算。
+</Note>

@@ -1,0 +1,50 @@
+---
+title: 'NextChat 配置教程'
+description: '在 NextChat (ChatGPT Next Web) 中配置 Crazyrouter API'
+---
+
+## 概述
+
+NextChat（原 ChatGPT Next Web）是一个流行的开源 ChatGPT 网页客户端。
+
+## 在线使用配置
+
+<Steps>
+  <Step title="打开设置">
+    点击左下角 `设置` 图标
+  </Step>
+  <Step title="配置接口">
+    - **接口地址**: `https://crazyrouter.com`
+    - **API Key**: `sk-xxx`
+  </Step>
+  <Step title="选择模型">
+    在 `模型 (model)` 中选择或输入模型名称
+  </Step>
+</Steps>
+
+## Docker 自部署
+
+```yaml
+services:
+  nextchat:
+    image: yidadaa/chatgpt-next-web
+    ports:
+      - "3000:3000"
+    environment:
+      - OPENAI_API_KEY=sk-xxx
+      - BASE_URL=https://crazyrouter.com
+      - CUSTOM_MODELS=+gpt-4o,+claude-sonnet-4-20250514,+gemini-2.5-pro
+```
+
+## 环境变量说明
+
+| 变量 | 说明 |
+|------|------|
+| `OPENAI_API_KEY` | API 密钥 |
+| `BASE_URL` | API 地址（不加 `/v1`） |
+| `CUSTOM_MODELS` | 自定义模型列表，`+` 表示添加 |
+| `HIDE_USER_API_KEY` | 设为 1 隐藏用户自定义 Key 入口 |
+
+<Note>
+  NextChat 的接口地址不需要加 `/v1` 后缀，程序会自动拼接。
+</Note>

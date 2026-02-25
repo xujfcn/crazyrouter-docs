@@ -1,0 +1,43 @@
+---
+title: 'Claude Dev 配置教程'
+description: '在 Claude Dev VS Code 扩展中配置 Crazyrouter API'
+---
+
+## 概述
+
+Claude Dev 是一个 VS Code AI 编程扩展，专注于使用 Claude 模型进行代码开发。
+
+## 配置步骤
+
+<Steps>
+  <Step title="安装扩展">
+    在 VS Code 扩展市场搜索 `Claude Dev` 并安装。
+  </Step>
+  <Step title="打开设置">
+    点击侧边栏的 Claude Dev 图标，进入设置。
+  </Step>
+  <Step title="选择 Provider">
+    选择 `OpenAI Compatible` 或 `Anthropic` 作为 API Provider。
+  </Step>
+  <Step title="填写配置">
+    **OpenAI Compatible 模式：**
+    - **Base URL**: `https://crazyrouter.com/v1`
+    - **API Key**: `sk-xxx`
+    - **Model**: `claude-sonnet-4-20250514`
+
+    **Anthropic 模式：**
+    - **Base URL**: `https://crazyrouter.com`
+    - **API Key**: `sk-xxx`
+  </Step>
+</Steps>
+
+## 推荐模型
+
+| 场景 | 模型 |
+|------|------|
+| 日常编程 | `claude-sonnet-4-20250514` |
+| 复杂重构 | `claude-opus-4-20250514` |
+
+<Note>
+  Claude Dev 和 Cline 功能类似。如果你已经在使用 Cline，配置方式基本相同。
+</Note>

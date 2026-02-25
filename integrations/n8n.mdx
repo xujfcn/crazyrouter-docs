@@ -1,0 +1,66 @@
+---
+title: 'n8n 配置教程'
+description: '在 n8n 工作流中配置 Crazyrouter API'
+---
+
+## 概述
+
+n8n 是一个开源的工作流自动化平台，支持通过 AI 节点调用大语言模型。
+
+## 配置步骤
+
+<Steps>
+  <Step title="添加凭证">
+    进入 `Settings` → `Credentials` → `Add Credential`，选择 `OpenAI API`
+  </Step>
+  <Step title="填写凭证">
+    - **API Key**: `sk-xxx`
+    - **Base URL**: `https://crazyrouter.com/v1`
+  </Step>
+  <Step title="在工作流中使用">
+    添加 `OpenAI` 节点或 `AI Agent` 节点，选择刚创建的凭证。
+  </Step>
+</Steps>
+
+## 工作流示例
+
+### AI 聊天节点
+
+```json
+{
+  "node": "OpenAI Chat Model",
+  "parameters": {
+    "model": "gpt-4o",
+    "messages": [
+      { "role": "user", "content": "{{ $json.input }}" }
+    ]
+  }
+}
+```
+
+### AI Agent 工作流
+
+1. **Trigger** → **AI Agent** → **Output**
+2. 在 AI Agent 节点中选择 Crazyrouter 凭证
+3. 配置工具（如 HTTP Request、Code 等）
+
+## 使用 HTTP Request 节点
+
+如果需要更灵活的控制，可以直接使用 HTTP Request 节点：
+
+```
+Method: POST
+URL: https://crazyrouter.com/v1/chat/completions
+Headers:
+  Authorization: Bearer sk-xxx
+  Content-Type: application/json
+Body:
+  {
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "{{ $json.input }}"}]
+  }
+```
+
+<Note>
+  n8n 的 AI Agent 节点支持工具调用（Function Calling），可以与其他 n8n 节点组合实现复杂的自动化流程。
+</Note>

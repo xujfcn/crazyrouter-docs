@@ -1,0 +1,135 @@
+---
+title: "查询任务状态"
+description: "查询 Midjourney 任务状态，支持单个查询和批量查询"
+---
+
+# 查询任务状态
+
+## 查询单个任务
+
+```
+GET /mj/task/{id}/fetch
+```
+
+根据任务 ID 查询任务详情和状态。
+
+### 请求示例
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/mj/task/task_1234567890/fetch \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    "https://crazyrouter.com/mj/task/task_1234567890/fetch",
+    headers={"Authorization": "Bearer YOUR_API_KEY"}
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### 响应示例（处理中）
+
+```json
+{
+  "id": "task_1234567890",
+  "action": "IMAGINE",
+  "status": "IN_PROGRESS",
+  "prompt": "a beautiful sunset over the ocean --ar 16:9 --v 6",
+  "promptEn": "a beautiful sunset over the ocean --ar 16:9 --v 6",
+  "progress": "65%",
+  "submitTime": 1709123456000,
+  "startTime": 1709123457000,
+  "imageUrl": "",
+  "failReason": "",
+  "buttons": []
+}
+```
+
+### 响应示例（已完成）
+
+```json
+{
+  "id": "task_1234567890",
+  "action": "IMAGINE",
+  "status": "SUCCESS",
+  "prompt": "a beautiful sunset over the ocean --ar 16:9 --v 6",
+  "promptEn": "a beautiful sunset over the ocean --ar 16:9 --v 6",
+  "progress": "100%",
+  "submitTime": 1709123456000,
+  "startTime": 1709123457000,
+  "finishTime": 1709123520000,
+  "imageUrl": "https://cdn.discordapp.com/attachments/.../image.png",
+  "failReason": "",
+  "buttons": [
+    {"customId": "MJ::JOB::upsample::1::abc123", "emoji": "U1", "label": "U1", "style": 2},
+    {"customId": "MJ::JOB::upsample::2::abc123", "emoji": "U2", "label": "U2", "style": 2},
+    {"customId": "MJ::JOB::upsample::3::abc123", "emoji": "U3", "label": "U3", "style": 2},
+    {"customId": "MJ::JOB::upsample::4::abc123", "emoji": "U4", "label": "U4", "style": 2},
+    {"customId": "MJ::JOB::variation::1::abc123", "emoji": "V1", "label": "V1", "style": 2},
+    {"customId": "MJ::JOB::variation::2::abc123", "emoji": "V2", "label": "V2", "style": 2},
+    {"customId": "MJ::JOB::variation::3::abc123", "emoji": "V3", "label": "V3", "style": 2},
+    {"customId": "MJ::JOB::variation::4::abc123", "emoji": "V4", "label": "V4", "style": 2}
+  ],
+  "properties": {}
+}
+```
+
+---
+
+## 批量查询任务
+
+```
+POST /mj/task/list-by-condition
+```
+
+根据条件批量查询任务列表。
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `ids` | array | 否 | 任务 ID 列表 |
+
+### 请求示例
+
+```bash cURL
+curl -X POST https://crazyrouter.com/mj/task/list-by-condition \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "ids": ["task_1234567890", "task_0987654321"]
+  }'
+```
+
+### 响应示例
+
+```json
+[
+  {
+    "id": "task_1234567890",
+    "action": "IMAGINE",
+    "status": "SUCCESS",
+    "progress": "100%",
+    "imageUrl": "https://cdn.discordapp.com/attachments/.../image1.png"
+  },
+  {
+    "id": "task_0987654321",
+    "action": "IMAGINE",
+    "status": "IN_PROGRESS",
+    "progress": "40%",
+    "imageUrl": ""
+  }
+]
+```
+
+<Note>
+  建议轮询间隔为 3-5 秒。任务通常在 30-120 秒内完成，具体取决于 Midjourney 服务负载。
+</Note>

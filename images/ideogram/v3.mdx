@@ -1,0 +1,181 @@
+---
+title: "Ideogram V3"
+description: "使用 Ideogram V3 API 进行图像生成、编辑、混合、重构和背景替换"
+---
+
+# Ideogram V3
+
+Ideogram V3 是最新一代的文本到图像模型，在文字渲染和图像质量方面有显著提升。
+
+## 生成图像
+
+```
+POST /ideogram/v1/ideogram-v3/generate
+```
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `prompt` | string | 是 | 图像描述提示词 |
+| `aspect_ratio` | string | 否 | 宽高比，如 `ASPECT_1_1`、`ASPECT_16_9`、`ASPECT_9_16` |
+| `model` | string | 否 | 模型版本，默认 `V_3` |
+| `magic_prompt_option` | string | 否 | 提示词增强：`AUTO`、`ON`、`OFF` |
+| `rendering_speed` | string | 否 | 渲染速度：`DEFAULT`、`TURBO`、`QUALITY` |
+| `style_type` | string | 否 | 风格类型：`AUTO`、`GENERAL`、`REALISTIC`、`DESIGN` |
+| `negative_prompt` | string | 否 | 负面提示词 |
+
+### 请求示例
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/ideogram/v1/ideogram-v3/generate \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "A serene Japanese garden with cherry blossoms, text saying \"Hello World\" on a wooden sign",
+    "aspect_ratio": "ASPECT_16_9",
+    "rendering_speed": "DEFAULT",
+    "style_type": "REALISTIC"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/ideogram/v1/ideogram-v3/generate",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "prompt": "A serene Japanese garden with cherry blossoms",
+        "aspect_ratio": "ASPECT_16_9",
+        "style_type": "REALISTIC"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### 响应示例
+
+```json
+{
+  "created": 1709123456,
+  "data": [
+    {
+      "url": "https://ideogram.ai/assets/image/...",
+      "prompt": "A serene Japanese garden with cherry blossoms",
+      "resolution": "1344x768",
+      "is_image_safe": true,
+      "seed": 12345
+    }
+  ]
+}
+```
+
+---
+
+## 编辑图像
+
+```
+POST /ideogram/v1/ideogram-v3/edit
+```
+
+基于已有图像进行编辑修改。
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `prompt` | string | 是 | 编辑描述 |
+| `image` | string | 是 | 原始图片 URL 或 Base64 |
+| `mask` | string | 否 | 遮罩图片，标记需要编辑的区域 |
+| `style_type` | string | 否 | 风格类型 |
+
+```bash cURL
+curl -X POST https://crazyrouter.com/ideogram/v1/ideogram-v3/edit \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "Replace the sky with a starry night",
+    "image": "https://example.com/photo.jpg",
+    "mask": "https://example.com/mask.png"
+  }'
+```
+
+---
+
+## Remix 图像
+
+```
+POST /ideogram/v1/ideogram-v3/remix
+```
+
+基于参考图像和新提示词生成变体。
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `prompt` | string | 是 | 新的提示词 |
+| `image` | string | 是 | 参考图片 |
+| `image_weight` | number | 否 | 参考图片权重，0-100 |
+
+```bash cURL
+curl -X POST https://crazyrouter.com/ideogram/v1/ideogram-v3/remix \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "Same scene but in watercolor painting style",
+    "image": "https://example.com/photo.jpg",
+    "image_weight": 50
+  }'
+```
+
+---
+
+## Reframe 重构
+
+```
+POST /ideogram/v1/ideogram-v3/reframe
+```
+
+扩展图像画布，生成超出原始边界的内容。
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `image` | string | 是 | 原始图片 |
+| `resolution` | string | 否 | 目标分辨率 |
+
+---
+
+## 替换背景
+
+```
+POST /ideogram/v1/ideogram-v3/replace-background
+```
+
+自动识别主体并替换背景。
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `prompt` | string | 是 | 新背景描述 |
+| `image` | string | 是 | 原始图片 |
+
+```bash cURL
+curl -X POST https://crazyrouter.com/ideogram/v1/ideogram-v3/replace-background \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "A tropical beach at sunset",
+    "image": "https://example.com/portrait.jpg"
+  }'
+```
+
+<Note>
+  Ideogram V3 在文字渲染方面表现优异，适合需要在图像中包含文字的场景。
+</Note>

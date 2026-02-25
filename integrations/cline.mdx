@@ -1,0 +1,42 @@
+---
+title: 'Cline 配置教程'
+description: '在 VS Code Cline 扩展中配置 Crazyrouter API'
+---
+
+## 概述
+
+Cline 是一个强大的 VS Code AI 编程扩展，支持自主编写代码、执行命令等。
+
+## 配置步骤
+
+<Steps>
+  <Step title="安装扩展">
+    在 VS Code 扩展市场搜索 `Cline` 并安装。
+  </Step>
+  <Step title="打开设置">
+    点击侧边栏的 Cline 图标，点击设置齿轮。
+  </Step>
+  <Step title="选择 Provider">
+    在 API Provider 下拉菜单中选择 `OpenAI Compatible`。
+  </Step>
+  <Step title="填写配置">
+    - **Base URL**: `https://crazyrouter.com/v1`
+    - **API Key**: `sk-xxx`
+    - **Model ID**: `claude-sonnet-4-20250514`（或其他模型）
+  </Step>
+  <Step title="保存并测试">
+    点击 Save，然后在聊天框中输入问题测试。
+  </Step>
+</Steps>
+
+## 推荐模型
+
+| 用途 | 推荐模型 |
+|------|----------|
+| 日常编程 | `claude-sonnet-4-20250514` |
+| 复杂任务 | `claude-opus-4-20250514` |
+| 快速问答 | `gpt-4o-mini` |
+
+<Note>
+  Cline 支持自动读写文件和执行终端命令，建议使用能力较强的模型以获得更好的自主编程体验。
+</Note>

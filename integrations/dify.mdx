@@ -1,0 +1,47 @@
+---
+title: 'Dify 配置教程'
+description: '在 Dify 平台中配置 Crazyrouter API'
+---
+
+## 概述
+
+Dify 是一个开源的 LLM 应用开发平台，支持工作流编排、RAG、Agent 等功能。
+
+## 配置步骤
+
+<Steps>
+  <Step title="进入模型供应商">
+    登录 Dify 后台，进入 `设置` → `模型供应商`
+  </Step>
+  <Step title="添加 OpenAI 兼容模型">
+    点击 `OpenAI-API-compatible`，填写：
+    - **模型名称**: `gpt-4o`（或其他模型）
+    - **API Key**: `sk-xxx`
+    - **API Base URL**: `https://crazyrouter.com/v1`
+  </Step>
+  <Step title="配置模型参数">
+    - **模型类型**: 根据模型选择 LLM / Text Embedding / Rerank
+    - **上下文长度**: 根据模型设置（如 gpt-4o 为 128000）
+    - **最大 Token**: 设置最大输出长度
+  </Step>
+  <Step title="保存并测试">
+    点击保存，在应用中选择该模型测试。
+  </Step>
+</Steps>
+
+## 添加 Embedding 模型
+
+在模型供应商中添加：
+- **模型名称**: `text-embedding-3-large`
+- **模型类型**: `Text Embedding`
+- **API Base URL**: `https://crazyrouter.com/v1`
+
+## 添加 Rerank 模型
+
+- **模型名称**: `BAAI/bge-reranker-v2-m3`
+- **模型类型**: `Rerank`
+- **API Base URL**: `https://crazyrouter.com/v1`
+
+<Note>
+  Dify 支持同时配置多个模型供应商。建议为不同用途（对话、嵌入、重排序）分别配置对应的模型。
+</Note>

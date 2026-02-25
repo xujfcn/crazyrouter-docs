@@ -1,0 +1,104 @@
+---
+title: '新增令牌'
+description: '创建新的 API 令牌'
+api: 'POST /api/token/'
+---
+
+## 接口说明
+
+创建一个新的 API 令牌（Token），用于调用 AI 模型 API。
+
+## 请求参数
+
+<ParamField body="name" type="string" required>
+  令牌名称，便于识别用途
+</ParamField>
+
+<ParamField body="remain_quota" type="integer" default="0">
+  初始额度（单位：内部额度值）。设置为 0 时需配合 `unlimited_quota` 使用
+</ParamField>
+
+<ParamField body="unlimited_quota" type="boolean" default="false">
+  是否设为无限额度
+</ParamField>
+
+<ParamField body="expired_time" type="integer" default="-1">
+  过期时间（Unix 时间戳），-1 表示永不过期
+</ParamField>
+
+<ParamField body="models" type="string[]">
+  允许使用的模型列表。为空表示允许所有模型
+</ParamField>
+
+<ParamField body="subnet" type="string">
+  IP 白名单，CIDR 格式，如 `192.168.1.0/24`。为空表示不限制
+</ParamField>
+
+## 响应格式
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "id": 10,
+    "key": "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "name": "生产环境",
+    "status": 1,
+    "remain_quota": 100000,
+    "unlimited_quota": false,
+    "expired_time": -1,
+    "models": ["gpt-4o", "claude-sonnet-4-20250514"]
+  }
+}
+```
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+headers = {
+    "Authorization": "Bearer your_access_token",
+    "New-Api-User": "1",
+    "Content-Type": "application/json",
+    "User-Agent": "Mozilla/5.0"
+}
+
+response = requests.post(
+    "https://crazyrouter.com/api/token/",
+    headers=headers,
+    json={
+        "name": "生产环境",
+        "remain_quota": 100000,
+        "unlimited_quota": False,
+        "expired_time": -1,
+        "models": ["gpt-4o", "claude-sonnet-4-20250514", "gemini-2.5-pro"]
+    }
+)
+
+data = response.json()
+if data["success"]:
+    print(f"令牌创建成功: {data['data']['key']}")
+```
+
+```bash cURL
+curl -X POST https://crazyrouter.com/api/token/ \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 1" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "生产环境",
+    "remain_quota": 100000,
+    "expired_time": -1,
+    "models": ["gpt-4o"]
+  }'
+```
+
+</CodeGroup>
+
+<Note>
+  创建后请妥善保存返回的 `key`，该值仅在创建时完整显示一次。
+</Note>

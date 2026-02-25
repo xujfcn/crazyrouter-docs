@@ -1,0 +1,117 @@
+---
+title: "Web 搜索"
+description: "通过 Chat Completions API 启用 Web 搜索功能，让模型获取实时信息"
+---
+
+# Web 搜索
+
+部分模型支持在对话中进行 Web 搜索，获取实时信息后再生成回答。通过在 `tools` 中添加 `web_search` 工具来启用。
+
+## 基本用法
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      {"role": "user", "content": "今天的科技新闻有哪些？"}
+    ],
+    "tools": [
+      {
+        "type": "web_search"
+      }
+    ]
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {"role": "user", "content": "今天的科技新闻有哪些？"}
+    ],
+    tools=[
+        {"type": "web_search"}
+    ]
+)
+
+print(response.choices[0].message.content)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const response = await client.chat.completions.create({
+  model: "gpt-4o",
+  messages: [{ role: "user", content: "今天的科技新闻有哪些？" }],
+  tools: [{ type: "web_search" }],
+});
+
+console.log(response.choices[0].message.content);
+```
+
+</CodeGroup>
+
+## 流式搜索
+
+```python Python
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {"role": "user", "content": "2026年最新的 AI 模型有哪些？"}
+    ],
+    tools=[{"type": "web_search"}],
+    stream=True
+)
+
+for chunk in stream:
+    if chunk.choices[0].delta.content is not None:
+        print(chunk.choices[0].delta.content, end="")
+```
+
+## 搜索配置
+
+可以通过 `web_search` 工具的参数控制搜索行为：
+
+```json
+{
+  "tools": [
+    {
+      "type": "web_search",
+      "web_search": {
+        "enable": true,
+        "search_context_size": "medium"
+      }
+    }
+  ]
+}
+```
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `enable` | boolean | 是否启用搜索 |
+| `search_context_size` | string | 搜索上下文大小：`low`、`medium`、`high` |
+
+<Note>
+  Web 搜索会增加响应延迟和 Token 消耗。模型会自动判断是否需要搜索，只有在需要实时信息时才会触发搜索。
+</Note>
+
+<Warning>
+  并非所有模型都支持 Web 搜索功能。如果模型不支持，`web_search` 工具会被忽略。
+</Warning>

@@ -1,0 +1,99 @@
+---
+title: '获取令牌列表'
+description: '分页获取当前用户的 API 令牌列表'
+api: 'GET /api/token/'
+---
+
+## 接口说明
+
+获取当前用户创建的所有 API 令牌（Token），支持分页。
+
+## 认证方式
+
+使用用户的 Access Token 进行认证，需要在请求头中携带：
+
+```
+Authorization: Bearer {access_token}
+New-Api-User: {user_id}
+```
+
+## 请求参数
+
+<ParamField query="p" type="integer" default="0">
+  页码，从 0 开始
+</ParamField>
+
+<ParamField query="size" type="integer" default="10">
+  每页数量，最大 100
+</ParamField>
+
+## 响应格式
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": [
+    {
+      "id": 1,
+      "user_id": 1,
+      "key": "sk-xxxxxxxxxxxxxxxx",
+      "status": 1,
+      "name": "我的令牌",
+      "created_time": 1706000000,
+      "accessed_time": 1706100000,
+      "expired_time": -1,
+      "remain_quota": 500000,
+      "unlimited_quota": false,
+      "used_quota": 12345,
+      "models": ["gpt-4o", "claude-sonnet-4-20250514"],
+      "subnet": ""
+    }
+  ]
+}
+```
+
+## 字段说明
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `id` | int | 令牌 ID |
+| `key` | string | API Key（sk-xxx 格式） |
+| `status` | int | 状态：1=启用，2=禁用 |
+| `name` | string | 令牌名称 |
+| `expired_time` | int | 过期时间戳，-1 表示永不过期 |
+| `remain_quota` | int | 剩余额度 |
+| `unlimited_quota` | bool | 是否无限额度 |
+| `used_quota` | int | 已使用额度 |
+| `models` | string[] | 允许使用的模型列表，空表示全部 |
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+headers = {
+    "Authorization": "Bearer your_access_token",
+    "New-Api-User": "1",
+    "User-Agent": "Mozilla/5.0"
+}
+
+response = requests.get(
+    "https://crazyrouter.com/api/token/?p=0&size=100",
+    headers=headers
+)
+
+tokens = response.json()["data"]
+for token in tokens:
+    print(f"[{token['name']}] {token['key'][:10]}... 额度: {token['remain_quota']}")
+```
+
+```bash cURL
+curl "https://crazyrouter.com/api/token/?p=0&size=100" \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 1"
+```
+
+</CodeGroup>

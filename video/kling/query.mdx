@@ -1,0 +1,136 @@
+---
+title: "Kling 任务查询"
+description: "查询 Kling 视频和图像生成任务的状态和结果"
+---
+
+# Kling 任务查询
+
+## 查询文生视频任务
+
+```
+GET /kling/v1/videos/text2video/{task_id}
+```
+
+```bash cURL
+curl https://crazyrouter.com/kling/v1/videos/text2video/kling_t2v_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+## 查询图生视频任务
+
+```
+GET /kling/v1/videos/image2video/{task_id}
+```
+
+```bash cURL
+curl https://crazyrouter.com/kling/v1/videos/image2video/kling_i2v_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+---
+
+## 响应格式
+
+### 处理中
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "task_id": "kling_t2v_abc123",
+    "task_status": "processing",
+    "task_status_msg": "视频生成中"
+  }
+}
+```
+
+### 已完成
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "task_id": "kling_t2v_abc123",
+    "task_status": "succeed",
+    "task_status_msg": "成功",
+    "task_result": {
+      "videos": [
+        {
+          "id": "video_001",
+          "url": "https://cdn.klingai.com/videos/...",
+          "duration": "5.0"
+        }
+      ]
+    }
+  }
+}
+```
+
+### 失败
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "task_id": "kling_t2v_abc123",
+    "task_status": "failed",
+    "task_status_msg": "内容审核未通过"
+  }
+}
+```
+
+## 任务状态
+
+| 状态 | 说明 |
+|------|------|
+| `submitted` | 已提交 |
+| `processing` | 处理中 |
+| `succeed` | 成功 |
+| `failed` | 失败 |
+
+---
+
+## 完整流程示例
+
+```python Python
+import requests
+import time
+
+API_KEY = "YOUR_API_KEY"
+BASE_URL = "https://crazyrouter.com"
+headers = {
+    "Content-Type": "application/json",
+    "Authorization": f"Bearer {API_KEY}"
+}
+
+# 1. 提交文生视频任务
+resp = requests.post(f"{BASE_URL}/kling/v1/videos/text2video", headers=headers, json={
+    "model_name": "kling-v1-6",
+    "prompt": "一只猫咪在花园里追蝴蝶",
+    "duration": "5",
+    "aspect_ratio": "16:9"
+})
+task_id = resp.json()["data"]["task_id"]
+
+# 2. 轮询查询
+while True:
+    resp = requests.get(f"{BASE_URL}/kling/v1/videos/text2video/{task_id}", headers=headers)
+    data = resp.json()["data"]
+
+    if data["task_status"] == "succeed":
+        video_url = data["task_result"]["videos"][0]["url"]
+        print(f"视频地址: {video_url}")
+        break
+    elif data["task_status"] == "failed":
+        print(f"失败: {data['task_status_msg']}")
+        break
+
+    time.sleep(10)
+```
+
+<Note>
+  建议轮询间隔为 10 秒，视频生成通常需要 2-5 分钟。
+</Note>

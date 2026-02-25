@@ -1,0 +1,85 @@
+---
+title: 'API 快速开始指南'
+description: '5 分钟完成第一次 API 调用'
+---
+
+## 第一步：获取 API Key
+
+1. 访问 [Crazyrouter](https://crazyrouter.com) 注册账号
+2. 进入 [Token 管理](https://crazyrouter.com/token) 页面
+3. 点击「新建令牌」创建 API Key
+
+## 第二步：发起请求
+
+<CodeGroup>
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      {"role": "user", "content": "你好"}
+    ]
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "你好"}]
+)
+print(response.choices[0].message.content)
+```
+
+```javascript Node.js
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: 'YOUR_API_KEY',
+  baseURL: 'https://crazyrouter.com/v1'
+});
+
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: '你好' }]
+});
+console.log(response.choices[0].message.content);
+```
+</CodeGroup>
+
+## 第三步：查看结果
+
+成功的响应示例：
+
+```json
+{
+  "id": "chatcmpl-abc123",
+  "object": "chat.completion",
+  "created": 1677652288,
+  "choices": [{
+    "index": 0,
+    "message": {
+      "role": "assistant",
+      "content": "你好！有什么可以帮助你的吗？"
+    },
+    "finish_reason": "stop"
+  }],
+  "usage": {
+    "prompt_tokens": 9,
+    "completion_tokens": 12,
+    "total_tokens": 21
+  }
+}
+```
+
+<Note>
+所有 OpenAI 兼容的客户端和框架（如 LangChain、LlamaIndex、Cursor 等）只需修改 `base_url` 和 `api_key` 即可接入。
+</Note>

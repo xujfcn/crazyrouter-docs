@@ -1,0 +1,253 @@
+---
+title: "Gemini 工具调用"
+description: "使用 Gemini 原生格式的代码执行、Google 搜索和 URL 上下文工具"
+---
+
+# Gemini 工具调用
+
+Gemini 模型支持多种内置工具，包括代码执行、Google 搜索和 URL 上下文获取。
+
+```
+POST /v1beta/models/{model}:generateContent
+```
+
+---
+
+## 代码执行
+
+让 Gemini 编写并执行 Python 代码：
+
+<CodeGroup>
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "计算前100个素数的和"}
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "codeExecution": {}
+      }
+    ]
+  }'
+```
+
+```python Python
+import google.generativeai as genai
+
+genai.configure(
+    api_key="YOUR_API_KEY",
+    transport="rest",
+    client_options={"api_endpoint": "https://crazyrouter.com"}
+)
+
+model = genai.GenerativeModel(
+    "gemini-2.5-flash",
+    tools=["code_execution"]
+)
+
+response = model.generate_content("计算前100个素数的和")
+
+for part in response.candidates[0].content.parts:
+    if hasattr(part, "executable_code"):
+        print("代码:", part.executable_code.code)
+    elif hasattr(part, "code_execution_result"):
+        print("结果:", part.code_execution_result.output)
+    elif hasattr(part, "text"):
+        print("文本:", part.text)
+```
+
+</CodeGroup>
+
+### 代码执行响应
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "我来计算前100个素数的和。"
+          },
+          {
+            "executableCode": {
+              "language": "PYTHON",
+              "code": "def is_prime(n):\n    if n < 2:\n        return False\n    for i in range(2, int(n**0.5) + 1):\n        if n % i == 0:\n            return False\n    return True\n\nprimes = []\nn = 2\nwhile len(primes) < 100:\n    if is_prime(n):\n        primes.append(n)\n    n += 1\n\nprint(f'前100个素数的和: {sum(primes)}')"
+            }
+          },
+          {
+            "codeExecutionResult": {
+              "outcome": "OUTCOME_OK",
+              "output": "前100个素数的和: 24133\n"
+            }
+          },
+          {
+            "text": "前100个素数的和是 **24133**。"
+          }
+        ],
+        "role": "model"
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Google 搜索
+
+启用 Google 搜索让模型获取实时信息：
+
+<CodeGroup>
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "2026年最新的 AI 技术趋势是什么？"}
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "googleSearch": {}
+      }
+    ]
+  }'
+```
+
+```python Python
+model = genai.GenerativeModel(
+    "gemini-2.5-flash",
+    tools=["google_search"]
+)
+
+response = model.generate_content("2026年最新的 AI 技术趋势是什么？")
+print(response.text)
+```
+
+</CodeGroup>
+
+---
+
+## URL 上下文
+
+让模型读取指定 URL 的内容：
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "总结这个网页的主要内容：https://example.com/article"}
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "urlContext": {}
+      }
+    ]
+  }'
+```
+
+---
+
+## 自定义函数调用
+
+Gemini 也支持自定义函数调用（类似 OpenAI 的 Function Calling）：
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [{"text": "查询北京的天气"}]
+      }
+    ],
+    "tools": [
+      {
+        "functionDeclarations": [
+          {
+            "name": "get_weather",
+            "description": "获取指定城市的天气信息",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "city": {
+                  "type": "string",
+                  "description": "城市名称"
+                }
+              },
+              "required": ["city"]
+            }
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+### 函数调用响应
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "functionCall": {
+              "name": "get_weather",
+              "args": {"city": "北京"}
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+### 返回函数结果
+
+```json
+{
+  "contents": [
+    {"role": "user", "parts": [{"text": "查询北京的天气"}]},
+    {"role": "model", "parts": [{"functionCall": {"name": "get_weather", "args": {"city": "北京"}}}]},
+    {
+      "role": "user",
+      "parts": [
+        {
+          "functionResponse": {
+            "name": "get_weather",
+            "response": {"temperature": 18, "condition": "晴"}
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+<Note>
+  多个工具可以同时启用。例如同时启用代码执行和 Google 搜索，模型会根据需要自动选择合适的工具。
+</Note>

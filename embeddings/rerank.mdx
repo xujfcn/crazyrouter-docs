@@ -1,0 +1,129 @@
+---
+title: '重排序'
+description: '对搜索结果进行语义重排序'
+api: 'POST /v1/rerank'
+---
+
+## 接口说明
+
+对一组文档按照与查询的语义相关性进行重新排序，常用于 RAG 检索增强生成的第二阶段精排。
+
+<Note>
+  参考 [SiliconFlow Rerank API](https://docs.siliconflow.cn/cn/api-reference/rerank/create-rerank) 格式实现。
+</Note>
+
+## 支持模型
+
+| 模型 | 说明 |
+|------|------|
+| `BAAI/bge-reranker-v2-m3` | 多语言重排序模型，推荐 |
+| `BAAI/bge-reranker-large` | 英文为主 |
+
+## 请求参数
+
+<ParamField body="model" type="string" required>
+  重排序模型名称，如 `BAAI/bge-reranker-v2-m3`
+</ParamField>
+
+<ParamField body="query" type="string" required>
+  查询文本
+</ParamField>
+
+<ParamField body="documents" type="string[]" required>
+  待排序的文档列表
+</ParamField>
+
+<ParamField body="top_n" type="integer">
+  返回前 N 个结果，默认返回全部
+</ParamField>
+
+<ParamField body="return_documents" type="boolean" default="true">
+  是否在响应中返回文档原文
+</ParamField>
+
+## 响应格式
+
+```json
+{
+  "model": "BAAI/bge-reranker-v2-m3",
+  "results": [
+    {
+      "index": 2,
+      "relevance_score": 0.9875,
+      "document": { "text": "最相关的文档内容" }
+    },
+    {
+      "index": 0,
+      "relevance_score": 0.7432,
+      "document": { "text": "次相关的文档内容" }
+    },
+    {
+      "index": 1,
+      "relevance_score": 0.1205,
+      "document": { "text": "不太相关的文档内容" }
+    }
+  ],
+  "usage": {
+    "total_tokens": 128
+  }
+}
+```
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/v1/rerank",
+    headers={
+        "Authorization": "Bearer sk-xxx",
+        "Content-Type": "application/json"
+    },
+    json={
+        "model": "BAAI/bge-reranker-v2-m3",
+        "query": "什么是向量数据库",
+        "documents": [
+            "向量数据库是专门存储和检索高维向量的数据库系统",
+            "关系型数据库使用表格存储结构化数据",
+            "向量数据库支持近似最近邻搜索，适合语义检索场景",
+            "Redis 是一个内存键值存储系统"
+        ],
+        "top_n": 2,
+        "return_documents": True
+    }
+)
+
+data = response.json()
+for result in data["results"]:
+    print(f"[{result['relevance_score']:.4f}] {result['document']['text']}")
+```
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/rerank \
+  -H "Authorization: Bearer sk-xxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "BAAI/bge-reranker-v2-m3",
+    "query": "什么是向量数据库",
+    "documents": [
+      "向量数据库是专门存储和检索高维向量的数据库系统",
+      "关系型数据库使用表格存储结构化数据"
+    ],
+    "top_n": 2
+  }'
+```
+
+</CodeGroup>
+
+## 典型 RAG 流程
+
+```
+用户查询 → Embedding 检索 Top-K → Rerank 精排 → LLM 生成回答
+```
+
+<Warning>
+  重排序模型的输入文档数量建议不超过 100 条。文档过多会增加延迟和费用。
+</Warning>

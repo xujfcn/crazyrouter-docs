@@ -1,0 +1,54 @@
+---
+title: 'GPT Academic 配置教程'
+description: '在 GPT Academic 中配置 Crazyrouter API'
+---
+
+## 概述
+
+GPT Academic（学术版 GPT）是一个面向学术场景的 AI 工具，支持论文润色、翻译、代码解释等功能。
+
+## 配置方法
+
+### 修改配置文件
+
+编辑 `config.py` 或 `config_private.py`：
+
+```python
+API_KEY = "sk-xxx"
+API_URL_REDIRECT = {
+    "https://api.openai.com/v1/chat/completions": "https://crazyrouter.com/v1/chat/completions"
+}
+
+# 或者直接设置
+LLM_MODEL = "gpt-4o"
+AVAIL_LLM_MODELS = [
+    "gpt-4o", "gpt-4o-mini",
+    "claude-sonnet-4-20250514",
+    "gemini-2.5-pro"
+]
+```
+
+### 环境变量方式
+
+```bash
+export API_KEY=sk-xxx
+export API_URL_REDIRECT='{"https://api.openai.com/v1/chat/completions": "https://crazyrouter.com/v1/chat/completions"}'
+```
+
+### Docker 部署
+
+```yaml
+services:
+  gpt-academic:
+    image: ghcr.io/binary-husky/gpt_academic
+    ports:
+      - "22303:22303"
+    environment:
+      - API_KEY=sk-xxx
+      - LLM_MODEL=gpt-4o
+      - API_URL_REDIRECT={"https://api.openai.com/v1/chat/completions": "https://crazyrouter.com/v1/chat/completions"}
+```
+
+<Note>
+  GPT Academic 的 URL 重定向功能可以将所有 OpenAI API 请求转发到 Crazyrouter，无需修改其他代码。
+</Note>

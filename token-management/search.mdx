@@ -1,0 +1,66 @@
+---
+title: '搜索令牌'
+description: '按关键词搜索令牌'
+api: 'GET /api/token/search'
+---
+
+## 接口说明
+
+根据关键词搜索令牌，支持按名称模糊匹配。
+
+## 请求参数
+
+<ParamField query="keyword" type="string" required>
+  搜索关键词，匹配令牌名称
+</ParamField>
+
+## 响应格式
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": [
+    {
+      "id": 5,
+      "name": "生产环境",
+      "key": "sk-xxxxxxxx",
+      "status": 1,
+      "remain_quota": 50000,
+      "used_quota": 8000,
+      "created_time": 1706000000
+    }
+  ]
+}
+```
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+headers = {
+    "Authorization": "Bearer your_access_token",
+    "New-Api-User": "1",
+    "User-Agent": "Mozilla/5.0"
+}
+
+response = requests.get(
+    "https://crazyrouter.com/api/token/search?keyword=生产",
+    headers=headers
+)
+
+tokens = response.json()["data"]
+for token in tokens:
+    print(f"[{token['id']}] {token['name']} - 剩余额度: {token['remain_quota']}")
+```
+
+```bash cURL
+curl "https://crazyrouter.com/api/token/search?keyword=生产" \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 1"
+```
+
+</CodeGroup>

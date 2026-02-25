@@ -1,0 +1,99 @@
+---
+title: '修改令牌'
+description: '更新已有令牌的配置'
+api: 'PUT /api/token/'
+---
+
+## 接口说明
+
+修改已有令牌的名称、额度、过期时间、模型权限等配置。
+
+## 请求参数
+
+<ParamField body="id" type="integer" required>
+  令牌 ID
+</ParamField>
+
+<ParamField body="name" type="string">
+  令牌名称
+</ParamField>
+
+<ParamField body="remain_quota" type="integer">
+  剩余额度
+</ParamField>
+
+<ParamField body="unlimited_quota" type="boolean">
+  是否无限额度
+</ParamField>
+
+<ParamField body="expired_time" type="integer">
+  过期时间戳，-1 为永不过期
+</ParamField>
+
+<ParamField body="models" type="string[]">
+  允许使用的模型列表
+</ParamField>
+
+<ParamField body="status" type="integer">
+  状态：1=启用，2=禁用
+</ParamField>
+
+<ParamField body="subnet" type="string">
+  IP 白名单（CIDR 格式）
+</ParamField>
+
+## 响应格式
+
+```json
+{
+  "success": true,
+  "message": "令牌更新成功"
+}
+```
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+headers = {
+    "Authorization": "Bearer your_access_token",
+    "New-Api-User": "1",
+    "Content-Type": "application/json",
+    "User-Agent": "Mozilla/5.0"
+}
+
+# 修改令牌额度和模型权限
+response = requests.put(
+    "https://crazyrouter.com/api/token/",
+    headers=headers,
+    json={
+        "id": 10,
+        "name": "生产环境-已更新",
+        "remain_quota": 200000,
+        "models": ["gpt-4o", "claude-sonnet-4-20250514", "gemini-2.5-flash"]
+    }
+)
+
+print(response.json())
+```
+
+```bash cURL
+curl -X PUT https://crazyrouter.com/api/token/ \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 1" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": 10,
+    "name": "生产环境-已更新",
+    "remain_quota": 200000
+  }'
+```
+
+</CodeGroup>
+
+<Warning>
+  修改令牌不会重新生成 API Key。如需更换 Key，请删除后重新创建。
+</Warning>

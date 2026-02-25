@@ -1,0 +1,39 @@
+---
+title: 'Zotero GPT 配置教程'
+description: '在 Zotero 文献管理工具中配置 Crazyrouter API'
+---
+
+## 概述
+
+Zotero GPT 是 Zotero 文献管理工具的 AI 插件，支持论文摘要、翻译、问答等功能。
+
+## 配置步骤
+
+<Steps>
+  <Step title="安装插件">
+    在 Zotero 中安装 `zotero-gpt` 或 `Aria` 等 AI 插件。
+  </Step>
+  <Step title="打开插件设置">
+    进入 `编辑` → `首选项` → `Zotero GPT`（或对应插件名称）
+  </Step>
+  <Step title="配置 API">
+    - **API URL**: `https://crazyrouter.com/v1`
+    - **API Key**: `sk-xxx`
+    - **Model**: `gpt-4o`（推荐用于学术场景）
+  </Step>
+  <Step title="测试">
+    选中一篇文献，右键使用 AI 功能测试。
+  </Step>
+</Steps>
+
+## 推荐模型
+
+| 场景 | 推荐模型 |
+|------|----------|
+| 论文摘要 | `gpt-4o` |
+| 文献翻译 | `gpt-4o-mini`（性价比高） |
+| 深度分析 | `claude-opus-4-20250514` |
+
+<Note>
+  不同的 Zotero AI 插件配置方式可能略有差异，请参考对应插件的文档。核心配置都是 API URL 和 API Key。
+</Note>

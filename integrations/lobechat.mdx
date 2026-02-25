@@ -1,0 +1,46 @@
+---
+title: 'LobeChat 配置教程'
+description: '在 LobeChat 中配置 Crazyrouter API'
+---
+
+## 概述
+
+LobeChat 是一个开源的 AI 聊天框架，支持自部署和在线使用。
+
+## 配置步骤
+
+<Steps>
+  <Step title="进入设置">
+    点击左下角头像 → `设置` → `语言模型`
+  </Step>
+  <Step title="配置 OpenAI">
+    在 `OpenAI` 选项卡中：
+    - **API Key**: `sk-xxx`
+    - **API 代理地址**: `https://crazyrouter.com/v1`
+    - 开启 `使用自定义 API 代理地址`
+  </Step>
+  <Step title="检查模型">
+    点击 `检查` 按钮验证连接是否正常。
+  </Step>
+</Steps>
+
+## Docker 自部署配置
+
+```yaml
+services:
+  lobechat:
+    image: lobehub/lobe-chat
+    ports:
+      - "3210:3210"
+    environment:
+      - OPENAI_API_KEY=sk-xxx
+      - OPENAI_PROXY_URL=https://crazyrouter.com/v1
+```
+
+## 使用多个模型
+
+LobeChat 支持在对话中随时切换模型。配置好 API 后，可以在对话界面顶部的模型选择器中选择不同模型。
+
+<Note>
+  LobeChat 也支持配置 Anthropic、Google 等独立 Provider。如果需要使用 Claude 原生格式，可以在 Anthropic 选项卡中配置 Base URL 为 `https://crazyrouter.com`。
+</Note>

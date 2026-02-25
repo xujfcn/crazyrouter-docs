@@ -1,0 +1,97 @@
+---
+title: "GPT-4o Audio"
+description: "使用 GPT-4o 的音频输入/输出能力"
+---
+
+# GPT-4o Audio
+
+GPT-4o 支持直接处理音频输入并生成音频输出，实现语音对话。
+
+## 音频输入
+
+通过 Chat Completions API 发送音频：
+
+```
+POST /v1/chat/completions
+```
+
+### 请求示例
+
+```python Python
+import base64
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+# 读取音频文件并编码为 Base64
+with open("question.wav", "rb") as f:
+    audio_base64 = base64.b64encode(f.read()).decode("utf-8")
+
+response = client.chat.completions.create(
+    model="gpt-4o-audio-preview",
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "请听这段音频并回答问题"},
+                {
+                    "type": "input_audio",
+                    "input_audio": {
+                        "data": audio_base64,
+                        "format": "wav"
+                    }
+                }
+            ]
+        }
+    ]
+)
+
+print(response.choices[0].message.content)
+```
+
+---
+
+## 音频输出
+
+请求模型以音频格式回复：
+
+```python Python
+response = client.chat.completions.create(
+    model="gpt-4o-audio-preview",
+    modalities=["text", "audio"],
+    audio={"voice": "nova", "format": "wav"},
+    messages=[
+        {"role": "user", "content": "用中文讲一个简短的笑话"}
+    ]
+)
+
+# 获取文本回复
+print(response.choices[0].message.content)
+
+# 获取音频回复
+if response.choices[0].message.audio:
+    audio_data = base64.b64decode(response.choices[0].message.audio.data)
+    with open("response.wav", "wb") as f:
+        f.write(audio_data)
+```
+
+---
+
+## 支持的模型
+
+| 模型 | 说明 |
+|------|------|
+| `gpt-4o-audio-preview` | GPT-4o 音频预览版 |
+
+## 音频格式
+
+输入支持：`wav`、`mp3`
+
+输出支持：`wav`、`mp3`、`opus`、`flac`、`pcm16`
+
+<Note>
+  GPT-4o Audio 可以理解音频中的语气、情感和环境声音，不仅仅是语音转文字。
+</Note>

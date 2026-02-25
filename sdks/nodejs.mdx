@@ -1,0 +1,105 @@
+---
+title: 'Node.js 基础对话'
+description: 'Node.js 使用 openai 包接入 Crazyrouter'
+---
+
+## 安装
+
+```bash
+npm install openai
+```
+
+## 基础对话
+
+```javascript
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: 'sk-xxx',
+  baseURL: 'https://crazyrouter.com/v1',
+});
+
+async function main() {
+  const response = await client.chat.completions.create({
+    model: 'gpt-4o',
+    messages: [
+      { role: 'system', content: '你是一个有帮助的助手。' },
+      { role: 'user', content: '用一句话解释什么是 Node.js' },
+    ],
+  });
+
+  console.log(response.choices[0].message.content);
+}
+
+main();
+```
+
+## 流式输出
+
+```javascript
+async function streamChat() {
+  const stream = await client.chat.completions.create({
+    model: 'gpt-4o',
+    messages: [{ role: 'user', content: '写一首关于编程的诗' }],
+    stream: true,
+  });
+
+  for await (const chunk of stream) {
+    const content = chunk.choices[0]?.delta?.content || '';
+    process.stdout.write(content);
+  }
+  console.log();
+}
+
+streamChat();
+```
+
+## 连续对话
+
+```javascript
+const messages = [
+  { role: 'system', content: '你是一个 JavaScript 专家。' },
+];
+
+async function chat(userInput) {
+  messages.push({ role: 'user', content: userInput });
+
+  const response = await client.chat.completions.create({
+    model: 'gpt-4o',
+    messages,
+  });
+
+  const reply = response.choices[0].message.content;
+  messages.push({ role: 'assistant', content: reply });
+  return reply;
+}
+
+async function main() {
+  console.log(await chat('什么是 Promise？'));
+  console.log(await chat('和 async/await 有什么区别？'));
+}
+
+main();
+```
+
+## CommonJS 用法
+
+```javascript
+const OpenAI = require('openai');
+
+const client = new OpenAI({
+  apiKey: 'sk-xxx',
+  baseURL: 'https://crazyrouter.com/v1',
+});
+
+client.chat.completions
+  .create({
+    model: 'gpt-4o',
+    messages: [{ role: 'user', content: '你好' }],
+  })
+  .then((res) => console.log(res.choices[0].message.content));
+```
+
+<Note>
+  Node.js openai 包版本需要 4.x 以上。如果使用旧版本，请参考 OpenAI 官方迁移指南升级。
+</Note>

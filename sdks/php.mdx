@@ -1,0 +1,118 @@
+---
+title: 'PHP 示例'
+description: 'PHP 调用 Crazyrouter API 示例'
+---
+
+## 基础对话
+
+```php
+<?php
+
+$apiKey = 'sk-xxx';
+$baseUrl = 'https://crazyrouter.com/v1';
+
+$data = [
+    'model' => 'gpt-4o',
+    'messages' => [
+        ['role' => 'user', 'content' => '你好，用PHP写一个冒泡排序']
+    ]
+];
+
+$ch = curl_init($baseUrl . '/chat/completions');
+curl_setopt_array($ch, [
+    CURLOPT_POST => true,
+    CURLOPT_HTTPHEADER => [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . $apiKey,
+    ],
+    CURLOPT_POSTFIELDS => json_encode($data),
+    CURLOPT_RETURNTRANSFER => true,
+]);
+
+$response = curl_exec($ch);
+curl_close($ch);
+
+$result = json_decode($response, true);
+echo $result['choices'][0]['message']['content'];
+```
+
+## 图像编辑
+
+```php
+<?php
+
+$apiKey = 'sk-xxx';
+$baseUrl = 'https://crazyrouter.com/v1';
+
+// 使用 GPT-Image-1 编辑图片
+$ch = curl_init($baseUrl . '/images/edits');
+
+$postFields = [
+    'model' => 'gpt-image-1',
+    'image' => new CURLFile('original.png', 'image/png'),
+    'prompt' => '把背景改成星空',
+];
+
+curl_setopt_array($ch, [
+    CURLOPT_POST => true,
+    CURLOPT_HTTPHEADER => [
+        'Authorization: Bearer ' . $apiKey,
+    ],
+    CURLOPT_POSTFIELDS => $postFields,
+    CURLOPT_RETURNTRANSFER => true,
+]);
+
+$response = curl_exec($ch);
+curl_close($ch);
+
+$result = json_decode($response, true);
+
+// 保存 base64 图片
+$imageData = base64_decode($result['data'][0]['b64_json']);
+file_put_contents('edited.png', $imageData);
+echo "图片已保存到 edited.png\n";
+```
+
+## 流式输出
+
+```php
+<?php
+
+$apiKey = 'sk-xxx';
+$baseUrl = 'https://crazyrouter.com/v1';
+
+$data = [
+    'model' => 'gpt-4o',
+    'messages' => [['role' => 'user', 'content' => '讲一个笑话']],
+    'stream' => true,
+];
+
+$ch = curl_init($baseUrl . '/chat/completions');
+curl_setopt_array($ch, [
+    CURLOPT_POST => true,
+    CURLOPT_HTTPHEADER => [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . $apiKey,
+    ],
+    CURLOPT_POSTFIELDS => json_encode($data),
+    CURLOPT_WRITEFUNCTION => function ($ch, $data) {
+        $lines = explode("\n", $data);
+        foreach ($lines as $line) {
+            if (str_starts_with($line, 'data: ') && $line !== 'data: [DONE]') {
+                $json = json_decode(substr($line, 6), true);
+                $content = $json['choices'][0]['delta']['content'] ?? '';
+                echo $content;
+            }
+        }
+        return strlen($data);
+    },
+]);
+
+curl_exec($ch);
+curl_close($ch);
+echo "\n";
+```
+
+<Note>
+  PHP 7.4+ 推荐使用 `openai-php/client` 包，提供更友好的 SDK 体验。安装：`composer require openai-php/client`
+</Note>

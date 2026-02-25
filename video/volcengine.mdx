@@ -1,0 +1,115 @@
+---
+title: "火山引擎"
+description: "使用火山引擎 API 生成视频"
+---
+
+# 火山引擎
+
+火山引擎（Volcengine）提供字节跳动旗下的视频生成能力。
+
+## 创建视频任务
+
+```
+POST /volc/v1/contents/generations/tasks
+```
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `model` | string | 是 | 模型名称 |
+| `content` | object | 是 | 内容配置 |
+| `content.prompt` | string | 是 | 视频描述提示词 |
+| `content.image_url` | string | 否 | 参考图片 URL |
+| `content.aspect_ratio` | string | 否 | 宽高比 |
+
+### 请求示例
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/volc/v1/contents/generations/tasks \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "doubao-video",
+    "content": {
+      "prompt": "一只蝴蝶在花丛中飞舞，微距镜头",
+      "aspect_ratio": "16:9"
+    }
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/volc/v1/contents/generations/tasks",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "doubao-video",
+        "content": {
+            "prompt": "一只蝴蝶在花丛中飞舞，微距镜头",
+            "aspect_ratio": "16:9"
+        }
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### 响应示例
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "task_id": "volc_task_abc123"
+  }
+}
+```
+
+---
+
+## 查询任务
+
+```
+GET /volc/v1/contents/generations/tasks/{task_id}
+```
+
+```bash cURL
+curl https://crazyrouter.com/volc/v1/contents/generations/tasks/volc_task_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### 响应示例（已完成）
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "task_id": "volc_task_abc123",
+    "status": "SUCCESS",
+    "content": {
+      "video_url": "https://cdn.volcengine.com/videos/...",
+      "duration": 5
+    }
+  }
+}
+```
+
+### 任务状态
+
+| 状态 | 说明 |
+|------|------|
+| `SUBMITTED` | 已提交 |
+| `PROCESSING` | 处理中 |
+| `SUCCESS` | 成功 |
+| `FAILED` | 失败 |

@@ -1,0 +1,219 @@
+---
+title: "创建模型响应"
+description: "使用 POST /v1/responses 端点创建模型响应，支持普通、流式和思考控制"
+---
+
+# 创建模型响应
+
+```
+POST /v1/responses
+```
+
+Responses API 提供了更简洁的接口来创建模型响应。
+
+## 认证
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+---
+
+## 基本请求
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o",
+    "input": "用一句话解释什么是 API"
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.responses.create(
+    model="gpt-4o",
+    input="用一句话解释什么是 API"
+)
+
+print(response.output_text)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const response = await client.responses.create({
+  model: "gpt-4o",
+  input: "用一句话解释什么是 API",
+});
+
+console.log(response.output_text);
+```
+
+</CodeGroup>
+
+### 响应格式
+
+```json
+{
+  "id": "resp_abc123",
+  "object": "response",
+  "created_at": 1709123456,
+  "model": "gpt-4o",
+  "output": [
+    {
+      "type": "message",
+      "id": "msg_abc123",
+      "role": "assistant",
+      "content": [
+        {
+          "type": "output_text",
+          "text": "API 是一组定义了软件组件之间如何交互的规则和协议，让不同的程序能够相互通信和共享数据。"
+        }
+      ]
+    }
+  ],
+  "usage": {
+    "input_tokens": 15,
+    "output_tokens": 40,
+    "total_tokens": 55
+  }
+}
+```
+
+---
+
+## 多轮对话
+
+使用 `input` 数组传入对话历史：
+
+```python Python
+response = client.responses.create(
+    model="gpt-4o",
+    input=[
+        {"role": "user", "content": "我想学习编程"},
+        {"role": "assistant", "content": "很好！你想学习哪种编程语言？"},
+        {"role": "user", "content": "Python，从哪里开始？"}
+    ]
+)
+
+print(response.output_text)
+```
+
+---
+
+## 流式请求
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o",
+    "input": "写一首关于编程的诗",
+    "stream": true
+  }'
+```
+
+```python Python
+stream = client.responses.create(
+    model="gpt-4o",
+    input="写一首关于编程的诗",
+    stream=True
+)
+
+for event in stream:
+    if event.type == "response.output_text.delta":
+        print(event.delta, end="")
+```
+
+```javascript Node.js
+const stream = await client.responses.create({
+  model: "gpt-4o",
+  input: "写一首关于编程的诗",
+  stream: true,
+});
+
+for await (const event of stream) {
+  if (event.type === "response.output_text.delta") {
+    process.stdout.write(event.delta);
+  }
+}
+```
+
+</CodeGroup>
+
+### 流式事件类型
+
+| 事件类型 | 说明 |
+|---------|------|
+| `response.created` | 响应创建 |
+| `response.in_progress` | 响应处理中 |
+| `response.output_item.added` | 新输出项添加 |
+| `response.content_part.added` | 新内容块添加 |
+| `response.output_text.delta` | 文本增量 |
+| `response.output_text.done` | 文本完成 |
+| `response.content_part.done` | 内容块完成 |
+| `response.output_item.done` | 输出项完成 |
+| `response.completed` | 响应完成 |
+
+---
+
+## 思考控制
+
+使用 `reasoning` 参数控制推理深度：
+
+```python Python
+response = client.responses.create(
+    model="o4-mini",
+    input="证明勾股定理",
+    reasoning={
+        "effort": "high"
+    }
+)
+
+print(response.output_text)
+```
+
+### reasoning 参数
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `effort` | string | 推理深度：`low`、`medium`、`high` |
+| `summary` | string | 思考摘要模式：`auto`、`concise`、`detailed` |
+
+---
+
+## 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `model` | string | 是 | 模型名称 |
+| `input` | string\|array | 是 | 输入内容或消息列表 |
+| `stream` | boolean | 否 | 是否流式输出 |
+| `temperature` | number | 否 | 采样温度 |
+| `max_output_tokens` | integer | 否 | 最大输出 Token 数 |
+| `tools` | array | 否 | 可用工具列表 |
+| `reasoning` | object | 否 | 推理控制 |
+| `instructions` | string | 否 | 系统指令（类似 system message） |
+
+<Note>
+  Responses API 的 `input` 参数既可以是简单字符串，也可以是消息数组，使用更灵活。
+</Note>

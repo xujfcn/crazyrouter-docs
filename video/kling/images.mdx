@@ -1,0 +1,131 @@
+---
+title: "Kling 图像生成"
+description: "使用 Kling API 生成图像"
+---
+
+# Kling 图像生成
+
+```
+POST /kling/v1/images/generations
+```
+
+使用 Kling 模型生成高质量图像。
+
+## 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `model_name` | string | 是 | 模型名称：`kling-v1`、`kling-v1-5`、`kling-v1-6` |
+| `prompt` | string | 是 | 图像描述提示词 |
+| `negative_prompt` | string | 否 | 负面提示词 |
+| `image` | string | 否 | 参考图片 URL（图生图） |
+| `image_fidelity` | number | 否 | 图片保真度，0-1 |
+| `n` | integer | 否 | 生成数量，默认 1 |
+| `aspect_ratio` | string | 否 | 宽高比：`1:1`、`16:9`、`9:16`、`4:3`、`3:4`、`3:2`、`2:3` |
+| `callback_url` | string | 否 | 任务完成回调地址 |
+
+## 请求示例
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/kling/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model_name": "kling-v1-6",
+    "prompt": "一幅中国水墨画风格的山水画，远处有瀑布",
+    "negative_prompt": "模糊, 低质量",
+    "n": 1,
+    "aspect_ratio": "16:9"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/kling/v1/images/generations",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model_name": "kling-v1-6",
+        "prompt": "一幅中国水墨画风格的山水画，远处有瀑布",
+        "n": 1,
+        "aspect_ratio": "16:9"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+## 响应示例
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "task_id": "kling_img_abc123",
+    "task_status": "submitted"
+  }
+}
+```
+
+---
+
+## 图生图
+
+传入 `image` 参数进行图生图：
+
+```json
+{
+  "model_name": "kling-v1-6",
+  "prompt": "将照片转换为动漫风格",
+  "image": "https://example.com/photo.jpg",
+  "image_fidelity": 0.6,
+  "aspect_ratio": "1:1"
+}
+```
+
+---
+
+## 查询图像任务
+
+```
+GET /kling/v1/images/generations/{task_id}
+```
+
+```bash cURL
+curl https://crazyrouter.com/kling/v1/images/generations/kling_img_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### 响应示例（已完成）
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "task_id": "kling_img_abc123",
+    "task_status": "succeed",
+    "task_result": {
+      "images": [
+        {
+          "index": 0,
+          "url": "https://cdn.klingai.com/images/..."
+        }
+      ]
+    }
+  }
+}
+```
+
+<Note>
+  Kling 图像生成为异步任务，提交后需通过查询接口获取结果。
+</Note>

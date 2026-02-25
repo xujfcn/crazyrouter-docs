@@ -1,0 +1,194 @@
+---
+title: "统一视频 API"
+description: "Crazyrouter 统一视频生成接口，支持多种模型通过统一格式调用"
+---
+
+# 统一视频 API
+
+Crazyrouter 提供统一的视频生成接口，支持多种视频模型通过相同的 API 格式调用。
+
+## 支持的模型
+
+| 模型 | 说明 |
+|------|------|
+| `veo3.1-components` | Google Veo 3.1 |
+| `veo3` | Google Veo 3 |
+| `veo2` | Google Veo 2 |
+| `grok-video-3` | xAI Grok Video |
+| `wan-ai/wan2.1-t2v-14b` | Wan 文生视频 |
+| `wan-ai/wan2.1-i2v-14b-720p` | Wan 图生视频 |
+| `seedance-lite` | 豆包 Seedance |
+
+---
+
+## 创建视频
+
+```
+POST /v1/video/create
+```
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `model` | string | 是 | 模型名称 |
+| `prompt` | string | 是 | 视频描述提示词 |
+| `aspect_ratio` | string | 否 | 宽高比：`16:9`、`9:16`、`1:1` |
+| `size` | string | 否 | 视频尺寸，如 `1280x720` |
+| `images` | array | 否 | 参考图片 URL 数组（图生视频） |
+| `duration` | integer | 否 | 视频时长（秒） |
+
+### 请求示例
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/video/create \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "veo3.1-components",
+    "prompt": "一只金毛犬在海滩上奔跑，慢动作，电影级画质",
+    "aspect_ratio": "16:9"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/v1/video/create",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "veo3.1-components",
+        "prompt": "一只金毛犬在海滩上奔跑，慢动作，电影级画质",
+        "aspect_ratio": "16:9"
+    }
+)
+
+data = response.json()
+task_id = data["id"]
+print(f"任务 ID: {task_id}")
+```
+
+</CodeGroup>
+
+### 创建响应
+
+```json
+{
+  "id": "video_task_abc123",
+  "status": "processing",
+  "status_update_time": 1709123456
+}
+```
+
+---
+
+## 图生视频
+
+在 `images` 参数中传入参考图片：
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/video/create \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "wan-ai/wan2.1-i2v-14b-720p",
+    "prompt": "图片中的人物开始微笑并挥手",
+    "images": ["https://example.com/portrait.jpg"],
+    "aspect_ratio": "16:9"
+  }'
+```
+
+---
+
+## 查询任务
+
+```
+GET /v1/video/query?id={task_id}
+```
+
+### 请求示例
+
+```bash cURL
+curl "https://crazyrouter.com/v1/video/query?id=video_task_abc123" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### 查询响应（处理中）
+
+```json
+{
+  "id": "video_task_abc123",
+  "status": "processing",
+  "status_update_time": 1709123460
+}
+```
+
+### 查询响应（已完成）
+
+```json
+{
+  "id": "video_task_abc123",
+  "status": "completed",
+  "status_update_time": 1709123520,
+  "video_url": "https://crazyrouter.com/files/video_abc123.mp4"
+}
+```
+
+### 任务状态
+
+| 状态 | 说明 |
+|------|------|
+| `processing` | 处理中 |
+| `completed` | 已完成 |
+| `failed` | 失败 |
+
+---
+
+## 完整流程示例
+
+```python Python
+import requests
+import time
+
+API_KEY = "YOUR_API_KEY"
+BASE_URL = "https://crazyrouter.com"
+headers = {
+    "Content-Type": "application/json",
+    "Authorization": f"Bearer {API_KEY}"
+}
+
+# 1. 创建视频任务
+resp = requests.post(f"{BASE_URL}/v1/video/create", headers=headers, json={
+    "model": "veo3.1-components",
+    "prompt": "一只金毛犬在海滩上奔跑，慢动作",
+    "aspect_ratio": "16:9"
+})
+task_id = resp.json()["id"]
+print(f"任务已创建: {task_id}")
+
+# 2. 轮询查询状态
+while True:
+    resp = requests.get(f"{BASE_URL}/v1/video/query?id={task_id}", headers=headers)
+    result = resp.json()
+    status = result["status"]
+    print(f"状态: {status}")
+
+    if status == "completed":
+        print(f"视频地址: {result['video_url']}")
+        break
+    elif status == "failed":
+        print("视频生成失败")
+        break
+
+    time.sleep(10)
+```
+
+<Note>
+  视频生成通常需要 1-5 分钟，建议轮询间隔为 10 秒。
+</Note>

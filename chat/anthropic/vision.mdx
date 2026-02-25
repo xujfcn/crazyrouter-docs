@@ -1,0 +1,211 @@
+---
+title: "Claude 识图"
+description: "使用 Claude 模型进行图片理解，支持原生格式和 OpenAI 兼容格式"
+---
+
+# Claude 识图
+
+Claude 模型支持强大的视觉理解能力。你可以通过原生格式或 OpenAI 兼容格式发送图片。
+
+## 原生格式（/v1/messages）
+
+### 通过 URL 发送图片
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-sonnet-4-20250514",
+    "max_tokens": 1024,
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "image",
+            "source": {
+              "type": "url",
+              "url": "https://example.com/photo.jpg"
+            }
+          },
+          {
+            "type": "text",
+            "text": "描述这张图片的内容"
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+```python Python
+import anthropic
+
+client = anthropic.Anthropic(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com"
+)
+
+message = client.messages.create(
+    model="claude-sonnet-4-20250514",
+    max_tokens=1024,
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "image",
+                    "source": {
+                        "type": "url",
+                        "url": "https://example.com/photo.jpg"
+                    }
+                },
+                {
+                    "type": "text",
+                    "text": "描述这张图片的内容"
+                }
+            ]
+        }
+    ]
+)
+
+print(message.content[0].text)
+```
+
+</CodeGroup>
+
+### 通过 Base64 发送图片
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-sonnet-4-20250514",
+    "max_tokens": 1024,
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "image",
+            "source": {
+              "type": "base64",
+              "media_type": "image/png",
+              "data": "iVBORw0KGgoAAAANSUhEUg..."
+            }
+          },
+          {
+            "type": "text",
+            "text": "这张图片里有什么？"
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+```python Python
+import anthropic
+import base64
+
+client = anthropic.Anthropic(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com"
+)
+
+with open("image.png", "rb") as f:
+    image_data = base64.standard_b64encode(f.read()).decode("utf-8")
+
+message = client.messages.create(
+    model="claude-sonnet-4-20250514",
+    max_tokens=1024,
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "image",
+                    "source": {
+                        "type": "base64",
+                        "media_type": "image/png",
+                        "data": image_data
+                    }
+                },
+                {
+                    "type": "text",
+                    "text": "这张图片里有什么？"
+                }
+            ]
+        }
+    ]
+)
+
+print(message.content[0].text)
+```
+
+</CodeGroup>
+
+---
+
+## OpenAI 兼容格式（/v1/chat/completions）
+
+使用标准 OpenAI 格式发送图片给 Claude：
+
+<CodeGroup>
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="claude-sonnet-4-20250514",
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "描述这张图片"},
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": "https://example.com/photo.jpg"
+                    }
+                }
+            ]
+        }
+    ],
+    max_tokens=1024
+)
+
+print(response.choices[0].message.content)
+```
+
+</CodeGroup>
+
+## 支持的图片格式
+
+| 格式 | MIME 类型 |
+|------|-----------|
+| JPEG | `image/jpeg` |
+| PNG | `image/png` |
+| GIF | `image/gif` |
+| WebP | `image/webp` |
+
+<Note>
+  Claude 的原生格式使用 `type: "image"` 和 `source` 对象，而 OpenAI 兼容格式使用 `type: "image_url"` 和 `image_url` 对象。Crazyrouter 会自动处理格式转换。
+</Note>
+
+<Warning>
+  单张图片建议不超过 20MB。图片分辨率越高，消耗的 Token 越多。
+</Warning>

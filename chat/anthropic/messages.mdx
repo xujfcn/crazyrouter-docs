@@ -1,0 +1,297 @@
+---
+title: "Claude 原生格式"
+description: "使用 Anthropic 原生 Messages API 格式调用 Claude 模型，支持流式、Function Calling 和 Extended Thinking"
+---
+
+# Claude 原生格式
+
+```
+POST /v1/messages
+```
+
+Crazyrouter 支持 Anthropic 原生的 Messages API 格式。你可以使用 `x-api-key` 或 `Authorization` 头传入 API Key。
+
+## 认证
+
+支持两种认证方式（二选一）：
+
+```
+x-api-key: YOUR_API_KEY
+```
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+---
+
+## 基本对话
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-sonnet-4-20250514",
+    "max_tokens": 1024,
+    "messages": [
+      {"role": "user", "content": "用简单的语言解释量子计算"}
+    ]
+  }'
+```
+
+```python Python
+import anthropic
+
+client = anthropic.Anthropic(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com"
+)
+
+message = client.messages.create(
+    model="claude-sonnet-4-20250514",
+    max_tokens=1024,
+    messages=[
+        {"role": "user", "content": "用简单的语言解释量子计算"}
+    ]
+)
+
+print(message.content[0].text)
+```
+
+```javascript Node.js
+import Anthropic from "@anthropic-ai/sdk";
+
+const client = new Anthropic({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com",
+});
+
+const message = await client.messages.create({
+  model: "claude-sonnet-4-20250514",
+  max_tokens: 1024,
+  messages: [{ role: "user", content: "用简单的语言解释量子计算" }],
+});
+
+console.log(message.content[0].text);
+```
+
+</CodeGroup>
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `model` | string | 是 | 模型名称 |
+| `max_tokens` | integer | 是 | 最大输出 Token 数 |
+| `messages` | array | 是 | 消息列表 |
+| `system` | string\|array | 否 | 系统提示 |
+| `temperature` | number | 否 | 采样温度，0-1 |
+| `top_p` | number | 否 | 核采样参数 |
+| `top_k` | integer | 否 | Top-K 采样 |
+| `stop_sequences` | array | 否 | 停止序列列表 |
+| `stream` | boolean | 否 | 是否流式输出 |
+| `tools` | array | 否 | 工具定义列表 |
+| `tool_choice` | object | 否 | 工具选择策略 |
+| `thinking` | object | 否 | Extended Thinking 配置 |
+
+---
+
+## 流式对话
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-sonnet-4-20250514",
+    "max_tokens": 1024,
+    "stream": true,
+    "messages": [
+      {"role": "user", "content": "写一首关于编程的诗"}
+    ]
+  }'
+```
+
+```python Python
+import anthropic
+
+client = anthropic.Anthropic(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com"
+)
+
+with client.messages.stream(
+    model="claude-sonnet-4-20250514",
+    max_tokens=1024,
+    messages=[
+        {"role": "user", "content": "写一首关于编程的诗"}
+    ]
+) as stream:
+    for text in stream.text_stream:
+        print(text, end="")
+```
+
+</CodeGroup>
+
+---
+
+## Function Calling
+
+<CodeGroup>
+
+```python Python
+import anthropic
+import json
+
+client = anthropic.Anthropic(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com"
+)
+
+tools = [
+    {
+        "name": "get_stock_price",
+        "description": "获取指定股票的当前价格",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "symbol": {
+                    "type": "string",
+                    "description": "股票代码，如 AAPL、GOOGL"
+                }
+            },
+            "required": ["symbol"]
+        }
+    }
+]
+
+# 第一次调用
+message = client.messages.create(
+    model="claude-sonnet-4-20250514",
+    max_tokens=1024,
+    tools=tools,
+    messages=[
+        {"role": "user", "content": "苹果公司的股价是多少？"}
+    ]
+)
+
+# 处理工具调用
+if message.stop_reason == "tool_use":
+    tool_block = next(b for b in message.content if b.type == "tool_use")
+
+    # 执行函数
+    result = {"symbol": "AAPL", "price": 198.50, "currency": "USD"}
+
+    # 第二次调用，返回函数结果
+    final = client.messages.create(
+        model="claude-sonnet-4-20250514",
+        max_tokens=1024,
+        tools=tools,
+        messages=[
+            {"role": "user", "content": "苹果公司的股价是多少？"},
+            {"role": "assistant", "content": message.content},
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "tool_result",
+                        "tool_use_id": tool_block.id,
+                        "content": json.dumps(result)
+                    }
+                ]
+            }
+        ]
+    )
+    print(final.content[0].text)
+```
+
+</CodeGroup>
+
+---
+
+## Extended Thinking
+
+启用 Extended Thinking 让 Claude 在回答前进行深度思考：
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-sonnet-4-20250514",
+    "max_tokens": 16000,
+    "thinking": {
+      "type": "enabled",
+      "budget_tokens": 10000
+    },
+    "messages": [
+      {"role": "user", "content": "分析以下代码的时间复杂度并提出优化方案：\ndef fib(n):\n    if n <= 1: return n\n    return fib(n-1) + fib(n-2)"}
+    ]
+  }'
+```
+
+```python Python
+message = client.messages.create(
+    model="claude-sonnet-4-20250514",
+    max_tokens=16000,
+    thinking={
+        "type": "enabled",
+        "budget_tokens": 10000
+    },
+    messages=[
+        {"role": "user", "content": "证明：对于所有正整数 n，1+2+...+n = n(n+1)/2"}
+    ]
+)
+
+for block in message.content:
+    if block.type == "thinking":
+        print("思考过程:", block.thinking)
+    elif block.type == "text":
+        print("回答:", block.text)
+```
+
+</CodeGroup>
+
+### Extended Thinking 响应
+
+```json
+{
+  "id": "msg_abc123",
+  "type": "message",
+  "role": "assistant",
+  "content": [
+    {
+      "type": "thinking",
+      "thinking": "让我用数学归纳法来证明...\n基础情况：当 n=1 时..."
+    },
+    {
+      "type": "text",
+      "text": "我来用数学归纳法证明这个公式。\n\n**基础情况**：..."
+    }
+  ],
+  "model": "claude-sonnet-4-20250514",
+  "stop_reason": "end_turn",
+  "usage": {
+    "input_tokens": 30,
+    "output_tokens": 500
+  }
+}
+```
+
+<Warning>
+  使用 Extended Thinking 时，`max_tokens` 必须大于 `budget_tokens`。思考 Token 也会计入费用。
+</Warning>
+
+<Note>
+  Crazyrouter 的 Claude 原生格式端点完全兼容 Anthropic 官方 SDK。只需修改 `base_url` 即可无缝切换。
+</Note>

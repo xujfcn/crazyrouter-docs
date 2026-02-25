@@ -1,0 +1,57 @@
+---
+title: 'Aider 配置教程'
+description: '在 Aider CLI 工具中配置 Crazyrouter API'
+---
+
+## 概述
+
+Aider 是一个命令行 AI 编程助手，支持直接在终端中与 AI 协作编写代码。
+
+## 配置方法
+
+### 环境变量
+
+```bash
+export OPENAI_API_KEY=sk-xxx
+export OPENAI_API_BASE=https://crazyrouter.com/v1
+```
+
+### 启动 Aider
+
+```bash
+# 使用 GPT-4o
+aider --model gpt-4o
+
+# 使用 Claude
+aider --model claude-sonnet-4-20250514
+
+# 使用 Gemini
+aider --model gemini-2.5-pro
+```
+
+### 配置文件方式
+
+创建 `~/.aider.conf.yml`：
+
+```yaml
+openai-api-key: sk-xxx
+openai-api-base: https://crazyrouter.com/v1
+model: gpt-4o
+```
+
+## 常用命令
+
+```bash
+# 添加文件到上下文
+/add src/main.py
+
+# 只读添加
+/read-only README.md
+
+# 切换模型
+/model claude-sonnet-4-20250514
+```
+
+<Note>
+  Aider 对 Claude 模型有原生支持。如果使用 Claude 系列，也可以设置 `ANTHROPIC_API_KEY` 和 `ANTHROPIC_API_BASE` 环境变量。
+</Note>

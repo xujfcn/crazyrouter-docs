@@ -1,0 +1,126 @@
+---
+title: "DALL-E"
+description: "使用 DALL-E 3 模型生成和编辑图像"
+---
+
+# DALL-E
+
+```
+POST /v1/images/generations
+```
+
+使用 DALL-E 3 模型生成图像，兼容 OpenAI Images API 格式。
+
+## 生成图像
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `model` | string | 是 | `dall-e-3` 或 `dall-e-2` |
+| `prompt` | string | 是 | 图像描述提示词 |
+| `n` | integer | 否 | 生成数量，DALL-E 3 仅支持 1 |
+| `size` | string | 否 | 图片尺寸 |
+| `quality` | string | 否 | 质量：`standard`（默认）、`hd` |
+| `style` | string | 否 | 风格：`vivid`（默认）、`natural` |
+| `response_format` | string | 否 | 返回格式：`url`（默认）、`b64_json` |
+
+### 尺寸选项
+
+| 模型 | 支持的尺寸 |
+|------|-----------|
+| `dall-e-3` | `1024x1024`、`1792x1024`、`1024x1792` |
+| `dall-e-2` | `256x256`、`512x512`、`1024x1024` |
+
+### 请求示例
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "dall-e-3",
+    "prompt": "一幅水墨画风格的山水画，远处有瀑布和云雾",
+    "n": 1,
+    "size": "1792x1024",
+    "quality": "hd",
+    "style": "natural"
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.images.generate(
+    model="dall-e-3",
+    prompt="一幅水墨画风格的山水画，远处有瀑布和云雾",
+    n=1,
+    size="1792x1024",
+    quality="hd",
+    style="natural"
+)
+
+print(response.data[0].url)
+print(response.data[0].revised_prompt)
+```
+
+</CodeGroup>
+
+### 响应示例
+
+```json
+{
+  "created": 1709123456,
+  "data": [
+    {
+      "url": "https://oaidalleapiprodscus.blob.core.windows.net/...",
+      "revised_prompt": "A traditional Chinese ink wash painting depicting a mountainous landscape with a waterfall cascading down rocky cliffs, surrounded by misty clouds..."
+    }
+  ]
+}
+```
+
+---
+
+## 编辑图像
+
+```
+POST /v1/images/edits
+```
+
+使用 DALL-E 2 对图像进行局部编辑。
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.images.edit(
+    model="dall-e-2",
+    image=open("image.png", "rb"),
+    mask=open("mask.png", "rb"),
+    prompt="在空白区域添加一只小猫",
+    n=1,
+    size="1024x1024"
+)
+
+print(response.data[0].url)
+```
+
+<Note>
+  DALL-E 3 会自动优化你的提示词（`revised_prompt`），生成更详细的描述以提高图像质量。
+</Note>
+
+<Warning>
+  DALL-E 3 每次请求只能生成 1 张图片（`n=1`）。如需多张，请发送多次请求。
+</Warning>

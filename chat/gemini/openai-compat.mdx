@@ -1,0 +1,187 @@
+---
+title: "Gemini OpenAI 兼容格式"
+description: "通过 OpenAI 兼容的 /v1/chat/completions 端点使用 Gemini 模型"
+---
+
+# Gemini OpenAI 兼容格式
+
+你可以通过标准的 OpenAI Chat Completions API 格式调用 Gemini 模型，无需学习 Gemini 原生 API。
+
+```
+POST /v1/chat/completions
+```
+
+---
+
+## 基本对话
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gemini-2.5-flash",
+    "messages": [
+      {"role": "system", "content": "你是一个知识渊博的助手。"},
+      {"role": "user", "content": "解释一下量子纠缠"}
+    ],
+    "temperature": 0.7,
+    "max_tokens": 1024
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="gemini-2.5-flash",
+    messages=[
+        {"role": "system", "content": "你是一个知识渊博的助手。"},
+        {"role": "user", "content": "解释一下量子纠缠"}
+    ],
+    temperature=0.7,
+    max_tokens=1024
+)
+
+print(response.choices[0].message.content)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const response = await client.chat.completions.create({
+  model: "gemini-2.5-flash",
+  messages: [
+    { role: "system", content: "你是一个知识渊博的助手。" },
+    { role: "user", content: "解释一下量子纠缠" },
+  ],
+  temperature: 0.7,
+  max_tokens: 1024,
+});
+
+console.log(response.choices[0].message.content);
+```
+
+</CodeGroup>
+
+---
+
+## 视觉理解
+
+```python Python
+response = client.chat.completions.create(
+    model="gemini-2.5-flash",
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "描述这张图片"},
+                {
+                    "type": "image_url",
+                    "image_url": {"url": "https://example.com/photo.jpg"}
+                }
+            ]
+        }
+    ],
+    max_tokens=1024
+)
+```
+
+---
+
+## 文件理解
+
+通过 OpenAI 兼容格式发送 PDF 等文件：
+
+```python Python
+import base64
+
+with open("document.pdf", "rb") as f:
+    pdf_base64 = base64.b64encode(f.read()).decode("utf-8")
+
+response = client.chat.completions.create(
+    model="gemini-2.5-flash",
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "总结这份文档"},
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:application/pdf;base64,{pdf_base64}"
+                    }
+                }
+            ]
+        }
+    ],
+    max_tokens=2048
+)
+```
+
+---
+
+## 图片生成
+
+通过 OpenAI 兼容格式使用 Gemini 图片生成模型：
+
+```python Python
+response = client.chat.completions.create(
+    model="gemini-2-5-flash-image",
+    messages=[
+        {
+            "role": "user",
+            "content": "画一只可爱的猫咪在花园里玩耍"
+        }
+    ],
+    max_tokens=4096
+)
+
+# 响应中可能包含 Base64 图片
+print(response.choices[0].message.content)
+```
+
+---
+
+## 流式输出
+
+```python Python
+stream = client.chat.completions.create(
+    model="gemini-2.5-flash",
+    messages=[
+        {"role": "user", "content": "用 Go 语言实现一个简单的 HTTP 服务器"}
+    ],
+    max_tokens=2048,
+    stream=True
+)
+
+for chunk in stream:
+    if chunk.choices[0].delta.content is not None:
+        print(chunk.choices[0].delta.content, end="")
+```
+
+## 可用的 Gemini 模型
+
+| 模型 | 说明 |
+|------|------|
+| `gemini-2.5-pro` | Gemini 2.5 Pro，最强能力 |
+| `gemini-2.5-flash` | Gemini 2.5 Flash，快速响应 |
+| `gemini-2.5-flash-thinking` | 带思考能力的 Flash |
+| `gemini-2-5-flash-image` | 支持图片生成的 Flash |
+| `gemini-3-pro-image-preview` | Gemini 3 Pro 图片预览 |
+
+<Note>
+  通过 OpenAI 兼容格式使用 Gemini 时，Crazyrouter 会自动将请求转换为 Gemini 原生格式，并将响应转换回 OpenAI 格式。大部分功能都可以正常使用，但某些 Gemini 特有功能（如代码执行、Google 搜索）需要使用[原生格式](/chat/gemini/native)。
+</Note>

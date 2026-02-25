@@ -1,0 +1,138 @@
+---
+title: "Ideogram 旧版"
+description: "使用 Ideogram 旧版 API 进行图像生成、混合、放大和描述"
+---
+
+# Ideogram 旧版
+
+Ideogram 旧版 API 提供基础的图像生成功能。
+
+<Note>
+  推荐使用 [Ideogram V3](/images/ideogram/v3) 获得更好的生成效果。
+</Note>
+
+## 生成图像
+
+```
+POST /ideogram/generate
+```
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `image_request` | object | 是 | 图像请求对象 |
+| `image_request.prompt` | string | 是 | 提示词 |
+| `image_request.model` | string | 否 | 模型版本：`V_2`、`V_2_TURBO` |
+| `image_request.aspect_ratio` | string | 否 | 宽高比 |
+| `image_request.magic_prompt_option` | string | 否 | 提示词增强 |
+| `image_request.style_type` | string | 否 | 风格类型 |
+| `image_request.negative_prompt` | string | 否 | 负面提示词 |
+
+### 请求示例
+
+```bash cURL
+curl -X POST https://crazyrouter.com/ideogram/generate \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "image_request": {
+      "prompt": "A futuristic cityscape at night with neon lights",
+      "model": "V_2",
+      "aspect_ratio": "ASPECT_16_9",
+      "magic_prompt_option": "AUTO"
+    }
+  }'
+```
+
+### 响应示例
+
+```json
+{
+  "created": 1709123456,
+  "data": [
+    {
+      "url": "https://ideogram.ai/assets/image/...",
+      "prompt": "A futuristic cityscape at night with neon lights",
+      "resolution": "1344x768",
+      "seed": 67890
+    }
+  ]
+}
+```
+
+---
+
+## Remix 混合
+
+```
+POST /ideogram/remix
+```
+
+基于参考图像生成变体。
+
+```bash cURL
+curl -X POST https://crazyrouter.com/ideogram/remix \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "image_request": {
+      "prompt": "Same scene in anime style",
+      "model": "V_2"
+    },
+    "image_file": "https://example.com/photo.jpg"
+  }'
+```
+
+---
+
+## 放大图像
+
+```
+POST /ideogram/upscale
+```
+
+将图像放大到更高分辨率。
+
+```bash cURL
+curl -X POST https://crazyrouter.com/ideogram/upscale \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "image_request": {
+      "prompt": "high quality detailed image"
+    },
+    "image_file": "https://example.com/photo.jpg"
+  }'
+```
+
+---
+
+## 描述图像
+
+```
+POST /ideogram/describe
+```
+
+让模型描述图片内容并生成对应的提示词。
+
+```bash cURL
+curl -X POST https://crazyrouter.com/ideogram/describe \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "image_file": "https://example.com/photo.jpg"
+  }'
+```
+
+### 响应示例
+
+```json
+{
+  "descriptions": [
+    {
+      "text": "A futuristic cityscape at night with vibrant neon lights reflecting off wet streets, tall skyscrapers with holographic advertisements"
+    }
+  ]
+}
+```

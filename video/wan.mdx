@@ -1,0 +1,138 @@
+---
+title: "Wan 视频"
+description: "使用 Wan 模型进行文生视频、图生视频和首尾帧视频生成"
+---
+
+# Wan 视频
+
+Wan 是阿里巴巴推出的视频生成模型，支持文生视频、图生视频和首尾帧视频生成。
+
+## 文生视频
+
+```
+POST /fal-ai/wan/text-to-video
+```
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `prompt` | string | 是 | 视频描述提示词 |
+| `model` | string | 否 | 模型名称，如 `wan-ai/wan2.1-t2v-14b` |
+| `aspect_ratio` | string | 否 | 宽高比：`16:9`、`9:16`、`1:1` |
+| `duration` | string | 否 | 视频时长 |
+| `negative_prompt` | string | 否 | 负面提示词 |
+
+### 请求示例
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/fal-ai/wan/text-to-video \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "A time-lapse of a flower blooming in a garden, soft natural lighting",
+    "aspect_ratio": "16:9"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/fal-ai/wan/text-to-video",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "prompt": "A time-lapse of a flower blooming in a garden",
+        "aspect_ratio": "16:9"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### 响应示例
+
+```json
+{
+  "video": {
+    "url": "https://fal.media/files/.../output.mp4",
+    "content_type": "video/mp4"
+  },
+  "seed": 42
+}
+```
+
+---
+
+## 图生视频
+
+```
+POST /fal-ai/wan/image-to-video
+```
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `prompt` | string | 是 | 视频描述 |
+| `image_url` | string | 是 | 参考图片 URL |
+| `aspect_ratio` | string | 否 | 宽高比 |
+
+```bash cURL
+curl -X POST https://crazyrouter.com/fal-ai/wan/image-to-video \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "The flower in the image starts swaying in the wind",
+    "image_url": "https://example.com/flower.jpg"
+  }'
+```
+
+---
+
+## 首尾帧视频
+
+```
+POST /fal-ai/wan/first-last-frame
+```
+
+提供首帧和尾帧图片，生成过渡视频。
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `prompt` | string | 否 | 过渡描述 |
+| `first_frame_url` | string | 是 | 首帧图片 URL |
+| `last_frame_url` | string | 是 | 尾帧图片 URL |
+
+```bash cURL
+curl -X POST https://crazyrouter.com/fal-ai/wan/first-last-frame \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "Smooth morphing transition",
+    "first_frame_url": "https://example.com/frame_start.jpg",
+    "last_frame_url": "https://example.com/frame_end.jpg"
+  }'
+```
+
+也可通过统一视频 API 调用：
+
+```json
+{
+  "model": "wan-ai/wan2.1-i2v-14b-720p",
+  "prompt": "Smooth transition",
+  "images": [
+    "https://example.com/frame_start.jpg",
+    "https://example.com/frame_end.jpg"
+  ]
+}
+```
+
+<Note>
+  Wan 模型在自然场景和人物动作方面表现出色，首尾帧模式适合制作平滑的场景过渡。
+</Note>

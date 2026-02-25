@@ -1,0 +1,117 @@
+---
+title: "提交 Imagine 任务"
+description: "使用 POST /mj/submit/imagine 提交 Midjourney 图像生成任务"
+---
+
+# 提交 Imagine 任务
+
+```
+POST /mj/submit/imagine
+```
+
+提交一个 Midjourney Imagine 任务，根据提示词生成图像。
+
+## 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `botType` | string | 否 | 机器人类型：`MID_JOURNEY`（默认）或 `NIJI_JOURNEY` |
+| `prompt` | string | 是 | 提示词，支持 Midjourney 原生语法（如 `--ar 16:9 --v 6`） |
+| `base64Array` | array | 否 | Base64 编码的参考图片数组，用于垫图 |
+| `notifyHook` | string | 否 | 任务状态变更回调地址 |
+| `state` | string | 否 | 自定义状态信息，会在回调中原样返回 |
+
+---
+
+## 请求示例
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/mj/submit/imagine \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "botType": "MID_JOURNEY",
+    "prompt": "a beautiful sunset over the ocean, cinematic lighting --ar 16:9 --v 6",
+    "notifyHook": "",
+    "state": ""
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/mj/submit/imagine",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "botType": "MID_JOURNEY",
+        "prompt": "a beautiful sunset over the ocean, cinematic lighting --ar 16:9 --v 6"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### 响应示例
+
+```json
+{
+  "code": 1,
+  "description": "提交成功",
+  "result": "task_1234567890",
+  "properties": {}
+}
+```
+
+| 字段 | 说明 |
+|------|------|
+| `code` | 状态码，`1` 表示成功，`22` 表示排队中 |
+| `description` | 状态描述 |
+| `result` | 任务 ID，用于后续查询 |
+
+---
+
+## 带垫图的请求
+
+使用 `base64Array` 传入参考图片：
+
+```bash cURL
+curl -X POST https://crazyrouter.com/mj/submit/imagine \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "botType": "MID_JOURNEY",
+    "prompt": "a cat in the style of the reference image --v 6",
+    "base64Array": [
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg..."
+    ]
+  }'
+```
+
+---
+
+## 使用 Niji Journey
+
+将 `botType` 设为 `NIJI_JOURNEY` 使用 Niji 模型生成动漫风格图片：
+
+```json
+{
+  "botType": "NIJI_JOURNEY",
+  "prompt": "a cute anime girl with blue hair, cherry blossoms --niji 6"
+}
+```
+
+<Note>
+  提交成功后返回任务 ID，需通过 [查询任务状态](/images/midjourney/query) 接口获取生成结果。
+</Note>
+
+<Warning>
+  `base64Array` 中的图片会增加请求体积，建议单张图片不超过 4MB。
+</Warning>

@@ -1,0 +1,107 @@
+---
+title: "Runway"
+description: "使用 Runway API 进行图生视频"
+---
+
+# Runway
+
+```
+POST /runwayml/v1/image_to_video
+```
+
+使用 Runway Gen-3 模型将图片转换为视频。
+
+## 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `model` | string | 否 | 模型名称，如 `gen3a_turbo` |
+| `promptImage` | string | 是 | 输入图片 URL |
+| `promptText` | string | 否 | 视频描述提示词 |
+| `duration` | integer | 否 | 视频时长（秒），默认 5 |
+| `ratio` | string | 否 | 宽高比：`16:9`、`9:16` |
+| `watermark` | boolean | 否 | 是否添加水印 |
+
+## 请求示例
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/runwayml/v1/image_to_video \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gen3a_turbo",
+    "promptImage": "https://example.com/landscape.jpg",
+    "promptText": "Camera slowly pans across the landscape, clouds moving in the sky",
+    "duration": 5,
+    "ratio": "16:9",
+    "watermark": false
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/runwayml/v1/image_to_video",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "gen3a_turbo",
+        "promptImage": "https://example.com/landscape.jpg",
+        "promptText": "Camera slowly pans across the landscape",
+        "duration": 5,
+        "ratio": "16:9"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### 响应示例
+
+```json
+{
+  "id": "runway_task_abc123",
+  "status": "PENDING"
+}
+```
+
+---
+
+## 查询任务
+
+```
+GET /runwayml/v1/tasks/{task_id}
+```
+
+```bash cURL
+curl https://crazyrouter.com/runwayml/v1/tasks/runway_task_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### 响应示例（已完成）
+
+```json
+{
+  "id": "runway_task_abc123",
+  "status": "SUCCEEDED",
+  "output": [
+    "https://runway-output.s3.amazonaws.com/..."
+  ]
+}
+```
+
+### 任务状态
+
+| 状态 | 说明 |
+|------|------|
+| `PENDING` | 等待处理 |
+| `RUNNING` | 生成中 |
+| `SUCCEEDED` | 成功 |
+| `FAILED` | 失败 |

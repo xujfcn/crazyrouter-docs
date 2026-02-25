@@ -1,0 +1,59 @@
+---
+title: '发出请求'
+description: '了解如何正确发出 API 请求'
+---
+
+## 请求格式
+
+所有 API 请求使用 HTTPS 协议，请求体使用 JSON 格式。
+
+### 必需的请求头
+
+| Header | 值 | 说明 |
+|--------|-----|------|
+| `Authorization` | `Bearer YOUR_API_KEY` | API 认证密钥 |
+| `Content-Type` | `application/json` | 请求体格式 |
+
+### 可选请求头
+
+| Header | 值 | 说明 |
+|--------|-----|------|
+| `Accept` | `application/json` | 响应格式 |
+
+## 请求示例
+
+```bash
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer sk-xxxxxxxx" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Hello"}],
+    "stream": false
+  }'
+```
+
+## 流式请求
+
+设置 `stream: true` 启用 SSE 流式输出：
+
+```bash
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer sk-xxxxxxxx" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Hello"}],
+    "stream": true
+  }'
+```
+
+流式响应格式为 Server-Sent Events (SSE)，每个事件以 `data: ` 开头，最后以 `data: [DONE]` 结束。
+
+## 在线调试
+
+你可以使用以下方式在线调试 API：
+
+1. **Crazyrouter Playground** - 访问 [crazyrouter.com/playground](https://crazyrouter.com/playground) 直接在浏览器中测试
+2. **cURL** - 使用命令行工具发送请求
+3. **Postman / Apifox** - 使用 API 调试工具

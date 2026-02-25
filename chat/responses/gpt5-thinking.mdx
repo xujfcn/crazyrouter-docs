@@ -1,0 +1,173 @@
+---
+title: "GPT-5 思考模式"
+description: "通过 Responses API 启用 GPT-5 的思考/推理模式"
+---
+
+# GPT-5 思考模式
+
+GPT-5 支持通过 Responses API 的 `reasoning` 参数启用思考模式，让模型在回答前进行深度推理。
+
+```
+POST /v1/responses
+```
+
+---
+
+## 基本用法
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5",
+    "input": "分析以下代码的时间复杂度，并提出优化方案：\ndef two_sum(nums, target):\n    for i in range(len(nums)):\n        for j in range(i+1, len(nums)):\n            if nums[i] + nums[j] == target:\n                return [i, j]",
+    "reasoning": {
+      "effort": "high"
+    }
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.responses.create(
+    model="gpt-5",
+    input="分析以下代码的时间复杂度，并提出优化方案：\ndef two_sum(nums, target):\n    for i in range(len(nums)):\n        for j in range(i+1, len(nums)):\n            if nums[i] + nums[j] == target:\n                return [i, j]",
+    reasoning={
+        "effort": "high"
+    }
+)
+
+print(response.output_text)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const response = await client.responses.create({
+  model: "gpt-5",
+  input: "证明：任意三角形的内角和为180度",
+  reasoning: {
+    effort: "high",
+  },
+});
+
+console.log(response.output_text);
+```
+
+</CodeGroup>
+
+---
+
+## reasoning 参数
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `effort` | string | 推理深度：`low`（快速）、`medium`（平衡）、`high`（深度） |
+| `summary` | string | 思考摘要：`auto`、`concise`、`detailed` |
+
+### effort 级别对比
+
+| 级别 | 适用场景 | Token 消耗 |
+|------|---------|-----------|
+| `low` | 简单问题、事实查询 | 低 |
+| `medium` | 一般推理、代码分析 | 中 |
+| `high` | 复杂数学、深度分析 | 高 |
+
+---
+
+## 获取思考摘要
+
+设置 `summary` 参数可以获取模型的思考过程摘要：
+
+```python Python
+response = client.responses.create(
+    model="gpt-5",
+    input="设计一个高并发的消息队列系统架构",
+    reasoning={
+        "effort": "high",
+        "summary": "detailed"
+    }
+)
+
+# 输出中可能包含思考摘要
+for item in response.output:
+    if item.type == "reasoning":
+        print("思考过程:", item.summary)
+    elif item.type == "message":
+        for content in item.content:
+            if content.type == "output_text":
+                print("回答:", content.text)
+```
+
+---
+
+## 流式思考
+
+```python Python
+stream = client.responses.create(
+    model="gpt-5",
+    input="解释 P=NP 问题为什么重要",
+    reasoning={"effort": "high", "summary": "concise"},
+    stream=True
+)
+
+for event in stream:
+    if event.type == "response.reasoning_summary_text.delta":
+        print(f"[思考] {event.delta}", end="")
+    elif event.type == "response.output_text.delta":
+        print(event.delta, end="")
+```
+
+---
+
+## 结合工具使用
+
+思考模式可以与 Function Calling 和 Web 搜索同时使用：
+
+```python Python
+response = client.responses.create(
+    model="gpt-5",
+    input="分析当前全球 AI 芯片市场格局，给出投资建议",
+    reasoning={"effort": "high"},
+    tools=[
+        {"type": "web_search_preview"}
+    ]
+)
+
+print(response.output_text)
+```
+
+---
+
+## 与系统指令结合
+
+```python Python
+response = client.responses.create(
+    model="gpt-5",
+    instructions="你是一位资深的软件架构师，擅长分析系统设计问题。",
+    input="设计一个支持百万级用户的实时聊天系统",
+    reasoning={"effort": "high"}
+)
+```
+
+<Note>
+  思考模式下，模型会消耗额外的 Token 用于内部推理。`effort` 越高，消耗的 Token 越多，但回答质量通常也越好。
+</Note>
+
+<Warning>
+  并非所有模型都支持 `reasoning` 参数。目前主要支持 GPT-5 和 o 系列模型。对于不支持的模型，该参数会被忽略。
+</Warning>

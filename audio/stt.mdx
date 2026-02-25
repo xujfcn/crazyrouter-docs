@@ -1,0 +1,140 @@
+---
+title: "语音转文字 (STT)"
+description: "使用 POST /v1/audio/transcriptions 将语音转换为文字"
+---
+
+# 语音转文字 (STT)
+
+```
+POST /v1/audio/transcriptions
+```
+
+将音频文件转录为文字，兼容 OpenAI Whisper API 格式。
+
+## 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `file` | file | 是 | 音频文件（multipart/form-data） |
+| `model` | string | 是 | 模型名称：`whisper-1`、`gpt-4o-transcribe` |
+| `language` | string | 否 | 音频语言（ISO-639-1 格式），如 `zh`、`en`、`ja` |
+| `response_format` | string | 否 | 输出格式：`json`（默认）、`text`、`srt`、`verbose_json`、`vtt` |
+| `temperature` | number | 否 | 采样温度，0-1 |
+| `prompt` | string | 否 | 提示词，帮助模型理解上下文 |
+
+### 支持的音频格式
+
+`mp3`、`mp4`、`mpeg`、`mpga`、`m4a`、`wav`、`webm`
+
+## 请求示例
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/audio/transcriptions \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F file=@audio.mp3 \
+  -F model=whisper-1 \
+  -F language=zh \
+  -F response_format=json
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+with open("audio.mp3", "rb") as audio_file:
+    transcript = client.audio.transcriptions.create(
+        model="whisper-1",
+        file=audio_file,
+        language="zh",
+        response_format="json"
+    )
+
+print(transcript.text)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+import fs from "fs";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const transcript = await client.audio.transcriptions.create({
+  model: "whisper-1",
+  file: fs.createReadStream("audio.mp3"),
+  language: "zh",
+});
+
+console.log(transcript.text);
+```
+
+</CodeGroup>
+
+## 响应示例
+
+### JSON 格式
+
+```json
+{
+  "text": "你好，欢迎使用 Crazyrouter API。今天我们来介绍一下语音转文字功能。"
+}
+```
+
+### verbose_json 格式
+
+```json
+{
+  "task": "transcribe",
+  "language": "chinese",
+  "duration": 5.2,
+  "text": "你好，欢迎使用 Crazyrouter API。",
+  "segments": [
+    {
+      "id": 0,
+      "start": 0.0,
+      "end": 2.5,
+      "text": "你好，欢迎使用 Crazyrouter API。"
+    }
+  ]
+}
+```
+
+### SRT 格式
+
+```
+1
+00:00:00,000 --> 00:00:02,500
+你好，欢迎使用 Crazyrouter API。
+```
+
+---
+
+## 音频翻译
+
+```
+POST /v1/audio/translations
+```
+
+将非英语音频翻译为英文文本。参数与转录接口相同。
+
+```python Python
+with open("chinese_audio.mp3", "rb") as audio_file:
+    translation = client.audio.translations.create(
+        model="whisper-1",
+        file=audio_file
+    )
+
+print(translation.text)  # 输出英文翻译
+```
+
+<Note>
+  指定 `language` 参数可以提高转录准确率。音频文件大小限制为 25MB。
+</Note>

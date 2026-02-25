@@ -1,0 +1,38 @@
+---
+title: 'ChatBox 配置教程'
+description: '在 ChatBox 桌面应用中配置 Crazyrouter API'
+---
+
+## 概述
+
+ChatBox 是一款跨平台的 AI 桌面客户端，支持 Windows、macOS、Linux。
+
+## 配置步骤
+
+<Steps>
+  <Step title="下载安装">
+    从 [ChatBox 官网](https://chatboxai.app/) 下载并安装。
+  </Step>
+  <Step title="打开设置">
+    点击左下角 `设置` 图标。
+  </Step>
+  <Step title="配置 API">
+    - **AI Provider**: 选择 `OpenAI API`
+    - **API Host**: `https://crazyrouter.com`
+    - **API Key**: `sk-xxx`
+    - **Model**: 选择或输入模型名称，如 `gpt-4o`
+  </Step>
+  <Step title="保存测试">
+    点击 `Save`，返回主界面发送消息测试。
+  </Step>
+</Steps>
+
+## 高级设置
+
+- **Temperature**: 控制回复随机性，0-2 之间
+- **Max Tokens**: 最大回复长度
+- **Context Messages**: 上下文消息数量，影响连续对话记忆
+
+<Note>
+  ChatBox 的 API Host 填写 `https://crazyrouter.com`，不需要加 `/v1` 后缀，ChatBox 会自动拼接。
+</Note>

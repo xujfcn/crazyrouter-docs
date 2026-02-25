@@ -1,0 +1,131 @@
+---
+title: "列出模型"
+description: "GET /v1/models 端点，获取当前可用的模型列表"
+---
+
+# 列出模型
+
+```
+GET /v1/models
+```
+
+返回当前 API Key 可用的模型列表。
+
+## 认证
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+## 请求示例
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/models \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+models = client.models.list()
+
+for model in models.data:
+    print(model.id)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const models = await client.models.list();
+
+for (const model of models.data) {
+  console.log(model.id);
+}
+```
+
+</CodeGroup>
+
+## 响应格式
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "gpt-4o",
+      "object": "model",
+      "created": 1700000000,
+      "owned_by": "openai",
+      "permission": [],
+      "root": "gpt-4o",
+      "parent": null
+    },
+    {
+      "id": "claude-sonnet-4-20250514",
+      "object": "model",
+      "created": 1700000000,
+      "owned_by": "anthropic",
+      "permission": [],
+      "root": "claude-sonnet-4-20250514",
+      "parent": null
+    },
+    {
+      "id": "gemini-2.5-flash",
+      "object": "model",
+      "created": 1700000000,
+      "owned_by": "google",
+      "permission": [],
+      "root": "gemini-2.5-flash",
+      "parent": null
+    },
+    {
+      "id": "deepseek-r1",
+      "object": "model",
+      "created": 1700000000,
+      "owned_by": "deepseek",
+      "permission": [],
+      "root": "deepseek-r1",
+      "parent": null
+    }
+  ]
+}
+```
+
+## 字段说明
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `id` | string | 模型标识符，用于 API 调用时的 `model` 参数 |
+| `object` | string | 固定为 `model` |
+| `created` | integer | 创建时间的 Unix 时间戳 |
+| `owned_by` | string | 模型所属组织 |
+
+<Note>
+  返回的模型列表取决于你的 API Key 权限。不同的 Token 可能配置了不同的可用模型范围。
+</Note>
+
+## 获取模型定价
+
+模型定价信息可通过公开端点获取：
+
+```bash
+GET /api/pricing
+```
+
+```bash cURL
+curl https://crazyrouter.com/api/pricing
+```
+
+该端点返回所有模型的输入/输出价格信息，无需认证。

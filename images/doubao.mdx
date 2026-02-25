@@ -1,0 +1,155 @@
+---
+title: "豆包 Seedream"
+description: "使用豆包 Seedream 模型进行图像生成，支持文生图、图生图、多图融合和组图输出"
+---
+
+# 豆包 Seedream
+
+豆包 Seedream 是字节跳动推出的图像生成模型，支持高质量的文生图和图生图。
+
+## 支持的模型
+
+| 模型 | 说明 |
+|------|------|
+| `doubao-seedream-3-0` | Seedream 3.0 |
+| `doubao-seedream-4-0` | Seedream 4.0 |
+| `doubao-seedream-4-5` | Seedream 4.5，最新版本 |
+
+---
+
+## 文生图
+
+```
+POST /fal-ai/seedream/text-to-image
+```
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `prompt` | string | 是 | 图像描述提示词 |
+| `model` | string | 否 | 模型名称，默认 `doubao-seedream-4-5` |
+| `size` | string | 否 | 图片尺寸，如 `1024x1024` |
+| `n` | integer | 否 | 生成数量 |
+| `negative_prompt` | string | 否 | 负面提示词 |
+
+### 请求示例
+
+```bash cURL
+curl -X POST https://crazyrouter.com/fal-ai/seedream/text-to-image \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "一只可爱的柴犬穿着和服，坐在樱花树下",
+    "model": "doubao-seedream-4-5",
+    "size": "1024x1024",
+    "n": 1
+  }'
+```
+
+### 响应示例
+
+```json
+{
+  "created": 1709123456,
+  "data": [
+    {
+      "url": "https://crazyrouter.com/files/seedream_abc123.png"
+    }
+  ]
+}
+```
+
+---
+
+## 图生图
+
+```
+POST /fal-ai/seedream/image-to-image
+```
+
+基于参考图像生成新图像。
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `prompt` | string | 是 | 描述提示词 |
+| `image` | string | 是 | 参考图片 URL |
+| `strength` | number | 否 | 变化强度，0-1，值越大变化越大 |
+
+```bash cURL
+curl -X POST https://crazyrouter.com/fal-ai/seedream/image-to-image \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "将照片转换为油画风格",
+    "image": "https://example.com/photo.jpg",
+    "strength": 0.7
+  }'
+```
+
+---
+
+## 多图融合
+
+```
+POST /fal-ai/seedream/multi-image-fusion
+```
+
+将多张图片融合生成新图像。
+
+```bash cURL
+curl -X POST https://crazyrouter.com/fal-ai/seedream/multi-image-fusion \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "融合两张图片的风格和内容",
+    "images": [
+      "https://example.com/image1.jpg",
+      "https://example.com/image2.jpg"
+    ]
+  }'
+```
+
+---
+
+## 组图输出
+
+```
+POST /fal-ai/seedream/group-output
+```
+
+一次生成多张不同角度或风格的图片。
+
+```bash cURL
+curl -X POST https://crazyrouter.com/fal-ai/seedream/group-output \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "一个现代简约风格的客厅设计",
+    "n": 4,
+    "size": "1024x1024"
+  }'
+```
+
+---
+
+## Seedance 视频
+
+豆包同时提供 Seedance 视频生成能力，使用 `seedance-lite` 模型。
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/video/create \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "seedance-lite",
+    "prompt": "一只猫咪在花园里追蝴蝶",
+    "aspect_ratio": "16:9"
+  }'
+```
+
+详细的 Seedance 视频 API 请参考 [Seedance 视频](/video/seedance)。
+
+<Note>
+  Seedream 模型对中文提示词有良好的理解能力，推荐使用中文描述以获得更好的效果。
+</Note>

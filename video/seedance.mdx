@@ -1,0 +1,97 @@
+---
+title: "Seedance"
+description: "使用 Seedance 模型进行首尾帧和参考图视频生成"
+---
+
+# Seedance
+
+Seedance 是字节跳动/豆包推出的视频生成模型，支持首尾帧视频和参考图视频生成。
+
+## 首尾帧视频
+
+通过提供首帧和尾帧图片，生成平滑的过渡视频。
+
+### 通过统一视频 API
+
+```
+POST /v1/video/create
+```
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/video/create \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "seedance-lite",
+    "prompt": "平滑过渡，人物从微笑变为大笑",
+    "images": [
+      "https://example.com/start_frame.jpg",
+      "https://example.com/end_frame.jpg"
+    ],
+    "aspect_ratio": "16:9"
+  }'
+```
+
+### 响应示例
+
+```json
+{
+  "id": "seedance_task_abc123",
+  "status": "processing",
+  "status_update_time": 1709123456
+}
+```
+
+---
+
+## 参考图视频
+
+使用单张参考图生成视频：
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/video/create \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "seedance-lite",
+    "prompt": "图片中的人物开始跳舞",
+    "images": ["https://example.com/portrait.jpg"],
+    "aspect_ratio": "9:16"
+  }'
+```
+
+---
+
+## 查询任务
+
+```
+GET /v1/video/query?id={task_id}
+```
+
+```bash cURL
+curl "https://crazyrouter.com/v1/video/query?id=seedance_task_abc123" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### 响应示例（已完成）
+
+```json
+{
+  "id": "seedance_task_abc123",
+  "status": "completed",
+  "status_update_time": 1709123520,
+  "video_url": "https://crazyrouter.com/files/seedance_abc123.mp4"
+}
+```
+
+---
+
+## 可用模型
+
+| 模型 | 说明 |
+|------|------|
+| `seedance-lite` | Seedance 轻量版，速度快 |
+
+<Note>
+  Seedance 在人物动作和表情变化方面表现出色，特别适合人像视频生成。
+</Note>

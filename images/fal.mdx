@@ -1,0 +1,130 @@
+---
+title: "Fal.ai 图像"
+description: "通过 Fal.ai 端点进行文生图和图像编辑"
+---
+
+# Fal.ai 图像
+
+Crazyrouter 代理了 Fal.ai 的图像生成端点，支持文生图和图像编辑。
+
+## 文生图
+
+```
+POST /fal-ai/nano-banana
+```
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `prompt` | string | 是 | 图像描述提示词 |
+| `negative_prompt` | string | 否 | 负面提示词 |
+| `image_size` | string | 否 | 图片尺寸：`square_hd`、`landscape_4_3`、`portrait_4_3`、`landscape_16_9`、`portrait_16_9` |
+| `num_images` | integer | 否 | 生成数量，默认 1 |
+| `seed` | integer | 否 | 随机种子 |
+| `guidance_scale` | number | 否 | 引导强度 |
+| `num_inference_steps` | integer | 否 | 推理步数 |
+
+### 请求示例
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/fal-ai/nano-banana \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "A majestic eagle soaring over snow-capped mountains at sunrise",
+    "image_size": "landscape_16_9",
+    "num_images": 1
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/fal-ai/nano-banana",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "prompt": "A majestic eagle soaring over snow-capped mountains at sunrise",
+        "image_size": "landscape_16_9",
+        "num_images": 1
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### 响应示例
+
+```json
+{
+  "images": [
+    {
+      "url": "https://fal.media/files/...",
+      "width": 1344,
+      "height": 768,
+      "content_type": "image/jpeg"
+    }
+  ],
+  "seed": 42,
+  "prompt": "A majestic eagle soaring over snow-capped mountains at sunrise"
+}
+```
+
+---
+
+## 图像编辑
+
+```
+POST /fal-ai/nano-banana/edit
+```
+
+基于已有图像进行编辑。
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `prompt` | string | 是 | 编辑描述 |
+| `image_url` | string | 是 | 原始图片 URL |
+| `mask_url` | string | 否 | 遮罩图片 URL |
+| `strength` | number | 否 | 编辑强度，0-1 |
+
+### 请求示例
+
+```bash cURL
+curl -X POST https://crazyrouter.com/fal-ai/nano-banana/edit \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "Add a rainbow in the sky",
+    "image_url": "https://example.com/landscape.jpg",
+    "strength": 0.6
+  }'
+```
+
+### 响应示例
+
+```json
+{
+  "images": [
+    {
+      "url": "https://fal.media/files/...",
+      "width": 1024,
+      "height": 1024,
+      "content_type": "image/jpeg"
+    }
+  ]
+}
+```
+
+<Note>
+  Fal.ai 端点支持多种底层模型，具体可用模型请参考 [模型定价](https://crazyrouter.com/pricing) 页面。
+</Note>

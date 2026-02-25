@@ -1,0 +1,135 @@
+---
+title: "Kling 视频生成"
+description: "使用 Kling API 进行文生视频和图生视频"
+---
+
+# Kling 视频生成
+
+## 文生视频
+
+```
+POST /kling/v1/videos/text2video
+```
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `model_name` | string | 是 | 模型名称：`kling-v1`、`kling-v1-5`、`kling-v1-6` |
+| `prompt` | string | 是 | 视频描述提示词 |
+| `negative_prompt` | string | 否 | 负面提示词 |
+| `duration` | string | 否 | 视频时长：`5`（5秒）、`10`（10秒） |
+| `aspect_ratio` | string | 否 | 宽高比：`16:9`、`9:16`、`1:1` |
+| `mode` | string | 否 | 生成模式：`std`（标准）、`pro`（专业） |
+| `cfg_scale` | number | 否 | 引导强度，0.0-1.0 |
+| `callback_url` | string | 否 | 回调地址 |
+
+### 请求示例
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/kling/v1/videos/text2video \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model_name": "kling-v1-6",
+    "prompt": "一只猫咪在花园里追蝴蝶，阳光明媚，电影级画质",
+    "negative_prompt": "模糊, 低质量, 变形",
+    "duration": "5",
+    "aspect_ratio": "16:9",
+    "mode": "std"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/kling/v1/videos/text2video",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model_name": "kling-v1-6",
+        "prompt": "一只猫咪在花园里追蝴蝶，阳光明媚",
+        "duration": "5",
+        "aspect_ratio": "16:9",
+        "mode": "std"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### 响应示例
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "task_id": "kling_t2v_abc123",
+    "task_status": "submitted"
+  }
+}
+```
+
+---
+
+## 图生视频
+
+```
+POST /kling/v1/videos/image2video
+```
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `model_name` | string | 是 | 模型名称 |
+| `prompt` | string | 否 | 视频描述（可选） |
+| `negative_prompt` | string | 否 | 负面提示词 |
+| `image` | string | 是 | 参考图片 URL |
+| `image_tail` | string | 否 | 尾帧图片 URL（首尾帧模式） |
+| `duration` | string | 否 | 视频时长 |
+| `aspect_ratio` | string | 否 | 宽高比 |
+| `mode` | string | 否 | 生成模式 |
+| `cfg_scale` | number | 否 | 引导强度 |
+| `callback_url` | string | 否 | 回调地址 |
+
+### 请求示例
+
+```bash cURL
+curl -X POST https://crazyrouter.com/kling/v1/videos/image2video \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model_name": "kling-v1-6",
+    "prompt": "图片中的人物开始微笑并缓缓转头",
+    "image": "https://example.com/portrait.jpg",
+    "duration": "5",
+    "mode": "std"
+  }'
+```
+
+### 首尾帧模式
+
+同时提供首帧和尾帧图片，生成过渡视频：
+
+```json
+{
+  "model_name": "kling-v1-6",
+  "prompt": "平滑过渡",
+  "image": "https://example.com/start_frame.jpg",
+  "image_tail": "https://example.com/end_frame.jpg",
+  "duration": "5"
+}
+```
+
+<Note>
+  视频生成为异步任务，通常需要 2-5 分钟。请通过 [任务查询](/video/kling/query) 接口获取结果。
+</Note>

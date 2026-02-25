@@ -1,0 +1,107 @@
+---
+title: '创建嵌入'
+description: '将文本转换为向量表示'
+api: 'POST /v1/embeddings'
+---
+
+## 接口说明
+
+将输入文本转换为高维向量，用于语义搜索、聚类、推荐等场景。完全兼容 OpenAI Embeddings API 格式。
+
+## 支持模型
+
+| 模型 | 维度 | 说明 |
+|------|------|------|
+| `text-embedding-3-large` | 3072 | 高精度，推荐用于生产环境 |
+| `text-embedding-3-small` | 1536 | 性价比高 |
+| `text-embedding-ada-002` | 1536 | 经典模型 |
+
+## 请求参数
+
+<ParamField body="model" type="string" required>
+  嵌入模型名称，如 `text-embedding-3-large`
+</ParamField>
+
+<ParamField body="input" type="string | string[]" required>
+  要嵌入的文本，支持单个字符串或字符串数组
+</ParamField>
+
+<ParamField body="encoding_format" type="string" default="float">
+  返回格式：`float` 或 `base64`
+</ParamField>
+
+<ParamField body="dimensions" type="integer">
+  输出向量维度（仅 `text-embedding-3-*` 支持）
+</ParamField>
+
+## 响应格式
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "object": "embedding",
+      "index": 0,
+      "embedding": [0.0023064255, -0.009327292, ...]
+    }
+  ],
+  "model": "text-embedding-3-large",
+  "usage": {
+    "prompt_tokens": 8,
+    "total_tokens": 8
+  }
+}
+```
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.embeddings.create(
+    model="text-embedding-3-large",
+    input="Crazyrouter 是一个 AI 模型网关"
+)
+
+embedding = response.data[0].embedding
+print(f"向量维度: {len(embedding)}")
+print(f"前5个值: {embedding[:5]}")
+```
+
+```python Python (批量)
+response = client.embeddings.create(
+    model="text-embedding-3-large",
+    input=[
+        "第一段文本",
+        "第二段文本",
+        "第三段文本"
+    ]
+)
+
+for item in response.data:
+    print(f"索引 {item.index}: 维度 {len(item.embedding)}")
+```
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/embeddings \
+  -H "Authorization: Bearer sk-xxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "text-embedding-3-large",
+    "input": "Crazyrouter 是一个 AI 模型网关"
+  }'
+```
+
+</CodeGroup>
+
+<Note>
+  批量请求时，单次最多支持 2048 条文本。建议每条文本不超过 8191 tokens。
+</Note>

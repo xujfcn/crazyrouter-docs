@@ -1,0 +1,185 @@
+---
+title: "Claude OpenAI 兼容格式"
+description: "通过 OpenAI 兼容的 /v1/chat/completions 端点使用 Claude 模型"
+---
+
+# Claude OpenAI 兼容格式
+
+你可以通过标准的 OpenAI Chat Completions API 格式调用 Claude 模型，无需修改现有代码。
+
+```
+POST /v1/chat/completions
+```
+
+---
+
+## 非流式请求
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "claude-sonnet-4-20250514",
+    "messages": [
+      {"role": "system", "content": "你是一个专业的技术顾问。"},
+      {"role": "user", "content": "比较 PostgreSQL 和 MySQL 的优缺点"}
+    ],
+    "max_tokens": 2048,
+    "temperature": 0.7
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="claude-sonnet-4-20250514",
+    messages=[
+        {"role": "system", "content": "你是一个专业的技术顾问。"},
+        {"role": "user", "content": "比较 PostgreSQL 和 MySQL 的优缺点"}
+    ],
+    max_tokens=2048,
+    temperature=0.7
+)
+
+print(response.choices[0].message.content)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const response = await client.chat.completions.create({
+  model: "claude-sonnet-4-20250514",
+  messages: [
+    { role: "system", content: "你是一个专业的技术顾问。" },
+    { role: "user", content: "比较 PostgreSQL 和 MySQL 的优缺点" },
+  ],
+  max_tokens: 2048,
+  temperature: 0.7,
+});
+
+console.log(response.choices[0].message.content);
+```
+
+</CodeGroup>
+
+### 响应
+
+```json
+{
+  "id": "chatcmpl-abc123",
+  "object": "chat.completion",
+  "created": 1709123456,
+  "model": "claude-sonnet-4-20250514",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "以下是 PostgreSQL 和 MySQL 的对比分析：\n\n..."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 35,
+    "completion_tokens": 420,
+    "total_tokens": 455
+  }
+}
+```
+
+---
+
+## 流式请求
+
+<CodeGroup>
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+stream = client.chat.completions.create(
+    model="claude-sonnet-4-20250514",
+    messages=[
+        {"role": "user", "content": "用 Python 实现一个简单的 LRU 缓存"}
+    ],
+    max_tokens=2048,
+    stream=True
+)
+
+for chunk in stream:
+    if chunk.choices[0].delta.content is not None:
+        print(chunk.choices[0].delta.content, end="")
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const stream = await client.chat.completions.create({
+  model: "claude-sonnet-4-20250514",
+  messages: [
+    { role: "user", content: "用 Python 实现一个简单的 LRU 缓存" },
+  ],
+  max_tokens: 2048,
+  stream: true,
+});
+
+for await (const chunk of stream) {
+  const content = chunk.choices[0]?.delta?.content || "";
+  process.stdout.write(content);
+}
+```
+
+</CodeGroup>
+
+---
+
+## 可用的 Claude 模型
+
+| 模型 | 说明 |
+|------|------|
+| `claude-sonnet-4-20250514` | Claude Sonnet 4，平衡能力和速度 |
+| `claude-opus-4-20250514` | Claude Opus 4，最强能力 |
+| `claude-3.5-sonnet` | Claude 3.5 Sonnet |
+| `claude-3.5-haiku` | Claude 3.5 Haiku，快速响应 |
+
+## 参数映射
+
+Crazyrouter 会自动将 OpenAI 格式的参数映射到 Claude 原生参数：
+
+| OpenAI 参数 | Claude 原生参数 | 说明 |
+|-------------|----------------|------|
+| `messages[0].role="system"` | `system` | 系统提示自动提取 |
+| `max_tokens` | `max_tokens` | 直接映射 |
+| `temperature` | `temperature` | 直接映射 |
+| `top_p` | `top_p` | 直接映射 |
+| `stop` | `stop_sequences` | 自动转换格式 |
+| `stream` | `stream` | 直接映射 |
+| `tools` | `tools` | 自动转换工具格式 |
+
+<Note>
+  使用 OpenAI 兼容格式时，响应会自动转换为 OpenAI 的 Chat Completion 格式。如果你需要访问 Claude 特有的功能（如 Extended Thinking 的思考过程），建议使用[原生格式](/chat/anthropic/messages)。
+</Note>

@@ -1,0 +1,100 @@
+---
+title: "Midjourney 概览"
+description: "Midjourney 图像生成 API 概览，包括任务对象、状态说明和响应字段"
+---
+
+# Midjourney 概览
+
+Crazyrouter 提供完整的 Midjourney API 代理，支持 Imagine、Blend、Describe、Upscale、Variation 等全部操作。所有请求通过异步任务方式处理。
+
+## 基础路径
+
+```
+https://crazyrouter.com/mj
+```
+
+## 认证
+
+在请求头中传入 API Key：
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+---
+
+## 任务对象
+
+每次提交 Midjourney 请求后，系统会返回一个任务对象。任务对象包含以下字段：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `id` | string | 任务唯一标识 |
+| `action` | string | 任务类型：`IMAGINE`、`UPSCALE`、`VARIATION`、`BLEND`、`DESCRIBE` 等 |
+| `status` | string | 任务状态 |
+| `prompt` | string | 提交的提示词 |
+| `promptEn` | string | 翻译后的英文提示词 |
+| `description` | string | 任务描述 |
+| `submitTime` | number | 提交时间（毫秒时间戳） |
+| `startTime` | number | 开始处理时间 |
+| `finishTime` | number | 完成时间 |
+| `progress` | string | 进度百分比，如 `"100%"` |
+| `imageUrl` | string | 生成的图片 URL |
+| `failReason` | string | 失败原因（仅失败时有值） |
+| `properties` | object | 附加属性 |
+| `buttons` | array | 可执行的操作按钮列表 |
+
+---
+
+## 任务状态
+
+| 状态 | 说明 |
+|------|------|
+| `NOT_START` | 任务已提交，等待处理 |
+| `SUBMITTED` | 任务已提交到 Midjourney |
+| `IN_PROGRESS` | 任务处理中 |
+| `SUCCESS` | 任务完成 |
+| `FAILURE` | 任务失败 |
+
+---
+
+## 操作按钮
+
+任务完成后，`buttons` 字段会包含可执行的后续操作：
+
+```json
+{
+  "buttons": [
+    {"customId": "MJ::JOB::upsample::1::hash", "emoji": "U1", "label": "U1", "style": 2},
+    {"customId": "MJ::JOB::upsample::2::hash", "emoji": "U2", "label": "U2", "style": 2},
+    {"customId": "MJ::JOB::upsample::3::hash", "emoji": "U3", "label": "U3", "style": 2},
+    {"customId": "MJ::JOB::upsample::4::hash", "emoji": "U4", "label": "U4", "style": 2},
+    {"customId": "MJ::JOB::variation::1::hash", "emoji": "V1", "label": "V1", "style": 2},
+    {"customId": "MJ::JOB::variation::2::hash", "emoji": "V2", "label": "V2", "style": 2},
+    {"customId": "MJ::JOB::variation::3::hash", "emoji": "V3", "label": "V3", "style": 2},
+    {"customId": "MJ::JOB::variation::4::hash", "emoji": "V4", "label": "V4", "style": 2}
+  ]
+}
+```
+
+通过 `customId` 可以调用 Action 接口执行对应操作（放大、变体等）。
+
+---
+
+## API 端点一览
+
+| 方法 | 端点 | 说明 |
+|------|------|------|
+| POST | `/mj/submit/imagine` | 提交 Imagine 任务 |
+| POST | `/mj/submit/action` | 执行操作（放大、变体等） |
+| POST | `/mj/submit/blend` | 混合图片 |
+| POST | `/mj/submit/describe` | 图片描述 |
+| POST | `/mj/submit/modal` | 提交弹窗确认 |
+| POST | `/mj/submit/shorten` | 缩短提示词 |
+| GET | `/mj/task/{id}/fetch` | 查询单个任务 |
+| POST | `/mj/task/list-by-condition` | 批量查询任务 |
+| GET | `/mj/task/{id}/image-seed` | 获取图片 Seed |
+
+<Note>
+  Midjourney 任务为异步处理，提交后需轮询查询任务状态。建议每 3-5 秒查询一次，直到状态变为 `SUCCESS` 或 `FAILURE`。
+</Note>

@@ -1,0 +1,58 @@
+---
+title: '删除令牌'
+description: '删除指定的 API 令牌'
+api: 'DELETE /api/token/{id}'
+---
+
+## 接口说明
+
+永久删除指定的 API 令牌。删除后该令牌的 API Key 将立即失效。
+
+## 路径参数
+
+<ParamField path="id" type="integer" required>
+  要删除的令牌 ID
+</ParamField>
+
+## 响应格式
+
+```json
+{
+  "success": true,
+  "message": "令牌删除成功"
+}
+```
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+headers = {
+    "Authorization": "Bearer your_access_token",
+    "New-Api-User": "1",
+    "User-Agent": "Mozilla/5.0"
+}
+
+token_id = 10
+response = requests.delete(
+    f"https://crazyrouter.com/api/token/{token_id}",
+    headers=headers
+)
+
+print(response.json())
+```
+
+```bash cURL
+curl -X DELETE https://crazyrouter.com/api/token/10 \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 1"
+```
+
+</CodeGroup>
+
+<Warning>
+  删除操作不可恢复。删除后使用该 Key 的所有应用将立即无法调用 API。
+</Warning>

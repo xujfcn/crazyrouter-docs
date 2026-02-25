@@ -1,0 +1,80 @@
+---
+title: "Suno 歌曲拼接"
+description: "使用 Suno API 拼接多段歌曲"
+---
+
+# Suno 歌曲拼接
+
+```
+POST /suno/submit/concat
+```
+
+将多段歌曲片段拼接为一首完整的歌曲。
+
+## 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `clip_id` | string | 是 | 要拼接的歌曲 clip ID |
+| `is_infill` | boolean | 否 | 是否为填充模式（在两段之间生成过渡） |
+
+## 请求示例
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/suno/submit/concat \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "clip_id": "clip_abc123",
+    "is_infill": false
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/suno/submit/concat",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "clip_id": "clip_abc123",
+        "is_infill": False
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+## 响应示例
+
+```json
+{
+  "code": 1,
+  "description": "提交成功",
+  "result": "concat_task_abc123"
+}
+```
+
+---
+
+## 填充模式
+
+设置 `is_infill: true` 时，Suno 会在两段歌曲之间自动生成过渡段落：
+
+```json
+{
+  "clip_id": "clip_abc123",
+  "is_infill": true
+}
+```
+
+<Note>
+  拼接任务提交后，通过 [任务查询](/audio/suno/query) 接口获取结果。拼接后的歌曲会生成新的 clip ID。
+</Note>

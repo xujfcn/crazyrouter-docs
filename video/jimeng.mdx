@@ -1,0 +1,109 @@
+---
+title: "即梦"
+description: "使用即梦 (Jimeng) API 生成视频"
+---
+
+# 即梦
+
+即梦（Jimeng）是字节跳动推出的视频生成服务。
+
+## 提交视频任务
+
+```
+POST /jimeng/submit/videos
+```
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `model` | string | 是 | 模型名称 |
+| `prompt` | string | 是 | 视频描述提示词 |
+| `image_url` | string | 否 | 参考图片 URL（图生视频） |
+| `aspect_ratio` | string | 否 | 宽高比 |
+
+### 请求示例
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/jimeng/submit/videos \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "jimeng-video-1",
+    "prompt": "一条金鱼在水中游动，水面波光粼粼"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/jimeng/submit/videos",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "jimeng-video-1",
+        "prompt": "一条金鱼在水中游动，水面波光粼粼"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### 响应示例
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "task_id": "jimeng_abc123"
+  }
+}
+```
+
+---
+
+## 查询任务
+
+```
+GET /jimeng/fetch/{task_id}
+```
+
+```bash cURL
+curl https://crazyrouter.com/jimeng/fetch/jimeng_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### 响应示例（已完成）
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "task_id": "jimeng_abc123",
+    "status": "SUCCESS",
+    "video_url": "https://cdn.jimeng.com/videos/..."
+  }
+}
+```
+
+### 任务状态
+
+| 状态 | 说明 |
+|------|------|
+| `SUBMITTED` | 已提交 |
+| `PROCESSING` | 处理中 |
+| `SUCCESS` | 成功 |
+| `FAILED` | 失败 |
+
+<Note>
+  即梦对中文提示词有良好的理解能力，推荐使用中文描述。
+</Note>

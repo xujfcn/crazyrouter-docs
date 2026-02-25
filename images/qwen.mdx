@@ -1,0 +1,105 @@
+---
+title: "Qwen 图片编辑"
+description: "使用 Qwen 图片编辑模型进行图像编辑"
+---
+
+# Qwen 图片编辑
+
+```
+POST /v1/images/generations
+```
+
+使用 `qwen-image-edit-2509` 模型进行智能图片编辑，兼容 OpenAI Images API 格式。
+
+## 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `model` | string | 是 | 固定为 `qwen-image-edit-2509` |
+| `prompt` | string | 是 | 编辑描述 |
+| `image` | string | 是 | 原始图片 URL |
+| `n` | integer | 否 | 生成数量，默认 1 |
+| `size` | string | 否 | 输出尺寸 |
+
+## 请求示例
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "qwen-image-edit-2509",
+    "prompt": "将图片中的天空替换为星空",
+    "image": "https://example.com/landscape.jpg",
+    "n": 1
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/v1/images/generations",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "qwen-image-edit-2509",
+        "prompt": "将图片中的天空替换为星空",
+        "image": "https://example.com/landscape.jpg",
+        "n": 1
+    }
+)
+
+data = response.json()
+print(data["data"][0]["url"])
+```
+
+</CodeGroup>
+
+## 响应示例
+
+```json
+{
+  "created": 1709123456,
+  "data": [
+    {
+      "url": "https://crazyrouter.com/files/qwen_edit_abc123.png"
+    }
+  ]
+}
+```
+
+## 使用场景
+
+- 替换图片背景
+- 修改图片中的特定元素
+- 添加或移除物体
+- 风格转换
+
+### 示例：移除物体
+
+```json
+{
+  "model": "qwen-image-edit-2509",
+  "prompt": "移除图片中的水印",
+  "image": "https://example.com/photo_with_watermark.jpg"
+}
+```
+
+### 示例：风格转换
+
+```json
+{
+  "model": "qwen-image-edit-2509",
+  "prompt": "将照片转换为卡通风格",
+  "image": "https://example.com/photo.jpg"
+}
+```
+
+<Note>
+  Qwen 图片编辑模型对中文指令有良好的理解能力，推荐使用中文描述编辑需求。
+</Note>

@@ -1,0 +1,50 @@
+---
+title: 'Coze 配置教程'
+description: '在 Coze 工作流中配置 Crazyrouter API'
+---
+
+## 概述
+
+Coze（扣子）是字节跳动推出的 AI Bot 开发平台，支持通过插件调用外部 API。
+
+## 配置方法
+
+### 通过 HTTP 插件调用
+
+<Steps>
+  <Step title="创建插件">
+    在 Coze 工作台中，进入 `插件` → `创建插件` → 选择 `基于 API 创建`
+  </Step>
+  <Step title="配置 API">
+    - **请求方法**: POST
+    - **URL**: `https://crazyrouter.com/v1/chat/completions`
+    - **Headers**:
+      - `Authorization`: `Bearer sk-xxx`
+      - `Content-Type`: `application/json`
+  </Step>
+  <Step title="配置请求体">
+    ```json
+    {
+      "model": "gpt-4o",
+      "messages": [
+        {"role": "user", "content": "{{input}}"}
+      ]
+    }
+    ```
+  </Step>
+  <Step title="在 Bot 中使用">
+    在 Bot 的工作流中添加该插件节点。
+  </Step>
+</Steps>
+
+### 通过模型配置
+
+部分 Coze 版本支持自定义模型接入：
+
+1. 进入 `设置` → `模型管理`
+2. 添加自定义模型
+3. 填写 API 地址和密钥
+
+<Note>
+  Coze 国际版和国内版的配置方式可能略有不同。建议参考 Coze 官方文档了解最新的自定义模型接入方式。
+</Note>

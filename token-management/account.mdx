@@ -1,0 +1,96 @@
+---
+title: '获取账号信息'
+description: '获取当前用户的账号信息和余额'
+api: 'GET /api/user/self'
+---
+
+## 接口说明
+
+获取当前认证用户的账号信息，包括用户名、余额、用量统计等。
+
+## 响应格式
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "id": 1,
+    "username": "user123",
+    "display_name": "张三",
+    "email": "user@example.com",
+    "role": 1,
+    "status": 1,
+    "quota": 500000,
+    "used_quota": 123456,
+    "request_count": 2048,
+    "group": "default",
+    "inviter_id": 0,
+    "aff_code": "abc123",
+    "aff_count": 5,
+    "aff_quota": 10000
+  }
+}
+```
+
+## 字段说明
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `quota` | int | 当前余额（内部额度值） |
+| `used_quota` | int | 累计已使用额度 |
+| `request_count` | int | 累计请求次数 |
+| `group` | string | 用户分组（影响价格倍率） |
+| `role` | int | 角色：1=普通用户，10=管理员，100=超级管理员 |
+| `aff_code` | string | 邀请码 |
+| `aff_count` | int | 邀请人数 |
+| `aff_quota` | int | 邀请奖励额度 |
+
+## 额度换算
+
+系统内部额度与美元的换算关系：
+
+```
+1 美元 = 500000 额度
+即 1 额度 ≈ 0.000002 美元
+```
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+headers = {
+    "Authorization": "Bearer your_access_token",
+    "New-Api-User": "1",
+    "User-Agent": "Mozilla/5.0"
+}
+
+response = requests.get(
+    "https://crazyrouter.com/api/user/self",
+    headers=headers
+)
+
+user = response.json()["data"]
+balance_usd = user["quota"] / 500000
+used_usd = user["used_quota"] / 500000
+
+print(f"用户: {user['username']}")
+print(f"余额: ${balance_usd:.2f}")
+print(f"已用: ${used_usd:.2f}")
+print(f"请求次数: {user['request_count']}")
+```
+
+```bash cURL
+curl https://crazyrouter.com/api/user/self \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 1"
+```
+
+</CodeGroup>
+
+<Note>
+  余额查询也可以通过 API Key 访问 `GET /api/user/self`，此时返回的是 Key 所属用户的信息。
+</Note>

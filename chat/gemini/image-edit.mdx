@@ -1,0 +1,140 @@
+---
+title: "Gemini 图片编辑"
+description: "使用 Gemini 原生格式进行图片编辑，通过内联图片数据实现"
+---
+
+# Gemini 图片编辑
+
+Gemini 图片模型支持对已有图片进行编辑和修改。通过发送原始图片和编辑指令，模型会返回修改后的图片。
+
+```
+POST /v1beta/models/{model}:generateContent
+```
+
+---
+
+## 基本图片编辑
+
+<CodeGroup>
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-2-5-flash-image:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "把这张图片的背景改成星空"},
+          {
+            "inlineData": {
+              "mimeType": "image/jpeg",
+              "data": "/9j/4AAQSkZJRgABAQAA..."
+            }
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "responseModalities": ["TEXT", "IMAGE"]
+    }
+  }'
+```
+
+```python Python
+import google.generativeai as genai
+import base64
+
+genai.configure(
+    api_key="YOUR_API_KEY",
+    transport="rest",
+    client_options={"api_endpoint": "https://crazyrouter.com"}
+)
+
+model = genai.GenerativeModel("gemini-2-5-flash-image")
+
+with open("input.jpg", "rb") as f:
+    image_data = f.read()
+
+response = model.generate_content(
+    [
+        "把这张图片的背景改成星空",
+        {
+            "mime_type": "image/jpeg",
+            "data": image_data
+        }
+    ],
+    generation_config=genai.GenerationConfig(
+        response_modalities=["TEXT", "IMAGE"]
+    )
+)
+
+for part in response.candidates[0].content.parts:
+    if hasattr(part, "inline_data"):
+        with open("edited.png", "wb") as f:
+            f.write(base64.b64decode(part.inline_data.data))
+        print("编辑后的图片已保存")
+```
+
+</CodeGroup>
+
+---
+
+## 风格转换
+
+```python Python
+response = model.generate_content(
+    [
+        "将这张照片转换为水彩画风格，保持原始构图",
+        {"mime_type": "image/jpeg", "data": image_data}
+    ],
+    generation_config=genai.GenerationConfig(
+        response_modalities=["TEXT", "IMAGE"]
+    )
+)
+```
+
+---
+
+## 局部编辑
+
+通过详细的文字描述指定编辑区域：
+
+```python Python
+response = model.generate_content(
+    [
+        "把图片中人物的衣服颜色从红色改成蓝色，其他部分保持不变",
+        {"mime_type": "image/jpeg", "data": image_data}
+    ],
+    generation_config=genai.GenerationConfig(
+        response_modalities=["TEXT", "IMAGE"]
+    )
+)
+```
+
+---
+
+## 多图参考编辑
+
+可以发送多张图片作为参考：
+
+```python Python
+response = model.generate_content(
+    [
+        "参考第二张图片的风格，重新绘制第一张图片",
+        {"mime_type": "image/jpeg", "data": content_image},
+        {"mime_type": "image/jpeg", "data": style_image}
+    ],
+    generation_config=genai.GenerationConfig(
+        response_modalities=["TEXT", "IMAGE"]
+    )
+)
+```
+
+<Note>
+  图片编辑的效果取决于编辑指令的清晰程度。建议使用具体、明确的描述来指定需要修改的内容。
+</Note>
+
+<Warning>
+  输入图片和输出图片都会消耗 Token。大尺寸图片会显著增加 Token 消耗。
+</Warning>

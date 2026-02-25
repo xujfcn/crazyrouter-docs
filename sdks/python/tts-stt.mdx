@@ -1,0 +1,97 @@
+---
+title: 'Python 语音'
+description: 'Python 实现文本转语音（TTS）和语音转文本（STT）'
+---
+
+## 文本转语音（TTS）
+
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+
+# 生成语音
+response = client.audio.speech.create(
+    model="tts-1",
+    voice="alloy",
+    input="你好，欢迎使用 Crazyrouter API 服务。"
+)
+
+# 保存为 MP3 文件
+response.stream_to_file("output.mp3")
+print("语音已保存到 output.mp3")
+```
+
+### 可用声音
+
+| 声音 | 特点 |
+|------|------|
+| `alloy` | 中性、平衡 |
+| `echo` | 男性、沉稳 |
+| `fable` | 男性、温暖 |
+| `onyx` | 男性、深沉 |
+| `nova` | 女性、活泼 |
+| `shimmer` | 女性、柔和 |
+
+### 高质量 TTS
+
+```python
+# 使用 tts-1-hd 获得更高音质
+response = client.audio.speech.create(
+    model="tts-1-hd",
+    voice="nova",
+    input="高质量语音合成示例",
+    response_format="opus",  # 支持 mp3, opus, aac, flac
+    speed=1.0  # 0.25 到 4.0
+)
+
+response.stream_to_file("output_hd.opus")
+```
+
+## 语音转文本（STT）
+
+```python
+# Whisper 语音识别
+audio_file = open("recording.mp3", "rb")
+
+transcript = client.audio.transcriptions.create(
+    model="whisper-1",
+    file=audio_file,
+    language="zh"  # 可选，指定语言提高准确率
+)
+
+print(transcript.text)
+```
+
+### 带时间戳的转录
+
+```python
+transcript = client.audio.transcriptions.create(
+    model="whisper-1",
+    file=open("recording.mp3", "rb"),
+    response_format="verbose_json",
+    timestamp_granularities=["segment"]
+)
+
+for segment in transcript.segments:
+    print(f"[{segment['start']:.1f}s - {segment['end']:.1f}s] {segment['text']}")
+```
+
+## 语音翻译
+
+将非英语语音翻译为英文文本：
+
+```python
+audio_file = open("chinese_audio.mp3", "rb")
+
+translation = client.audio.translations.create(
+    model="whisper-1",
+    file=audio_file
+)
+
+print(translation.text)  # 英文输出
+```
+
+<Note>
+  TTS 支持的模型包括 `tts-1`、`tts-1-hd` 和 `gpt-4o-mini-tts`。STT 使用 `whisper-1` 模型。
+</Note>

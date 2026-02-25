@@ -1,0 +1,147 @@
+---
+title: '接入教程'
+description: '从 OpenAI 或其他服务商迁移到 Crazyrouter'
+---
+
+## 概述
+
+Crazyrouter 完全兼容 OpenAI API 格式，从 OpenAI 或其他服务商迁移只需修改两个参数：
+
+1. **Base URL** → `https://crazyrouter.com/v1`
+2. **API Key** → 你的 Crazyrouter `sk-xxx` 密钥
+
+## 获取 API Key
+
+<Steps>
+  <Step title="注册账号">
+    访问 [crazyrouter.com](https://crazyrouter.com) 注册账号
+  </Step>
+  <Step title="充值余额">
+    进入 `充值` 页面，选择充值金额
+  </Step>
+  <Step title="创建令牌">
+    进入 `令牌` 页面，点击 `新建令牌`，获取 `sk-xxx` 格式的 API Key
+  </Step>
+</Steps>
+
+## 从 OpenAI 迁移
+
+### 修改前
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-openai-xxx"
+    # 默认 base_url: https://api.openai.com/v1
+)
+```
+
+### 修改后
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",  # Crazyrouter API Key
+    base_url="https://crazyrouter.com/v1"  # Crazyrouter 地址
+)
+```
+
+其他代码完全不需要改动。
+
+## 从 Anthropic 迁移
+
+### 使用 OpenAI 兼容格式
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1"
+)
+
+# Claude 模型通过 OpenAI 格式调用
+response = client.chat.completions.create(
+    model="claude-sonnet-4-20250514",
+    messages=[{"role": "user", "content": "你好"}]
+)
+```
+
+### 使用 Anthropic 原生格式
+
+```python
+import anthropic
+
+client = anthropic.Anthropic(
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com"  # 注意：不加 /v1
+)
+
+response = client.messages.create(
+    model="claude-sonnet-4-20250514",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "你好"}]
+)
+```
+
+## 从 Google Gemini 迁移
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="gemini-2.5-pro",
+    messages=[{"role": "user", "content": "你好"}]
+)
+```
+
+## 环境变量方式
+
+推荐通过环境变量配置，避免在代码中硬编码密钥：
+
+<Tabs>
+  <Tab title="Linux / macOS">
+    ```bash
+    export OPENAI_API_KEY=sk-xxx
+    export OPENAI_BASE_URL=https://crazyrouter.com/v1
+    ```
+  </Tab>
+  <Tab title="Windows">
+    ```powershell
+    $env:OPENAI_API_KEY = "sk-xxx"
+    $env:OPENAI_BASE_URL = "https://crazyrouter.com/v1"
+    ```
+  </Tab>
+</Tabs>
+
+然后代码中无需指定参数：
+
+```python
+from openai import OpenAI
+client = OpenAI()  # 自动读取环境变量
+```
+
+## 兼容性说明
+
+| 功能 | 兼容性 |
+|------|--------|
+| Chat Completions | 完全兼容 |
+| Streaming | 完全兼容 |
+| Function Calling | 完全兼容 |
+| Vision (识图) | 完全兼容 |
+| Embeddings | 完全兼容 |
+| TTS / STT | 完全兼容 |
+| Images (DALL-E) | 完全兼容 |
+| Anthropic Messages API | 完全兼容 |
+| Gemini Native API | 完全兼容 |
+
+<Note>
+  Crazyrouter 同时支持 OpenAI、Anthropic、Gemini 三种 API 格式。你可以根据需要选择最熟悉的格式。
+</Note>

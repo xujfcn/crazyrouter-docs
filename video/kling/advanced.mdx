@@ -1,0 +1,136 @@
+---
+title: "Kling 高级功能"
+description: "Kling 高级功能：虚拟试穿、口型同步、视频延长、视频特效"
+---
+
+# Kling 高级功能
+
+## 虚拟试穿
+
+```
+POST /kling/v1/virtual-try-on
+```
+
+将服装图片应用到人物照片上。
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `model_name` | string | 是 | 模型名称 |
+| `human_image` | string | 是 | 人物照片 URL |
+| `cloth_image` | string | 是 | 服装图片 URL |
+| `callback_url` | string | 否 | 回调地址 |
+
+### 请求示例
+
+```bash cURL
+curl -X POST https://crazyrouter.com/kling/v1/virtual-try-on \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model_name": "kling-v1",
+    "human_image": "https://example.com/person.jpg",
+    "cloth_image": "https://example.com/dress.jpg"
+  }'
+```
+
+---
+
+## 口型同步
+
+```
+POST /kling/v1/lip-sync
+```
+
+将音频与视频中的人物口型同步。
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `model_name` | string | 是 | 模型名称 |
+| `video_url` | string | 是 | 原始视频 URL |
+| `audio_url` | string | 是 | 音频文件 URL |
+| `callback_url` | string | 否 | 回调地址 |
+
+### 请求示例
+
+```bash cURL
+curl -X POST https://crazyrouter.com/kling/v1/lip-sync \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model_name": "kling-v1",
+    "video_url": "https://example.com/talking_head.mp4",
+    "audio_url": "https://example.com/speech.mp3"
+  }'
+```
+
+---
+
+## 视频延长
+
+```
+POST /kling/v1/video-extend
+```
+
+延长已有视频的时长。
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `model_name` | string | 是 | 模型名称 |
+| `video_url` | string | 是 | 原始视频 URL |
+| `prompt` | string | 否 | 延长部分的描述 |
+| `callback_url` | string | 否 | 回调地址 |
+
+### 请求示例
+
+```bash cURL
+curl -X POST https://crazyrouter.com/kling/v1/video-extend \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model_name": "kling-v1-6",
+    "video_url": "https://example.com/short_video.mp4",
+    "prompt": "继续展示猫咪追蝴蝶的场景"
+  }'
+```
+
+---
+
+## 视频特效
+
+```
+POST /kling/v1/effects
+```
+
+为视频添加特效。
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `model_name` | string | 是 | 模型名称 |
+| `image` | string | 是 | 输入图片 URL |
+| `effect_scene` | string | 是 | 特效场景 |
+| `callback_url` | string | 否 | 回调地址 |
+
+### 请求示例
+
+```bash cURL
+curl -X POST https://crazyrouter.com/kling/v1/effects \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model_name": "kling-v1",
+    "image": "https://example.com/photo.jpg",
+    "effect_scene": "christmas"
+  }'
+```
+
+<Note>
+  所有高级功能均为异步任务，提交后通过 [任务查询](/video/kling/query) 接口获取结果。
+</Note>

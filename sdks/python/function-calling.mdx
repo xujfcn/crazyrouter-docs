@@ -1,0 +1,126 @@
+---
+title: 'Python Function Calling'
+description: 'Python 实现 Function Calling 完整示例'
+---
+
+## 概述
+
+Function Calling 允许模型调用你定义的函数，实现与外部系统的交互。模型不会直接执行函数，而是返回函数名和参数，由你的代码执行后将结果返回给模型。
+
+## 完整示例
+
+```python
+import json
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+
+# 1. 定义工具
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_weather",
+            "description": "获取指定城市的天气信息",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "city": {
+                        "type": "string",
+                        "description": "城市名称，如：北京"
+                    },
+                    "unit": {
+                        "type": "string",
+                        "enum": ["celsius", "fahrenheit"],
+                        "description": "温度单位"
+                    }
+                },
+                "required": ["city"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_products",
+            "description": "搜索商品",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "搜索关键词"},
+                    "max_price": {"type": "number", "description": "最高价格"}
+                },
+                "required": ["query"]
+            }
+        }
+    }
+]
+
+# 2. 模拟函数实现
+def get_weather(city, unit="celsius"):
+    return {"city": city, "temperature": 22, "unit": unit, "condition": "晴"}
+
+def search_products(query, max_price=None):
+    return [{"name": f"{query} 商品A", "price": 99}, {"name": f"{query} 商品B", "price": 199}]
+
+# 3. 对话循环
+messages = [{"role": "user", "content": "北京今天天气怎么样？顺便帮我搜一下雨伞"}]
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=messages,
+    tools=tools,
+    tool_choice="auto"
+)
+
+message = response.choices[0].message
+
+# 4. 处理工具调用
+if message.tool_calls:
+    messages.append(message)
+
+    for tool_call in message.tool_calls:
+        func_name = tool_call.function.name
+        args = json.loads(tool_call.function.arguments)
+
+        if func_name == "get_weather":
+            result = get_weather(**args)
+        elif func_name == "search_products":
+            result = search_products(**args)
+
+        messages.append({
+            "role": "tool",
+            "tool_call_id": tool_call.id,
+            "content": json.dumps(result, ensure_ascii=False)
+        })
+
+    # 5. 获取最终回复
+    final = client.chat.completions.create(
+        model="gpt-4o",
+        messages=messages,
+        tools=tools
+    )
+    print(final.choices[0].message.content)
+```
+
+## 强制调用特定函数
+
+```python
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=messages,
+    tools=tools,
+    tool_choice={"type": "function", "function": {"name": "get_weather"}}
+)
+```
+
+## 支持的模型
+
+Function Calling 支持以下模型：
+- `gpt-4o`、`gpt-4o-mini`、`gpt-4-turbo`
+- `claude-sonnet-4-20250514`、`claude-opus-4-20250514`
+- `gemini-2.5-pro`、`gemini-2.5-flash`
+
+<Note>
+  不同模型对 Function Calling 的支持程度不同。GPT-4o 支持并行调用多个函数，部分模型可能仅支持单次调用。
+</Note>

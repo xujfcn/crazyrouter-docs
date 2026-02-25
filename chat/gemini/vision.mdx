@@ -1,0 +1,178 @@
+---
+title: "Gemini 多模态理解"
+description: "使用 Gemini 原生格式进行图片、视频和音频的多模态理解"
+---
+
+# Gemini 多模态理解
+
+Gemini 模型支持理解图片、视频和音频等多种模态的内容。
+
+```
+POST /v1beta/models/{model}:generateContent
+```
+
+---
+
+## 图片理解
+
+<CodeGroup>
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "详细描述这张图片的内容"},
+          {
+            "inlineData": {
+              "mimeType": "image/jpeg",
+              "data": "/9j/4AAQSkZJRgABAQAA..."
+            }
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+```python Python
+import google.generativeai as genai
+
+genai.configure(
+    api_key="YOUR_API_KEY",
+    transport="rest",
+    client_options={"api_endpoint": "https://crazyrouter.com"}
+)
+
+model = genai.GenerativeModel("gemini-2.5-flash")
+
+with open("photo.jpg", "rb") as f:
+    image_data = f.read()
+
+response = model.generate_content([
+    "详细描述这张图片的内容",
+    {"mime_type": "image/jpeg", "data": image_data}
+])
+
+print(response.text)
+```
+
+</CodeGroup>
+
+---
+
+## 视频理解
+
+通过内联数据或文件 URI 发送视频：
+
+<CodeGroup>
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "描述这个视频的内容，列出关键场景"},
+          {
+            "inlineData": {
+              "mimeType": "video/mp4",
+              "data": "AAAAIGZ0eXBpc29t..."
+            }
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+```python Python
+import base64
+
+with open("video.mp4", "rb") as f:
+    video_data = f.read()
+
+response = model.generate_content([
+    "描述这个视频的内容，列出关键场景",
+    {"mime_type": "video/mp4", "data": video_data}
+])
+
+print(response.text)
+```
+
+</CodeGroup>
+
+---
+
+## 音频理解
+
+<CodeGroup>
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "转录这段音频的内容，并总结主要观点"},
+          {
+            "inlineData": {
+              "mimeType": "audio/mp3",
+              "data": "SUQzBAAAAAAAI1RTU0..."
+            }
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+```python Python
+with open("audio.mp3", "rb") as f:
+    audio_data = f.read()
+
+response = model.generate_content([
+    "转录这段音频的内容，并总结主要观点",
+    {"mime_type": "audio/mp3", "data": audio_data}
+])
+
+print(response.text)
+```
+
+</CodeGroup>
+
+---
+
+## 多图对比
+
+```python Python
+response = model.generate_content([
+    "比较这三张产品图片，分析各自的设计特点和优缺点",
+    {"mime_type": "image/jpeg", "data": image1_data},
+    {"mime_type": "image/jpeg", "data": image2_data},
+    {"mime_type": "image/jpeg", "data": image3_data}
+])
+```
+
+## 支持的媒体格式
+
+| 类型 | 支持的格式 |
+|------|-----------|
+| 图片 | JPEG、PNG、GIF、WebP、BMP |
+| 视频 | MP4、AVI、MOV、MKV、WebM |
+| 音频 | MP3、WAV、FLAC、AAC、OGG |
+
+<Note>
+  视频和音频文件通过内联数据发送时，文件大小受请求体限制。对于大文件，建议先上传到可访问的 URL，然后通过 `fileData` 引用。
+</Note>
+
+<Warning>
+  视频和音频处理消耗的 Token 远高于纯文本。一分钟的视频可能消耗数千个 Token。
+</Warning>

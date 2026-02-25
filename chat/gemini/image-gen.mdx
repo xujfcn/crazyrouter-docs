@@ -1,0 +1,153 @@
+---
+title: "Gemini 图片生成"
+description: "使用 Gemini 模型生成图片，支持宽高比和分辨率控制"
+---
+
+# Gemini 图片生成
+
+Gemini 图片生成模型（如 `gemini-2-5-flash-image`、`gemini-3-pro-image-preview`）支持通过对话方式生成图片。
+
+```
+POST /v1beta/models/{model}:generateContent
+```
+
+---
+
+## 基本图片生成
+
+<CodeGroup>
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-2-5-flash-image:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "生成一张日落时分的海边风景画，油画风格"}
+        ]
+      }
+    ],
+    "generationConfig": {
+      "responseModalities": ["TEXT", "IMAGE"]
+    }
+  }'
+```
+
+```python Python
+import google.generativeai as genai
+
+genai.configure(
+    api_key="YOUR_API_KEY",
+    transport="rest",
+    client_options={"api_endpoint": "https://crazyrouter.com"}
+)
+
+model = genai.GenerativeModel("gemini-2-5-flash-image")
+
+response = model.generate_content(
+    "生成一张日落时分的海边风景画，油画风格",
+    generation_config=genai.GenerationConfig(
+        response_modalities=["TEXT", "IMAGE"]
+    )
+)
+
+# 处理响应中的图片
+for part in response.candidates[0].content.parts:
+    if hasattr(part, "text"):
+        print(part.text)
+    elif hasattr(part, "inline_data"):
+        import base64
+        with open("output.png", "wb") as f:
+            f.write(base64.b64decode(part.inline_data.data))
+        print("图片已保存为 output.png")
+```
+
+</CodeGroup>
+
+### 响应格式
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "这是一幅日落海边的油画风景："
+          },
+          {
+            "inlineData": {
+              "mimeType": "image/png",
+              "data": "iVBORw0KGgoAAAANSUhEUg..."
+            }
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP"
+    }
+  ]
+}
+```
+
+---
+
+## 宽高比控制
+
+通过提示词或参数控制生成图片的宽高比：
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-2-5-flash-image:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "生成一张 16:9 宽屏的山水画"}
+        ]
+      }
+    ],
+    "generationConfig": {
+      "responseModalities": ["TEXT", "IMAGE"],
+      "imageGenerationConfig": {
+        "aspectRatio": "16:9"
+      }
+    }
+  }'
+```
+
+### 支持的宽高比
+
+| 宽高比 | 说明 |
+|--------|------|
+| `1:1` | 正方形 |
+| `16:9` | 宽屏横向 |
+| `9:16` | 竖屏纵向 |
+| `4:3` | 标准横向 |
+| `3:4` | 标准纵向 |
+
+---
+
+## 图片数量控制
+
+```json
+{
+  "generationConfig": {
+    "responseModalities": ["TEXT", "IMAGE"],
+    "imageGenerationConfig": {
+      "numberOfImages": 4
+    }
+  }
+}
+```
+
+<Note>
+  `responseModalities` 必须包含 `"IMAGE"` 才能让模型生成图片。如果只设置 `"TEXT"`，模型只会返回文字描述。
+</Note>
+
+<Warning>
+  图片生成消耗的 Token 较多，且响应中的 Base64 图片数据体积较大。建议合理控制生成数量。
+</Warning>

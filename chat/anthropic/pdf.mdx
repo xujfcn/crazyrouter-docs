@@ -1,0 +1,231 @@
+---
+title: "Claude PDF 支持"
+description: "使用 Claude 原生 Messages API 处理 PDF 文档，支持 URL 和 Base64 格式"
+---
+
+# Claude PDF 支持
+
+Claude 模型支持直接处理 PDF 文档。你可以通过 URL 或 Base64 编码发送 PDF 文件，让 Claude 阅读、分析和总结文档内容。
+
+```
+POST /v1/messages
+```
+
+---
+
+## 通过 URL 发送 PDF
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-sonnet-4-20250514",
+    "max_tokens": 4096,
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "document",
+            "source": {
+              "type": "url",
+              "url": "https://example.com/report.pdf"
+            }
+          },
+          {
+            "type": "text",
+            "text": "总结这份文档的主要内容，列出关键要点"
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+```python Python
+import anthropic
+
+client = anthropic.Anthropic(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com"
+)
+
+message = client.messages.create(
+    model="claude-sonnet-4-20250514",
+    max_tokens=4096,
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "document",
+                    "source": {
+                        "type": "url",
+                        "url": "https://example.com/report.pdf"
+                    }
+                },
+                {
+                    "type": "text",
+                    "text": "总结这份文档的主要内容，列出关键要点"
+                }
+            ]
+        }
+    ]
+)
+
+print(message.content[0].text)
+```
+
+</CodeGroup>
+
+---
+
+## 通过 Base64 发送 PDF
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-sonnet-4-20250514",
+    "max_tokens": 4096,
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "document",
+            "source": {
+              "type": "base64",
+              "media_type": "application/pdf",
+              "data": "JVBERi0xLjQKMSAwIG9iago..."
+            }
+          },
+          {
+            "type": "text",
+            "text": "这份合同的主要条款有哪些？"
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+```python Python
+import anthropic
+import base64
+
+client = anthropic.Anthropic(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com"
+)
+
+with open("contract.pdf", "rb") as f:
+    pdf_data = base64.standard_b64encode(f.read()).decode("utf-8")
+
+message = client.messages.create(
+    model="claude-sonnet-4-20250514",
+    max_tokens=4096,
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "document",
+                    "source": {
+                        "type": "base64",
+                        "media_type": "application/pdf",
+                        "data": pdf_data
+                    }
+                },
+                {
+                    "type": "text",
+                    "text": "这份合同的主要条款有哪些？"
+                }
+            ]
+        }
+    ]
+)
+
+print(message.content[0].text)
+```
+
+</CodeGroup>
+
+---
+
+## 多文档分析
+
+可以同时发送多个 PDF 进行对比分析：
+
+```python Python
+message = client.messages.create(
+    model="claude-sonnet-4-20250514",
+    max_tokens=4096,
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "document",
+                    "source": {
+                        "type": "url",
+                        "url": "https://example.com/report_q1.pdf"
+                    }
+                },
+                {
+                    "type": "document",
+                    "source": {
+                        "type": "url",
+                        "url": "https://example.com/report_q2.pdf"
+                    }
+                },
+                {
+                    "type": "text",
+                    "text": "对比这两份季度报告，分析关键指标的变化趋势"
+                }
+            ]
+        }
+    ]
+)
+```
+
+## 流式处理
+
+PDF 分析也支持流式输出：
+
+```python Python
+with client.messages.stream(
+    model="claude-sonnet-4-20250514",
+    max_tokens=4096,
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "document",
+                    "source": {"type": "url", "url": "https://example.com/paper.pdf"}
+                },
+                {"type": "text", "text": "详细分析这篇论文的研究方法和结论"}
+            ]
+        }
+    ]
+) as stream:
+    for text in stream.text_stream:
+        print(text, end="")
+```
+
+<Note>
+  PDF 文档的每一页都会消耗 Token。页数越多，消耗越大。建议对大型文档进行分页处理或提取关键页面。
+</Note>
+
+<Warning>
+  PDF 文件大小建议不超过 32MB。过大的文件可能导致请求超时。
+</Warning>

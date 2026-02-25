@@ -1,0 +1,88 @@
+---
+title: "Suno 生成歌词"
+description: "使用 Suno API 自动生成歌词"
+---
+
+# Suno 生成歌词
+
+```
+POST /suno/submit/lyrics
+```
+
+根据描述自动生成歌词，可用于后续的自定义模式歌曲创作。
+
+## 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `prompt` | string | 是 | 歌词主题描述 |
+
+## 请求示例
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/suno/submit/lyrics \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "一首关于在雨天思念远方朋友的歌"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/suno/submit/lyrics",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "prompt": "一首关于在雨天思念远方朋友的歌"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+## 响应示例
+
+```json
+{
+  "code": 1,
+  "description": "提交成功",
+  "result": "lyrics_task_abc123"
+}
+```
+
+---
+
+## 查询歌词结果
+
+通过 [任务查询](/audio/suno/query) 接口获取生成的歌词：
+
+```bash cURL
+curl https://crazyrouter.com/suno/fetch/lyrics_task_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### 歌词结果示例
+
+```json
+{
+  "id": "lyrics_task_abc123",
+  "status": "complete",
+  "data": {
+    "title": "雨中思念",
+    "text": "[Verse 1]\n窗外的雨滴轻轻落下\n模糊了远方的灯火\n翻开手机看你的照片\n思念像雨水一样蔓延\n\n[Chorus]\n你在远方 我在这里\n隔着千山万水的距离\n但每一滴雨都在诉说\n我对你深深的想念\n\n[Verse 2]\n记得那年一起淋雨\n笑着跑过街头巷尾\n如今你在另一座城市\n是否也在听雨声入睡"
+  }
+}
+```
+
+<Note>
+  生成的歌词已包含段落标记（如 `[Verse]`、`[Chorus]`），可直接用于自定义模式的歌曲创作。
+</Note>

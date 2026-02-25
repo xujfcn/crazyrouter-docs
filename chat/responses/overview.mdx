@@ -1,0 +1,85 @@
+---
+title: "Responses API 概览"
+description: "Responses API 与 Chat Completions API 的对比，以及使用场景说明"
+---
+
+# Responses API 概览
+
+Responses API 是 OpenAI 推出的新一代 API 格式，旨在简化多步骤任务和工具调用的开发体验。Crazyrouter 完整支持 Responses API。
+
+## Responses API vs Chat Completions API
+
+| 特性 | Responses API | Chat Completions API |
+|------|--------------|---------------------|
+| 端点 | `/v1/responses` | `/v1/chat/completions` |
+| 消息格式 | `input` (字符串或数组) | `messages` (数组) |
+| 工具调用 | 内置支持，自动管理上下文 | 需要手动管理消息历史 |
+| 流式格式 | 丰富的事件类型 | 简单的 delta 格式 |
+| 思考模式 | `reasoning` 参数 | `reasoning_effort` 参数 |
+| Web 搜索 | 内置 `web_search` 工具 | 通过 `tools` 参数 |
+| 兼容性 | 较新，部分模型支持 | 广泛支持所有模型 |
+
+---
+
+## 何时使用 Responses API
+
+适合以下场景：
+- 需要内置工具（Web 搜索、文件搜索）
+- 多步骤任务和复杂工具调用
+- 需要丰富的流式事件
+- 使用 GPT-5 等新模型的高级功能
+
+## 何时使用 Chat Completions API
+
+适合以下场景：
+- 需要最广泛的模型兼容性
+- 简单的对话和文本生成
+- 已有基于 Chat Completions 的代码
+- 使用非 OpenAI 模型（Claude、Gemini 等）
+
+---
+
+## 快速对比示例
+
+<Tabs>
+  <Tab title="Responses API">
+    ```python
+    from openai import OpenAI
+
+    client = OpenAI(
+        api_key="YOUR_API_KEY",
+        base_url="https://crazyrouter.com/v1"
+    )
+
+    response = client.responses.create(
+        model="gpt-4o",
+        input="解释什么是 REST API"
+    )
+
+    print(response.output_text)
+    ```
+  </Tab>
+  <Tab title="Chat Completions API">
+    ```python
+    from openai import OpenAI
+
+    client = OpenAI(
+        api_key="YOUR_API_KEY",
+        base_url="https://crazyrouter.com/v1"
+    )
+
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "user", "content": "解释什么是 REST API"}
+        ]
+    )
+
+    print(response.choices[0].message.content)
+    ```
+  </Tab>
+</Tabs>
+
+<Note>
+  两种 API 可以在同一个项目中混合使用。Crazyrouter 对两种格式都提供完整支持，你可以根据具体需求选择合适的 API。
+</Note>

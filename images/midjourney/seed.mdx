@@ -1,0 +1,64 @@
+---
+title: "获取 Seed"
+description: "获取 Midjourney 任务的图片 Seed 值"
+---
+
+# 获取 Seed
+
+```
+GET /mj/task/{id}/image-seed
+```
+
+获取已完成任务的图片 Seed 值。Seed 可用于复现相似的生成结果。
+
+## 请求示例
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/mj/task/task_1234567890/image-seed \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    "https://crazyrouter.com/mj/task/task_1234567890/image-seed",
+    headers={"Authorization": "Bearer YOUR_API_KEY"}
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+## 响应示例
+
+```json
+{
+  "code": 1,
+  "description": "成功",
+  "result": "1234567890"
+}
+```
+
+| 字段 | 说明 |
+|------|------|
+| `result` | Seed 值，可在 Imagine 提示词中使用 `--seed 1234567890` 复现 |
+
+---
+
+## 使用 Seed
+
+在 Imagine 请求的 prompt 中添加 `--seed` 参数：
+
+```json
+{
+  "prompt": "a beautiful sunset over the ocean --ar 16:9 --v 6 --seed 1234567890"
+}
+```
+
+<Note>
+  Seed 仅在任务成功完成后可获取。相同的 Seed + 相同的 Prompt 可以生成非常相似（但不完全相同）的图片。
+</Note>

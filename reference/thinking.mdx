@@ -1,0 +1,123 @@
+---
+title: 'AI 思考字段'
+description: '理解 AI 模型响应中的思考/推理字段'
+---
+
+## 概述
+
+部分 AI 模型支持「思考」（Thinking/Reasoning）功能，模型会在生成最终回答前先进行内部推理。思考过程会通过特定字段返回。
+
+## 支持思考的模型
+
+| 模型 | 思考字段 | 说明 |
+|------|----------|------|
+| `o1` | `reasoning_content` | OpenAI 推理模型 |
+| `o1-mini` | `reasoning_content` | 轻量推理模型 |
+| `o3` | `reasoning_content` | 最新推理模型 |
+| `o3-mini` | `reasoning_content` | 轻量版 |
+| `o4-mini` | `reasoning_content` | 最新轻量推理 |
+| `claude-sonnet-4-20250514` | `thinking` | Claude 扩展思考 |
+| `claude-opus-4-20250514` | `thinking` | Claude 扩展思考 |
+| `gemini-2.5-pro` | `thoughts` | Gemini 思考 |
+| `gemini-2.5-flash-thinking` | `thoughts` | Gemini 思考 |
+| `deepseek-r1` | `reasoning_content` | DeepSeek 推理 |
+
+## 响应格式
+
+### OpenAI 格式（o1/o3/DeepSeek）
+
+```json
+{
+  "choices": [{
+    "message": {
+      "role": "assistant",
+      "content": "最终回答内容",
+      "reasoning_content": "模型的思考过程..."
+    }
+  }],
+  "usage": {
+    "prompt_tokens": 100,
+    "completion_tokens": 500,
+    "total_tokens": 600,
+    "completion_tokens_details": {
+      "reasoning_tokens": 350
+    }
+  }
+}
+```
+
+### 流式输出中的思考
+
+```json
+// 思考阶段
+{"choices": [{"delta": {"reasoning_content": "让我思考一下..."}}]}
+{"choices": [{"delta": {"reasoning_content": "首先分析..."}}]}
+
+// 回答阶段
+{"choices": [{"delta": {"content": "最终答案是..."}}]}
+```
+
+## Claude 扩展思考
+
+使用 Claude 模型时，通过 `thinking` 参数启用扩展思考：
+
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+
+response = client.chat.completions.create(
+    model="claude-sonnet-4-20250514",
+    messages=[{"role": "user", "content": "证明根号2是无理数"}],
+    extra_body={
+        "thinking": {
+            "type": "enabled",
+            "budget_tokens": 10000
+        }
+    }
+)
+
+# 思考内容在 reasoning_content 字段
+print("思考:", response.choices[0].message.reasoning_content)
+print("回答:", response.choices[0].message.content)
+```
+
+## 思考 Token 计费
+
+<Warning>
+  思考 Token 会计入总用量。推理模型的思考 Token 通常占总输出的 50%-80%，请注意成本控制。
+</Warning>
+
+| 模型 | 思考 Token 计费 |
+|------|----------------|
+| o1/o3 系列 | 按输出 Token 价格计费 |
+| Claude 扩展思考 | 按输出 Token 价格计费 |
+| DeepSeek-R1 | 按输出 Token 价格计费 |
+
+## 代码示例：提取思考内容
+
+```python
+response = client.chat.completions.create(
+    model="o3-mini",
+    messages=[{"role": "user", "content": "9.11 和 9.8 哪个大？"}]
+)
+
+msg = response.choices[0].message
+
+# 思考过程
+if hasattr(msg, 'reasoning_content') and msg.reasoning_content:
+    print(f"思考过程:\n{msg.reasoning_content}\n")
+
+# 最终回答
+print(f"回答:\n{msg.content}")
+
+# Token 用量
+usage = response.usage
+print(f"\n总 Token: {usage.total_tokens}")
+if hasattr(usage, 'completion_tokens_details'):
+    print(f"推理 Token: {usage.completion_tokens_details.reasoning_tokens}")
+```
+
+<Note>
+  不是所有模型都支持思考功能。对于不支持的模型，`reasoning_content` 字段不会出现在响应中。
+</Note>
