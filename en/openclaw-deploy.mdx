@@ -1,0 +1,150 @@
+---
+title: 'One-Click Deploy OpenClaw'
+description: 'Deploy an AI gateway on Linux/macOS with a single command — Telegram Bot, 300+ models'
+icon: 'rocket'
+---
+
+Deploy [OpenClaw](https://github.com/open-claw/open-claw) AI gateway on your server with a single command, powered by Crazyrouter as the API backend. Ready to use out of the box.
+
+## Quick Install
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-openclaw/main/install.sh | bash
+```
+
+Or download and run:
+
+```bash
+wget https://raw.githubusercontent.com/xujfcn/crazyrouter-openclaw/main/install.sh
+bash install.sh
+```
+
+<Note>
+The installer supports both Chinese and English. You'll be prompted to choose a language at startup. You can also set `INSTALLER_LANG=en` or `INSTALLER_LANG=zh` to skip the prompt.
+</Note>
+
+## Prerequisites
+
+| Item | Description |
+|------|-------------|
+| **Crazyrouter API Key** | Sign up at [crazyrouter.com](https://crazyrouter.com), then go to [Token Management](https://crazyrouter.com/token) to create one |
+| **Telegram Bot Token** (optional) | Create a bot via [@BotFather](https://t.me/BotFather) on Telegram |
+
+## Installation Process
+
+The script automatically handles these 10 steps:
+
+<Steps>
+  <Step title="Detect System Environment">
+    Identifies Linux/macOS, x64/arm64, and selects the appropriate installation method
+  </Step>
+  <Step title="Install Node.js 22+">
+    Auto-installs via NodeSource (apt/dnf/yum) or Homebrew if not present
+  </Step>
+  <Step title="Install OpenClaw">
+    Installs the OpenClaw package globally via npm
+  </Step>
+  <Step title="Configure API Key">
+    Interactive prompt for your Crazyrouter API Key (or reads from environment variable)
+  </Step>
+  <Step title="Pre-configure AI Models">
+    Sets up 15+ popular models, ready to use immediately
+  </Step>
+  <Step title="Apply Stability Patches">
+    TLS crash guard, memory directory backup, and more
+  </Step>
+  <Step title="Install IM Plugins">
+    DingTalk, WeCom, QQ Bot, and other messaging plugins
+  </Step>
+  <Step title="Configure System Service">
+    Uses systemd on Linux, launchd on macOS for auto-start on boot
+  </Step>
+  <Step title="Start Gateway">
+    Launches the OpenClaw service on port 18789 (default)
+  </Step>
+  <Step title="Telegram Bot Setup">
+    Interactive Telegram Bot configuration with automatic owner pairing
+  </Step>
+</Steps>
+
+## Pre-configured Models
+
+| Provider | Models |
+|----------|--------|
+| Claude | Opus 4.6, Sonnet 4.6 |
+| GPT | 5.2, 5.3 Codex, 5 Mini, 4.1, 4.1 Mini, 4o Mini |
+| Gemini | 3.1 Pro, 3 Flash |
+| DeepSeek | R1, V3.2 |
+| Others | Kimi K2.5, GLM-5, Grok 4.1, MiniMax M2.1 |
+
+## Environment Variables
+
+Use environment variables for non-interactive installation:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `CRAZYROUTER_API_KEY` | Pre-set API key, skips interactive prompt | — |
+| `GATEWAY_PORT` | Gateway port | `18789` |
+| `INSTALLER_LANG` | Installer language (`zh`/`en`) | Interactive |
+
+```bash
+# Non-interactive install example
+CRAZYROUTER_API_KEY=sk-xxx INSTALLER_LANG=en \
+  curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-openclaw/main/install.sh | bash
+```
+
+## Post-Install Management
+
+<Tabs>
+  <Tab title="Linux (systemd)">
+    ```bash
+    systemctl --user status openclaw    # Check status
+    journalctl --user -u openclaw -f    # View logs
+    systemctl --user restart openclaw   # Restart
+    systemctl --user stop openclaw      # Stop
+    ```
+  </Tab>
+  <Tab title="macOS (launchd)">
+    ```bash
+    tail -f ~/.openclaw/openclaw.log    # View logs
+    # Restart
+    launchctl stop com.crazyrouter.openclaw && launchctl start com.crazyrouter.openclaw
+    # Stop
+    launchctl stop com.crazyrouter.openclaw
+    ```
+  </Tab>
+</Tabs>
+
+## Supported IM Platforms
+
+<CardGroup cols={3}>
+  <Card title="Telegram" icon="telegram">
+    Interactive setup during install with auto owner pairing
+  </Card>
+  <Card title="Discord" icon="discord">
+    Connect via OpenClaw plugin
+  </Card>
+  <Card title="DingTalk" icon="message">
+    Plugin auto-configured during install
+  </Card>
+  <Card title="WeCom" icon="building">
+    Plugin auto-configured during install
+  </Card>
+  <Card title="QQ Bot" icon="comments">
+    Plugin auto-configured during install
+  </Card>
+  <Card title="Slack / Lark" icon="hashtag">
+    Connect via OpenClaw plugin
+  </Card>
+</CardGroup>
+
+## System Requirements
+
+- Linux (x64/arm64) or macOS (x64/arm64)
+- 1-2 GB RAM
+- Internet access
+- Crazyrouter API Key
+
+<Card title="GitHub Repository" icon="github" href="https://github.com/xujfcn/crazyrouter-openclaw">
+  View source code, submit issues, or contribute
+</Card>
