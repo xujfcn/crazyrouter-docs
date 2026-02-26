@@ -1,0 +1,138 @@
+---
+title: "Wan Video"
+description: "Use Wan models for text-to-video, image-to-video, and first-last frame video generation"
+---
+
+# Wan Video
+
+Wan is a video generation model by Alibaba, supporting text-to-video, image-to-video, and first-last frame video generation.
+
+## Text-to-Video
+
+```
+POST /fal-ai/wan/text-to-video
+```
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `prompt` | string | Yes | Video description prompt |
+| `model` | string | No | Model name, e.g. `wan-ai/wan2.1-t2v-14b` |
+| `aspect_ratio` | string | No | Aspect ratio: `16:9`, `9:16`, `1:1` |
+| `duration` | string | No | Video duration |
+| `negative_prompt` | string | No | Negative prompt |
+
+### Request Examples
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/fal-ai/wan/text-to-video \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "A time-lapse of a flower blooming in a garden, soft natural lighting",
+    "aspect_ratio": "16:9"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/fal-ai/wan/text-to-video",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "prompt": "A time-lapse of a flower blooming in a garden",
+        "aspect_ratio": "16:9"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### Response Example
+
+```json
+{
+  "video": {
+    "url": "https://fal.media/files/.../output.mp4",
+    "content_type": "video/mp4"
+  },
+  "seed": 42
+}
+```
+
+---
+
+## Image-to-Video
+
+```
+POST /fal-ai/wan/image-to-video
+```
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `prompt` | string | Yes | Video description |
+| `image_url` | string | Yes | Reference image URL |
+| `aspect_ratio` | string | No | Aspect ratio |
+
+```bash cURL
+curl -X POST https://crazyrouter.com/fal-ai/wan/image-to-video \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "The flower in the image starts swaying in the wind",
+    "image_url": "https://example.com/flower.jpg"
+  }'
+```
+
+---
+
+## First-Last Frame Video
+
+```
+POST /fal-ai/wan/first-last-frame
+```
+
+Provide first and last frame images to generate a transition video.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `prompt` | string | No | Transition description |
+| `first_frame_url` | string | Yes | First frame image URL |
+| `last_frame_url` | string | Yes | Last frame image URL |
+
+```bash cURL
+curl -X POST https://crazyrouter.com/fal-ai/wan/first-last-frame \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "Smooth morphing transition",
+    "first_frame_url": "https://example.com/frame_start.jpg",
+    "last_frame_url": "https://example.com/frame_end.jpg"
+  }'
+```
+
+Also available via the Unified Video API:
+
+```json
+{
+  "model": "wan-ai/wan2.1-i2v-14b-720p",
+  "prompt": "Smooth transition",
+  "images": [
+    "https://example.com/frame_start.jpg",
+    "https://example.com/frame_end.jpg"
+  ]
+}
+```
+
+<Note>
+  Wan models excel at natural scenes and human motion. The first-last frame mode is ideal for creating smooth scene transitions.
+</Note>

@@ -1,0 +1,194 @@
+---
+title: "Unified Video API"
+description: "Crazyrouter unified video generation endpoint, supporting multiple models through a single API format"
+---
+
+# Unified Video API
+
+Crazyrouter provides a unified video generation endpoint that supports multiple video models through the same API format.
+
+## Supported Models
+
+| Model | Description |
+|-------|-------------|
+| `veo3.1-components` | Google Veo 3.1 |
+| `veo3` | Google Veo 3 |
+| `veo2` | Google Veo 2 |
+| `grok-video-3` | xAI Grok Video |
+| `wan-ai/wan2.1-t2v-14b` | Wan text-to-video |
+| `wan-ai/wan2.1-i2v-14b-720p` | Wan image-to-video |
+| `seedance-lite` | Doubao Seedance |
+
+---
+
+## Create Video
+
+```
+POST /v1/video/create
+```
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model` | string | Yes | Model name |
+| `prompt` | string | Yes | Video description prompt |
+| `aspect_ratio` | string | No | Aspect ratio: `16:9`, `9:16`, `1:1` |
+| `size` | string | No | Video size, e.g. `1280x720` |
+| `images` | array | No | Reference image URL array (image-to-video) |
+| `duration` | integer | No | Video duration (seconds) |
+
+### Request Examples
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/video/create \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "veo3.1-components",
+    "prompt": "A golden retriever running on the beach, slow motion, cinematic quality",
+    "aspect_ratio": "16:9"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/v1/video/create",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "veo3.1-components",
+        "prompt": "A golden retriever running on the beach, slow motion, cinematic quality",
+        "aspect_ratio": "16:9"
+    }
+)
+
+data = response.json()
+task_id = data["id"]
+print(f"Task ID: {task_id}")
+```
+
+</CodeGroup>
+
+### Create Response
+
+```json
+{
+  "id": "video_task_abc123",
+  "status": "processing",
+  "status_update_time": 1709123456
+}
+```
+
+---
+
+## Image-to-Video
+
+Pass reference images in the `images` parameter:
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/video/create \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "wan-ai/wan2.1-i2v-14b-720p",
+    "prompt": "The person in the image starts smiling and waving",
+    "images": ["https://example.com/portrait.jpg"],
+    "aspect_ratio": "16:9"
+  }'
+```
+
+---
+
+## Query Task
+
+```
+GET /v1/video/query?id={task_id}
+```
+
+### Request Example
+
+```bash cURL
+curl "https://crazyrouter.com/v1/video/query?id=video_task_abc123" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Query Response (Processing)
+
+```json
+{
+  "id": "video_task_abc123",
+  "status": "processing",
+  "status_update_time": 1709123460
+}
+```
+
+### Query Response (Completed)
+
+```json
+{
+  "id": "video_task_abc123",
+  "status": "completed",
+  "status_update_time": 1709123520,
+  "video_url": "https://crazyrouter.com/files/video_abc123.mp4"
+}
+```
+
+### Task Status
+
+| Status | Description |
+|--------|-------------|
+| `processing` | Processing |
+| `completed` | Completed |
+| `failed` | Failed |
+
+---
+
+## Complete Workflow Example
+
+```python Python
+import requests
+import time
+
+API_KEY = "YOUR_API_KEY"
+BASE_URL = "https://crazyrouter.com"
+headers = {
+    "Content-Type": "application/json",
+    "Authorization": f"Bearer {API_KEY}"
+}
+
+# 1. Create video task
+resp = requests.post(f"{BASE_URL}/v1/video/create", headers=headers, json={
+    "model": "veo3.1-components",
+    "prompt": "A golden retriever running on the beach, slow motion",
+    "aspect_ratio": "16:9"
+})
+task_id = resp.json()["id"]
+print(f"Task created: {task_id}")
+
+# 2. Poll for status
+while True:
+    resp = requests.get(f"{BASE_URL}/v1/video/query?id={task_id}", headers=headers)
+    result = resp.json()
+    status = result["status"]
+    print(f"Status: {status}")
+
+    if status == "completed":
+        print(f"Video URL: {result['video_url']}")
+        break
+    elif status == "failed":
+        print("Video generation failed")
+        break
+
+    time.sleep(10)
+```
+
+<Note>
+  Video generation typically takes 1-5 minutes. A polling interval of 10 seconds is recommended.
+</Note>

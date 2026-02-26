@@ -1,0 +1,57 @@
+---
+title: 'Aider Setup Guide'
+description: 'Configure Crazyrouter API in the Aider CLI tool'
+---
+
+## Overview
+
+Aider is a command-line AI programming assistant that supports collaborating with AI to write code directly in the terminal.
+
+## Configuration
+
+### Environment Variables
+
+```bash
+export OPENAI_API_KEY=sk-xxx
+export OPENAI_API_BASE=https://crazyrouter.com/v1
+```
+
+### Launch Aider
+
+```bash
+# Use GPT-4o
+aider --model gpt-4o
+
+# Use Claude
+aider --model claude-sonnet-4-20250514
+
+# Use Gemini
+aider --model gemini-2.5-pro
+```
+
+### Configuration File
+
+Create `~/.aider.conf.yml`:
+
+```yaml
+openai-api-key: sk-xxx
+openai-api-base: https://crazyrouter.com/v1
+model: gpt-4o
+```
+
+## Common Commands
+
+```bash
+# Add file to context
+/add src/main.py
+
+# Add as read-only
+/read-only README.md
+
+# Switch model
+/model claude-sonnet-4-20250514
+```
+
+<Note>
+  Aider has native support for Claude models. If using the Claude series, you can also set the `ANTHROPIC_API_KEY` and `ANTHROPIC_API_BASE` environment variables.
+</Note>

@@ -1,0 +1,66 @@
+---
+title: 'n8n Setup Guide'
+description: 'Configure Crazyrouter API in n8n workflows'
+---
+
+## Overview
+
+n8n is an open-source workflow automation platform that supports calling large language models through AI nodes.
+
+## Configuration Steps
+
+<Steps>
+  <Step title="Add Credentials">
+    Go to `Settings` → `Credentials` → `Add Credential`, select `OpenAI API`
+  </Step>
+  <Step title="Enter Credentials">
+    - **API Key**: `sk-xxx`
+    - **Base URL**: `https://crazyrouter.com/v1`
+  </Step>
+  <Step title="Use in Workflows">
+    Add an `OpenAI` node or `AI Agent` node and select the credentials you just created.
+  </Step>
+</Steps>
+
+## Workflow Examples
+
+### AI Chat Node
+
+```json
+{
+  "node": "OpenAI Chat Model",
+  "parameters": {
+    "model": "gpt-4o",
+    "messages": [
+      { "role": "user", "content": "{{ $json.input }}" }
+    ]
+  }
+}
+```
+
+### AI Agent Workflow
+
+1. **Trigger** → **AI Agent** → **Output**
+2. Select the Crazyrouter credentials in the AI Agent node
+3. Configure tools (such as HTTP Request, Code, etc.)
+
+## Using HTTP Request Node
+
+For more flexible control, you can use the HTTP Request node directly:
+
+```
+Method: POST
+URL: https://crazyrouter.com/v1/chat/completions
+Headers:
+  Authorization: Bearer sk-xxx
+  Content-Type: application/json
+Body:
+  {
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "{{ $json.input }}"}]
+  }
+```
+
+<Note>
+  n8n's AI Agent node supports tool calling (Function Calling) and can be combined with other n8n nodes to build complex automation workflows.
+</Note>

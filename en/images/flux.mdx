@@ -1,0 +1,132 @@
+---
+title: "Flux"
+description: "Use Flux models to generate high-quality images, supporting both OpenAI format and Replicate native format"
+---
+
+# Flux
+
+Flux is a high-quality image generation model developed by Black Forest Labs, supporting multiple variants.
+
+## Via OpenAI Format
+
+```
+POST /v1/images/generations
+```
+
+Call Flux models using the OpenAI-compatible format.
+
+### Supported Models
+
+| Model | Description |
+|-------|-------------|
+| `flux-1.1-pro` | Flux 1.1 Pro, high-quality generation |
+| `flux-1.1-pro-ultra` | Flux 1.1 Pro Ultra, ultra-high quality |
+| `flux-dev` | Flux Dev, development version |
+| `flux-schnell` | Flux Schnell, fast generation |
+| `flux-kontext-pro` | Flux Kontext Pro, context-aware |
+| `flux-kontext-dev` | Flux Kontext Dev |
+
+### Request Examples
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "flux-1.1-pro",
+    "prompt": "A photorealistic portrait of a woman with flowing red hair in golden hour lighting",
+    "n": 1,
+    "size": "1024x1024"
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.images.generate(
+    model="flux-1.1-pro",
+    prompt="A photorealistic portrait of a woman with flowing red hair in golden hour lighting",
+    n=1,
+    size="1024x1024"
+)
+
+print(response.data[0].url)
+```
+
+</CodeGroup>
+
+### Resolution Options
+
+| Size | Aspect Ratio |
+|------|-------------|
+| `1024x1024` | 1:1 |
+| `1024x768` | 4:3 |
+| `768x1024` | 3:4 |
+| `1024x576` | 16:9 |
+| `576x1024` | 9:16 |
+| `1536x1024` | 3:2 |
+| `1024x1536` | 2:3 |
+
+### Response Example
+
+```json
+{
+  "created": 1709123456,
+  "data": [
+    {
+      "url": "https://crazyrouter.com/files/flux_abc123.png"
+    }
+  ]
+}
+```
+
+---
+
+## Via Replicate Format
+
+```
+POST /replicate/v1/models/black-forest-labs/flux-kontext-dev/predictions
+```
+
+Call Flux Kontext models using the Replicate native format, with support for more advanced parameters.
+
+### Request Example
+
+```bash cURL
+curl -X POST https://crazyrouter.com/replicate/v1/models/black-forest-labs/flux-kontext-dev/predictions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Prefer: wait" \
+  -d '{
+    "input": {
+      "prompt": "Change the background to a tropical beach",
+      "image": "https://example.com/photo.jpg",
+      "aspect_ratio": "16:9",
+      "safety_tolerance": 2,
+      "output_format": "webp"
+    }
+  }'
+```
+
+### Response Example
+
+```json
+{
+  "id": "prediction_abc123",
+  "status": "succeeded",
+  "output": [
+    "https://replicate.delivery/pbxt/.../output.webp"
+  ]
+}
+```
+
+<Note>
+  Flux models excel at photorealistic styles and portrait generation. The Flux Kontext series supports reference image-based editing and style transfer.
+</Note>

@@ -1,0 +1,231 @@
+---
+title: "Claude PDF Support"
+description: "Process PDF documents using the Claude native Messages API, supporting URL and Base64 formats"
+---
+
+# Claude PDF Support
+
+Claude models support processing PDF documents directly. You can send PDF files via URL or Base64 encoding to let Claude read, analyze, and summarize document content.
+
+```
+POST /v1/messages
+```
+
+---
+
+## Send PDF via URL
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-sonnet-4-20250514",
+    "max_tokens": 4096,
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "document",
+            "source": {
+              "type": "url",
+              "url": "https://example.com/report.pdf"
+            }
+          },
+          {
+            "type": "text",
+            "text": "Summarize the main content of this document and list the key points"
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+```python Python
+import anthropic
+
+client = anthropic.Anthropic(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com"
+)
+
+message = client.messages.create(
+    model="claude-sonnet-4-20250514",
+    max_tokens=4096,
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "document",
+                    "source": {
+                        "type": "url",
+                        "url": "https://example.com/report.pdf"
+                    }
+                },
+                {
+                    "type": "text",
+                    "text": "Summarize the main content of this document and list the key points"
+                }
+            ]
+        }
+    ]
+)
+
+print(message.content[0].text)
+```
+
+</CodeGroup>
+
+---
+
+## Send PDF via Base64
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-sonnet-4-20250514",
+    "max_tokens": 4096,
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "document",
+            "source": {
+              "type": "base64",
+              "media_type": "application/pdf",
+              "data": "JVBERi0xLjQKMSAwIG9iago..."
+            }
+          },
+          {
+            "type": "text",
+            "text": "What are the main terms of this contract?"
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+```python Python
+import anthropic
+import base64
+
+client = anthropic.Anthropic(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com"
+)
+
+with open("contract.pdf", "rb") as f:
+    pdf_data = base64.standard_b64encode(f.read()).decode("utf-8")
+
+message = client.messages.create(
+    model="claude-sonnet-4-20250514",
+    max_tokens=4096,
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "document",
+                    "source": {
+                        "type": "base64",
+                        "media_type": "application/pdf",
+                        "data": pdf_data
+                    }
+                },
+                {
+                    "type": "text",
+                    "text": "What are the main terms of this contract?"
+                }
+            ]
+        }
+    ]
+)
+
+print(message.content[0].text)
+```
+
+</CodeGroup>
+
+---
+
+## Multi-Document Analysis
+
+You can send multiple PDFs simultaneously for comparative analysis:
+
+```python Python
+message = client.messages.create(
+    model="claude-sonnet-4-20250514",
+    max_tokens=4096,
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "document",
+                    "source": {
+                        "type": "url",
+                        "url": "https://example.com/report_q1.pdf"
+                    }
+                },
+                {
+                    "type": "document",
+                    "source": {
+                        "type": "url",
+                        "url": "https://example.com/report_q2.pdf"
+                    }
+                },
+                {
+                    "type": "text",
+                    "text": "Compare these two quarterly reports and analyze the trends in key metrics"
+                }
+            ]
+        }
+    ]
+)
+```
+
+## Streaming Processing
+
+PDF analysis also supports streaming output:
+
+```python Python
+with client.messages.stream(
+    model="claude-sonnet-4-20250514",
+    max_tokens=4096,
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "document",
+                    "source": {"type": "url", "url": "https://example.com/paper.pdf"}
+                },
+                {"type": "text", "text": "Analyze the research methodology and conclusions of this paper in detail"}
+            ]
+        }
+    ]
+) as stream:
+    for text in stream.text_stream:
+        print(text, end="")
+```
+
+<Note>
+  Each page of a PDF document consumes tokens. The more pages, the higher the consumption. It is recommended to process large documents in segments or extract key pages.
+</Note>
+
+<Warning>
+  PDF file size should not exceed 32MB. Oversized files may cause request timeouts.
+</Warning>

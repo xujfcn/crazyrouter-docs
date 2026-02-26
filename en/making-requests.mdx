@@ -1,0 +1,59 @@
+---
+title: 'Making Requests'
+description: 'Learn how to make API requests correctly'
+---
+
+## Request Format
+
+All API requests use the HTTPS protocol with JSON request bodies.
+
+### Required Headers
+
+| Header | Value | Description |
+|--------|-------|-------------|
+| `Authorization` | `Bearer YOUR_API_KEY` | API authentication key |
+| `Content-Type` | `application/json` | Request body format |
+
+### Optional Headers
+
+| Header | Value | Description |
+|--------|-------|-------------|
+| `Accept` | `application/json` | Response format |
+
+## Request Example
+
+```bash
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer sk-xxxxxxxx" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Hello"}],
+    "stream": false
+  }'
+```
+
+## Streaming Requests
+
+Set `stream: true` to enable SSE streaming output:
+
+```bash
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer sk-xxxxxxxx" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Hello"}],
+    "stream": true
+  }'
+```
+
+Streaming responses use the Server-Sent Events (SSE) format. Each event starts with `data: ` and the stream ends with `data: [DONE]`.
+
+## Online Debugging
+
+You can debug the API online using the following methods:
+
+1. **Crazyrouter Playground** - Visit [crazyrouter.com/playground](https://crazyrouter.com/playground) to test directly in your browser
+2. **cURL** - Send requests using the command-line tool
+3. **Postman / Apifox** - Use API debugging tools

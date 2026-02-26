@@ -1,0 +1,219 @@
+---
+title: "Create Model Response"
+description: "Use the POST /v1/responses endpoint to create model responses, supporting standard, streaming, and thinking control"
+---
+
+# Create Model Response
+
+```
+POST /v1/responses
+```
+
+The Responses API provides a more concise interface for creating model responses.
+
+## Authentication
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+---
+
+## Basic Request
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o",
+    "input": "Explain what an API is in one sentence"
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.responses.create(
+    model="gpt-4o",
+    input="Explain what an API is in one sentence"
+)
+
+print(response.output_text)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const response = await client.responses.create({
+  model: "gpt-4o",
+  input: "Explain what an API is in one sentence",
+});
+
+console.log(response.output_text);
+```
+
+</CodeGroup>
+
+### Response Format
+
+```json
+{
+  "id": "resp_abc123",
+  "object": "response",
+  "created_at": 1709123456,
+  "model": "gpt-4o",
+  "output": [
+    {
+      "type": "message",
+      "id": "msg_abc123",
+      "role": "assistant",
+      "content": [
+        {
+          "type": "output_text",
+          "text": "An API is a set of rules and protocols that define how software components interact, enabling different programs to communicate and share data."
+        }
+      ]
+    }
+  ],
+  "usage": {
+    "input_tokens": 15,
+    "output_tokens": 40,
+    "total_tokens": 55
+  }
+}
+```
+
+---
+
+## Multi-Turn Conversation
+
+Use the `input` array to pass conversation history:
+
+```python Python
+response = client.responses.create(
+    model="gpt-4o",
+    input=[
+        {"role": "user", "content": "I want to learn programming"},
+        {"role": "assistant", "content": "Great! Which programming language would you like to learn?"},
+        {"role": "user", "content": "Python, where should I start?"}
+    ]
+)
+
+print(response.output_text)
+```
+
+---
+
+## Streaming Request
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o",
+    "input": "Write a poem about programming",
+    "stream": true
+  }'
+```
+
+```python Python
+stream = client.responses.create(
+    model="gpt-4o",
+    input="Write a poem about programming",
+    stream=True
+)
+
+for event in stream:
+    if event.type == "response.output_text.delta":
+        print(event.delta, end="")
+```
+
+```javascript Node.js
+const stream = await client.responses.create({
+  model: "gpt-4o",
+  input: "Write a poem about programming",
+  stream: true,
+});
+
+for await (const event of stream) {
+  if (event.type === "response.output_text.delta") {
+    process.stdout.write(event.delta);
+  }
+}
+```
+
+</CodeGroup>
+
+### Streaming Event Types
+
+| Event Type | Description |
+|------------|-------------|
+| `response.created` | Response created |
+| `response.in_progress` | Response processing |
+| `response.output_item.added` | New output item added |
+| `response.content_part.added` | New content block added |
+| `response.output_text.delta` | Text increment |
+| `response.output_text.done` | Text complete |
+| `response.content_part.done` | Content block complete |
+| `response.output_item.done` | Output item complete |
+| `response.completed` | Response complete |
+
+---
+
+## Thinking Control
+
+Use the `reasoning` parameter to control reasoning depth:
+
+```python Python
+response = client.responses.create(
+    model="o4-mini",
+    input="Prove the Pythagorean theorem",
+    reasoning={
+        "effort": "high"
+    }
+)
+
+print(response.output_text)
+```
+
+### reasoning Parameter
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `effort` | string | Reasoning depth: `low`, `medium`, `high` |
+| `summary` | string | Thinking summary mode: `auto`, `concise`, `detailed` |
+
+---
+
+## Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model` | string | Yes | Model name |
+| `input` | string\|array | Yes | Input content or message list |
+| `stream` | boolean | No | Whether to stream output |
+| `temperature` | number | No | Sampling temperature |
+| `max_output_tokens` | integer | No | Maximum output tokens |
+| `tools` | array | No | Available tools list |
+| `reasoning` | object | No | Reasoning control |
+| `instructions` | string | No | System instructions (similar to system message) |
+
+<Note>
+  The Responses API's `input` parameter can be either a simple string or a message array, providing more flexibility.
+</Note>

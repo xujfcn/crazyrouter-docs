@@ -1,0 +1,142 @@
+---
+title: 'Python OpenAI SDK'
+description: 'Connect to Crazyrouter using the OpenAI SDK, LangChain, and LlamaIndex'
+---
+
+## OpenAI Official SDK
+
+```bash
+pip install openai
+```
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1"
+)
+
+# Synchronous call
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello"}],
+    temperature=0.7,
+    max_tokens=1000
+)
+print(response.choices[0].message.content)
+```
+
+### Async Call
+
+```python
+from openai import AsyncOpenAI
+import asyncio
+
+client = AsyncOpenAI(
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1"
+)
+
+async def main():
+    response = await client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": "Hello"}]
+    )
+    print(response.choices[0].message.content)
+
+asyncio.run(main())
+```
+
+## LangChain Integration
+
+```bash
+pip install langchain-openai
+```
+
+```python
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(
+    model="gpt-4o",
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1",
+    temperature=0.7
+)
+
+# Simple call
+response = llm.invoke("Write a quicksort in Python")
+print(response.content)
+```
+
+### LangChain Chain
+
+```python
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+
+llm = ChatOpenAI(
+    model="gpt-4o",
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1"
+)
+
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are a {role}."),
+    ("user", "{input}")
+])
+
+chain = prompt | llm
+response = chain.invoke({"role": "Python expert", "input": "Explain decorators"})
+print(response.content)
+```
+
+### LangChain Embeddings
+
+```python
+from langchain_openai import OpenAIEmbeddings
+
+embeddings = OpenAIEmbeddings(
+    model="text-embedding-3-large",
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1"
+)
+
+vectors = embeddings.embed_documents(["Text one", "Text two"])
+print(f"Vector dimensions: {len(vectors[0])}")
+```
+
+## LlamaIndex Integration
+
+```bash
+pip install llama-index-llms-openai llama-index-embeddings-openai
+```
+
+```python
+from llama_index.llms.openai import OpenAI
+from llama_index.embeddings.openai import OpenAIEmbedding
+
+# LLM configuration
+llm = OpenAI(
+    model="gpt-4o",
+    api_key="sk-xxx",
+    api_base="https://crazyrouter.com/v1"
+)
+
+response = llm.complete("What is RAG?")
+print(response.text)
+
+# Embedding configuration
+embed_model = OpenAIEmbedding(
+    model="text-embedding-3-large",
+    api_key="sk-xxx",
+    api_base="https://crazyrouter.com/v1"
+)
+
+vector = embed_model.get_text_embedding("Test text")
+print(f"Dimensions: {len(vector)}")
+```
+
+<Note>
+  Crazyrouter is fully compatible with the OpenAI API format. All frameworks and tools built on the OpenAI SDK can connect by simply changing the `base_url` and `api_key`.
+</Note>

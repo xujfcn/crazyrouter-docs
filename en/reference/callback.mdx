@@ -1,0 +1,139 @@
+---
+title: 'Callback Protocol'
+description: 'Webhook callback protocol for async tasks'
+---
+
+## Overview
+
+For async tasks (Midjourney image generation, video generation, music generation, etc.), Crazyrouter supports Webhook callbacks to notify task status changes.
+
+## Callback URL Configuration
+
+Specify the callback URL via the `notifyHook` parameter when submitting a task:
+
+```json
+{
+  "prompt": "a beautiful sunset",
+  "notifyHook": "https://your-server.com/api/callback"
+}
+```
+
+## Callback Request Format
+
+Crazyrouter sends a POST request to your callback URL:
+
+```
+POST https://your-server.com/api/callback
+Content-Type: application/json
+```
+
+### Midjourney Callback
+
+```json
+{
+  "id": "task_abc123",
+  "action": "IMAGINE",
+  "status": "SUCCESS",
+  "prompt": "a beautiful sunset",
+  "imageUrl": "https://cdn.example.com/image.png",
+  "progress": "100%",
+  "failReason": "",
+  "submitTime": 1706000000000,
+  "startTime": 1706000010000,
+  "finishTime": 1706000060000
+}
+```
+
+### Video Generation Callback (Kling/Luma/Runway)
+
+```json
+{
+  "id": "task_xyz789",
+  "status": "succeed",
+  "type": "video",
+  "output": {
+    "video_url": "https://cdn.example.com/video.mp4",
+    "cover_url": "https://cdn.example.com/cover.jpg",
+    "duration": 5.0
+  },
+  "created_at": 1706000000,
+  "updated_at": 1706000120
+}
+```
+
+### Suno Music Callback
+
+```json
+{
+  "id": "task_music456",
+  "status": "complete",
+  "output": {
+    "audio_url": "https://cdn.example.com/song.mp3",
+    "title": "My Song",
+    "duration": 180
+  }
+}
+```
+
+## Callback Status Flow
+
+```
+Submitted → NOT_START → IN_PROGRESS → SUCCESS / FAILURE
+```
+
+A callback is triggered on each status change.
+
+## Callback Server Examples
+
+<CodeGroup>
+
+```python Python (Flask)
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+@app.route("/api/callback", methods=["POST"])
+def callback():
+    data = request.json
+    task_id = data["id"]
+    status = data["status"]
+
+    print(f"Task {task_id} status update: {status}")
+
+    if status == "SUCCESS":
+        image_url = data.get("imageUrl")
+        print(f"Image URL: {image_url}")
+
+    return jsonify({"success": True})
+
+app.run(port=8080)
+```
+
+```javascript Node.js (Express)
+const express = require('express');
+const app = express();
+app.use(express.json());
+
+app.post('/api/callback', (req, res) => {
+  const { id, status, imageUrl } = req.body;
+  console.log(`Task ${id} status: ${status}`);
+
+  if (status === 'SUCCESS') {
+    console.log(`Image: ${imageUrl}`);
+  }
+
+  res.json({ success: true });
+});
+
+app.listen(8080);
+```
+
+</CodeGroup>
+
+<Warning>
+  The callback URL must be publicly accessible. Ensure your server can receive POST requests and return a 200 status code within 5 seconds.
+</Warning>
+
+<Note>
+  If a callback fails, the system retries up to 3 times with intervals of 10 seconds, 30 seconds, and 60 seconds.
+</Note>

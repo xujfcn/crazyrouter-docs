@@ -1,0 +1,97 @@
+---
+title: "Seedance"
+description: "Use Seedance models for first-last frame and reference image video generation"
+---
+
+# Seedance
+
+Seedance is a video generation model by ByteDance/Doubao, supporting first-last frame video and reference image video generation.
+
+## First-Last Frame Video
+
+Generate smooth transition videos by providing first and last frame images.
+
+### Via Unified Video API
+
+```
+POST /v1/video/create
+```
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/video/create \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "seedance-lite",
+    "prompt": "Smooth transition, person changes from smiling to laughing",
+    "images": [
+      "https://example.com/start_frame.jpg",
+      "https://example.com/end_frame.jpg"
+    ],
+    "aspect_ratio": "16:9"
+  }'
+```
+
+### Response Example
+
+```json
+{
+  "id": "seedance_task_abc123",
+  "status": "processing",
+  "status_update_time": 1709123456
+}
+```
+
+---
+
+## Reference Image Video
+
+Generate video using a single reference image:
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/video/create \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "seedance-lite",
+    "prompt": "The person in the image starts dancing",
+    "images": ["https://example.com/portrait.jpg"],
+    "aspect_ratio": "9:16"
+  }'
+```
+
+---
+
+## Query Task
+
+```
+GET /v1/video/query?id={task_id}
+```
+
+```bash cURL
+curl "https://crazyrouter.com/v1/video/query?id=seedance_task_abc123" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Response Example (Completed)
+
+```json
+{
+  "id": "seedance_task_abc123",
+  "status": "completed",
+  "status_update_time": 1709123520,
+  "video_url": "https://crazyrouter.com/files/seedance_abc123.mp4"
+}
+```
+
+---
+
+## Available Models
+
+| Model | Description |
+|-------|-------------|
+| `seedance-lite` | Seedance Lite, fast generation |
+
+<Note>
+  Seedance excels at human motion and facial expression changes, making it particularly suitable for portrait video generation.
+</Note>

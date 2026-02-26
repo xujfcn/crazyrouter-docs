@@ -1,0 +1,193 @@
+---
+title: "Gemini Document Understanding"
+description: "Use the Gemini native format for document understanding and formatted output"
+---
+
+# Gemini Document Understanding
+
+Gemini models support understanding PDF documents and other document formats, and can output structured results in specified formats.
+
+```
+POST /v1beta/models/{model}:generateContent
+```
+
+---
+
+## PDF Document Understanding
+
+<CodeGroup>
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "Summarize the core content of this document"},
+          {
+            "inlineData": {
+              "mimeType": "application/pdf",
+              "data": "JVBERi0xLjQKMSAwIG9iago..."
+            }
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+```python Python
+import google.generativeai as genai
+
+genai.configure(
+    api_key="YOUR_API_KEY",
+    transport="rest",
+    client_options={"api_endpoint": "https://crazyrouter.com"}
+)
+
+model = genai.GenerativeModel("gemini-2.5-flash")
+
+with open("document.pdf", "rb") as f:
+    pdf_data = f.read()
+
+response = model.generate_content([
+    "Summarize the core content of this document",
+    {"mime_type": "application/pdf", "data": pdf_data}
+])
+
+print(response.text)
+```
+
+</CodeGroup>
+
+---
+
+## Formatted Output
+
+Use `responseMimeType` and `responseSchema` to control the output format:
+
+### JSON Format Output
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "Extract key information from this resume"},
+          {
+            "inlineData": {
+              "mimeType": "application/pdf",
+              "data": "JVBERi0xLjQK..."
+            }
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "responseMimeType": "application/json",
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "email": {"type": "string"},
+          "phone": {"type": "string"},
+          "education": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "school": {"type": "string"},
+                "degree": {"type": "string"},
+                "year": {"type": "string"}
+              }
+            }
+          },
+          "experience": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "company": {"type": "string"},
+                "position": {"type": "string"},
+                "duration": {"type": "string"}
+              }
+            }
+          },
+          "skills": {
+            "type": "array",
+            "items": {"type": "string"}
+          }
+        }
+      }
+    }
+  }'
+```
+
+### Response
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\"name\":\"John Doe\",\"email\":\"john@example.com\",\"phone\":\"555-0100\",\"education\":[{\"school\":\"MIT\",\"degree\":\"M.S. Computer Science\",\"year\":\"2020\"}],\"experience\":[{\"company\":\"Tech Corp\",\"position\":\"Senior Engineer\",\"duration\":\"2020-2024\"}],\"skills\":[\"Python\",\"Go\",\"Kubernetes\"]}"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP"
+    }
+  ]
+}
+```
+
+---
+
+## Table Data Extraction
+
+```python Python
+response = model.generate_content(
+    [
+        "Extract all table data from the document and return in JSON format",
+        {"mime_type": "application/pdf", "data": pdf_data}
+    ],
+    generation_config=genai.GenerationConfig(
+        response_mime_type="application/json"
+    )
+)
+
+import json
+tables = json.loads(response.text)
+```
+
+---
+
+## Document Comparison
+
+```python Python
+with open("v1.pdf", "rb") as f:
+    v1_data = f.read()
+with open("v2.pdf", "rb") as f:
+    v2_data = f.read()
+
+response = model.generate_content([
+    "Compare these two versions of the document and list all changes",
+    {"mime_type": "application/pdf", "data": v1_data},
+    {"mime_type": "application/pdf", "data": v2_data}
+])
+```
+
+<Note>
+  Using `responseSchema` ensures the model output strictly conforms to the specified JSON structure, making it ideal for data extraction and automation scenarios.
+</Note>
+
+<Warning>
+  Large PDF documents consume a significant number of tokens. It is recommended to process documents with more than 50 pages in segments.
+</Warning>

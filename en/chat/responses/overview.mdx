@@ -1,0 +1,85 @@
+---
+title: "Responses API Overview"
+description: "Comparison of Responses API and Chat Completions API, and use case descriptions"
+---
+
+# Responses API Overview
+
+The Responses API is OpenAI's next-generation API format, designed to simplify the development experience for multi-step tasks and tool calling. Crazyrouter fully supports the Responses API.
+
+## Responses API vs Chat Completions API
+
+| Feature | Responses API | Chat Completions API |
+|---------|--------------|---------------------|
+| Endpoint | `/v1/responses` | `/v1/chat/completions` |
+| Message format | `input` (string or array) | `messages` (array) |
+| Tool calling | Built-in support, automatic context management | Requires manual message history management |
+| Streaming format | Rich event types | Simple delta format |
+| Thinking mode | `reasoning` parameter | `reasoning_effort` parameter |
+| Web search | Built-in `web_search` tool | Via `tools` parameter |
+| Compatibility | Newer, supported by some models | Broadly supported by all models |
+
+---
+
+## When to Use Responses API
+
+Suitable for the following scenarios:
+- Need built-in tools (web search, file search)
+- Multi-step tasks and complex tool calling
+- Need rich streaming events
+- Using advanced features of newer models like GPT-5
+
+## When to Use Chat Completions API
+
+Suitable for the following scenarios:
+- Need the broadest model compatibility
+- Simple conversations and text generation
+- Existing code based on Chat Completions
+- Using non-OpenAI models (Claude, Gemini, etc.)
+
+---
+
+## Quick Comparison Example
+
+<Tabs>
+  <Tab title="Responses API">
+    ```python
+    from openai import OpenAI
+
+    client = OpenAI(
+        api_key="YOUR_API_KEY",
+        base_url="https://crazyrouter.com/v1"
+    )
+
+    response = client.responses.create(
+        model="gpt-4o",
+        input="Explain what a REST API is"
+    )
+
+    print(response.output_text)
+    ```
+  </Tab>
+  <Tab title="Chat Completions API">
+    ```python
+    from openai import OpenAI
+
+    client = OpenAI(
+        api_key="YOUR_API_KEY",
+        base_url="https://crazyrouter.com/v1"
+    )
+
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "user", "content": "Explain what a REST API is"}
+        ]
+    )
+
+    print(response.choices[0].message.content)
+    ```
+  </Tab>
+</Tabs>
+
+<Note>
+  Both APIs can be used together in the same project. Crazyrouter provides full support for both formats, and you can choose the appropriate API based on your specific needs.
+</Note>

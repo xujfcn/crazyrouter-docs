@@ -1,0 +1,107 @@
+---
+title: "Runway"
+description: "Use the Runway API for image-to-video generation"
+---
+
+# Runway
+
+```
+POST /runwayml/v1/image_to_video
+```
+
+Use the Runway Gen-3 model to convert images into videos.
+
+## Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model` | string | No | Model name, e.g. `gen3a_turbo` |
+| `promptImage` | string | Yes | Input image URL |
+| `promptText` | string | No | Video description prompt |
+| `duration` | integer | No | Video duration (seconds), default 5 |
+| `ratio` | string | No | Aspect ratio: `16:9`, `9:16` |
+| `watermark` | boolean | No | Whether to add a watermark |
+
+## Request Examples
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/runwayml/v1/image_to_video \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gen3a_turbo",
+    "promptImage": "https://example.com/landscape.jpg",
+    "promptText": "Camera slowly pans across the landscape, clouds moving in the sky",
+    "duration": 5,
+    "ratio": "16:9",
+    "watermark": false
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/runwayml/v1/image_to_video",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "gen3a_turbo",
+        "promptImage": "https://example.com/landscape.jpg",
+        "promptText": "Camera slowly pans across the landscape",
+        "duration": 5,
+        "ratio": "16:9"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### Response Example
+
+```json
+{
+  "id": "runway_task_abc123",
+  "status": "PENDING"
+}
+```
+
+---
+
+## Query Task
+
+```
+GET /runwayml/v1/tasks/{task_id}
+```
+
+```bash cURL
+curl https://crazyrouter.com/runwayml/v1/tasks/runway_task_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Response Example (Completed)
+
+```json
+{
+  "id": "runway_task_abc123",
+  "status": "SUCCEEDED",
+  "output": [
+    "https://runway-output.s3.amazonaws.com/..."
+  ]
+}
+```
+
+### Task Status
+
+| Status | Description |
+|--------|-------------|
+| `PENDING` | Waiting to be processed |
+| `RUNNING` | Generating |
+| `SUCCEEDED` | Succeeded |
+| `FAILED` | Failed |

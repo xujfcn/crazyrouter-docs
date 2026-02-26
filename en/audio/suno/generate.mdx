@@ -1,0 +1,155 @@
+---
+title: "Suno Generate Song"
+description: "Use the Suno API to generate songs, supporting inspiration mode, custom mode, continuation, and singer style"
+---
+
+# Suno Generate Song
+
+```
+POST /suno/submit/music
+```
+
+Generate songs with Suno, supporting multiple creation modes.
+
+## Inspiration Mode
+
+Automatically generate songs from a simple description.
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `gpt_description_prompt` | string | Yes | Song description, e.g. "An upbeat pop song about summer" |
+| `mv` | string | No | Model version, e.g. `chirp-v3-5`, `chirp-v4` |
+| `make_instrumental` | boolean | No | Whether to create instrumental only (no vocals) |
+
+### Request Examples
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/suno/submit/music \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "gpt_description_prompt": "An upbeat summer pop song about the beach, with guitar and drums",
+    "mv": "chirp-v4",
+    "make_instrumental": false
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/suno/submit/music",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "gpt_description_prompt": "An upbeat summer pop song about the beach",
+        "mv": "chirp-v4",
+        "make_instrumental": False
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### Response Example
+
+```json
+{
+  "code": 1,
+  "description": "Submitted successfully",
+  "result": "suno_task_abc123"
+}
+```
+
+---
+
+## Custom Mode
+
+Write your own lyrics and set style tags.
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `prompt` | string | Yes | Lyrics content |
+| `title` | string | Yes | Song title |
+| `tags` | string | Yes | Style tags, e.g. `pop, upbeat, summer` |
+| `mv` | string | No | Model version |
+| `make_instrumental` | boolean | No | Whether instrumental only |
+
+```bash cURL
+curl -X POST https://crazyrouter.com/suno/submit/music \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "[Verse]\nSunshine on the ocean waves\nGentle breeze across my face\n\n[Chorus]\nThis summer we are together\nSinging and dancing by the sea",
+    "title": "Summer Beach",
+    "tags": "pop, english, upbeat, summer",
+    "mv": "chirp-v4"
+  }'
+```
+
+---
+
+## Continuation Mode
+
+Continue creating from a specific point in an existing song.
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `prompt` | string | Yes | Continuation lyrics |
+| `continue_clip_id` | string | Yes | Clip ID of the song to continue |
+| `continue_at` | number | Yes | Continuation start time (seconds) |
+| `tags` | string | No | Style tags |
+| `mv` | string | No | Model version |
+
+```json
+{
+  "prompt": "[Bridge]\nMemories like ocean waves\nCrashing one after another\n\n[Outro]\nGoodbye to this summer",
+  "continue_clip_id": "clip_abc123",
+  "continue_at": 60,
+  "tags": "pop, english, emotional"
+}
+```
+
+---
+
+## Singer Style
+
+Specify a singer style for creation:
+
+```json
+{
+  "gpt_description_prompt": "A soulful R&B love ballad",
+  "mv": "chirp-v4",
+  "singer_style": "smooth male vocal, R&B"
+}
+```
+
+---
+
+## Upload Audio for Re-creation
+
+Re-create based on uploaded audio:
+
+```json
+{
+  "prompt": "Add lyrics to this melody",
+  "audio_url": "https://example.com/melody.mp3",
+  "tags": "pop, english"
+}
+```
+
+<Note>
+  Each submission generates 2 song variants. After submission, use the [Task Query](/en/audio/suno/query) endpoint to get results.
+</Note>

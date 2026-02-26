@@ -1,0 +1,135 @@
+---
+title: "Query Task Status"
+description: "Query Midjourney task status, supporting single and batch queries"
+---
+
+# Query Task Status
+
+## Query Single Task
+
+```
+GET /mj/task/{id}/fetch
+```
+
+Query task details and status by task ID.
+
+### Request Examples
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/mj/task/task_1234567890/fetch \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    "https://crazyrouter.com/mj/task/task_1234567890/fetch",
+    headers={"Authorization": "Bearer YOUR_API_KEY"}
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### Response Example (Processing)
+
+```json
+{
+  "id": "task_1234567890",
+  "action": "IMAGINE",
+  "status": "IN_PROGRESS",
+  "prompt": "a beautiful sunset over the ocean --ar 16:9 --v 6",
+  "promptEn": "a beautiful sunset over the ocean --ar 16:9 --v 6",
+  "progress": "65%",
+  "submitTime": 1709123456000,
+  "startTime": 1709123457000,
+  "imageUrl": "",
+  "failReason": "",
+  "buttons": []
+}
+```
+
+### Response Example (Completed)
+
+```json
+{
+  "id": "task_1234567890",
+  "action": "IMAGINE",
+  "status": "SUCCESS",
+  "prompt": "a beautiful sunset over the ocean --ar 16:9 --v 6",
+  "promptEn": "a beautiful sunset over the ocean --ar 16:9 --v 6",
+  "progress": "100%",
+  "submitTime": 1709123456000,
+  "startTime": 1709123457000,
+  "finishTime": 1709123520000,
+  "imageUrl": "https://cdn.discordapp.com/attachments/.../image.png",
+  "failReason": "",
+  "buttons": [
+    {"customId": "MJ::JOB::upsample::1::abc123", "emoji": "U1", "label": "U1", "style": 2},
+    {"customId": "MJ::JOB::upsample::2::abc123", "emoji": "U2", "label": "U2", "style": 2},
+    {"customId": "MJ::JOB::upsample::3::abc123", "emoji": "U3", "label": "U3", "style": 2},
+    {"customId": "MJ::JOB::upsample::4::abc123", "emoji": "U4", "label": "U4", "style": 2},
+    {"customId": "MJ::JOB::variation::1::abc123", "emoji": "V1", "label": "V1", "style": 2},
+    {"customId": "MJ::JOB::variation::2::abc123", "emoji": "V2", "label": "V2", "style": 2},
+    {"customId": "MJ::JOB::variation::3::abc123", "emoji": "V3", "label": "V3", "style": 2},
+    {"customId": "MJ::JOB::variation::4::abc123", "emoji": "V4", "label": "V4", "style": 2}
+  ],
+  "properties": {}
+}
+```
+
+---
+
+## Batch Query Tasks
+
+```
+POST /mj/task/list-by-condition
+```
+
+Batch query tasks by conditions.
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `ids` | array | No | List of task IDs |
+
+### Request Example
+
+```bash cURL
+curl -X POST https://crazyrouter.com/mj/task/list-by-condition \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "ids": ["task_1234567890", "task_0987654321"]
+  }'
+```
+
+### Response Example
+
+```json
+[
+  {
+    "id": "task_1234567890",
+    "action": "IMAGINE",
+    "status": "SUCCESS",
+    "progress": "100%",
+    "imageUrl": "https://cdn.discordapp.com/attachments/.../image1.png"
+  },
+  {
+    "id": "task_0987654321",
+    "action": "IMAGINE",
+    "status": "IN_PROGRESS",
+    "progress": "40%",
+    "imageUrl": ""
+  }
+]
+```
+
+<Note>
+  A polling interval of 3-5 seconds is recommended. Tasks typically complete within 30-120 seconds, depending on Midjourney service load.
+</Note>

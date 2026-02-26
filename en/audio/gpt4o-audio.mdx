@@ -1,0 +1,97 @@
+---
+title: "GPT-4o Audio"
+description: "Use GPT-4o audio input/output capabilities"
+---
+
+# GPT-4o Audio
+
+GPT-4o supports direct audio input processing and audio output generation for voice conversations.
+
+## Audio Input
+
+Send audio via the Chat Completions API:
+
+```
+POST /v1/chat/completions
+```
+
+### Request Example
+
+```python Python
+import base64
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+# Read audio file and encode to Base64
+with open("question.wav", "rb") as f:
+    audio_base64 = base64.b64encode(f.read()).decode("utf-8")
+
+response = client.chat.completions.create(
+    model="gpt-4o-audio-preview",
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "Please listen to this audio and answer the question"},
+                {
+                    "type": "input_audio",
+                    "input_audio": {
+                        "data": audio_base64,
+                        "format": "wav"
+                    }
+                }
+            ]
+        }
+    ]
+)
+
+print(response.choices[0].message.content)
+```
+
+---
+
+## Audio Output
+
+Request the model to respond in audio format:
+
+```python Python
+response = client.chat.completions.create(
+    model="gpt-4o-audio-preview",
+    modalities=["text", "audio"],
+    audio={"voice": "nova", "format": "wav"},
+    messages=[
+        {"role": "user", "content": "Tell me a short joke"}
+    ]
+)
+
+# Get text response
+print(response.choices[0].message.content)
+
+# Get audio response
+if response.choices[0].message.audio:
+    audio_data = base64.b64decode(response.choices[0].message.audio.data)
+    with open("response.wav", "wb") as f:
+        f.write(audio_data)
+```
+
+---
+
+## Supported Models
+
+| Model | Description |
+|-------|-------------|
+| `gpt-4o-audio-preview` | GPT-4o Audio Preview |
+
+## Audio Formats
+
+Input supported: `wav`, `mp3`
+
+Output supported: `wav`, `mp3`, `opus`, `flac`, `pcm16`
+
+<Note>
+  GPT-4o Audio can understand tone, emotion, and ambient sounds in audio -- it goes beyond simple speech-to-text.
+</Note>

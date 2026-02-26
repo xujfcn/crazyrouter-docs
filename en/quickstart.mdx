@@ -1,0 +1,85 @@
+---
+title: 'Quick Start Guide'
+description: 'Make your first API call in 5 minutes'
+---
+
+## Step 1: Get Your API Key
+
+1. Visit [Crazyrouter](https://crazyrouter.com) and create an account
+2. Go to the [Token Management](https://crazyrouter.com/token) page
+3. Click "Create Token" to generate an API Key
+
+## Step 2: Make a Request
+
+<CodeGroup>
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      {"role": "user", "content": "Hello"}
+    ]
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello"}]
+)
+print(response.choices[0].message.content)
+```
+
+```javascript Node.js
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: 'YOUR_API_KEY',
+  baseURL: 'https://crazyrouter.com/v1'
+});
+
+const response = await client.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello' }]
+});
+console.log(response.choices[0].message.content);
+```
+</CodeGroup>
+
+## Step 3: View the Response
+
+Example of a successful response:
+
+```json
+{
+  "id": "chatcmpl-abc123",
+  "object": "chat.completion",
+  "created": 1677652288,
+  "choices": [{
+    "index": 0,
+    "message": {
+      "role": "assistant",
+      "content": "Hello! How can I help you today?"
+    },
+    "finish_reason": "stop"
+  }],
+  "usage": {
+    "prompt_tokens": 9,
+    "completion_tokens": 12,
+    "total_tokens": 21
+  }
+}
+```
+
+<Note>
+All OpenAI-compatible clients and frameworks (such as LangChain, LlamaIndex, Cursor, etc.) can be integrated by simply changing the `base_url` and `api_key`.
+</Note>

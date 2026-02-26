@@ -1,0 +1,205 @@
+---
+title: "Structured Output"
+description: "Use the response_format parameter to have the model return structured JSON data"
+---
+
+# Structured Output
+
+Using the `response_format` parameter, you can have the model return structured data according to a specified JSON Schema, ensuring reliable and parseable output format.
+
+## JSON Mode
+
+The simplest form of structured output, forcing the model to return valid JSON:
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      {"role": "system", "content": "You are a data extraction assistant. Return results in JSON format."},
+      {"role": "user", "content": "Extract the names and job titles from the following text: John is the CTO of the company, and Jane is the product manager."}
+    ],
+    "response_format": {"type": "json_object"}
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {"role": "system", "content": "You are a data extraction assistant. Return results in JSON format."},
+        {"role": "user", "content": "Extract the names and job titles from the following text: John is the CTO of the company, and Jane is the product manager."}
+    ],
+    response_format={"type": "json_object"}
+)
+
+import json
+data = json.loads(response.choices[0].message.content)
+print(data)
+```
+
+</CodeGroup>
+
+### Response
+
+```json
+{
+  "people": [
+    {"name": "John", "title": "CTO"},
+    {"name": "Jane", "title": "Product Manager"}
+  ]
+}
+```
+
+---
+
+## JSON Schema Mode
+
+Using the `json_schema` type, you can precisely define the output structure, and the model will strictly follow the schema:
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      {"role": "user", "content": "Analyze the quality of this code: def add(a, b): return a + b"}
+    ],
+    "response_format": {
+      "type": "json_schema",
+      "json_schema": {
+        "name": "code_review",
+        "strict": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "score": {
+              "type": "integer",
+              "description": "Code quality score, 1-10"
+            },
+            "issues": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "severity": {
+                    "type": "string",
+                    "enum": ["low", "medium", "high"]
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                },
+                "required": ["severity", "description"],
+                "additionalProperties": false
+              }
+            },
+            "suggestions": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          },
+          "required": ["score", "issues", "suggestions"],
+          "additionalProperties": false
+        }
+      }
+    }
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {"role": "user", "content": "Analyze the quality of this code: def add(a, b): return a + b"}
+    ],
+    response_format={
+        "type": "json_schema",
+        "json_schema": {
+            "name": "code_review",
+            "strict": True,
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "score": {"type": "integer", "description": "Code quality score, 1-10"},
+                    "issues": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "severity": {"type": "string", "enum": ["low", "medium", "high"]},
+                                "description": {"type": "string"}
+                            },
+                            "required": ["severity", "description"],
+                            "additionalProperties": False
+                        }
+                    },
+                    "suggestions": {"type": "array", "items": {"type": "string"}}
+                },
+                "required": ["score", "issues", "suggestions"],
+                "additionalProperties": False
+            }
+        }
+    }
+)
+
+import json
+result = json.loads(response.choices[0].message.content)
+print(f"Score: {result['score']}/10")
+for issue in result["issues"]:
+    print(f"  [{issue['severity']}] {issue['description']}")
+```
+
+</CodeGroup>
+
+### Response
+
+```json
+{
+  "score": 7,
+  "issues": [
+    {
+      "severity": "low",
+      "description": "Missing type annotations"
+    },
+    {
+      "severity": "low",
+      "description": "Missing docstring"
+    }
+  ],
+  "suggestions": [
+    "Add type annotations: def add(a: int, b: int) -> int",
+    "Add a docstring describing the function's purpose",
+    "Consider adding input validation"
+  ]
+}
+```
+
+<Note>
+  When using `json_schema` mode, setting `"strict": true` ensures the model strictly follows the schema definition. `additionalProperties` must be set to `false`.
+</Note>
+
+<Warning>
+  When using `json_object` mode, you must explicitly prompt the model to return JSON in the system or user message, otherwise it may result in infinite generation.
+</Warning>

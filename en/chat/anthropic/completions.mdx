@@ -1,0 +1,185 @@
+---
+title: "Claude OpenAI-Compatible Format"
+description: "Use Claude models through the OpenAI-compatible /v1/chat/completions endpoint"
+---
+
+# Claude OpenAI-Compatible Format
+
+You can call Claude models through the standard OpenAI Chat Completions API format without modifying existing code.
+
+```
+POST /v1/chat/completions
+```
+
+---
+
+## Non-Streaming Request
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "claude-sonnet-4-20250514",
+    "messages": [
+      {"role": "system", "content": "You are a professional technical consultant."},
+      {"role": "user", "content": "Compare the pros and cons of PostgreSQL and MySQL"}
+    ],
+    "max_tokens": 2048,
+    "temperature": 0.7
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="claude-sonnet-4-20250514",
+    messages=[
+        {"role": "system", "content": "You are a professional technical consultant."},
+        {"role": "user", "content": "Compare the pros and cons of PostgreSQL and MySQL"}
+    ],
+    max_tokens=2048,
+    temperature=0.7
+)
+
+print(response.choices[0].message.content)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const response = await client.chat.completions.create({
+  model: "claude-sonnet-4-20250514",
+  messages: [
+    { role: "system", content: "You are a professional technical consultant." },
+    { role: "user", content: "Compare the pros and cons of PostgreSQL and MySQL" },
+  ],
+  max_tokens: 2048,
+  temperature: 0.7,
+});
+
+console.log(response.choices[0].message.content);
+```
+
+</CodeGroup>
+
+### Response
+
+```json
+{
+  "id": "chatcmpl-abc123",
+  "object": "chat.completion",
+  "created": 1709123456,
+  "model": "claude-sonnet-4-20250514",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Here is a comparative analysis of PostgreSQL and MySQL:\n\n..."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 35,
+    "completion_tokens": 420,
+    "total_tokens": 455
+  }
+}
+```
+
+---
+
+## Streaming Request
+
+<CodeGroup>
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+stream = client.chat.completions.create(
+    model="claude-sonnet-4-20250514",
+    messages=[
+        {"role": "user", "content": "Implement a simple LRU cache in Python"}
+    ],
+    max_tokens=2048,
+    stream=True
+)
+
+for chunk in stream:
+    if chunk.choices[0].delta.content is not None:
+        print(chunk.choices[0].delta.content, end="")
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const stream = await client.chat.completions.create({
+  model: "claude-sonnet-4-20250514",
+  messages: [
+    { role: "user", content: "Implement a simple LRU cache in Python" },
+  ],
+  max_tokens: 2048,
+  stream: true,
+});
+
+for await (const chunk of stream) {
+  const content = chunk.choices[0]?.delta?.content || "";
+  process.stdout.write(content);
+}
+```
+
+</CodeGroup>
+
+---
+
+## Available Claude Models
+
+| Model | Description |
+|-------|-------------|
+| `claude-sonnet-4-20250514` | Claude Sonnet 4, balancing capability and speed |
+| `claude-opus-4-20250514` | Claude Opus 4, strongest capability |
+| `claude-3.5-sonnet` | Claude 3.5 Sonnet |
+| `claude-3.5-haiku` | Claude 3.5 Haiku, fast response |
+
+## Parameter Mapping
+
+Crazyrouter automatically maps OpenAI format parameters to Claude native parameters:
+
+| OpenAI Parameter | Claude Native Parameter | Description |
+|------------------|------------------------|-------------|
+| `messages[0].role="system"` | `system` | System prompt auto-extracted |
+| `max_tokens` | `max_tokens` | Direct mapping |
+| `temperature` | `temperature` | Direct mapping |
+| `top_p` | `top_p` | Direct mapping |
+| `stop` | `stop_sequences` | Format auto-converted |
+| `stream` | `stream` | Direct mapping |
+| `tools` | `tools` | Tool format auto-converted |
+
+<Note>
+  When using the OpenAI-compatible format, responses are automatically converted to the OpenAI Chat Completion format. If you need access to Claude-specific features (such as Extended Thinking's thought process), it is recommended to use the [native format](/chat/anthropic/messages).
+</Note>

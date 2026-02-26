@@ -1,0 +1,50 @@
+---
+title: 'Coze Setup Guide'
+description: 'Configure Crazyrouter API in Coze workflows'
+---
+
+## Overview
+
+Coze is an AI Bot development platform by ByteDance that supports calling external APIs through plugins.
+
+## Configuration
+
+### Via HTTP Plugin
+
+<Steps>
+  <Step title="Create Plugin">
+    In the Coze workspace, go to `Plugins` → `Create Plugin` → Select `Create from API`
+  </Step>
+  <Step title="Configure API">
+    - **Request Method**: POST
+    - **URL**: `https://crazyrouter.com/v1/chat/completions`
+    - **Headers**:
+      - `Authorization`: `Bearer sk-xxx`
+      - `Content-Type`: `application/json`
+  </Step>
+  <Step title="Configure Request Body">
+    ```json
+    {
+      "model": "gpt-4o",
+      "messages": [
+        {"role": "user", "content": "{{input}}"}
+      ]
+    }
+    ```
+  </Step>
+  <Step title="Use in Bot">
+    Add the plugin node to your Bot's workflow.
+  </Step>
+</Steps>
+
+### Via Model Configuration
+
+Some Coze versions support custom model integration:
+
+1. Go to `Settings` → `Model Management`
+2. Add a custom model
+3. Enter the API URL and key
+
+<Note>
+  Configuration may differ slightly between Coze international and domestic versions. Refer to the official Coze documentation for the latest custom model integration methods.
+</Note>

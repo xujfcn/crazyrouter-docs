@@ -1,0 +1,147 @@
+---
+title: 'Getting Started'
+description: 'Migrate to Crazyrouter from OpenAI or other providers'
+---
+
+## Overview
+
+Crazyrouter is fully compatible with the OpenAI API format. Migrating from OpenAI or other providers requires changing just two parameters:
+
+1. **Base URL** → `https://crazyrouter.com/v1`
+2. **API Key** → Your Crazyrouter `sk-xxx` key
+
+## Get an API Key
+
+<Steps>
+  <Step title="Register an Account">
+    Visit [crazyrouter.com](https://crazyrouter.com) to register
+  </Step>
+  <Step title="Top Up Balance">
+    Go to the `Top Up` page and select a top-up amount
+  </Step>
+  <Step title="Create a Token">
+    Go to the `Tokens` page, click `Create Token`, and get an `sk-xxx` format API Key
+  </Step>
+</Steps>
+
+## Migrating from OpenAI
+
+### Before
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-openai-xxx"
+    # Default base_url: https://api.openai.com/v1
+)
+```
+
+### After
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",  # Crazyrouter API Key
+    base_url="https://crazyrouter.com/v1"  # Crazyrouter URL
+)
+```
+
+No other code changes needed.
+
+## Migrating from Anthropic
+
+### Using OpenAI-Compatible Format
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1"
+)
+
+# Call Claude models via OpenAI format
+response = client.chat.completions.create(
+    model="claude-sonnet-4-20250514",
+    messages=[{"role": "user", "content": "Hello"}]
+)
+```
+
+### Using Anthropic Native Format
+
+```python
+import anthropic
+
+client = anthropic.Anthropic(
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com"  # Note: no /v1
+)
+
+response = client.messages.create(
+    model="claude-sonnet-4-20250514",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "Hello"}]
+)
+```
+
+## Migrating from Google Gemini
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="gemini-2.5-pro",
+    messages=[{"role": "user", "content": "Hello"}]
+)
+```
+
+## Environment Variables
+
+It's recommended to configure via environment variables to avoid hardcoding keys in your code:
+
+<Tabs>
+  <Tab title="Linux / macOS">
+    ```bash
+    export OPENAI_API_KEY=sk-xxx
+    export OPENAI_BASE_URL=https://crazyrouter.com/v1
+    ```
+  </Tab>
+  <Tab title="Windows">
+    ```powershell
+    $env:OPENAI_API_KEY = "sk-xxx"
+    $env:OPENAI_BASE_URL = "https://crazyrouter.com/v1"
+    ```
+  </Tab>
+</Tabs>
+
+Then no parameters needed in your code:
+
+```python
+from openai import OpenAI
+client = OpenAI()  # Automatically reads environment variables
+```
+
+## Compatibility
+
+| Feature | Compatibility |
+|---------|--------------|
+| Chat Completions | Fully compatible |
+| Streaming | Fully compatible |
+| Function Calling | Fully compatible |
+| Vision | Fully compatible |
+| Embeddings | Fully compatible |
+| TTS / STT | Fully compatible |
+| Images (DALL-E) | Fully compatible |
+| Anthropic Messages API | Fully compatible |
+| Gemini Native API | Fully compatible |
+
+<Note>
+  Crazyrouter supports OpenAI, Anthropic, and Gemini API formats simultaneously. Choose whichever format you're most familiar with.
+</Note>

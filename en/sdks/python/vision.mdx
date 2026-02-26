@@ -1,0 +1,119 @@
+---
+title: 'Python Vision'
+description: 'Python image recognition with GPT-4o and Claude'
+---
+
+## GPT-4o Vision - URL Method
+
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "Describe the content of this image"},
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": "https://example.com/photo.jpg"
+                }
+            }
+        ]
+    }]
+)
+
+print(response.choices[0].message.content)
+```
+
+## GPT-4o Vision - Local Image
+
+```python
+import base64
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+
+# Read local image and convert to base64
+with open("photo.jpg", "rb") as f:
+    image_data = base64.b64encode(f.read()).decode("utf-8")
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "What's in this image?"},
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/jpeg;base64,{image_data}"
+                }
+            }
+        ]
+    }]
+)
+
+print(response.choices[0].message.content)
+```
+
+## Multi-Image Comparison
+
+```python
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "Compare the differences between these two images"},
+            {"type": "image_url", "image_url": {"url": "https://example.com/img1.jpg"}},
+            {"type": "image_url", "image_url": {"url": "https://example.com/img2.jpg"}}
+        ]
+    }]
+)
+
+print(response.choices[0].message.content)
+```
+
+## Claude Vision
+
+Claude models also support vision through the OpenAI-compatible format:
+
+```python
+response = client.chat.completions.create(
+    model="claude-sonnet-4-20250514",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "Describe this image in detail"},
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/png;base64,{image_data}"
+                }
+            }
+        ]
+    }],
+    max_tokens=1024
+)
+
+print(response.choices[0].message.content)
+```
+
+## Supported Vision Models
+
+| Model | Description |
+|-------|-------------|
+| `gpt-4o` | OpenAI flagship multimodal model |
+| `gpt-4o-mini` | Lightweight version, faster |
+| `claude-sonnet-4-20250514` | Anthropic Claude Sonnet |
+| `claude-opus-4-20250514` | Anthropic Claude Opus |
+| `gemini-2.5-pro` | Google Gemini Pro |
+| `gemini-2.5-flash` | Google Gemini Flash |
+
+<Note>
+  Image size should not exceed 20MB. Base64 encoding adds approximately 33% to the data size, so URL method is recommended for large images.
+</Note>

@@ -1,0 +1,159 @@
+---
+title: "Responses Web Search"
+description: "Use the web search tool via the Responses API to retrieve real-time information"
+---
+
+# Responses Web Search
+
+The Responses API has a built-in web search tool that enables models to search the internet for real-time information.
+
+```
+POST /v1/responses
+```
+
+---
+
+## Basic Usage
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o",
+    "input": "What are the important tech news stories today?",
+    "tools": [
+      {
+        "type": "web_search_preview"
+      }
+    ]
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.responses.create(
+    model="gpt-4o",
+    input="What are the important tech news stories today?",
+    tools=[
+        {"type": "web_search_preview"}
+    ]
+)
+
+print(response.output_text)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const response = await client.responses.create({
+  model: "gpt-4o",
+  input: "What are the important tech news stories today?",
+  tools: [{ type: "web_search_preview" }],
+});
+
+console.log(response.output_text);
+```
+
+</CodeGroup>
+
+---
+
+## Search Configuration
+
+You can configure the search context size:
+
+```json
+{
+  "model": "gpt-4o",
+  "input": "Latest AI model releases in 2026",
+  "tools": [
+    {
+      "type": "web_search_preview",
+      "search_context_size": "medium"
+    }
+  ]
+}
+```
+
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| `search_context_size` | `low` | Less search context, faster speed |
+| `search_context_size` | `medium` | Default, balancing speed and information |
+| `search_context_size` | `high` | More search context, more comprehensive information |
+
+---
+
+## Streaming Search
+
+```python Python
+stream = client.responses.create(
+    model="gpt-4o",
+    input="Compare the latest version features of React and Vue",
+    tools=[{"type": "web_search_preview"}],
+    stream=True
+)
+
+for event in stream:
+    if event.type == "response.output_text.delta":
+        print(event.delta, end="")
+```
+
+---
+
+## Response Format
+
+Search results are included in the response output:
+
+```json
+{
+  "id": "resp_abc123",
+  "object": "response",
+  "output": [
+    {
+      "type": "web_search_call",
+      "id": "ws_abc123",
+      "status": "completed"
+    },
+    {
+      "type": "message",
+      "role": "assistant",
+      "content": [
+        {
+          "type": "output_text",
+          "text": "Based on the latest search results, today's major tech news includes...",
+          "annotations": [
+            {
+              "type": "url_citation",
+              "start_index": 10,
+              "end_index": 20,
+              "url": "https://example.com/news"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+<Note>
+  The `annotations` field in web search results contains the source URLs of citations, which can be used to display reference links.
+</Note>
+
+<Warning>
+  Web search increases response latency and token consumption. The model automatically determines whether a search is needed and only triggers it when real-time information is required.
+</Warning>

@@ -1,0 +1,213 @@
+---
+title: "Responses Function Calling"
+description: "Use Function Calling via the Responses API to interact with external tools"
+---
+
+# Responses Function Calling
+
+The Responses API supports Function Calling, allowing models to call functions you define to retrieve external data or perform actions.
+
+```
+POST /v1/responses
+```
+
+---
+
+## Define Tools and Call
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o",
+    "input": "What is the weather like in Beijing and Shanghai today?",
+    "tools": [
+      {
+        "type": "function",
+        "name": "get_weather",
+        "description": "Get the current weather for a specified city",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "city": {
+              "type": "string",
+              "description": "City name"
+            }
+          },
+          "required": ["city"]
+        }
+      }
+    ]
+  }'
+```
+
+```python Python
+from openai import OpenAI
+import json
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+tools = [
+    {
+        "type": "function",
+        "name": "get_weather",
+        "description": "Get the current weather for a specified city",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "city": {
+                    "type": "string",
+                    "description": "City name"
+                }
+            },
+            "required": ["city"]
+        }
+    }
+]
+
+# First call
+response = client.responses.create(
+    model="gpt-4o",
+    input="What is the weather like in Beijing and Shanghai today?",
+    tools=tools
+)
+
+# Check for function calls
+function_calls = [
+    item for item in response.output
+    if item.type == "function_call"
+]
+
+if function_calls:
+    # Build function results
+    tool_results = []
+    for call in function_calls:
+        args = json.loads(call.arguments)
+        # Execute your function
+        if args["city"] == "Beijing":
+            result = {"temperature": 22, "condition": "sunny", "humidity": 40}
+        else:
+            result = {"temperature": 26, "condition": "cloudy", "humidity": 65}
+
+        tool_results.append({
+            "type": "function_call_output",
+            "call_id": call.call_id,
+            "output": json.dumps(result, ensure_ascii=False)
+        })
+
+    # Second call, pass function results
+    final_response = client.responses.create(
+        model="gpt-4o",
+        input=[
+            {"role": "user", "content": "What is the weather like in Beijing and Shanghai today?"},
+            *[{"type": item.type, "id": item.id, "call_id": item.call_id,
+               "name": item.name, "arguments": item.arguments}
+              for item in function_calls],
+            *tool_results
+        ],
+        tools=tools
+    )
+
+    print(final_response.output_text)
+```
+
+</CodeGroup>
+
+---
+
+## Function Call Response
+
+When the model decides to call a function, the response contains `function_call` type outputs:
+
+```json
+{
+  "id": "resp_abc123",
+  "object": "response",
+  "output": [
+    {
+      "type": "function_call",
+      "id": "fc_001",
+      "call_id": "call_abc123",
+      "name": "get_weather",
+      "arguments": "{\"city\": \"Beijing\"}"
+    },
+    {
+      "type": "function_call",
+      "id": "fc_002",
+      "call_id": "call_def456",
+      "name": "get_weather",
+      "arguments": "{\"city\": \"Shanghai\"}"
+    }
+  ],
+  "status": "incomplete"
+}
+```
+
+---
+
+## Return Function Results
+
+Return function execution results via `function_call_output`:
+
+```json
+{
+  "model": "gpt-4o",
+  "input": [
+    {"role": "user", "content": "What is the weather like in Beijing and Shanghai today?"},
+    {
+      "type": "function_call",
+      "call_id": "call_abc123",
+      "name": "get_weather",
+      "arguments": "{\"city\": \"Beijing\"}"
+    },
+    {
+      "type": "function_call_output",
+      "call_id": "call_abc123",
+      "output": "{\"temperature\": 22, \"condition\": \"sunny\"}"
+    },
+    {
+      "type": "function_call",
+      "call_id": "call_def456",
+      "name": "get_weather",
+      "arguments": "{\"city\": \"Shanghai\"}"
+    },
+    {
+      "type": "function_call_output",
+      "call_id": "call_def456",
+      "output": "{\"temperature\": 26, \"condition\": \"cloudy\"}"
+    }
+  ],
+  "tools": [...]
+}
+```
+
+---
+
+## Streaming Function Calling
+
+```python Python
+stream = client.responses.create(
+    model="gpt-4o",
+    input="Look up Apple's stock price",
+    tools=tools,
+    stream=True
+)
+
+for event in stream:
+    if event.type == "response.function_call_arguments.delta":
+        print(event.delta, end="")
+    elif event.type == "response.function_call_arguments.done":
+        print("\nFunction call complete:", event.arguments)
+    elif event.type == "response.output_text.delta":
+        print(event.delta, end="")
+```
+
+<Note>
+  The main difference between Function Calling in the Responses API and the Chat Completions API is that tool definitions use `name` and `parameters` fields directly, without needing to nest them inside a `function` object.
+</Note>

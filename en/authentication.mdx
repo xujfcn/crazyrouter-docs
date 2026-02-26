@@ -1,0 +1,63 @@
+---
+title: 'Authentication'
+description: 'How to obtain and use API Keys'
+---
+
+## Bearer Token Authentication
+
+All API requests require an API Key in the header:
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Getting an API Key
+
+1. Log in to [Crazyrouter](https://crazyrouter.com)
+2. Go to the [Token Management](https://crazyrouter.com/token) page
+3. Click "Create Token"
+4. Set the token name, quota limit, available models, etc.
+5. Copy the generated key starting with `sk-`
+
+<Warning>
+The API Key is only displayed once at creation time. Please save it securely. If lost, you will need to create a new one.
+</Warning>
+
+## Usage Examples
+
+<CodeGroup>
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Authorization: Bearer sk-xxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "gpt-4o", "messages": [{"role": "user", "content": "Hi"}]}'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxxxxxxx",
+    base_url="https://crazyrouter.com/v1"
+)
+```
+
+```javascript Node.js
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: 'sk-xxxxxxxx',
+  baseURL: 'https://crazyrouter.com/v1'
+});
+```
+</CodeGroup>
+
+## Token Permission Controls
+
+When creating a token, you can configure:
+
+- **Name**: For easy identification of its purpose
+- **Quota Limit**: Set the maximum available quota
+- **Expiration Time**: Set a validity period
+- **Available Models**: Restrict which models can be called
+- **IP Whitelist**: Restrict the source IPs allowed to make calls

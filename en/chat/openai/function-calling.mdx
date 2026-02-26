@@ -1,0 +1,210 @@
+---
+title: "Function Calling"
+description: "Use function calling via the Chat Completions API to let models interact with external tools and APIs"
+---
+
+# Function Calling
+
+Function Calling allows models to call functions you define during a conversation. The model does not execute functions directly; instead, it returns the function name and arguments, and your code executes the function and returns the result to the model.
+
+## Workflow
+
+1. Send messages and tool definitions to the model
+2. The model determines whether to call a tool and returns `tool_calls`
+3. Your code executes the function and gets the result
+4. Send the function result back to the model as a `tool` role message
+5. The model generates the final response based on the function result
+
+---
+
+## Define Tools
+
+Define available functions in the `tools` parameter:
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      {"role": "user", "content": "What is the weather like in Beijing today?"}
+    ],
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "get_weather",
+          "description": "Get the current weather information for a specified city",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "city": {
+                "type": "string",
+                "description": "City name, e.g.: Beijing, Shanghai"
+              },
+              "unit": {
+                "type": "string",
+                "enum": ["celsius", "fahrenheit"],
+                "description": "Temperature unit"
+              }
+            },
+            "required": ["city"]
+          }
+        }
+      }
+    ],
+    "tool_choice": "auto"
+  }'
+```
+
+```python Python
+from openai import OpenAI
+import json
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_weather",
+            "description": "Get the current weather information for a specified city",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "city": {
+                        "type": "string",
+                        "description": "City name, e.g.: Beijing, Shanghai"
+                    },
+                    "unit": {
+                        "type": "string",
+                        "enum": ["celsius", "fahrenheit"],
+                        "description": "Temperature unit"
+                    }
+                },
+                "required": ["city"]
+            }
+        }
+    }
+]
+
+messages = [{"role": "user", "content": "What is the weather like in Beijing today?"}]
+
+# First call: model decides to call a function
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=messages,
+    tools=tools,
+    tool_choice="auto"
+)
+
+assistant_message = response.choices[0].message
+
+# Check if there are tool calls
+if assistant_message.tool_calls:
+    messages.append(assistant_message)
+
+    for tool_call in assistant_message.tool_calls:
+        args = json.loads(tool_call.function.arguments)
+        # Execute your function
+        result = {"temperature": 22, "condition": "sunny", "humidity": 45}
+
+        messages.append({
+            "role": "tool",
+            "tool_call_id": tool_call.id,
+            "content": json.dumps(result, ensure_ascii=False)
+        })
+
+    # Second call: model generates response based on function results
+    final_response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=messages,
+        tools=tools
+    )
+    print(final_response.choices[0].message.content)
+```
+
+</CodeGroup>
+
+## Model Returns tool_calls
+
+When the model decides to call a function, the response looks like this:
+
+```json
+{
+  "id": "chatcmpl-abc123",
+  "object": "chat.completion",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": null,
+        "tool_calls": [
+          {
+            "id": "call_abc123",
+            "type": "function",
+            "function": {
+              "name": "get_weather",
+              "arguments": "{\"city\": \"Beijing\", \"unit\": \"celsius\"}"
+            }
+          }
+        ]
+      },
+      "finish_reason": "tool_calls"
+    }
+  ]
+}
+```
+
+## tool_choice Parameter
+
+| Value | Description |
+|-------|-------------|
+| `"auto"` | Default, the model decides whether to call tools |
+| `"none"` | Disable tool calling |
+| `"required"` | Force the model to call at least one tool |
+| `{"type": "function", "function": {"name": "get_weather"}}` | Force calling a specific function |
+
+## Parallel Function Calling
+
+The model can request multiple function calls in a single response:
+
+```json
+{
+  "tool_calls": [
+    {
+      "id": "call_001",
+      "type": "function",
+      "function": {
+        "name": "get_weather",
+        "arguments": "{\"city\": \"Beijing\"}"
+      }
+    },
+    {
+      "id": "call_002",
+      "type": "function",
+      "function": {
+        "name": "get_weather",
+        "arguments": "{\"city\": \"Shanghai\"}"
+      }
+    }
+  ]
+}
+```
+
+In this case, you need to return a corresponding `tool` message for each `tool_call`, and the `tool_call_id` must match.
+
+<Note>
+  `function.arguments` is a JSON string that needs to be parsed with `JSON.parse()` or `json.loads()`. The arguments generated by the model may not fully conform to the schema, so proper error handling is recommended.
+</Note>
+
+<Warning>
+  Not all models support Function Calling. Make sure the model you are using supports this feature.
+</Warning>

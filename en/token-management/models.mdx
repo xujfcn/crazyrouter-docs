@@ -1,0 +1,74 @@
+---
+title: 'Get Token Models'
+description: 'Query the list of models available to a specific token'
+api: 'GET /api/token/models'
+---
+
+## Overview
+
+Get the list of models that the current token (API Key) can access. If the token has no model restrictions, all enabled system models are returned.
+
+## Authentication
+
+Authenticate using an API Key (sk-xxx):
+
+```
+Authorization: Bearer sk-xxx
+```
+
+## Response Format
+
+```json
+{
+  "success": true,
+  "data": [
+    "gpt-4o",
+    "gpt-4o-mini",
+    "claude-sonnet-4-20250514",
+    "gemini-2.5-pro",
+    "text-embedding-3-large"
+  ]
+}
+```
+
+## Code Examples
+
+<CodeGroup>
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1"
+)
+
+# Get model list via OpenAI SDK
+models = client.models.list()
+for model in models.data:
+    print(model.id)
+```
+
+```python Python (requests)
+import requests
+
+response = requests.get(
+    "https://crazyrouter.com/v1/models",
+    headers={"Authorization": "Bearer sk-xxx"}
+)
+
+models = response.json()["data"]
+for model in models:
+    print(model["id"])
+```
+
+```bash cURL
+curl https://crazyrouter.com/v1/models \
+  -H "Authorization: Bearer sk-xxx"
+```
+
+</CodeGroup>
+
+<Note>
+  You can also use the OpenAI-compatible `GET /v1/models` endpoint to get the model list, which works the same way.
+</Note>

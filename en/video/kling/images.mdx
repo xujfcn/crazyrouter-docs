@@ -1,0 +1,131 @@
+---
+title: "Kling Image Generation"
+description: "Use the Kling API to generate images"
+---
+
+# Kling Image Generation
+
+```
+POST /kling/v1/images/generations
+```
+
+Use Kling models to generate high-quality images.
+
+## Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model_name` | string | Yes | Model name: `kling-v1`, `kling-v1-5`, `kling-v1-6` |
+| `prompt` | string | Yes | Image description prompt |
+| `negative_prompt` | string | No | Negative prompt |
+| `image` | string | No | Reference image URL (image-to-image) |
+| `image_fidelity` | number | No | Image fidelity, 0-1 |
+| `n` | integer | No | Number of images, default 1 |
+| `aspect_ratio` | string | No | Aspect ratio: `1:1`, `16:9`, `9:16`, `4:3`, `3:4`, `3:2`, `2:3` |
+| `callback_url` | string | No | Task completion callback URL |
+
+## Request Examples
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/kling/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model_name": "kling-v1-6",
+    "prompt": "A Chinese ink wash painting of mountains with a waterfall in the distance",
+    "negative_prompt": "blurry, low quality",
+    "n": 1,
+    "aspect_ratio": "16:9"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/kling/v1/images/generations",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model_name": "kling-v1-6",
+        "prompt": "A Chinese ink wash painting of mountains with a waterfall in the distance",
+        "n": 1,
+        "aspect_ratio": "16:9"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+## Response Example
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "task_id": "kling_img_abc123",
+    "task_status": "submitted"
+  }
+}
+```
+
+---
+
+## Image-to-Image
+
+Pass the `image` parameter for image-to-image generation:
+
+```json
+{
+  "model_name": "kling-v1-6",
+  "prompt": "Convert the photo to anime style",
+  "image": "https://example.com/photo.jpg",
+  "image_fidelity": 0.6,
+  "aspect_ratio": "1:1"
+}
+```
+
+---
+
+## Query Image Task
+
+```
+GET /kling/v1/images/generations/{task_id}
+```
+
+```bash cURL
+curl https://crazyrouter.com/kling/v1/images/generations/kling_img_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Response Example (Completed)
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "task_id": "kling_img_abc123",
+    "task_status": "succeed",
+    "task_result": {
+      "images": [
+        {
+          "index": 0,
+          "url": "https://cdn.klingai.com/images/..."
+        }
+      ]
+    }
+  }
+}
+```
+
+<Note>
+  Kling image generation is an asynchronous task. After submission, use the query endpoint to get results.
+</Note>

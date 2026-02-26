@@ -1,0 +1,152 @@
+---
+title: "Chat Image Generation"
+description: "Generate images in conversations using models that support image generation via the Chat Completions API"
+---
+
+# Chat Image Generation
+
+Some models (such as `gpt-4o`, `gpt-4o-image`) support generating images directly within chat conversations. The model automatically determines whether to generate an image based on the conversation context and returns the image in its response.
+
+<Note>
+  Chat image generation is different from the standalone Images API (`/v1/images/generations`). Here, the model generates images through chat conversation and can return both text and images simultaneously.
+</Note>
+
+## Basic Usage
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Draw a cat running under moonlight in cyberpunk style"
+      }
+    ],
+    "max_tokens": 4096
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {
+            "role": "user",
+            "content": "Draw a cat running under moonlight in cyberpunk style"
+        }
+    ],
+    max_tokens=4096
+)
+
+message = response.choices[0].message
+
+# The response may contain both text and images
+for part in message.content:
+    if isinstance(part, dict):
+        if part.get("type") == "text":
+            print(part["text"])
+        elif part.get("type") == "image_url":
+            print("Image URL:", part["image_url"]["url"])
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const response = await client.chat.completions.create({
+  model: "gpt-4o",
+  messages: [
+    {
+      role: "user",
+      content: "Draw a cat running under moonlight in cyberpunk style",
+    },
+  ],
+  max_tokens: 4096,
+});
+
+console.log(response.choices[0].message.content);
+```
+
+</CodeGroup>
+
+## Response Format
+
+When the model generates an image, the `content` field returns multipart content containing the image:
+
+```json
+{
+  "id": "chatcmpl-abc123",
+  "object": "chat.completion",
+  "created": 1709123456,
+  "model": "gpt-4o",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": [
+          {
+            "type": "text",
+            "text": "Here is the cyberpunk-style moonlight cat I created for you:"
+          },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg..."
+            }
+          }
+        ]
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 20,
+    "completion_tokens": 1024,
+    "total_tokens": 1044
+  }
+}
+```
+
+## Image Editing
+
+You can also send an image and ask the model to modify it:
+
+```python Python
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "Convert this image to watercolor painting style"},
+                {
+                    "type": "image_url",
+                    "image_url": {"url": "https://example.com/photo.jpg"}
+                }
+            ]
+        }
+    ],
+    max_tokens=4096
+)
+```
+
+<Warning>
+  Image generation consumes a significant number of tokens. Generated images are returned in Base64 format, so be aware that response sizes can be large.
+</Warning>

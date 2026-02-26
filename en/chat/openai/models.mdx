@@ -1,0 +1,131 @@
+---
+title: "List Models"
+description: "GET /v1/models endpoint to retrieve the list of currently available models"
+---
+
+# List Models
+
+```
+GET /v1/models
+```
+
+Returns the list of models available for the current API Key.
+
+## Authentication
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Request Example
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/models \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+models = client.models.list()
+
+for model in models.data:
+    print(model.id)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const models = await client.models.list();
+
+for (const model of models.data) {
+  console.log(model.id);
+}
+```
+
+</CodeGroup>
+
+## Response Format
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "gpt-4o",
+      "object": "model",
+      "created": 1700000000,
+      "owned_by": "openai",
+      "permission": [],
+      "root": "gpt-4o",
+      "parent": null
+    },
+    {
+      "id": "claude-sonnet-4-20250514",
+      "object": "model",
+      "created": 1700000000,
+      "owned_by": "anthropic",
+      "permission": [],
+      "root": "claude-sonnet-4-20250514",
+      "parent": null
+    },
+    {
+      "id": "gemini-2.5-flash",
+      "object": "model",
+      "created": 1700000000,
+      "owned_by": "google",
+      "permission": [],
+      "root": "gemini-2.5-flash",
+      "parent": null
+    },
+    {
+      "id": "deepseek-r1",
+      "object": "model",
+      "created": 1700000000,
+      "owned_by": "deepseek",
+      "permission": [],
+      "root": "deepseek-r1",
+      "parent": null
+    }
+  ]
+}
+```
+
+## Field Descriptions
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Model identifier, used as the `model` parameter in API calls |
+| `object` | string | Always `model` |
+| `created` | integer | Unix timestamp of creation time |
+| `owned_by` | string | Organization that owns the model |
+
+<Note>
+  The returned model list depends on your API Key permissions. Different tokens may be configured with different available model scopes.
+</Note>
+
+## Get Model Pricing
+
+Model pricing information is available through a public endpoint:
+
+```bash
+GET /api/pricing
+```
+
+```bash cURL
+curl https://crazyrouter.com/api/pricing
+```
+
+This endpoint returns input/output pricing information for all models and does not require authentication.

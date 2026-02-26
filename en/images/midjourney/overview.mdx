@@ -1,0 +1,100 @@
+---
+title: "Midjourney Overview"
+description: "Midjourney image generation API overview, including task objects, status descriptions, and response fields"
+---
+
+# Midjourney Overview
+
+Crazyrouter provides a complete Midjourney API proxy, supporting all operations including Imagine, Blend, Describe, Upscale, Variation, and more. All requests are processed asynchronously via tasks.
+
+## Base Path
+
+```
+https://crazyrouter.com/mj
+```
+
+## Authentication
+
+Pass your API Key in the request header:
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+---
+
+## Task Object
+
+Each Midjourney request submission returns a task object. The task object contains the following fields:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Unique task identifier |
+| `action` | string | Task type: `IMAGINE`, `UPSCALE`, `VARIATION`, `BLEND`, `DESCRIBE`, etc. |
+| `status` | string | Task status |
+| `prompt` | string | Submitted prompt |
+| `promptEn` | string | Translated English prompt |
+| `description` | string | Task description |
+| `submitTime` | number | Submission time (millisecond timestamp) |
+| `startTime` | number | Processing start time |
+| `finishTime` | number | Completion time |
+| `progress` | string | Progress percentage, e.g. `"100%"` |
+| `imageUrl` | string | Generated image URL |
+| `failReason` | string | Failure reason (only present on failure) |
+| `properties` | object | Additional properties |
+| `buttons` | array | List of available action buttons |
+
+---
+
+## Task Status
+
+| Status | Description |
+|--------|-------------|
+| `NOT_START` | Task submitted, waiting to be processed |
+| `SUBMITTED` | Task submitted to Midjourney |
+| `IN_PROGRESS` | Task is being processed |
+| `SUCCESS` | Task completed |
+| `FAILURE` | Task failed |
+
+---
+
+## Action Buttons
+
+After a task completes, the `buttons` field contains available follow-up actions:
+
+```json
+{
+  "buttons": [
+    {"customId": "MJ::JOB::upsample::1::hash", "emoji": "U1", "label": "U1", "style": 2},
+    {"customId": "MJ::JOB::upsample::2::hash", "emoji": "U2", "label": "U2", "style": 2},
+    {"customId": "MJ::JOB::upsample::3::hash", "emoji": "U3", "label": "U3", "style": 2},
+    {"customId": "MJ::JOB::upsample::4::hash", "emoji": "U4", "label": "U4", "style": 2},
+    {"customId": "MJ::JOB::variation::1::hash", "emoji": "V1", "label": "V1", "style": 2},
+    {"customId": "MJ::JOB::variation::2::hash", "emoji": "V2", "label": "V2", "style": 2},
+    {"customId": "MJ::JOB::variation::3::hash", "emoji": "V3", "label": "V3", "style": 2},
+    {"customId": "MJ::JOB::variation::4::hash", "emoji": "V4", "label": "V4", "style": 2}
+  ]
+}
+```
+
+Use the `customId` to call the Action endpoint to perform the corresponding operation (upscale, variation, etc.).
+
+---
+
+## API Endpoints Overview
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/mj/submit/imagine` | Submit an Imagine task |
+| POST | `/mj/submit/action` | Execute an action (upscale, variation, etc.) |
+| POST | `/mj/submit/blend` | Blend images |
+| POST | `/mj/submit/describe` | Describe an image |
+| POST | `/mj/submit/modal` | Submit modal confirmation |
+| POST | `/mj/submit/shorten` | Shorten a prompt |
+| GET | `/mj/task/{id}/fetch` | Query a single task |
+| POST | `/mj/task/list-by-condition` | Batch query tasks |
+| GET | `/mj/task/{id}/image-seed` | Get image seed |
+
+<Note>
+  Midjourney tasks are processed asynchronously. After submission, you need to poll the task status. It is recommended to query every 3-5 seconds until the status becomes `SUCCESS` or `FAILURE`.
+</Note>

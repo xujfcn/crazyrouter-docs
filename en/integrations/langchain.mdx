@@ -1,0 +1,115 @@
+---
+title: 'LangChain Setup Guide'
+description: 'Configure Crazyrouter API in the LangChain framework'
+---
+
+## Overview
+
+LangChain is the most popular LLM application development framework, supporting both Python and JavaScript.
+
+## Python Configuration
+
+### Installation
+
+```bash
+pip install langchain-openai langchain-community
+```
+
+### Chat Model
+
+```python
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(
+    model="gpt-4o",
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1",
+    temperature=0.7
+)
+
+response = llm.invoke("What is LangChain?")
+print(response.content)
+```
+
+### Embeddings
+
+```python
+from langchain_openai import OpenAIEmbeddings
+
+embeddings = OpenAIEmbeddings(
+    model="text-embedding-3-large",
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1"
+)
+
+vectors = embeddings.embed_documents(["Text one", "Text two"])
+```
+
+### Chain
+
+```python
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+
+llm = ChatOpenAI(
+    model="gpt-4o",
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1"
+)
+
+prompt = ChatPromptTemplate.from_template("Explain {topic} in simple terms")
+chain = prompt | llm | StrOutputParser()
+
+result = chain.invoke({"topic": "quantum computing"})
+print(result)
+```
+
+### RAG Example
+
+```python
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_community.vectorstores import FAISS
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnablePassthrough
+
+llm = ChatOpenAI(model="gpt-4o", api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+embeddings = OpenAIEmbeddings(model="text-embedding-3-large", api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+
+# Create vector store
+texts = ["Crazyrouter supports 300+ AI models", "API is pay-per-use, flexible and affordable"]
+vectorstore = FAISS.from_texts(texts, embeddings)
+retriever = vectorstore.as_retriever()
+
+# RAG chain
+prompt = ChatPromptTemplate.from_template("Answer the question based on the following context:\n{context}\n\nQuestion: {question}")
+chain = {"context": retriever, "question": RunnablePassthrough()} | prompt | llm
+
+result = chain.invoke("How many models does Crazyrouter support?")
+print(result.content)
+```
+
+## JavaScript Configuration
+
+```bash
+npm install @langchain/openai
+```
+
+```javascript
+import { ChatOpenAI } from '@langchain/openai';
+
+const llm = new ChatOpenAI({
+  modelName: 'gpt-4o',
+  openAIApiKey: 'sk-xxx',
+  configuration: {
+    baseURL: 'https://crazyrouter.com/v1',
+  },
+});
+
+const response = await llm.invoke('Hello');
+console.log(response.content);
+```
+
+<Note>
+  All LangChain components based on OpenAI can connect to Crazyrouter by simply changing the `base_url` and `api_key`, with no additional adaptation needed.
+</Note>

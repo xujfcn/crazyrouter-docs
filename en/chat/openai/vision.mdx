@@ -1,0 +1,259 @@
+---
+title: "Vision"
+description: "Send images via the Chat Completions API for visual understanding, supporting URL and Base64 formats"
+---
+
+# Vision
+
+Send images through the `/v1/chat/completions` endpoint to let the model understand and describe image content. Supports both URL references and Base64 encoding.
+
+## Supported Models
+
+`gpt-4o`, `gpt-4o-mini`, `claude-sonnet-4-20250514`, `gemini-2.5-flash`, `gemini-2.5-pro`, and other vision-capable models.
+
+---
+
+## Send Image via URL
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {"type": "text", "text": "Describe the content of this image"},
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "https://example.com/photo.jpg",
+              "detail": "high"
+            }
+          }
+        ]
+      }
+    ],
+    "max_tokens": 500
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "Describe the content of this image"},
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": "https://example.com/photo.jpg",
+                        "detail": "high"
+                    }
+                }
+            ]
+        }
+    ],
+    max_tokens=500
+)
+
+print(response.choices[0].message.content)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const response = await client.chat.completions.create({
+  model: "gpt-4o",
+  messages: [
+    {
+      role: "user",
+      content: [
+        { type: "text", text: "Describe the content of this image" },
+        {
+          type: "image_url",
+          image_url: {
+            url: "https://example.com/photo.jpg",
+            detail: "high",
+          },
+        },
+      ],
+    },
+  ],
+  max_tokens: 500,
+});
+
+console.log(response.choices[0].message.content);
+```
+
+</CodeGroup>
+
+---
+
+## Send Image via Base64
+
+Encode the image as a Base64 string and pass it using the `data:` URI format.
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {"type": "text", "text": "What is in this image?"},
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg..."
+            }
+          }
+        ]
+      }
+    ],
+    "max_tokens": 500
+  }'
+```
+
+```python Python
+import base64
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+with open("image.png", "rb") as f:
+    image_base64 = base64.b64encode(f.read()).decode("utf-8")
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "What is in this image?"},
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:image/png;base64,{image_base64}"
+                    }
+                }
+            ]
+        }
+    ],
+    max_tokens=500
+)
+
+print(response.choices[0].message.content)
+```
+
+</CodeGroup>
+
+---
+
+## Streaming Vision
+
+<CodeGroup>
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "Describe this image in detail"},
+                {
+                    "type": "image_url",
+                    "image_url": {"url": "https://example.com/photo.jpg"}
+                }
+            ]
+        }
+    ],
+    max_tokens=1000,
+    stream=True
+)
+
+for chunk in stream:
+    if chunk.choices[0].delta.content is not None:
+        print(chunk.choices[0].delta.content, end="")
+```
+
+</CodeGroup>
+
+---
+
+## Multiple Image Understanding
+
+You can send multiple images in a single message:
+
+```python Python
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "Compare the differences between these two images"},
+                {
+                    "type": "image_url",
+                    "image_url": {"url": "https://example.com/image1.jpg"}
+                },
+                {
+                    "type": "image_url",
+                    "image_url": {"url": "https://example.com/image2.jpg"}
+                }
+            ]
+        }
+    ],
+    max_tokens=1000
+)
+```
+
+## detail Parameter
+
+| Value | Description |
+|-------|-------------|
+| `low` | Low resolution mode, consumes fewer tokens, suitable for quick recognition |
+| `high` | High resolution mode, consumes more tokens, suitable for detailed analysis |
+| `auto` | Default, the model chooses automatically |
+
+<Note>
+  Images consume additional tokens. Higher resolution images consume more tokens. Choose the appropriate `detail` level based on your actual needs.
+</Note>
+
+<Warning>
+  Base64 encoding increases image size by approximately 33%. For large images, it is recommended to use the URL method to reduce request size.
+</Warning>

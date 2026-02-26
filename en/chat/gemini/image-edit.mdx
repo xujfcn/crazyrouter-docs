@@ -1,0 +1,140 @@
+---
+title: "Gemini Image Editing"
+description: "Edit images using the Gemini native format with inline image data"
+---
+
+# Gemini Image Editing
+
+Gemini image models support editing and modifying existing images. By sending the original image along with editing instructions, the model returns the modified image.
+
+```
+POST /v1beta/models/{model}:generateContent
+```
+
+---
+
+## Basic Image Editing
+
+<CodeGroup>
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-2-5-flash-image:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "Change the background of this image to a starry sky"},
+          {
+            "inlineData": {
+              "mimeType": "image/jpeg",
+              "data": "/9j/4AAQSkZJRgABAQAA..."
+            }
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "responseModalities": ["TEXT", "IMAGE"]
+    }
+  }'
+```
+
+```python Python
+import google.generativeai as genai
+import base64
+
+genai.configure(
+    api_key="YOUR_API_KEY",
+    transport="rest",
+    client_options={"api_endpoint": "https://crazyrouter.com"}
+)
+
+model = genai.GenerativeModel("gemini-2-5-flash-image")
+
+with open("input.jpg", "rb") as f:
+    image_data = f.read()
+
+response = model.generate_content(
+    [
+        "Change the background of this image to a starry sky",
+        {
+            "mime_type": "image/jpeg",
+            "data": image_data
+        }
+    ],
+    generation_config=genai.GenerationConfig(
+        response_modalities=["TEXT", "IMAGE"]
+    )
+)
+
+for part in response.candidates[0].content.parts:
+    if hasattr(part, "inline_data"):
+        with open("edited.png", "wb") as f:
+            f.write(base64.b64decode(part.inline_data.data))
+        print("Edited image saved")
+```
+
+</CodeGroup>
+
+---
+
+## Style Transfer
+
+```python Python
+response = model.generate_content(
+    [
+        "Convert this photo to watercolor painting style, keeping the original composition",
+        {"mime_type": "image/jpeg", "data": image_data}
+    ],
+    generation_config=genai.GenerationConfig(
+        response_modalities=["TEXT", "IMAGE"]
+    )
+)
+```
+
+---
+
+## Local Editing
+
+Specify the editing area through detailed text descriptions:
+
+```python Python
+response = model.generate_content(
+    [
+        "Change the person's clothing color from red to blue, keep everything else unchanged",
+        {"mime_type": "image/jpeg", "data": image_data}
+    ],
+    generation_config=genai.GenerationConfig(
+        response_modalities=["TEXT", "IMAGE"]
+    )
+)
+```
+
+---
+
+## Multi-Image Reference Editing
+
+You can send multiple images as references:
+
+```python Python
+response = model.generate_content(
+    [
+        "Redraw the first image using the style of the second image",
+        {"mime_type": "image/jpeg", "data": content_image},
+        {"mime_type": "image/jpeg", "data": style_image}
+    ],
+    generation_config=genai.GenerationConfig(
+        response_modalities=["TEXT", "IMAGE"]
+    )
+)
+```
+
+<Note>
+  The quality of image editing depends on the clarity of the editing instructions. It is recommended to use specific, clear descriptions to specify what needs to be modified.
+</Note>
+
+<Warning>
+  Both input and output images consume tokens. Large images significantly increase token consumption.
+</Warning>

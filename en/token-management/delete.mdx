@@ -1,0 +1,58 @@
+---
+title: 'Delete Token'
+description: 'Delete a specified API token'
+api: 'DELETE /api/token/{id}'
+---
+
+## Overview
+
+Permanently delete a specified API token. The token's API Key will be invalidated immediately after deletion.
+
+## Path Parameters
+
+<ParamField path="id" type="integer" required>
+  ID of the token to delete
+</ParamField>
+
+## Response Format
+
+```json
+{
+  "success": true,
+  "message": "Token deleted successfully"
+}
+```
+
+## Code Examples
+
+<CodeGroup>
+
+```python Python
+import requests
+
+headers = {
+    "Authorization": "Bearer your_access_token",
+    "New-Api-User": "1",
+    "User-Agent": "Mozilla/5.0"
+}
+
+token_id = 10
+response = requests.delete(
+    f"https://crazyrouter.com/api/token/{token_id}",
+    headers=headers
+)
+
+print(response.json())
+```
+
+```bash cURL
+curl -X DELETE https://crazyrouter.com/api/token/10 \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 1"
+```
+
+</CodeGroup>
+
+<Warning>
+  This operation is irreversible. All applications using this Key will immediately lose API access.
+</Warning>

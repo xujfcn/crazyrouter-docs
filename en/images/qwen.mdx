@@ -1,0 +1,105 @@
+---
+title: "Qwen Image Editing"
+description: "Use the Qwen image editing model for intelligent image editing"
+---
+
+# Qwen Image Editing
+
+```
+POST /v1/images/generations
+```
+
+Use the `qwen-image-edit-2509` model for intelligent image editing, compatible with the OpenAI Images API format.
+
+## Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model` | string | Yes | Fixed as `qwen-image-edit-2509` |
+| `prompt` | string | Yes | Edit description |
+| `image` | string | Yes | Original image URL |
+| `n` | integer | No | Number of images, default 1 |
+| `size` | string | No | Output size |
+
+## Request Examples
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "qwen-image-edit-2509",
+    "prompt": "Replace the sky in the image with a starry night",
+    "image": "https://example.com/landscape.jpg",
+    "n": 1
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/v1/images/generations",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "qwen-image-edit-2509",
+        "prompt": "Replace the sky in the image with a starry night",
+        "image": "https://example.com/landscape.jpg",
+        "n": 1
+    }
+)
+
+data = response.json()
+print(data["data"][0]["url"])
+```
+
+</CodeGroup>
+
+## Response Example
+
+```json
+{
+  "created": 1709123456,
+  "data": [
+    {
+      "url": "https://crazyrouter.com/files/qwen_edit_abc123.png"
+    }
+  ]
+}
+```
+
+## Use Cases
+
+- Replace image backgrounds
+- Modify specific elements in an image
+- Add or remove objects
+- Style transfer
+
+### Example: Remove Object
+
+```json
+{
+  "model": "qwen-image-edit-2509",
+  "prompt": "Remove the watermark from the image",
+  "image": "https://example.com/photo_with_watermark.jpg"
+}
+```
+
+### Example: Style Transfer
+
+```json
+{
+  "model": "qwen-image-edit-2509",
+  "prompt": "Convert the photo to cartoon style",
+  "image": "https://example.com/photo.jpg"
+}
+```
+
+<Note>
+  The Qwen image editing model has excellent understanding of Chinese instructions. Using Chinese descriptions for editing requests is recommended.
+</Note>

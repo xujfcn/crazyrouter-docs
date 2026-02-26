@@ -1,0 +1,253 @@
+---
+title: "Gemini Tools"
+description: "Use Gemini native format for code execution, Google Search, and URL context tools"
+---
+
+# Gemini Tools
+
+Gemini models support multiple built-in tools, including code execution, Google Search, and URL context retrieval.
+
+```
+POST /v1beta/models/{model}:generateContent
+```
+
+---
+
+## Code Execution
+
+Let Gemini write and execute Python code:
+
+<CodeGroup>
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "Calculate the sum of the first 100 prime numbers"}
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "codeExecution": {}
+      }
+    ]
+  }'
+```
+
+```python Python
+import google.generativeai as genai
+
+genai.configure(
+    api_key="YOUR_API_KEY",
+    transport="rest",
+    client_options={"api_endpoint": "https://crazyrouter.com"}
+)
+
+model = genai.GenerativeModel(
+    "gemini-2.5-flash",
+    tools=["code_execution"]
+)
+
+response = model.generate_content("Calculate the sum of the first 100 prime numbers")
+
+for part in response.candidates[0].content.parts:
+    if hasattr(part, "executable_code"):
+        print("Code:", part.executable_code.code)
+    elif hasattr(part, "code_execution_result"):
+        print("Result:", part.code_execution_result.output)
+    elif hasattr(part, "text"):
+        print("Text:", part.text)
+```
+
+</CodeGroup>
+
+### Code Execution Response
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "I will calculate the sum of the first 100 prime numbers."
+          },
+          {
+            "executableCode": {
+              "language": "PYTHON",
+              "code": "def is_prime(n):\n    if n < 2:\n        return False\n    for i in range(2, int(n**0.5) + 1):\n        if n % i == 0:\n            return False\n    return True\n\nprimes = []\nn = 2\nwhile len(primes) < 100:\n    if is_prime(n):\n        primes.append(n)\n    n += 1\n\nprint(f'Sum of first 100 primes: {sum(primes)}')"
+            }
+          },
+          {
+            "codeExecutionResult": {
+              "outcome": "OUTCOME_OK",
+              "output": "Sum of first 100 primes: 24133\n"
+            }
+          },
+          {
+            "text": "The sum of the first 100 prime numbers is **24133**."
+          }
+        ],
+        "role": "model"
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Google Search
+
+Enable Google Search to let the model access real-time information:
+
+<CodeGroup>
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "What are the latest AI technology trends in 2026?"}
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "googleSearch": {}
+      }
+    ]
+  }'
+```
+
+```python Python
+model = genai.GenerativeModel(
+    "gemini-2.5-flash",
+    tools=["google_search"]
+)
+
+response = model.generate_content("What are the latest AI technology trends in 2026?")
+print(response.text)
+```
+
+</CodeGroup>
+
+---
+
+## URL Context
+
+Let the model read the content of a specified URL:
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "Summarize the main content of this webpage: https://example.com/article"}
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "urlContext": {}
+      }
+    ]
+  }'
+```
+
+---
+
+## Custom Function Calling
+
+Gemini also supports custom function calling (similar to OpenAI's Function Calling):
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [{"text": "Check the weather in Beijing"}]
+      }
+    ],
+    "tools": [
+      {
+        "functionDeclarations": [
+          {
+            "name": "get_weather",
+            "description": "Get weather information for a specified city",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "city": {
+                  "type": "string",
+                  "description": "City name"
+                }
+              },
+              "required": ["city"]
+            }
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+### Function Call Response
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "functionCall": {
+              "name": "get_weather",
+              "args": {"city": "Beijing"}
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+### Return Function Result
+
+```json
+{
+  "contents": [
+    {"role": "user", "parts": [{"text": "Check the weather in Beijing"}]},
+    {"role": "model", "parts": [{"functionCall": {"name": "get_weather", "args": {"city": "Beijing"}}}]},
+    {
+      "role": "user",
+      "parts": [
+        {
+          "functionResponse": {
+            "name": "get_weather",
+            "response": {"temperature": 18, "condition": "sunny"}
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+<Note>
+  Multiple tools can be enabled simultaneously. For example, enabling both code execution and Google Search allows the model to automatically choose the appropriate tool as needed.
+</Note>

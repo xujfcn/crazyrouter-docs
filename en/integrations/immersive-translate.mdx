@@ -1,0 +1,48 @@
+---
+title: 'Immersive Translate Setup Guide'
+description: 'Configure Crazyrouter API in the Immersive Translate browser extension'
+---
+
+## Overview
+
+Immersive Translate is a browser translation extension that supports high-quality web page translation using AI models.
+
+## Configuration Steps
+
+<Steps>
+  <Step title="Install Extension">
+    Install "Immersive Translate" from the Chrome Web Store or Firefox Add-ons.
+  </Step>
+  <Step title="Open Settings">
+    Click the extension icon → `Settings` → `Translation Services`
+  </Step>
+  <Step title="Select OpenAI">
+    Choose `OpenAI` from the translation service list.
+  </Step>
+  <Step title="Configure API">
+    - **API Key**: `sk-xxx`
+    - **Custom API URL**: `https://crazyrouter.com/v1/chat/completions`
+    - **Model**: `gpt-4o-mini` (recommended, cost-effective)
+  </Step>
+  <Step title="Set as Default">
+    Set OpenAI as the default translation service.
+  </Step>
+</Steps>
+
+## Recommended Models
+
+| Model | Features |
+|-------|----------|
+| `gpt-4o-mini` | Fast, low cost, best for daily translation |
+| `gpt-4o` | Higher translation quality, suitable for professional documents |
+| `claude-sonnet-4-20250514` | Excellent for literary translation |
+
+## Cost-Saving Tips
+
+- Use `gpt-4o-mini` to significantly reduce translation costs
+- Enable "Translate selected area only" in settings to avoid unnecessary translations
+- Set up translation cache to avoid re-translating the same content
+
+<Note>
+  Immersive Translate requires the full API path (including `/chat/completions`), which differs from other tools.
+</Note>

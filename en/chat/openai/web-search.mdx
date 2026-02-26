@@ -1,0 +1,117 @@
+---
+title: "Web Search"
+description: "Enable web search via the Chat Completions API to let models access real-time information"
+---
+
+# Web Search
+
+Some models support performing web searches during conversations to retrieve real-time information before generating responses. Enable this by adding a `web_search` tool in `tools`.
+
+## Basic Usage
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      {"role": "user", "content": "What are today'\''s top tech news stories?"}
+    ],
+    "tools": [
+      {
+        "type": "web_search"
+      }
+    ]
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {"role": "user", "content": "What are today's top tech news stories?"}
+    ],
+    tools=[
+        {"type": "web_search"}
+    ]
+)
+
+print(response.choices[0].message.content)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const response = await client.chat.completions.create({
+  model: "gpt-4o",
+  messages: [{ role: "user", content: "What are today's top tech news stories?" }],
+  tools: [{ type: "web_search" }],
+});
+
+console.log(response.choices[0].message.content);
+```
+
+</CodeGroup>
+
+## Streaming Search
+
+```python Python
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {"role": "user", "content": "What are the latest AI models in 2026?"}
+    ],
+    tools=[{"type": "web_search"}],
+    stream=True
+)
+
+for chunk in stream:
+    if chunk.choices[0].delta.content is not None:
+        print(chunk.choices[0].delta.content, end="")
+```
+
+## Search Configuration
+
+You can control search behavior through the `web_search` tool parameters:
+
+```json
+{
+  "tools": [
+    {
+      "type": "web_search",
+      "web_search": {
+        "enable": true,
+        "search_context_size": "medium"
+      }
+    }
+  ]
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `enable` | boolean | Whether to enable search |
+| `search_context_size` | string | Search context size: `low`, `medium`, `high` |
+
+<Note>
+  Web search increases response latency and token consumption. The model automatically determines whether a search is needed and only triggers a search when real-time information is required.
+</Note>
+
+<Warning>
+  Not all models support web search. If the model does not support it, the `web_search` tool will be ignored.
+</Warning>

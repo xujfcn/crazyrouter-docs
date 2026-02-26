@@ -1,0 +1,67 @@
+---
+title: 'GPTs Conversations'
+description: 'Call OpenAI GPTs applications via API'
+---
+
+## Overview
+
+Crazyrouter supports calling OpenAI GPTs (custom GPT applications) through the standard Chat Completions API. Simply set the model name to the GPTs-specific format.
+
+## Model Name Format
+
+```
+gpt-4-gizmo-{gizmo_id}
+```
+
+The `gizmo_id` is the unique identifier for the GPT, which can be extracted from the GPTs URL.
+
+## Getting the Gizmo ID
+
+1. Visit the [ChatGPT GPTs Store](https://chatgpt.com/gpts)
+2. Open the target GPT application
+3. Extract the ID from the URL: `https://chatgpt.com/g/g-B3hgivKK9-xxx` → ID is `g-B3hgivKK9`
+
+## Code Examples
+
+<CodeGroup>
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1"
+)
+
+# Chat with a GPT
+response = client.chat.completions.create(
+    model="gpt-4-gizmo-g-B3hgivKK9",
+    messages=[
+        {"role": "user", "content": "Hello, please introduce yourself"}
+    ]
+)
+
+print(response.choices[0].message.content)
+```
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/chat/completions \
+  -H "Authorization: Bearer sk-xxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4-gizmo-g-B3hgivKK9",
+    "messages": [
+      {"role": "user", "content": "Hello, please introduce yourself"}
+    ]
+  }'
+```
+
+</CodeGroup>
+
+<Warning>
+  GPTs calls require upstream channel support. Not all GPTs are available - availability depends on channel configuration.
+</Warning>
+
+<Note>
+  GPTs conversations support streaming output by setting `stream: true`. Billing is calculated based on GPT-4 model pricing.
+</Note>

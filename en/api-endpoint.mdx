@@ -1,0 +1,68 @@
+---
+title: 'API Endpoints'
+description: 'API endpoint addresses and reference'
+---
+
+## API Base URL
+
+```
+https://crazyrouter.com
+```
+
+## Main Endpoints
+
+### Chat API
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/v1/chat/completions` | POST | OpenAI Chat format |
+| `/v1/messages` | POST | Anthropic Claude format |
+| `/v1/responses` | POST | OpenAI Responses API |
+| `/v1/completions` | POST | Legacy Completions |
+
+### Gemini Native Format
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/v1beta/models/{model}:generateContent` | POST | Content generation |
+| `/v1beta/models/{model}:streamGenerateContent` | POST | Streaming generation |
+
+### Image API
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/v1/images/generations` | POST | OpenAI image generation |
+| `/v1/images/edits` | POST | Image editing |
+| `/mj/submit/imagine` | POST | Midjourney image generation |
+| `/ideogram/v1/ideogram-v3/generate` | POST | Ideogram V3 |
+
+### Video API
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/v1/video/create` | POST | Unified video creation |
+| `/v1/video/query` | GET | Unified video query |
+| `/kling/v1/videos/text2video` | POST | Kling text-to-video |
+| `/luma/generations` | POST | Luma video generation |
+| `/runwayml/v1/tasks` | POST | Runway video generation |
+
+### Audio API
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/v1/audio/speech` | POST | Text-to-Speech (TTS) |
+| `/v1/audio/transcriptions` | POST | Speech-to-Text (STT) |
+| `/suno/submit/music` | POST | Suno music generation |
+
+### Other APIs
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/v1/embeddings` | POST | Embeddings |
+| `/v1/rerank` | POST | Reranking |
+| `/v1/models` | GET | Model list |
+| `/api/upload` | POST | Image upload |
+
+<Note>
+All endpoints support HTTPS. When using an OpenAI-compatible client, simply set `base_url` to `https://crazyrouter.com/v1`.
+</Note>

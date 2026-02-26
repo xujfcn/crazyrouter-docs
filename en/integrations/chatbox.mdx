@@ -1,0 +1,38 @@
+---
+title: 'ChatBox Setup Guide'
+description: 'Configure Crazyrouter API in the ChatBox desktop application'
+---
+
+## Overview
+
+ChatBox is a cross-platform AI desktop client that supports Windows, macOS, and Linux.
+
+## Configuration Steps
+
+<Steps>
+  <Step title="Download and Install">
+    Download and install from the [ChatBox website](https://chatboxai.app/).
+  </Step>
+  <Step title="Open Settings">
+    Click the `Settings` icon in the bottom left.
+  </Step>
+  <Step title="Configure API">
+    - **AI Provider**: Select `OpenAI API`
+    - **API Host**: `https://crazyrouter.com`
+    - **API Key**: `sk-xxx`
+    - **Model**: Select or enter a model name, e.g. `gpt-4o`
+  </Step>
+  <Step title="Save and Test">
+    Click `Save`, return to the main screen and send a message to test.
+  </Step>
+</Steps>
+
+## Advanced Settings
+
+- **Temperature**: Controls response randomness, between 0-2
+- **Max Tokens**: Maximum response length
+- **Context Messages**: Number of context messages, affects conversation memory
+
+<Note>
+  For ChatBox, enter `https://crazyrouter.com` as the API Host without the `/v1` suffix -- ChatBox appends it automatically.
+</Note>

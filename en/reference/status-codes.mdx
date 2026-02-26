@@ -1,0 +1,118 @@
+---
+title: 'Status Codes'
+description: 'Status code reference for all API types'
+---
+
+## HTTP Status Codes
+
+| Status Code | Description | Recommended Action |
+|-------------|-------------|-------------------|
+| 200 | Request successful | - |
+| 400 | Bad request parameters | Check request body format and parameters |
+| 401 | Authentication failed | Check if API Key is correct |
+| 403 | Insufficient permissions | Check if the token has access to the requested model |
+| 404 | Resource not found | Check URL path |
+| 429 | Rate limit exceeded | Reduce request frequency or contact admin |
+| 500 | Internal server error | Retry later |
+| 502 | Upstream service error | Upstream channel error, system will auto-retry |
+| 503 | Service unavailable | System maintenance in progress |
+
+## Chat Completions Error Codes
+
+```json
+{
+  "error": {
+    "message": "Error description",
+    "type": "error_type",
+    "code": "error_code"
+  }
+}
+```
+
+| code | Description |
+|------|-------------|
+| `invalid_api_key` | API Key is invalid or expired |
+| `insufficient_quota` | Insufficient balance |
+| `model_not_found` | Model does not exist or is not enabled |
+| `context_length_exceeded` | Input exceeds model context length limit |
+| `rate_limit_exceeded` | Rate limit exceeded |
+| `content_filter` | Content blocked by safety filter |
+
+## Midjourney Task Status Codes
+
+| Status | Description |
+|--------|-------------|
+| `NOT_START` | Task not started |
+| `SUBMITTED` | Submitted |
+| `IN_PROGRESS` | Generating |
+| `SUCCESS` | Generation successful |
+| `FAILURE` | Generation failed |
+| `CANCEL` | Cancelled |
+
+### MJ Error Codes
+
+| code | Description |
+|------|-------------|
+| 1 | Submission successful |
+| 21 | Task already exists |
+| 22 | Queued |
+| 23 | Queue full |
+| 24 | Submission failed |
+
+## Kling Video Status Codes
+
+| Status | Description |
+|--------|-------------|
+| `submitted` | Submitted |
+| `processing` | Processing |
+| `succeed` | Generation successful |
+| `failed` | Generation failed |
+
+## Luma Video Status Codes
+
+| Status | Description |
+|--------|-------------|
+| `pending` | Pending |
+| `processing` | Processing |
+| `completed` | Completed |
+| `failed` | Failed |
+
+## Suno Music Status Codes
+
+| Status | Description |
+|--------|-------------|
+| `submitted` | Submitted |
+| `processing` | Generating |
+| `complete` | Completed |
+| `error` | Error |
+
+## Runway Video Status Codes
+
+| Status | Description |
+|--------|-------------|
+| `PENDING` | Pending |
+| `RUNNING` | Generating |
+| `SUCCEEDED` | Succeeded |
+| `FAILED` | Failed |
+
+## General Error Handling Recommendations
+
+<Warning>
+  When encountering a 429 error, do not retry immediately. Use an exponential backoff strategy, starting with a 1-second wait and doubling each time.
+</Warning>
+
+```python
+import time
+import requests
+
+def request_with_retry(url, headers, json_data, max_retries=3):
+    for i in range(max_retries):
+        response = requests.post(url, headers=headers, json=json_data)
+        if response.status_code == 429:
+            wait = 2 ** i
+            print(f"Rate limited, waiting {wait} seconds before retrying...")
+            time.sleep(wait)
+            continue
+        return response
+    return response
+```

@@ -1,0 +1,173 @@
+---
+title: "GPT-5 Thinking Mode"
+description: "Enable GPT-5's thinking/reasoning mode via the Responses API"
+---
+
+# GPT-5 Thinking Mode
+
+GPT-5 supports enabling thinking mode through the Responses API's `reasoning` parameter, allowing the model to perform deep reasoning before answering.
+
+```
+POST /v1/responses
+```
+
+---
+
+## Basic Usage
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5",
+    "input": "Analyze the time complexity of the following code and propose an optimization:\ndef two_sum(nums, target):\n    for i in range(len(nums)):\n        for j in range(i+1, len(nums)):\n            if nums[i] + nums[j] == target:\n                return [i, j]",
+    "reasoning": {
+      "effort": "high"
+    }
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.responses.create(
+    model="gpt-5",
+    input="Analyze the time complexity of the following code and propose an optimization:\ndef two_sum(nums, target):\n    for i in range(len(nums)):\n        for j in range(i+1, len(nums)):\n            if nums[i] + nums[j] == target:\n                return [i, j]",
+    reasoning={
+        "effort": "high"
+    }
+)
+
+print(response.output_text)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const response = await client.responses.create({
+  model: "gpt-5",
+  input: "Prove that the sum of interior angles of any triangle is 180 degrees",
+  reasoning: {
+    effort: "high",
+  },
+});
+
+console.log(response.output_text);
+```
+
+</CodeGroup>
+
+---
+
+## reasoning Parameter
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `effort` | string | Reasoning depth: `low` (quick), `medium` (balanced), `high` (deep) |
+| `summary` | string | Thinking summary: `auto`, `concise`, `detailed` |
+
+### effort Level Comparison
+
+| Level | Use Cases | Token Consumption |
+|-------|-----------|-------------------|
+| `low` | Simple questions, factual queries | Low |
+| `medium` | General reasoning, code analysis | Medium |
+| `high` | Complex math, deep analysis | High |
+
+---
+
+## Get Thinking Summary
+
+Set the `summary` parameter to get a summary of the model's thinking process:
+
+```python Python
+response = client.responses.create(
+    model="gpt-5",
+    input="Design a high-concurrency message queue system architecture",
+    reasoning={
+        "effort": "high",
+        "summary": "detailed"
+    }
+)
+
+# Output may contain thinking summary
+for item in response.output:
+    if item.type == "reasoning":
+        print("Thinking process:", item.summary)
+    elif item.type == "message":
+        for content in item.content:
+            if content.type == "output_text":
+                print("Answer:", content.text)
+```
+
+---
+
+## Streaming Thinking
+
+```python Python
+stream = client.responses.create(
+    model="gpt-5",
+    input="Explain why the P=NP problem is important",
+    reasoning={"effort": "high", "summary": "concise"},
+    stream=True
+)
+
+for event in stream:
+    if event.type == "response.reasoning_summary_text.delta":
+        print(f"[Thinking] {event.delta}", end="")
+    elif event.type == "response.output_text.delta":
+        print(event.delta, end="")
+```
+
+---
+
+## Combined with Tools
+
+Thinking mode can be used simultaneously with Function Calling and Web Search:
+
+```python Python
+response = client.responses.create(
+    model="gpt-5",
+    input="Analyze the current global AI chip market landscape and provide investment recommendations",
+    reasoning={"effort": "high"},
+    tools=[
+        {"type": "web_search_preview"}
+    ]
+)
+
+print(response.output_text)
+```
+
+---
+
+## Combined with System Instructions
+
+```python Python
+response = client.responses.create(
+    model="gpt-5",
+    instructions="You are a senior software architect who specializes in analyzing system design problems.",
+    input="Design a real-time chat system that supports millions of users",
+    reasoning={"effort": "high"}
+)
+```
+
+<Note>
+  In thinking mode, the model consumes additional tokens for internal reasoning. The higher the `effort`, the more tokens consumed, but the answer quality is typically better.
+</Note>
+
+<Warning>
+  Not all models support the `reasoning` parameter. Currently it is mainly supported by GPT-5 and o-series models. For unsupported models, this parameter will be ignored.
+</Warning>

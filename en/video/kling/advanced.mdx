@@ -1,0 +1,136 @@
+---
+title: "Kling Advanced Features"
+description: "Kling advanced features: virtual try-on, lip sync, video extension, video effects"
+---
+
+# Kling Advanced Features
+
+## Virtual Try-On
+
+```
+POST /kling/v1/virtual-try-on
+```
+
+Apply clothing images onto person photos.
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model_name` | string | Yes | Model name |
+| `human_image` | string | Yes | Person photo URL |
+| `cloth_image` | string | Yes | Clothing image URL |
+| `callback_url` | string | No | Callback URL |
+
+### Request Example
+
+```bash cURL
+curl -X POST https://crazyrouter.com/kling/v1/virtual-try-on \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model_name": "kling-v1",
+    "human_image": "https://example.com/person.jpg",
+    "cloth_image": "https://example.com/dress.jpg"
+  }'
+```
+
+---
+
+## Lip Sync
+
+```
+POST /kling/v1/lip-sync
+```
+
+Synchronize audio with a person's lip movements in a video.
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model_name` | string | Yes | Model name |
+| `video_url` | string | Yes | Original video URL |
+| `audio_url` | string | Yes | Audio file URL |
+| `callback_url` | string | No | Callback URL |
+
+### Request Example
+
+```bash cURL
+curl -X POST https://crazyrouter.com/kling/v1/lip-sync \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model_name": "kling-v1",
+    "video_url": "https://example.com/talking_head.mp4",
+    "audio_url": "https://example.com/speech.mp3"
+  }'
+```
+
+---
+
+## Video Extension
+
+```
+POST /kling/v1/video-extend
+```
+
+Extend the duration of an existing video.
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model_name` | string | Yes | Model name |
+| `video_url` | string | Yes | Original video URL |
+| `prompt` | string | No | Description for the extended portion |
+| `callback_url` | string | No | Callback URL |
+
+### Request Example
+
+```bash cURL
+curl -X POST https://crazyrouter.com/kling/v1/video-extend \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model_name": "kling-v1-6",
+    "video_url": "https://example.com/short_video.mp4",
+    "prompt": "Continue showing the cat chasing butterflies"
+  }'
+```
+
+---
+
+## Video Effects
+
+```
+POST /kling/v1/effects
+```
+
+Add effects to videos.
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model_name` | string | Yes | Model name |
+| `image` | string | Yes | Input image URL |
+| `effect_scene` | string | Yes | Effect scene |
+| `callback_url` | string | No | Callback URL |
+
+### Request Example
+
+```bash cURL
+curl -X POST https://crazyrouter.com/kling/v1/effects \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model_name": "kling-v1",
+    "image": "https://example.com/photo.jpg",
+    "effect_scene": "christmas"
+  }'
+```
+
+<Note>
+  All advanced features are asynchronous tasks. After submission, use the [Task Query](/en/video/kling/query) endpoint to get results.
+</Note>

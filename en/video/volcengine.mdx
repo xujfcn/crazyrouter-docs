@@ -1,0 +1,115 @@
+---
+title: "Volcengine"
+description: "Use the Volcengine API to generate videos"
+---
+
+# Volcengine
+
+Volcengine provides video generation capabilities from ByteDance.
+
+## Create Video Task
+
+```
+POST /volc/v1/contents/generations/tasks
+```
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model` | string | Yes | Model name |
+| `content` | object | Yes | Content configuration |
+| `content.prompt` | string | Yes | Video description prompt |
+| `content.image_url` | string | No | Reference image URL |
+| `content.aspect_ratio` | string | No | Aspect ratio |
+
+### Request Examples
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/volc/v1/contents/generations/tasks \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "doubao-video",
+    "content": {
+      "prompt": "A butterfly fluttering among flowers, macro lens shot",
+      "aspect_ratio": "16:9"
+    }
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/volc/v1/contents/generations/tasks",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "doubao-video",
+        "content": {
+            "prompt": "A butterfly fluttering among flowers, macro lens shot",
+            "aspect_ratio": "16:9"
+        }
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### Response Example
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "task_id": "volc_task_abc123"
+  }
+}
+```
+
+---
+
+## Query Task
+
+```
+GET /volc/v1/contents/generations/tasks/{task_id}
+```
+
+```bash cURL
+curl https://crazyrouter.com/volc/v1/contents/generations/tasks/volc_task_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Response Example (Completed)
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "task_id": "volc_task_abc123",
+    "status": "SUCCESS",
+    "content": {
+      "video_url": "https://cdn.volcengine.com/videos/...",
+      "duration": 5
+    }
+  }
+}
+```
+
+### Task Status
+
+| Status | Description |
+|--------|-------------|
+| `SUBMITTED` | Submitted |
+| `PROCESSING` | Processing |
+| `SUCCESS` | Succeeded |
+| `FAILED` | Failed |

@@ -1,0 +1,135 @@
+---
+title: "Kling Video Generation"
+description: "Use the Kling API for text-to-video and image-to-video generation"
+---
+
+# Kling Video Generation
+
+## Text-to-Video
+
+```
+POST /kling/v1/videos/text2video
+```
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model_name` | string | Yes | Model name: `kling-v1`, `kling-v1-5`, `kling-v1-6` |
+| `prompt` | string | Yes | Video description prompt |
+| `negative_prompt` | string | No | Negative prompt |
+| `duration` | string | No | Video duration: `5` (5 seconds), `10` (10 seconds) |
+| `aspect_ratio` | string | No | Aspect ratio: `16:9`, `9:16`, `1:1` |
+| `mode` | string | No | Generation mode: `std` (standard), `pro` (professional) |
+| `cfg_scale` | number | No | Guidance strength, 0.0-1.0 |
+| `callback_url` | string | No | Callback URL |
+
+### Request Examples
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/kling/v1/videos/text2video \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model_name": "kling-v1-6",
+    "prompt": "A cat chasing butterflies in a garden, sunny day, cinematic quality",
+    "negative_prompt": "blurry, low quality, distorted",
+    "duration": "5",
+    "aspect_ratio": "16:9",
+    "mode": "std"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/kling/v1/videos/text2video",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model_name": "kling-v1-6",
+        "prompt": "A cat chasing butterflies in a garden, sunny day",
+        "duration": "5",
+        "aspect_ratio": "16:9",
+        "mode": "std"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### Response Example
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "task_id": "kling_t2v_abc123",
+    "task_status": "submitted"
+  }
+}
+```
+
+---
+
+## Image-to-Video
+
+```
+POST /kling/v1/videos/image2video
+```
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model_name` | string | Yes | Model name |
+| `prompt` | string | No | Video description (optional) |
+| `negative_prompt` | string | No | Negative prompt |
+| `image` | string | Yes | Reference image URL |
+| `image_tail` | string | No | End frame image URL (first-last frame mode) |
+| `duration` | string | No | Video duration |
+| `aspect_ratio` | string | No | Aspect ratio |
+| `mode` | string | No | Generation mode |
+| `cfg_scale` | number | No | Guidance strength |
+| `callback_url` | string | No | Callback URL |
+
+### Request Example
+
+```bash cURL
+curl -X POST https://crazyrouter.com/kling/v1/videos/image2video \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model_name": "kling-v1-6",
+    "prompt": "The person in the image starts smiling and slowly turns their head",
+    "image": "https://example.com/portrait.jpg",
+    "duration": "5",
+    "mode": "std"
+  }'
+```
+
+### First-Last Frame Mode
+
+Provide both first and last frame images to generate a transition video:
+
+```json
+{
+  "model_name": "kling-v1-6",
+  "prompt": "Smooth transition",
+  "image": "https://example.com/start_frame.jpg",
+  "image_tail": "https://example.com/end_frame.jpg",
+  "duration": "5"
+}
+```
+
+<Note>
+  Video generation is an asynchronous task, typically taking 2-5 minutes. Use the [Task Query](/en/video/kling/query) endpoint to get results.
+</Note>

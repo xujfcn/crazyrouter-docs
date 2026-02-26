@@ -1,0 +1,61 @@
+---
+title: 'ChatGPT on WeChat Setup Guide'
+description: 'Configure Crazyrouter API in the ChatGPT on WeChat project'
+---
+
+## Overview
+
+ChatGPT on WeChat is an open-source project that integrates AI chat capabilities into WeChat.
+
+## Configuration
+
+### Edit Configuration File
+
+Edit `config.json`:
+
+```json
+{
+  "open_ai_api_key": "sk-xxx",
+  "open_ai_api_base": "https://crazyrouter.com/v1",
+  "model": "gpt-4o",
+  "proxy": "",
+  "single_chat_prefix": [""],
+  "single_chat_reply_prefix": "",
+  "group_chat_prefix": ["@bot"],
+  "group_name_white_list": ["AI Chat Group"]
+}
+```
+
+### Environment Variables
+
+```bash
+export OPEN_AI_API_KEY=sk-xxx
+export OPEN_AI_API_BASE=https://crazyrouter.com/v1
+export MODEL=gpt-4o
+```
+
+### Docker Deployment
+
+```yaml
+services:
+  chatgpt-on-wechat:
+    image: zhayujie/chatgpt-on-wechat
+    environment:
+      - OPEN_AI_API_KEY=sk-xxx
+      - OPEN_AI_API_BASE=https://crazyrouter.com/v1
+      - MODEL=gpt-4o
+    volumes:
+      - ./config.json:/app/config.json
+```
+
+## Recommended Models
+
+| Scenario | Model | Description |
+|----------|-------|-------------|
+| Daily chat | `gpt-4o-mini` | Fast response, low cost |
+| High quality replies | `gpt-4o` | Better response quality |
+| Long text analysis | `claude-sonnet-4-20250514` | Large context window |
+
+<Warning>
+  WeChat bot projects must comply with WeChat usage policies. Avoid sending messages too frequently to prevent account restrictions.
+</Warning>

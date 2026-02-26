@@ -1,0 +1,47 @@
+---
+title: 'Dify Setup Guide'
+description: 'Configure Crazyrouter API in the Dify platform'
+---
+
+## Overview
+
+Dify is an open-source LLM application development platform that supports workflow orchestration, RAG, Agents, and more.
+
+## Configuration Steps
+
+<Steps>
+  <Step title="Go to Model Providers">
+    Log in to the Dify dashboard, go to `Settings` → `Model Providers`
+  </Step>
+  <Step title="Add OpenAI-Compatible Model">
+    Click `OpenAI-API-compatible` and fill in:
+    - **Model Name**: `gpt-4o` (or another model)
+    - **API Key**: `sk-xxx`
+    - **API Base URL**: `https://crazyrouter.com/v1`
+  </Step>
+  <Step title="Configure Model Parameters">
+    - **Model Type**: Select LLM / Text Embedding / Rerank based on the model
+    - **Context Length**: Set according to the model (e.g. 128000 for gpt-4o)
+    - **Max Tokens**: Set maximum output length
+  </Step>
+  <Step title="Save and Test">
+    Click save and select the model in an application to test.
+  </Step>
+</Steps>
+
+## Add Embedding Model
+
+In Model Providers, add:
+- **Model Name**: `text-embedding-3-large`
+- **Model Type**: `Text Embedding`
+- **API Base URL**: `https://crazyrouter.com/v1`
+
+## Add Rerank Model
+
+- **Model Name**: `BAAI/bge-reranker-v2-m3`
+- **Model Type**: `Rerank`
+- **API Base URL**: `https://crazyrouter.com/v1`
+
+<Note>
+  Dify supports configuring multiple model providers simultaneously. It's recommended to configure separate models for different purposes (chat, embedding, reranking).
+</Note>

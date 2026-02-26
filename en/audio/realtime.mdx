@@ -1,0 +1,124 @@
+---
+title: "GPT Realtime"
+description: "Use the GPT Realtime API for real-time voice conversations"
+---
+
+# GPT Realtime
+
+```
+GET /v1/realtime
+```
+
+The GPT Realtime API enables low-latency real-time voice conversations via WebSocket connections.
+
+## Connection
+
+Connect to the Realtime endpoint via WebSocket:
+
+```
+wss://crazyrouter.com/v1/realtime?model=gpt-4o-realtime-preview
+```
+
+### Authentication
+
+Pass the API Key in the WebSocket connection headers:
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+Or via URL parameter:
+
+```
+wss://crazyrouter.com/v1/realtime?model=gpt-4o-realtime-preview&api_key=YOUR_API_KEY
+```
+
+---
+
+## Supported Models
+
+| Model | Description |
+|-------|-------------|
+| `gpt-4o-realtime-preview` | GPT-4o Realtime Preview |
+| `gpt-4o-mini-realtime-preview` | GPT-4o Mini Realtime Preview |
+
+---
+
+## Usage Example
+
+```python Python
+import asyncio
+import websockets
+import json
+
+async def realtime_chat():
+    uri = "wss://crazyrouter.com/v1/realtime?model=gpt-4o-realtime-preview"
+    headers = {"Authorization": "Bearer YOUR_API_KEY"}
+
+    async with websockets.connect(uri, extra_headers=headers) as ws:
+        # Configure session
+        await ws.send(json.dumps({
+            "type": "session.update",
+            "session": {
+                "modalities": ["text", "audio"],
+                "voice": "nova",
+                "input_audio_format": "pcm16",
+                "output_audio_format": "pcm16",
+                "turn_detection": {
+                    "type": "server_vad"
+                }
+            }
+        }))
+
+        # Send text message
+        await ws.send(json.dumps({
+            "type": "conversation.item.create",
+            "item": {
+                "type": "message",
+                "role": "user",
+                "content": [
+                    {"type": "input_text", "text": "Hello, please introduce yourself"}
+                ]
+            }
+        }))
+
+        # Trigger response
+        await ws.send(json.dumps({"type": "response.create"}))
+
+        # Receive response
+        async for message in ws:
+            event = json.loads(message)
+            if event["type"] == "response.text.delta":
+                print(event["delta"], end="")
+            elif event["type"] == "response.done":
+                break
+
+asyncio.run(realtime_chat())
+```
+
+---
+
+## Event Types
+
+### Client Events
+
+| Event | Description |
+|-------|-------------|
+| `session.update` | Update session configuration |
+| `conversation.item.create` | Create a conversation item |
+| `input_audio_buffer.append` | Append audio data |
+| `input_audio_buffer.commit` | Commit audio buffer |
+| `response.create` | Trigger model response |
+
+### Server Events
+
+| Event | Description |
+|-------|-------------|
+| `session.created` | Session created |
+| `response.text.delta` | Text delta |
+| `response.audio.delta` | Audio delta |
+| `response.done` | Response complete |
+
+<Warning>
+  The Realtime API uses persistent WebSocket connections. Ensure your client supports the WebSocket protocol. The default connection timeout is 120 seconds.
+</Warning>

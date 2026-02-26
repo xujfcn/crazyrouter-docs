@@ -1,0 +1,80 @@
+---
+title: "Suno Song Concatenation"
+description: "Use the Suno API to concatenate multiple song segments"
+---
+
+# Suno Song Concatenation
+
+```
+POST /suno/submit/concat
+```
+
+Concatenate multiple song clips into a complete song.
+
+## Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `clip_id` | string | Yes | Clip ID of the song to concatenate |
+| `is_infill` | boolean | No | Whether to use infill mode (generate transitions between segments) |
+
+## Request Examples
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/suno/submit/concat \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "clip_id": "clip_abc123",
+    "is_infill": false
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/suno/submit/concat",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "clip_id": "clip_abc123",
+        "is_infill": False
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+## Response Example
+
+```json
+{
+  "code": 1,
+  "description": "Submitted successfully",
+  "result": "concat_task_abc123"
+}
+```
+
+---
+
+## Infill Mode
+
+When `is_infill: true` is set, Suno will automatically generate transition passages between song segments:
+
+```json
+{
+  "clip_id": "clip_abc123",
+  "is_infill": true
+}
+```
+
+<Note>
+  After submitting a concatenation task, use the [Task Query](/en/audio/suno/query) endpoint to get results. The concatenated song will generate a new clip ID.
+</Note>

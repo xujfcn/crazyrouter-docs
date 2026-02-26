@@ -1,0 +1,157 @@
+---
+title: "Reasoning Models"
+description: "Use reasoning models (such as o4-mini, DeepSeek) and control reasoning depth"
+---
+
+# Reasoning Models
+
+Reasoning Models perform deep thinking before answering, making them suitable for complex tasks like math, coding, and logical reasoning. Crazyrouter supports multiple reasoning models with reasoning depth control.
+
+## Supported Reasoning Models
+
+| Model | Description |
+|-------|-------------|
+| `o4-mini` | OpenAI reasoning model, balancing speed and capability |
+| `o3` | OpenAI advanced reasoning model |
+| `o3-mini` | OpenAI lightweight reasoning model |
+| `deepseek-r1` | DeepSeek reasoning model |
+| `deepseek-v3-1` | DeepSeek V3.1 |
+| `claude-sonnet-4-20250514` | Claude with extended thinking support |
+| `gemini-2.5-flash-thinking` | Gemini thinking model |
+
+---
+
+## reasoning_effort Parameter
+
+Control the model's reasoning depth with `reasoning_effort`:
+
+| Value | Description |
+|-------|-------------|
+| `low` | Quick answers, suitable for simple questions |
+| `medium` | Moderate reasoning, balancing speed and quality |
+| `high` | Deep reasoning, suitable for complex problems |
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "o4-mini",
+    "messages": [
+      {"role": "user", "content": "Prove that the square root of 2 is irrational"}
+    ],
+    "reasoning_effort": "high"
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="o4-mini",
+    messages=[
+        {"role": "user", "content": "Prove that the square root of 2 is irrational"}
+    ],
+    reasoning_effort="high"
+)
+
+print(response.choices[0].message.content)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const response = await client.chat.completions.create({
+  model: "o4-mini",
+  messages: [{ role: "user", content: "Prove that the square root of 2 is irrational" }],
+  reasoning_effort: "high",
+});
+
+console.log(response.choices[0].message.content);
+```
+
+</CodeGroup>
+
+---
+
+## thinking Parameter (Thinking Budget)
+
+Some models support precise control of the thinking token budget via the `thinking` parameter:
+
+```python Python
+response = client.chat.completions.create(
+    model="claude-sonnet-4-20250514",
+    messages=[
+        {"role": "user", "content": "Analyze the time complexity of this algorithm and optimize it"}
+    ],
+    thinking={
+        "type": "enabled",
+        "budget_tokens": 10000
+    },
+    max_tokens=16000
+)
+```
+
+<Note>
+  When using the `thinking` parameter, `max_tokens` must be greater than `budget_tokens`, because `max_tokens` includes both thinking tokens and output tokens.
+</Note>
+
+---
+
+## Streaming Reasoning
+
+Reasoning models also support streaming output. The thinking process and final answer are returned as separate chunks:
+
+```python Python
+stream = client.chat.completions.create(
+    model="o4-mini",
+    messages=[
+        {"role": "user", "content": "Solve a Sudoku puzzle"}
+    ],
+    reasoning_effort="medium",
+    stream=True
+)
+
+for chunk in stream:
+    if chunk.choices[0].delta.content is not None:
+        print(chunk.choices[0].delta.content, end="")
+```
+
+---
+
+## DeepSeek Reasoning Models
+
+DeepSeek reasoning models return the thinking process in the response:
+
+```python Python
+response = client.chat.completions.create(
+    model="deepseek-r1",
+    messages=[
+        {"role": "user", "content": "Which is larger, 9.11 or 9.8?"}
+    ]
+)
+
+# The thinking process may be in the reasoning_content field
+message = response.choices[0].message
+print("Answer:", message.content)
+```
+
+<Warning>
+  Reasoning models typically consume far more tokens than regular models because the thinking process also consumes tokens. Be mindful of controlling `reasoning_effort` and `budget_tokens` to manage costs.
+</Warning>
+
+<Note>
+  Reasoning models typically do not support sampling parameters like `temperature` and `top_p`. If these parameters are passed, they may be ignored or return an error.
+</Note>

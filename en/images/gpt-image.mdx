@@ -1,0 +1,125 @@
+---
+title: "GPT Image"
+description: "Use the GPT Image model to generate and edit images, compatible with OpenAI format"
+---
+
+# GPT Image
+
+```
+POST /v1/images/generations
+```
+
+Use the `gpt-image-1` model to generate images, compatible with the OpenAI Images API format.
+
+## Generate Image
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model` | string | Yes | Fixed as `gpt-image-1` |
+| `prompt` | string | Yes | Image description prompt |
+| `n` | integer | No | Number of images to generate, default 1 |
+| `size` | string | No | Image size: `1024x1024` (default), `1536x1024`, `1024x1536`, `auto` |
+| `quality` | string | No | Quality: `auto` (default), `low`, `medium`, `high` |
+| `background` | string | No | Background: `auto` (default), `transparent`, `opaque` |
+| `output_format` | string | No | Output format: `png` (default), `jpeg`, `webp` |
+
+### Request Examples
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-image-1",
+    "prompt": "A cat wearing a spacesuit walking on the moon with Earth in the background",
+    "n": 1,
+    "size": "1024x1024",
+    "quality": "high"
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.images.generate(
+    model="gpt-image-1",
+    prompt="A cat wearing a spacesuit walking on the moon with Earth in the background",
+    n=1,
+    size="1024x1024",
+    quality="high"
+)
+
+print(response.data[0].url)
+```
+
+</CodeGroup>
+
+### Response Example
+
+```json
+{
+  "created": 1709123456,
+  "data": [
+    {
+      "url": "https://crazyrouter.com/files/image_abc123.png",
+      "revised_prompt": "A cat wearing a spacesuit walking on the moon's surface with Earth visible in the background"
+    }
+  ]
+}
+```
+
+---
+
+## Edit Image
+
+```
+POST /v1/images/edits
+```
+
+Edit an existing image with mask-based region editing support.
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model` | string | Yes | Fixed as `gpt-image-1` |
+| `image` | file | Yes | Original image file (multipart) |
+| `prompt` | string | Yes | Edit description |
+| `mask` | file | No | Mask image, transparent areas indicate regions to edit |
+| `n` | integer | No | Number of images to generate |
+| `size` | string | No | Output size |
+
+### Request Example
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.images.edit(
+    model="gpt-image-1",
+    image=open("original.png", "rb"),
+    mask=open("mask.png", "rb"),
+    prompt="Add a rainbow in the sky",
+    n=1,
+    size="1024x1024"
+)
+
+print(response.data[0].url)
+```
+
+<Note>
+  GPT Image supports transparent background output. Set `background: "transparent"` and use PNG format.
+</Note>

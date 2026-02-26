@@ -1,0 +1,64 @@
+---
+title: "Get Seed"
+description: "Get the image seed value of a Midjourney task"
+---
+
+# Get Seed
+
+```
+GET /mj/task/{id}/image-seed
+```
+
+Get the image seed value of a completed task. The seed can be used to reproduce similar generation results.
+
+## Request Examples
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/mj/task/task_1234567890/image-seed \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    "https://crazyrouter.com/mj/task/task_1234567890/image-seed",
+    headers={"Authorization": "Bearer YOUR_API_KEY"}
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+## Response Example
+
+```json
+{
+  "code": 1,
+  "description": "Success",
+  "result": "1234567890"
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `result` | Seed value, can be used in Imagine prompts with `--seed 1234567890` to reproduce results |
+
+---
+
+## Using the Seed
+
+Add the `--seed` parameter to the prompt in an Imagine request:
+
+```json
+{
+  "prompt": "a beautiful sunset over the ocean --ar 16:9 --v 6 --seed 1234567890"
+}
+```
+
+<Note>
+  The seed can only be retrieved after a task has completed successfully. The same seed + same prompt will generate very similar (but not identical) images.
+</Note>

@@ -1,0 +1,187 @@
+---
+title: "Gemini OpenAI-Compatible Format"
+description: "Use Gemini models through the OpenAI-compatible /v1/chat/completions endpoint"
+---
+
+# Gemini OpenAI-Compatible Format
+
+You can call Gemini models through the standard OpenAI Chat Completions API format without learning the Gemini native API.
+
+```
+POST /v1/chat/completions
+```
+
+---
+
+## Basic Conversation
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gemini-2.5-flash",
+    "messages": [
+      {"role": "system", "content": "You are a knowledgeable assistant."},
+      {"role": "user", "content": "Explain quantum entanglement"}
+    ],
+    "temperature": 0.7,
+    "max_tokens": 1024
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="gemini-2.5-flash",
+    messages=[
+        {"role": "system", "content": "You are a knowledgeable assistant."},
+        {"role": "user", "content": "Explain quantum entanglement"}
+    ],
+    temperature=0.7,
+    max_tokens=1024
+)
+
+print(response.choices[0].message.content)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const response = await client.chat.completions.create({
+  model: "gemini-2.5-flash",
+  messages: [
+    { role: "system", content: "You are a knowledgeable assistant." },
+    { role: "user", content: "Explain quantum entanglement" },
+  ],
+  temperature: 0.7,
+  max_tokens: 1024,
+});
+
+console.log(response.choices[0].message.content);
+```
+
+</CodeGroup>
+
+---
+
+## Vision Understanding
+
+```python Python
+response = client.chat.completions.create(
+    model="gemini-2.5-flash",
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "Describe this image"},
+                {
+                    "type": "image_url",
+                    "image_url": {"url": "https://example.com/photo.jpg"}
+                }
+            ]
+        }
+    ],
+    max_tokens=1024
+)
+```
+
+---
+
+## File Understanding
+
+Send PDFs and other files through the OpenAI-compatible format:
+
+```python Python
+import base64
+
+with open("document.pdf", "rb") as f:
+    pdf_base64 = base64.b64encode(f.read()).decode("utf-8")
+
+response = client.chat.completions.create(
+    model="gemini-2.5-flash",
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "Summarize this document"},
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:application/pdf;base64,{pdf_base64}"
+                    }
+                }
+            ]
+        }
+    ],
+    max_tokens=2048
+)
+```
+
+---
+
+## Image Generation
+
+Use Gemini image generation models through the OpenAI-compatible format:
+
+```python Python
+response = client.chat.completions.create(
+    model="gemini-2-5-flash-image",
+    messages=[
+        {
+            "role": "user",
+            "content": "Draw a cute cat playing in a garden"
+        }
+    ],
+    max_tokens=4096
+)
+
+# The response may contain Base64 images
+print(response.choices[0].message.content)
+```
+
+---
+
+## Streaming Output
+
+```python Python
+stream = client.chat.completions.create(
+    model="gemini-2.5-flash",
+    messages=[
+        {"role": "user", "content": "Implement a simple HTTP server in Go"}
+    ],
+    max_tokens=2048,
+    stream=True
+)
+
+for chunk in stream:
+    if chunk.choices[0].delta.content is not None:
+        print(chunk.choices[0].delta.content, end="")
+```
+
+## Available Gemini Models
+
+| Model | Description |
+|-------|-------------|
+| `gemini-2.5-pro` | Gemini 2.5 Pro, strongest capability |
+| `gemini-2.5-flash` | Gemini 2.5 Flash, fast response |
+| `gemini-2.5-flash-thinking` | Flash with thinking capability |
+| `gemini-2-5-flash-image` | Flash with image generation support |
+| `gemini-3-pro-image-preview` | Gemini 3 Pro image preview |
+
+<Note>
+  When using Gemini through the OpenAI-compatible format, Crazyrouter automatically converts requests to Gemini native format and converts responses back to OpenAI format. Most features work normally, but certain Gemini-specific features (such as code execution, Google Search) require using the [native format](/chat/gemini/native).
+</Note>

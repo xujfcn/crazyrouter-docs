@@ -1,0 +1,46 @@
+---
+title: 'LobeChat Setup Guide'
+description: 'Configure Crazyrouter API in LobeChat'
+---
+
+## Overview
+
+LobeChat is an open-source AI chat framework that supports self-hosting and online use.
+
+## Configuration Steps
+
+<Steps>
+  <Step title="Open Settings">
+    Click the avatar in the bottom left → `Settings` → `Language Model`
+  </Step>
+  <Step title="Configure OpenAI">
+    In the `OpenAI` tab:
+    - **API Key**: `sk-xxx`
+    - **API Proxy URL**: `https://crazyrouter.com/v1`
+    - Enable `Use Custom API Proxy URL`
+  </Step>
+  <Step title="Verify">
+    Click the `Check` button to verify the connection is working.
+  </Step>
+</Steps>
+
+## Docker Self-Hosting
+
+```yaml
+services:
+  lobechat:
+    image: lobehub/lobe-chat
+    ports:
+      - "3210:3210"
+    environment:
+      - OPENAI_API_KEY=sk-xxx
+      - OPENAI_PROXY_URL=https://crazyrouter.com/v1
+```
+
+## Using Multiple Models
+
+LobeChat supports switching models during conversations. After configuring the API, you can select different models from the model selector at the top of the chat interface.
+
+<Note>
+  LobeChat also supports configuring Anthropic, Google, and other independent providers. If you need to use the Claude native format, configure the Base URL as `https://crazyrouter.com` in the Anthropic tab.
+</Note>

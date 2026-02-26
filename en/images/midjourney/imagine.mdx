@@ -1,0 +1,117 @@
+---
+title: "Submit Imagine Task"
+description: "Use POST /mj/submit/imagine to submit a Midjourney image generation task"
+---
+
+# Submit Imagine Task
+
+```
+POST /mj/submit/imagine
+```
+
+Submit a Midjourney Imagine task to generate images based on a prompt.
+
+## Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `botType` | string | No | Bot type: `MID_JOURNEY` (default) or `NIJI_JOURNEY` |
+| `prompt` | string | Yes | Prompt, supports native Midjourney syntax (e.g. `--ar 16:9 --v 6`) |
+| `base64Array` | array | No | Array of Base64-encoded reference images for image-guided generation |
+| `notifyHook` | string | No | Callback URL for task status changes |
+| `state` | string | No | Custom state information, returned as-is in callbacks |
+
+---
+
+## Request Examples
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/mj/submit/imagine \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "botType": "MID_JOURNEY",
+    "prompt": "a beautiful sunset over the ocean, cinematic lighting --ar 16:9 --v 6",
+    "notifyHook": "",
+    "state": ""
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/mj/submit/imagine",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "botType": "MID_JOURNEY",
+        "prompt": "a beautiful sunset over the ocean, cinematic lighting --ar 16:9 --v 6"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### Response Example
+
+```json
+{
+  "code": 1,
+  "description": "Submitted successfully",
+  "result": "task_1234567890",
+  "properties": {}
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `code` | Status code, `1` means success, `22` means queued |
+| `description` | Status description |
+| `result` | Task ID, used for subsequent queries |
+
+---
+
+## Request with Reference Images
+
+Use `base64Array` to pass reference images:
+
+```bash cURL
+curl -X POST https://crazyrouter.com/mj/submit/imagine \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "botType": "MID_JOURNEY",
+    "prompt": "a cat in the style of the reference image --v 6",
+    "base64Array": [
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg..."
+    ]
+  }'
+```
+
+---
+
+## Using Niji Journey
+
+Set `botType` to `NIJI_JOURNEY` to use the Niji model for anime-style images:
+
+```json
+{
+  "botType": "NIJI_JOURNEY",
+  "prompt": "a cute anime girl with blue hair, cherry blossoms --niji 6"
+}
+```
+
+<Note>
+  After successful submission, a task ID is returned. Use the [Query Task Status](/en/images/midjourney/query) endpoint to get the generation result.
+</Note>
+
+<Warning>
+  Images in `base64Array` increase the request payload size. It is recommended to keep each image under 4MB.
+</Warning>

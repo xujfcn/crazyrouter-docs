@@ -1,0 +1,99 @@
+---
+title: 'Update Token'
+description: 'Update the configuration of an existing token'
+api: 'PUT /api/token/'
+---
+
+## Overview
+
+Modify the name, quota, expiration time, model permissions, and other settings of an existing token.
+
+## Request Parameters
+
+<ParamField body="id" type="integer" required>
+  Token ID
+</ParamField>
+
+<ParamField body="name" type="string">
+  Token name
+</ParamField>
+
+<ParamField body="remain_quota" type="integer">
+  Remaining quota
+</ParamField>
+
+<ParamField body="unlimited_quota" type="boolean">
+  Whether quota is unlimited
+</ParamField>
+
+<ParamField body="expired_time" type="integer">
+  Expiration timestamp, -1 means never expires
+</ParamField>
+
+<ParamField body="models" type="string[]">
+  List of allowed models
+</ParamField>
+
+<ParamField body="status" type="integer">
+  Status: 1=enabled, 2=disabled
+</ParamField>
+
+<ParamField body="subnet" type="string">
+  IP whitelist (CIDR format)
+</ParamField>
+
+## Response Format
+
+```json
+{
+  "success": true,
+  "message": "Token updated successfully"
+}
+```
+
+## Code Examples
+
+<CodeGroup>
+
+```python Python
+import requests
+
+headers = {
+    "Authorization": "Bearer your_access_token",
+    "New-Api-User": "1",
+    "Content-Type": "application/json",
+    "User-Agent": "Mozilla/5.0"
+}
+
+# Update token quota and model permissions
+response = requests.put(
+    "https://crazyrouter.com/api/token/",
+    headers=headers,
+    json={
+        "id": 10,
+        "name": "Production-Updated",
+        "remain_quota": 200000,
+        "models": ["gpt-4o", "claude-sonnet-4-20250514", "gemini-2.5-flash"]
+    }
+)
+
+print(response.json())
+```
+
+```bash cURL
+curl -X PUT https://crazyrouter.com/api/token/ \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 1" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": 10,
+    "name": "Production-Updated",
+    "remain_quota": 200000
+  }'
+```
+
+</CodeGroup>
+
+<Warning>
+  Updating a token does not regenerate the API Key. If you need a new Key, delete the token and create a new one.
+</Warning>

@@ -1,0 +1,155 @@
+---
+title: "Execute Actions"
+description: "Execute Midjourney follow-up actions: upscale, variation, blend, describe, and more"
+---
+
+# Execute Actions
+
+## Action - Upscale / Variation
+
+```
+POST /mj/submit/action
+```
+
+Execute follow-up actions on a completed Imagine task, such as Upscale, Variation, etc.
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `taskId` | string | Yes | Original task ID |
+| `customId` | string | Yes | The `customId` of the action button, obtained from the task's `buttons` field |
+| `notifyHook` | string | No | Callback URL |
+| `state` | string | No | Custom state |
+
+### Request Example
+
+```bash cURL
+curl -X POST https://crazyrouter.com/mj/submit/action \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "taskId": "task_1234567890",
+    "customId": "MJ::JOB::upsample::1::abc123"
+  }'
+```
+
+### Response Example
+
+```json
+{
+  "code": 1,
+  "description": "Submitted successfully",
+  "result": "task_action_001",
+  "properties": {}
+}
+```
+
+---
+
+## Blend - Image Blending
+
+```
+POST /mj/submit/blend
+```
+
+Blend multiple images to generate a new image.
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `botType` | string | No | `MID_JOURNEY` (default) or `NIJI_JOURNEY` |
+| `base64Array` | array | Yes | Array of Base64-encoded images, 2-5 images |
+| `dimensions` | string | No | Output dimensions: `PORTRAIT`, `SQUARE`, `LANDSCAPE` |
+| `notifyHook` | string | No | Callback URL |
+| `state` | string | No | Custom state |
+
+### Request Example
+
+```bash cURL
+curl -X POST https://crazyrouter.com/mj/submit/blend \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "base64Array": [
+      "data:image/png;base64,iVBORw0KGgo...",
+      "data:image/png;base64,iVBORw0KGgo..."
+    ],
+    "dimensions": "SQUARE"
+  }'
+```
+
+### Response Example
+
+```json
+{
+  "code": 1,
+  "description": "Submitted successfully",
+  "result": "task_blend_001"
+}
+```
+
+---
+
+## Describe - Image Description
+
+```
+POST /mj/submit/describe
+```
+
+Upload an image and let Midjourney generate corresponding prompt descriptions.
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `botType` | string | No | `MID_JOURNEY` (default) or `NIJI_JOURNEY` |
+| `base64` | string | Yes | Base64-encoded image |
+| `notifyHook` | string | No | Callback URL |
+| `state` | string | No | Custom state |
+
+### Request Example
+
+```bash cURL
+curl -X POST https://crazyrouter.com/mj/submit/describe \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "base64": "data:image/png;base64,iVBORw0KGgo..."
+  }'
+```
+
+---
+
+## Modal - Dialog Confirmation
+
+```
+POST /mj/submit/modal
+```
+
+Submit a Midjourney modal confirmation action (e.g. Region Vary and other operations requiring secondary confirmation).
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `taskId` | string | Yes | Original task ID |
+| `prompt` | string | No | Prompt in the modal dialog |
+| `maskBase64` | string | No | Base64-encoded mask image |
+
+### Request Example
+
+```bash cURL
+curl -X POST https://crazyrouter.com/mj/submit/modal \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "taskId": "task_1234567890",
+    "prompt": "add a rainbow in the sky"
+  }'
+```
+
+<Note>
+  All actions return a new task ID after submission. Use the [Query Task Status](/en/images/midjourney/query) endpoint to get results.
+</Note>

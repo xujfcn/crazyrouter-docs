@@ -1,0 +1,97 @@
+---
+title: 'Python Audio'
+description: 'Python text-to-speech (TTS) and speech-to-text (STT)'
+---
+
+## Text-to-Speech (TTS)
+
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+
+# Generate speech
+response = client.audio.speech.create(
+    model="tts-1",
+    voice="alloy",
+    input="Hello, welcome to the Crazyrouter API service."
+)
+
+# Save as MP3 file
+response.stream_to_file("output.mp3")
+print("Audio saved to output.mp3")
+```
+
+### Available Voices
+
+| Voice | Characteristics |
+|-------|----------------|
+| `alloy` | Neutral, balanced |
+| `echo` | Male, calm |
+| `fable` | Male, warm |
+| `onyx` | Male, deep |
+| `nova` | Female, lively |
+| `shimmer` | Female, soft |
+
+### High Quality TTS
+
+```python
+# Use tts-1-hd for higher audio quality
+response = client.audio.speech.create(
+    model="tts-1-hd",
+    voice="nova",
+    input="High quality speech synthesis example",
+    response_format="opus",  # Supports mp3, opus, aac, flac
+    speed=1.0  # 0.25 to 4.0
+)
+
+response.stream_to_file("output_hd.opus")
+```
+
+## Speech-to-Text (STT)
+
+```python
+# Whisper speech recognition
+audio_file = open("recording.mp3", "rb")
+
+transcript = client.audio.transcriptions.create(
+    model="whisper-1",
+    file=audio_file,
+    language="en"  # Optional, specifying language improves accuracy
+)
+
+print(transcript.text)
+```
+
+### Transcription with Timestamps
+
+```python
+transcript = client.audio.transcriptions.create(
+    model="whisper-1",
+    file=open("recording.mp3", "rb"),
+    response_format="verbose_json",
+    timestamp_granularities=["segment"]
+)
+
+for segment in transcript.segments:
+    print(f"[{segment['start']:.1f}s - {segment['end']:.1f}s] {segment['text']}")
+```
+
+## Audio Translation
+
+Translate non-English audio to English text:
+
+```python
+audio_file = open("foreign_audio.mp3", "rb")
+
+translation = client.audio.translations.create(
+    model="whisper-1",
+    file=audio_file
+)
+
+print(translation.text)  # English output
+```
+
+<Note>
+  TTS supported models include `tts-1`, `tts-1-hd`, and `gpt-4o-mini-tts`. STT uses the `whisper-1` model.
+</Note>

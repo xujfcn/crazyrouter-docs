@@ -1,0 +1,104 @@
+---
+title: 'Create Token'
+description: 'Create a new API token'
+api: 'POST /api/token/'
+---
+
+## Overview
+
+Create a new API token for calling AI model APIs.
+
+## Request Parameters
+
+<ParamField body="name" type="string" required>
+  Token name for easy identification
+</ParamField>
+
+<ParamField body="remain_quota" type="integer" default="0">
+  Initial quota (internal quota units). When set to 0, use with `unlimited_quota`
+</ParamField>
+
+<ParamField body="unlimited_quota" type="boolean" default="false">
+  Whether to set unlimited quota
+</ParamField>
+
+<ParamField body="expired_time" type="integer" default="-1">
+  Expiration time (Unix timestamp), -1 means never expires
+</ParamField>
+
+<ParamField body="models" type="string[]">
+  List of allowed models. Empty means all models are allowed
+</ParamField>
+
+<ParamField body="subnet" type="string">
+  IP whitelist in CIDR format, e.g. `192.168.1.0/24`. Empty means no restriction
+</ParamField>
+
+## Response Format
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "id": 10,
+    "key": "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "name": "Production",
+    "status": 1,
+    "remain_quota": 100000,
+    "unlimited_quota": false,
+    "expired_time": -1,
+    "models": ["gpt-4o", "claude-sonnet-4-20250514"]
+  }
+}
+```
+
+## Code Examples
+
+<CodeGroup>
+
+```python Python
+import requests
+
+headers = {
+    "Authorization": "Bearer your_access_token",
+    "New-Api-User": "1",
+    "Content-Type": "application/json",
+    "User-Agent": "Mozilla/5.0"
+}
+
+response = requests.post(
+    "https://crazyrouter.com/api/token/",
+    headers=headers,
+    json={
+        "name": "Production",
+        "remain_quota": 100000,
+        "unlimited_quota": False,
+        "expired_time": -1,
+        "models": ["gpt-4o", "claude-sonnet-4-20250514", "gemini-2.5-pro"]
+    }
+)
+
+data = response.json()
+if data["success"]:
+    print(f"Token created: {data['data']['key']}")
+```
+
+```bash cURL
+curl -X POST https://crazyrouter.com/api/token/ \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 1" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Production",
+    "remain_quota": 100000,
+    "expired_time": -1,
+    "models": ["gpt-4o"]
+  }'
+```
+
+</CodeGroup>
+
+<Note>
+  Save the returned `key` securely after creation. The full key is only displayed once at creation time.
+</Note>

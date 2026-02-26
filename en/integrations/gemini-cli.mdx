@@ -1,0 +1,47 @@
+---
+title: 'Gemini CLI Setup Guide'
+description: 'Configure Crazyrouter API in Gemini CLI'
+---
+
+## Overview
+
+Gemini CLI is Google's command-line AI assistant. With configuration, you can connect it to Crazyrouter to use Gemini series models.
+
+## Configuration
+
+### Environment Variables
+
+```bash
+export GEMINI_API_KEY=sk-xxx
+export GEMINI_BASE_URL=https://crazyrouter.com
+```
+
+### Configuration File
+
+Edit `~/.gemini/settings.json`:
+
+```json
+{
+  "apiKey": "sk-xxx",
+  "baseUrl": "https://crazyrouter.com",
+  "model": "gemini-2.5-pro"
+}
+```
+
+### Launch
+
+```bash
+gemini
+```
+
+## Available Models
+
+| Model | Description |
+|-------|-------------|
+| `gemini-2.5-pro` | Strongest reasoning capability |
+| `gemini-2.5-flash` | Fast response |
+| `gemini-2.0-flash` | Previous generation fast model |
+
+<Note>
+  Crazyrouter supports both the Gemini native API format and the OpenAI-compatible format. Gemini CLI uses the native format.
+</Note>

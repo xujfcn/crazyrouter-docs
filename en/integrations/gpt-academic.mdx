@@ -1,0 +1,54 @@
+---
+title: 'GPT Academic Setup Guide'
+description: 'Configure Crazyrouter API in GPT Academic'
+---
+
+## Overview
+
+GPT Academic is an AI tool designed for academic scenarios, supporting paper polishing, translation, code explanation, and more.
+
+## Configuration
+
+### Edit Configuration File
+
+Edit `config.py` or `config_private.py`:
+
+```python
+API_KEY = "sk-xxx"
+API_URL_REDIRECT = {
+    "https://api.openai.com/v1/chat/completions": "https://crazyrouter.com/v1/chat/completions"
+}
+
+# Or set directly
+LLM_MODEL = "gpt-4o"
+AVAIL_LLM_MODELS = [
+    "gpt-4o", "gpt-4o-mini",
+    "claude-sonnet-4-20250514",
+    "gemini-2.5-pro"
+]
+```
+
+### Environment Variables
+
+```bash
+export API_KEY=sk-xxx
+export API_URL_REDIRECT='{"https://api.openai.com/v1/chat/completions": "https://crazyrouter.com/v1/chat/completions"}'
+```
+
+### Docker Deployment
+
+```yaml
+services:
+  gpt-academic:
+    image: ghcr.io/binary-husky/gpt_academic
+    ports:
+      - "22303:22303"
+    environment:
+      - API_KEY=sk-xxx
+      - LLM_MODEL=gpt-4o
+      - API_URL_REDIRECT={"https://api.openai.com/v1/chat/completions": "https://crazyrouter.com/v1/chat/completions"}
+```
+
+<Note>
+  GPT Academic's URL redirect feature forwards all OpenAI API requests to Crazyrouter without requiring any other code changes.
+</Note>

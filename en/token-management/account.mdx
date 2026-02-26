@@ -1,0 +1,96 @@
+---
+title: 'Get Account Info'
+description: 'Get the current user account information and balance'
+api: 'GET /api/user/self'
+---
+
+## Overview
+
+Retrieve the current authenticated user's account information, including username, balance, and usage statistics.
+
+## Response Format
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "id": 1,
+    "username": "user123",
+    "display_name": "John Doe",
+    "email": "user@example.com",
+    "role": 1,
+    "status": 1,
+    "quota": 500000,
+    "used_quota": 123456,
+    "request_count": 2048,
+    "group": "default",
+    "inviter_id": 0,
+    "aff_code": "abc123",
+    "aff_count": 5,
+    "aff_quota": 10000
+  }
+}
+```
+
+## Field Descriptions
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `quota` | int | Current balance (internal quota units) |
+| `used_quota` | int | Total used quota |
+| `request_count` | int | Total request count |
+| `group` | string | User group (affects pricing multiplier) |
+| `role` | int | Role: 1=regular user, 10=admin, 100=super admin |
+| `aff_code` | string | Referral code |
+| `aff_count` | int | Number of referrals |
+| `aff_quota` | int | Referral reward quota |
+
+## Quota Conversion
+
+The conversion between internal quota units and USD:
+
+```
+1 USD = 500,000 quota units
+i.e. 1 quota unit ≈ $0.000002
+```
+
+## Code Examples
+
+<CodeGroup>
+
+```python Python
+import requests
+
+headers = {
+    "Authorization": "Bearer your_access_token",
+    "New-Api-User": "1",
+    "User-Agent": "Mozilla/5.0"
+}
+
+response = requests.get(
+    "https://crazyrouter.com/api/user/self",
+    headers=headers
+)
+
+user = response.json()["data"]
+balance_usd = user["quota"] / 500000
+used_usd = user["used_quota"] / 500000
+
+print(f"User: {user['username']}")
+print(f"Balance: ${balance_usd:.2f}")
+print(f"Used: ${used_usd:.2f}")
+print(f"Requests: {user['request_count']}")
+```
+
+```bash cURL
+curl https://crazyrouter.com/api/user/self \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 1"
+```
+
+</CodeGroup>
+
+<Note>
+  You can also query balance via API Key using `GET /api/user/self`, which returns the information of the user who owns the Key.
+</Note>

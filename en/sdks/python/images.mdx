@@ -1,0 +1,91 @@
+---
+title: 'Python Image Generation'
+description: 'Python image generation and editing with DALL-E and GPT-Image-1'
+---
+
+## DALL-E 3 Image Generation
+
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+
+response = client.images.generate(
+    model="dall-e-3",
+    prompt="A cat wearing a spacesuit walking on the moon, digital art style",
+    size="1024x1024",
+    quality="hd",
+    n=1
+)
+
+image_url = response.data[0].url
+print(f"Image URL: {image_url}")
+```
+
+### DALL-E Parameters
+
+| Parameter | Options | Description |
+|-----------|---------|-------------|
+| `size` | `1024x1024`, `1792x1024`, `1024x1792` | Image dimensions |
+| `quality` | `standard`, `hd` | Image quality |
+| `style` | `vivid`, `natural` | Style |
+
+## GPT-Image-1 Image Generation
+
+```python
+response = client.images.generate(
+    model="gpt-image-1",
+    prompt="A modern minimalist logo with an artificial intelligence theme",
+    size="1024x1024",
+    n=1
+)
+
+# GPT-Image-1 returns base64
+import base64
+image_b64 = response.data[0].b64_json
+with open("logo.png", "wb") as f:
+    f.write(base64.b64decode(image_b64))
+print("Image saved")
+```
+
+## GPT-Image-1 Image Editing
+
+```python
+# Image editing (requires original image)
+response = client.images.edit(
+    model="gpt-image-1",
+    image=open("original.png", "rb"),
+    prompt="Change the background to a beach sunset"
+)
+
+import base64
+with open("edited.png", "wb") as f:
+    f.write(base64.b64decode(response.data[0].b64_json))
+```
+
+## Download and Save Images
+
+```python
+import requests
+
+response = client.images.generate(
+    model="dall-e-3",
+    prompt="Cyberpunk city nightscape",
+    size="1792x1024"
+)
+
+# Download image
+image_url = response.data[0].url
+img_data = requests.get(image_url).content
+with open("cyberpunk_city.png", "wb") as f:
+    f.write(img_data)
+print("Image saved")
+```
+
+<Note>
+  DALL-E 3 returns URLs (valid for about 1 hour), while GPT-Image-1 returns base64 data. Download and save promptly.
+</Note>
+
+<Warning>
+  Image generation costs are relatively high. Test your prompt with smaller sizes first, then generate high-quality large images once satisfied.
+</Warning>

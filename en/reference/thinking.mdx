@@ -1,0 +1,123 @@
+---
+title: 'AI Thinking Fields'
+description: 'Understanding thinking/reasoning fields in AI model responses'
+---
+
+## Overview
+
+Some AI models support a "Thinking" (Reasoning) feature, where the model performs internal reasoning before generating the final answer. The thinking process is returned through specific fields.
+
+## Models with Thinking Support
+
+| Model | Thinking Field | Description |
+|-------|---------------|-------------|
+| `o1` | `reasoning_content` | OpenAI reasoning model |
+| `o1-mini` | `reasoning_content` | Lightweight reasoning model |
+| `o3` | `reasoning_content` | Latest reasoning model |
+| `o3-mini` | `reasoning_content` | Lightweight version |
+| `o4-mini` | `reasoning_content` | Latest lightweight reasoning |
+| `claude-sonnet-4-20250514` | `thinking` | Claude extended thinking |
+| `claude-opus-4-20250514` | `thinking` | Claude extended thinking |
+| `gemini-2.5-pro` | `thoughts` | Gemini thinking |
+| `gemini-2.5-flash-thinking` | `thoughts` | Gemini thinking |
+| `deepseek-r1` | `reasoning_content` | DeepSeek reasoning |
+
+## Response Format
+
+### OpenAI Format (o1/o3/DeepSeek)
+
+```json
+{
+  "choices": [{
+    "message": {
+      "role": "assistant",
+      "content": "Final answer content",
+      "reasoning_content": "Model's thinking process..."
+    }
+  }],
+  "usage": {
+    "prompt_tokens": 100,
+    "completion_tokens": 500,
+    "total_tokens": 600,
+    "completion_tokens_details": {
+      "reasoning_tokens": 350
+    }
+  }
+}
+```
+
+### Thinking in Streaming Output
+
+```json
+// Thinking phase
+{"choices": [{"delta": {"reasoning_content": "Let me think about this..."}}]}
+{"choices": [{"delta": {"reasoning_content": "First, let's analyze..."}}]}
+
+// Answer phase
+{"choices": [{"delta": {"content": "The final answer is..."}}]}
+```
+
+## Claude Extended Thinking
+
+When using Claude models, enable extended thinking via the `thinking` parameter:
+
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+
+response = client.chat.completions.create(
+    model="claude-sonnet-4-20250514",
+    messages=[{"role": "user", "content": "Prove that the square root of 2 is irrational"}],
+    extra_body={
+        "thinking": {
+            "type": "enabled",
+            "budget_tokens": 10000
+        }
+    }
+)
+
+# Thinking content is in the reasoning_content field
+print("Thinking:", response.choices[0].message.reasoning_content)
+print("Answer:", response.choices[0].message.content)
+```
+
+## Thinking Token Billing
+
+<Warning>
+  Thinking tokens count toward total usage. Reasoning model thinking tokens typically account for 50%-80% of total output. Be mindful of cost control.
+</Warning>
+
+| Model | Thinking Token Billing |
+|-------|----------------------|
+| o1/o3 series | Billed at output token price |
+| Claude extended thinking | Billed at output token price |
+| DeepSeek-R1 | Billed at output token price |
+
+## Code Example: Extracting Thinking Content
+
+```python
+response = client.chat.completions.create(
+    model="o3-mini",
+    messages=[{"role": "user", "content": "Which is larger, 9.11 or 9.8?"}]
+)
+
+msg = response.choices[0].message
+
+# Thinking process
+if hasattr(msg, 'reasoning_content') and msg.reasoning_content:
+    print(f"Thinking process:\n{msg.reasoning_content}\n")
+
+# Final answer
+print(f"Answer:\n{msg.content}")
+
+# Token usage
+usage = response.usage
+print(f"\nTotal tokens: {usage.total_tokens}")
+if hasattr(usage, 'completion_tokens_details'):
+    print(f"Reasoning tokens: {usage.completion_tokens_details.reasoning_tokens}")
+```
+
+<Note>
+  Not all models support thinking. For models that don't support it, the `reasoning_content` field will not appear in the response.
+</Note>

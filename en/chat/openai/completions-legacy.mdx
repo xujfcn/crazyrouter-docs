@@ -1,0 +1,94 @@
+---
+title: "Create Completion (Legacy)"
+description: "POST /v1/completions legacy text completion endpoint, superseded by Chat Completions"
+---
+
+# Create Completion (Legacy)
+
+```
+POST /v1/completions
+```
+
+<Warning>
+  This endpoint is deprecated. It is recommended to use `/v1/chat/completions` instead. Newer models may no longer support this endpoint.
+</Warning>
+
+The legacy Completions API accepts a text prompt and returns the model's text completion result. Unlike Chat Completions, it does not use the message list format.
+
+## Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model` | string | Yes | Model name |
+| `prompt` | string\|array | Yes | Input prompt text |
+| `max_tokens` | integer | No | Maximum tokens to generate, default 16 |
+| `temperature` | number | No | Sampling temperature, 0-2 |
+| `top_p` | number | No | Nucleus sampling parameter |
+| `n` | integer | No | Number of completions to generate |
+| `stream` | boolean | No | Whether to stream output |
+| `stop` | string\|array | No | Stop tokens |
+| `echo` | boolean | No | Whether to echo the input |
+| `suffix` | string | No | Completion suffix |
+
+## Example
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-3.5-turbo-instruct",
+    "prompt": "Write a poem about spring:\n",
+    "max_tokens": 200,
+    "temperature": 0.7
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.completions.create(
+    model="gpt-3.5-turbo-instruct",
+    prompt="Write a poem about spring:\n",
+    max_tokens=200,
+    temperature=0.7
+)
+
+print(response.choices[0].text)
+```
+
+</CodeGroup>
+
+## Response Format
+
+```json
+{
+  "id": "cmpl-abc123",
+  "object": "text_completion",
+  "created": 1709123456,
+  "model": "gpt-3.5-turbo-instruct",
+  "choices": [
+    {
+      "text": "\nSpring breeze warms the land anew,\nBlossoms paint the morning dew.\nBirds return to build their nest,\nNature wakes from winter's rest.",
+      "index": 0,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 12,
+    "completion_tokens": 36,
+    "total_tokens": 48
+  }
+}
+```
+
+<Note>
+  If you are developing a new application, please use the [Chat Completions API](/chat/openai/completions) directly. It is more powerful and supports more models.
+</Note>

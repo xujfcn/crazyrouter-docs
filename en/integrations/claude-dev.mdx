@@ -1,0 +1,43 @@
+---
+title: 'Claude Dev Setup Guide'
+description: 'Configure Crazyrouter API in the Claude Dev VS Code extension'
+---
+
+## Overview
+
+Claude Dev is a VS Code AI programming extension focused on using Claude models for code development.
+
+## Configuration Steps
+
+<Steps>
+  <Step title="Install Extension">
+    Search for `Claude Dev` in the VS Code extension marketplace and install it.
+  </Step>
+  <Step title="Open Settings">
+    Click the Claude Dev icon in the sidebar to enter settings.
+  </Step>
+  <Step title="Select Provider">
+    Choose `OpenAI Compatible` or `Anthropic` as the API Provider.
+  </Step>
+  <Step title="Enter Configuration">
+    **OpenAI Compatible mode:**
+    - **Base URL**: `https://crazyrouter.com/v1`
+    - **API Key**: `sk-xxx`
+    - **Model**: `claude-sonnet-4-20250514`
+
+    **Anthropic mode:**
+    - **Base URL**: `https://crazyrouter.com`
+    - **API Key**: `sk-xxx`
+  </Step>
+</Steps>
+
+## Recommended Models
+
+| Scenario | Model |
+|----------|-------|
+| Daily coding | `claude-sonnet-4-20250514` |
+| Complex refactoring | `claude-opus-4-20250514` |
+
+<Note>
+  Claude Dev and Cline have similar functionality. If you're already using Cline, the configuration is essentially the same.
+</Note>

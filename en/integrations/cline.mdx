@@ -1,0 +1,42 @@
+---
+title: 'Cline Setup Guide'
+description: 'Configure Crazyrouter API in the VS Code Cline extension'
+---
+
+## Overview
+
+Cline is a powerful VS Code AI programming extension that supports autonomous code writing, command execution, and more.
+
+## Configuration Steps
+
+<Steps>
+  <Step title="Install Extension">
+    Search for `Cline` in the VS Code extension marketplace and install it.
+  </Step>
+  <Step title="Open Settings">
+    Click the Cline icon in the sidebar, then click the settings gear.
+  </Step>
+  <Step title="Select Provider">
+    In the API Provider dropdown, select `OpenAI Compatible`.
+  </Step>
+  <Step title="Enter Configuration">
+    - **Base URL**: `https://crazyrouter.com/v1`
+    - **API Key**: `sk-xxx`
+    - **Model ID**: `claude-sonnet-4-20250514` (or another model)
+  </Step>
+  <Step title="Save and Test">
+    Click Save, then enter a question in the chat box to test.
+  </Step>
+</Steps>
+
+## Recommended Models
+
+| Use Case | Recommended Model |
+|----------|-------------------|
+| Daily coding | `claude-sonnet-4-20250514` |
+| Complex tasks | `claude-opus-4-20250514` |
+| Quick Q&A | `gpt-4o-mini` |
+
+<Note>
+  Cline supports automatic file read/write and terminal command execution. Using a more capable model is recommended for a better autonomous programming experience.
+</Note>

@@ -1,0 +1,50 @@
+---
+title: 'NextChat Setup Guide'
+description: 'Configure Crazyrouter API in NextChat (ChatGPT Next Web)'
+---
+
+## Overview
+
+NextChat (formerly ChatGPT Next Web) is a popular open-source ChatGPT web client.
+
+## Online Configuration
+
+<Steps>
+  <Step title="Open Settings">
+    Click the `Settings` icon in the bottom left
+  </Step>
+  <Step title="Configure API">
+    - **API URL**: `https://crazyrouter.com`
+    - **API Key**: `sk-xxx`
+  </Step>
+  <Step title="Select Model">
+    Select or enter a model name in the `Model` field
+  </Step>
+</Steps>
+
+## Docker Self-Hosting
+
+```yaml
+services:
+  nextchat:
+    image: yidadaa/chatgpt-next-web
+    ports:
+      - "3000:3000"
+    environment:
+      - OPENAI_API_KEY=sk-xxx
+      - BASE_URL=https://crazyrouter.com
+      - CUSTOM_MODELS=+gpt-4o,+claude-sonnet-4-20250514,+gemini-2.5-pro
+```
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `OPENAI_API_KEY` | API key |
+| `BASE_URL` | API URL (without `/v1`) |
+| `CUSTOM_MODELS` | Custom model list, `+` means add |
+| `HIDE_USER_API_KEY` | Set to 1 to hide user custom Key entry |
+
+<Note>
+  NextChat's API URL does not need the `/v1` suffix -- the application appends it automatically.
+</Note>

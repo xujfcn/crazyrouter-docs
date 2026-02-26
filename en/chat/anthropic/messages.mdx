@@ -1,0 +1,297 @@
+---
+title: "Claude Native Format"
+description: "Call Claude models using the Anthropic native Messages API format, supporting streaming, Function Calling, and Extended Thinking"
+---
+
+# Claude Native Format
+
+```
+POST /v1/messages
+```
+
+Crazyrouter supports Anthropic's native Messages API format. You can pass the API Key using either the `x-api-key` or `Authorization` header.
+
+## Authentication
+
+Two authentication methods are supported (choose one):
+
+```
+x-api-key: YOUR_API_KEY
+```
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+---
+
+## Basic Conversation
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-sonnet-4-20250514",
+    "max_tokens": 1024,
+    "messages": [
+      {"role": "user", "content": "Explain quantum computing in simple terms"}
+    ]
+  }'
+```
+
+```python Python
+import anthropic
+
+client = anthropic.Anthropic(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com"
+)
+
+message = client.messages.create(
+    model="claude-sonnet-4-20250514",
+    max_tokens=1024,
+    messages=[
+        {"role": "user", "content": "Explain quantum computing in simple terms"}
+    ]
+)
+
+print(message.content[0].text)
+```
+
+```javascript Node.js
+import Anthropic from "@anthropic-ai/sdk";
+
+const client = new Anthropic({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com",
+});
+
+const message = await client.messages.create({
+  model: "claude-sonnet-4-20250514",
+  max_tokens: 1024,
+  messages: [{ role: "user", content: "Explain quantum computing in simple terms" }],
+});
+
+console.log(message.content[0].text);
+```
+
+</CodeGroup>
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model` | string | Yes | Model name |
+| `max_tokens` | integer | Yes | Maximum output tokens |
+| `messages` | array | Yes | Message list |
+| `system` | string\|array | No | System prompt |
+| `temperature` | number | No | Sampling temperature, 0-1 |
+| `top_p` | number | No | Nucleus sampling parameter |
+| `top_k` | integer | No | Top-K sampling |
+| `stop_sequences` | array | No | Stop sequence list |
+| `stream` | boolean | No | Whether to stream output |
+| `tools` | array | No | Tool definition list |
+| `tool_choice` | object | No | Tool selection strategy |
+| `thinking` | object | No | Extended Thinking configuration |
+
+---
+
+## Streaming Conversation
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-sonnet-4-20250514",
+    "max_tokens": 1024,
+    "stream": true,
+    "messages": [
+      {"role": "user", "content": "Write a poem about programming"}
+    ]
+  }'
+```
+
+```python Python
+import anthropic
+
+client = anthropic.Anthropic(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com"
+)
+
+with client.messages.stream(
+    model="claude-sonnet-4-20250514",
+    max_tokens=1024,
+    messages=[
+        {"role": "user", "content": "Write a poem about programming"}
+    ]
+) as stream:
+    for text in stream.text_stream:
+        print(text, end="")
+```
+
+</CodeGroup>
+
+---
+
+## Function Calling
+
+<CodeGroup>
+
+```python Python
+import anthropic
+import json
+
+client = anthropic.Anthropic(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com"
+)
+
+tools = [
+    {
+        "name": "get_stock_price",
+        "description": "Get the current price of a specified stock",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "symbol": {
+                    "type": "string",
+                    "description": "Stock ticker symbol, e.g. AAPL, GOOGL"
+                }
+            },
+            "required": ["symbol"]
+        }
+    }
+]
+
+# First call
+message = client.messages.create(
+    model="claude-sonnet-4-20250514",
+    max_tokens=1024,
+    tools=tools,
+    messages=[
+        {"role": "user", "content": "What is Apple's stock price?"}
+    ]
+)
+
+# Handle tool call
+if message.stop_reason == "tool_use":
+    tool_block = next(b for b in message.content if b.type == "tool_use")
+
+    # Execute function
+    result = {"symbol": "AAPL", "price": 198.50, "currency": "USD"}
+
+    # Second call, return function result
+    final = client.messages.create(
+        model="claude-sonnet-4-20250514",
+        max_tokens=1024,
+        tools=tools,
+        messages=[
+            {"role": "user", "content": "What is Apple's stock price?"},
+            {"role": "assistant", "content": message.content},
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "tool_result",
+                        "tool_use_id": tool_block.id,
+                        "content": json.dumps(result)
+                    }
+                ]
+            }
+        ]
+    )
+    print(final.content[0].text)
+```
+
+</CodeGroup>
+
+---
+
+## Extended Thinking
+
+Enable Extended Thinking to let Claude perform deep thinking before answering:
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-sonnet-4-20250514",
+    "max_tokens": 16000,
+    "thinking": {
+      "type": "enabled",
+      "budget_tokens": 10000
+    },
+    "messages": [
+      {"role": "user", "content": "Analyze the time complexity of the following code and propose an optimization:\ndef fib(n):\n    if n <= 1: return n\n    return fib(n-1) + fib(n-2)"}
+    ]
+  }'
+```
+
+```python Python
+message = client.messages.create(
+    model="claude-sonnet-4-20250514",
+    max_tokens=16000,
+    thinking={
+        "type": "enabled",
+        "budget_tokens": 10000
+    },
+    messages=[
+        {"role": "user", "content": "Prove: for all positive integers n, 1+2+...+n = n(n+1)/2"}
+    ]
+)
+
+for block in message.content:
+    if block.type == "thinking":
+        print("Thinking process:", block.thinking)
+    elif block.type == "text":
+        print("Answer:", block.text)
+```
+
+</CodeGroup>
+
+### Extended Thinking Response
+
+```json
+{
+  "id": "msg_abc123",
+  "type": "message",
+  "role": "assistant",
+  "content": [
+    {
+      "type": "thinking",
+      "thinking": "Let me use mathematical induction to prove this...\nBase case: when n=1..."
+    },
+    {
+      "type": "text",
+      "text": "I will prove this formula using mathematical induction.\n\n**Base case**: ..."
+    }
+  ],
+  "model": "claude-sonnet-4-20250514",
+  "stop_reason": "end_turn",
+  "usage": {
+    "input_tokens": 30,
+    "output_tokens": 500
+  }
+}
+```
+
+<Warning>
+  When using Extended Thinking, `max_tokens` must be greater than `budget_tokens`. Thinking tokens are also billed.
+</Warning>
+
+<Note>
+  Crazyrouter's Claude native format endpoint is fully compatible with the official Anthropic SDK. Simply change the `base_url` for seamless switching.
+</Note>

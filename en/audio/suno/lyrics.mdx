@@ -1,0 +1,88 @@
+---
+title: "Suno Generate Lyrics"
+description: "Use the Suno API to automatically generate lyrics"
+---
+
+# Suno Generate Lyrics
+
+```
+POST /suno/submit/lyrics
+```
+
+Automatically generate lyrics based on a description, which can be used for subsequent custom mode song creation.
+
+## Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `prompt` | string | Yes | Lyrics theme description |
+
+## Request Examples
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/suno/submit/lyrics \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "A song about missing a faraway friend on a rainy day"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/suno/submit/lyrics",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "prompt": "A song about missing a faraway friend on a rainy day"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+## Response Example
+
+```json
+{
+  "code": 1,
+  "description": "Submitted successfully",
+  "result": "lyrics_task_abc123"
+}
+```
+
+---
+
+## Query Lyrics Result
+
+Use the [Task Query](/en/audio/suno/query) endpoint to get the generated lyrics:
+
+```bash cURL
+curl https://crazyrouter.com/suno/fetch/lyrics_task_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Lyrics Result Example
+
+```json
+{
+  "id": "lyrics_task_abc123",
+  "status": "complete",
+  "data": {
+    "title": "Rainy Day Memories",
+    "text": "[Verse 1]\nRaindrops falling softly on the glass\nBlurring distant city lights\nScrolling through your photos on my phone\nMissing you like rain that never ends\n\n[Chorus]\nYou're so far away, I'm still here\nSeparated by a thousand miles\nBut every raindrop seems to whisper\nHow deeply I miss you tonight\n\n[Verse 2]\nRemember when we danced in the rain\nLaughing through the streets together\nNow you're in another city\nDo you also fall asleep to the sound of rain"
+  }
+}
+```
+
+<Note>
+  Generated lyrics include section markers (e.g. `[Verse]`, `[Chorus]`) and can be used directly for custom mode song creation.
+</Note>

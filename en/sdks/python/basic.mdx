@@ -1,0 +1,140 @@
+---
+title: 'Python Basic Chat'
+description: 'Python basic chat, multi-turn conversation, and streaming output'
+---
+
+## Install Dependencies
+
+```bash
+pip install openai requests
+```
+
+## Basic Chat
+
+<CodeGroup>
+
+```python OpenAI SDK
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Explain artificial intelligence in one sentence"}
+    ]
+)
+
+print(response.choices[0].message.content)
+```
+
+```python requests
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/v1/chat/completions",
+    headers={
+        "Authorization": "Bearer sk-xxx",
+        "Content-Type": "application/json"
+    },
+    json={
+        "model": "gpt-4o",
+        "messages": [
+            {"role": "user", "content": "Explain artificial intelligence in one sentence"}
+        ]
+    }
+)
+
+data = response.json()
+print(data["choices"][0]["message"]["content"])
+```
+
+</CodeGroup>
+
+## Multi-turn Conversation
+
+Maintain a `messages` list to implement multi-turn dialogue:
+
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+
+messages = [
+    {"role": "system", "content": "You are a Python programming assistant."}
+]
+
+def chat(user_input):
+    messages.append({"role": "user", "content": user_input})
+
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=messages
+    )
+
+    reply = response.choices[0].message.content
+    messages.append({"role": "assistant", "content": reply})
+    return reply
+
+# Multi-turn dialogue
+print(chat("How do I read a CSV file?"))
+print(chat("What if the file is very large?"))
+print(chat("Can I use pandas for this?"))
+```
+
+## Streaming Output
+
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Write a poem about programming"}],
+    stream=True
+)
+
+for chunk in stream:
+    if chunk.choices[0].delta.content:
+        print(chunk.choices[0].delta.content, end="", flush=True)
+print()
+```
+
+## Streaming with requests
+
+```python
+import requests
+import json
+
+response = requests.post(
+    "https://crazyrouter.com/v1/chat/completions",
+    headers={
+        "Authorization": "Bearer sk-xxx",
+        "Content-Type": "application/json"
+    },
+    json={
+        "model": "gpt-4o",
+        "messages": [{"role": "user", "content": "Hello"}],
+        "stream": True
+    },
+    stream=True
+)
+
+for line in response.iter_lines():
+    if line:
+        line = line.decode("utf-8")
+        if line.startswith("data: ") and line != "data: [DONE]":
+            data = json.loads(line[6:])
+            content = data["choices"][0]["delta"].get("content", "")
+            print(content, end="", flush=True)
+print()
+```
+
+<Note>
+  The `model` parameter in all examples can be replaced with any model supported by Crazyrouter, such as `claude-sonnet-4-20250514`, `gemini-2.5-pro`, etc.
+</Note>

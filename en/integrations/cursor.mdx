@@ -1,0 +1,49 @@
+---
+title: 'Cursor Setup Guide'
+description: 'Configure Crazyrouter API in Cursor IDE'
+---
+
+## Configuration Steps
+
+<Steps>
+  <Step title="Open Settings">
+    Open Cursor, click the gear icon in the bottom left, select `Settings` → `Models`
+  </Step>
+  <Step title="Configure API">
+    - **OpenAI API Key**: Enter your `sk-xxx` key
+    - **Override OpenAI Base URL**: Enter `https://crazyrouter.com/v1`
+  </Step>
+  <Step title="Select Models">
+    Choose the models you need from the model list, such as `gpt-4o`, `claude-sonnet-4-20250514`, etc. You can also click `+ Add Model` to add custom model names.
+  </Step>
+  <Step title="Verify Connection">
+    Press `Ctrl+K` (or `Cmd+K`) in the editor to open the AI panel and enter any question to test the response.
+  </Step>
+</Steps>
+
+## Configuration Reference
+
+```
+Settings → Models:
+┌─────────────────────────────────┐
+│ OpenAI API Key: sk-xxx          │
+│ Override OpenAI Base URL:       │
+│ https://crazyrouter.com/v1      │
+│                                 │
+│ Models:                         │
+│ ☑ gpt-4o                       │
+│ ☑ claude-sonnet-4-20250514      │
+│ ☑ claude-opus-4-20250514        │
+└─────────────────────────────────┘
+```
+
+## Tips
+
+- **Tab Completion**: Cursor's Tab autocomplete uses the configured model
+- **Ctrl+K**: Inline editing -- select code and press Ctrl+K to let AI modify it
+- **Ctrl+L**: Open sidebar chat
+- **Composer**: Press `Ctrl+I` to open Composer for multi-file editing
+
+<Warning>
+  Some advanced Cursor features (such as Agent mode) may require specific model support. Using `gpt-4o` or `claude-sonnet-4-20250514` is recommended for the best experience.
+</Warning>

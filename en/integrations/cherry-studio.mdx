@@ -1,0 +1,54 @@
+---
+title: 'Cherry Studio Setup Guide'
+description: 'Configure Crazyrouter API in Cherry Studio'
+---
+
+## Overview
+
+Cherry Studio is a feature-rich AI desktop client that supports multi-model conversations, MCP tools, reasoning models, and more.
+
+## Basic Configuration
+
+<Steps>
+  <Step title="Open Settings">
+    Launch Cherry Studio, click `Settings` in the bottom left → `Model Services`
+  </Step>
+  <Step title="Add Provider">
+    Click `Add Provider`, select `OpenAI Compatible` type
+  </Step>
+  <Step title="Enter Details">
+    - **Name**: `Crazyrouter`
+    - **API URL**: `https://crazyrouter.com/v1`
+    - **API Key**: `sk-xxx`
+  </Step>
+  <Step title="Add Models">
+    Click `Fetch Model List` to automatically pull available models. You can also manually add model names.
+  </Step>
+</Steps>
+
+## MCP Tool Configuration
+
+Cherry Studio supports MCP (Model Context Protocol) tools:
+
+1. Go to `Settings` → `MCP Services`
+2. Add MCP server configuration
+3. Enable MCP tools in conversations
+
+## Reasoning Model Configuration
+
+For models that support reasoning (such as `o1`, `o3`), Cherry Studio automatically detects and displays the thinking process:
+
+1. Add reasoning models like `o1`, `o3-mini` when adding models
+2. The reasoning chain is automatically displayed during conversations
+
+## Recommended Settings
+
+| Setting | Recommended Value |
+|---------|-------------------|
+| Temperature | 0.7 (creative tasks) / 0 (precise tasks) |
+| Max Tokens | 4096 |
+| Streaming | Enabled |
+
+<Note>
+  Cherry Studio supports configuring multiple providers simultaneously, allowing you to switch between different models during conversations.
+</Note>

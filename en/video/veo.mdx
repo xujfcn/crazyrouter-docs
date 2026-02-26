@@ -1,0 +1,118 @@
+---
+title: "Veo 3.1"
+description: "Use the Google Veo 3.1 model to generate videos"
+---
+
+# Veo 3.1
+
+Google Veo 3.1 is one of the most advanced video generation models, supporting high-quality text-to-video and image-to-video.
+
+## Via Unified Video API
+
+```
+POST /v1/video/create
+```
+
+### Request Examples
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/video/create \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "veo3.1-components",
+    "prompt": "A cinematic shot of a spaceship landing on Mars, dust clouds rising, golden hour lighting",
+    "aspect_ratio": "16:9"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/v1/video/create",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "veo3.1-components",
+        "prompt": "A cinematic shot of a spaceship landing on Mars",
+        "aspect_ratio": "16:9"
+    }
+)
+
+task_id = response.json()["id"]
+print(f"Task ID: {task_id}")
+```
+
+</CodeGroup>
+
+### Response Example
+
+```json
+{
+  "id": "veo_task_abc123",
+  "status": "processing",
+  "status_update_time": 1709123456
+}
+```
+
+---
+
+## Query Task
+
+```
+GET /v1/video/query?id={task_id}
+```
+
+```bash cURL
+curl "https://crazyrouter.com/v1/video/query?id=veo_task_abc123" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Response Example (Completed)
+
+```json
+{
+  "id": "veo_task_abc123",
+  "status": "completed",
+  "status_update_time": 1709123520,
+  "video_url": "https://crazyrouter.com/files/veo_abc123.mp4"
+}
+```
+
+---
+
+## Via Fal.ai Format
+
+```
+POST /fal-ai/veo3/run
+```
+
+```bash cURL
+curl -X POST https://crazyrouter.com/fal-ai/veo3/run \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "A cinematic shot of a spaceship landing on Mars",
+    "aspect_ratio": "16:9",
+    "duration": "8s"
+  }'
+```
+
+---
+
+## Available Models
+
+| Model | Description |
+|-------|-------------|
+| `veo3.1-components` | Veo 3.1, latest version |
+| `veo3` | Veo 3 |
+| `veo2` | Veo 2 |
+
+<Note>
+  Veo 3.1 produces extremely high-quality videos, but generation time is longer (typically 3-8 minutes). A polling interval of 15 seconds is recommended.
+</Note>

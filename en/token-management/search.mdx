@@ -1,0 +1,66 @@
+---
+title: 'Search Tokens'
+description: 'Search tokens by keyword'
+api: 'GET /api/token/search'
+---
+
+## Overview
+
+Search for tokens by keyword with fuzzy matching on token names.
+
+## Request Parameters
+
+<ParamField query="keyword" type="string" required>
+  Search keyword, matches against token names
+</ParamField>
+
+## Response Format
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": [
+    {
+      "id": 5,
+      "name": "Production",
+      "key": "sk-xxxxxxxx",
+      "status": 1,
+      "remain_quota": 50000,
+      "used_quota": 8000,
+      "created_time": 1706000000
+    }
+  ]
+}
+```
+
+## Code Examples
+
+<CodeGroup>
+
+```python Python
+import requests
+
+headers = {
+    "Authorization": "Bearer your_access_token",
+    "New-Api-User": "1",
+    "User-Agent": "Mozilla/5.0"
+}
+
+response = requests.get(
+    "https://crazyrouter.com/api/token/search?keyword=production",
+    headers=headers
+)
+
+tokens = response.json()["data"]
+for token in tokens:
+    print(f"[{token['id']}] {token['name']} - Remaining quota: {token['remain_quota']}")
+```
+
+```bash cURL
+curl "https://crazyrouter.com/api/token/search?keyword=production" \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 1"
+```
+
+</CodeGroup>

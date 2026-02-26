@@ -1,0 +1,159 @@
+---
+title: "Claude Chat Object"
+description: "Structure of the Anthropic Claude Message object and streaming event types"
+---
+
+# Claude Chat Object
+
+Crazyrouter supports Anthropic Claude's native Messages API format. This page describes the Message object and streaming event types.
+
+## Message Object
+
+The complete Message object returned by non-streaming requests:
+
+```json
+{
+  "id": "msg_abc123",
+  "type": "message",
+  "role": "assistant",
+  "content": [
+    {
+      "type": "text",
+      "text": "Hello! How can I help you?"
+    }
+  ],
+  "model": "claude-sonnet-4-20250514",
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "usage": {
+    "input_tokens": 15,
+    "output_tokens": 20,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0
+  }
+}
+```
+
+### Field Descriptions
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Unique message identifier |
+| `type` | string | Always `message` |
+| `role` | string | Always `assistant` |
+| `content` | array | List of content blocks, can contain `text` and `tool_use` types |
+| `model` | string | The model actually used |
+| `stop_reason` | string | Stop reason: `end_turn`, `max_tokens`, `stop_sequence`, `tool_use` |
+| `stop_sequence` | string\|null | The sequence that triggered the stop |
+| `usage` | object | Token usage |
+
+### content Block Types
+
+**Text block:**
+```json
+{
+  "type": "text",
+  "text": "Response content"
+}
+```
+
+**Tool use block:**
+```json
+{
+  "type": "tool_use",
+  "id": "toolu_abc123",
+  "name": "get_weather",
+  "input": {"city": "Beijing"}
+}
+```
+
+---
+
+## Streaming Event Types
+
+Streaming responses use SSE format and include the following event types:
+
+### message_start
+
+Sent at the beginning of the stream, contains the Message object (with empty content):
+
+```
+event: message_start
+data: {"type":"message_start","message":{"id":"msg_abc123","type":"message","role":"assistant","content":[],"model":"claude-sonnet-4-20250514","stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":15,"output_tokens":0}}}
+```
+
+### content_block_start
+
+New content block begins:
+
+```
+event: content_block_start
+data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}
+```
+
+### content_block_delta
+
+Content block incremental update:
+
+```
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Hello"}}
+```
+
+### content_block_stop
+
+Content block ends:
+
+```
+event: content_block_stop
+data: {"type":"content_block_stop","index":0}
+```
+
+### message_delta
+
+Message-level update (contains stop_reason and output token count):
+
+```
+event: message_delta
+data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"output_tokens":20}}
+```
+
+### message_stop
+
+Stream ends:
+
+```
+event: message_stop
+data: {"type":"message_stop"}
+```
+
+---
+
+## Complete Streaming Event Sequence
+
+```
+event: message_start
+data: {"type":"message_start","message":{...}}
+
+event: content_block_start
+data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Hello"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"!"}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":0}
+
+event: message_delta
+data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"output_tokens":5}}
+
+event: message_stop
+data: {"type":"message_stop"}
+```
+
+<Note>
+  Crazyrouter fully supports Anthropic's native streaming event format. You can also use Claude models through the OpenAI-compatible format (`/v1/chat/completions`), in which case the streaming format follows the standard OpenAI SSE format.
+</Note>

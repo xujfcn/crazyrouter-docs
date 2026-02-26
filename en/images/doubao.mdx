@@ -1,0 +1,155 @@
+---
+title: "Doubao Seedream"
+description: "Use Doubao Seedream models for image generation, supporting text-to-image, image-to-image, multi-image fusion, and group output"
+---
+
+# Doubao Seedream
+
+Doubao Seedream is an image generation model by ByteDance, supporting high-quality text-to-image and image-to-image generation.
+
+## Supported Models
+
+| Model | Description |
+|-------|-------------|
+| `doubao-seedream-3-0` | Seedream 3.0 |
+| `doubao-seedream-4-0` | Seedream 4.0 |
+| `doubao-seedream-4-5` | Seedream 4.5, latest version |
+
+---
+
+## Text-to-Image
+
+```
+POST /fal-ai/seedream/text-to-image
+```
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `prompt` | string | Yes | Image description prompt |
+| `model` | string | No | Model name, defaults to `doubao-seedream-4-5` |
+| `size` | string | No | Image size, e.g. `1024x1024` |
+| `n` | integer | No | Number of images to generate |
+| `negative_prompt` | string | No | Negative prompt |
+
+### Request Example
+
+```bash cURL
+curl -X POST https://crazyrouter.com/fal-ai/seedream/text-to-image \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "A cute Shiba Inu wearing a kimono, sitting under a cherry blossom tree",
+    "model": "doubao-seedream-4-5",
+    "size": "1024x1024",
+    "n": 1
+  }'
+```
+
+### Response Example
+
+```json
+{
+  "created": 1709123456,
+  "data": [
+    {
+      "url": "https://crazyrouter.com/files/seedream_abc123.png"
+    }
+  ]
+}
+```
+
+---
+
+## Image-to-Image
+
+```
+POST /fal-ai/seedream/image-to-image
+```
+
+Generate new images based on a reference image.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `prompt` | string | Yes | Description prompt |
+| `image` | string | Yes | Reference image URL |
+| `strength` | number | No | Variation strength, 0-1, higher values produce more variation |
+
+```bash cURL
+curl -X POST https://crazyrouter.com/fal-ai/seedream/image-to-image \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "Convert the photo to oil painting style",
+    "image": "https://example.com/photo.jpg",
+    "strength": 0.7
+  }'
+```
+
+---
+
+## Multi-Image Fusion
+
+```
+POST /fal-ai/seedream/multi-image-fusion
+```
+
+Fuse multiple images to generate a new image.
+
+```bash cURL
+curl -X POST https://crazyrouter.com/fal-ai/seedream/multi-image-fusion \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "Fuse the style and content of both images",
+    "images": [
+      "https://example.com/image1.jpg",
+      "https://example.com/image2.jpg"
+    ]
+  }'
+```
+
+---
+
+## Group Output
+
+```
+POST /fal-ai/seedream/group-output
+```
+
+Generate multiple images with different angles or styles in a single request.
+
+```bash cURL
+curl -X POST https://crazyrouter.com/fal-ai/seedream/group-output \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "A modern minimalist living room design",
+    "n": 4,
+    "size": "1024x1024"
+  }'
+```
+
+---
+
+## Seedance Video
+
+Doubao also provides Seedance video generation capabilities using the `seedance-lite` model.
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/video/create \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "seedance-lite",
+    "prompt": "A cat chasing butterflies in a garden",
+    "aspect_ratio": "16:9"
+  }'
+```
+
+For detailed Seedance video API documentation, see [Seedance Video](/en/video/seedance).
+
+<Note>
+  Seedream models have excellent understanding of Chinese prompts. Using Chinese descriptions is recommended for better results.
+</Note>

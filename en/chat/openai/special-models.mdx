@@ -1,0 +1,159 @@
+---
+title: "Special Models"
+description: "Usage methods for special-purpose models, including translation models and OCR recognition models"
+---
+
+# Special Models
+
+Crazyrouter provides some models with special capabilities. They are called through the standard Chat Completions API but have specific usage patterns.
+
+---
+
+## qwen-mt-turbo (Translation Model)
+
+Qwen Machine Translation model, optimized for high-quality translation. Specify source and target languages through the `translation` parameter.
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "qwen-mt-turbo",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a translation assistant."
+      },
+      {
+        "role": "user",
+        "content": "Translate the following into English: Artificial intelligence is changing our way of life, from healthcare to transportation, it is everywhere."
+      }
+    ],
+    "translation": {
+      "source_lang": "zh",
+      "target_lang": "en"
+    }
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/v1/chat/completions",
+    headers={
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Content-Type": "application/json"
+    },
+    json={
+        "model": "qwen-mt-turbo",
+        "messages": [
+            {"role": "system", "content": "You are a translation assistant."},
+            {"role": "user", "content": "Translate the following into English: Artificial intelligence is changing our way of life."}
+        ],
+        "translation": {
+            "source_lang": "zh",
+            "target_lang": "en"
+        }
+    }
+)
+
+print(response.json()["choices"][0]["message"]["content"])
+```
+
+</CodeGroup>
+
+### Supported Language Codes
+
+| Code | Language | Code | Language |
+|------|----------|------|----------|
+| `zh` | Chinese | `en` | English |
+| `ja` | Japanese | `ko` | Korean |
+| `fr` | French | `de` | German |
+| `es` | Spanish | `ru` | Russian |
+| `pt` | Portuguese | `it` | Italian |
+
+---
+
+## deepseek-ocr (OCR Recognition)
+
+DeepSeek OCR model, optimized for text recognition in documents and images. Send images to let the model extract text content.
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "deepseek-ocr",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {"type": "text", "text": "Recognize all text in the image"},
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "https://example.com/document.png"
+            }
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="deepseek-ocr",
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "Recognize all text in the image"},
+                {
+                    "type": "image_url",
+                    "image_url": {"url": "https://example.com/document.png"}
+                }
+            ]
+        }
+    ]
+)
+
+print(response.choices[0].message.content)
+```
+
+</CodeGroup>
+
+### Response Example
+
+```json
+{
+  "id": "chatcmpl-abc123",
+  "object": "chat.completion",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Text content in the image:\n\nInvoice Number: 12345678\nDate: February 20, 2026\nAmount: $1,280.00\n..."
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}
+```
+
+<Note>
+  Extra parameters for special models (such as `translation`) are non-standard extensions by Crazyrouter. Standard OpenAI SDKs may not directly support them. You can pass them via `extra_body` or use HTTP requests directly.
+</Note>

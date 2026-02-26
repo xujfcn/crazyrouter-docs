@@ -1,0 +1,103 @@
+---
+title: 'Upload Images'
+description: 'Upload images to the built-in image hosting or your own image host'
+api: 'POST /api/upload'
+---
+
+## Overview
+
+Crazyrouter provides an image upload endpoint that supports uploading images to the built-in image host. After uploading, it returns an accessible image URL that can be used for vision, image editing, and other API calls.
+
+## Built-in Image Host
+
+### Request
+
+```
+POST /api/upload
+Content-Type: multipart/form-data
+Authorization: Bearer sk-xxx
+```
+
+<ParamField body="file" type="file" required>
+  Image file. Supported formats: JPG, PNG, GIF, WebP.
+</ParamField>
+
+### Response
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": "https://crazyrouter.com/uploads/2026/01/abc123.png"
+}
+```
+
+## Code Examples
+
+<CodeGroup>
+
+```python Python
+import requests
+
+url = "https://crazyrouter.com/api/upload"
+headers = {
+    "Authorization": "Bearer sk-xxx"
+}
+
+with open("image.png", "rb") as f:
+    response = requests.post(
+        url,
+        headers=headers,
+        files={"file": ("image.png", f, "image/png")}
+    )
+
+data = response.json()
+image_url = data["data"]
+print(f"Image URL: {image_url}")
+```
+
+```bash cURL
+curl -X POST https://crazyrouter.com/api/upload \
+  -H "Authorization: Bearer sk-xxx" \
+  -F "file=@image.png"
+```
+
+</CodeGroup>
+
+## Using with Vision
+
+After uploading an image, you can use the returned URL with GPT-4o vision:
+
+```python
+# Upload the image first
+upload_resp = requests.post(
+    "https://crazyrouter.com/api/upload",
+    headers={"Authorization": "Bearer sk-xxx"},
+    files={"file": open("photo.jpg", "rb")}
+)
+image_url = upload_resp.json()["data"]
+
+# Then call the vision API
+from openai import OpenAI
+client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "Describe this image"},
+            {"type": "image_url", "image_url": {"url": image_url}}
+        ]
+    }]
+)
+print(response.choices[0].message.content)
+```
+
+## Self-Hosted Image Storage
+
+If you need to use your own image hosting, you can configure the image host API address in the system settings. S3-compatible object storage services are supported.
+
+<Note>
+  The upload file size limit is 20MB. It is recommended to compress images before uploading to save storage space and speed up transfers.
+</Note>

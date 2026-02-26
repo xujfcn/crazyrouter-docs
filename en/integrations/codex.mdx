@@ -1,0 +1,45 @@
+---
+title: 'OpenAI Codex CLI Setup Guide'
+description: 'Configure Crazyrouter API in OpenAI Codex CLI'
+---
+
+## Overview
+
+OpenAI Codex CLI is OpenAI's official command-line programming assistant that supports AI-assisted programming in the terminal.
+
+## Configuration
+
+### Environment Variables
+
+```bash
+export OPENAI_API_KEY=sk-xxx
+export OPENAI_BASE_URL=https://crazyrouter.com/v1
+```
+
+### Launch
+
+```bash
+codex
+```
+
+### Specify Model
+
+```bash
+codex --model gpt-4o
+```
+
+## Configuration File
+
+Create `~/.codex/config.json`:
+
+```json
+{
+  "model": "gpt-4o",
+  "apiKey": "sk-xxx",
+  "baseURL": "https://crazyrouter.com/v1"
+}
+```
+
+<Note>
+  Codex CLI uses the OpenAI format by default, which Crazyrouter fully supports. Just change the Base URL and API Key.
+</Note>

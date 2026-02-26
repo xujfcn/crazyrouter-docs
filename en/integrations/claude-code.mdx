@@ -1,0 +1,60 @@
+---
+title: 'Claude Code Setup Guide'
+description: 'Configure Crazyrouter API in Claude Code CLI'
+---
+
+## Overview
+
+Claude Code is Anthropic's official command-line AI programming assistant. You can connect it to Crazyrouter by configuring environment variables.
+
+## Configuration
+
+### Set Environment Variables
+
+<Tabs>
+  <Tab title="Linux / macOS">
+    ```bash
+    export ANTHROPIC_BASE_URL=https://crazyrouter.com
+    export ANTHROPIC_API_KEY=sk-xxx
+    ```
+
+    Add to `~/.bashrc` or `~/.zshrc` for persistence:
+
+    ```bash
+    echo 'export ANTHROPIC_BASE_URL=https://crazyrouter.com' >> ~/.bashrc
+    echo 'export ANTHROPIC_API_KEY=sk-xxx' >> ~/.bashrc
+    source ~/.bashrc
+    ```
+  </Tab>
+  <Tab title="Windows (PowerShell)">
+    ```powershell
+    $env:ANTHROPIC_BASE_URL = "https://crazyrouter.com"
+    $env:ANTHROPIC_API_KEY = "sk-xxx"
+    ```
+
+    Set permanently:
+
+    ```powershell
+    [System.Environment]::SetEnvironmentVariable("ANTHROPIC_BASE_URL", "https://crazyrouter.com", "User")
+    [System.Environment]::SetEnvironmentVariable("ANTHROPIC_API_KEY", "sk-xxx", "User")
+    ```
+  </Tab>
+</Tabs>
+
+### Launch Claude Code
+
+```bash
+claude
+```
+
+## Verification
+
+After launching, enter any question. If you get a normal response, the configuration is successful.
+
+<Note>
+  Claude Code uses the Anthropic native API format (`/v1/messages`), which Crazyrouter fully supports. Note that the Base URL should not include the `/v1` suffix.
+</Note>
+
+<Warning>
+  Make sure your token has Claude models enabled (e.g. `claude-sonnet-4-20250514`).
+</Warning>

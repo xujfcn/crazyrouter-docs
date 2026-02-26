@@ -1,0 +1,109 @@
+---
+title: "Jimeng"
+description: "Use the Jimeng API to generate videos"
+---
+
+# Jimeng
+
+Jimeng is a video generation service by ByteDance.
+
+## Submit Video Task
+
+```
+POST /jimeng/submit/videos
+```
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model` | string | Yes | Model name |
+| `prompt` | string | Yes | Video description prompt |
+| `image_url` | string | No | Reference image URL (image-to-video) |
+| `aspect_ratio` | string | No | Aspect ratio |
+
+### Request Examples
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/jimeng/submit/videos \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "jimeng-video-1",
+    "prompt": "A goldfish swimming in water, sunlight sparkling on the surface"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/jimeng/submit/videos",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "jimeng-video-1",
+        "prompt": "A goldfish swimming in water, sunlight sparkling on the surface"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### Response Example
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "task_id": "jimeng_abc123"
+  }
+}
+```
+
+---
+
+## Query Task
+
+```
+GET /jimeng/fetch/{task_id}
+```
+
+```bash cURL
+curl https://crazyrouter.com/jimeng/fetch/jimeng_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Response Example (Completed)
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "task_id": "jimeng_abc123",
+    "status": "SUCCESS",
+    "video_url": "https://cdn.jimeng.com/videos/..."
+  }
+}
+```
+
+### Task Status
+
+| Status | Description |
+|--------|-------------|
+| `SUBMITTED` | Submitted |
+| `PROCESSING` | Processing |
+| `SUCCESS` | Succeeded |
+| `FAILED` | Failed |
+
+<Note>
+  Jimeng has excellent understanding of Chinese prompts. Using Chinese descriptions is recommended.
+</Note>

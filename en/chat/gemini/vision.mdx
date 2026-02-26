@@ -1,0 +1,178 @@
+---
+title: "Gemini Multimodal Understanding"
+description: "Use the Gemini native format for image, video, and audio multimodal understanding"
+---
+
+# Gemini Multimodal Understanding
+
+Gemini models support understanding multiple modalities of content including images, video, and audio.
+
+```
+POST /v1beta/models/{model}:generateContent
+```
+
+---
+
+## Image Understanding
+
+<CodeGroup>
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "Describe the content of this image in detail"},
+          {
+            "inlineData": {
+              "mimeType": "image/jpeg",
+              "data": "/9j/4AAQSkZJRgABAQAA..."
+            }
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+```python Python
+import google.generativeai as genai
+
+genai.configure(
+    api_key="YOUR_API_KEY",
+    transport="rest",
+    client_options={"api_endpoint": "https://crazyrouter.com"}
+)
+
+model = genai.GenerativeModel("gemini-2.5-flash")
+
+with open("photo.jpg", "rb") as f:
+    image_data = f.read()
+
+response = model.generate_content([
+    "Describe the content of this image in detail",
+    {"mime_type": "image/jpeg", "data": image_data}
+])
+
+print(response.text)
+```
+
+</CodeGroup>
+
+---
+
+## Video Understanding
+
+Send video via inline data or file URI:
+
+<CodeGroup>
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "Describe the content of this video and list the key scenes"},
+          {
+            "inlineData": {
+              "mimeType": "video/mp4",
+              "data": "AAAAIGZ0eXBpc29t..."
+            }
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+```python Python
+import base64
+
+with open("video.mp4", "rb") as f:
+    video_data = f.read()
+
+response = model.generate_content([
+    "Describe the content of this video and list the key scenes",
+    {"mime_type": "video/mp4", "data": video_data}
+])
+
+print(response.text)
+```
+
+</CodeGroup>
+
+---
+
+## Audio Understanding
+
+<CodeGroup>
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "Transcribe this audio and summarize the main points"},
+          {
+            "inlineData": {
+              "mimeType": "audio/mp3",
+              "data": "SUQzBAAAAAAAI1RTU0..."
+            }
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+```python Python
+with open("audio.mp3", "rb") as f:
+    audio_data = f.read()
+
+response = model.generate_content([
+    "Transcribe this audio and summarize the main points",
+    {"mime_type": "audio/mp3", "data": audio_data}
+])
+
+print(response.text)
+```
+
+</CodeGroup>
+
+---
+
+## Multi-Image Comparison
+
+```python Python
+response = model.generate_content([
+    "Compare these three product images and analyze the design features, pros, and cons of each",
+    {"mime_type": "image/jpeg", "data": image1_data},
+    {"mime_type": "image/jpeg", "data": image2_data},
+    {"mime_type": "image/jpeg", "data": image3_data}
+])
+```
+
+## Supported Media Formats
+
+| Type | Supported Formats |
+|------|-------------------|
+| Image | JPEG, PNG, GIF, WebP, BMP |
+| Video | MP4, AVI, MOV, MKV, WebM |
+| Audio | MP3, WAV, FLAC, AAC, OGG |
+
+<Note>
+  When sending video and audio files via inline data, file size is limited by the request body size. For large files, it is recommended to upload them to an accessible URL first and then reference them via `fileData`.
+</Note>
+
+<Warning>
+  Video and audio processing consumes far more tokens than plain text. One minute of video can consume thousands of tokens.
+</Warning>

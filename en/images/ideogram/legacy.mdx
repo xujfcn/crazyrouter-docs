@@ -1,0 +1,138 @@
+---
+title: "Ideogram Legacy"
+description: "Use the Ideogram Legacy API for image generation, remixing, upscaling, and description"
+---
+
+# Ideogram Legacy
+
+The Ideogram Legacy API provides basic image generation capabilities.
+
+<Note>
+  We recommend using [Ideogram V3](/en/images/ideogram/v3) for better generation results.
+</Note>
+
+## Generate Image
+
+```
+POST /ideogram/generate
+```
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `image_request` | object | Yes | Image request object |
+| `image_request.prompt` | string | Yes | Prompt |
+| `image_request.model` | string | No | Model version: `V_2`, `V_2_TURBO` |
+| `image_request.aspect_ratio` | string | No | Aspect ratio |
+| `image_request.magic_prompt_option` | string | No | Prompt enhancement |
+| `image_request.style_type` | string | No | Style type |
+| `image_request.negative_prompt` | string | No | Negative prompt |
+
+### Request Example
+
+```bash cURL
+curl -X POST https://crazyrouter.com/ideogram/generate \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "image_request": {
+      "prompt": "A futuristic cityscape at night with neon lights",
+      "model": "V_2",
+      "aspect_ratio": "ASPECT_16_9",
+      "magic_prompt_option": "AUTO"
+    }
+  }'
+```
+
+### Response Example
+
+```json
+{
+  "created": 1709123456,
+  "data": [
+    {
+      "url": "https://ideogram.ai/assets/image/...",
+      "prompt": "A futuristic cityscape at night with neon lights",
+      "resolution": "1344x768",
+      "seed": 67890
+    }
+  ]
+}
+```
+
+---
+
+## Remix
+
+```
+POST /ideogram/remix
+```
+
+Generate variations based on a reference image.
+
+```bash cURL
+curl -X POST https://crazyrouter.com/ideogram/remix \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "image_request": {
+      "prompt": "Same scene in anime style",
+      "model": "V_2"
+    },
+    "image_file": "https://example.com/photo.jpg"
+  }'
+```
+
+---
+
+## Upscale Image
+
+```
+POST /ideogram/upscale
+```
+
+Upscale an image to a higher resolution.
+
+```bash cURL
+curl -X POST https://crazyrouter.com/ideogram/upscale \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "image_request": {
+      "prompt": "high quality detailed image"
+    },
+    "image_file": "https://example.com/photo.jpg"
+  }'
+```
+
+---
+
+## Describe Image
+
+```
+POST /ideogram/describe
+```
+
+Let the model describe the image content and generate corresponding prompts.
+
+```bash cURL
+curl -X POST https://crazyrouter.com/ideogram/describe \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "image_file": "https://example.com/photo.jpg"
+  }'
+```
+
+### Response Example
+
+```json
+{
+  "descriptions": [
+    {
+      "text": "A futuristic cityscape at night with vibrant neon lights reflecting off wet streets, tall skyscrapers with holographic advertisements"
+    }
+  ]
+}
+```

@@ -1,0 +1,99 @@
+---
+title: 'List Tokens'
+description: 'Get a paginated list of API tokens for the current user'
+api: 'GET /api/token/'
+---
+
+## Overview
+
+Retrieve all API tokens created by the current user, with pagination support.
+
+## Authentication
+
+Authenticate using the user's Access Token with the following headers:
+
+```
+Authorization: Bearer {access_token}
+New-Api-User: {user_id}
+```
+
+## Request Parameters
+
+<ParamField query="p" type="integer" default="0">
+  Page number, starting from 0
+</ParamField>
+
+<ParamField query="size" type="integer" default="10">
+  Items per page, maximum 100
+</ParamField>
+
+## Response Format
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": [
+    {
+      "id": 1,
+      "user_id": 1,
+      "key": "sk-xxxxxxxxxxxxxxxx",
+      "status": 1,
+      "name": "My Token",
+      "created_time": 1706000000,
+      "accessed_time": 1706100000,
+      "expired_time": -1,
+      "remain_quota": 500000,
+      "unlimited_quota": false,
+      "used_quota": 12345,
+      "models": ["gpt-4o", "claude-sonnet-4-20250514"],
+      "subnet": ""
+    }
+  ]
+}
+```
+
+## Field Descriptions
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | int | Token ID |
+| `key` | string | API Key (sk-xxx format) |
+| `status` | int | Status: 1=enabled, 2=disabled |
+| `name` | string | Token name |
+| `expired_time` | int | Expiration timestamp, -1 means never expires |
+| `remain_quota` | int | Remaining quota |
+| `unlimited_quota` | bool | Whether quota is unlimited |
+| `used_quota` | int | Used quota |
+| `models` | string[] | Allowed model list, empty means all models |
+
+## Code Examples
+
+<CodeGroup>
+
+```python Python
+import requests
+
+headers = {
+    "Authorization": "Bearer your_access_token",
+    "New-Api-User": "1",
+    "User-Agent": "Mozilla/5.0"
+}
+
+response = requests.get(
+    "https://crazyrouter.com/api/token/?p=0&size=100",
+    headers=headers
+)
+
+tokens = response.json()["data"]
+for token in tokens:
+    print(f"[{token['name']}] {token['key'][:10]}... Quota: {token['remain_quota']}")
+```
+
+```bash cURL
+curl "https://crazyrouter.com/api/token/?p=0&size=100" \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 1"
+```
+
+</CodeGroup>
