@@ -12,204 +12,201 @@
     "light": "#07C983",
     "dark": "#0D9373"
   },
-  "topbarLinks": [
-    { "name": "Dashboard", "url": "https://crazyrouter.com" }
-  ],
-  "topbarCtaButton": {
-    "name": "Get API Key",
-    "url": "https://crazyrouter.com/token"
-  },
-  "anchors": [
-    { "name": "API Playground", "icon": "play", "url": "https://crazyrouter.com/playground" },
-    { "name": "Pricing", "icon": "tag", "url": "https://crazyrouter.com/pricing" }
-  ],
   "api": {
     "baseUrl": "https://crazyrouter.com",
     "auth": {
       "method": "bearer"
     }
   },
-  "navigation": [
-    {
-      "group": "开始使用",
-      "pages": [
-        "introduction",
-        "quickstart",
-        "making-requests",
-        "api-endpoint",
-        "authentication",
-        "error-handling",
-        "contact"
-      ]
-    },
-    {
-      "group": "Chat - OpenAI",
-      "pages": [
-        "chat/openai/overview",
-        "chat/openai/completions",
-        "chat/openai/vision",
-        "chat/openai/image-creation",
-        "chat/openai/function-calling",
-        "chat/openai/structured-output",
-        "chat/openai/reasoning",
-        "chat/openai/web-search",
-        "chat/openai/completions-legacy",
-        "chat/openai/special-models",
-        "chat/openai/models"
-      ]
-    },
-    {
-      "group": "Chat - Claude",
-      "pages": [
-        "chat/anthropic/overview",
-        "chat/anthropic/messages",
-        "chat/anthropic/completions",
-        "chat/anthropic/vision",
-        "chat/anthropic/pdf"
-      ]
-    },
-    {
-      "group": "Chat - Gemini",
-      "pages": [
-        "chat/gemini/native",
-        "chat/gemini/image-gen",
-        "chat/gemini/image-edit",
-        "chat/gemini/vision",
-        "chat/gemini/document",
-        "chat/gemini/tools",
-        "chat/gemini/openai-compat",
-        "chat/gemini/imagen"
-      ]
-    },
-    {
-      "group": "Chat - Responses API",
-      "pages": [
-        "chat/responses/overview",
-        "chat/responses/create",
-        "chat/responses/web-search",
-        "chat/responses/function-calling",
-        "chat/responses/gpt5-thinking"
-      ]
-    },
-    {
-      "group": "图像生成",
-      "pages": [
-        "images/midjourney/overview",
-        "images/midjourney/imagine",
-        "images/midjourney/query",
-        "images/midjourney/action",
-        "images/midjourney/seed",
-        "images/ideogram/v3",
-        "images/ideogram/legacy",
-        "images/gpt-image",
-        "images/dalle",
-        "images/flux",
-        "images/doubao",
-        "images/fal",
-        "images/qwen"
-      ]
-    },
-    {
-      "group": "视频生成",
-      "pages": [
-        "video/unified",
-        "video/kling/images",
-        "video/kling/video",
-        "video/kling/advanced",
-        "video/kling/query",
-        "video/luma",
-        "video/runway",
-        "video/veo",
-        "video/sora",
-        "video/minimax",
-        "video/jimeng",
-        "video/wan",
-        "video/seedance",
-        "video/volcengine",
-        "video/openai-video"
-      ]
-    },
-    {
-      "group": "音频",
-      "pages": [
-        "audio/tts",
-        "audio/stt",
-        "audio/gpt4o-audio",
-        "audio/realtime",
-        "audio/suno/generate",
-        "audio/suno/lyrics",
-        "audio/suno/concat",
-        "audio/suno/query"
-      ]
-    },
-    {
-      "group": "嵌入 & 重排序",
-      "pages": ["embeddings/create", "embeddings/rerank"]
-    },
-    {
-      "group": "其他 API",
-      "pages": ["gpts", "upload"]
-    },
-    {
-      "group": "Token 管理",
-      "pages": [
-        "token-management/list",
-        "token-management/create",
-        "token-management/update",
-        "token-management/delete",
-        "token-management/search",
-        "token-management/models",
-        "token-management/account"
-      ]
-    },
-    {
-      "group": "SDK & 代码示例",
-      "pages": [
-        "sdks/python/basic",
-        "sdks/python/openai-sdk",
-        "sdks/python/vision",
-        "sdks/python/embeddings",
-        "sdks/python/tts-stt",
-        "sdks/python/images",
-        "sdks/python/function-calling",
-        "sdks/nodejs",
-        "sdks/php"
-      ]
-    },
-    {
-      "group": "第三方集成",
-      "pages": [
-        "integrations/cursor",
-        "integrations/claude-code",
-        "integrations/cline",
-        "integrations/aider",
-        "integrations/codex",
-        "integrations/gemini-cli",
-        "integrations/cherry-studio",
-        "integrations/chatbox",
-        "integrations/lobechat",
-        "integrations/nextchat",
-        "integrations/dify",
-        "integrations/n8n",
-        "integrations/coze",
-        "integrations/rikkahub",
-        "integrations/gpt-academic",
-        "integrations/zotero",
-        "integrations/claude-dev",
-        "integrations/immersive-translate",
-        "integrations/chatgpt-sidebar",
-        "integrations/chatgpt-on-wechat",
-        "integrations/langchain"
-      ]
-    },
-    {
-      "group": "参考",
-      "pages": [
-        "reference/status-codes",
-        "reference/callback",
-        "reference/thinking",
-        "reference/tutorial"
-      ]
-    }
-  ]
+  "navigation": {
+    "groups": [
+      {
+        "group": "开始使用",
+        "pages": [
+          "introduction",
+          "quickstart",
+          "making-requests",
+          "api-endpoint",
+          "authentication",
+          "error-handling",
+          "contact"
+        ]
+      },
+      {
+        "group": "Chat - OpenAI",
+        "pages": [
+          "chat/openai/overview",
+          "chat/openai/completions",
+          "chat/openai/vision",
+          "chat/openai/image-creation",
+          "chat/openai/function-calling",
+          "chat/openai/structured-output",
+          "chat/openai/reasoning",
+          "chat/openai/web-search",
+          "chat/openai/completions-legacy",
+          "chat/openai/special-models",
+          "chat/openai/models"
+        ]
+      },
+      {
+        "group": "Chat - Claude",
+        "pages": [
+          "chat/anthropic/overview",
+          "chat/anthropic/messages",
+          "chat/anthropic/completions",
+          "chat/anthropic/vision",
+          "chat/anthropic/pdf"
+        ]
+      },
+      {
+        "group": "Chat - Gemini",
+        "pages": [
+          "chat/gemini/native",
+          "chat/gemini/image-gen",
+          "chat/gemini/image-edit",
+          "chat/gemini/vision",
+          "chat/gemini/document",
+          "chat/gemini/tools",
+          "chat/gemini/openai-compat",
+          "chat/gemini/imagen"
+        ]
+      },
+      {
+        "group": "Chat - Responses API",
+        "pages": [
+          "chat/responses/overview",
+          "chat/responses/create",
+          "chat/responses/web-search",
+          "chat/responses/function-calling",
+          "chat/responses/gpt5-thinking"
+        ]
+      },
+      {
+        "group": "图像生成",
+        "pages": [
+          "images/midjourney/overview",
+          "images/midjourney/imagine",
+          "images/midjourney/query",
+          "images/midjourney/action",
+          "images/midjourney/seed",
+          "images/ideogram/v3",
+          "images/ideogram/legacy",
+          "images/gpt-image",
+          "images/dalle",
+          "images/flux",
+          "images/doubao",
+          "images/fal",
+          "images/qwen"
+        ]
+      },
+      {
+        "group": "视频生成",
+        "pages": [
+          "video/unified",
+          "video/kling/images",
+          "video/kling/video",
+          "video/kling/advanced",
+          "video/kling/query",
+          "video/luma",
+          "video/runway",
+          "video/veo",
+          "video/sora",
+          "video/minimax",
+          "video/jimeng",
+          "video/wan",
+          "video/seedance",
+          "video/volcengine",
+          "video/openai-video"
+        ]
+      },
+      {
+        "group": "音频",
+        "pages": [
+          "audio/tts",
+          "audio/stt",
+          "audio/gpt4o-audio",
+          "audio/realtime",
+          "audio/suno/generate",
+          "audio/suno/lyrics",
+          "audio/suno/concat",
+          "audio/suno/query"
+        ]
+      },
+      {
+        "group": "嵌入 & 重排序",
+        "pages": [
+          "embeddings/create",
+          "embeddings/rerank"
+        ]
+      },
+      {
+        "group": "其他 API",
+        "pages": [
+          "gpts",
+          "upload"
+        ]
+      },
+      {
+        "group": "Token 管理",
+        "pages": [
+          "token-management/list",
+          "token-management/create",
+          "token-management/update",
+          "token-management/delete",
+          "token-management/search",
+          "token-management/models",
+          "token-management/account"
+        ]
+      },
+      {
+        "group": "SDK & 代码示例",
+        "pages": [
+          "sdks/python/basic",
+          "sdks/python/openai-sdk",
+          "sdks/python/vision",
+          "sdks/python/embeddings",
+          "sdks/python/tts-stt",
+          "sdks/python/images",
+          "sdks/python/function-calling",
+          "sdks/nodejs",
+          "sdks/php"
+        ]
+      },
+      {
+        "group": "第三方集成",
+        "pages": [
+          "integrations/cursor",
+          "integrations/claude-code",
+          "integrations/cline",
+          "integrations/aider",
+          "integrations/codex",
+          "integrations/gemini-cli",
+          "integrations/cherry-studio",
+          "integrations/chatbox",
+          "integrations/lobechat",
+          "integrations/nextchat",
+          "integrations/dify",
+          "integrations/n8n",
+          "integrations/coze",
+          "integrations/rikkahub",
+          "integrations/gpt-academic",
+          "integrations/zotero",
+          "integrations/claude-dev",
+          "integrations/immersive-translate",
+          "integrations/chatgpt-sidebar",
+          "integrations/chatgpt-on-wechat",
+          "integrations/langchain"
+        ]
+      },
+      {
+        "group": "参考",
+        "pages": [
+          "reference/status-codes",
+          "reference/callback",
+          "reference/thinking",
+          "reference/tutorial"
+        ]
+      }
+    ]
+  }
 }
