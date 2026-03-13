@@ -5,7 +5,121 @@ description: "使用 OpenAI Sora 模型生成视频，支持多种调用格式"
 
 # Sora
 
-OpenAI Sora 支持多种调用格式：统一视频 API、OpenAI 视频格式和原生格式。
+OpenAI Sora 支持多种调用格式：统一视频 API、OpenAI 视频格式、Video Generations API 和原生格式。
+
+## 模型选择
+
+| 模型 | 说明 | 生成速度 | 质量 | 推荐场景 |
+|------|------|----------|------|----------|
+| `sora` | 标准版 | 快速 | 标准 | 日常使用、快速原型 |
+| `sora-2` | 第二代 | 中等 | 高 | 生产环境、高质量需求 |
+| `sora-pro` | 专业版 | 较慢 | 最高 | 专业作品、精细控制 |
+
+---
+
+## 通过 Video Generations API（推荐）
+
+```
+POST /v1/video/generations
+```
+
+这是最新的 API 格式，提供更详细的任务状态和元数据。
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/video/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "sora-2",
+    "prompt": "A serene Japanese garden in spring, with cherry blossoms gently falling",
+    "size": "1280x720",
+    "duration": 5
+  }'
+```
+
+### 响应示例
+
+```json
+{
+  "id": "video_69b3a77020e88193b4476bb2be76b39400a8d08edef728f9",
+  "object": "video",
+  "model": "sora-2",
+  "status": "queued",
+  "progress": 0,
+  "created_at": 1773381488,
+  "seconds": "8",
+  "size": "1280x720"
+}
+```
+
+### 查询任务状态
+
+```
+GET /v1/video/generations/{task_id}
+```
+
+```bash cURL
+curl https://crazyrouter.com/v1/video/generations/video_69b3a77020e88193b4476bb2be76b39400a8d08edef728f9 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### 完整响应示例（已完成）
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "task_id": "video_69b3a77020e88193b4476bb2be76b39400a8d08edef728f9",
+    "action": "textGenerate",
+    "status": "SUCCESS",
+    "progress": "100%",
+    "submit_time": 1773381488,
+    "start_time": 1773381573,
+    "finish_time": 1773381664,
+    "data": {
+      "id": "video_69b3a77020e88193b4476bb2be76b39400a8d08edef728f9",
+      "model": "sora-2",
+      "object": "video",
+      "status": "completed",
+      "progress": 100,
+      "created_at": 1773381488,
+      "completed_at": 1773381629,
+      "generation_time": 141,
+      "expires_at": 1773385229,
+      "seconds": "8",
+      "size": "1280x720",
+      "prompt": "A serene Japanese garden in spring, with cherry blossoms gently falling",
+      "url": "https://uploads-xxx.s3.amazonaws.com/uploads/xxx.mp4",
+      "video_url": "https://uploads-xxx.s3.amazonaws.com/uploads/xxx.mp4",
+      "thumbnail_url": "https://uploads-xxx.s3.amazonaws.com/uploads/xxx.webp",
+      "spritesheet_url": "https://uploads-xxx.s3.amazonaws.com/uploads/xxx.jpeg"
+    }
+  }
+}
+```
+
+### 任务状态说明
+
+| 状态 | 说明 |
+|------|------|
+| `queued` | 任务已提交，等待处理 |
+| `in_progress` | 正在生成中 |
+| `completed` | 生成完成 |
+| `failed` | 生成失败 |
+
+### 重要字段说明
+
+- `generation_time`: 实际生成耗时（秒）
+- `expires_at`: 视频 URL 过期时间戳（通常为生成后 1 小时）
+- `thumbnail_url`: 视频缩略图
+- `spritesheet_url`: 视频雪碧图（用于预览）
+
+<Note>
+  视频 URL 有效期为 1 小时，请及时下载保存。
+</Note>
+
+---
 
 ## 通过统一视频 API
 
@@ -166,6 +280,17 @@ curl https://crazyrouter.com/v1/videos/sora_task_abc123 \
 }
 ```
 
+---
+
+## 性能参考
+
+基于 `sora-2` 模型的实际测试数据：
+
+- **队列等待时间**: 约 60-90 秒
+- **生成时间**: 约 120-150 秒
+- **总耗时**: 约 3-4 分钟
+- **视频大小**: 约 8 MB（8秒，1280x720）
+
 <Note>
-  Sora Pro 模式生成时间较长但质量更高。Storyboard 模式适合需要多场景连贯叙事的视频。
+  生成时间会根据系统负载和视频复杂度有所变化。Sora Pro 模式生成时间较长但质量更高。Storyboard 模式适合需要多场景连贯叙事的视频。
 </Note>

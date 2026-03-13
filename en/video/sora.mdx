@@ -1,11 +1,125 @@
 ---
 title: "Sora"
-description: "Use the OpenAI Sora model to generate videos, supporting multiple calling formats"
+description: "Generate videos using OpenAI Sora models with multiple API formats"
 ---
 
 # Sora
 
-OpenAI Sora supports multiple calling formats: Unified Video API, OpenAI Video format, and native format.
+OpenAI Sora supports multiple API formats: Unified Video API, OpenAI Video format, Video Generations API, and native format.
+
+## Model Selection
+
+| Model | Description | Speed | Quality | Recommended Use |
+|-------|-------------|-------|---------|-----------------|
+| `sora` | Standard version | Fast | Standard | Daily use, quick prototypes |
+| `sora-2` | Second generation | Medium | High | Production, high quality needs |
+| `sora-pro` | Professional version | Slower | Highest | Professional work, fine control |
+
+---
+
+## Via Video Generations API (Recommended)
+
+```
+POST /v1/video/generations
+```
+
+This is the latest API format with more detailed task status and metadata.
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/video/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "sora-2",
+    "prompt": "A serene Japanese garden in spring, with cherry blossoms gently falling",
+    "size": "1280x720",
+    "duration": 5
+  }'
+```
+
+### Response Example
+
+```json
+{
+  "id": "video_69b3a77020e88193b4476bb2be76b39400a8d08edef728f9",
+  "object": "video",
+  "model": "sora-2",
+  "status": "queued",
+  "progress": 0,
+  "created_at": 1773381488,
+  "seconds": "8",
+  "size": "1280x720"
+}
+```
+
+### Query Task Status
+
+```
+GET /v1/video/generations/{task_id}
+```
+
+```bash cURL
+curl https://crazyrouter.com/v1/video/generations/video_69b3a77020e88193b4476bb2be76b39400a8d08edef728f9 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Complete Response Example (Completed)
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "task_id": "video_69b3a77020e88193b4476bb2be76b39400a8d08edef728f9",
+    "action": "textGenerate",
+    "status": "SUCCESS",
+    "progress": "100%",
+    "submit_time": 1773381488,
+    "start_time": 1773381573,
+    "finish_time": 1773381664,
+    "data": {
+      "id": "video_69b3a77020e88193b4476bb2be76b39400a8d08edef728f9",
+      "model": "sora-2",
+      "object": "video",
+      "status": "completed",
+      "progress": 100,
+      "created_at": 1773381488,
+      "completed_at": 1773381629,
+      "generation_time": 141,
+      "expires_at": 1773385229,
+      "seconds": "8",
+      "size": "1280x720",
+      "prompt": "A serene Japanese garden in spring, with cherry blossoms gently falling",
+      "url": "https://uploads-xxx.s3.amazonaws.com/uploads/xxx.mp4",
+      "video_url": "https://uploads-xxx.s3.amazonaws.com/uploads/xxx.mp4",
+      "thumbnail_url": "https://uploads-xxx.s3.amazonaws.com/uploads/xxx.webp",
+      "spritesheet_url": "https://uploads-xxx.s3.amazonaws.com/uploads/xxx.jpeg"
+    }
+  }
+}
+```
+
+### Task Status
+
+| Status | Description |
+|--------|-------------|
+| `queued` | Task submitted, waiting for processing |
+| `in_progress` | Generating |
+| `completed` | Generation completed |
+| `failed` | Generation failed |
+
+### Important Fields
+
+- `generation_time`: Actual generation time (seconds)
+- `expires_at`: Video URL expiration timestamp (typically 1 hour after generation)
+- `thumbnail_url`: Video thumbnail
+- `spritesheet_url`: Video spritesheet (for preview)
+
+<Note>
+  Video URLs expire after 1 hour. Please download and save promptly.
+</Note>
+
+---
 
 ## Via Unified Video API
 
@@ -56,9 +170,9 @@ curl -X POST https://crazyrouter.com/v1/videos \
 
 ---
 
-## Image-to-Video
+## Image to Video
 
-Pass a reference image to generate video:
+Generate video from reference image:
 
 ```bash cURL
 curl -X POST https://crazyrouter.com/v1/videos \
@@ -112,7 +226,7 @@ curl -X POST https://crazyrouter.com/sora/v1/characters \
 
 ## Storyboard Support
 
-Define multi-scene videos using storyboards:
+Define multi-scene videos via storyboard:
 
 ```bash cURL
 curl -X POST https://crazyrouter.com/v1/videos \
@@ -166,6 +280,17 @@ curl https://crazyrouter.com/v1/videos/sora_task_abc123 \
 }
 ```
 
+---
+
+## Performance Reference
+
+Based on actual testing with `sora-2` model:
+
+- **Queue wait time**: ~60-90 seconds
+- **Generation time**: ~120-150 seconds
+- **Total time**: ~3-4 minutes
+- **Video size**: ~8 MB (8 seconds, 1280x720)
+
 <Note>
-  Sora Pro mode takes longer to generate but produces higher quality results. Storyboard mode is ideal for videos that require coherent multi-scene narratives.
+  Generation time varies based on system load and video complexity. Sora Pro mode takes longer but delivers higher quality. Storyboard mode is ideal for multi-scene narrative videos.
 </Note>
