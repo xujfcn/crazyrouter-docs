@@ -5,15 +5,14 @@ description: "使用 OpenAI Sora 模型生成视频，支持多种调用格式"
 
 # Sora
 
-OpenAI Sora 支持多种调用格式：统一视频 API、OpenAI 视频格式、Video Generations API 和原生格式。
+OpenAI Sora 支持多种调用格式：Video Generations API、统一视频 API、OpenAI 视频格式和原生格式。
 
 ## 模型选择
 
 | 模型 | 说明 | 生成速度 | 质量 | 推荐场景 |
 |------|------|----------|------|----------|
-| `sora` | 标准版 | 快速 | 标准 | 日常使用、快速原型 |
-| `sora-2` | 第二代 | 中等 | 高 | 生产环境、高质量需求 |
-| `sora-pro` | 专业版 | 较慢 | 最高 | 专业作品、精细控制 |
+| `sora-2` | 第二代标准版 | 中等 | 高 | 生产环境、日常使用 |
+| `sora-2-pro` | 第二代专业版 | 较慢 | 最高 | 专业作品、精细控制 |
 
 ---
 
@@ -132,7 +131,7 @@ curl -X POST https://crazyrouter.com/v1/video/create \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "sora",
+    "model": "sora-2",
     "prompt": "A cat playing piano in a jazz club, cinematic lighting",
     "aspect_ratio": "16:9"
   }'
@@ -151,7 +150,7 @@ curl -X POST https://crazyrouter.com/v1/videos \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "sora",
+    "model": "sora-2",
     "prompt": "A cat playing piano in a jazz club, cinematic lighting",
     "size": "1920x1080",
     "duration": 10
@@ -179,7 +178,7 @@ curl -X POST https://crazyrouter.com/v1/videos \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "sora",
+    "model": "sora-2",
     "prompt": "The person in the image starts dancing",
     "image_url": "https://example.com/portrait.jpg",
     "size": "1920x1080"
@@ -190,36 +189,15 @@ curl -X POST https://crazyrouter.com/v1/videos \
 
 ## Pro 模式
 
-使用 `sora-pro` 获得更高质量的输出：
+使用 `sora-2-pro` 获得更高质量的输出：
 
 ```json
 {
-  "model": "sora-pro",
+  "model": "sora-2-pro",
   "prompt": "An epic battle scene in a fantasy world",
   "size": "1920x1080",
   "duration": 20
 }
-```
-
----
-
-## 角色创建
-
-```
-POST /sora/v1/characters
-```
-
-创建可复用的角色，在后续视频中保持一致性。
-
-```bash cURL
-curl -X POST https://crazyrouter.com/sora/v1/characters \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "name": "Luna",
-    "description": "A young woman with long silver hair and blue eyes",
-    "reference_images": ["https://example.com/character_ref.jpg"]
-  }'
 ```
 
 ---
@@ -233,7 +211,7 @@ curl -X POST https://crazyrouter.com/v1/videos \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "sora",
+    "model": "sora-2",
     "storyboard": [
       {
         "prompt": "A sunrise over the mountains",
@@ -292,5 +270,5 @@ curl https://crazyrouter.com/v1/videos/sora_task_abc123 \
 - **视频大小**: 约 8 MB（8秒，1280x720）
 
 <Note>
-  生成时间会根据系统负载和视频复杂度有所变化。Sora Pro 模式生成时间较长但质量更高。Storyboard 模式适合需要多场景连贯叙事的视频。
+  生成时间会根据系统负载和视频复杂度有所变化。sora-2-pro 模式生成时间较长但质量更高。Storyboard 模式适合需要多场景连贯叙事的视频。
 </Note>
