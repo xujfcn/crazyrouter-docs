@@ -1,42 +1,382 @@
 ---
 title: 'Cline 配置教程'
-description: '在 VS Code Cline 扩展中配置 Crazyrouter API'
+description: '在 VS Code 的 Cline 扩展中通过 OpenAI Compatible provider 接入 Crazyrouter，并提供区分 Windows 与 macOS 的完整安装、配置、验证与排障步骤'
 ---
 
-## 概述
+Cline 是 VS Code 里很强的代理式编码扩展，适合文件读写、终端执行、逐步规划和多轮改代码。对接 Crazyrouter 时，推荐使用 Cline 官方提供的 `OpenAI Compatible` provider。
 
-Cline 是一个强大的 VS Code AI 编程扩展，支持自主编写代码、执行命令等。
+## 概览
 
-## 配置步骤
+通过 Cline 的 OpenAI Compatible provider，你可以把代理请求发到 Crazyrouter：
+
+- 推荐协议：`OpenAI-compatible API`
+- Base URL：`https://crazyrouter.com/v1`
+- 认证方式：`sk-...` token
+- 推荐默认模型：`claude-sonnet-4-6` 或 `gpt-5.3-codex`
+
+<Warning>
+Cline 具备读写文件和执行终端命令的能力。接入成功后，真正的风险不在“能不能连上”，而在“有没有给它过大的执行权限”。建议先从你熟悉的小仓库开始。
+</Warning>
+
+## 适合谁用
+
+- 想在 VS Code 中获得代理式编程体验的人
+- 想结合 Crazyrouter 的多模型能力做代码修改的人
+- 想把 IDE 代理流量与 CLI 流量分开统计的人
+- 想把 Claude、GPT 等模型切到统一网关的人
+
+## 使用协议
+
+推荐协议：`OpenAI-compatible API`
+
+在 Cline 设置中选择：
+
+- `API Provider`: `OpenAI Compatible`
+- `Base URL`: `https://crazyrouter.com/v1`
+- `API Key`: 你的 `sk-...`
+- `Model ID`: 你要使用的模型名
+
+不要把 Base URL 写成：
+
+- `https://crazyrouter.com`
+- `https://crazyrouter.com/v1/chat/completions`
+
+<Note>
+和 Claude Code、Codex、Aider 不同，Cline 的标准 VS Code 接法通常不需要你手动写环境变量。大多数情况下，直接在 Cline 设置界面里填写 `Base URL`、`API Key` 和 `Model ID` 就可以。
+</Note>
+
+## 系统要求与前置条件
+
+| 项目 | 说明 |
+|------|------|
+| Crazyrouter 账号 | 先在 [crazyrouter.com](https://crazyrouter.com) 注册 |
+| Crazyrouter token | 建议为 Cline 单独创建一个 token |
+| Git | 建议 `git 2.23+` |
+| VS Code | 建议当前稳定版 |
+| Cline 扩展 | 建议当前版本 |
+| 可用模型 | 至少放行 1 到 2 个适合代理式编码的模型 |
+| 环境变量 | 标准 VS Code 接法通常不需要 |
+
+建议初始白名单：
+
+- `claude-sonnet-4-6`
+- `gpt-5.3-codex`
+- `gpt-4.1`
+
+## 按操作系统的完整安装路径
+
+### Windows 推荐路径
+
+Cline 在 Windows 上最稳妥的路径是：`Git` + `VS Code` + `扩展市场安装 Cline` + `在 Cline 设置里直接填 Crazyrouter 参数`。
+
+推荐顺序：
+
+1. 安装 Git
+2. 安装 VS Code
+3. 在 VS Code 扩展市场安装 Cline
+4. 在 Crazyrouter 创建 Cline 专用 token
+5. 打开仓库并先做 Git 快照
+6. 在 Cline 设置里填写 `OpenAI Compatible`、`Base URL`、`API Key`、`Model ID`
+
+推荐验证命令：
+
+```powershell
+git --version
+where.exe git
+code --version
+where.exe code
+```
+
+如果 `code --version` 找不到命令，但 VS Code 本体能正常打开，也不影响 Cline 使用；只是你暂时不能从终端直接用 `code` 打开目录。
+
+### macOS 推荐路径
+
+Cline 在 macOS 上最顺手的路径通常是：`Xcode Command Line Tools` + `Homebrew` + `Git` + `VS Code` + `扩展市场安装 Cline`。
+
+推荐顺序：
+
+1. 安装 Xcode Command Line Tools
+2. 安装 Homebrew（如果你还没有）
+3. 安装 Git
+4. 安装 VS Code
+5. 在 VS Code 里安装 Cline
+6. 在 Cline 设置里直接填写 Crazyrouter 参数
+
+推荐验证命令：
+
+```bash
+git --version
+which git
+open -a "Visual Studio Code"
+```
+
+如果你想从终端直接使用 `code` 命令，可以在 VS Code 命令面板里执行 `Shell Command: Install 'code' command in PATH`，然后再检查：
+
+```bash
+code --version
+which code
+```
+
+### Linux 说明
+
+Linux 用户基本可以按 Windows / macOS 的思路理解：先装 Git 和 VS Code，再在扩展市场安装 Cline。Ubuntu / Debian 常见命令如下：
+
+```bash
+sudo apt update
+sudo apt install -y git
+sudo snap install code --classic
+git --version
+code --version
+```
+
+## 从零开始完整安装
 
 <Steps>
-  <Step title="安装扩展">
-    在 VS Code 扩展市场搜索 `Cline` 并安装。
+  <Step title="第 1 步：安装 Git">
+    如果你的机器还没有 Git，先安装 Git。
+
+    <Tabs>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        winget install --id Git.Git -e --source winget
+        git --version
+        where.exe git
+        ```
+      </Tab>
+      <Tab title="macOS">
+        ```bash
+        xcode-select --install
+        git --version
+        ```
+        或：
+        ```bash
+        brew install git
+        git --version
+        which git
+        ```
+      </Tab>
+      <Tab title="Ubuntu / Debian">
+        ```bash
+        sudo apt update
+        sudo apt install -y git
+        git --version
+        which git
+        ```
+      </Tab>
+    </Tabs>
+
+    安装后建议执行：
+
+    ```bash
+    git config --global user.name "Your Name"
+    git config --global user.email "you@example.com"
+    git config --global init.defaultBranch main
+    ```
   </Step>
-  <Step title="打开设置">
-    点击侧边栏的 Cline 图标，点击设置齿轮。
+
+  <Step title="第 2 步：安装 VS Code">
+    Cline 当前最常见的使用方式是 VS Code 扩展。
+
+    <Tabs>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        winget install Microsoft.VisualStudioCode
+        code --version
+        where.exe code
+        ```
+      </Tab>
+      <Tab title="macOS">
+        ```bash
+        brew install --cask visual-studio-code
+        open -a "Visual Studio Code"
+        ```
+
+        如果你想从终端直接执行 `code`，再在 VS Code 命令面板里运行：
+
+        ```text
+        Shell Command: Install 'code' command in PATH
+        ```
+
+        然后验证：
+
+        ```bash
+        code --version
+        which code
+        ```
+      </Tab>
+      <Tab title="Ubuntu / Debian">
+        ```bash
+        sudo snap install code --classic
+        code --version
+        which code
+        ```
+      </Tab>
+    </Tabs>
+
+    安装完成后，先正常打开一次 VS Code。
   </Step>
-  <Step title="选择 Provider">
-    在 API Provider 下拉菜单中选择 `OpenAI Compatible`。
+
+  <Step title="第 3 步：安装 Cline 扩展">
+    打开 VS Code 后：
+
+    1. 按 `Ctrl/Cmd + Shift + X` 打开扩展市场
+    2. 搜索 `Cline`
+    3. 点击安装
+    4. 安装完成后，点击侧边栏 Cline 图标，或按 `Ctrl/Cmd + Shift + P` 后执行 `Cline: Open In New Tab`
+
+    如果 VS Code 弹出类似 `Running extensions might...` 的提示，选择允许即可。
+
+    如果你没有看到图标，先重启 VS Code 再看一次。
   </Step>
-  <Step title="填写配置">
-    - **Base URL**: `https://crazyrouter.com/v1`
-    - **API Key**: `sk-xxx`
-    - **Model ID**: `claude-sonnet-4-20250514`（或其他模型）
+
+  <Step title="第 4 步：在 Crazyrouter 创建 Cline 专用 token">
+    在 Crazyrouter 后台创建一个名为 `cline` 的 token，第一次只建议放行：
+
+    - `claude-sonnet-4-6`
+    - `gpt-5.3-codex`
+    - `gpt-4.1`
+
+    <Note>
+    Cline 的标准 VS Code 接法通常通过界面填写 API Key，而不是像 Claude Code / Codex 那样主要依赖环境变量。所以这里最重要的是专用 token 和最小模型白名单。
+    </Note>
   </Step>
-  <Step title="保存并测试">
-    点击 Save，然后在聊天框中输入问题测试。
+
+  <Step title="第 5 步：准备 Git 仓库并做首个快照">
+    Cline 会改文件、执行命令。第一次接入前，建议先做仓库快照。
+
+    如果目录还不是 Git 仓库：
+
+    ```bash
+    git init
+    git add .
+    git commit -m "chore: initial snapshot before Cline"
+    ```
+
+    如果已经是现有仓库，至少先看一下：
+
+    ```bash
+    git status
+    ```
+  </Step>
+
+  <Step title="第 6 步：在 Cline 中填写 Crazyrouter 配置">
+    进入 Cline 设置后填写：
+
+    - `API Provider`: `OpenAI Compatible`
+    - `Base URL`: `https://crazyrouter.com/v1`
+    - `API Key`: 你的 `sk-...`
+    - `Model ID`: 先填 `claude-sonnet-4-6`
+
+    如果你当前版本的 Cline 界面里有 `Verify` 按钮，建议先点一次，确认链路可用；如果没有，也可以直接发送一个只读测试请求来验证。
+
+    第一次只用一个模型做验证，不要一开始就同时切很多模型。
+  </Step>
+
+  <Step title="第 7 步：完成第一次验证">
+    第一次验证建议按这个顺序：
+
+    1. 先让 Cline 执行只读任务：`只读取当前工作区 README 并总结要点，不修改任何文件`
+    2. 再让它做低风险分析：`指出当前仓库里最值得先检查的 3 个文件`
+    3. 最后再尝试小范围修改：`只修改 README 中一个明显错别字，并展示 diff`
+
+    当这三步都正常工作，且 Crazyrouter 后台能看到对应请求日志，就说明主链路已经稳定。
+  </Step>
+
+  <Step title="第 8 步：再逐步放开更强权限">
+    当只读任务和小范围改动都稳定后，再逐步尝试：
+
+    1. 小范围多文件修改
+    2. 允许它执行低风险命令
+    3. 最后再让它做更复杂的代理式重构
+
+    不建议一上来就让 Cline 在大仓库里执行大范围自动操作。
   </Step>
 </Steps>
 
-## 推荐模型
+## 推荐模型配置
 
-| 用途 | 推荐模型 |
-|------|----------|
-| 日常编程 | `claude-sonnet-4-20250514` |
-| 复杂任务 | `claude-opus-4-20250514` |
-| 快速问答 | `gpt-4o-mini` |
+| 使用场景 | 推荐模型 | 原因 |
+|----------|----------|------|
+| 默认主力代理 | `claude-sonnet-4-6` | 多轮规划、代码解释、长上下文表现稳 |
+| 强编码执行 | `gpt-5.3-codex` | 更适合复杂改代码和代理式执行 |
+| 稳定基线 | `gpt-4.1` | 适合先做兼容性验证 |
+| 低成本试运行 | `gpt-4.1-mini` | 适合轻量任务和高频小请求 |
+
+建议先用 `claude-sonnet-4-6` 跑通代理流程；如果你更看重代码生成和修改效率，再切到 `gpt-5.3-codex`。
+
+## Token 设置最佳实践
+
+| 设置 | 建议 | 说明 |
+|------|------|------|
+| 专用 token | 必须 | Cline 不要和 Cursor、Claude Code、Aider 共用 token |
+| 模型白名单 | 强烈建议 | Cline 是高消耗工具，白名单越窄越安全 |
+| IP 限制 | 固定办公环境建议开启 | 笔记本移动网络下谨慎使用 |
+| 配额上限 | 强烈建议 | 代理式多轮执行很容易把额度打满 |
+| 环境隔离 | 建议 | 个人 VS Code、远程开发机、团队共享环境分开 token |
+| 权限隔离 | 强烈建议 | 高风险仓库最好配更小额度的单独 token |
+
+## 验证清单
+
+- [ ] `git --version` 正常
+- [ ] VS Code 已正常安装
+- [ ] 如需终端打开项目，`code --version` 也正常
+- [ ] Cline 扩展已安装并能打开
+- [ ] Cline 已选择 `OpenAI Compatible` provider
+- [ ] `Base URL` 已设置为 `https://crazyrouter.com/v1`
+- [ ] `API Key` 已填写正确
+- [ ] `Model ID` 已填写可用模型
+- [ ] 第一个只读任务执行成功
+- [ ] 文件读写或命令执行任务能按预期工作
+- [ ] Crazyrouter 后台日志中能看到对应请求
+
+## 常见错误与修复
+
+| 现象 | 常见原因 | 修复方式 |
+|------|----------|----------|
+| 扩展装好但看不到 Cline 图标 | VS Code 没刷新，或扩展未正确激活 | 重启 VS Code，再从命令面板打开 Cline |
+| `code` 命令不可用 | VS Code 本体装好了，但 shell 命令没进 PATH | Windows 重新开终端再试；macOS 在命令面板执行 `Shell Command: Install 'code' command in PATH` |
+| 401 unauthorized | API Key 错误、过期或复制错误 | 重新生成 token 并重新粘贴 |
+| 403 / model not allowed | token 未放行当前模型 | 在 Crazyrouter token 设置中放行模型 |
+| 404 | Base URL 填成根域名或具体接口路径 | 改成 `https://crazyrouter.com/v1` |
+| `model not found` | `Model ID` 名称写错或当前模型不可用 | 改回 `claude-sonnet-4-6` 或其他已放行模型 |
+| 企业网络下连不上 | 代理或防火墙阻断 | 先检查 VS Code 自己的代理设置；Cline 扩展会复用 VS Code 的网络代理配置 |
+| 写了不该写的文件 | 一开始给了过大的写权限 | 先从只读任务和小范围 diff 验证开始 |
+| 成本上涨过快 | 多轮计划 + 大量上下文 + 自动执行 | 缩小任务范围，并给 Cline 单独设预算 |
+
+## 性能与成本建议
+
+- 第一次接入时，先只做只读任务和小范围修改
+- 复杂重构优先 `claude-sonnet-4-6` 或 `gpt-5.3-codex`
+- 高频轻任务可以切到 `gpt-4.1-mini`
+- 不同工作区或不同项目类型建议用不同 token
+- 每次执行大任务后，回看 Crazyrouter 日志确认真实消耗
+
+## FAQ
+
+### Cline 应该选哪个 Provider？
+
+选 `OpenAI Compatible`。
+
+### Base URL 应该填什么？
+
+填 `https://crazyrouter.com/v1`。
+
+### Cline 这条接法一定要写环境变量吗？
+
+通常不用。标准 VS Code 接法一般直接在 Cline 设置界面里填写 `Base URL`、`API Key` 和 `Model ID` 就够了。
+
+### 第一次为什么要先做 Git 快照？
+
+因为 Cline 是真正会读写文件和执行命令的代理。先做快照，review 和回退都会更轻松。
+
+### 第一个推荐模型是什么？
+
+先用 `claude-sonnet-4-6`。
+
+### 为什么不建议一开始就给它很大权限？
+
+因为 Cline 会真正操作你的工作区。先用只读、小范围任务验证，是最稳妥的上线方式。
 
 <Note>
-  Cline 支持自动读写文件和执行终端命令，建议使用能力较强的模型以获得更好的自主编程体验。
+如果你更看重 VS Code 内的一体化代理体验，Cline 会比 Cursor 的 BYOK 路线更适合做“真正的代码代理”。
 </Note>

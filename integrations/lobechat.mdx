@@ -1,30 +1,95 @@
 ---
 title: 'LobeChat 配置教程'
-description: '在 LobeChat 中配置 Crazyrouter API'
+description: '在 LobeChat 中通过 Crazyrouter 接入 OpenAI 兼容模型，并完成聊天、自部署、模型管理与排障配置'
 ---
 
-## 概述
+LobeChat 适合做团队聊天入口、个人多模型工作台和自部署 AI 对话前端。对接 Crazyrouter 时，最稳的方式是使用 LobeChat 的 `OpenAI` 路径，并把代理地址指向 Crazyrouter 的 OpenAI 兼容基址。
 
-LobeChat 是一个开源的 AI 聊天框架，支持自部署和在线使用。
+## 概览
 
-## 配置步骤
+通过 LobeChat 的 OpenAI 配置项，你可以把对话请求转到 Crazyrouter：
+
+- 推荐协议：`OpenAI-compatible API`
+- 推荐接法：LobeChat `OpenAI` provider
+- Base URL：`https://crazyrouter.com/v1`
+- 认证方式：`sk-...` token
+- 推荐首次验证模型：`gpt-4.1`
+
+如果你是自部署 LobeChat，也可以通过环境变量把默认 OpenAI 路径预置为 Crazyrouter。
+
+## 适合谁用
+
+- 想自部署一个稳定聊天前端的人
+- 想把 Crazyrouter 用在个人或团队聊天工作台的人
+- 想统一管理多个模型并保留对话历史的人
+- 想给内部成员默认下发固定模型和默认配置的人
+
+## 使用协议
+
+推荐协议：`OpenAI-compatible API`
+
+在 LobeChat 中，对接 Crazyrouter 时应使用 OpenAI 兼容基址：
+
+```text
+https://crazyrouter.com/v1
+```
+
+不要填成：
+
+- `https://crazyrouter.com`
+- `https://crazyrouter.com/v1/chat/completions`
+
+<Note>
+LobeChat 文档对 `OPENAI_PROXY_URL` 的说明是“OpenAI API 请求地址”，常见默认值和示例也是 `/v1` 风格；同时本地 `http://127.0.0.1:4000/api/status` 给出的官方示例链接也是 `{address}/v1`。因此对接 Crazyrouter 时优先填 `https://crazyrouter.com/v1`。如果你自己的反向代理已经额外拼接了一层 `/v1`，再单独调整，避免变成重复后缀。
+</Note>
+
+## 前置条件
+
+| 项目 | 说明 |
+|------|------|
+| Crazyrouter 账号 | 先在 [crazyrouter.com](https://crazyrouter.com) 注册 |
+| Crazyrouter token | 建议为 LobeChat 单独创建一个 `sk-...` token |
+| LobeChat | 在线版或自部署版均可，建议使用当前稳定版 |
+| 可用模型 | 至少放行一个 OpenAI 兼容聊天模型，如 `gpt-4.1` |
+
+推荐首批白名单：
+
+- `gpt-4.1`
+- `gpt-4.1-mini`
+- `gpt-4o`
+- `claude-sonnet-4-6`
+
+<Tip>
+如果你还准备给 Cursor、Codex、Claude Code 接 Crazyrouter，LobeChat 最好单独用一个 token，这样更容易统计聊天端消耗。
+</Tip>
+
+## 5 分钟快速开始
 
 <Steps>
-  <Step title="进入设置">
-    点击左下角头像 → `设置` → `语言模型`
+  <Step title="创建 LobeChat 专用 token">
+    在 Crazyrouter 后台创建一个名为 `lobechat` 的 token，首次只放行 `gpt-4.1` 和 `gpt-4.1-mini` 之类最常用的模型。
   </Step>
-  <Step title="配置 OpenAI">
-    在 `OpenAI` 选项卡中：
-    - **API Key**: `sk-xxx`
-    - **API 代理地址**: `https://crazyrouter.com/v1`
-    - 开启 `使用自定义 API 代理地址`
+  <Step title="打开语言模型设置">
+    进入 LobeChat，点击左下角头像或设置入口，打开 `设置` → `语言模型`。
   </Step>
-  <Step title="检查模型">
-    点击 `检查` 按钮验证连接是否正常。
+  <Step title="配置 OpenAI 路径">
+    在 `OpenAI` 相关配置中填写：
+    - `API Key`: 你的 `sk-...`
+    - `API 代理地址 / API Proxy URL`: `https://crazyrouter.com/v1`
+
+    同时开启 `使用自定义 API 代理地址` 或等价选项。
+  </Step>
+  <Step title="选择一个基线模型">
+    保存后先选择 `gpt-4.1` 作为默认模型，不要一开始就上很多模型。
+  </Step>
+  <Step title="做首次验证">
+    新建一个对话，发送：`Reply only OK`。如果正常返回，同时 Crazyrouter 后台能看到日志，说明接入成功。
   </Step>
 </Steps>
 
-## Docker 自部署配置
+## 自部署快速配置
+
+如果你通过 Docker 自部署 LobeChat，可以先把默认 OpenAI 设置写入环境变量：
 
 ```yaml
 services:
@@ -35,12 +100,93 @@ services:
     environment:
       - OPENAI_API_KEY=sk-xxx
       - OPENAI_PROXY_URL=https://crazyrouter.com/v1
+      - OPENAI_MODEL_LIST=gpt-4.1,gpt-4.1-mini
 ```
 
-## 使用多个模型
+如果你不想让前端用户随意改 Key，可以再结合你当前版本支持的隐藏或托管配置项，把默认 Key 固定在服务端环境变量中。
 
-LobeChat 支持在对话中随时切换模型。配置好 API 后，可以在对话界面顶部的模型选择器中选择不同模型。
+## 推荐模型配置
+
+| 使用场景 | 推荐模型 | 原因 |
+|----------|----------|------|
+| 默认主聊天模型 | `gpt-4.1` | 稳定，适合绝大多数对话场景 |
+| 低成本高频问答 | `gpt-4.1-mini` | 更省钱，适合日常聊天 |
+| 更强多轮体验 | `gpt-4o` | 对复杂上下文和多轮对话更友好 |
+| 高质量写作 / 代码 | `claude-sonnet-4-6` | 长文本、写作和代码辅助体验更强 |
+| 预算敏感备用档 | `gemini-2.5-flash` | 适合轻量使用与快速试错 |
+
+推荐顺序：先用 `gpt-4.1` 跑通，再扩展到更多模型。
+
+## Token 设置最佳实践
+
+| 设置 | 建议 | 说明 |
+|------|------|------|
+| 专用 token | 必须 | LobeChat 不要和 IDE / CLI 共用 token |
+| 模型白名单 | 强烈建议 | 只开放聊天端会用到的模型 |
+| IP 限制 | 自部署固定出口时建议开启 | 公网访问或家庭网络频繁变化时谨慎使用 |
+| 配额上限 | 强烈建议 | 团队聊天前端容易多人共用同一 token |
+| 环境隔离 | 建议 | 测试环境与生产环境使用不同 token |
+| 默认模型控制 | 建议 | 先把高价模型从默认列表里拿掉，按需再打开 |
+
+## 验证清单
+
+- [ ] `API Key` 已正确保存
+- [ ] `API 代理地址 / API Proxy URL` 已设置为 `https://crazyrouter.com/v1`
+- [ ] 自定义代理地址开关已开启
+- [ ] 第一个模型已成功选中
+- [ ] 第一条对话请求成功返回
+- [ ] 流式输出正常
+- [ ] Crazyrouter 后台日志能看到对应请求
+- [ ] token 的配额与模型白名单符合预期
+
+## 常见错误与修复
+
+| 现象 | 常见原因 | 修复方式 |
+|------|----------|----------|
+| 无法保存或校验失败 | API Key 错误或代理地址写错 | 重新检查 `sk-...` 和 `https://crazyrouter.com/v1` |
+| 401 unauthorized | token 失效、过期或被误删 | 重新生成 token 并替换 |
+| 403 / model not allowed | 当前模型没有加入 token 白名单 | 在 Crazyrouter 后台放行该模型 |
+| 404 | 代理地址写成根域名，或写成具体接口路径 | 改成 `https://crazyrouter.com/v1` |
+| 配置看起来正确但还是 404 | 你自己的网关、反代或部署层已经自动补了一次 `/v1` | 检查是否出现了重复后缀；若上游链路已自动补 `/v1`，就不要再重复拼接 |
+| 模型看起来可选但实际报错 | LobeChat 前端缓存了旧模型或默认模型不存在 | 切回 `gpt-4.1`，刷新页面后重新选择 |
+| 对话能发出但流式异常 | 客户端版本或模型兼容问题 | 先用 `gpt-4.1` 做基线验证，并升级 LobeChat |
+| 团队多人一起用时消耗很快 | 多用户共享同一 token 且没有配额上限 | 给团队前端单独设置额度，必要时拆分多个 token |
+| 自部署后用户仍能改成别的上游 | 只设置了默认值，没有限制前端自定义入口 | 在部署层加托管配置或关闭用户自定义能力 |
+
+## 性能与成本建议
+
+- 第一阶段只保留 `gpt-4.1` 和 `gpt-4.1-mini`
+- 团队聊天默认模型优先选低成本档，把高价模型留给高级用户或特定场景
+- 如果你开了知识库、插件或长上下文会话，更要单独设置 LobeChat 配额
+- 自部署环境建议将生产 token 与测试 token 分开，避免内部试验影响正式额度
+- 遇到异常高消耗时，先看 Crazyrouter 日志确认是不是多用户长会话导致
+
+## FAQ
+
+### LobeChat 应该填哪个 Base URL？
+
+填 `https://crazyrouter.com/v1`。
+
+### 为什么这里不能只填根域名？
+
+因为 LobeChat 的 OpenAI 代理配置更适合直接填写 OpenAI 兼容基址，而不是根域名。
+
+### 如果我自己的反向代理已经自动补 `/v1` 怎么办？
+
+那就不要在最终暴露给 LobeChat 的地址里再重复写一次 `/v1`。先检查你的代理链路，避免出现双重后缀。
+
+### 第一个推荐模型是什么？
+
+先用 `gpt-4.1`。
+
+### LobeChat 可以同时接多个模型吗？
+
+可以，但建议先用一个模型做验证，再逐步扩展。
+
+### 自部署时要不要把 token 写死在环境变量里？
+
+如果你想统一控制上游和成本，建议这样做；如果你希望每个用户自带 Key，再开放前端自定义入口。
 
 <Note>
-  LobeChat 也支持配置 Anthropic、Google 等独立 Provider。如果需要使用 Claude 原生格式，可以在 Anthropic 选项卡中配置 Base URL 为 `https://crazyrouter.com`。
+如果你的目标是稳定聊天前端和团队共享工作台，LobeChat 是很合适的选择；如果你的目标是代码代理和自动执行，优先级仍应放在 Cursor、Claude Code、Codex、Cline 这类工具。
 </Note>

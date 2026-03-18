@@ -1,45 +1,460 @@
 ---
 title: 'OpenAI Codex CLI 配置教程'
-description: '在 OpenAI Codex CLI 中配置 Crazyrouter API'
+description: '在 Codex CLI 中通过 Crazyrouter 自定义 provider 接入 OpenAI Responses API，并提供从 Git、Node.js、安装命令、配置文件到环境变量写入的完整步骤'
 ---
 
-## 概述
+Codex CLI 是 OpenAI 的终端编码代理工具，适合在本地仓库中做代码修改、审查、批量重构和命令协作。对接 Crazyrouter 时，推荐使用当前官方支持的 `config.toml` 自定义 provider 方式，而不是旧版配置思路。
 
-OpenAI Codex CLI 是 OpenAI 官方的命令行编程助手，支持在终端中进行 AI 辅助编程。
+## 概览
 
-## 配置方法
+通过 `~/.codex/config.toml` 配置自定义 provider，Codex CLI 可以把请求发到 Crazyrouter：
 
-### 环境变量
+- 推荐协议：`OpenAI-compatible API`
+- 走的接口类型：`Responses API`
+- Base URL：`https://crazyrouter.com/v1`
+- 认证变量：`OPENAI_API_KEY`
+- 推荐默认模型：`gpt-5.3-codex`
 
-```bash
-export OPENAI_API_KEY=sk-xxx
-export OPENAI_BASE_URL=https://crazyrouter.com/v1
-```
+<Tip>
+如果你之前只用过 ChatGPT 登录方式，接 Crazyrouter 时请切换到 API Key + 自定义 provider 配置。这样模型、日志、额度和计费都更可控。
+</Tip>
 
-### 启动
+## 适合谁用
 
-```bash
-codex
-```
+- 想把 Crazyrouter 接到终端代理式编码工作流的人
+- 想在本地仓库里做批量修改、代码审查和自动执行的人
+- 想把 Codex、Cursor、Claude Code 的流量拆分计费的人
+- 想优先使用 `gpt-5.3-codex` 这类编码模型的人
 
-### 指定模型
+## 使用协议
 
-```bash
-codex --model gpt-4o
-```
+推荐协议：`OpenAI-compatible API`
 
-## 配置文件
+Codex CLI 当前推荐通过自定义 `model_provider` 使用 OpenAI 兼容 provider，并指定：
 
-创建 `~/.codex/config.json`：
-
-```json
-{
-  "model": "gpt-4o",
-  "apiKey": "sk-xxx",
-  "baseURL": "https://crazyrouter.com/v1"
-}
-```
+- `base_url = "https://crazyrouter.com/v1"`
+- `wire_api = "responses"`
 
 <Note>
-  Codex CLI 默认使用 OpenAI 格式，Crazyrouter 完全兼容。只需修改 Base URL 和 API Key 即可。
+Crazyrouter 支持 `/v1/responses`，因此 Codex CLI 这条接法可以直接走 Responses API。
+</Note>
+
+## 系统要求与前置条件
+
+| 项目 | 说明 |
+|------|------|
+| Crazyrouter 账号 | 先在 [crazyrouter.com](https://crazyrouter.com) 注册 |
+| Crazyrouter token | 建议为 Codex 单独创建一个 `sk-...` token |
+| Git | 建议 `git 2.23+` |
+| Node.js | 建议 `Node.js 20+` |
+| Codex CLI | 建议当前稳定版 |
+| 可用模型 | 至少放行一个适合编码的模型，如 `gpt-5.3-codex` |
+
+建议初始白名单：
+
+- `gpt-5.3-codex`
+- `gpt-5.2`
+- `gpt-4.1`
+
+## 按操作系统的完整安装路径
+
+### Windows 推荐路径
+
+Codex 在 Windows 上最简单的路径是：`Git` + `Node.js` + `npm 全局安装 Codex` + `PowerShell 配置环境变量`。
+
+推荐顺序：
+
+1. 安装 Git
+2. 安装 Node.js LTS
+3. 用 npm 安装 Codex CLI
+4. 用 PowerShell 写入 `OPENAI_API_KEY`
+5. 用 PowerShell 写入 `$HOME/.codex/config.toml`
+
+推荐验证命令：
+
+```powershell
+git --version
+node -v
+npm -v
+codex --version
+where.exe git
+where.exe node
+where.exe codex
+```
+
+如果 `codex --version` 找不到命令，先关闭并重新打开 PowerShell，再试一次。
+
+### macOS 推荐路径
+
+macOS 上最顺手的路径通常是：`Homebrew` + `Git` + `Node.js` + `brew` 或 `npm` 安装 Codex CLI + `~/.zshrc` 持久化环境变量。
+
+推荐顺序：
+
+1. 安装 Xcode Command Line Tools
+2. 安装 Homebrew（如果你还没有）
+3. 安装 Git、Node.js
+4. 安装 Codex CLI
+5. 写入 `~/.zshrc`
+6. 写入 `~/.codex/config.toml`
+
+推荐验证命令：
+
+```bash
+git --version
+node -v
+npm -v
+codex --version
+which git
+which node
+which codex
+```
+
+### Codex CLI 安装备选路径
+
+除了包管理器，Codex 官方仓库也提供 GitHub Releases 二进制包。对大多数用户来说，仍然优先推荐：
+
+- Windows：`npm install -g @openai/codex`
+- macOS：`brew install --cask codex` 或 `npm install -g @openai/codex`
+
+## 从零开始完整安装
+
+<Steps>
+  <Step title="第 1 步：安装 Git">
+    如果你还没有 Git，先装 Git，并补齐全局身份配置。
+
+    <Tabs>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        winget install --id Git.Git -e --source winget
+        git --version
+        ```
+      </Tab>
+      <Tab title="macOS">
+        ```bash
+        xcode-select --install
+        git --version
+        ```
+        或：
+        ```bash
+        brew install git
+        git --version
+        ```
+      </Tab>
+      <Tab title="Ubuntu / Debian">
+        ```bash
+        sudo apt update
+        sudo apt install -y git
+        git --version
+        ```
+      </Tab>
+    </Tabs>
+
+    建议顺手执行：
+
+    ```bash
+    git config --global user.name "Your Name"
+    git config --global user.email "you@example.com"
+    git config --global init.defaultBranch main
+    ```
+  </Step>
+
+  <Step title="第 2 步：安装 Node.js 20+">
+    Codex CLI 是 Node.js 工具。先确认 Node 和 npm 已就绪。
+
+    <Tabs>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        winget install OpenJS.NodeJS.LTS
+        node -v
+        npm -v
+        ```
+      </Tab>
+      <Tab title="macOS">
+        ```bash
+        brew install node
+        node -v
+        npm -v
+        ```
+      </Tab>
+      <Tab title="Ubuntu / Debian">
+        ```bash
+        sudo apt update
+        sudo apt install -y nodejs npm
+        node -v
+        npm -v
+        ```
+      </Tab>
+    </Tabs>
+
+    如果你的发行版默认安装版本太旧，请升级到更高版本后再继续。
+  </Step>
+
+  <Step title="第 3 步：安装 Codex CLI">
+    <Tabs>
+      <Tab title="Windows PowerShell">
+        推荐直接使用 npm 全局安装：
+        ```powershell
+        npm install -g @openai/codex
+        codex --version
+        where.exe codex
+        ```
+      </Tab>
+      <Tab title="macOS">
+        推荐优先使用 Homebrew：
+        ```bash
+        brew install --cask codex
+        codex --version
+        which codex
+        ```
+
+        如果你更习惯 npm，也可以：
+        ```bash
+        npm install -g @openai/codex
+        codex --version
+        which codex
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="第 4 步：在 Crazyrouter 创建 Codex 专用 token">
+    在 Crazyrouter 后台创建一个名为 `codex` 的 token，第一次只建议放行：
+
+    - `gpt-5.3-codex`
+    - `gpt-5.2`
+    - `gpt-4.1`
+
+    这样首次排障更简单，也更容易控费。
+  </Step>
+
+  <Step title="第 5 步：先设置临时环境变量">
+    Codex 通过 provider 配置读取 `OPENAI_API_KEY`。先在当前终端设置：
+
+    <Tabs>
+      <Tab title="Linux / macOS">
+        ```bash
+        export OPENAI_API_KEY=sk-xxx
+        echo $OPENAI_API_KEY
+        ```
+      </Tab>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        $env:OPENAI_API_KEY = "sk-xxx"
+        echo $env:OPENAI_API_KEY
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="第 6 步：把 API Key 写入持久环境变量">
+    日常使用建议写入 shell 配置文件或系统用户环境变量。
+
+    <Tabs>
+      <Tab title="Linux Bash">
+        ```bash
+        echo 'export OPENAI_API_KEY=sk-xxx' >> ~/.bashrc
+        source ~/.bashrc
+        ```
+      </Tab>
+      <Tab title="macOS / Zsh">
+        ```bash
+        echo 'export OPENAI_API_KEY=sk-xxx' >> ~/.zshrc
+        source ~/.zshrc
+        ```
+      </Tab>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        [System.Environment]::SetEnvironmentVariable("OPENAI_API_KEY", "sk-xxx", "User")
+        $env:OPENAI_API_KEY = "sk-xxx"
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="第 7 步：写入 Codex 配置文件 ~/.codex/config.toml">
+    Codex CLI 启动时会读取 `~/.codex/config.toml`。
+
+    <Tabs>
+      <Tab title="macOS">
+        ```bash
+        mkdir -p ~/.codex
+        cat > ~/.codex/config.toml <<'EOF'
+        model = "gpt-5.3-codex"
+        model_provider = "crazyrouter"
+
+        [model_providers.crazyrouter]
+        name = "Crazyrouter"
+        base_url = "https://crazyrouter.com/v1"
+        env_key = "OPENAI_API_KEY"
+        wire_api = "responses"
+
+        [profiles.crazyrouter]
+        model = "gpt-5.3-codex"
+        model_provider = "crazyrouter"
+        approval_policy = "on-request"
+        sandbox_mode = "workspace-write"
+        EOF
+        ```
+      </Tab>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        New-Item -ItemType Directory -Force "$HOME/.codex" | Out-Null
+        @'
+        model = "gpt-5.3-codex"
+        model_provider = "crazyrouter"
+
+        [model_providers.crazyrouter]
+        name = "Crazyrouter"
+        base_url = "https://crazyrouter.com/v1"
+        env_key = "OPENAI_API_KEY"
+        wire_api = "responses"
+
+        [profiles.crazyrouter]
+        model = "gpt-5.3-codex"
+        model_provider = "crazyrouter"
+        approval_policy = "on-request"
+        sandbox_mode = "workspace-write"
+        '@ | Set-Content -Path "$HOME/.codex/config.toml"
+        ```
+      </Tab>
+    </Tabs>
+
+    配置完后可以检查：
+
+    <Tabs>
+      <Tab title="macOS">
+        ```bash
+        cat ~/.codex/config.toml
+        ```
+      </Tab>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        Get-Content $HOME/.codex/config.toml
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="第 8 步：准备 Git 仓库并做首个快照">
+    如果目录还不是 Git 仓库：
+
+    ```bash
+    git init
+    git add .
+    git commit -m "chore: initial snapshot before Codex"
+    ```
+
+    如果已经是现有仓库，至少先看一下：
+
+    ```bash
+    git status
+    ```
+  </Step>
+
+  <Step title="第 9 步：启动 Codex 并完成第一次验证">
+    进入仓库目录后，可以先做一次最小验证：
+
+    ```bash
+    cd /path/to/your/project
+    codex --profile crazyrouter "Reply only OK"
+    ```
+
+    成功后再进入交互模式：
+
+    ```bash
+    codex --profile crazyrouter
+    ```
+
+    第一次验证建议按下面顺序：
+
+    1. `Reply only OK`
+    2. `Read the repository structure only. Do not edit files.`
+    3. `Find the highest-risk file in this repo and explain why, but do not change anything.`
+  </Step>
+</Steps>
+
+## 推荐模型配置
+
+| 使用场景 | 推荐模型 | 原因 |
+|----------|----------|------|
+| 默认主力编码 | `gpt-5.3-codex` | 最适合代码生成、修改和代理式工作流 |
+| 平衡型日常开发 | `gpt-5.2` | 成本和能力更平衡 |
+| 稳定兼容回退 | `gpt-4.1` | 适合先做基线验证 |
+| 低成本高频试探 | `gpt-4.1-mini` | 适合轻量问答和快速试运行 |
+
+推荐顺序：先让 `gpt-5.3-codex` 跑通；若你更关注成本，再回落到 `gpt-5.2` 或 `gpt-4.1`。
+
+## Token 设置最佳实践
+
+| 设置 | 建议 | 说明 |
+|------|------|------|
+| 专用 token | 必须 | Codex 不要和 Cursor、Claude Code 共用 token |
+| 模型白名单 | 强烈建议 | 只开放 Codex 真正会调用的模型 |
+| IP 限制 | 固定出口环境建议开启 | 个人设备经常换网络时谨慎使用 |
+| 配额上限 | 强烈建议 | Codex 代理式执行容易快速消耗额度 |
+| 环境隔离 | 建议 | 本机开发、远程服务器、CI 使用不同 token |
+| 泄露处理 | 立即轮换 | shell 历史、配置备份或共享屏幕暴露 token 后应立即更换 |
+
+## 验证清单
+
+- [ ] `git --version` 正常
+- [ ] `node -v` 正常
+- [ ] `codex --version` 正常
+- [ ] `OPENAI_API_KEY` 已正确设置
+- [ ] `~/.codex/config.toml` 已写入 `model_provider = "crazyrouter"`
+- [ ] `base_url` 已设置为 `https://crazyrouter.com/v1`
+- [ ] `wire_api` 已设置为 `responses`
+- [ ] 第一条请求成功返回
+- [ ] Crazyrouter 后台日志能看到对应请求
+- [ ] token 配额和模型白名单符合预期
+
+## 常见错误与修复
+
+| 现象 | 常见原因 | 修复方式 |
+|------|----------|----------|
+| `codex: command not found` | CLI 没装成功，或全局 npm 目录不在 PATH | 重装 Codex，并确认 npm 全局 bin 已进入 PATH |
+| 401 unauthorized | `OPENAI_API_KEY` 错误、过期或复制带空格 | 重新生成 token 并重新设置环境变量 |
+| 403 / model not allowed | token 没有放行当前模型 | 在 Crazyrouter token 设置里放行对应模型 |
+| 404 | `base_url` 写错，或漏了 `/v1` | 改成 `https://crazyrouter.com/v1` |
+| 请求结构报错 | `wire_api` 不是 `responses` | 改成 `wire_api = "responses"` |
+| CLI 能启动但请求不走 Crazyrouter | `model_provider` 没切到 `crazyrouter` | 检查 `config.toml` 的 provider 配置 |
+| Git 改动难以审查 | 没先做仓库快照 | 先提交初始快照，再让 Codex 做真实修改 |
+| 成本增长太快 | 长上下文、多轮工具调用或多个仓库共用一个 token | 拆 token、限额，并缩小模型白名单 |
+
+## 性能与成本建议
+
+- 首次接入先用小仓库验证，不要一上来就在超大仓库跑全量任务
+- 默认主力建议 `gpt-5.3-codex`，但日常轻任务可以切到 `gpt-5.2`
+- 把 Codex 与 IDE 工具拆开记账，便于定位高消耗来源
+- 对高风险仓库或 CI 场景设置更严格的 token 配额
+- 每次遇到异常高消耗，先回看 Crazyrouter 日志确认是不是多轮代理行为导致
+
+## FAQ
+
+### Codex CLI 应该写哪个 Base URL？
+
+写成 `https://crazyrouter.com/v1`。
+
+### Windows 上推荐用 PowerShell 还是 Git Bash？
+
+首次配置时优先按文档里的 PowerShell 路线走，最容易和用户级环境变量、`$HOME/.codex/config.toml` 保持一致。
+
+### 为什么这里要配置 `wire_api = "responses"`？
+
+因为 Codex CLI 当前的自定义 provider 推荐通过 Responses API 工作，而 Crazyrouter 支持 `/v1/responses`。
+
+### 第一次为什么建议先做 Git 快照？
+
+因为 Codex 是会改文件、会运行命令的代理。先做快照，review 和回滚都会轻松很多。
+
+### 如果我已经 `codex login` 过，还需要配 API Key 吗？
+
+需要。对接 Crazyrouter 时，仍然应使用 `OPENAI_API_KEY` 和自定义 provider 配置。
+
+### 第一个推荐模型是什么？
+
+先用 `gpt-5.3-codex`。
+
+<Note>
+如果你想优先获得 OpenAI / Responses API 路线下最顺手的终端代理体验，Codex 应该放在 Claude Code 之后、Aider 之前重点配置。
 </Note>

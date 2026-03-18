@@ -1,84 +1,52 @@
 ---
-title: 'Upload Images'
-description: 'Upload images to the built-in image hosting or your own image host'
-api: 'POST /api/upload'
+title: 'Image Upload Guidance'
+description: 'How to provide image URLs and use model-native upload flows'
 ---
 
-## Overview
+## Current status
 
-Crazyrouter provides an image upload endpoint that supports uploading images to the built-in image host. After uploading, it returns an accessible image URL that can be used for vision, image editing, and other API calls.
+Crazyrouter does not currently expose a public generic image-hosting endpoint.
 
-## Built-in Image Host
+Do not depend on the following endpoint:
 
-### Request
-
-```
+```text
 POST /api/upload
-Content-Type: multipart/form-data
-Authorization: Bearer sk-xxx
 ```
 
-<ParamField body="file" type="file" required>
-  Image file. Supported formats: JPG, PNG, GIF, WebP.
-</ParamField>
+## Recommended approaches
 
-### Response
+### 1. Use your own object storage or CDN
 
-```json
-{
-  "success": true,
-  "message": "",
-  "data": "https://crazyrouter.com/uploads/2026/01/abc123.png"
-}
-```
+The best option is to upload files to your own S3 / R2 / OSS / COS / CDN bucket first, then pass the resulting public URL to Crazyrouter endpoints that support image input.
 
-## Code Examples
+Typical use cases:
+
+- GPT-4o / Claude / Gemini vision
+- image editing
+- image-to-video
+- workflow tool integrations
+
+### 2. Use model-native upload flows
+
+Some models and upstream APIs already support multipart uploads or dedicated upload routes. Use the model-specific endpoint when available.
+
+Examples:
+
+- Midjourney image upload: `POST /mj/submit/upload-discord-images`
+- OpenAI-compatible image edits: `POST /v1/images/edits`
+- audio transcription: `POST /v1/audio/transcriptions`
+
+### 3. Save files in your own backend first, then send URLs
+
+If users upload local files to your app, your backend should store the file, generate a public URL, and then call Crazyrouter with that URL.
+
+## Example: use a public image URL for vision
 
 <CodeGroup>
 
 ```python Python
-import requests
-
-url = "https://crazyrouter.com/api/upload"
-headers = {
-    "Authorization": "Bearer sk-xxx"
-}
-
-with open("image.png", "rb") as f:
-    response = requests.post(
-        url,
-        headers=headers,
-        files={"file": ("image.png", f, "image/png")}
-    )
-
-data = response.json()
-image_url = data["data"]
-print(f"Image URL: {image_url}")
-```
-
-```bash cURL
-curl -X POST https://crazyrouter.com/api/upload \
-  -H "Authorization: Bearer sk-xxx" \
-  -F "file=@image.png"
-```
-
-</CodeGroup>
-
-## Using with Vision
-
-After uploading an image, you can use the returned URL with GPT-4o vision:
-
-```python
-# Upload the image first
-upload_resp = requests.post(
-    "https://crazyrouter.com/api/upload",
-    headers={"Authorization": "Bearer sk-xxx"},
-    files={"file": open("photo.jpg", "rb")}
-)
-image_url = upload_resp.json()["data"]
-
-# Then call the vision API
 from openai import OpenAI
+
 client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
 
 response = client.chat.completions.create(
@@ -87,17 +55,35 @@ response = client.chat.completions.create(
         "role": "user",
         "content": [
             {"type": "text", "text": "Describe this image"},
-            {"type": "image_url", "image_url": {"url": image_url}}
+            {"type": "image_url", "image_url": {"url": "https://example.com/photo.jpg"}}
         ]
     }]
 )
 print(response.choices[0].message.content)
 ```
 
-## Self-Hosted Image Storage
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer sk-xxx" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{
+      "role": "user",
+      "content": [
+        {"type": "text", "text": "Describe this image"},
+        {"type": "image_url", "image_url": {"url": "https://example.com/photo.jpg"}}
+      ]
+    }]
+  }'
+```
 
-If you need to use your own image hosting, you can configure the image host API address in the system settings. S3-compatible object storage services are supported.
+</CodeGroup>
+
+<Warning>
+  If the image URL is not publicly reachable, the upstream model usually cannot read it.
+</Warning>
 
 <Note>
-  The upload file size limit is 20MB. It is recommended to compress images before uploading to save storage space and speed up transfers.
+  If Crazyrouter exposes a public generic upload API again in the future, this page will be updated into a formal endpoint reference.
 </Note>

@@ -1,38 +1,261 @@
 ---
 title: 'ChatBox 配置教程'
-description: '在 ChatBox 桌面应用中配置 Crazyrouter API'
+description: '在 ChatBox 桌面应用中通过 OpenAI 兼容方式接入 Crazyrouter，并补充模型、知识库、排障与首轮验证建议'
 ---
 
-## 概述
+ChatBox 是一款常见的跨平台 AI 客户端，支持 Windows、macOS、Linux，也有 Web 端。对接 Crazyrouter 时，建议优先使用 ChatBox 的 `OpenAI API Compatible` 或 `OpenAI API` 方式配置，而不是去找特定厂商预设。
 
-ChatBox 是一款跨平台的 AI 桌面客户端，支持 Windows、macOS、Linux。
+这类接法的优点是：
+
+- 配置简单，适合普通用户快速接入
+- 可以直接切换 Crazyrouter 已放行的模型
+- 适合桌面对话、知识库问答、文件辅助阅读等使用场景
+
+## 先说结论
+
+推荐优先使用下面这组配置：
+
+- Provider / API Mode：`OpenAI API Compatible` 或 `OpenAI API`
+- API Host：`https://crazyrouter.com`
+- API Path：保持默认或留空
+- API Key：`sk-xxx`
+- 首个验证模型：`gpt-4.1`
+
+<Note>
+根据 ChatBox 官方文档，`API Path` 一般不需要手动填写，默认就是 OpenAI 兼容聊天路径。因此在 Crazyrouter 文档里，推荐把 `API Host` 写成根域名 `https://crazyrouter.com`，不要先手动补 `/v1/chat/completions`。
+</Note>
+
+## 适合谁用
+
+- 想在桌面端快速使用 Crazyrouter 的用户
+- 想做多模型日常对话、翻译、摘要、写作辅助的人
+- 想把本地知识库或文件问答能力与 Crazyrouter 结合的人
+- 不想写代码，只想在 GUI 里完成配置的人
+
+## 前置条件
+
+| 项目 | 说明 |
+|------|------|
+| Crazyrouter 账号 | 先在 [crazyrouter.com](https://crazyrouter.com) 注册 |
+| Crazyrouter token | 建议单独给 ChatBox 创建一个 token |
+| ChatBox 客户端 | 推荐安装桌面版，知识库等能力更完整 |
+| 可用模型 | 至少先放行 1 个聊天模型 |
+
+建议首轮只放行：
+
+- `gpt-4.1`
+- `gpt-4.1-mini`
+- `claude-sonnet-4-6`
+
+## 安装 ChatBox
+
+### Windows
+
+1. 打开 [ChatBox 官网](https://chatboxai.app/)
+2. 下载 Windows 安装包
+3. 双击安装
+4. 完成后启动 ChatBox
+
+### macOS
+
+1. 打开 [ChatBox 官网](https://chatboxai.app/)
+2. 下载 macOS 安装包
+3. 拖动到 `Applications`
+4. 首次打开时如遇系统安全提示，按系统提示完成放行
+
+### Linux
+
+1. 打开 [ChatBox 官网](https://chatboxai.app/)
+2. 下载适合你的发行版的安装包或桌面版本
+3. 安装后启动 ChatBox
+
+<Tip>
+如果你只是先验证 Crazyrouter 是否能在 ChatBox 中跑通，优先使用桌面客户端，不要一开始就同时折腾多端同步、知识库和复杂模型列表。
+</Tip>
+
+## 推荐配置方式
+
+ChatBox 不同版本界面名称可能略有不同，常见入口包括：
+
+- `Settings`
+- `Model Provider`
+- `AI Provider`
+- `Add`
+
+如果你当前版本已经内置了 `OpenAI API` 提供商，直接选它即可；如果没有，就新增一个 `OpenAI API Compatible` 提供商。
 
 ## 配置步骤
 
 <Steps>
-  <Step title="下载安装">
-    从 [ChatBox 官网](https://chatboxai.app/) 下载并安装。
+  <Step title="第 1 步：在 Crazyrouter 创建 ChatBox 专用 token">
+    第一次建议只放行 1 到 2 个模型，例如：
+
+    - `gpt-4.1`
+    - `gpt-4.1-mini`
+
+    这样更容易定位问题，不会因为模型太多导致排障范围过大。
   </Step>
-  <Step title="打开设置">
-    点击左下角 `设置` 图标。
+
+  <Step title="第 2 步：打开 ChatBox 设置">
+    启动 ChatBox 后，点击左下角的设置入口，然后进入：
+
+    - `Model Provider`
+    - 或 `AI Provider`
   </Step>
-  <Step title="配置 API">
-    - **AI Provider**: 选择 `OpenAI API`
-    - **API Host**: `https://crazyrouter.com`
-    - **API Key**: `sk-xxx`
-    - **Model**: 选择或输入模型名称，如 `gpt-4o`
+
+  <Step title="第 3 步：选择或新增 OpenAI 兼容提供商">
+    推荐两种情况：
+
+    - 如果已有 `OpenAI API`，直接选择
+    - 如果没有，点击 `Add`，新增一个 `OpenAI API Compatible` 提供商
   </Step>
-  <Step title="保存测试">
-    点击 `Save`，返回主界面发送消息测试。
+
+  <Step title="第 4 步：填写 Crazyrouter 连接信息">
+    推荐填写：
+
+    - `API Host`: `https://crazyrouter.com`
+    - `API Path`: 保持默认或留空
+    - `API Key`: `sk-xxx`
+
+    如果界面里要求填写提供商名称，可写成 `Crazyrouter`。
+  </Step>
+
+  <Step title="第 5 步：添加首个模型">
+    第一次只建议加一个模型：
+
+    - `gpt-4.1`
+
+    等最小链路验证通过后，再逐步加入：
+
+    - `gpt-4.1-mini`
+    - `claude-sonnet-4-6`
+  </Step>
+
+  <Step title="第 6 步：使用 Check 或 Save 先做连通性测试">
+    如果你的 ChatBox 版本有 `Check` 按钮，先点 `Check`。
+
+    如果只有 `Save`，先保存，然后返回主界面新建会话测试。
+  </Step>
+
+  <Step title="第 7 步：在主界面做首轮最小验证">
+    新建一个聊天，确保当前模型是 `gpt-4.1`，输入：
+
+    ```text
+    Reply only OK
+    ```
+
+    如果能稳定返回 `OK` 或接近结果，说明 ChatBox 到 Crazyrouter 的主链路已经通了。
   </Step>
 </Steps>
 
-## 高级设置
+## 推荐验证顺序
 
-- **Temperature**: 控制回复随机性，0-2 之间
-- **Max Tokens**: 最大回复长度
-- **Context Messages**: 上下文消息数量，影响连续对话记忆
+建议按这个顺序做，不要一上来就开很多模型和功能：
+
+1. 先只配 1 个 token
+2. 先只配 1 个模型 `gpt-4.1`
+3. 先只做纯文本聊天验证
+4. 再增加第二个模型
+5. 最后再启用知识库、文件问答或复杂会话参数
+
+## 推荐模型
+
+| 场景 | 推荐模型 | 原因 |
+|------|----------|------|
+| 首轮连通性验证 | `gpt-4.1` | 最适合先验证配置是否正确 |
+| 低成本常用对话 | `gpt-4.1-mini` | 成本更低，适合长时间日常使用 |
+| 更强写作与解释 | `claude-sonnet-4-6` | 更适合复杂说明、润色、总结 |
+
+## ChatBox 常见功能怎么搭配 Crazyrouter
+
+### 普通聊天
+
+最简单，优先用来验证配置是否正确。
+
+### 知识库 / 文件问答
+
+建议在普通聊天已经跑通之后再启用。第一次测试时：
+
+- 文件尽量小
+- 内容尽量清晰
+- 先验证单文件问答
+
+不要在尚未确认 API 配置正确时，直接用大量文件做复杂知识库测试。
+
+### 多模型切换
+
+适合在 ChatBox 里做不同任务分工，例如：
+
+- 日常快问快答：`gpt-4.1-mini`
+- 重要总结与写作：`claude-sonnet-4-6`
+- 首轮标准验证：`gpt-4.1`
+
+## 参数建议
+
+如果你的 ChatBox 版本支持常见采样参数，建议第一次保持保守：
+
+| 参数 | 建议值 | 说明 |
+|------|--------|------|
+| Temperature | `0.2` 到 `0.7` | 首轮验证不要太高 |
+| Max Tokens | 保持默认或适中 | 避免因输出太长影响排障 |
+| Context Messages | 保持默认 | 先验证基础聊天即可 |
+
+## Token 最佳实践
+
+| 设置 | 建议 | 说明 |
+|------|------|------|
+| 专用 token | 必须 | 不要和 IDE、自动化流程共用 |
+| 模型白名单 | 强烈建议 | 先只开放 1 到 2 个模型 |
+| 配额上限 | 强烈建议 | 避免知识库批量问答消耗放大 |
+| 分环境 token | 建议 | 桌面个人使用和团队共享分开 |
+| 泄露处理 | 立即轮换 | 截图、录屏、共享桌面暴露后应立刻换 key |
+
+## 验证清单
+
+- [ ] 已安装 ChatBox 并能正常启动
+- [ ] 已创建 ChatBox 专用 Crazyrouter token
+- [ ] 已选择 `OpenAI API` 或 `OpenAI API Compatible`
+- [ ] `API Host` 已填写为 `https://crazyrouter.com`
+- [ ] `API Path` 已保持默认或留空
+- [ ] 已成功填写 `sk-xxx`
+- [ ] 已先只添加 `gpt-4.1`
+- [ ] 已通过 `Check` 或最小对话完成验证
+- [ ] Crazyrouter 后台日志中能看到对应请求
+
+## 常见错误与修复
+
+| 现象 | 常见原因 | 修复方式 |
+|------|----------|----------|
+| 401 unauthorized | token 错误、复制不完整或已失效 | 重新生成 token 并重新粘贴 |
+| 404 | Host 或 Path 填错 | Host 改回 `https://crazyrouter.com`，Path 保持默认 |
+| 403 / model not allowed | token 没放行当前模型 | 在 Crazyrouter token 设置中放行该模型 |
+| `model not found` | 模型名拼写错误 | 先改回 `gpt-4.1` 做最小验证 |
+| 保存成功但聊天失败 | Provider 选错，或模型未真正添加 | 重新检查 provider 类型和模型列表 |
+| 知识库问答很慢或失败 | 文件太大、一次任务太复杂 | 先回退到小文件和纯文本问答 |
+| 不确定要不要填 `/v1` | 当前版本通常不需要手动填完整路径 | 先用根域名 Host，Path 留空或默认 |
+
+## FAQ
+
+### ChatBox 里应该选哪个 Provider？
+
+优先选 `OpenAI API` 或 `OpenAI API Compatible`。
+
+### API Host 该填什么？
+
+填 `https://crazyrouter.com`。
+
+### 要不要手动填写 `/v1/chat/completions`？
+
+一般不需要。按照 ChatBox 官方文档，`API Path` 通常有默认值，先保持默认或留空即可。
+
+### 第一个模型推荐填什么？
+
+先填 `gpt-4.1`。
+
+### 什么时候再加更多模型和知识库？
+
+等最小聊天链路验证通过后，再逐步增加。
 
 <Note>
-  ChatBox 的 API Host 填写 `https://crazyrouter.com`，不需要加 `/v1` 后缀，ChatBox 会自动拼接。
+如果你的目标是“先把 ChatBox 跑通”，最好的做法不是一次性配很多模型和功能，而是先用 `gpt-4.1` 把最小聊天链路验证成功。
 </Note>

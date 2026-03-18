@@ -8,6 +8,19 @@ api: 'PUT /api/token/'
 
 Modify the name, quota, expiration time, model permissions, and other settings of an existing token.
 
+<Note>
+  The `/api/token/*` endpoints are mainly for Crazyrouter dashboard automation around API key management. They require a user `access token` plus the `New-Api-User` header, and are not the normal interface for `sk-xxx` model calls.
+</Note>
+
+## Authentication
+
+Use user-side authentication with these headers:
+
+```text
+Authorization: Bearer your_access_token
+New-Api-User: 1
+```
+
 ## Request Parameters
 
 <ParamField body="id" type="integer" required>
@@ -27,27 +40,48 @@ Modify the name, quota, expiration time, model permissions, and other settings o
 </ParamField>
 
 <ParamField body="expired_time" type="integer">
-  Expiration timestamp, -1 means never expires
+  Expiration timestamp, `-1` means never expires
 </ParamField>
 
-<ParamField body="models" type="string[]">
-  List of allowed models
+<ParamField body="model_limits_enabled" type="boolean">
+  Whether to enable the model whitelist
+</ParamField>
+
+<ParamField body="model_limits" type="string">
+  Model restriction config string, for example `["gpt-4o","claude-sonnet-4-20250514"]`
 </ParamField>
 
 <ParamField body="status" type="integer">
   Status: 1=enabled, 2=disabled
 </ParamField>
 
-<ParamField body="subnet" type="string">
-  IP whitelist (CIDR format)
+<ParamField body="allow_ips" type="string">
+  IP whitelist string
+</ParamField>
+
+<ParamField body="group" type="string">
+  Group
 </ParamField>
 
 ## Response Format
 
+The current endpoint returns the updated token object:
+
 ```json
 {
   "success": true,
-  "message": "Token updated successfully"
+  "message": "",
+  "data": {
+    "id": 10,
+    "name": "Production-Updated",
+    "status": 1,
+    "remain_quota": 200000,
+    "unlimited_quota": false,
+    "model_limits_enabled": true,
+    "model_limits": "[\"gpt-4o\",\"claude-sonnet-4-20250514\"]",
+    "allow_ips": "203.0.113.10",
+    "group": "default"
+  }
 }
 ```
 
@@ -56,6 +90,7 @@ Modify the name, quota, expiration time, model permissions, and other settings o
 <CodeGroup>
 
 ```python Python
+import json
 import requests
 
 headers = {
@@ -65,7 +100,6 @@ headers = {
     "User-Agent": "Mozilla/5.0"
 }
 
-# Update token quota and model permissions
 response = requests.put(
     "https://crazyrouter.com/api/token/",
     headers=headers,
@@ -73,7 +107,8 @@ response = requests.put(
         "id": 10,
         "name": "Production-Updated",
         "remain_quota": 200000,
-        "models": ["gpt-4o", "claude-sonnet-4-20250514", "gemini-2.5-flash"]
+        "model_limits_enabled": True,
+        "model_limits": json.dumps(["gpt-4o", "claude-sonnet-4-20250514"])
     }
 )
 
@@ -88,12 +123,14 @@ curl -X PUT https://crazyrouter.com/api/token/ \
   -d '{
     "id": 10,
     "name": "Production-Updated",
-    "remain_quota": 200000
+    "remain_quota": 200000,
+    "model_limits_enabled": true,
+    "model_limits": "[\"gpt-4o\"]"
   }'
 ```
 
 </CodeGroup>
 
 <Warning>
-  Updating a token does not regenerate the API Key. If you need a new Key, delete the token and create a new one.
+  Updating a token does not regenerate the API key. If you need a new key, delete the token and create a new one.
 </Warning>

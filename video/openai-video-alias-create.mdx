@@ -1,0 +1,70 @@
+---
+title: "视频生成别名"
+description: "POST /v1/video/generations 兼容别名接口，供依赖该路径的客户端提交视频生成任务"
+---
+
+# 视频生成别名
+
+```
+POST /v1/video/generations
+```
+
+这是 Crazyrouter 提供的兼容别名路由，适合那些固定使用 `/v1/video/generations` 路径的视频客户端或中间层。
+
+## 认证
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## 什么时候用它
+
+- 你的客户端已经写死了 `/v1/video/generations`
+- 你在迁移历史视频工作流，不想改调用路径
+- 你需要兼容第三方已经发布的请求格式
+
+如果你在开发新接入，优先考虑：
+
+- `POST /v1/videos`：更接近 OpenAI 官方视频格式
+- `POST /v1/video/create`：Crazyrouter 自己的统一视频格式
+
+## 最小请求示例
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/video/generations   -H "Content-Type: application/json"   -H "Authorization: Bearer YOUR_API_KEY"   -d '{
+    "model": "veo3.1",
+    "prompt": "A cinematic shot of waves hitting a cliff at sunset"
+  }'
+```
+
+## 典型成功响应
+
+```json
+{
+  "id": "video_task_abc123",
+  "status": "processing",
+  "status_update_time": 1709123456
+}
+```
+
+## 本地验证到的错误响应
+
+在本地 `http://127.0.0.1:4000` 环境中，这个路由已经验证存在。当模型临时不可用时，返回的是业务错误而不是 `404`：
+
+```json
+{
+  "code": "get_channel_failed",
+  "message": "model veo3.1 is temporarily unavailable, please try again later",
+  "data": null
+}
+```
+
+## 注意事项
+
+- 请求体字段会随具体视频模型和上游能力而变化
+- `model` 是否可用取决于当前 Token 白名单和上游渠道状态
+- 任务创建成功后，可继续调用 `GET /v1/video/generations/{task_id}` 查询状态
+
+<Note>
+这个路由是兼容别名，不代表所有视频模型都共享完全一致的请求字段。新项目如果不受历史路径约束，建议优先使用主文档中的 `/v1/videos` 或 `/v1/video/create`。
+</Note>

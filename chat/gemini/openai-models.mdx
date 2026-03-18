@@ -1,0 +1,90 @@
+---
+title: "Gemini 兼容 OpenAI 模型列表"
+description: "GET /v1beta/openai/models 为 Gemini 风格客户端提供 OpenAI 兼容模型列表"
+---
+
+# Gemini 兼容 OpenAI 模型列表
+
+```
+GET /v1beta/openai/models
+```
+
+这个端点给 Gemini 风格客户端或中间层提供一个兼容的模型列表入口：认证方式可以走 `key` 查询参数或 `x-goog-api-key`，但返回的是 OpenAI 风格的模型列表数据。
+
+## 什么时候用它
+
+- 你的客户端习惯把 API Key 放在 `?key=` 查询参数里
+- 你的中间层沿用了 `x-goog-api-key` 这样的 Gemini 风格认证
+- 你仍然想拿到 OpenAI 风格的模型列表，而不是 Gemini 原生模型元数据
+
+如果你是标准 OpenAI 客户端，优先使用 `GET /v1/models`。
+
+## 认证
+
+支持以下任一方式：
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+```http
+x-goog-api-key: YOUR_API_KEY
+```
+
+```text
+GET /v1beta/openai/models?key=YOUR_API_KEY
+```
+
+## 请求示例
+
+<CodeGroup>
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/openai/models?key=YOUR_API_KEY"
+```
+
+```bash cURL with Header
+curl https://crazyrouter.com/v1beta/openai/models   -H "x-goog-api-key: YOUR_API_KEY"
+```
+
+</CodeGroup>
+
+## 响应示例
+
+```json
+{
+  "data": [
+    {
+      "id": "gpt-4o",
+      "object": "model",
+      "created": 1626777600,
+      "owned_by": "openai",
+      "supported_endpoint_types": ["openai"]
+    },
+    {
+      "id": "claude-sonnet-4-20250514",
+      "object": "model",
+      "created": 1626777600,
+      "owned_by": "vertex-ai",
+      "supported_endpoint_types": ["anthropic", "openai", "gemini"]
+    }
+  ],
+  "object": "list",
+  "success": true
+}
+```
+
+## 字段说明
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `data[]` | array | 当前 Token 可用模型列表 |
+| `id` | string | 模型标识符 |
+| `owned_by` | string | 模型来源或所属渠道 |
+| `supported_endpoint_types` | array | 当前模型支持的接口类型，如 `openai`、`anthropic`、`gemini` |
+| `object` | string | 固定为 `list` |
+| `success` | boolean | 当前请求是否成功 |
+
+<Note>
+该端点本质上是一个兼容桥接入口：认证风格偏 Gemini，返回数据结构偏 OpenAI 模型列表。
+</Note>

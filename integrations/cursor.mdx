@@ -1,49 +1,164 @@
 ---
 title: 'Cursor 配置教程'
-description: '在 Cursor IDE 中配置 Crazyrouter API'
+description: '在 Cursor 中接入 Crazyrouter，并了解 BYOK 模式下的可用范围、限制与排障方法'
 ---
 
-## 配置步骤
+Cursor 适合把 Crazyrouter 接到日常编码工作流里，用来做聊天、代码解释、重构建议和常规编辑辅助。
+
+## 概览
+
+通过 Cursor 的 BYOK（Bring Your Own Key）能力，你可以把部分聊天模型请求切到 Crazyrouter，并按自己的 token 计费。
+
+- 推荐接法：OpenAI 兼容模式
+- Crazyrouter Base URL：`https://crazyrouter.com/v1`
+- 认证方式：`sk-...` token
+- 最适合先接入的功能：Chat、Ask、常规编辑对话
+
+<Warning>
+根据 Cursor 官方文档，`Custom API keys only work with standard chat models`，像 Tab Completion 这类依赖专用模型的功能会继续使用 Cursor 内置模型。这个限制来自 Cursor 本身，而不是 Crazyrouter。
+</Warning>
+
+## 适合谁用
+
+- 想在 Cursor 里统一使用 Crazyrouter token 的开发者
+- 想控制模型选择、成本和额度的人
+- 想把 Cursor 聊天能力接到 Crazyrouter 的团队
+- 想给不同 IDE / CLI 分开计费和限额的人
+
+## 使用协议
+
+推荐协议：`OpenAI-compatible API`
+
+Cursor 里对接 Crazyrouter 时，使用 OpenAI 兼容基址：
+
+```text
+https://crazyrouter.com/v1
+```
+
+不要填成：
+
+- `https://crazyrouter.com`
+- `https://crazyrouter.com/v1/chat/completions`
+
+## 前置条件
+
+| 项目 | 说明 |
+|------|------|
+| Crazyrouter 账号 | 先在 [crazyrouter.com](https://crazyrouter.com) 注册 |
+| Crazyrouter token | 建议单独创建一个给 Cursor 使用的 `sk-...` token |
+| Cursor 桌面端 | 建议升级到当前稳定版后再配置 |
+| 可用模型 | 至少保证 token 放行了 1 到 2 个 OpenAI 兼容聊天模型 |
+
+推荐先放行这些模型之一：
+
+- `gpt-4.1`
+- `gpt-4o`
+- `gpt-4.1-mini`
+
+<Tip>
+如果你后续还要配置 Claude Code、Codex、Cline，不要和 Cursor 共用同一个 token。单独拆 token 更方便排查和控费。
+</Tip>
+
+## 5 分钟快速开始
 
 <Steps>
-  <Step title="打开设置">
-    打开 Cursor，点击左下角齿轮图标，选择 `Settings` → `Models`
+  <Step title="创建 Cursor 专用 token">
+    在 Crazyrouter 后台创建一个新 token，名称建议直接写 `cursor`。先开启少量模型白名单，例如 `gpt-4.1` 与 `gpt-4.1-mini`。
   </Step>
-  <Step title="配置 API">
-    - **OpenAI API Key**: 输入你的 `sk-xxx` 密钥
-    - **Override OpenAI Base URL**: 输入 `https://crazyrouter.com/v1`
+  <Step title="打开 Cursor 设置">
+    打开 Cursor，进入 `Cursor Settings` → `Models`。
   </Step>
-  <Step title="选择模型">
-    在模型列表中选择需要的模型，如 `gpt-4o`、`claude-sonnet-4-20250514` 等。也可以点击 `+ Add Model` 添加自定义模型名称。
+  <Step title="填写 OpenAI 接入信息">
+    在 OpenAI 相关配置区域填写：
+    - `OpenAI API Key`: 你的 `sk-...`
+    - `Override OpenAI Base URL`: `https://crazyrouter.com/v1`
+
+    如果你的 Cursor 版本没有看到 `Override OpenAI Base URL`，说明当前版本的自定义 OpenAI 兼容端点支持不完整，需要先升级 Cursor，或等待 Cursor 侧进一步完善该能力。
   </Step>
-  <Step title="验证连接">
-    在编辑器中按 `Ctrl+K`（或 `Cmd+K`）打开 AI 面板，输入任意问题测试是否正常响应。
+  <Step title="验证密钥并选择模型">
+    点击 `Verify`。通过后，优先启用一个模型做首次验证，建议先选 `gpt-4.1`。
+  </Step>
+  <Step title="完成首次测试">
+    打开 Cursor 的聊天面板，发送一句简单请求，例如：`Reply with only OK`。只要成功返回，就说明 Crazyrouter 接通了。
   </Step>
 </Steps>
 
-## 配置截图参考
+## 推荐模型配置
 
-```
-Settings → Models:
-┌─────────────────────────────────┐
-│ OpenAI API Key: sk-xxx          │
-│ Override OpenAI Base URL:       │
-│ https://crazyrouter.com/v1      │
-│                                 │
-│ Models:                         │
-│ ☑ gpt-4o                       │
-│ ☑ claude-sonnet-4-20250514      │
-│ ☑ claude-opus-4-20250514        │
-└─────────────────────────────────┘
-```
+| 使用场景 | 推荐模型 | 原因 |
+|----------|----------|------|
+| 默认主力 | `gpt-4.1` | 稳定，适合代码解释、编辑和常规对话 |
+| 更快更省 | `gpt-4.1-mini` | 成本更低，适合高频问答 |
+| 更强通用体验 | `gpt-4o` | 适合通用编程辅助和多轮对话 |
+| 尝试更强编码能力 | `gpt-5.3-codex` | 更偏代码场景，但可用性取决于你的 Cursor 版本和 BYOK 路径兼容性 |
+| 高质量替代项 | `claude-sonnet-4-6` | 某些自定义模型配置场景可用，但建议在基础接通后再尝试 |
 
-## 使用技巧
+推荐顺序：先用 `gpt-4.1` 跑通，再逐步尝试自定义模型。
 
-- **Tab 补全**：Cursor 的 Tab 自动补全会使用配置的模型
-- **Ctrl+K**：内联编辑，选中代码后按 Ctrl+K 可以让 AI 修改
-- **Ctrl+L**：打开侧边栏聊天
-- **Composer**：按 `Ctrl+I` 打开 Composer 进行多文件编辑
+## Token 设置最佳实践
 
-<Warning>
-  Cursor 的部分高级功能（如 Agent 模式）可能需要特定模型支持。建议使用 `gpt-4o` 或 `claude-sonnet-4-20250514` 以获得最佳体验。
-</Warning>
+| 设置 | 建议 | 说明 |
+|------|------|------|
+| 专用 token | 必须 | Cursor 单独一个 token，避免和别的工具混用 |
+| 模型白名单 | 建议开启 | 只放行 Cursor 实际要用的模型 |
+| IP 限制 | 视情况开启 | 个人电脑出口不固定时通常不建议；固定办公网可考虑开启 |
+| 配额上限 | 强烈建议 | 给 Cursor 单独设预算，避免一次性吃掉总额度 |
+| 开发 / 生产分离 | 建议 | 个人机器、团队机器、CI 机分别用不同 token |
+| 轮换频率 | 建议定期 | 如果截图、录屏或同步配置可能泄露 token，要及时重置 |
+
+## 验证清单
+
+- [ ] `Cursor Settings` → `Models` 中的 key 能通过 `Verify`
+- [ ] `Override OpenAI Base URL` 已正确设置为 `https://crazyrouter.com/v1`
+- [ ] 已成功选择至少一个 Crazyrouter 模型
+- [ ] 聊天面板的第一条请求成功返回
+- [ ] Crazyrouter 后台日志能看到对应请求
+- [ ] token 配额与模型白名单符合预期
+- [ ] 你知道 Tab Completion 等专用能力可能不会走 Crazyrouter
+
+## 常见错误与修复
+
+| 现象 | 常见原因 | 修复方式 |
+|------|----------|----------|
+| `Verify` 失败 | API Key 错误，或 Base URL 写错 | 重新检查 `sk-...` 和 `https://crazyrouter.com/v1` |
+| 401 unauthorized | token 无效、过期或复制时带了空格 | 重新生成 token 并粘贴纯净值 |
+| 403 / model not allowed | 当前模型不在 token 白名单内 | 在 Crazyrouter token 设置里放行对应模型 |
+| 404 | Base URL 填成了根域名或具体接口路径 | 统一改成 `https://crazyrouter.com/v1` |
+| 模型列表不对或没有模型 | Cursor BYOK 刷新失败，或版本兼容性问题 | 重启 Cursor，重新 Verify，必要时升级到最新稳定版 |
+| 聊天能用但 Tab 补全不走 Crazyrouter | Cursor 官方限制：专用能力仍会走内置模型 | 这是预期行为，不是 Crazyrouter 故障 |
+| 自定义模型无法使用 | Cursor 对自定义 OpenAI 兼容端点支持不稳定 | 先用 `gpt-4.1` 跑通，再逐步尝试其他模型 |
+| 成本异常升高 | 多个功能共用同一 token，或白名单过宽 | 缩小模型范围，并为 Cursor 单独设置额度 |
+
+## 性能与成本建议
+
+- 第一阶段先只开 `gpt-4.1` 和 `gpt-4.1-mini`
+- 高频日常问答优先走 `gpt-4.1-mini`
+- 复杂重构、长对话或更重的代码理解再切 `gpt-4.1` 或 `gpt-4o`
+- 如果你同时在用 Claude Code / Codex，务必拆分 token 统计成本
+- 遇到可疑高消耗时，先回看 Crazyrouter 日志确认是不是 Cursor 的多轮上下文导致
+
+## FAQ
+
+### Cursor 里应该填哪个 Base URL？
+
+填：`https://crazyrouter.com/v1`
+
+### 为什么我填了 Key，但某些功能还是没走 Crazyrouter？
+
+因为 Cursor 官方说明自定义 API key 只覆盖标准聊天模型，像 Tab Completion 这样的专用能力仍会使用 Cursor 自己的模型。
+
+### 第一次推荐用哪个模型？
+
+先用 `gpt-4.1`。它比一开始就尝试更多自定义模型更稳。
+
+### 能不能直接用 Claude 或其他模型？
+
+可以尝试，但建议先完成 OpenAI 兼容路径的基础验证。某些自定义模型是否能在 Cursor 当前版本中顺利工作，取决于 Cursor 的兼容实现。
+
+### 聊天正常但模型选择总是乱掉怎么办？
+
+先重启 Cursor，再重新 Verify；如果问题仍存在，优先回退到 `gpt-4.1` 这种最稳的基线模型。
+
+<Note>
+如果你主要想把 Crazyrouter 用在稳定的编码工作流里，Claude Code、Codex、Cline 往往比 Cursor 的自定义端点路径更直接可控。Cursor 更适合先接入聊天和常规编辑辅助。
+</Note>

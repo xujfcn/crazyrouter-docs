@@ -1,28 +1,92 @@
 ---
 title: 'NextChat 配置教程'
-description: '在 NextChat (ChatGPT Next Web) 中配置 Crazyrouter API'
+description: '在 NextChat 中通过 Crazyrouter 接入 OpenAI 兼容模型，并完成在线设置、自部署、模型列表和排障配置'
 ---
 
-## 概述
+NextChat（原 ChatGPT Next Web）适合快速搭建一个轻量、响应快、易自部署的聊天前端。对接 Crazyrouter 时，推荐继续走它默认的 OpenAI 兼容路径，把服务地址指向 Crazyrouter 根域名。
 
-NextChat（原 ChatGPT Next Web）是一个流行的开源 ChatGPT 网页客户端。
+## 概览
 
-## 在线使用配置
+通过 NextChat 的 OpenAI 配置项，你可以把请求发到 Crazyrouter：
+
+- 推荐协议：`OpenAI-compatible API`
+- 推荐接法：NextChat 默认 OpenAI 路线
+- Base URL：`https://crazyrouter.com`
+- 认证方式：`sk-...` token
+- 推荐首次验证模型：`gpt-4.1`
+
+<Note>
+NextChat 官方 README 把 `BASE_URL` 定义为 OpenAI API request base URL，示例也是根域名风格；同时本地 `http://127.0.0.1:4000/api/status` 暴露的 `server_address` 也是根地址。因此对接 Crazyrouter 时，首次验证优先填写 `https://crazyrouter.com`；如果你的定制版本明确要求更具体路径，再按该版本说明调整。
+</Note>
+
+## 适合谁用
+
+- 想快速部署一个轻量聊天前端的人
+- 想把 Crazyrouter 用于个人或小团队网页聊天的人
+- 想通过环境变量统一下发默认模型和默认上游的人
+- 想用最少配置先把 OpenAI 兼容路径跑通的人
+
+## 使用协议
+
+推荐协议：`OpenAI-compatible API`
+
+NextChat 对接 Crazyrouter 时，优先填写：
+
+```text
+https://crazyrouter.com
+```
+
+不要填成：
+
+- `https://crazyrouter.com/v1/chat/completions`
+- `https://crazyrouter.com/v1/models`
+
+如果你的 NextChat 某个历史版本要求手动填写更具体的 API host，再按该版本说明调整；首次接入先用根域名做基线验证。
+
+<Tip>
+NextChat 的不同部署形态里，入口位置可能不一样：在线使用时通常在设置页填写；自部署时更常见的是直接通过环境变量下发。无论 UI 怎么变化，首轮验证都先坚持最小配置：`API Key` + 根域名 `BASE_URL` + 单一模型 `gpt-4.1`。
+</Tip>
+
+## 前置条件
+
+| 项目 | 说明 |
+|------|------|
+| Crazyrouter 账号 | 先在 [crazyrouter.com](https://crazyrouter.com) 注册 |
+| Crazyrouter token | 建议为 NextChat 单独创建一个 `sk-...` token |
+| NextChat | 在线版或自部署版均可，建议使用当前稳定版 |
+| 可用模型 | 至少放行一个 OpenAI 兼容聊天模型，如 `gpt-4.1` |
+
+推荐首批白名单：
+
+- `gpt-4.1`
+- `gpt-4.1-mini`
+- `gpt-4o`
+
+## 5 分钟快速开始
 
 <Steps>
-  <Step title="打开设置">
-    点击左下角 `设置` 图标
+  <Step title="创建 NextChat 专用 token">
+    在 Crazyrouter 后台新建 token，名称建议写成 `nextchat`。首次只放行 `gpt-4.1` 和 `gpt-4.1-mini` 这类基线模型。
   </Step>
-  <Step title="配置接口">
-    - **接口地址**: `https://crazyrouter.com`
-    - **API Key**: `sk-xxx`
+  <Step title="打开 NextChat 设置">
+    进入 NextChat，点击左下角 `设置` 图标或 `Settings` 入口。
   </Step>
-  <Step title="选择模型">
-    在 `模型 (model)` 中选择或输入模型名称
+  <Step title="填写接口地址和 Key">
+    在 OpenAI 相关设置中填写：
+    - `API Key`: 你的 `sk-...`
+    - `接口地址 / Base URL`: `https://crazyrouter.com`
+  </Step>
+  <Step title="指定模型">
+    在 `模型 / Model` 中先手动输入或选择 `gpt-4.1`。如果当前版本支持自定义模型列表，再补充你需要的其他模型。
+  </Step>
+  <Step title="完成首次验证">
+    新建一个会话，发送 `Reply only OK`。收到正常返回后，再逐步加更多模型。
   </Step>
 </Steps>
 
-## Docker 自部署
+## 自部署快速配置
+
+Docker 环境常见写法如下：
 
 ```yaml
 services:
@@ -33,18 +97,99 @@ services:
     environment:
       - OPENAI_API_KEY=sk-xxx
       - BASE_URL=https://crazyrouter.com
-      - CUSTOM_MODELS=+gpt-4o,+claude-sonnet-4-20250514,+gemini-2.5-pro
+      - CUSTOM_MODELS=+gpt-4.1,+gpt-4.1-mini,+gpt-4o
+      - HIDE_USER_API_KEY=1
 ```
 
-## 环境变量说明
+常见环境变量说明：
 
-| 变量 | 说明 |
-|------|------|
-| `OPENAI_API_KEY` | API 密钥 |
-| `BASE_URL` | API 地址（不加 `/v1`） |
-| `CUSTOM_MODELS` | 自定义模型列表，`+` 表示添加 |
-| `HIDE_USER_API_KEY` | 设为 1 隐藏用户自定义 Key 入口 |
+| 变量 | 建议值 | 说明 |
+|------|--------|------|
+| `OPENAI_API_KEY` | `sk-xxx` | 默认 Crazyrouter token |
+| `BASE_URL` | `https://crazyrouter.com` | 按官方 `BASE_URL` 用法先填根域名，作为首轮验证基线 |
+| `CUSTOM_MODELS` | `+gpt-4.1,+gpt-4.1-mini` | 给前端补充可选模型 |
+| `HIDE_USER_API_KEY` | `1` | 不让终端用户自行输入其他 Key |
+
+## 推荐模型配置
+
+| 使用场景 | 推荐模型 | 原因 |
+|----------|----------|------|
+| 默认主聊天模型 | `gpt-4.1` | 稳定，适合大多数聊天场景 |
+| 更低成本高频问答 | `gpt-4.1-mini` | 快且便宜，适合默认档 |
+| 更强多轮体验 | `gpt-4o` | 适合更复杂的连续会话 |
+| 轻量备用档 | `gemini-2.5-flash` | 适合预算敏感场景 |
+
+推荐顺序：先用 `gpt-4.1` 跑通，再通过 `CUSTOM_MODELS` 扩展模型列表。
+
+## Token 设置最佳实践
+
+| 设置 | 建议 | 说明 |
+|------|------|------|
+| 专用 token | 必须 | NextChat 不要和 LobeChat、Cursor、Codex 共用 token |
+| 模型白名单 | 强烈建议 | 只放行前端真正会显示的模型 |
+| IP 限制 | 自部署固定出口时可考虑 | 经常换网络的个人环境谨慎使用 |
+| 配额上限 | 强烈建议 | 网页聊天多人使用时消耗可能增长很快 |
+| 环境隔离 | 建议 | 演示站、测试站、正式站用不同 token |
+| 用户自定义 Key | 建议默认关闭 | 如果你想统一上游和计费，设置 `HIDE_USER_API_KEY=1` |
+
+## 验证清单
+
+- [ ] `API Key` 已正确保存
+- [ ] `Base URL` 已设置为 `https://crazyrouter.com`
+- [ ] 第一个模型已设置为 `gpt-4.1`
+- [ ] 第一条会话请求成功返回
+- [ ] 若是自部署，`CUSTOM_MODELS` 已生效
+- [ ] 流式输出正常
+- [ ] Crazyrouter 后台日志能看到对应请求
+- [ ] token 配额和模型白名单符合预期
+
+## 常见错误与修复
+
+| 现象 | 常见原因 | 修复方式 |
+|------|----------|----------|
+| 401 unauthorized | token 错误、失效或复制带空格 | 重新生成 token 并替换 |
+| 403 / model not allowed | 模型不在白名单里 | 在 Crazyrouter token 设置中放行对应模型 |
+| 404 | 把地址写成完整接口路径，或版本变量名使用错误 | 优先改回 `https://crazyrouter.com`，并检查你的版本使用的是 `BASE_URL` 还是其他变量名 |
+| 自部署后前端界面里看不到相关设置项 | 当前部署方式把配置固定在环境变量里，而不是前端设置页 | 直接检查部署配置中的 `OPENAI_API_KEY`、`BASE_URL`、`CUSTOM_MODELS` |
+| 页面里看不到模型 | 没配置 `CUSTOM_MODELS`，或缓存了旧配置 | 先手动输入 `gpt-4.1` 验证，再刷新并检查环境变量 |
+| 请求能发但模型报错 | 默认模型写错，或该模型当前不可用 | 回退到 `gpt-4.1` 做基线验证 |
+| 用户仍能改用自己的 Key | 没开启 `HIDE_USER_API_KEY=1` | 在部署环境中补上该变量 |
+| 成本增长很快 | 多人共用一个高权限 token | 拆 token、缩小白名单、设置额度 |
+
+## 性能与成本建议
+
+- 默认只开放 `gpt-4.1` 和 `gpt-4.1-mini`
+- 把高价模型从默认列表中拿掉，按需再加
+- 如果是公开或半公开部署，尽量隐藏用户自定义 Key 入口
+- 对演示站和正式站分开计费，避免测试流量影响生产额度
+- 遇到消耗异常时，先看 Crazyrouter 日志确认是不是长会话或多人共用造成
+
+## FAQ
+
+### NextChat 应该填哪个地址？
+
+优先填 `https://crazyrouter.com`。
+
+### 为什么这里不建议直接填 `/v1`？
+
+因为 NextChat 官方文档对 `BASE_URL` 给出的示例就是根域名风格；再结合本地 `4000` 环境返回的 `server_address`，先用根域名做首轮验证更稳。
+
+### 第一个推荐模型是什么？
+
+先用 `gpt-4.1`。
+
+### 我必须配置 `CUSTOM_MODELS` 吗？
+
+不是必须。你可以先手动输入 `gpt-4.1` 做验证，确认可用后再补充模型列表。
+
+### 为什么有些部署里只能改环境变量，不能在页面里改？
+
+因为不同 NextChat 部署方式暴露的设置入口不一样。有些自部署实例会把上游、模型和 Key 固定在环境变量里，前端只负责使用，不负责编辑。
+
+### 自部署时建议隐藏用户自定义 Key 吗？
+
+如果你希望统一控制上游和成本，建议隐藏。
 
 <Note>
-  NextChat 的接口地址不需要加 `/v1` 后缀，程序会自动拼接。
+如果你想用最少的部署成本做一个轻量聊天前端，NextChat 是非常合适的；如果你更需要团队协作和复杂功能，LobeChat 或 Dify 往往更适合继续扩展。
 </Note>

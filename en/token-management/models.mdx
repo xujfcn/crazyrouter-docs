@@ -1,12 +1,20 @@
 ---
 title: 'Get Token Models'
 description: 'Query the list of models available to a specific token'
-api: 'GET /api/token/models'
+api: 'GET /v1/models'
 ---
 
 ## Overview
 
 Get the list of models that the current token (API Key) can access. If the token has no model restrictions, all enabled system models are returned.
+
+The currently supported public endpoint is:
+
+```text
+GET /v1/models
+```
+
+`GET /api/token/models` is not a currently exposed public endpoint. Use `/v1/models` instead.
 
 ## Authentication
 
@@ -21,12 +29,18 @@ Authorization: Bearer sk-xxx
 ```json
 {
   "success": true,
+  "object": "list",
   "data": [
-    "gpt-4o",
-    "gpt-4o-mini",
-    "claude-sonnet-4-20250514",
-    "gemini-2.5-pro",
-    "text-embedding-3-large"
+    {
+      "id": "gpt-4o",
+      "object": "model",
+      "owned_by": "openai"
+    },
+    {
+      "id": "claude-sonnet-4-20250514",
+      "object": "model",
+      "owned_by": "anthropic"
+    }
   ]
 }
 ```
@@ -70,5 +84,5 @@ curl https://crazyrouter.com/v1/models \
 </CodeGroup>
 
 <Note>
-  You can also use the OpenAI-compatible `GET /v1/models` endpoint to get the model list, which works the same way.
+  If you use the OpenAI SDK, `client.models.list()` is effectively calling `GET /v1/models`.
 </Note>

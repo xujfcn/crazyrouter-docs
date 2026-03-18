@@ -1,57 +1,492 @@
 ---
 title: 'Aider 配置教程'
-description: '在 Aider CLI 工具中配置 Crazyrouter API'
+description: '在 Aider CLI 中通过 OpenAI 兼容方式接入 Crazyrouter，并提供区分 Windows 与 macOS 的完整安装、环境变量、配置文件与验证步骤'
 ---
 
-## 概述
+Aider 是非常实用的终端结对编程工具，适合在 Git 仓库里做小步快跑式改代码、审查 diff、追加上下文文件和逐轮修复。对接 Crazyrouter 时，最稳妥的方式是走 Aider 官方支持的 OpenAI-compatible 配置。
 
-Aider 是一个命令行 AI 编程助手，支持直接在终端中与 AI 协作编写代码。
+## 概览
 
-## 配置方法
+通过环境变量或 `~/.aider.conf.yml`，Aider 可以把请求发到 Crazyrouter：
 
-### 环境变量
+- 推荐协议：`OpenAI-compatible API`
+- Base URL：`https://crazyrouter.com/v1`
+- 认证变量：`OPENAI_API_KEY`
+- 推荐默认模型写法：`openai/gpt-5.3-codex`
+
+<Tip>
+如果你的日常工作流是“读代码 -> 改几处 -> 看 diff -> 再修一轮”，Aider 往往是最轻量、最容易稳定落地的一类终端编码工具。
+</Tip>
+
+## 适合谁用
+
+- 想在终端里做小步提交式代码修改的人
+- 想明确控制上下文文件、diff 和提交节奏的人
+- 想把 Aider 与 Codex、Claude Code 分开计费的人
+- 想先用最直接的 OpenAI 兼容方式接入 Crazyrouter 的人
+
+## 使用协议
+
+推荐协议：`OpenAI-compatible API`
+
+Aider 官方支持以下配置项：
+
+- `OPENAI_API_KEY`
+- `OPENAI_API_BASE`
+- `openai-api-key`
+- `openai-api-base`
+
+Crazyrouter 对应写法：
+
+```text
+OPENAI_API_BASE=https://crazyrouter.com/v1
+```
+
+同时要注意：Aider 官方文档里，连接 OpenAI 兼容接口时，模型名建议写成 `openai/<model-name>`。因此 Crazyrouter 的 `gpt-5.3-codex`，在 Aider 里建议写成：
+
+```text
+openai/gpt-5.3-codex
+```
+
+<Warning>
+这是本轮补强里最重要的修正点之一。Crazyrouter token 白名单里仍然放行原始模型名，例如 `gpt-5.3-codex`；但在 Aider 命令和 `~/.aider.conf.yml` 里，建议写成 `openai/gpt-5.3-codex`。
+</Warning>
+
+## 系统要求与前置条件
+
+| 项目 | 说明 |
+|------|------|
+| Crazyrouter 账号 | 先在 [crazyrouter.com](https://crazyrouter.com) 注册 |
+| Crazyrouter token | 建议为 Aider 单独创建一个 token |
+| Git | 建议 `git 2.23+` |
+| Python | 如果走 `aider-install` 路线，建议本机先有 `Python 3.8-3.13`；如果走官方一键安装脚本，安装器会按需处理 Python 3.12 |
+| Aider | 建议使用当前稳定版本 |
+| Git 仓库 | Aider 在 Git 仓库中体验通常最好 |
+| 可用模型 | 至少放行一个你要使用的编码模型 |
+
+建议初始白名单：
+
+- `gpt-5.3-codex`
+- `gpt-4.1`
+- `claude-sonnet-4-6`
+
+## 按操作系统的完整安装路径
+
+### Windows 推荐路径
+
+Aider 在 Windows 上最稳妥的路径是：`Git` + `Python` + `PowerShell 安装 Aider` + `PowerShell 写环境变量`。
+
+推荐顺序：
+
+1. 安装 Git
+2. 安装 Python
+3. 用 PowerShell 跑 Aider 官方安装脚本，或先装 `aider-install`
+4. 用 PowerShell 写临时变量
+5. 用 PowerShell 写用户级持久变量
+6. 新开终端确认 `aider` 命令和变量都生效
+
+推荐验证命令：
+
+```powershell
+git --version
+python --version
+pip --version
+aider --version
+where.exe git
+where.exe python
+where.exe aider
+```
+
+如果 `aider --version` 找不到命令，先关闭并重新打开 PowerShell，再重试。
+
+### macOS 推荐路径
+
+Aider 在 macOS 上最顺手的路径通常是：`Xcode Command Line Tools` + `Homebrew` + `Git` + `Python` + `Aider 官方安装脚本` + `~/.zshrc` 持久化环境变量。
+
+推荐顺序：
+
+1. 安装 Xcode Command Line Tools
+2. 安装 Homebrew（如果你还没有）
+3. 安装 Git、Python
+4. 运行 Aider 官方安装脚本，或通过 `aider-install` / `uv` 安装
+5. 写入 `~/.zshrc`
+6. 新开终端确认 `aider` 命令和变量路径
+
+推荐验证命令：
 
 ```bash
-export OPENAI_API_KEY=sk-xxx
-export OPENAI_API_BASE=https://crazyrouter.com/v1
+git --version
+python3 --version
+pip3 --version
+aider --version
+which git
+which python3
+which aider
 ```
 
-### 启动 Aider
+### Linux 说明
 
-```bash
-# 使用 GPT-4o
-aider --model gpt-4o
+Linux 基本可以按 macOS 的终端路线理解，只是持久环境变量通常写入 `~/.bashrc`。如果你只是本地开发机或云主机首次接入，优先先用当前 shell 里的临时变量跑通，再决定是否持久写入。
 
-# 使用 Claude
-aider --model claude-sonnet-4-20250514
+## 从零开始完整安装
 
-# 使用 Gemini
-aider --model gemini-2.5-pro
-```
+<Steps>
+  <Step title="第 1 步：安装 Git">
+    如果机器还没有 Git，请先安装。
 
-### 配置文件方式
+    <Tabs>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        winget install --id Git.Git -e --source winget
+        git --version
+        where.exe git
+        ```
+      </Tab>
+      <Tab title="macOS">
+        ```bash
+        xcode-select --install
+        git --version
+        ```
+        或：
+        ```bash
+        brew install git
+        git --version
+        which git
+        ```
+      </Tab>
+      <Tab title="Ubuntu / Debian">
+        ```bash
+        sudo apt update
+        sudo apt install -y git
+        git --version
+        which git
+        ```
+      </Tab>
+    </Tabs>
 
-创建 `~/.aider.conf.yml`：
+    建议补齐：
 
-```yaml
-openai-api-key: sk-xxx
-openai-api-base: https://crazyrouter.com/v1
-model: gpt-4o
-```
+    ```bash
+    git config --global user.name "Your Name"
+    git config --global user.email "you@example.com"
+    git config --global init.defaultBranch main
+    ```
+  </Step>
 
-## 常用命令
+  <Step title="第 2 步：安装 Python 和 pip">
+    Aider 官方安装器会使用 Python 或自动准备自己的 Python 运行环境。为了排障简单，建议你先确认本机 Python 可用。
 
-```bash
-# 添加文件到上下文
-/add src/main.py
+    <Tabs>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        winget install Python.Python.3.12
+        python --version
+        pip --version
+        where.exe python
+        ```
+      </Tab>
+      <Tab title="macOS">
+        ```bash
+        brew install python
+        python3 --version
+        pip3 --version
+        which python3
+        ```
+      </Tab>
+      <Tab title="Ubuntu / Debian">
+        ```bash
+        sudo apt update
+        sudo apt install -y python3 python3-pip python3-venv
+        python3 --version
+        pip3 --version
+        which python3
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
 
-# 只读添加
-/read-only README.md
+  <Step title="第 3 步：安装 Aider">
+    Aider 官方当前推荐的一键安装脚本如下。
 
-# 切换模型
-/model claude-sonnet-4-20250514
-```
+    <Tabs>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        powershell -ExecutionPolicy ByPass -c "irm https://aider.chat/install.ps1 | iex"
+        aider --version
+        where.exe aider
+        ```
+      </Tab>
+      <Tab title="macOS / Linux">
+        ```bash
+        curl -LsSf https://aider.chat/install.sh | sh
+        aider --version
+        which aider
+        ```
+      </Tab>
+    </Tabs>
+
+    如果你更想先明确看到安装过程，也可以走 Aider 官方的 `aider-install` 路线：
+
+    <Tabs>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        python -m pip install aider-install
+        aider-install
+        aider --version
+        ```
+      </Tab>
+      <Tab title="macOS / Linux">
+        ```bash
+        python3 -m pip install aider-install
+        aider-install
+        aider --version
+        ```
+      </Tab>
+    </Tabs>
+
+    如果你已经在团队里统一使用 `uv`，也可以按官方文档这样装：
+
+    ```bash
+    python -m pip install uv
+    uv tool install --force --python python3.12 --with pip aider-chat@latest
+    aider --version
+    ```
+
+    <Warning>
+    不建议一开始就手动 `pip install aider-chat` 到系统环境里。官方更推荐使用安装脚本、`aider-install` 或 `uv`，这样依赖隔离更稳。
+    </Warning>
+  </Step>
+
+  <Step title="第 4 步：在 Crazyrouter 创建 Aider 专用 token">
+    在 Crazyrouter 后台创建一个名为 `aider` 的 token，第一次只建议放行：
+
+    - `gpt-5.3-codex`
+    - `gpt-4.1`
+    - `claude-sonnet-4-6`
+
+    <Note>
+    这里白名单里放的是 Crazyrouter 的原始模型名，不需要写 `openai/` 前缀。
+    </Note>
+  </Step>
+
+  <Step title="第 5 步：先在当前终端设置临时环境变量">
+    先临时配置，跑通后再写入持久配置。
+
+    <Tabs>
+      <Tab title="macOS / Linux">
+        ```bash
+        export OPENAI_API_KEY=sk-xxx
+        export OPENAI_API_BASE=https://crazyrouter.com/v1
+        echo $OPENAI_API_KEY
+        echo $OPENAI_API_BASE
+        ```
+      </Tab>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        $env:OPENAI_API_KEY = "sk-xxx"
+        $env:OPENAI_API_BASE = "https://crazyrouter.com/v1"
+        echo $env:OPENAI_API_KEY
+        echo $env:OPENAI_API_BASE
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="第 6 步：把环境变量写入持久配置">
+    <Tabs>
+      <Tab title="Linux Bash">
+        ```bash
+        echo 'export OPENAI_API_KEY=sk-xxx' >> ~/.bashrc
+        echo 'export OPENAI_API_BASE=https://crazyrouter.com/v1' >> ~/.bashrc
+        source ~/.bashrc
+        echo $OPENAI_API_BASE
+        ```
+      </Tab>
+      <Tab title="macOS / Zsh">
+        ```bash
+        echo 'export OPENAI_API_KEY=sk-xxx' >> ~/.zshrc
+        echo 'export OPENAI_API_BASE=https://crazyrouter.com/v1' >> ~/.zshrc
+        source ~/.zshrc
+        echo $OPENAI_API_BASE
+        ```
+      </Tab>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        [System.Environment]::SetEnvironmentVariable("OPENAI_API_KEY", "sk-xxx", "User")
+        [System.Environment]::SetEnvironmentVariable("OPENAI_API_BASE", "https://crazyrouter.com/v1", "User")
+
+        $env:OPENAI_API_KEY = "sk-xxx"
+        $env:OPENAI_API_BASE = "https://crazyrouter.com/v1"
+
+        echo $env:OPENAI_API_BASE
+        ```
+      </Tab>
+    </Tabs>
+
+    持久化之后，建议新开一个终端，再执行一次：
+
+    <Tabs>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        aider --version
+        echo $env:OPENAI_API_BASE
+        ```
+      </Tab>
+      <Tab title="macOS / Linux">
+        ```bash
+        aider --version
+        echo $OPENAI_API_BASE
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="第 7 步：可选写入 ~/.aider.conf.yml">
+    如果你不想每次都手动加参数，可以写配置文件。
+
+    <Tabs>
+      <Tab title="macOS / Linux">
+        ```bash
+        cat > ~/.aider.conf.yml <<'EOF'
+        model: openai/gpt-5.3-codex
+        openai-api-base: https://crazyrouter.com/v1
+        EOF
+        cat ~/.aider.conf.yml
+        ```
+      </Tab>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        @'
+        model: openai/gpt-5.3-codex
+        openai-api-base: https://crazyrouter.com/v1
+        '@ | Set-Content -Path "$HOME/.aider.conf.yml"
+
+        Get-Content $HOME/.aider.conf.yml
+        ```
+      </Tab>
+    </Tabs>
+
+    如果你更注重安全，也可以把 key 只放在环境变量里，把配置文件里只保留 `model` 和 `openai-api-base`。
+  </Step>
+
+  <Step title="第 8 步：准备 Git 仓库并做首个快照">
+    Aider 在 Git 仓库中体验最好。如果当前目录还不是 Git 仓库：
+
+    ```bash
+    git init
+    git add .
+    git commit -m "chore: initial snapshot before Aider"
+    ```
+
+    如果已经是现有仓库，先看一下：
+
+    ```bash
+    git status
+    ```
+  </Step>
+
+  <Step title="第 9 步：启动 Aider 并完成第一次验证">
+    进入项目目录后执行：
+
+    ```bash
+    cd /path/to/your/project
+    aider --model openai/gpt-5.3-codex
+    ```
+
+    第一次验证建议按下面顺序：
+
+    1. `请只总结当前仓库结构，不修改文件`
+    2. `请阅读 README，给出最小修改建议，先不要直接改`
+    3. 确认能正常显示 diff 后，再做小范围修改
+
+    <Tip>
+    如果你临时想验证另一个模型，写法也保持同样模式，例如 `aider --model openai/gpt-4.1`。
+    </Tip>
+  </Step>
+</Steps>
+
+## 推荐模型配置
+
+| 使用场景 | Aider 中建议写法 | Crazyrouter 实际模型 | 原因 |
+|----------|------------------|----------------------|------|
+| 默认主力编码 | `openai/gpt-5.3-codex` | `gpt-5.3-codex` | 最适合改代码、解释 diff 和多轮修复 |
+| 稳定基线 | `openai/gpt-4.1` | `gpt-4.1` | 适合先做兼容性验证 |
+| Claude 风格替代 | `openai/claude-sonnet-4-6` | `claude-sonnet-4-6` | 适合长上下文解释和较稳的多轮协作 |
+| 低成本高频任务 | `openai/gpt-4.1-mini` | `gpt-4.1-mini` | 适合简单问答与轻量调整 |
+
+建议先用 `openai/gpt-5.3-codex`，如果你更关注成本或只是先测试链路，再用 `openai/gpt-4.1`。
+
+## Token 设置最佳实践
+
+| 设置 | 建议 | 说明 |
+|------|------|------|
+| 专用 token | 必须 | Aider 不要和其他 IDE / CLI 共用 token |
+| 模型白名单 | 强烈建议 | 保持最小模型集合，避免误切高价模型 |
+| IP 限制 | 视环境开启 | 固定服务器可以考虑，移动开发机谨慎使用 |
+| 配额上限 | 强烈建议 | Aider 长会话和多轮修复容易持续消耗 |
+| 环境隔离 | 建议 | 本地开发、远程机器、CI 分开 token |
+| 泄露处理 | 立即轮换 | `.aider.conf.yml`、shell 历史或录屏泄露后要立即换 key |
+
+## 验证清单
+
+- [ ] `git --version` 正常
+- [ ] `python --version` 或 `python3 --version` 正常
+- [ ] `aider --version` 正常
+- [ ] `OPENAI_API_KEY` 已设置正确
+- [ ] `OPENAI_API_BASE` 已设置为 `https://crazyrouter.com/v1`
+- [ ] `~/.aider.conf.yml` 如有使用，模型名写法为 `openai/...`
+- [ ] `aider --model openai/...` 可以正常启动
+- [ ] 第一个只读或小改动任务成功返回
+- [ ] Crazyrouter 后台日志能看到对应请求
+- [ ] token 配额和模型白名单符合预期
+
+## 常见错误与修复
+
+| 现象 | 常见原因 | 修复方式 |
+|------|----------|----------|
+| `aider: command not found` | Aider 没装成功，或安装器没有把可执行文件加入 PATH | 重新运行官方安装器，并开新终端再试 |
+| Python 版本混乱 | 系统 Python 与 Aider 运行环境冲突 | 优先使用安装脚本、`aider-install` 或 `uv`，不要自己混装多个依赖 |
+| 401 unauthorized | API Key 错误、过期或复制不完整 | 重新生成 token 并重新设置 |
+| 403 / model not allowed | token 未放行当前模型 | 在 Crazyrouter token 设置中放行模型 |
+| 404 | Base URL 填错，或少了 `/v1` | 改成 `https://crazyrouter.com/v1` |
+| `model not found` | 模型名写错，或忘了在 Aider 里加 `openai/` 前缀 | 改回 `openai/gpt-5.3-codex`、`openai/gpt-4.1` 等已确认写法 |
+| 配置文件和环境变量行为不一致 | 两处配置冲突 | 保留一个主配置来源，重新启动 Aider |
+| 成本升高过快 | 长会话累计、上下文文件过多 | 及时清理上下文并限制 token 配额 |
+
+## 性能与成本建议
+
+- 第一次接入时，先在小仓库里验证
+- 默认用 `openai/gpt-5.3-codex`，轻任务用 `openai/gpt-4.1` 或 `openai/gpt-4.1-mini`
+- 不同项目类型建议拆开 token，便于统计成本
+- 会话过长时及时清理上下文，避免反复携带无关文件
+- 每次大改后都回看 Aider 生成的 diff 和 Crazyrouter 日志
+
+## FAQ
+
+### Aider 应该填哪个 Base URL？
+
+填 `https://crazyrouter.com/v1`。
+
+### 为什么模型名推荐写成 `openai/gpt-5.3-codex`？
+
+因为 Aider 官方在 OpenAI-compatible 路线里建议使用 `openai/<model-name>` 这种写法。Crazyrouter 后台白名单里仍然是原始模型名，但在 Aider 命令和配置文件里建议加上 `openai/` 前缀。
+
+### 推荐用环境变量还是配置文件？
+
+两种都可以。先用环境变量更快；长期使用建议再补 `~/.aider.conf.yml`。
+
+### 第一次为什么建议先做 Git 快照？
+
+因为 Aider 会改文件、生成 diff、自动提交或建议提交。先做快照，排障和回滚会简单很多。
+
+### 第一个推荐模型是什么？
+
+先用 `openai/gpt-5.3-codex`。
+
+### Aider 一定要在 Git 仓库中使用吗？
+
+不是绝对必须，但它在 Git 仓库中的体验通常最好，也更容易审查修改结果。
 
 <Note>
-  Aider 对 Claude 模型有原生支持。如果使用 Claude 系列，也可以设置 `ANTHROPIC_API_KEY` 和 `ANTHROPIC_API_BASE` 环境变量。
+如果你想要一个非常轻量、非常适合日常小步改代码的终端工具，Aider 仍然值得优先保留在 Crazyrouter 的应用指南里。
 </Note>

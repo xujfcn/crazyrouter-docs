@@ -8,6 +8,19 @@ api: 'POST /api/token/'
 
 创建一个新的 API 令牌（Token），用于调用 AI 模型 API。
 
+<Note>
+  这组 `/api/token/*` 接口主要用于 Crazyrouter 控制台中的 API Key 管理自动化。它们需要用户 `access token` 与 `New-Api-User` 请求头，不是给普通 `sk-xxx` 模型调用流程直接使用的接口。
+</Note>
+
+## 认证方式
+
+该接口需要用户侧认证：
+
+```text
+Authorization: Bearer your_access_token
+New-Api-User: 1
+```
+
 ## 请求参数
 
 <ParamField body="name" type="string" required>
@@ -23,33 +36,33 @@ api: 'POST /api/token/'
 </ParamField>
 
 <ParamField body="expired_time" type="integer" default="-1">
-  过期时间（Unix 时间戳），-1 表示永不过期
+  过期时间（Unix 时间戳），`-1` 表示永不过期
 </ParamField>
 
-<ParamField body="models" type="string[]">
-  允许使用的模型列表。为空表示允许所有模型
+<ParamField body="model_limits_enabled" type="boolean" default="false">
+  是否启用模型白名单限制
 </ParamField>
 
-<ParamField body="subnet" type="string">
-  IP 白名单，CIDR 格式，如 `192.168.1.0/24`。为空表示不限制
+<ParamField body="model_limits" type="string">
+  模型限制配置，当前接口字段是字符串，通常保存为 JSON 字符串，例如 `["gpt-4o","claude-sonnet-4-20250514"]`
+</ParamField>
+
+<ParamField body="allow_ips" type="string">
+  IP 白名单字符串。可填写单个 IP，或用换行分隔多个 IP
+</ParamField>
+
+<ParamField body="group" type="string">
+  令牌所属分组。只有当前用户有权使用的分组才可设置
 </ParamField>
 
 ## 响应格式
 
+当前接口创建成功后仅返回成功状态：
+
 ```json
 {
   "success": true,
-  "message": "",
-  "data": {
-    "id": 10,
-    "key": "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-    "name": "生产环境",
-    "status": 1,
-    "remain_quota": 100000,
-    "unlimited_quota": false,
-    "expired_time": -1,
-    "models": ["gpt-4o", "claude-sonnet-4-20250514"]
-  }
+  "message": ""
 }
 ```
 
@@ -58,6 +71,7 @@ api: 'POST /api/token/'
 <CodeGroup>
 
 ```python Python
+import json
 import requests
 
 headers = {
@@ -75,13 +89,13 @@ response = requests.post(
         "remain_quota": 100000,
         "unlimited_quota": False,
         "expired_time": -1,
-        "models": ["gpt-4o", "claude-sonnet-4-20250514", "gemini-2.5-pro"]
+        "model_limits_enabled": True,
+        "model_limits": json.dumps(["gpt-4o", "claude-sonnet-4-20250514"]),
+        "allow_ips": "203.0.113.10"
     }
 )
 
-data = response.json()
-if data["success"]:
-    print(f"令牌创建成功: {data['data']['key']}")
+print(response.json())
 ```
 
 ```bash cURL
@@ -93,12 +107,13 @@ curl -X POST https://crazyrouter.com/api/token/ \
     "name": "生产环境",
     "remain_quota": 100000,
     "expired_time": -1,
-    "models": ["gpt-4o"]
+    "model_limits_enabled": true,
+    "model_limits": "[\"gpt-4o\"]"
   }'
 ```
 
 </CodeGroup>
 
-<Note>
-  创建后请妥善保存返回的 `key`，该值仅在创建时完整显示一次。
-</Note>
+<Warning>
+  当前创建接口不会在响应中返回新生成的完整 `key`。如果你的流程要求立即复制完整密钥，请优先通过控制台页面创建并保存。
+</Warning>

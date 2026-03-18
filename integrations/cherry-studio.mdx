@@ -1,54 +1,189 @@
 ---
 title: 'Cherry Studio 配置教程'
-description: '在 Cherry Studio 中配置 Crazyrouter API'
+description: '在 Cherry Studio 中通过 Crazyrouter 接入 OpenAI 兼容模型，并完成首轮验证、模型管理、MCP 使用与排障'
 ---
 
-## 概述
+Cherry Studio 是一款适合桌面多模型聊天、知识整理和 MCP 工具联动的 AI 客户端。对接 Crazyrouter 时，推荐走 Cherry Studio 的 `OpenAI` 自定义服务商模式，这样最容易兼容模型列表、流式输出和常规聊天功能。
 
-Cherry Studio 是一款功能丰富的 AI 桌面客户端，支持多模型对话、MCP 工具、推理模型等。
+## 概览
 
-## 基础配置
+通过 Cherry Studio 的自定义服务商功能，你可以把 Crazyrouter 作为一个 OpenAI 兼容上游接入：
+
+- 推荐协议：`OpenAI-compatible API`
+- 推荐服务商类型：`OpenAI`
+- API 地址：`https://crazyrouter.com`
+- 认证方式：`sk-...` token
+- 推荐首次验证模型：`gpt-4.1`
+
+<Note>
+Cherry Studio 官方文档说明：如果上游给出的接口是 `https://xxx.com/v1/chat/completions` 这种格式，在 `API 地址` 中通常只填写根地址即可。也就是说，对接 Crazyrouter 时优先填写 `https://crazyrouter.com`，而不是 `https://crazyrouter.com/v1`。
+</Note>
+
+<Tip>
+Cherry Studio 还会自动拼接标准剩余路径；只有当你的上游不是常规 `.../v1/chat/completions` 路由时，才需要在 `API 地址` 中手动填写完整地址并以 `#` 结尾。Crazyrouter 常规聊天接入不需要这样做。
+</Tip>
+
+## 适合谁用
+
+- 想在桌面端统一管理多个模型的人
+- 想把 Crazyrouter 用于日常聊天、写作、翻译和资料整理的人
+- 想把 MCP 工具接到本地聊天客户端的人
+- 想在一个界面里快速切换低成本模型和高性能模型的人
+
+## 使用协议
+
+推荐协议：`OpenAI-compatible API`
+
+推荐接法是新增一个 `OpenAI` 类型的自定义服务商，然后把 Crazyrouter 根域名填进 `API 地址`：
+
+```text
+https://crazyrouter.com
+```
+
+不要一开始就填：
+
+- `https://crazyrouter.com/v1/chat/completions`
+- `https://crazyrouter.com/v1/models`
+
+如果你使用的是特殊非标准路由，Cherry Studio 才需要手动填写完整地址并以 `#` 结尾；Crazyrouter 常规聊天接入不需要这样做。
+
+## 前置条件
+
+| 项目 | 说明 |
+|------|------|
+| Crazyrouter 账号 | 先在 [crazyrouter.com](https://crazyrouter.com) 注册 |
+| Crazyrouter token | 建议为 Cherry Studio 单独创建一个 `sk-...` token |
+| Cherry Studio | 建议使用当前稳定版桌面客户端 |
+| 可用模型 | 至少放行一个聊天模型，如 `gpt-4.1` 或 `gpt-4.1-mini` |
+
+推荐首批白名单：
+
+- `gpt-4.1`
+- `gpt-4.1-mini`
+- `gpt-4o`
+- `claude-sonnet-4-6`
+
+## 5 分钟快速开始
 
 <Steps>
-  <Step title="打开设置">
-    启动 Cherry Studio，点击左下角 `设置` → `模型服务`
+  <Step title="创建 Cherry Studio 专用 token">
+    在 Crazyrouter 后台创建一个新 token，名称建议写成 `cherry-studio`。首次只放行 2 到 4 个你确定会用到的模型，不要一开始把全部模型都开放。
   </Step>
-  <Step title="添加服务商">
-    点击 `添加服务商`，选择 `OpenAI 兼容` 类型
+  <Step title="添加自定义服务商">
+    打开 Cherry Studio，进入 `设置` → `模型服务`，点击底部 `添加` 或 `+ Add`。服务商类型选择 `OpenAI`，名称建议写成 `Crazyrouter`。
   </Step>
-  <Step title="填写信息">
-    - **名称**: `Crazyrouter`
-    - **API 地址**: `https://crazyrouter.com/v1`
-    - **API Key**: `sk-xxx`
+  <Step title="填写连接信息">
+    在服务商配置页填写：
+    - `API Key`: 你的 `sk-...`
+    - `API 地址`: `https://crazyrouter.com`
+
+    填完后点击 `检查` 确认 token 与地址有效。
   </Step>
-  <Step title="添加模型">
-    点击 `获取模型列表`，系统会自动拉取可用模型。也可以手动添加模型名称。
+  <Step title="拉取并添加模型">
+    点击 `管理` 或 `Manage` 拉取模型列表，然后手动把需要的模型加入该服务商。注意：弹窗里出现模型不代表已经加入可用列表，通常还需要再点一次 `+`。首次建议只加一个基线模型：`gpt-4.1`。
+  </Step>
+  <Step title="开启服务商并做首次对话">
+    打开右上角启用开关，回到聊天界面选择 `gpt-4.1`，发送一句简单请求，例如：`Reply only OK`。收到正常回复后，再开始添加其他模型。
   </Step>
 </Steps>
 
-## MCP 工具配置
+## 推荐模型配置
 
-Cherry Studio 支持 MCP（Model Context Protocol）工具：
+| 使用场景 | 推荐模型 | 原因 |
+|----------|----------|------|
+| 默认主力聊天 | `gpt-4.1` | 稳定，适合绝大多数桌面对话场景 |
+| 高性价比日常使用 | `gpt-4.1-mini` | 便宜、快，适合高频问答 |
+| 更强多轮通用体验 | `gpt-4o` | 适合复杂上下文和更灵活的互动 |
+| 高质量代码 / 长文本 | `claude-sonnet-4-6` | 适合较强推理、写作和代码解释 |
+| 成本敏感备用档 | `gemini-2.5-flash` | 适合轻量任务和快速试错 |
 
-1. 进入 `设置` → `MCP 服务`
-2. 添加 MCP 服务器配置
-3. 在对话中启用 MCP 工具
+推荐顺序：先让 `gpt-4.1` 跑通，再逐步加入高性能模型和低成本模型。
 
-## 推理模型配置
+## Token 设置最佳实践
 
-对于支持推理的模型（如 `o1`、`o3`），Cherry Studio 会自动识别并显示思考过程：
+| 设置 | 建议 | 说明 |
+|------|------|------|
+| 专用 token | 必须 | Cherry Studio 不要和 Cursor、Claude Code、Codex 共用 token |
+| 模型白名单 | 强烈建议 | 只开放 Cherry Studio 会实际使用的模型 |
+| IP 限制 | 视设备环境决定 | 固定办公网可考虑开启；笔记本频繁切网络时谨慎使用 |
+| 配额上限 | 强烈建议 | 桌面聊天客户端容易高频多轮调用，建议单独限额 |
+| 开发 / 生产隔离 | 建议 | 个人机器、共享机器、演示机器分开建 token |
+| 多 Key 轮询 | 谨慎使用 | Cherry Studio 支持多 key 轮询，但排障会更复杂，先单 key 跑通 |
 
-1. 添加模型时选择 `o1`、`o3-mini` 等推理模型
-2. 对话时会自动展示推理链
+## 验证清单
 
-## 推荐设置
+- [ ] `检查` 按钮可以通过
+- [ ] `API 地址` 已设置为 `https://crazyrouter.com`
+- [ ] 服务商右上角开关已开启
+- [ ] 至少一个模型已从 `管理 / Manage` 页面加入列表
+- [ ] 第一条对话请求成功返回
+- [ ] 流式输出能正常显示
+- [ ] 如需 MCP，MCP 服务能正常启用
+- [ ] Crazyrouter 后台日志能看到对应请求
 
-| 设置项 | 推荐值 |
-|--------|--------|
-| 温度 | 0.7（创意任务）/ 0（精确任务） |
-| 最大 Token | 4096 |
-| 流式输出 | 开启 |
+## MCP 使用建议
+
+Cherry Studio 支持 MCP 服务，但建议分两步做：
+
+1. 先只验证 Crazyrouter 聊天模型能否稳定工作
+2. 再单独添加 MCP 服务并逐个测试工具
+
+这样可以避免你把模型接入问题和 MCP 工具问题混在一起排查。
+
+如果你启用了 MCP：
+
+- 优先选一个支持工具调用稳定的模型
+- 先只挂一个 MCP 服务做验证
+- 第一次调用工具时，先测试最简单的读操作或查询操作
+
+## 常见错误与修复
+
+| 现象 | 常见原因 | 修复方式 |
+|------|----------|----------|
+| `检查` 失败 | `API Key` 错误或复制带空格 | 重新生成 token，确保只粘贴纯净的 `sk-...` |
+| 401 unauthorized | token 失效、过期或已被删除 | 在 Crazyrouter 后台重新创建并替换 token |
+| 403 / model not allowed | 当前模型不在 token 白名单中 | 在 token 设置里放行对应模型 |
+| 404 | `API 地址` 填成了完整接口路径，或服务商类型不对 | 改回 `OpenAI` 类型，并把地址写成 `https://crazyrouter.com` |
+| `检查` 还是失败但地址和 Key 看起来都对 | Cherry Studio 默认会用当前模型列表里的最后一个对话模型做连通性检查，而该模型可能无效 | 先只保留 `gpt-4.1`，删除可疑模型后重新点 `检查` |
+| 模型列表拉不出来 | 地址填写错误、网络问题，或服务商未启用 | 先点 `检查`，再确认启用开关和网络连通性 |
+| 能连上但聊天时报错 | 加入了不兼容或不可用模型 | 先只保留 `gpt-4.1` 做基线验证 |
+| 流式输出异常 | 模型本身或客户端版本兼容性问题 | 切回 `gpt-4.1`，并升级 Cherry Studio |
+| MCP 工具调用失败 | 不是模型问题，而是 MCP 服务本身配置不完整 | 先禁用 MCP，只验证模型；再单独修复 MCP 服务 |
+
+## 性能与成本建议
+
+- 初次接入只保留 1 到 2 个模型，避免模型太多导致选择混乱
+- 日常问答优先用 `gpt-4.1-mini`，复杂任务再切 `gpt-4.1` 或 `claude-sonnet-4-6`
+- 如果你经常做长对话，建议单独给 Cherry Studio 配额上限
+- Cherry Studio 支持多模型切换，最好把高价模型只留给重任务使用
+- 发现消耗异常时，先回看 Crazyrouter 日志确认是否出现高频重试或长上下文多轮对话
+
+## FAQ
+
+### Cherry Studio 里应该填哪个地址？
+
+优先填 `https://crazyrouter.com`。
+
+### 为什么这里不推荐一开始就填 `/v1`？
+
+因为 Cherry Studio 官方说明，很多 OpenAI 兼容上游只需要填写根地址，客户端会自动拼接标准路径。对 Crazyrouter 也建议先按这种方式接入。
+
+### 什么时候才需要填写完整接口地址并加 `#`？
+
+当你的上游不是标准 OpenAI 路由时才需要。Crazyrouter 常规聊天接入不要这样填，先用根域名就好。
+
+### 第一个推荐模型是什么？
+
+先用 `gpt-4.1`。
+
+### 我可以一次性配置很多模型吗？
+
+可以，但不建议第一次就这样做。先用一个模型跑通，再逐步添加。
+
+### Cherry Studio 能和 Crazyrouter 一起用 MCP 吗？
+
+可以，但建议先验证聊天模型，再启用 MCP，这样更容易定位问题。
 
 <Note>
-  Cherry Studio 支持同时配置多个服务商，可以在对话中随时切换不同的模型。
+如果你的主要目标是桌面多模型聊天和 MCP 轻量协作，Cherry Studio 是很合适的入口；如果你更看重 IDE 编码代理体验，优先级仍然建议放在 Cursor、Claude Code、Codex、Cline 这类工具上。
 </Note>

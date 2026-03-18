@@ -8,6 +8,19 @@ api: 'PUT /api/token/'
 
 修改已有令牌的名称、额度、过期时间、模型权限等配置。
 
+<Note>
+  这组 `/api/token/*` 接口主要用于 Crazyrouter 控制台中的 API Key 管理自动化。它们需要用户 `access token` 与 `New-Api-User` 请求头，不是给普通 `sk-xxx` 模型调用流程直接使用的接口。
+</Note>
+
+## 认证方式
+
+使用用户侧认证，请在请求头中携带：
+
+```text
+Authorization: Bearer your_access_token
+New-Api-User: 1
+```
+
 ## 请求参数
 
 <ParamField body="id" type="integer" required>
@@ -27,27 +40,48 @@ api: 'PUT /api/token/'
 </ParamField>
 
 <ParamField body="expired_time" type="integer">
-  过期时间戳，-1 为永不过期
+  过期时间戳，`-1` 为永不过期
 </ParamField>
 
-<ParamField body="models" type="string[]">
-  允许使用的模型列表
+<ParamField body="model_limits_enabled" type="boolean">
+  是否启用模型白名单
+</ParamField>
+
+<ParamField body="model_limits" type="string">
+  模型限制配置字符串，例如 `["gpt-4o","claude-sonnet-4-20250514"]`
 </ParamField>
 
 <ParamField body="status" type="integer">
   状态：1=启用，2=禁用
 </ParamField>
 
-<ParamField body="subnet" type="string">
-  IP 白名单（CIDR 格式）
+<ParamField body="allow_ips" type="string">
+  IP 白名单字符串
+</ParamField>
+
+<ParamField body="group" type="string">
+  分组
 </ParamField>
 
 ## 响应格式
 
+当前接口会返回更新后的 token 对象：
+
 ```json
 {
   "success": true,
-  "message": "令牌更新成功"
+  "message": "",
+  "data": {
+    "id": 10,
+    "name": "生产环境-已更新",
+    "status": 1,
+    "remain_quota": 200000,
+    "unlimited_quota": false,
+    "model_limits_enabled": true,
+    "model_limits": "[\"gpt-4o\",\"claude-sonnet-4-20250514\"]",
+    "allow_ips": "203.0.113.10",
+    "group": "default"
+  }
 }
 ```
 
@@ -56,6 +90,7 @@ api: 'PUT /api/token/'
 <CodeGroup>
 
 ```python Python
+import json
 import requests
 
 headers = {
@@ -65,7 +100,6 @@ headers = {
     "User-Agent": "Mozilla/5.0"
 }
 
-# 修改令牌额度和模型权限
 response = requests.put(
     "https://crazyrouter.com/api/token/",
     headers=headers,
@@ -73,7 +107,8 @@ response = requests.put(
         "id": 10,
         "name": "生产环境-已更新",
         "remain_quota": 200000,
-        "models": ["gpt-4o", "claude-sonnet-4-20250514", "gemini-2.5-flash"]
+        "model_limits_enabled": True,
+        "model_limits": json.dumps(["gpt-4o", "claude-sonnet-4-20250514"])
     }
 )
 
@@ -88,7 +123,9 @@ curl -X PUT https://crazyrouter.com/api/token/ \
   -d '{
     "id": 10,
     "name": "生产环境-已更新",
-    "remain_quota": 200000
+    "remain_quota": 200000,
+    "model_limits_enabled": true,
+    "model_limits": "[\"gpt-4o\"]"
   }'
 ```
 

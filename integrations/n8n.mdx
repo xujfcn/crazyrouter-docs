@@ -1,36 +1,93 @@
 ---
 title: 'n8n 配置教程'
-description: '在 n8n 工作流中配置 Crazyrouter API'
+description: '在 n8n 中通过 Crazyrouter 配置 OpenAI 凭证、AI Agent 工作流与 HTTP Request 回退方案，并完成验证与排障'
 ---
 
-## 概述
+n8n 适合把 LLM 调用接进自动化流程、Agent 节点、审批流和业务系统集成。对接 Crazyrouter 时，推荐先用 n8n 的 OpenAI 凭证路径把一个最小工作流跑通，再决定是否切换到更灵活的 HTTP Request 节点。
 
-n8n 是一个开源的工作流自动化平台，支持通过 AI 节点调用大语言模型。
+## 概览
 
-## 配置步骤
+通过 n8n 的 OpenAI 凭证或 AI 节点，你可以把工作流中的模型请求转到 Crazyrouter：
+
+- 推荐协议：`OpenAI-compatible API`
+- 推荐接法：n8n `OpenAI API` credential + 节点级 `Base URL`
+- Base URL：`https://crazyrouter.com/v1`
+- 认证方式：`sk-...` token
+- 推荐首次验证模型：`gpt-4.1`
+
+如果你的某些节点不支持所需参数或最新模型特性，再回退到 `HTTP Request` 节点直接调 Crazyrouter 接口。
+
+## 适合谁用
+
+- 想把 AI 接进自动化工作流的人
+- 想做表单、数据库、审批、Webhook 和模型联动的人
+- 想用 AI Agent 节点编排工具调用的人
+- 想通过可视化方式把 Crazyrouter 接进内部业务流程的人
+
+## 使用协议
+
+推荐协议：`OpenAI-compatible API`
+
+在 n8n 中对接 Crazyrouter 时，推荐填写：
+
+```text
+https://crazyrouter.com/v1
+```
+
+不要填成：
+
+- `https://crazyrouter.com`
+- `https://crazyrouter.com/v1/chat/completions`
+
+## 前置条件
+
+| 项目 | 说明 |
+|------|------|
+| Crazyrouter 账号 | 先在 [crazyrouter.com](https://crazyrouter.com) 注册 |
+| Crazyrouter token | 建议为 n8n 单独创建一个 `sk-...` token |
+| n8n | 建议使用当前稳定版，并确认 AI 节点可用 |
+| 可用模型 | 至少放行一个聊天模型，如 `gpt-4.1` |
+
+推荐首批白名单：
+
+- `gpt-4.1`
+- `gpt-4.1-mini`
+- `gpt-4o`
+- `text-embedding-3-large`（如果你会用向量或检索相关节点）
+
+## 5 分钟快速开始
 
 <Steps>
-  <Step title="添加凭证">
-    进入 `Settings` → `Credentials` → `Add Credential`，选择 `OpenAI API`
+  <Step title="创建 n8n 专用 token">
+    在 Crazyrouter 后台创建一个名为 `n8n` 的 token。首次建议只开放 `gpt-4.1` 和 `gpt-4.1-mini`。
   </Step>
-  <Step title="填写凭证">
-    - **API Key**: `sk-xxx`
-    - **Base URL**: `https://crazyrouter.com/v1`
+  <Step title="添加 OpenAI 凭证">
+    在 n8n 中进入 `Settings` → `Credentials` → `Add Credential`，选择 `OpenAI API` 或你当前版本对应的 OpenAI 凭证类型。
   </Step>
-  <Step title="在工作流中使用">
-    添加 `OpenAI` 节点或 `AI Agent` 节点，选择刚创建的凭证。
+  <Step title="填写凭证和节点信息">
+    先在凭证中填写：
+    - `API Key`: 你的 `sk-...`
+
+    然后在 `OpenAI`、`OpenAI Chat Model` 或相关 AI 节点的 `Options` 中设置：
+    - `Base URL`: `https://crazyrouter.com/v1`
+  </Step>
+  <Step title="创建最小工作流">
+    新建一个工作流，使用：`Manual Trigger` → `OpenAI Chat Model` → `Output`，模型先填 `gpt-4.1`。
+  </Step>
+  <Step title="完成首次验证">
+    在 `OpenAI Chat Model` 节点里给一个简单输入，例如 `Reply only OK`，手动执行工作流。成功返回后，再继续配置 AI Agent 或复杂流程。
   </Step>
 </Steps>
 
-## 工作流示例
+## 最小工作流示例
 
-### AI 聊天节点
+### OpenAI Chat Model 节点
 
 ```json
 {
   "node": "OpenAI Chat Model",
   "parameters": {
-    "model": "gpt-4o",
+    "model": "gpt-4.1",
     "messages": [
       { "role": "user", "content": "{{ $json.input }}" }
     ]
@@ -40,15 +97,25 @@ n8n 是一个开源的工作流自动化平台，支持通过 AI 节点调用大
 
 ### AI Agent 工作流
 
-1. **Trigger** → **AI Agent** → **Output**
-2. 在 AI Agent 节点中选择 Crazyrouter 凭证
-3. 配置工具（如 HTTP Request、Code 等）
+推荐先从最简单的链路开始：
 
-## 使用 HTTP Request 节点
+1. `Manual Trigger`
+2. `AI Agent`
+3. `Output`
 
-如果需要更灵活的控制，可以直接使用 HTTP Request 节点：
+在 `AI Agent` 中选择刚创建的 Crazyrouter 凭证，并先只挂一个简单工具节点，避免把模型问题和工具问题混在一起。
 
-```
+## HTTP Request 回退方案
+
+如果你需要：
+
+- 某个 n8n AI 节点暂时不支持的新参数
+- 更灵活的请求体控制
+- 更明确地调试 headers、body、stream 参数
+
+可以直接用 `HTTP Request` 节点调用 Crazyrouter：
+
+```http
 Method: POST
 URL: https://crazyrouter.com/v1/chat/completions
 Headers:
@@ -56,11 +123,101 @@ Headers:
   Content-Type: application/json
 Body:
   {
-    "model": "gpt-4o",
-    "messages": [{"role": "user", "content": "{{ $json.input }}"}]
+    "model": "gpt-4.1",
+    "messages": [
+      {"role": "user", "content": "{{ $json.input }}"}
+    ]
   }
 ```
 
+<Tip>
+推荐顺序是：先用 OpenAI 凭证 + 原生 AI 节点跑通；只有在节点能力不够时，再切到 `HTTP Request`。
+</Tip>
+
 <Note>
-  n8n 的 AI Agent 节点支持工具调用（Function Calling），可以与其他 n8n 节点组合实现复杂的自动化流程。
+不同 n8n 版本里，`Base URL` 可能出现在凭证页，也可能出现在具体的 OpenAI / Chat Model 节点 `Options` 里。当前官方文档更明确提到的是节点级 `Base URL` 覆盖项，所以接 Crazyrouter 时优先按“凭证填 Key、节点填 Base URL”的思路配置。
+</Note>
+
+## 推荐模型配置
+
+| 使用场景 | 推荐模型 | 原因 |
+|----------|----------|------|
+| 默认工作流模型 | `gpt-4.1` | 稳定，适合多数自动化流程 |
+| 低成本批量任务 | `gpt-4.1-mini` | 更适合高频工作流调用 |
+| 更复杂 Agent 场景 | `gpt-4o` | 适合多步推理和复杂输入 |
+| 检索 / 向量相关 | `text-embedding-3-large` | 适合后续做向量处理或检索增强 |
+
+推荐顺序：先用 `gpt-4.1` 跑通最小工作流，再扩展到 Agent、工具和批量任务。
+
+## Token 设置最佳实践
+
+| 设置 | 建议 | 说明 |
+|------|------|------|
+| 专用 token | 必须 | n8n 不要和聊天前端、CLI 或 SDK 示例共用 token |
+| 模型白名单 | 强烈建议 | 只放行工作流真正会用到的模型 |
+| IP 限制 | 固定服务器出口建议开启 | 本地调试、云端混用时谨慎使用 |
+| 配额上限 | 强烈建议 | 自动化任务可能因为重试、循环、批处理快速消耗额度 |
+| 环境隔离 | 必须 | 开发、测试、生产工作流使用不同 token |
+| 节点分级 | 建议 | 高频任务用低成本模型，关键任务再切高性能模型 |
+
+## 验证清单
+
+- [ ] `OpenAI API` 凭证已成功保存
+- [ ] 节点级 `Base URL` 已设置为 `https://crazyrouter.com/v1`
+- [ ] `OpenAI Chat Model` 节点可正常执行
+- [ ] 第一个最小工作流成功返回
+- [ ] 如需 Agent，`AI Agent` 节点也能正常调用模型
+- [ ] Crazyrouter 后台日志能看到对应请求
+- [ ] token 配额和模型白名单符合预期
+- [ ] 开发 / 测试 / 生产工作流已做 token 隔离
+
+## 常见错误与修复
+
+| 现象 | 常见原因 | 修复方式 |
+|------|----------|----------|
+| 凭证测试失败 | API Key 错误，或把 Base URL 配置位置填错 | 重新检查 `sk-...`，并确认 `Base URL` 填在你的版本实际支持的位置 |
+| 401 unauthorized | token 失效、被删或复制带空格 | 重新生成 token 并替换 |
+| 403 / model not allowed | 节点中用到的模型不在白名单里 | 在 Crazyrouter 后台放行对应模型 |
+| 404 | `Base URL` 填成根域名或完整接口路径 | 改成 `https://crazyrouter.com/v1` |
+| 工作流不停重试，成本快速增长 | 节点错误后自动重试、循环配置不当 | 限制重试次数，拆分工作流并设置额度 |
+| AI Agent 能启动但工具调用不稳定 | 不是凭证问题，而是工具链路太复杂 | 先只保留一个简单工具节点做验证 |
+| 原生 AI 节点缺少某些参数 | n8n 节点封装暂未覆盖该特性 | 改用 `HTTP Request` 节点直接调用 Crazyrouter |
+| 批处理任务性能不稳 | 高价模型用于大量数据行处理 | 批量任务优先切到 `gpt-4.1-mini` |
+
+## 性能与成本建议
+
+- 自动化任务默认先用 `gpt-4.1-mini` 或 `gpt-4.1` 做基线
+- 对循环、批量、定时任务设置更严格的额度与错误告警
+- 把生产工作流和调试工作流拆成不同 token
+- AI Agent 先少工具、短链路验证，稳定后再扩展复杂编排
+- 发现费用异常时，先看 Crazyrouter 日志和 n8n 执行历史，确认是不是重试或循环造成
+
+## FAQ
+
+### n8n 里应该填哪个 Base URL？
+
+填 `https://crazyrouter.com/v1`。
+
+### Base URL 应该填在凭证里还是节点里？
+
+优先看你当前 n8n 版本的界面。当前官方文档更明确提到的是节点级 `Base URL` 选项；如果你的凭证页也支持填写，填在那里也可以，但第一次配置建议以节点级设置为准。
+
+### 我应该先用原生 AI 节点还是 HTTP Request？
+
+先用原生 OpenAI 凭证和 AI 节点；只有在参数不够或要深度调试时再切到 `HTTP Request`。
+
+### 第一个推荐模型是什么？
+
+先用 `gpt-4.1`。
+
+### 为什么工作流费用突然变高？
+
+通常不是单次请求本身，而是循环、批处理、自动重试或多人共用工作流触发造成。
+
+### n8n 一定要拆多个 token 吗？
+
+强烈建议至少把开发和生产分开；高频任务最好再单独拆分。
+
+<Note>
+n8n 接入 Crazyrouter 后，价值不只是“能调模型”，而是能把模型放进自动化链路里。因此最关键的不是单次对话能否成功，而是要同时控制重试、循环、批量执行和 token 配额。
 </Note>

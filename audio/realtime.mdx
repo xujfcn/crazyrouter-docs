@@ -21,17 +21,23 @@ wss://crazyrouter.com/v1/realtime?model=gpt-4o-realtime-preview
 
 ### 认证
 
-在 WebSocket 连接的请求头中传入 API Key：
+当前推荐并支持的认证方式有两种。
+
+#### 方式 1：在请求头中传入 API Key
 
 ```
 Authorization: Bearer YOUR_API_KEY
 ```
 
-或通过 URL 参数：
+#### 方式 2：在 `Sec-WebSocket-Protocol` 中传入 Key
+
+适用于部分 OpenAI Realtime 兼容客户端：
 
 ```
-wss://crazyrouter.com/v1/realtime?model=gpt-4o-realtime-preview&api_key=YOUR_API_KEY
+Sec-WebSocket-Protocol: realtime, openai-insecure-api-key.YOUR_API_KEY
 ```
+
+不要使用 `?api_key=` URL 参数方式。
 
 ---
 
@@ -120,5 +126,5 @@ asyncio.run(realtime_chat())
 | `response.done` | 响应完成 |
 
 <Warning>
-  Realtime API 使用 WebSocket 长连接，请确保客户端支持 WebSocket 协议。连接超时默认为 120 秒。
+  Realtime API 使用 WebSocket 长连接，请确保客户端支持 WebSocket 协议。请优先使用请求头认证，不要依赖 `?api_key=` 查询参数。
 </Warning>

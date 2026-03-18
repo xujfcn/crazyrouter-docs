@@ -1,28 +1,30 @@
 ---
 title: "Sora"
-description: "Generate videos using OpenAI Sora models with multiple API formats"
+description: "Generate videos with OpenAI Sora models through the verified public unified video API, Video Generations API, and OpenAI-compatible video format"
 ---
 
 # Sora
 
-OpenAI Sora supports multiple API formats: Video Generations API, Unified Video API, OpenAI Video format, and native format.
+For public Crazyrouter docs, the recommended verified Sora routes are:
+
+- `POST /v1/video/create` with `GET /v1/video/query`
+- `POST /v1/video/generations` with `GET /v1/video/generations/{task_id}`
+- `POST /v1/videos` with `GET /v1/videos/{task_id}`
+
+If this is your first Sora integration, start with `POST /v1/video/generations`. It has clearer task-state fields and is now documented in dedicated route pages as part of this update round.
 
 ## Model Selection
 
 | Model | Description | Speed | Quality | Recommended Use |
 |-------|-------------|-------|---------|-----------------|
-| `sora-2` | Second generation standard | Medium | High | Production, daily use |
-| `sora-2-pro` | Second generation professional | Slower | Highest | Professional work, fine control |
+| `sora-2` | Second-generation standard model | Medium | High | Production and day-to-day usage |
+| `sora-2-pro` | Second-generation professional model | Slower | Highest | Professional work and finer control |
 
----
-
-## Via Video Generations API (Recommended)
+## Recommended Main Path: Video Generations API
 
 ```
 POST /v1/video/generations
 ```
-
-This is the latest API format with more detailed task status and metadata.
 
 ```bash cURL
 curl -X POST https://crazyrouter.com/v1/video/generations \
@@ -36,91 +38,24 @@ curl -X POST https://crazyrouter.com/v1/video/generations \
   }'
 ```
 
-### Response Example
-
-```json
-{
-  "id": "video_69b3a77020e88193b4476bb2be76b39400a8d08edef728f9",
-  "object": "video",
-  "model": "sora-2",
-  "status": "queued",
-  "progress": 0,
-  "created_at": 1773381488,
-  "seconds": "8",
-  "size": "1280x720"
-}
-```
-
-### Query Task Status
+Query the task:
 
 ```
 GET /v1/video/generations/{task_id}
 ```
 
 ```bash cURL
-curl https://crazyrouter.com/v1/video/generations/video_69b3a77020e88193b4476bb2be76b39400a8d08edef728f9 \
+curl https://crazyrouter.com/v1/video/generations/video_123 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-### Complete Response Example (Completed)
+### When to use this route
 
-```json
-{
-  "code": "success",
-  "message": "",
-  "data": {
-    "task_id": "video_69b3a77020e88193b4476bb2be76b39400a8d08edef728f9",
-    "action": "textGenerate",
-    "status": "SUCCESS",
-    "progress": "100%",
-    "submit_time": 1773381488,
-    "start_time": 1773381573,
-    "finish_time": 1773381664,
-    "data": {
-      "id": "video_69b3a77020e88193b4476bb2be76b39400a8d08edef728f9",
-      "model": "sora-2",
-      "object": "video",
-      "status": "completed",
-      "progress": 100,
-      "created_at": 1773381488,
-      "completed_at": 1773381629,
-      "generation_time": 141,
-      "expires_at": 1773385229,
-      "seconds": "8",
-      "size": "1280x720",
-      "prompt": "A serene Japanese garden in spring, with cherry blossoms gently falling",
-      "url": "https://uploads-xxx.s3.amazonaws.com/uploads/xxx.mp4",
-      "video_url": "https://uploads-xxx.s3.amazonaws.com/uploads/xxx.mp4",
-      "thumbnail_url": "https://uploads-xxx.s3.amazonaws.com/uploads/xxx.webp",
-      "spritesheet_url": "https://uploads-xxx.s3.amazonaws.com/uploads/xxx.jpeg"
-    }
-  }
-}
-```
+- first-pass Sora integration
+- clearer task status and metadata
+- teams that want to follow the new dedicated Crazyrouter video compatibility pages
 
-### Task Status
-
-| Status | Description |
-|--------|-------------|
-| `queued` | Task submitted, waiting for processing |
-| `in_progress` | Generating |
-| `completed` | Generation completed |
-| `failed` | Generation failed |
-
-### Important Fields
-
-- `generation_time`: Actual generation time (seconds)
-- `expires_at`: Video URL expiration timestamp (typically 1 hour after generation)
-- `thumbnail_url`: Video thumbnail
-- `spritesheet_url`: Video spritesheet (for preview)
-
-<Note>
-  Video URLs expire after 1 hour. Please download and save promptly.
-</Note>
-
----
-
-## Via Unified Video API
+## Unified Video API
 
 ```
 POST /v1/video/create
@@ -137,9 +72,18 @@ curl -X POST https://crazyrouter.com/v1/video/create \
   }'
 ```
 
----
+Query the task:
 
-## Via OpenAI Video Format
+```
+GET /v1/video/query?task_id=your_task_id
+```
+
+```bash cURL
+curl "https://crazyrouter.com/v1/video/query?task_id=your_task_id" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+## OpenAI-Compatible Video Format
 
 ```
 POST /v1/videos
@@ -157,82 +101,7 @@ curl -X POST https://crazyrouter.com/v1/videos \
   }'
 ```
 
-### Response Example
-
-```json
-{
-  "id": "sora_task_abc123",
-  "status": "processing",
-  "created_at": 1709123456
-}
-```
-
----
-
-## Image to Video
-
-Generate video from reference image:
-
-```bash cURL
-curl -X POST https://crazyrouter.com/v1/videos \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "model": "sora-2",
-    "prompt": "The person in the image starts dancing",
-    "image_url": "https://example.com/portrait.jpg",
-    "size": "1920x1080"
-  }'
-```
-
----
-
-## Pro Mode
-
-Use `sora-2-pro` for higher quality output:
-
-```json
-{
-  "model": "sora-2-pro",
-  "prompt": "An epic battle scene in a fantasy world",
-  "size": "1920x1080",
-  "duration": 20
-}
-```
-
----
-
-## Storyboard Support
-
-Define multi-scene videos via storyboard:
-
-```bash cURL
-curl -X POST https://crazyrouter.com/v1/videos \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "model": "sora-2",
-    "storyboard": [
-      {
-        "prompt": "A sunrise over the mountains",
-        "duration": 5
-      },
-      {
-        "prompt": "Camera pans down to reveal a village",
-        "duration": 5
-      },
-      {
-        "prompt": "Close-up of a farmer starting their day",
-        "duration": 5
-      }
-    ],
-    "size": "1920x1080"
-  }'
-```
-
----
-
-## Query Task
+Query the task:
 
 ```
 GET /v1/videos/{task_id}
@@ -243,32 +112,42 @@ curl https://crazyrouter.com/v1/videos/sora_task_abc123 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-### Response Example
+## Status And Result Fields
 
-```json
-{
-  "id": "sora_task_abc123",
-  "status": "completed",
-  "video": {
-    "url": "https://crazyrouter.com/files/sora_abc123.mp4",
-    "duration": 10,
-    "width": 1920,
-    "height": 1080
-  }
-}
-```
+Common task states:
 
----
+| Status | Meaning |
+|--------|---------|
+| `queued` | Submitted and waiting |
+| `in_progress` | Generating |
+| `completed` | Finished |
+| `failed` | Failed |
 
-## Performance Reference
+Common result fields:
 
-Based on actual testing with `sora-2` model:
-
-- **Queue wait time**: ~60-90 seconds
-- **Generation time**: ~120-150 seconds
-- **Total time**: ~3-4 minutes
-- **Video size**: ~8 MB (8 seconds, 1280x720)
+- `url` or `video_url`: video download URL
+- `thumbnail_url`: preview thumbnail
+- `progress`: generation progress
+- `expires_at`: expiration time for the temporary result URL
 
 <Note>
-  Generation time varies based on system load and video complexity. sora-2-pro mode takes longer but delivers higher quality. Storyboard mode is ideal for multi-scene narrative videos.
+  Result URLs are usually not permanent. Download the video promptly instead of treating the returned URL as long-term storage.
+</Note>
+
+## Recommended Rollout Order
+
+1. Start with `sora-2`
+2. Start with a short 5-10 second video
+3. Validate one simple text-to-video request first
+4. Add higher resolution, longer duration, or more advanced parameters later
+5. Switch to `sora-2-pro` only after the basic path is stable
+
+## Practical Notes
+
+- Do not assume every more complex native field is part of the stable public baseline
+- If you need route-specific `Video Generations` examples, prefer the new dedicated pages added in this docs round
+- If you are only checking connectivity, validate with a short prompt and short duration first
+
+<Note>
+  This page keeps the public Sora overview concise. More specific compatibility-route details have been split into dedicated video docs so each route can be maintained more accurately.
 </Note>

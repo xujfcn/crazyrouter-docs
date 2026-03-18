@@ -21,17 +21,23 @@ wss://crazyrouter.com/v1/realtime?model=gpt-4o-realtime-preview
 
 ### Authentication
 
-Pass the API Key in the WebSocket connection headers:
+The currently supported and recommended authentication methods are:
+
+#### Method 1: pass the API key in request headers
 
 ```
 Authorization: Bearer YOUR_API_KEY
 ```
 
-Or via URL parameter:
+#### Method 2: pass the key in `Sec-WebSocket-Protocol`
+
+Useful for some OpenAI Realtime-compatible clients:
 
 ```
-wss://crazyrouter.com/v1/realtime?model=gpt-4o-realtime-preview&api_key=YOUR_API_KEY
+Sec-WebSocket-Protocol: realtime, openai-insecure-api-key.YOUR_API_KEY
 ```
+
+Do not rely on the `?api_key=` URL query style.
 
 ---
 
@@ -120,5 +126,5 @@ asyncio.run(realtime_chat())
 | `response.done` | Response complete |
 
 <Warning>
-  The Realtime API uses persistent WebSocket connections. Ensure your client supports the WebSocket protocol. The default connection timeout is 120 seconds.
+  The Realtime API uses persistent WebSocket connections. Prefer header-based authentication and do not rely on the `?api_key=` query parameter.
 </Warning>

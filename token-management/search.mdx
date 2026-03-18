@@ -6,12 +6,29 @@ api: 'GET /api/token/search'
 
 ## 接口说明
 
-根据关键词搜索令牌，支持按名称模糊匹配。
+根据关键词搜索令牌，支持按名称模糊匹配，也支持按 token 片段过滤。
+
+<Note>
+  这组 `/api/token/*` 接口主要用于 Crazyrouter 控制台中的 API Key 管理自动化。它们需要用户 `access token` 与 `New-Api-User` 请求头，不是给普通 `sk-xxx` 模型调用流程直接使用的接口。
+</Note>
+
+## 认证方式
+
+使用用户侧认证，请在请求头中携带：
+
+```text
+Authorization: Bearer your_access_token
+New-Api-User: 1
+```
 
 ## 请求参数
 
 <ParamField query="keyword" type="string" required>
   搜索关键词，匹配令牌名称
+</ParamField>
+
+<ParamField query="token" type="string">
+  可选。按 token 字符串片段过滤
 </ParamField>
 
 ## 响应格式
@@ -28,7 +45,11 @@ api: 'GET /api/token/search'
       "status": 1,
       "remain_quota": 50000,
       "used_quota": 8000,
-      "created_time": 1706000000
+      "created_time": 1706000000,
+      "model_limits_enabled": false,
+      "model_limits": "",
+      "allow_ips": "",
+      "group": "default"
     }
   ]
 }
@@ -48,7 +69,7 @@ headers = {
 }
 
 response = requests.get(
-    "https://crazyrouter.com/api/token/search?keyword=生产",
+    "https://crazyrouter.com/api/token/search?keyword=生产&token=sk-",
     headers=headers
 )
 
@@ -58,7 +79,7 @@ for token in tokens:
 ```
 
 ```bash cURL
-curl "https://crazyrouter.com/api/token/search?keyword=生产" \
+curl "https://crazyrouter.com/api/token/search?keyword=生产&token=sk-" \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 1"
 ```

@@ -1,42 +1,382 @@
 ---
 title: 'Cline Setup Guide'
-description: 'Configure Crazyrouter API in the VS Code Cline extension'
+description: 'Connect Crazyrouter to the Cline VS Code extension through the OpenAI Compatible provider, with separate Windows and macOS install flows, setup, validation, and troubleshooting steps'
 ---
+
+Cline is a strong agent-style coding extension for VS Code, especially for file edits, terminal execution, step-by-step planning, and multi-turn code changes. For Crazyrouter, the recommended path is Cline's official `OpenAI Compatible` provider.
 
 ## Overview
 
-Cline is a powerful VS Code AI programming extension that supports autonomous code writing, command execution, and more.
+With the OpenAI Compatible provider, Cline can send its agent traffic to Crazyrouter:
 
-## Configuration Steps
+- recommended protocol: `OpenAI-compatible API`
+- base URL: `https://crazyrouter.com/v1`
+- auth format: `sk-...` token
+- recommended default models: `claude-sonnet-4-6` or `gpt-5.3-codex`
+
+<Warning>
+Cline can read and write files and execute terminal commands. After the connection works, the real risk is not connectivity but over-granting execution scope. Start with a small repo you know well.
+</Warning>
+
+## Best For
+
+- users who want an agent-style coding workflow inside VS Code
+- code modification flows powered by Crazyrouter's multi-model access
+- teams that want IDE agent traffic separated from CLI traffic
+- developers who want Claude, GPT, and other models behind one gateway
+
+## Protocol Used
+
+Recommended protocol: `OpenAI-compatible API`
+
+In Cline settings, use:
+
+- `API Provider`: `OpenAI Compatible`
+- `Base URL`: `https://crazyrouter.com/v1`
+- `API Key`: your `sk-...`
+- `Model ID`: the model you want to use
+
+Do not set the base URL to:
+
+- `https://crazyrouter.com`
+- `https://crazyrouter.com/v1/chat/completions`
+
+<Note>
+Unlike Claude Code, Codex, or Aider, the normal Cline-in-VS-Code path usually does not require shell environment variables. In most cases, you only need to enter `Base URL`, `API Key`, and `Model ID` in the Cline settings UI.
+</Note>
+
+## Prerequisites
+
+| Item | Notes |
+|------|-------|
+| Crazyrouter account | Create one at [crazyrouter.com](https://crazyrouter.com) |
+| Crazyrouter token | Create a dedicated token for Cline |
+| Git | Prefer `git 2.23+` |
+| VS Code | Use a current stable release |
+| Cline extension | Use a current version |
+| Allowed models | Allow at least 1 to 2 models suitable for agentic coding |
+| Environment variables | Usually not required for the standard VS Code setup |
+
+Suggested starter allowlist:
+
+- `claude-sonnet-4-6`
+- `gpt-5.3-codex`
+- `gpt-4.1`
+
+## Full Install Path By Operating System
+
+### Recommended Windows Path
+
+The most reliable Windows setup is: `Git` + `VS Code` + `install Cline from the marketplace` + `enter Crazyrouter settings directly in Cline`.
+
+Recommended order:
+
+1. Install Git
+2. Install VS Code
+3. Install Cline from the VS Code marketplace
+4. Create a Cline-specific Crazyrouter token
+5. Open your repo and take a Git snapshot first
+6. Fill in `OpenAI Compatible`, `Base URL`, `API Key`, and `Model ID` inside Cline
+
+Recommended verification commands:
+
+```powershell
+git --version
+where.exe git
+code --version
+where.exe code
+```
+
+If `code --version` is not available but VS Code itself opens normally, Cline can still work fine. You just will not be able to open folders from the terminal with `code` yet.
+
+### Recommended macOS Path
+
+The smoothest macOS setup is usually: `Xcode Command Line Tools` + `Homebrew` + `Git` + `VS Code` + `install Cline from the marketplace`.
+
+Recommended order:
+
+1. Install Xcode Command Line Tools
+2. Install Homebrew if needed
+3. Install Git
+4. Install VS Code
+5. Install Cline in VS Code
+6. Enter the Crazyrouter settings directly inside Cline
+
+Recommended verification commands:
+
+```bash
+git --version
+which git
+open -a "Visual Studio Code"
+```
+
+If you want the terminal `code` command, run `Shell Command: Install 'code' command in PATH` from the VS Code command palette, then verify:
+
+```bash
+code --version
+which code
+```
+
+### Linux Note
+
+Linux users can generally follow the same pattern: install Git, install VS Code, then install Cline from the extension marketplace. A common Ubuntu / Debian path is:
+
+```bash
+sudo apt update
+sudo apt install -y git
+sudo snap install code --classic
+git --version
+code --version
+```
+
+## Detailed Install Walkthrough
 
 <Steps>
-  <Step title="Install Extension">
-    Search for `Cline` in the VS Code extension marketplace and install it.
+  <Step title="Step 1: Install Git">
+    If Git is not installed yet, install it first.
+
+    <Tabs>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        winget install --id Git.Git -e --source winget
+        git --version
+        where.exe git
+        ```
+      </Tab>
+      <Tab title="macOS">
+        ```bash
+        xcode-select --install
+        git --version
+        ```
+        Or:
+        ```bash
+        brew install git
+        git --version
+        which git
+        ```
+      </Tab>
+      <Tab title="Ubuntu / Debian">
+        ```bash
+        sudo apt update
+        sudo apt install -y git
+        git --version
+        which git
+        ```
+      </Tab>
+    </Tabs>
+
+    Recommended one-time identity setup:
+
+    ```bash
+    git config --global user.name "Your Name"
+    git config --global user.email "you@example.com"
+    git config --global init.defaultBranch main
+    ```
   </Step>
-  <Step title="Open Settings">
-    Click the Cline icon in the sidebar, then click the settings gear.
+
+  <Step title="Step 2: Install VS Code">
+    Cline is most commonly used as a VS Code extension.
+
+    <Tabs>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        winget install Microsoft.VisualStudioCode
+        code --version
+        where.exe code
+        ```
+      </Tab>
+      <Tab title="macOS">
+        ```bash
+        brew install --cask visual-studio-code
+        open -a "Visual Studio Code"
+        ```
+
+        If you want the `code` terminal command, run this from the VS Code command palette:
+
+        ```text
+        Shell Command: Install 'code' command in PATH
+        ```
+
+        Then verify:
+
+        ```bash
+        code --version
+        which code
+        ```
+      </Tab>
+      <Tab title="Ubuntu / Debian">
+        ```bash
+        sudo snap install code --classic
+        code --version
+        which code
+        ```
+      </Tab>
+    </Tabs>
+
+    After installation, open VS Code normally at least once.
   </Step>
-  <Step title="Select Provider">
-    In the API Provider dropdown, select `OpenAI Compatible`.
+
+  <Step title="Step 3: Install the Cline extension">
+    In VS Code:
+
+    1. Press `Ctrl/Cmd + Shift + X`
+    2. Search for `Cline`
+    3. Click Install
+    4. Open Cline from the activity bar or from the command palette with `Cline: Open In New Tab`
+
+    If VS Code shows a prompt like `Running extensions might...`, allow it.
+
+    If you do not see the Cline icon, restart VS Code and check again.
   </Step>
-  <Step title="Enter Configuration">
-    - **Base URL**: `https://crazyrouter.com/v1`
-    - **API Key**: `sk-xxx`
-    - **Model ID**: `claude-sonnet-4-20250514` (or another model)
+
+  <Step title="Step 4: Create a Cline-specific token">
+    In Crazyrouter, create a token named something like `cline`. For the first pass, allow only:
+
+    - `claude-sonnet-4-6`
+    - `gpt-5.3-codex`
+    - `gpt-4.1`
+
+    <Note>
+    The standard Cline-in-VS-Code path usually stores the API key in the UI rather than through shell env vars. The most important setup decisions here are a dedicated token and a narrow allowlist.
+    </Note>
   </Step>
-  <Step title="Save and Test">
-    Click Save, then enter a question in the chat box to test.
+
+  <Step title="Step 5: Prepare the repo before the first real run">
+    Cline can edit files and run commands, so take a repo snapshot before you trust it with real work.
+
+    If this directory is not a Git repo yet:
+
+    ```bash
+    git init
+    git add .
+    git commit -m "chore: initial snapshot before Cline"
+    ```
+
+    If it is already an existing repo, inspect the current state first:
+
+    ```bash
+    git status
+    ```
+  </Step>
+
+  <Step title="Step 6: Enter the Crazyrouter settings in Cline">
+    In the Cline settings panel, enter:
+
+    - `API Provider`: `OpenAI Compatible`
+    - `Base URL`: `https://crazyrouter.com/v1`
+    - `API Key`: your `sk-...`
+    - `Model ID`: start with `claude-sonnet-4-6`
+
+    If your current Cline version shows a `Verify` button, click it first to confirm the connection. If not, you can validate with a small read-only prompt instead.
+
+    For the first pass, validate with only one model rather than switching across many models immediately.
+  </Step>
+
+  <Step title="Step 7: Run the first validation">
+    Recommended validation order:
+
+    1. `Read the current workspace README and summarize it without changing any files.`
+    2. `Point out the 3 files that are most worth reviewing first.`
+    3. `Fix one obvious typo in the README only and show the diff.`
+
+    Once those all work and Crazyrouter logs show the matching requests, the main path is stable.
+  </Step>
+
+  <Step title="Step 8: Widen permissions gradually">
+    Only after the read-only and tiny-edit path is stable should you move to:
+
+    1. small multi-file changes
+    2. low-risk command execution
+    3. larger agent-style refactors
+
+    Avoid starting with broad autonomous runs in a large unfamiliar repo.
   </Step>
 </Steps>
 
-## Recommended Models
+## Recommended Model Setup
 
-| Use Case | Recommended Model |
-|----------|-------------------|
-| Daily coding | `claude-sonnet-4-20250514` |
-| Complex tasks | `claude-opus-4-20250514` |
-| Quick Q&A | `gpt-4o-mini` |
+| Use case | Recommended model | Why |
+|----------|-------------------|-----|
+| default agent driver | `claude-sonnet-4-6` | stable for multi-turn planning, code explanation, and long context |
+| stronger coding execution | `gpt-5.3-codex` | better fit for complex edits and agent-style execution |
+| stable compatibility baseline | `gpt-4.1` | useful for first-pass validation |
+| cheaper trial runs | `gpt-4.1-mini` | better for light tasks and frequent small requests |
+
+Recommended rollout: get the workflow stable on `claude-sonnet-4-6` first. If raw code-edit performance matters more, move to `gpt-5.3-codex`.
+
+## Token Setup Best Practices
+
+| Setting | Recommendation | Notes |
+|---------|----------------|-------|
+| dedicated token | Required | Do not share Cline tokens with Cursor, Claude Code, or Aider |
+| model allowlist | Strongly recommended | Cline is a higher-consumption tool, so narrow allowlists are safer |
+| IP restriction | Recommended on fixed office networks | Use carefully on laptops and mobile networks |
+| quota cap | Strongly recommended | Multi-step agent runs can consume budget very quickly |
+| environment split | Recommended | Separate local VS Code, remote dev hosts, and team environments |
+| permission split | Strongly recommended | High-risk repos should use their own low-budget token |
+
+## Verification Checklist
+
+- [ ] `git --version` works
+- [ ] VS Code is installed correctly
+- [ ] if you want terminal repo opening, `code --version` also works
+- [ ] Cline is installed and opens correctly
+- [ ] Cline is set to the `OpenAI Compatible` provider
+- [ ] `Base URL` is `https://crazyrouter.com/v1`
+- [ ] `API Key` is entered correctly
+- [ ] `Model ID` is a real allowed model
+- [ ] the first read-only task succeeds
+- [ ] file edits or command flows work when expected
+- [ ] Crazyrouter logs show the matching requests
+
+## Common Errors And Fixes
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| the extension installs but no Cline icon appears | VS Code did not refresh or the extension was not activated cleanly | restart VS Code and reopen Cline from the command palette |
+| the `code` command does not exist | VS Code is installed but the shell command is not in PATH | on Windows, reopen the terminal; on macOS, run `Shell Command: Install 'code' command in PATH` |
+| `401 unauthorized` | wrong, expired, or badly pasted API key | create a new token and paste it again |
+| `403` or `model not allowed` | the token does not allow the selected model | allow that model in Crazyrouter token settings |
+| `404` | base URL was set to the root domain or a full endpoint path | use `https://crazyrouter.com/v1` |
+| `model not found` | incorrect `Model ID` or unavailable model | switch back to `claude-sonnet-4-6` or another confirmed model |
+| it cannot connect on a corporate network | proxy or firewall settings are blocking traffic | check VS Code's own proxy settings first; the Cline extension reuses VS Code's proxy configuration |
+| Cline edits the wrong files | permissions are too wide or the prompt scope is too loose | validate with read-only tasks first, then widen permissions gradually |
+| cost rises too fast | multi-step planning, large context, and auto execution | narrow the task scope and give Cline its own budget |
+
+## Performance And Cost Tips
+
+- start with read-only tasks and small edits on first setup
+- use `claude-sonnet-4-6` or `gpt-5.3-codex` for complex refactors
+- move repetitive light tasks to `gpt-4.1-mini`
+- use different tokens for different workspaces or project types
+- after large tasks, inspect Crazyrouter logs to see the real cost pattern
+
+## FAQ
+
+### Which provider should I choose in Cline?
+
+Choose `OpenAI Compatible`.
+
+### What base URL should I use?
+
+Use `https://crazyrouter.com/v1`.
+
+### Do I have to set environment variables for this Cline path?
+
+Usually no. The normal VS Code path generally works by entering `Base URL`, `API Key`, and `Model ID` directly in Cline's settings UI.
+
+### Which model should I try first?
+
+Start with `claude-sonnet-4-6`.
+
+### Why should I take a Git snapshot before the first real task?
+
+Because Cline is a real coding agent that can edit files and run commands. A snapshot makes review and rollback much easier.
+
+### Why should I avoid broad permissions immediately?
+
+Because the safest rollout pattern is read-only first, then tiny edits, then wider execution scope only after the integration is clearly stable.
 
 <Note>
-  Cline supports automatic file read/write and terminal command execution. Using a more capable model is recommended for a better autonomous programming experience.
+If you want a true agent workflow inside VS Code, Cline is usually a better fit than Cursor's BYOK path.
 </Note>

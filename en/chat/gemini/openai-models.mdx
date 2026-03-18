@@ -1,0 +1,90 @@
+---
+title: "Gemini-Compatible OpenAI Model List"
+description: "GET /v1beta/openai/models returns an OpenAI-style model list for Gemini-style clients"
+---
+
+# Gemini-Compatible OpenAI Model List
+
+```
+GET /v1beta/openai/models
+```
+
+This endpoint is a compatibility bridge for Gemini-style clients or middleware. Authentication can use a `key` query parameter or `x-goog-api-key`, while the returned payload is an OpenAI-style model list.
+
+## When To Use It
+
+- your client normally sends the API key through `?key=`
+- your middleware already uses Gemini-style auth like `x-goog-api-key`
+- you still want an OpenAI-style model list rather than native Gemini model metadata
+
+If you are using a normal OpenAI-compatible client, prefer `GET /v1/models`.
+
+## Authentication
+
+Any of the following works:
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+```http
+x-goog-api-key: YOUR_API_KEY
+```
+
+```text
+GET /v1beta/openai/models?key=YOUR_API_KEY
+```
+
+## Request Example
+
+<CodeGroup>
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/openai/models?key=YOUR_API_KEY"
+```
+
+```bash cURL with Header
+curl https://crazyrouter.com/v1beta/openai/models   -H "x-goog-api-key: YOUR_API_KEY"
+```
+
+</CodeGroup>
+
+## Response Example
+
+```json
+{
+  "data": [
+    {
+      "id": "gpt-4o",
+      "object": "model",
+      "created": 1626777600,
+      "owned_by": "openai",
+      "supported_endpoint_types": ["openai"]
+    },
+    {
+      "id": "claude-sonnet-4-20250514",
+      "object": "model",
+      "created": 1626777600,
+      "owned_by": "vertex-ai",
+      "supported_endpoint_types": ["anthropic", "openai", "gemini"]
+    }
+  ],
+  "object": "list",
+  "success": true
+}
+```
+
+## Field Notes
+
+| Field | Type | Description |
+|------|------|-------------|
+| `data[]` | array | Models available to the current token |
+| `id` | string | Model identifier |
+| `owned_by` | string | Model owner or upstream source |
+| `supported_endpoint_types` | array | Supported API styles, such as `openai`, `anthropic`, or `gemini` |
+| `object` | string | Always `list` |
+| `success` | boolean | Whether the request succeeded |
+
+<Note>
+This endpoint is intentionally a bridge: Gemini-style auth on the way in, OpenAI-style model-list semantics on the way out.
+</Note>

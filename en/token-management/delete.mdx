@@ -8,6 +8,19 @@ api: 'DELETE /api/token/{id}'
 
 Permanently delete a specified API token. The token's API Key will be invalidated immediately after deletion.
 
+<Note>
+  The `/api/token/*` endpoints are mainly for Crazyrouter dashboard automation around API key management. They require a user `access token` plus the `New-Api-User` header, and are not the normal interface for `sk-xxx` model calls.
+</Note>
+
+## Authentication
+
+Use user-side authentication with these headers:
+
+```text
+Authorization: Bearer your_access_token
+New-Api-User: 1
+```
+
 ## Path Parameters
 
 <ParamField path="id" type="integer" required>

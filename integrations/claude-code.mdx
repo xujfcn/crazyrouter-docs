@@ -1,60 +1,420 @@
 ---
 title: 'Claude Code 配置教程'
-description: '在 Claude Code CLI 中配置 Crazyrouter API'
+description: '在 Claude Code 中通过 Anthropic Messages API 接入 Crazyrouter，并提供从 Git、Node.js、安装命令、环境变量到首次验证的完整步骤'
 ---
 
-## 概述
+Claude Code 是目前最值得优先接入 Crazyrouter 的终端编码工具之一。它直接使用 Anthropic Messages API，适合代码阅读、修改、重构、命令执行、工具调用和长上下文仓库分析。
 
-Claude Code 是 Anthropic 官方的命令行 AI 编程助手。通过配置环境变量，可以将其接入 Crazyrouter。
+## 概览
 
-## 配置方法
+通过环境变量，Claude Code 可以把 Anthropic 请求直接发到 Crazyrouter：
 
-### 设置环境变量
+- 推荐协议：`Anthropic Messages API`
+- Base URL：`https://crazyrouter.com`
+- 认证变量：`ANTHROPIC_API_KEY`
+- 推荐默认模型：`claude-sonnet-4-6`
 
-<Tabs>
-  <Tab title="Linux / macOS">
-    ```bash
-    export ANTHROPIC_BASE_URL=https://crazyrouter.com
-    export ANTHROPIC_API_KEY=sk-xxx
-    ```
+<Tip>
+Claude Code 自己会补完整的 Anthropic 请求路径，所以 Base URL 必须写根域名 `https://crazyrouter.com`，不要手动拼 `/v1` 或 `/v1/messages`。
+</Tip>
 
-    写入 `~/.bashrc` 或 `~/.zshrc` 永久生效：
+## 适合谁用
 
-    ```bash
-    echo 'export ANTHROPIC_BASE_URL=https://crazyrouter.com' >> ~/.bashrc
-    echo 'export ANTHROPIC_API_KEY=sk-xxx' >> ~/.bashrc
-    source ~/.bashrc
-    ```
-  </Tab>
-  <Tab title="Windows (PowerShell)">
-    ```powershell
-    $env:ANTHROPIC_BASE_URL = "https://crazyrouter.com"
-    $env:ANTHROPIC_API_KEY = "sk-xxx"
-    ```
+- 想把 Crazyrouter 作为 Claude Code 后端的开发者
+- 想稳定使用工具调用、长上下文和终端编码工作流的人
+- 想把 Claude Code 和 Cursor / Codex / Aider 分开计费的人
+- 想在 Linux、macOS、Windows 上统一配置 CLI 的团队
 
-    永久设置：
+## 使用协议
 
-    ```powershell
-    [System.Environment]::SetEnvironmentVariable("ANTHROPIC_BASE_URL", "https://crazyrouter.com", "User")
-    [System.Environment]::SetEnvironmentVariable("ANTHROPIC_API_KEY", "sk-xxx", "User")
-    ```
-  </Tab>
-</Tabs>
+推荐协议：`Anthropic Messages API`
 
-### 启动 Claude Code
+Claude Code 对接 Crazyrouter 时请使用：
 
-```bash
-claude
+```text
+ANTHROPIC_BASE_URL=https://crazyrouter.com
 ```
 
-## 验证
+不要写成：
 
-启动后输入任意问题，如果正常返回则配置成功。
+- `https://crazyrouter.com/v1`
+- `https://crazyrouter.com/v1/messages`
+- `https://crazyrouter.com/v1/complete`
+
+## 系统要求与前置条件
+
+| 项目 | 说明 |
+|------|------|
+| Crazyrouter 账号 | 先在 [crazyrouter.com](https://crazyrouter.com) 注册 |
+| Crazyrouter token | 建议单独创建一个给 Claude Code 使用的 `sk-...` token |
+| Git | 建议 `git 2.23+`，便于回滚和审查 AI 改动 |
+| Node.js | 建议 `Node.js 18+` |
+| Claude Code | 建议当前稳定版 |
+| Claude 系列模型权限 | 至少放行 `claude-sonnet-4-6` |
+
+建议初始白名单：
+
+- `claude-sonnet-4-6`
+- `claude-opus-4-6`
+
+## 按操作系统的完整安装路径
+
+### Windows 推荐路径
+
+Claude Code 在 Windows 上最稳妥的路径是：`Git` + `Node.js` + `npm 全局安装 Claude Code` + `PowerShell` 写入环境变量。
+
+推荐顺序：
+
+1. 安装 Git
+2. 安装 Node.js LTS
+3. 使用 npm 安装 Claude Code
+4. 用 PowerShell 写临时变量
+5. 用 PowerShell 写用户级持久变量
+
+推荐验证命令：
+
+```powershell
+git --version
+node -v
+npm -v
+claude --version
+where.exe git
+where.exe node
+where.exe claude
+```
+
+如果 `claude --version` 找不到命令，先关闭并重新打开 PowerShell，再重试。
+
+### macOS 推荐路径
+
+Claude Code 在 macOS 上最顺手的路径通常是：`Xcode Command Line Tools` + `Homebrew` + `Git` + `Node.js` + `npm 全局安装 Claude Code` + `~/.zshrc` 持久化环境变量。
+
+推荐顺序：
+
+1. 安装 Xcode Command Line Tools
+2. 安装 Homebrew（如果你还没有）
+3. 安装 Git、Node.js
+4. 使用 npm 安装 Claude Code
+5. 写入 `~/.zshrc`
+6. 新开终端验证命令路径
+
+推荐验证命令：
+
+```bash
+git --version
+node -v
+npm -v
+claude --version
+which git
+which node
+which claude
+```
+
+### 为什么这里不建议手动写 API 路径
+
+Claude Code 走的是 Anthropic 原生协议。你只需要告诉它站点根地址：
+
+```text
+ANTHROPIC_BASE_URL=https://crazyrouter.com
+```
+
+不要像 OpenAI 兼容客户端那样自己拼 `/v1`、`/v1/messages` 或具体 API 路径。
+
+## 从零开始完整安装
+
+<Steps>
+  <Step title="第 1 步：安装 Git">
+    如果你的机器还没有 Git，先装 Git，再继续后面的 Claude Code 配置。
+
+    <Tabs>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        winget install --id Git.Git -e --source winget
+        git --version
+        ```
+      </Tab>
+      <Tab title="macOS">
+        ```bash
+        xcode-select --install
+        git --version
+        ```
+        如果你已经使用 Homebrew，也可以：
+        ```bash
+        brew install git
+        git --version
+        ```
+      </Tab>
+      <Tab title="Ubuntu / Debian">
+        ```bash
+        sudo apt update
+        sudo apt install -y git
+        git --version
+        ```
+      </Tab>
+    </Tabs>
+
+    安装后建议补上全局身份信息：
+
+    ```bash
+    git config --global user.name "Your Name"
+    git config --global user.email "you@example.com"
+    git config --global init.defaultBranch main
+    ```
+  </Step>
+
+  <Step title="第 2 步：安装 Node.js 18+">
+    Claude Code 依赖 Node.js。先确认版本，再继续安装 Claude Code。
+
+    <Tabs>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        winget install OpenJS.NodeJS.LTS
+        node -v
+        npm -v
+        ```
+      </Tab>
+      <Tab title="macOS">
+        ```bash
+        brew install node
+        node -v
+        npm -v
+        ```
+      </Tab>
+      <Tab title="Ubuntu / Debian">
+        ```bash
+        sudo apt update
+        sudo apt install -y nodejs npm
+        node -v
+        npm -v
+        ```
+      </Tab>
+    </Tabs>
+
+    如果你装完后 `node -v` 仍低于 18，建议改用 `nvm` 或 Node 官方安装包升级后再继续。
+  </Step>
+
+  <Step title="第 3 步：安装 Claude Code">
+    <Tabs>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        npm install -g @anthropic-ai/claude-code
+        claude --version
+        where.exe claude
+        ```
+      </Tab>
+      <Tab title="macOS">
+        ```bash
+        npm install -g @anthropic-ai/claude-code
+        claude --version
+        which claude
+        ```
+      </Tab>
+    </Tabs>
+
+    <Warning>
+    不要使用 `sudo npm install -g @anthropic-ai/claude-code`。如果全局安装遇到权限问题，先修复 npm/Node 环境，再继续安装。
+    </Warning>
+  </Step>
+
+  <Step title="第 4 步：在 Crazyrouter 创建 Claude Code 专用 token">
+    登录 Crazyrouter 后台，创建一个单独 token，名称建议直接写 `claude-code`。
+
+    第一次只建议放行：
+
+    - `claude-sonnet-4-6`
+    - `claude-opus-4-6`
+
+    同时建议给它设置独立额度，避免和 Cursor、Codex、OpenClaw 共用预算。
+  </Step>
+
+  <Step title="第 5 步：先在当前终端设置临时环境变量">
+    先做临时配置，确认能跑通后，再写入持久配置。
+
+    <Tabs>
+      <Tab title="macOS / Linux">
+        ```bash
+        export ANTHROPIC_BASE_URL=https://crazyrouter.com
+        export ANTHROPIC_API_KEY=sk-xxx
+        echo $ANTHROPIC_BASE_URL
+        echo $ANTHROPIC_API_KEY
+        ```
+      </Tab>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        $env:ANTHROPIC_BASE_URL = "https://crazyrouter.com"
+        $env:ANTHROPIC_API_KEY = "sk-xxx"
+        echo $env:ANTHROPIC_BASE_URL
+        echo $env:ANTHROPIC_API_KEY
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="第 6 步：把环境变量写入持久配置">
+    临时变量只对当前终端有效。日常使用建议写入 shell 配置文件。
+
+    <Tabs>
+      <Tab title="Linux Bash">
+        ```bash
+        echo 'export ANTHROPIC_BASE_URL=https://crazyrouter.com' >> ~/.bashrc
+        echo 'export ANTHROPIC_API_KEY=sk-xxx' >> ~/.bashrc
+        source ~/.bashrc
+        ```
+      </Tab>
+      <Tab title="macOS / Zsh">
+        ```bash
+        echo 'export ANTHROPIC_BASE_URL=https://crazyrouter.com' >> ~/.zshrc
+        echo 'export ANTHROPIC_API_KEY=sk-xxx' >> ~/.zshrc
+        source ~/.zshrc
+        ```
+      </Tab>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        [System.Environment]::SetEnvironmentVariable("ANTHROPIC_BASE_URL", "https://crazyrouter.com", "User")
+        [System.Environment]::SetEnvironmentVariable("ANTHROPIC_API_KEY", "sk-xxx", "User")
+
+        $env:ANTHROPIC_BASE_URL = "https://crazyrouter.com"
+        $env:ANTHROPIC_API_KEY = "sk-xxx"
+        ```
+      </Tab>
+    </Tabs>
+
+    完成后建议新开一个终端，再执行：
+
+    <Tabs>
+      <Tab title="macOS / Linux">
+        ```bash
+        claude --version
+        echo $ANTHROPIC_BASE_URL
+        ```
+      </Tab>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        claude --version
+        echo $env:ANTHROPIC_BASE_URL
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="第 7 步：准备你的 Git 仓库">
+    Claude Code 会读写文件、执行命令。第一次接入时，建议先在你熟悉的小仓库中验证。
+
+    如果当前目录还不是 Git 仓库：
+
+    ```bash
+    git init
+    git add .
+    git commit -m "chore: initial snapshot before Claude Code"
+    ```
+
+    如果已经是现有仓库，至少先确认工作区是你自己能接受的状态：
+
+    ```bash
+    git status
+    ```
+  </Step>
+
+  <Step title="第 8 步：启动 Claude Code 并完成第一次验证">
+    进入项目目录后运行：
+
+    ```bash
+    cd /path/to/your/project
+    claude
+    ```
+
+    第一次验证建议按下面顺序进行：
+
+    1. 先发一句：`请只回复 OK`
+    2. 再发一句：`只读取当前仓库结构，不要修改任何文件`
+    3. 最后再做低风险任务，例如：`请找出 README 里的明显错别字，先不要直接改文件`
+
+    当这三步都正常返回，且 Crazyrouter 后台出现请求日志，就说明链路已经跑通。
+  </Step>
+</Steps>
+
+## 推荐模型配置
+
+| 使用场景 | 推荐模型 | 原因 |
+|----------|----------|------|
+| 默认主力 | `claude-sonnet-4-6` | 质量、速度、成本平衡最好，适合大多数编码任务 |
+| 高难度重构 | `claude-opus-4-6` | 更强的复杂推理、规划和代码理解 |
+| 长上下文仓库分析 | `claude-sonnet-4-6` | 稳定，适合长期会话 |
+| 成本敏感验证 | `claude-sonnet-4-6` | 先把主链路跑通最重要 |
+
+建议先把默认工作流稳定在 `claude-sonnet-4-6`，只有在确实遇到复杂任务时再切 `claude-opus-4-6`。
+
+## Token 设置最佳实践
+
+| 设置 | 建议 | 说明 |
+|------|------|------|
+| 专用 token | 必须 | Claude Code 不要和 Cursor、Codex、OpenClaw 共用 token |
+| 模型白名单 | 强烈建议 | Claude Code 场景通常只需要 1 到 2 个 Claude 模型 |
+| IP 限制 | 固定出口环境建议开启 | 笔记本经常变 IP 时谨慎使用 |
+| 配额上限 | 强烈建议 | Claude Code 长会话 + 工具调用容易持续消耗额度 |
+| 开发 / 团队分离 | 建议 | 每个开发者、每台共享主机都单独使用 token |
+| 泄露轮换 | 必须 | shell 历史、录屏或共享终端暴露 token 后立即轮换 |
+
+## 验证清单
+
+- [ ] `git --version` 正常
+- [ ] `node -v` 不低于 18
+- [ ] `claude --version` 正常
+- [ ] `ANTHROPIC_BASE_URL` 已设置为 `https://crazyrouter.com`
+- [ ] `ANTHROPIC_API_KEY` 已正确设置
+- [ ] Claude Code 可以正常启动
+- [ ] 第一条普通文本请求成功返回
+- [ ] 只读仓库分析可以正常工作
+- [ ] Crazyrouter 后台日志中能看到 Claude Code 请求
+- [ ] token 配额与模型白名单符合预期
+
+## 常见错误与修复
+
+| 现象 | 常见原因 | 修复方式 |
+|------|----------|----------|
+| `claude: command not found` | Claude Code 没装成功，或 npm 全局路径没进 PATH | 重新安装，确认 `npm bin -g` 所在目录已进 PATH |
+| `node` 版本过低 | 本机 Node 版本低于要求 | 升级到 Node.js 18+ 后重装 Claude Code |
+| 401 unauthorized | `ANTHROPIC_API_KEY` 无效、过期或复制错误 | 重新生成 token 并重新设置环境变量 |
+| 403 / model not allowed | token 没有放行当前 Claude 模型 | 在 Crazyrouter token 设置中放行所需模型 |
+| 404 | Base URL 写成 `/v1`、`/v1/messages` 等错误路径 | 改回 `https://crazyrouter.com` |
+| Claude Code 启动后仍走旧配置 | 新环境变量没有重新加载 | 新开终端，或重新 `source ~/.bashrc` / `source ~/.zshrc` |
+| Git 改动太乱 | 没先做仓库快照就开始让 AI 改代码 | 先提交初始快照，再逐轮修改 |
+| 成本超预期 | 长上下文 + 多轮工具调用 + 长时间会话 | 缩短会话、拆分任务、给 Claude Code 单独设预算 |
+
+## 性能与成本建议
+
+- 默认先用 `claude-sonnet-4-6`
+- 只有在复杂架构分析、长链路重构时再切 `claude-opus-4-6`
+- 第一次接入先用小仓库验证，不要直接对大型生产仓库全量操作
+- 每次进入新任务前先看一下 `git status`
+- 工具调用频繁时，更要回看 Crazyrouter 日志和 token 消耗
+
+## FAQ
+
+### Claude Code 里 Base URL 应该写什么？
+
+写根域名：`https://crazyrouter.com`
+
+### 为什么这里不能写 `/v1`？
+
+因为 Claude Code 自己会补 Anthropic Messages API 路径。你只需要提供站点根地址。
+
+### 我在 Windows 上应该用什么方式？
+
+如果你主要是命令行开发，优先用 PowerShell 或 WSL2。无论哪种方式，都先保证 Git、Node.js、Claude Code 自己都已正确安装。
+
+### Windows 上推荐用 PowerShell 还是 Git Bash？
+
+首次配置时优先用 PowerShell。环境变量写入、`where.exe` 验证和用户级变量持久化都更直接。
+
+### 第一次为什么要先做 Git 快照？
+
+因为 Claude Code 会改文件、跑命令。先做快照，出问题时你更容易 review 和回退。
+
+### 第一个推荐模型是什么？
+
+先用 `claude-sonnet-4-6`。它通常是最稳的基线模型。
 
 <Note>
-  Claude Code 使用 Anthropic 原生 API 格式（`/v1/messages`），Crazyrouter 完全兼容该格式。注意 Base URL 不需要加 `/v1` 后缀。
+如果你优先追求 Claude 系列模型 + 终端编码体验，Claude Code 应该放在 Crazyrouter 编码工具接入顺序的最前面。
 </Note>
-
-<Warning>
-  确保你的令牌已启用 Claude 系列模型（如 `claude-sonnet-4-20250514`）。
-</Warning>

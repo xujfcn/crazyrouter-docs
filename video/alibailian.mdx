@@ -1,0 +1,125 @@
+---
+title: "阿里百炼视频接口"
+description: "阿里百炼兼容视频接口，支持通过 /alibailian/api/v1/services/aigc/video-generation/video-synthesis 提交任务，并通过 /tasks/{task_id} 查询结果"
+---
+
+# 阿里百炼视频接口
+
+Crazyrouter 提供阿里百炼兼容的视频路径，适合已经接入 DashScope / 阿里百炼视频格式的应用直接迁移。
+
+## 支持的端点
+
+- `POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis`
+- `GET /alibailian/api/v1/tasks/{task_id}`
+
+## 认证
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## POST 生成视频
+
+```
+POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis
+```
+
+### 请求体结构
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `model` | string | 是 | 模型名称，如 `wan2.5-i2v-preview` |
+| `input` | object | 是 | 基本输入参数 |
+| `input.prompt` | string | 否 | 正向提示词 |
+| `input.negative_prompt` | string | 否 | 反向提示词 |
+| `input.img_url` | string | 否 | 首帧图像 URL 或 Base64 |
+| `input.audio_url` | string | 否 | 音频文件 URL |
+| `input.template` | string | 否 | 视频特效模板 |
+| `parameters` | object | 否 | 高级处理参数 |
+| `parameters.resolution` | string | 否 | 分辨率档位，如 `480P` |
+| `parameters.duration` | integer | 否 | 视频时长（秒） |
+| `parameters.prompt_extend` | boolean | 否 | 是否启用智能改写 |
+| `parameters.watermark` | boolean | 否 | 是否添加 AI 水印 |
+| `parameters.audio` | boolean | 否 | 是否自动补音频 |
+| `parameters.seed` | integer | 否 | 随机种子 |
+
+### 请求示例
+
+```bash cURL
+curl -X POST https://crazyrouter.com/alibailian/api/v1/services/aigc/video-generation/video-synthesis   -H "Content-Type: application/json"   -H "Authorization: Bearer YOUR_API_KEY"   -d '{
+    "model": "wan2.5-i2v-preview",
+    "input": {
+      "prompt": "改变一下光线",
+      "img_url": "https://example.com/first-frame.png"
+    },
+    "parameters": {
+      "resolution": "480P",
+      "prompt_extend": true,
+      "audio": true
+    }
+  }'
+```
+
+### 响应示例
+
+```json
+{
+  "request_id": "ccffb21f-c21e-4eba-861a-6c80e6db6e4d",
+  "output": {
+    "task_id": "a55bfe14-6e78-4b9d-b97d-128420399ed1",
+    "task_status": "PENDING"
+  }
+}
+```
+
+## GET 查询任务
+
+```
+GET /alibailian/api/v1/tasks/{task_id}
+```
+
+### 请求示例
+
+```bash cURL
+curl https://crazyrouter.com/alibailian/api/v1/tasks/a55bfe14-6e78-4b9d-b97d-128420399ed1   -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### 响应示例
+
+```json
+{
+  "usage": {
+    "SR": 480,
+    "duration": 5,
+    "video_count": 1
+  },
+  "output": {
+    "task_id": "a55bfe14-6e78-4b9d-b97d-128420399ed1",
+    "end_time": "2025-10-11 19:02:27.297",
+    "video_url": "https://dashscope-result.example.com/video.mp4",
+    "orig_prompt": "改变一下光线",
+    "submit_time": "2025-10-11 18:55:56.952",
+    "task_status": "SUCCEEDED",
+    "actual_prompt": "橙衣男性骑着扫帚从画面右侧向左侧高速飞过……",
+    "scheduled_time": "2025-10-11 18:55:57.908"
+  },
+  "request_id": "ec8f059e-f2e5-4887-bb43-3306cd38f403"
+}
+```
+
+## 本地验证到的错误响应
+
+- 本地已验证创建路由存在；模型不可用时会返回 `model_not_found` 类业务错误，而不是 `404`
+- 本地已验证查询路由存在；不存在的任务会返回：
+
+```json
+{
+  "code": "task_not_exist",
+  "message": "task_not_exist",
+  "data": null
+}
+```
+
+<Note>
+阿里百炼这组路径更适合“协议兼容迁移”。请求体和返回体会更贴近原始 DashScope / 百炼风格，而不是 Crazyrouter 的统一视频格式。
+</Note>

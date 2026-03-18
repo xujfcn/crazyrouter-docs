@@ -8,6 +8,19 @@ api: 'POST /api/token/'
 
 Create a new API token for calling AI model APIs.
 
+<Note>
+  The `/api/token/*` endpoints are mainly for Crazyrouter dashboard automation around API key management. They require a user `access token` plus the `New-Api-User` header, and are not the normal interface for `sk-xxx` model calls.
+</Note>
+
+## Authentication
+
+This endpoint requires user-side authentication:
+
+```text
+Authorization: Bearer your_access_token
+New-Api-User: 1
+```
+
 ## Request Parameters
 
 <ParamField body="name" type="string" required>
@@ -15,41 +28,41 @@ Create a new API token for calling AI model APIs.
 </ParamField>
 
 <ParamField body="remain_quota" type="integer" default="0">
-  Initial quota (internal quota units). When set to 0, use with `unlimited_quota`
+  Initial quota in internal quota units. If set to 0, use it together with `unlimited_quota`
 </ParamField>
 
 <ParamField body="unlimited_quota" type="boolean" default="false">
-  Whether to set unlimited quota
+  Whether the token has unlimited quota
 </ParamField>
 
 <ParamField body="expired_time" type="integer" default="-1">
-  Expiration time (Unix timestamp), -1 means never expires
+  Expiration timestamp. `-1` means never expires
 </ParamField>
 
-<ParamField body="models" type="string[]">
-  List of allowed models. Empty means all models are allowed
+<ParamField body="model_limits_enabled" type="boolean" default="false">
+  Whether to enable a model whitelist
 </ParamField>
 
-<ParamField body="subnet" type="string">
-  IP whitelist in CIDR format, e.g. `192.168.1.0/24`. Empty means no restriction
+<ParamField body="model_limits" type="string">
+  Model restriction config as a string, usually a JSON string such as `["gpt-4o","claude-sonnet-4-20250514"]`
+</ParamField>
+
+<ParamField body="allow_ips" type="string">
+  IP whitelist string. You can pass a single IP or multiple IPs separated by newlines
+</ParamField>
+
+<ParamField body="group" type="string">
+  Token group. It must be a group the current user is allowed to use
 </ParamField>
 
 ## Response Format
 
+The current implementation only returns a success state after creation:
+
 ```json
 {
   "success": true,
-  "message": "",
-  "data": {
-    "id": 10,
-    "key": "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-    "name": "Production",
-    "status": 1,
-    "remain_quota": 100000,
-    "unlimited_quota": false,
-    "expired_time": -1,
-    "models": ["gpt-4o", "claude-sonnet-4-20250514"]
-  }
+  "message": ""
 }
 ```
 
@@ -58,6 +71,7 @@ Create a new API token for calling AI model APIs.
 <CodeGroup>
 
 ```python Python
+import json
 import requests
 
 headers = {
@@ -75,13 +89,13 @@ response = requests.post(
         "remain_quota": 100000,
         "unlimited_quota": False,
         "expired_time": -1,
-        "models": ["gpt-4o", "claude-sonnet-4-20250514", "gemini-2.5-pro"]
+        "model_limits_enabled": True,
+        "model_limits": json.dumps(["gpt-4o", "claude-sonnet-4-20250514"]),
+        "allow_ips": "203.0.113.10"
     }
 )
 
-data = response.json()
-if data["success"]:
-    print(f"Token created: {data['data']['key']}")
+print(response.json())
 ```
 
 ```bash cURL
@@ -93,12 +107,13 @@ curl -X POST https://crazyrouter.com/api/token/ \
     "name": "Production",
     "remain_quota": 100000,
     "expired_time": -1,
-    "models": ["gpt-4o"]
+    "model_limits_enabled": true,
+    "model_limits": "[\"gpt-4o\"]"
   }'
 ```
 
 </CodeGroup>
 
-<Note>
-  Save the returned `key` securely after creation. The full key is only displayed once at creation time.
-</Note>
+<Warning>
+  The current create endpoint does not return the full generated `key` in the response. If your workflow requires copying the full token immediately, prefer creating it from the console UI and saving it there.
+</Warning>

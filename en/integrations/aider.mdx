@@ -1,57 +1,430 @@
 ---
 title: 'Aider Setup Guide'
-description: 'Configure Crazyrouter API in the Aider CLI tool'
+description: 'Connect Aider to Crazyrouter through the OpenAI-compatible path, with separate Windows and macOS install flows, config-file setup, env vars, and validation steps'
 ---
+
+Aider is a practical terminal pair-programming tool that works especially well for small iterative code changes, diff review, explicit context-file control, and repeated fix cycles inside a git repo. For Crazyrouter, the safest path is Aider's officially supported OpenAI-compatible setup.
 
 ## Overview
 
-Aider is a command-line AI programming assistant that supports collaborating with AI to write code directly in the terminal.
+With environment variables or `~/.aider.conf.yml`, Aider can send requests to Crazyrouter:
 
-## Configuration
+- recommended protocol: `OpenAI-compatible API`
+- base URL: `https://crazyrouter.com/v1`
+- auth variable: `OPENAI_API_KEY`
+- recommended default model string: `openai/gpt-5.3-codex`
 
-### Environment Variables
+<Tip>
+If your main workflow is `read code -> edit a few places -> inspect the diff -> refine once more`, Aider is often one of the lightest and easiest tools to operationalize.
+</Tip>
+
+## Best For
+
+- users who want small-step code edits from the terminal
+- workflows that need explicit control over context files, diffs, and commit cadence
+- teams that want Aider billed separately from Codex or Claude Code
+- users who want the simplest OpenAI-compatible Crazyrouter setup path
+
+## Protocol Used
+
+Recommended protocol: `OpenAI-compatible API`
+
+Aider officially supports these settings:
+
+- `OPENAI_API_KEY`
+- `OPENAI_API_BASE`
+- `openai-api-key`
+- `openai-api-base`
+
+For Crazyrouter, use:
+
+```text
+OPENAI_API_BASE=https://crazyrouter.com/v1
+```
+
+One important accuracy detail: in Aider's official OpenAI-compatible docs, model names are typically written as `openai/<model-name>`. So Crazyrouter's `gpt-5.3-codex` should usually be entered in Aider as:
+
+```text
+openai/gpt-5.3-codex
+```
+
+<Warning>
+This is one of the most important corrections in this doc upgrade. In your Crazyrouter token allowlist, keep the raw model id such as `gpt-5.3-codex`. But in Aider commands and `~/.aider.conf.yml`, prefer the `openai/...` model form.
+</Warning>
+
+## Prerequisites
+
+| Item | Notes |
+|------|-------|
+| Crazyrouter account | Create one at [crazyrouter.com](https://crazyrouter.com) |
+| Crazyrouter token | Create a dedicated token for Aider |
+| Git | Prefer `git 2.23+` |
+| Python | If you use the `aider-install` path, make sure you have `Python 3.8-3.13`; if you use the official one-line installer, it can provision Python 3.12 as needed |
+| Aider | Use a current stable version |
+| Git repo | Aider generally works best inside a git repo |
+| Allowed models | Allow at least one coding-friendly model |
+
+Suggested starter allowlist:
+
+- `gpt-5.3-codex`
+- `gpt-4.1`
+- `claude-sonnet-4-6`
+
+## Full Install Path By Operating System
+
+### Recommended Windows Path
+
+The most reliable Windows setup is: `Git` + `Python` + `PowerShell install flow for Aider` + `PowerShell environment variables`.
+
+Recommended order:
+
+1. Install Git
+2. Install Python
+3. Install Aider from the official PowerShell installer, or use `aider-install`
+4. Set temporary env vars in PowerShell
+5. Persist user-level env vars in PowerShell
+6. Open a fresh terminal and verify both the command and variables
+
+Recommended verification commands:
+
+```powershell
+git --version
+python --version
+pip --version
+aider --version
+where.exe git
+where.exe python
+where.exe aider
+```
+
+If `aider --version` is not found, close and reopen PowerShell and try again.
+
+### Recommended macOS Path
+
+The smoothest macOS setup is usually: `Xcode Command Line Tools` + `Homebrew` + `Git` + `Python` + `Aider official installer` + `~/.zshrc` for persistent env vars.
+
+Recommended order:
+
+1. Install Xcode Command Line Tools
+2. Install Homebrew if needed
+3. Install Git and Python
+4. Run Aider's official installer, or install via `aider-install` or `uv`
+5. Persist env vars in `~/.zshrc`
+6. Open a fresh terminal and verify the executable path
+
+Recommended verification commands:
 
 ```bash
-export OPENAI_API_KEY=sk-xxx
-export OPENAI_API_BASE=https://crazyrouter.com/v1
+git --version
+python3 --version
+pip3 --version
+aider --version
+which git
+which python3
+which aider
 ```
 
-### Launch Aider
+### Linux Note
+
+Linux can generally follow the same terminal flow as macOS, except persistent variables usually belong in `~/.bashrc`. For a first pass, it is safer to validate with temporary env vars before making the setup permanent.
+
+## Detailed Install Walkthrough
+
+Before connecting Aider to Crazyrouter, make sure the local toolchain is ready.
+
+### 1. Install Git
+
+<Tabs>
+  <Tab title="Windows PowerShell">
+    ```powershell
+    winget install --id Git.Git -e --source winget
+    git --version
+    where.exe git
+    ```
+  </Tab>
+  <Tab title="macOS">
+    ```bash
+    xcode-select --install
+    git --version
+    ```
+    Or:
+    ```bash
+    brew install git
+    git --version
+    which git
+    ```
+  </Tab>
+  <Tab title="Ubuntu / Debian">
+    ```bash
+    sudo apt update
+    sudo apt install -y git
+    git --version
+    which git
+    ```
+  </Tab>
+</Tabs>
+
+Recommended one-time identity setup:
 
 ```bash
-# Use GPT-4o
-aider --model gpt-4o
-
-# Use Claude
-aider --model claude-sonnet-4-20250514
-
-# Use Gemini
-aider --model gemini-2.5-pro
+git config --global user.name "Your Name"
+git config --global user.email "you@example.com"
+git config --global init.defaultBranch main
 ```
 
-### Configuration File
+### 2. Install Python and pip
 
-Create `~/.aider.conf.yml`:
+<Tabs>
+  <Tab title="Windows PowerShell">
+    ```powershell
+    winget install Python.Python.3.12
+    python --version
+    pip --version
+    where.exe python
+    ```
+  </Tab>
+  <Tab title="macOS">
+    ```bash
+    brew install python
+    python3 --version
+    pip3 --version
+    which python3
+    ```
+  </Tab>
+  <Tab title="Ubuntu / Debian">
+    ```bash
+    sudo apt update
+    sudo apt install -y python3 python3-pip python3-venv
+    python3 --version
+    pip3 --version
+    which python3
+    ```
+  </Tab>
+</Tabs>
 
-```yaml
-openai-api-key: sk-xxx
-openai-api-base: https://crazyrouter.com/v1
-model: gpt-4o
-```
+### 3. Install Aider
 
-## Common Commands
+Aider's current official one-line installers are:
+
+<Tabs>
+  <Tab title="Windows PowerShell">
+    ```powershell
+    powershell -ExecutionPolicy ByPass -c "irm https://aider.chat/install.ps1 | iex"
+    aider --version
+    where.exe aider
+    ```
+  </Tab>
+  <Tab title="macOS / Linux">
+    ```bash
+    curl -LsSf https://aider.chat/install.sh | sh
+    aider --version
+    which aider
+    ```
+  </Tab>
+</Tabs>
+
+If you prefer a more explicit step-by-step install, Aider's official `aider-install` flow is also valid:
+
+<Tabs>
+  <Tab title="Windows PowerShell">
+    ```powershell
+    python -m pip install aider-install
+    aider-install
+    aider --version
+    ```
+  </Tab>
+  <Tab title="macOS / Linux">
+    ```bash
+    python3 -m pip install aider-install
+    aider-install
+    aider --version
+    ```
+  </Tab>
+</Tabs>
+
+If your team already standardizes on `uv`, Aider's docs also allow:
 
 ```bash
-# Add file to context
-/add src/main.py
-
-# Add as read-only
-/read-only README.md
-
-# Switch model
-/model claude-sonnet-4-20250514
+python -m pip install uv
+uv tool install --force --python python3.12 --with pip aider-chat@latest
+aider --version
 ```
+
+<Warning>
+Avoid starting with a plain system-wide `pip install aider-chat`. Aider's own installers, `aider-install`, or `uv` are usually safer and easier to debug.
+</Warning>
+
+## Quick Start
+
+<Steps>
+  <Step title="Create an Aider-specific token">
+    In Crazyrouter, create a token named something like `aider`. Start by allowing only models such as `gpt-5.3-codex`, `gpt-4.1`, and `claude-sonnet-4-6`.
+
+    <Note>
+    The allowlist here uses Crazyrouter's raw model ids. Do not add the `openai/` prefix in the Crazyrouter token allowlist itself.
+    </Note>
+  </Step>
+  <Step title="Set the environment variables">
+    <Tabs>
+      <Tab title="Linux / macOS">
+        ```bash
+        export OPENAI_API_KEY=sk-xxx
+        export OPENAI_API_BASE=https://crazyrouter.com/v1
+        echo $OPENAI_API_KEY
+        echo $OPENAI_API_BASE
+        ```
+      </Tab>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        $env:OPENAI_API_KEY = "sk-xxx"
+        $env:OPENAI_API_BASE = "https://crazyrouter.com/v1"
+        echo $env:OPENAI_API_KEY
+        echo $env:OPENAI_API_BASE
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+  <Step title="Persist the environment variables">
+    <Tabs>
+      <Tab title="Linux Bash">
+        ```bash
+        echo 'export OPENAI_API_KEY=sk-xxx' >> ~/.bashrc
+        echo 'export OPENAI_API_BASE=https://crazyrouter.com/v1' >> ~/.bashrc
+        source ~/.bashrc
+        echo $OPENAI_API_BASE
+        ```
+      </Tab>
+      <Tab title="macOS / Zsh">
+        ```bash
+        echo 'export OPENAI_API_KEY=sk-xxx' >> ~/.zshrc
+        echo 'export OPENAI_API_BASE=https://crazyrouter.com/v1' >> ~/.zshrc
+        source ~/.zshrc
+        echo $OPENAI_API_BASE
+        ```
+      </Tab>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        [System.Environment]::SetEnvironmentVariable("OPENAI_API_KEY", "sk-xxx", "User")
+        [System.Environment]::SetEnvironmentVariable("OPENAI_API_BASE", "https://crazyrouter.com/v1", "User")
+
+        $env:OPENAI_API_KEY = "sk-xxx"
+        $env:OPENAI_API_BASE = "https://crazyrouter.com/v1"
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+  <Step title="Optionally add a config file">
+    Add this to `~/.aider.conf.yml`:
+    ```yaml
+    model: openai/gpt-5.3-codex
+    openai-api-base: https://crazyrouter.com/v1
+    ```
+
+    If you prefer a safer secret-handling pattern, keep the key only in environment variables and store only `model` plus `openai-api-base` in the config file.
+  </Step>
+  <Step title="Prepare the repo before the first real run">
+    If this folder is not a Git repo yet:
+    ```bash
+    git init
+    git add .
+    git commit -m "chore: initial snapshot before Aider"
+    ```
+    If it is already an existing repo, at least inspect the current state first:
+    ```bash
+    git status
+    ```
+  </Step>
+  <Step title="Launch Aider inside your repo">
+    ```bash
+    aider --model openai/gpt-5.3-codex
+    ```
+  </Step>
+  <Step title="Run the first validation">
+    Start with a low-risk task such as: `Check the README for typos and suggest the smallest safe edits.` Confirm Aider can read files and respond sensibly before using it for real code changes.
+  </Step>
+</Steps>
+
+## Recommended Model Setup
+
+| Use case | Recommended Aider model string | Raw Crazyrouter model | Why |
+|----------|--------------------------------|-----------------------|-----|
+| default coding driver | `openai/gpt-5.3-codex` | `gpt-5.3-codex` | best fit for code edits, diff reasoning, and repeated repair loops |
+| stable baseline | `openai/gpt-4.1` | `gpt-4.1` | useful for first-pass compatibility checks |
+| Claude-style alternative | `openai/claude-sonnet-4-6` | `claude-sonnet-4-6` | good for long-context explanation and steady multi-turn collaboration |
+| cheaper high-frequency tasks | `openai/gpt-4.1-mini` | `gpt-4.1-mini` | useful for lighter prompts and routine adjustments |
+
+Recommended rollout: start with `openai/gpt-5.3-codex`. If cost matters more or you are just validating the path, use `openai/gpt-4.1` first.
+
+## Token Setup Best Practices
+
+| Setting | Recommendation | Notes |
+|---------|----------------|-------|
+| dedicated token | Required | Do not share the Aider token with other IDE or CLI tools |
+| model allowlist | Strongly recommended | Keep the model set small to avoid accidental high-cost switching |
+| IP restriction | Situational | Consider it on fixed servers; be careful on mobile dev machines |
+| quota cap | Strongly recommended | Long sessions and repeated repair loops can add up quickly |
+| environment split | Recommended | Separate local development, remote hosts, and CI |
+| leak response | Rotate immediately | If `.aider.conf.yml`, shell history, or recordings expose the key, rotate it |
+
+## Verification Checklist
+
+- [ ] `git --version` works
+- [ ] `python --version` or `python3 --version` works
+- [ ] `aider --version` works
+- [ ] `OPENAI_API_KEY` is set correctly
+- [ ] `OPENAI_API_BASE` is `https://crazyrouter.com/v1`
+- [ ] if `~/.aider.conf.yml` is used, the model string is written as `openai/...`
+- [ ] `aider --model openai/...` launches correctly
+- [ ] the first read-only or small-change task succeeds
+- [ ] Crazyrouter logs show the matching request
+- [ ] token quota and model allowlist match your intended setup
+
+## Common Errors And Fixes
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| `401 unauthorized` | wrong, expired, or incomplete API key | generate a new token and set it again |
+| `403` or `model not allowed` | the token does not allow the selected model | allow that model in Crazyrouter token settings |
+| `404` | wrong base URL or missing `/v1` | use `https://crazyrouter.com/v1` |
+| `model not found` | wrong model string or missing the `openai/` prefix in Aider | switch back to `openai/gpt-5.3-codex`, `openai/gpt-4.1`, or another confirmed `openai/...` model string |
+| Aider launches but performs poorly | the model is too weak or the context is too noisy | return to `gpt-5.3-codex` and reduce the context files |
+| config file and env vars behave inconsistently | the two configuration sources conflict | pick one primary source and restart Aider |
+| cost rises too quickly | long sessions and too many context files | clear or restart the session and shrink the context |
+
+## Performance And Cost Tips
+
+- validate on a small repo first
+- keep `openai/gpt-5.3-codex` as the main model and move lighter work to `openai/gpt-4.1` or `openai/gpt-4.1-mini`
+- split tokens by project type so cost tracking stays clear
+- clear context when the session becomes too long or drifts away from the task
+- after larger edits, review both the Aider diff and Crazyrouter logs
+
+## FAQ
+
+### What base URL should I use for Aider?
+
+Use `https://crazyrouter.com/v1`.
+
+### Why should the model name usually be `openai/gpt-5.3-codex` instead of just `gpt-5.3-codex`?
+
+Because Aider's official OpenAI-compatible guidance uses the `openai/<model-name>` pattern. In Crazyrouter token settings, keep the raw model id. In Aider commands and config, prefer the `openai/...` form.
+
+### Should I prefer env vars or a config file?
+
+Both work. Environment variables are faster for a first setup; `~/.aider.conf.yml` is useful once the setup becomes permanent.
+
+### Which model should I try first?
+
+Start with `openai/gpt-5.3-codex`.
+
+### Does Aider have to run inside a git repo?
+
+Not strictly, but the experience is usually best inside a git repo because change review is easier and safer.
+
+### Why should I avoid allowing too many models at first?
+
+Because multi-turn sessions make troubleshooting, budget control, and stability harder when the model surface area is too broad.
 
 <Note>
-  Aider has native support for Claude models. If using the Claude series, you can also set the `ANTHROPIC_API_KEY` and `ANTHROPIC_API_BASE` environment variables.
+If you want a very lightweight terminal tool for day-to-day small-step coding, Aider still deserves a strong place in the Crazyrouter application guides.
 </Note>

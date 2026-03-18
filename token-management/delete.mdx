@@ -8,6 +8,19 @@ api: 'DELETE /api/token/{id}'
 
 永久删除指定的 API 令牌。删除后该令牌的 API Key 将立即失效。
 
+<Note>
+  这组 `/api/token/*` 接口主要用于 Crazyrouter 控制台中的 API Key 管理自动化。它们需要用户 `access token` 与 `New-Api-User` 请求头，不是给普通 `sk-xxx` 模型调用流程直接使用的接口。
+</Note>
+
+## 认证方式
+
+使用用户侧认证，请在请求头中携带：
+
+```text
+Authorization: Bearer your_access_token
+New-Api-User: 1
+```
+
 ## 路径参数
 
 <ParamField path="id" type="integer" required>

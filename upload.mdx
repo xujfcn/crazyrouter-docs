@@ -1,84 +1,54 @@
 ---
-title: '上传图片'
-description: '上传图片到内置图床或自建图床'
-api: 'POST /api/upload'
+title: '图片上传说明'
+description: '关于图片 URL、模型原生上传和替代方案的说明'
 ---
 
-## 概述
+## 当前状态
 
-Crazyrouter 提供图片上传接口，支持将图片上传到内置图床。上传后返回可访问的图片 URL，可用于识图、图像编辑等 API 调用。
+Crazyrouter 当前没有对外开放通用的公共图床接口。
 
-## 内置图床
+这意味着你不应依赖以下端点：
 
-### 请求
-
-```
+```text
 POST /api/upload
-Content-Type: multipart/form-data
-Authorization: Bearer sk-xxx
 ```
 
-<ParamField body="file" type="file" required>
-  图片文件，支持 JPG、PNG、GIF、WebP 格式
-</ParamField>
+## 推荐做法
 
-### 响应
+根据你的使用场景，推荐以下几种方式：
 
-```json
-{
-  "success": true,
-  "message": "",
-  "data": "https://crazyrouter.com/uploads/2026/01/abc123.png"
-}
-```
+### 1. 使用你自己的图床或对象存储
 
-## 代码示例
+最推荐的方式是先把图片上传到你自己的 S3 / R2 / OSS / COS / CDN，得到一个可公网访问的 URL，再把该 URL 传给 Crazyrouter 支持图片输入的接口。
+
+适用场景：
+
+- GPT-4o / Claude / Gemini 识图
+- 图像编辑
+- 图生视频
+- 工作流平台集成
+
+### 2. 直接使用模型原生上传能力
+
+部分模型或上游接口本身支持文件上传、multipart/form-data 或专用上传流程，应优先按照对应文档调用。
+
+例如：
+
+- Midjourney 图片上传：`POST /mj/submit/upload-discord-images`
+- OpenAI 兼容图像编辑：`POST /v1/images/edits`
+- 音频转写：`POST /v1/audio/transcriptions`
+
+### 3. 在业务侧先保存文件，再传 URL
+
+如果你的应用允许用户上传本地图片，建议你的服务端先保存文件并生成访问 URL，然后再调用 Crazyrouter。
+
+## 示例：使用公网图片 URL 进行识图
 
 <CodeGroup>
 
 ```python Python
-import requests
-
-url = "https://crazyrouter.com/api/upload"
-headers = {
-    "Authorization": "Bearer sk-xxx"
-}
-
-with open("image.png", "rb") as f:
-    response = requests.post(
-        url,
-        headers=headers,
-        files={"file": ("image.png", f, "image/png")}
-    )
-
-data = response.json()
-image_url = data["data"]
-print(f"图片地址: {image_url}")
-```
-
-```bash cURL
-curl -X POST https://crazyrouter.com/api/upload \
-  -H "Authorization: Bearer sk-xxx" \
-  -F "file=@image.png"
-```
-
-</CodeGroup>
-
-## 配合识图使用
-
-上传图片后，可以将返回的 URL 用于 GPT-4o 识图：
-
-```python
-# 先上传图片
-upload_resp = requests.post(
-    "https://crazyrouter.com/api/upload",
-    headers={"Authorization": "Bearer sk-xxx"},
-    files={"file": open("photo.jpg", "rb")}
-)
-image_url = upload_resp.json()["data"]
-
-# 再调用识图
 from openai import OpenAI
+
 client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
 
 response = client.chat.completions.create(
@@ -87,17 +57,35 @@ response = client.chat.completions.create(
         "role": "user",
         "content": [
             {"type": "text", "text": "描述这张图片"},
-            {"type": "image_url", "image_url": {"url": image_url}}
+            {"type": "image_url", "image_url": {"url": "https://example.com/photo.jpg"}}
         ]
     }]
 )
 print(response.choices[0].message.content)
 ```
 
-## 自建图床
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer sk-xxx" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{
+      "role": "user",
+      "content": [
+        {"type": "text", "text": "描述这张图片"},
+        {"type": "image_url", "image_url": {"url": "https://example.com/photo.jpg"}}
+      ]
+    }]
+  }'
+```
 
-如果需要使用自建图床，可在系统设置中配置图床 API 地址。支持兼容 S3 协议的对象存储服务。
+</CodeGroup>
+
+<Warning>
+  如果你的图片 URL 不能被公网访问，上游模型通常无法读取该图片。
+</Warning>
 
 <Note>
-  上传文件大小限制为 20MB。建议在上传前压缩图片以节省存储空间和加快传输速度。
+  如果后续 Crazyrouter 重新开放通用上传接口，本页会更新为正式的接口文档。
 </Note>

@@ -8,19 +8,23 @@ api: 'GET /api/token/'
 
 Retrieve all API tokens created by the current user, with pagination support.
 
+<Note>
+  The `/api/token/*` endpoints are mainly for Crazyrouter dashboard automation around API key management. They require a user `access token` plus the `New-Api-User` header, and are not the normal interface for `sk-xxx` model calls.
+</Note>
+
 ## Authentication
 
-Authenticate using the user's Access Token with the following headers:
+Authenticate using the user's access token with the following headers:
 
-```
+```text
 Authorization: Bearer {access_token}
 New-Api-User: {user_id}
 ```
 
 ## Request Parameters
 
-<ParamField query="p" type="integer" default="0">
-  Page number, starting from 0
+<ParamField query="p" type="integer" default="1">
+  Page number. The backend accepts older styles too, but `1` is the recommended starting page
 </ParamField>
 
 <ParamField query="size" type="integer" default="10">
@@ -33,23 +37,30 @@ New-Api-User: {user_id}
 {
   "success": true,
   "message": "",
-  "data": [
-    {
-      "id": 1,
-      "user_id": 1,
-      "key": "sk-xxxxxxxxxxxxxxxx",
-      "status": 1,
-      "name": "My Token",
-      "created_time": 1706000000,
-      "accessed_time": 1706100000,
-      "expired_time": -1,
-      "remain_quota": 500000,
-      "unlimited_quota": false,
-      "used_quota": 12345,
-      "models": ["gpt-4o", "claude-sonnet-4-20250514"],
-      "subnet": ""
-    }
-  ]
+  "data": {
+    "page": 1,
+    "page_size": 10,
+    "total": 1,
+    "items": [
+      {
+        "id": 1,
+        "user_id": 1,
+        "key": "sk-xxxxxxxxxxxxxxxx",
+        "status": 1,
+        "name": "My Token",
+        "created_time": 1706000000,
+        "accessed_time": 1706100000,
+        "expired_time": -1,
+        "remain_quota": 500000,
+        "unlimited_quota": false,
+        "model_limits_enabled": true,
+        "model_limits": "[\"gpt-4o\",\"claude-sonnet-4-20250514\"]",
+        "allow_ips": "203.0.113.10",
+        "used_quota": 12345,
+        "group": "default"
+      }
+    ]
+  }
 }
 ```
 
@@ -58,14 +69,17 @@ New-Api-User: {user_id}
 | Field | Type | Description |
 |-------|------|-------------|
 | `id` | int | Token ID |
-| `key` | string | API Key (sk-xxx format) |
+| `key` | string | API key in `sk-xxx` format |
 | `status` | int | Status: 1=enabled, 2=disabled |
 | `name` | string | Token name |
-| `expired_time` | int | Expiration timestamp, -1 means never expires |
+| `expired_time` | int | Expiration timestamp, `-1` means never expires |
 | `remain_quota` | int | Remaining quota |
 | `unlimited_quota` | bool | Whether quota is unlimited |
 | `used_quota` | int | Used quota |
-| `models` | string[] | Allowed model list, empty means all models |
+| `model_limits_enabled` | bool | Whether the model whitelist is enabled |
+| `model_limits` | string | Model restriction config string |
+| `allow_ips` | string | IP whitelist string |
+| `group` | string | Group |
 
 ## Code Examples
 
@@ -81,17 +95,17 @@ headers = {
 }
 
 response = requests.get(
-    "https://crazyrouter.com/api/token/?p=0&size=100",
+    "https://crazyrouter.com/api/token/?p=1&size=100",
     headers=headers
 )
 
-tokens = response.json()["data"]
-for token in tokens:
+page = response.json()["data"]
+for token in page["items"]:
     print(f"[{token['name']}] {token['key'][:10]}... Quota: {token['remain_quota']}")
 ```
 
 ```bash cURL
-curl "https://crazyrouter.com/api/token/?p=0&size=100" \
+curl "https://crazyrouter.com/api/token/?p=1&size=100" \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 1"
 ```

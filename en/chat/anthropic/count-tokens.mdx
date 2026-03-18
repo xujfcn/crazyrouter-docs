@@ -1,0 +1,99 @@
+---
+title: "Claude Token Counting"
+description: "POST /v1/messages/count_tokens estimate the input token count for a Claude Messages request"
+---
+
+# Claude Token Counting
+
+```
+POST /v1/messages/count_tokens
+```
+
+Use this endpoint to estimate input token usage before you send the real `POST /v1/messages` request. It is useful for Claude CLI, Claude Code, budget checks, and context-trimming logic.
+
+## Authentication
+
+The recommended headers follow Anthropic-style requests:
+
+```http
+x-api-key: YOUR_API_KEY
+anthropic-version: 2023-06-01
+```
+
+Standard Bearer authentication also works, but Anthropic ecosystem clients usually send the headers above.
+
+## Request Body
+
+The body follows the Claude Messages shape. The smallest practical request usually includes:
+
+- `model`
+- `messages`
+
+If your request also includes `system`, `tools`, tool results, or text content, those are included in the estimate too.
+
+## Request Example
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/messages/count_tokens   -H "Content-Type: application/json"   -H "x-api-key: YOUR_API_KEY"   -H "anthropic-version: 2023-06-01"   -d '{
+    "model": "claude-sonnet-4-6",
+    "messages": [
+      {"role": "user", "content": "hello"}
+    ]
+  }'
+```
+
+```python Python
+import requests
+
+resp = requests.post(
+    "https://crazyrouter.com/v1/messages/count_tokens",
+    headers={
+        "x-api-key": "YOUR_API_KEY",
+        "anthropic-version": "2023-06-01",
+        "Content-Type": "application/json",
+    },
+    json={
+        "model": "claude-sonnet-4-6",
+        "messages": [
+            {"role": "user", "content": "hello"}
+        ],
+    },
+)
+
+print(resp.json())
+```
+
+</CodeGroup>
+
+## Response Example
+
+```json
+{
+  "input_tokens": 4
+}
+```
+
+## Response Fields
+
+| Field | Type | Description |
+|------|------|-------------|
+| `input_tokens` | integer | Estimated input tokens for the text portion of the request |
+| `warning` | string | Optional warning; may appear when images or files were not included in the estimate |
+
+## Current Limits
+
+The current implementation mainly estimates:
+
+- `system`
+- text content in `messages`
+- text and JSON content in tool definitions and tool results
+
+<Warning>
+If the request contains images or files, those image/file tokens are not included in `input_tokens`. In that case the response may include a `warning`, and real billing can be higher than this estimate.
+</Warning>
+
+<Note>
+This endpoint returns an estimate, not a final billing record. Actual usage is determined by the real model call.
+</Note>

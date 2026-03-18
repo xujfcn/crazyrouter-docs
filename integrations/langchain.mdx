@@ -1,37 +1,269 @@
 ---
 title: 'LangChain 配置教程'
-description: '在 LangChain 框架中配置 Crazyrouter API'
+description: '在 LangChain 的 Python 与 JavaScript / TypeScript 项目中通过 OpenAI 兼容方式接入 Crazyrouter，并补齐安装、环境变量、验证、RAG 与排障步骤'
 ---
 
-## 概述
+LangChain 是最常用的 LLM 应用开发框架之一，适合做聊天接口封装、提示词链、工具调用、RAG、代理式工作流和应用级编排。对接 Crazyrouter 时，最稳妥的方式是走 LangChain 官方支持的 OpenAI 兼容组件。
 
-LangChain 是最流行的 LLM 应用开发框架，支持 Python 和 JavaScript。
+## 概览
 
-## Python 配置
+通过 LangChain 的 OpenAI 组件，你可以把请求发到 Crazyrouter：
 
-### 安装
+- 推荐协议：`OpenAI-compatible API`
+- Base URL：`https://crazyrouter.com/v1`
+- 认证变量：`OPENAI_API_KEY`
+- Python 主包：`langchain-openai`
+- JavaScript / TypeScript 主包：`@langchain/openai`
 
-```bash
-pip install langchain-openai langchain-community
+<Tip>
+如果你准备把 Crazyrouter 接进自己的应用代码，而不是只在桌面客户端里聊天，LangChain 通常是最自然的一条工程化接入路径。
+</Tip>
+
+## 适合谁用
+
+- 想在 Python 或 Node.js 项目里正式集成 Crazyrouter 的开发者
+- 想做提示词链、RAG、工具调用、工作流编排的人
+- 想把模型调用逻辑统一抽象，不想直接手写底层 HTTP 请求的人
+- 想保留后续切换模型或切换上游灵活性的人
+
+## 使用协议
+
+推荐协议：`OpenAI-compatible API`
+
+Crazyrouter 对应核心配置：
+
+```text
+OPENAI_API_KEY=sk-xxx
+BASE_URL=https://crazyrouter.com/v1
 ```
 
-### Chat Model
+在 LangChain 里对应写法通常是：
+
+- Python：`api_key` + `base_url`
+- JavaScript / TypeScript：`apiKey` + `configuration.baseURL`
+
+## 系统要求与前置条件
+
+| 项目 | 说明 |
+|------|------|
+| Crazyrouter 账号 | 先在 [crazyrouter.com](https://crazyrouter.com) 注册 |
+| Crazyrouter token | 建议为 LangChain 项目单独创建一个 token |
+| Python | 建议 `Python 3.10+` |
+| Node.js | 建议 `Node.js 18+` |
+| LangChain 包 | Python 用 `langchain-openai`；JS / TS 用 `@langchain/openai` |
+| 可用模型 | 至少放行 1 个聊天模型；若要做向量检索，还要放行 embedding 模型 |
+
+建议初始白名单：
+
+- `gpt-4.1`
+- `gpt-4.1-mini`
+- `gpt-5.2`
+- `text-embedding-3-large`
+
+## Python 项目完整接入路径
+
+### Windows 推荐路径
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -U pip
+pip install -U langchain-openai langchain-community
+python --version
+pip --version
+```
+
+如果你要跑 FAISS 示例，再补：
+
+```powershell
+pip install faiss-cpu
+```
+
+### macOS / Linux 推荐路径
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -U pip
+pip install -U langchain-openai langchain-community
+python --version
+pip --version
+```
+
+如果你要跑 FAISS 示例，再补：
+
+```bash
+pip install faiss-cpu
+```
+
+## JavaScript / TypeScript 项目完整接入路径
+
+### Windows PowerShell
+
+```powershell
+npm init -y
+npm install @langchain/openai @langchain/core
+node -v
+npm -v
+```
+
+### macOS / Linux
+
+```bash
+npm init -y
+npm install @langchain/openai @langchain/core
+node -v
+npm -v
+```
+
+## 从零开始完整配置
+
+<Steps>
+  <Step title="第 1 步：在 Crazyrouter 创建 LangChain 专用 token">
+    第一次只建议放行：
+
+    - `gpt-4.1`
+    - `gpt-4.1-mini`
+    - `text-embedding-3-large`
+
+    如果你已经确定会跑更复杂的编码 / 推理场景，再增加 `gpt-5.2` 等更强模型。
+  </Step>
+
+  <Step title="第 2 步：先设置环境变量">
+    <Tabs>
+      <Tab title="macOS / Linux">
+        ```bash
+        export OPENAI_API_KEY=sk-xxx
+        echo $OPENAI_API_KEY
+        ```
+      </Tab>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        $env:OPENAI_API_KEY = "sk-xxx"
+        echo $env:OPENAI_API_KEY
+        ```
+      </Tab>
+    </Tabs>
+
+    如果你打算长期开发，再做持久化：
+
+    <Tabs>
+      <Tab title="Linux Bash">
+        ```bash
+        echo 'export OPENAI_API_KEY=sk-xxx' >> ~/.bashrc
+        source ~/.bashrc
+        ```
+      </Tab>
+      <Tab title="macOS / Zsh">
+        ```bash
+        echo 'export OPENAI_API_KEY=sk-xxx' >> ~/.zshrc
+        source ~/.zshrc
+        ```
+      </Tab>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        [System.Environment]::SetEnvironmentVariable("OPENAI_API_KEY", "sk-xxx", "User")
+        $env:OPENAI_API_KEY = "sk-xxx"
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="第 3 步：完成 Python 最小聊天验证">
+    新建一个 `test_langchain_chat.py`：
+
+    ```python
+    from langchain_openai import ChatOpenAI
+
+    llm = ChatOpenAI(
+        model="gpt-4.1",
+        api_key="sk-xxx",
+        base_url="https://crazyrouter.com/v1",
+        temperature=0,
+    )
+
+    response = llm.invoke("Reply only OK")
+    print(response.content)
+    ```
+
+    运行：
+
+    ```bash
+    python test_langchain_chat.py
+    ```
+  </Step>
+
+  <Step title="第 4 步：改成环境变量版本">
+    跑通后，建议不要把 key 硬编码在代码里：
+
+    ```python
+    import os
+    from langchain_openai import ChatOpenAI
+
+    llm = ChatOpenAI(
+        model="gpt-4.1",
+        api_key=os.environ["OPENAI_API_KEY"],
+        base_url="https://crazyrouter.com/v1",
+        temperature=0,
+    )
+    ```
+  </Step>
+
+  <Step title="第 5 步：完成 JavaScript / TypeScript 最小聊天验证">
+    新建 `test-langchain-chat.mjs`：
+
+    ```javascript
+    import { ChatOpenAI } from "@langchain/openai";
+
+    const llm = new ChatOpenAI({
+      model: "gpt-4.1",
+      apiKey: process.env.OPENAI_API_KEY,
+      configuration: {
+        baseURL: "https://crazyrouter.com/v1",
+      },
+      temperature: 0,
+    });
+
+    const response = await llm.invoke("Reply only OK");
+    console.log(response.content);
+    ```
+
+    运行：
+
+    ```bash
+    node test-langchain-chat.mjs
+    ```
+  </Step>
+
+  <Step title="第 6 步：再逐步增加 Embeddings、Prompt、RAG">
+    不建议一开始就直接上复杂链路。推荐顺序：
+
+    1. 先跑通单轮聊天
+    2. 再跑 Prompt + Output Parser
+    3. 再接 Embeddings
+    4. 最后再做 RAG 或 Agent
+  </Step>
+</Steps>
+
+## Python 示例
+
+### 最小聊天示例
 
 ```python
 from langchain_openai import ChatOpenAI
 
 llm = ChatOpenAI(
-    model="gpt-4o",
+    model="gpt-4.1",
     api_key="sk-xxx",
     base_url="https://crazyrouter.com/v1",
-    temperature=0.7
+    temperature=0.7,
 )
 
 response = llm.invoke("什么是 LangChain？")
 print(response.content)
 ```
 
-### Embeddings
+### Embeddings 示例
 
 ```python
 from langchain_openai import OpenAIEmbeddings
@@ -39,13 +271,14 @@ from langchain_openai import OpenAIEmbeddings
 embeddings = OpenAIEmbeddings(
     model="text-embedding-3-large",
     api_key="sk-xxx",
-    base_url="https://crazyrouter.com/v1"
+    base_url="https://crazyrouter.com/v1",
 )
 
 vectors = embeddings.embed_documents(["文本一", "文本二"])
+print(len(vectors), len(vectors[0]))
 ```
 
-### 链式调用
+### Prompt 链示例
 
 ```python
 from langchain_openai import ChatOpenAI
@@ -53,9 +286,9 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
 llm = ChatOpenAI(
-    model="gpt-4o",
+    model="gpt-4.1",
     api_key="sk-xxx",
-    base_url="https://crazyrouter.com/v1"
+    base_url="https://crazyrouter.com/v1",
 )
 
 prompt = ChatPromptTemplate.from_template("用简单的语言解释 {topic}")
@@ -65,7 +298,7 @@ result = chain.invoke({"topic": "量子计算"})
 print(result)
 ```
 
-### RAG 示例
+### RAG 最小示例
 
 ```python
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
@@ -73,43 +306,119 @@ from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 
-llm = ChatOpenAI(model="gpt-4o", api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
-embeddings = OpenAIEmbeddings(model="text-embedding-3-large", api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+llm = ChatOpenAI(
+    model="gpt-4.1",
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1",
+)
 
-# 创建向量存储
-texts = ["Crazyrouter 支持 300+ AI 模型", "API 按量计费，灵活实惠"]
+embeddings = OpenAIEmbeddings(
+    model="text-embedding-3-large",
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1",
+)
+
+texts = [
+    "Crazyrouter 支持多种 AI 模型协议",
+    "Crazyrouter 支持 OpenAI 兼容调用方式",
+]
+
 vectorstore = FAISS.from_texts(texts, embeddings)
 retriever = vectorstore.as_retriever()
 
-# RAG 链
-prompt = ChatPromptTemplate.from_template("根据以下上下文回答问题：\n{context}\n\n问题：{question}")
+prompt = ChatPromptTemplate.from_template(
+    "根据以下上下文回答问题：\n{context}\n\n问题：{question}"
+)
+
 chain = {"context": retriever, "question": RunnablePassthrough()} | prompt | llm
 
-result = chain.invoke("Crazyrouter 支持多少模型？")
+result = chain.invoke("Crazyrouter 适合用什么协议接 LangChain？")
 print(result.content)
 ```
 
-## JavaScript 配置
+## JavaScript / TypeScript 示例
 
-```bash
-npm install @langchain/openai
-```
+### 最小聊天示例
 
 ```javascript
-import { ChatOpenAI } from '@langchain/openai';
+import { ChatOpenAI } from "@langchain/openai";
 
 const llm = new ChatOpenAI({
-  modelName: 'gpt-4o',
-  openAIApiKey: 'sk-xxx',
+  model: "gpt-4.1",
+  apiKey: process.env.OPENAI_API_KEY,
   configuration: {
-    baseURL: 'https://crazyrouter.com/v1',
+    baseURL: "https://crazyrouter.com/v1",
   },
+  temperature: 0,
 });
 
-const response = await llm.invoke('你好');
+const response = await llm.invoke("你好");
 console.log(response.content);
 ```
 
+## 推荐模型配置
+
+| 使用场景 | 推荐模型 | 原因 |
+|----------|----------|------|
+| 首轮链路验证 | `gpt-4.1` | 最适合先确认 LangChain 与 Crazyrouter 已连通 |
+| 高频轻任务 | `gpt-4.1-mini` | 成本更低，适合简单链路 |
+| 更强推理与编排 | `gpt-5.2` | 适合复杂流程和更高质量输出 |
+| 向量检索 | `text-embedding-3-large` | 适合先做 embedding 基线验证 |
+
+## Token 设置最佳实践
+
+| 设置 | 建议 | 说明 |
+|------|------|------|
+| 专用 token | 必须 | LangChain 项目不要和桌面客户端共用 token |
+| 模型白名单 | 强烈建议 | 先只放行聊天模型 + embedding 模型 |
+| 配额上限 | 强烈建议 | 链式调用、RAG、Agent 会放大消耗 |
+| 环境隔离 | 建议 | dev / staging / production 分开 token |
+| 泄露处理 | 立即轮换 | 不要把 key 提交到 Git；泄露后立即换 key |
+
+## 验证清单
+
+- [ ] Python 或 Node.js 运行环境已就绪
+- [ ] `OPENAI_API_KEY` 已正确设置
+- [ ] `langchain-openai` 或 `@langchain/openai` 已安装
+- [ ] 聊天模型已设置 `base_url` / `baseURL` 为 `https://crazyrouter.com/v1`
+- [ ] 第一条 `Reply only OK` 请求成功返回
+- [ ] Crazyrouter 后台日志能看到对应请求
+- [ ] 若使用 embeddings，embedding 模型也已放行
+- [ ] 若使用 RAG，先在最小文本集上完成验证
+
+## 常见错误与修复
+
+| 现象 | 常见原因 | 修复方式 |
+|------|----------|----------|
+| 401 unauthorized | `OPENAI_API_KEY` 错误、过期或复制错误 | 重新生成 token 并重新设置环境变量 |
+| 404 | `base_url` / `baseURL` 写错或漏了 `/v1` | 改成 `https://crazyrouter.com/v1` |
+| `model not found` | 模型名写错或 token 未放行 | 改回 `gpt-4.1` 等已确认模型并检查白名单 |
+| embeddings 报错 | 忘了放行 embedding 模型 | 给 token 增加 `text-embedding-3-large` |
+| RAG 跑不起来 | 一上来就接了太多组件 | 先回退到单轮聊天，再逐层增加 |
+| 消耗过快 | 链式调用、检索、多轮 Agent 叠加 | 先缩小链路，并单独控制 token 配额 |
+
+## FAQ
+
+### LangChain 接 Crazyrouter 应该走什么协议？
+
+优先走 OpenAI 兼容协议。
+
+### Base URL 应该填什么？
+
+填 `https://crazyrouter.com/v1`。
+
+### Python 里应该用哪个包？
+
+优先用 `langchain-openai`。
+
+### JavaScript / TypeScript 里应该用哪个包？
+
+优先用 `@langchain/openai`。
+
+### 第一次为什么不建议直接上 Agent 或大规模 RAG？
+
+因为 LangChain 链路一旦复杂，排障成本会显著上升。先跑通最小聊天，再逐层增加组件，最稳。
+
 <Note>
-  LangChain 的所有基于 OpenAI 的组件都可以通过修改 `base_url` 和 `api_key` 接入 Crazyrouter，无需额外适配。
+如果你准备把 Crazyrouter 正式接入自己的应用工程，LangChain 仍然是最值得优先补齐的开发框架文档之一。
 </Note>

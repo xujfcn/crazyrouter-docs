@@ -1,0 +1,99 @@
+---
+title: "Claude Token 计数"
+description: "POST /v1/messages/count_tokens 预估 Claude Messages 请求的输入 Token 数量"
+---
+
+# Claude Token 计数
+
+```
+POST /v1/messages/count_tokens
+```
+
+用于在真正调用 `POST /v1/messages` 之前，先预估输入部分会消耗多少 Token。适合 Claude CLI、Claude Code、预算控制或上下文裁剪逻辑。
+
+## 认证
+
+推荐使用 Anthropic 风格请求头：
+
+```http
+x-api-key: YOUR_API_KEY
+anthropic-version: 2023-06-01
+```
+
+也可以使用标准 Bearer 认证，但 Anthropic 生态客户端通常会携带上面的头。
+
+## 请求体
+
+请求体沿用 Claude Messages 风格。最小可用字段通常是：
+
+- `model`
+- `messages`
+
+如果请求里包含 `system`、`tools`、工具结果或文本内容，也会一起参与估算。
+
+## 请求示例
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/messages/count_tokens   -H "Content-Type: application/json"   -H "x-api-key: YOUR_API_KEY"   -H "anthropic-version: 2023-06-01"   -d '{
+    "model": "claude-sonnet-4-6",
+    "messages": [
+      {"role": "user", "content": "hello"}
+    ]
+  }'
+```
+
+```python Python
+import requests
+
+resp = requests.post(
+    "https://crazyrouter.com/v1/messages/count_tokens",
+    headers={
+        "x-api-key": "YOUR_API_KEY",
+        "anthropic-version": "2023-06-01",
+        "Content-Type": "application/json",
+    },
+    json={
+        "model": "claude-sonnet-4-6",
+        "messages": [
+            {"role": "user", "content": "hello"}
+        ],
+    },
+)
+
+print(resp.json())
+```
+
+</CodeGroup>
+
+## 响应示例
+
+```json
+{
+  "input_tokens": 4
+}
+```
+
+## 返回字段
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `input_tokens` | integer | 当前请求文本部分的估算输入 Token 数 |
+| `warning` | string | 可选告警；当请求包含图片或文件时，可能提示这些内容未计入估算 |
+
+## 限制说明
+
+当前实现主要估算：
+
+- `system`
+- `messages` 中的文本内容
+- 工具定义和工具结果中的文本/JSON
+
+<Warning>
+如果请求里包含图片或文件，这个接口不会把对应的图片/文件 Token 计入 `input_tokens`。此时响应里可能出现 `warning`，实际计费会高于这里的估算值。
+</Warning>
+
+<Note>
+这个接口返回的是预估值，不是最终结算值。真正的用量仍以实际模型调用结果为准。
+</Note>

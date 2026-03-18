@@ -1,6 +1,6 @@
 ---
 title: "Flux"
-description: "Use Flux models to generate high-quality images, supporting both OpenAI format and Replicate native format"
+description: "Use Flux models to generate high-quality images"
 ---
 
 # Flux
@@ -89,44 +89,6 @@ print(response.data[0].url)
 
 ---
 
-## Via Replicate Format
-
-```
-POST /replicate/v1/models/black-forest-labs/flux-kontext-dev/predictions
-```
-
-Call Flux Kontext models using the Replicate native format, with support for more advanced parameters.
-
-### Request Example
-
-```bash cURL
-curl -X POST https://crazyrouter.com/replicate/v1/models/black-forest-labs/flux-kontext-dev/predictions \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Prefer: wait" \
-  -d '{
-    "input": {
-      "prompt": "Change the background to a tropical beach",
-      "image": "https://example.com/photo.jpg",
-      "aspect_ratio": "16:9",
-      "safety_tolerance": 2,
-      "output_format": "webp"
-    }
-  }'
-```
-
-### Response Example
-
-```json
-{
-  "id": "prediction_abc123",
-  "status": "succeeded",
-  "output": [
-    "https://replicate.delivery/pbxt/.../output.webp"
-  ]
-}
-```
-
 <Note>
-  Flux models excel at photorealistic styles and portrait generation. The Flux Kontext series supports reference image-based editing and style transfer.
+  Flux models excel at photorealistic styles and portrait generation. The Flux Kontext series supports reference image-based editing and style transfer. The public docs currently cover only the common `POST /v1/images/generations` route.
 </Note>

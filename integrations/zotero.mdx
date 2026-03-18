@@ -1,39 +1,287 @@
 ---
-title: 'Zotero GPT 配置教程'
-description: '在 Zotero 文献管理工具中配置 Crazyrouter API'
+title: 'Zotero 配置教程'
+description: '在 Zotero 中通过支持 OpenAI 兼容接口的 AI 插件接入 Crazyrouter，并明确区分可直接接入与不可直接接入的插件类型'
 ---
 
-## 概述
+Zotero 本身是文献管理工具，不直接内置 Crazyrouter 配置入口。实际接入方式通常是：先安装一个支持 AI 调用的 Zotero 插件，再在该插件里填写 Crazyrouter 的 OpenAI 兼容地址、API Key 和模型名。
 
-Zotero GPT 是 Zotero 文献管理工具的 AI 插件，支持论文摘要、翻译、问答等功能。
+这页最重要的原则不是“随便找个 Zotero AI 插件就能接”，而是先区分插件类型：
+
+- 可直接接入：插件支持自定义 `Base API URL` / `API URL` / `Endpoint`
+- 不可直接接入或不适合作为公开主线：插件只支持填写官方 OpenAI Key，没有自定义上游地址入口
+
+## 先说结论
+
+Crazyrouter 在 Zotero 里的公开推荐接法是：
+
+- 选择一个支持自定义 OpenAI 兼容地址的 Zotero AI 插件
+- 把基础地址填为 `https://crazyrouter.com/v1`
+- 把 API Key 填为 `sk-xxx`
+- 第一个验证模型先用 `gpt-4.1`
+
+<Warning>
+不是所有 Zotero AI 插件都支持自定义上游地址。如果某个插件只有“填 OpenAI API Key”的入口、没有 `Base URL` 或 `API URL` 设置，那么它通常不能直接把请求改走 Crazyrouter。这类插件不应作为公开默认教程。
+</Warning>
+
+## 为什么这样写
+
+因为目前 Zotero AI 插件生态差异较大：
+
+- Zotero 官方文档说明，插件是社区生态，安装方式统一，但能力并不统一
+- 有些插件明确支持自定义 `base API URL`
+- 也有一些插件公开文档里只写了填 `OpenAI API Key`
+
+因此 Crazyrouter 的公开文档应优先教用户选择“支持自定义 OpenAI 兼容地址”的插件，而不是默认所有插件都能直接接。
+
+## 适合谁用
+
+- 想在 Zotero 里做论文摘要、翻译、问答的用户
+- 想把文献阅读和 Crazyrouter 模型调用放到一个工作流里的人
+- 想在文献条目、PDF 阅读、笔记整理环节加入 AI 辅助的人
+- 不想自己写脚本，希望直接在 Zotero 图形界面里完成配置的人
+
+## 前置条件
+
+| 项目 | 说明 |
+|------|------|
+| Crazyrouter 账号 | 先在 [crazyrouter.com](https://crazyrouter.com) 注册 |
+| Crazyrouter token | 建议单独为 Zotero 创建一个 token |
+| Zotero 桌面版 | 插件主要运行在桌面端 |
+| AI 插件 | 需要支持自定义 OpenAI 兼容地址 |
+| 文献或 PDF | 至少准备一篇可测试的条目 |
+
+建议首轮只放行：
+
+- `gpt-4.1`
+- `gpt-4.1-mini`
+- `claude-sonnet-4-6`
+
+## 安装 Zotero
+
+### Windows
+
+1. 打开 [Zotero 官网下载页](https://www.zotero.org/download/)
+2. 下载 Windows 安装包
+3. 运行安装程序
+4. 启动 Zotero
+
+### macOS
+
+1. 打开 [Zotero 官网下载页](https://www.zotero.org/download/)
+2. 下载 macOS 安装包
+3. 拖动 Zotero 到 `Applications`
+4. 启动 Zotero
+
+### Linux
+
+1. 打开 [Zotero 官网下载页](https://www.zotero.org/download/)
+2. 下载官方 Linux 包
+3. 解压并按 Zotero 官方说明启动
+4. 确认 Zotero 可以正常打开
+
+<Note>
+根据 Zotero 官方文档，插件主要安装在桌面版里。这类 AI 插件通常不适合从移动端作为首轮配置入口。
+</Note>
+
+## 如何选择 Zotero AI 插件
+
+公开文档建议优先选择满足下面条件的插件：
+
+- 能填写 `Base API URL`、`API URL` 或 `Endpoint`
+- 能填写 `API Key`
+- 能手动填写模型名
+- 最好支持在 Zotero 偏好设置中修改这些参数
+
+### 推荐的公开判断方法
+
+如果插件文档里明确写了下面这类能力，通常更适合接 Crazyrouter：
+
+- `Customize base API URL`
+- `API URL`
+- `Custom endpoint`
+- `Model preferences`
+
+例如，`zotero-chatgpt` 的公开 README 明确提到支持自定义 `base API URL`；而 `Aria` 的公开 README 重点写的是填写 `OpenAI API Key` 和模型偏好，公开说明里没有把“自定义上游地址”作为主线能力。因此在 Crazyrouter 文档里，更稳妥的主线应是“选择支持自定义 OpenAI 兼容地址的插件”。
+
+## 推荐配置格式
+
+不同插件字段名可能不同，但第一次建议按下面思路填写：
+
+| 插件字段 | 推荐值 |
+|----------|--------|
+| Base API URL / API URL | `https://crazyrouter.com/v1` |
+| Full Endpoint | `https://crazyrouter.com/v1/chat/completions` |
+| API Key | `sk-xxx` |
+| Model | `gpt-4.1` |
+
+<Tip>
+如果插件让你填写的是“基础地址”，优先填 `https://crazyrouter.com/v1`。只有在插件明确要求“完整聊天接口地址”时，再填 `https://crazyrouter.com/v1/chat/completions`。
+</Tip>
 
 ## 配置步骤
 
 <Steps>
-  <Step title="安装插件">
-    在 Zotero 中安装 `zotero-gpt` 或 `Aria` 等 AI 插件。
+  <Step title="第 1 步：创建 Zotero 专用 Crazyrouter token">
+    第一次建议只放行：
+
+    - `gpt-4.1`
+    - `gpt-4.1-mini`
+
+    先不要把大量模型一次性全部开放，这样更容易排障。
   </Step>
-  <Step title="打开插件设置">
-    进入 `编辑` → `首选项` → `Zotero GPT`（或对应插件名称）
+
+  <Step title="第 2 步：安装 Zotero 桌面版">
+    按你的系统安装 Zotero，并确认可以正常导入或查看一篇论文条目。
   </Step>
-  <Step title="配置 API">
-    - **API URL**: `https://crazyrouter.com/v1`
-    - **API Key**: `sk-xxx`
-    - **Model**: `gpt-4o`（推荐用于学术场景）
+
+  <Step title="第 3 步：下载并安装 AI 插件">
+    根据 Zotero 官方插件安装文档，先下载插件的 `.xpi` 文件，然后在 Zotero 中：
+
+    - 打开 `Tools`
+    - 进入 `Plugins`
+    - 把 `.xpi` 文件拖入插件窗口
+
+    完成后重启 Zotero。
   </Step>
-  <Step title="测试">
-    选中一篇文献，右键使用 AI 功能测试。
+
+  <Step title="第 4 步：进入插件设置">
+    常见入口包括：
+
+    - `Edit` → `Preferences`
+    - 插件自己的偏好设置页
+    - 插件侧边栏或工具栏入口
+
+    不同插件位置可能不同，但核心是找到 API 与模型配置区域。
+  </Step>
+
+  <Step title="第 5 步：填写 Crazyrouter 地址、Key 和模型">
+    如果插件支持基础地址模式，推荐填写：
+
+    - `Base API URL`: `https://crazyrouter.com/v1`
+    - `API Key`: `sk-xxx`
+    - `Model`: `gpt-4.1`
+
+    如果插件只支持完整接口地址，改填：
+
+    - `Endpoint`: `https://crazyrouter.com/v1/chat/completions`
+  </Step>
+
+  <Step title="第 6 步：如插件要求，重启 Zotero">
+    某些插件在修改 API Key、模型或首选项后需要重启 Zotero 才生效。第一次配置完成后，建议主动重启一次。
+  </Step>
+
+  <Step title="第 7 步：用最小学术场景做首轮验证">
+    先不要上来就做复杂综述。第一次只建议：
+
+    - 选中一篇带摘要的文献
+    - 或打开一篇较小的 PDF
+    - 执行一次摘要 / 翻译 / 简单问答
+
+    测试提示词可以用：
+
+    ```text
+    Summarize this paper in 3 bullet points.
+    ```
   </Step>
 </Steps>
 
+## 推荐验证顺序
+
+建议按下面顺序推进：
+
+1. 先验证 Zotero 本体和插件都能正常打开
+2. 先验证 `gpt-4.1`
+3. 先做单篇摘要
+4. 再做翻译
+5. 再做多篇对比、长文分析或批量任务
+
 ## 推荐模型
 
-| 场景 | 推荐模型 |
-|------|----------|
-| 论文摘要 | `gpt-4o` |
-| 文献翻译 | `gpt-4o-mini`（性价比高） |
-| 深度分析 | `claude-opus-4-20250514` |
+| 场景 | 推荐模型 | 原因 |
+|------|----------|------|
+| 首轮链路验证 | `gpt-4.1` | 最适合先验证插件到 Crazyrouter 的基础链路 |
+| 文献翻译 | `gpt-4.1-mini` | 成本更低，适合较频繁翻译 |
+| 深度分析与解释 | `claude-sonnet-4-6` | 更适合复杂总结、方法比较、长文解释 |
+
+## 适合 Zotero 的使用方式
+
+### 单篇论文摘要
+
+最适合作为首轮验证，因为上下文简单、结果容易判断。
+
+### PDF 翻译
+
+建议先对单页或短段落测试，再逐步扩大范围。
+
+### 多文献对比
+
+不建议作为第一步。等单篇摘要和翻译已经稳定后，再尝试多篇对比、综述提纲、研究空白提取等更复杂任务。
+
+### 笔记整理
+
+如果插件支持把结果写回 Zotero 笔记，建议先从短摘要开始，不要一开始就批量生成长笔记。
+
+## Token 最佳实践
+
+| 设置 | 建议 | 说明 |
+|------|------|------|
+| 专用 token | 必须 | Zotero 不要和 IDE、自动化流程共用 token |
+| 模型白名单 | 强烈建议 | 先只放行 1 到 2 个模型 |
+| 配额上限 | 强烈建议 | 长 PDF、多轮总结会放大消耗 |
+| 分场景 token | 建议 | 个人学术使用与团队共享分开 |
+| 泄露处理 | 立即轮换 | 演示、录屏、共享设置页暴露后应立刻换 key |
+
+## 验证清单
+
+- [ ] 已安装 Zotero 桌面版
+- [ ] 已安装支持自定义 OpenAI 兼容地址的 AI 插件
+- [ ] 已创建 Zotero 专用 Crazyrouter token
+- [ ] 已把基础地址填写为 `https://crazyrouter.com/v1` 或完整接口地址
+- [ ] 已正确填写 `sk-xxx`
+- [ ] 已先只配置 `gpt-4.1`
+- [ ] 修改设置后已按需重启 Zotero
+- [ ] 已完成单篇摘要或单篇翻译验证
+- [ ] Crazyrouter 后台日志中能看到对应请求
+
+## 常见错误与修复
+
+| 现象 | 常见原因 | 修复方式 |
+|------|----------|----------|
+| 插件里只有 OpenAI Key，没有 Base URL | 插件不支持自定义上游 | 换成支持自定义 `Base API URL` 或 `Endpoint` 的插件 |
+| 401 unauthorized | token 错误、复制不完整或失效 | 重新生成 token 并重新填写 |
+| 404 | 基础地址或完整接口地址填错 | 基础地址改回 `https://crazyrouter.com/v1`，或完整地址改回 `https://crazyrouter.com/v1/chat/completions` |
+| 403 / model not allowed | token 没放行当前模型 | 在 Crazyrouter token 设置中放行该模型 |
+| `model not found` | 模型名写错 | 先改回 `gpt-4.1` 做最小验证 |
+| 插件没反应或设置改了不生效 | 插件需要重启 Zotero | 重启 Zotero 后重试 |
+| 摘要失败但接口没报错 | 当前条目没有摘要、PDF 没附件或插件没拿到上下文 | 先换成带摘要或带 PDF 的条目测试 |
+| 长文处理很慢 | PDF 太长或任务过重 | 先缩小到单段、单页或单篇摘要 |
+
+## FAQ
+
+### Zotero 能直接配置 Crazyrouter 吗？
+
+通常不是直接在 Zotero 本体里配置，而是通过支持 OpenAI 兼容接口的 AI 插件配置。
+
+### 哪类插件最适合接 Crazyrouter？
+
+优先选择支持 `Base API URL`、`API URL` 或 `Endpoint` 自定义的插件。
+
+### 如果插件只能填 OpenAI API Key 怎么办？
+
+这类插件通常不能直接改成 Crazyrouter 上游，不适合作为公开默认方案。更建议换一个支持自定义地址的插件。
+
+### 基础地址应该填什么？
+
+优先填 `https://crazyrouter.com/v1`。
+
+### 第一个模型填什么？
+
+先填 `gpt-4.1`。
+
+### 什么时候再做多篇分析或复杂综述？
+
+等单篇摘要和单篇翻译已经稳定后，再逐步升级任务复杂度。
 
 <Note>
-  不同的 Zotero AI 插件配置方式可能略有差异，请参考对应插件的文档。核心配置都是 API URL 和 API Key。
+如果你的目标是“先让 Zotero 跑通 Crazyrouter”，最关键的不是一开始就追求最强插件，而是先确认你选的插件真的支持自定义 OpenAI 兼容地址，然后用 `gpt-4.1` 跑通单篇摘要。
 </Note>

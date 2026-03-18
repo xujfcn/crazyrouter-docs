@@ -1,0 +1,58 @@
+---
+title: "视频任务查询别名"
+description: "GET /v1/video/generations/{task_id} 兼容别名接口，用于查询视频任务状态"
+---
+
+# 视频任务查询别名
+
+```
+GET /v1/video/generations/{task_id}
+```
+
+用于查询通过兼容视频路由提交的任务状态。这是 `/v1/video/generations` 的配套查询路由。
+
+## 认证
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## 请求示例
+
+```bash cURL
+curl https://crazyrouter.com/v1/video/generations/video_task_abc123   -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+## 典型成功响应
+
+```json
+{
+  "id": "video_task_abc123",
+  "status": "completed",
+  "video_url": "https://example.com/video.mp4"
+}
+```
+
+## 本地验证到的不存在任务响应
+
+在本地 `http://127.0.0.1:4000` 环境中，查询不存在的任务会返回：
+
+```json
+{
+  "code": "task_not_exist",
+  "message": "task_not_exist",
+  "data": null
+}
+```
+
+## 常见状态
+
+| 状态 | 说明 |
+|------|------|
+| `processing` | 任务处理中 |
+| `completed` | 任务已完成 |
+| `failed` | 任务失败 |
+
+<Note>
+不同视频模型和不同上游的完成结果字段可能略有差异。最稳定的做法是：创建和查询尽量保持在同一套兼容路径里。
+</Note>

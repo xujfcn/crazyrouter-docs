@@ -1,0 +1,125 @@
+---
+title: "Ali Bailian Video API"
+description: "Ali Bailian-compatible video routes for task creation through /alibailian/api/v1/services/aigc/video-generation/video-synthesis and task lookup through /tasks/{task_id}"
+---
+
+# Ali Bailian Video API
+
+Crazyrouter exposes Ali Bailian-compatible video routes so applications already using DashScope / Ali Bailian video formats can migrate with minimal path changes.
+
+## Supported Endpoints
+
+- `POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis`
+- `GET /alibailian/api/v1/tasks/{task_id}`
+
+## Authentication
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## POST Create Video
+
+```
+POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis
+```
+
+### Request Body Shape
+
+| Field | Type | Required | Description |
+|------|------|----------|-------------|
+| `model` | string | Yes | Model name, such as `wan2.5-i2v-preview` |
+| `input` | object | Yes | Core input payload |
+| `input.prompt` | string | No | Positive prompt |
+| `input.negative_prompt` | string | No | Negative prompt |
+| `input.img_url` | string | No | First-frame image URL or Base64 |
+| `input.audio_url` | string | No | Audio file URL |
+| `input.template` | string | No | Video effect template |
+| `parameters` | object | No | Advanced processing parameters |
+| `parameters.resolution` | string | No | Resolution tier, for example `480P` |
+| `parameters.duration` | integer | No | Video duration in seconds |
+| `parameters.prompt_extend` | boolean | No | Whether to enable prompt enhancement |
+| `parameters.watermark` | boolean | No | Whether to add an AI watermark |
+| `parameters.audio` | boolean | No | Whether to auto-add audio |
+| `parameters.seed` | integer | No | Random seed |
+
+### Request Example
+
+```bash cURL
+curl -X POST https://crazyrouter.com/alibailian/api/v1/services/aigc/video-generation/video-synthesis   -H "Content-Type: application/json"   -H "Authorization: Bearer YOUR_API_KEY"   -d '{
+    "model": "wan2.5-i2v-preview",
+    "input": {
+      "prompt": "Change the lighting",
+      "img_url": "https://example.com/first-frame.png"
+    },
+    "parameters": {
+      "resolution": "480P",
+      "prompt_extend": true,
+      "audio": true
+    }
+  }'
+```
+
+### Response Example
+
+```json
+{
+  "request_id": "ccffb21f-c21e-4eba-861a-6c80e6db6e4d",
+  "output": {
+    "task_id": "a55bfe14-6e78-4b9d-b97d-128420399ed1",
+    "task_status": "PENDING"
+  }
+}
+```
+
+## GET Query Task
+
+```
+GET /alibailian/api/v1/tasks/{task_id}
+```
+
+### Request Example
+
+```bash cURL
+curl https://crazyrouter.com/alibailian/api/v1/tasks/a55bfe14-6e78-4b9d-b97d-128420399ed1   -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Response Example
+
+```json
+{
+  "usage": {
+    "SR": 480,
+    "duration": 5,
+    "video_count": 1
+  },
+  "output": {
+    "task_id": "a55bfe14-6e78-4b9d-b97d-128420399ed1",
+    "end_time": "2025-10-11 19:02:27.297",
+    "video_url": "https://dashscope-result.example.com/video.mp4",
+    "orig_prompt": "Change the lighting",
+    "submit_time": "2025-10-11 18:55:56.952",
+    "task_status": "SUCCEEDED",
+    "actual_prompt": "A man in orange clothes flies from right to left on a broom...",
+    "scheduled_time": "2025-10-11 18:55:57.908"
+  },
+  "request_id": "ec8f059e-f2e5-4887-bb43-3306cd38f403"
+}
+```
+
+## Error Behavior Verified Locally
+
+- the local environment confirmed the create route exists; when a model is unavailable it returns a business error such as `model_not_found` rather than `404`
+- the local environment also confirmed the query route exists; a nonexistent task returns:
+
+```json
+{
+  "code": "task_not_exist",
+  "message": "task_not_exist",
+  "data": null
+}
+```
+
+<Note>
+This path family is primarily for protocol-compatible migration. The request and response bodies stay much closer to native DashScope / Bailian conventions than to Crazyrouter's unified video schema.
+</Note>

@@ -1,12 +1,20 @@
 ---
 title: '获取令牌支持模型'
 description: '查询指定令牌可使用的模型列表'
-api: 'GET /api/token/models'
+api: 'GET /v1/models'
 ---
 
 ## 接口说明
 
 获取当前令牌（API Key）可以调用的模型列表。如果令牌未限制模型，则返回系统所有已启用模型。
+
+当前推荐并实际支持的接口是：
+
+```text
+GET /v1/models
+```
+
+`GET /api/token/models` 不是当前公开可用的接口，请使用 `/v1/models`。
 
 ## 认证方式
 
@@ -21,12 +29,18 @@ Authorization: Bearer sk-xxx
 ```json
 {
   "success": true,
+  "object": "list",
   "data": [
-    "gpt-4o",
-    "gpt-4o-mini",
-    "claude-sonnet-4-20250514",
-    "gemini-2.5-pro",
-    "text-embedding-3-large"
+    {
+      "id": "gpt-4o",
+      "object": "model",
+      "owned_by": "openai"
+    },
+    {
+      "id": "claude-sonnet-4-20250514",
+      "object": "model",
+      "owned_by": "anthropic"
+    }
   ]
 }
 ```
@@ -70,5 +84,5 @@ curl https://crazyrouter.com/v1/models \
 </CodeGroup>
 
 <Note>
-  也可以通过 OpenAI 兼容的 `GET /v1/models` 端点获取模型列表，效果相同。
+  如果你使用 OpenAI SDK，`client.models.list()` 实际就是在调用 `GET /v1/models`。
 </Note>

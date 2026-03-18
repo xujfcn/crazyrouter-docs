@@ -1,150 +1,367 @@
 ---
 title: '一键部署 OpenClaw'
-description: '一条命令在 Linux/macOS 上部署 AI 网关，支持 Telegram Bot、300+ 模型'
+description: '在 Linux 或 macOS 上使用 Crazyrouter 快速部署 OpenClaw，并完成 WebUI、Telegram 与日常运维配置'
 icon: 'rocket'
 ---
 
-通过一键脚本在你的服务器上部署 [OpenClaw](https://github.com/open-claw/open-claw) AI 网关，使用 Crazyrouter 作为 API 后端，开箱即用。
+通过一键脚本在 Linux 或 macOS 上部署 [OpenClaw](https://github.com/open-claw/open-claw) AI 网关，使用 Crazyrouter 作为默认后端。安装器会写入可直接运行的 `~/.openclaw/openclaw.json`、注册系统服务，并预配置一组适合聊天、编码和长上下文任务的模型。
 
-## 快速安装
+## 概览
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-openclaw/main/install.sh | bash
-```
+OpenClaw 适合把 Crazyrouter 变成一个你自己可控的本地 AI 入口：
 
-或者下载后运行：
+- 本地 WebUI / 网关，默认监听 `18789`
+- 可直接复用 Crazyrouter 的模型与额度
+- 支持 Telegram，并预启用钉钉、企业微信、QQ Bot、Discord、Slack、飞书等插件入口
+- 适合个人常驻机器人、团队内部助手、家庭服务器或轻量自托管场景
 
-```bash
-wget https://raw.githubusercontent.com/xujfcn/crazyrouter-openclaw/main/install.sh
-bash install.sh
-```
+## 适合谁用
 
-<Note>
-脚本支持中英文界面，启动时会提示选择语言。也可通过环境变量 `INSTALLER_LANG=zh` 或 `INSTALLER_LANG=en` 跳过选择。
-</Note>
+- 想用一条命令把 Crazyrouter 接到本地 AI 网关的人
+- 想把 Telegram Bot 跑在自己的服务器上的人
+- 想统一管理聊天、WebUI、IM 入口的人
+- 想给开发机或家用小主机部署常驻助手的人
 
-## 你需要准备
+## 使用协议
+
+推荐协议：`OpenAI-compatible API`
+
+- 安装器默认把 `crazyrouter` provider 指向 `https://crazyrouter.com/v1`
+- 同时会写入 `crazyrouter-claude`、`crazyrouter-minimax` provider，便于切换到 Anthropic Messages 兼容路径
+- OpenClaw 自身对外暴露的是本地网关和 WebUI，认证依赖安装时生成的 `gateway.auth.token`
+
+## 前置条件
 
 | 项目 | 说明 |
 |------|------|
-| **Crazyrouter API Key** | 在 [crazyrouter.com](https://crazyrouter.com) 注册后，前往 [Token 管理](https://crazyrouter.com/token) 创建 |
-| **Telegram Bot Token**（可选） | 在 Telegram 找 [@BotFather](https://t.me/BotFather) 创建 Bot 后获取 |
+| Crazyrouter 账号 | 先在 [crazyrouter.com](https://crazyrouter.com) 注册 |
+| Crazyrouter API Key | 建议为 OpenClaw 单独创建一个 token，不要与 Cursor、Claude Code 共用 |
+| 操作系统 | Linux 或 macOS，x64 / arm64 均可 |
+| 网络 | 服务器需要能访问公网；如果你要从其他设备访问 WebUI，还要放行 `18789` 端口 |
+| Node.js | 安装器会尽量自动安装 Node.js 22+ |
+| Telegram Bot Token | 可选，仅在你要接 Telegram 时需要 |
 
-## 安装过程
+<Warning>
+OpenClaw 安装器默认把网关绑定到局域网地址（`bind: lan`）。如果你的主机直接暴露公网，请务必同时做好防火墙限制，并妥善保管网关登录 token。
+</Warning>
 
-脚本会自动完成以下 10 个步骤：
+## 5 分钟快速开始
 
 <Steps>
-  <Step title="检测系统环境">
-    识别 Linux/macOS、x64/arm64，选择对应安装方式
+  <Step title="创建专用 Crazyrouter token">
+    在 Crazyrouter 后台创建一个专门给 OpenClaw 使用的 `sk-...` token。建议先只放行你打算在网关里使用的模型，例如 `claude-sonnet-4-6`、`gpt-5.3-codex`、`gemini-3-flash-preview`。
   </Step>
-  <Step title="安装 Node.js 22+">
-    如未安装，自动通过 NodeSource (apt/dnf/yum) 或 Homebrew 安装
+  <Step title="运行安装脚本">
+    ```bash
+    curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-openclaw/main/install.sh | bash
+    ```
+    如果你想跳过语言选择和 API Key 输入，也可以这样：
+    ```bash
+    CRAZYROUTER_API_KEY=sk-xxx INSTALLER_LANG=zh \
+      curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-openclaw/main/install.sh | bash
+    ```
   </Step>
-  <Step title="安装 OpenClaw">
-    通过 npm 全局安装 OpenClaw 包
+  <Step title="记下安装器输出的 3 个值">
+    - WebUI 地址：`http://<服务器IP>:18789`
+    - 自动登录地址：`http://<服务器IP>:18789?token=<gateway_token>`
+    - 配置文件：`~/.openclaw/openclaw.json`
   </Step>
-  <Step title="配置 API Key">
-    交互式输入 Crazyrouter API Key（或从环境变量读取）
+  <Step title="打开 WebUI 做第一次验证">
+    用浏览器访问自动登录地址，确认能够进入 OpenClaw 控制台，并用默认模型 `claude-sonnet-4-6` 发一条测试消息，例如“只回复 ok”。
   </Step>
-  <Step title="预配置 AI 模型">
-    自动配置 15+ 热门模型，开箱即用
-  </Step>
-  <Step title="应用稳定性补丁">
-    TLS 崩溃防护、内存目录备份等
-  </Step>
-  <Step title="安装 IM 插件">
-    钉钉、企业微信、QQ Bot 等插件
-  </Step>
-  <Step title="配置系统服务">
-    Linux 使用 systemd，macOS 使用 launchd，开机自启
-  </Step>
-  <Step title="启动网关">
-    启动 OpenClaw 服务，默认端口 18789
-  </Step>
-  <Step title="Telegram Bot 设置">
-    交互式配置 Telegram Bot 并自动完成 owner 配对
+  <Step title="按需完成 Telegram 配对">
+    安装器会询问是否立即设置 Telegram。若选择立即配置，填入 Bot Token 后，给你的机器人发送任意一条消息即可完成首个 owner 配对。
   </Step>
 </Steps>
 
-## 预配置模型
+## 推荐模型配置
 
-| Provider | 模型 |
-|----------|------|
-| Claude | Opus 4.6, Sonnet 4.6 |
-| GPT | 5.2, 5.3 Codex, 5 Mini, 4.1, 4.1 Mini, 4o Mini |
-| Gemini | 3.1 Pro, 3 Flash |
-| DeepSeek | R1, V3.2 |
-| 其他 | Kimi K2.5, GLM-5, Grok 4.1, MiniMax M2.1 |
+安装器默认主模型是 `claude-sonnet-4-6`。如果你想切换日常默认模型，直接修改 `~/.openclaw/openclaw.json` 里的 `agents.defaults.model.primary`。
 
-## 环境变量
+| 场景 | 推荐模型 | 原因 |
+|------|----------|------|
+| 默认日常聊天 | `claude-sonnet-4-6` | 质量、稳定性和成本比较均衡 |
+| 编码 / Agent | `gpt-5.3-codex` | 更适合代码生成、修改和工具调用 |
+| 极致质量 | `claude-opus-4-6` | 更强的复杂推理与表达质量 |
+| 低成本高频问答 | `gpt-4.1-mini` | 更适合机器人日常问答和轻任务 |
+| 长上下文整理 | `gemini-3.1-pro-preview` | 超长上下文，适合读长文档或大段记录 |
+| 深度推理 | `deepseek-r1` | 适合需要更强推理链的场景 |
 
-支持通过环境变量实现非交互安装：
+示例：把默认模型改成 `gpt-5.3-codex`
 
-| 变量 | 说明 | 默认值 |
-|------|------|--------|
-| `CRAZYROUTER_API_KEY` | 预设 API Key，跳过交互输入 | — |
-| `GATEWAY_PORT` | 网关端口 | `18789` |
-| `INSTALLER_LANG` | 安装语言 (`zh`/`en`) | 交互选择 |
-
-```bash
-# 非交互安装示例
-CRAZYROUTER_API_KEY=sk-xxx INSTALLER_LANG=zh \
-  curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-openclaw/main/install.sh | bash
+```json
+{
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "crazyrouter/gpt-5.3-codex"
+      }
+    }
+  }
+}
 ```
 
-## 安装后管理
+如果你想显式走 Claude 兼容 provider，可以这样写：
+
+```json
+{
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "crazyrouter-claude/claude-sonnet-4-6"
+      }
+    }
+  }
+}
+```
+
+## Token 设置最佳实践
+
+| 设置 | 建议 | 说明 |
+|------|------|------|
+| 专用 token | 必须 | 不要把 OpenClaw 和其他 IDE / CLI 共用同一个 token |
+| 模型白名单 | 建议开启 | 只保留 OpenClaw 会用到的模型，减少误用 |
+| IP 限制 | 固定出口服务器建议开启 | 如果你的主机出口 IP 固定，可把 token 限制到这台服务器 |
+| 配额上限 | 建议设置 | 给机器人场景单独设月度或日度预算 |
+| 环境隔离 | 建议 | 生产机器人和测试机器人分开 token |
+| 泄露处理 | 立即轮换 | 如果 `openclaw.json`、日志或分享链接暴露过 token，应立即重置 Crazyrouter token 和网关 token |
+
+<Tip>
+OpenClaw 里至少有两类凭证：一类是 Crazyrouter 的 `sk-...` API Key，用来调用模型；另一类是 OpenClaw 本地网关登录 token，用来进入 WebUI。两者不要混用。
+</Tip>
+
+## 首次成功检查清单
+
+- [ ] 浏览器能打开 `http://<服务器IP>:18789?token=<gateway_token>`
+- [ ] OpenClaw WebUI 能正常进入，不会循环要求登录
+- [ ] 默认模型可以成功返回第一条消息
+- [ ] 修改模型后，重启服务仍能正常响应
+- [ ] `journalctl --user -u openclaw -f` 或 `tail -f ~/.openclaw/openclaw.log` 能看到成功请求
+- [ ] 如启用 Telegram，给机器人发消息后能够收到回复
+- [ ] 已保存 `~/.openclaw/openclaw.json` 备份
+
+## 关键文件与配置项
+
+### 文件位置
+
+| 路径 | 用途 |
+|------|------|
+| `~/.openclaw/openclaw.json` | 主配置文件 |
+| `~/.openclaw/start-gateway.sh` | 启动脚本，系统服务实际调用它 |
+| `~/.openclaw/crash-guard.cjs` | 安装器写入的稳定性补丁 |
+| `~/.openclaw/credentials/.telegram-owner-paired` | Telegram 首个 owner 完成配对后的标记文件 |
+| `~/.config/systemd/user/openclaw.service` | Linux 用户级 systemd 服务 |
+| `~/Library/LaunchAgents/com.crazyrouter.openclaw.plist` | macOS launchd 服务 |
+| `~/.openclaw/openclaw.log` | macOS 常规日志 |
+| `~/.openclaw/openclaw.err` | macOS 错误日志 |
+
+### 最常改的配置项
+
+| JSON 路径 | 作用 | 常见修改 |
+|-----------|------|----------|
+| `models.providers.crazyrouter.apiKey` | Crazyrouter OpenAI 兼容 key | 更换 API Key |
+| `models.providers.crazyrouter.baseUrl` | OpenAI 兼容基址 | 通常保持 `https://crazyrouter.com/v1` |
+| `agents.defaults.model.primary` | 默认主模型 | 切换到 `gpt-5.3-codex`、`claude-opus-4-6` 等 |
+| `gateway.port` | WebUI / 网关端口 | 改成你自己的端口 |
+| `gateway.auth.token` | WebUI 登录 token | 泄露后立即更换 |
+| `gateway.bind` | 监听范围 | 默认是 `lan` |
+| `channels.telegram.botToken` | Telegram Bot Token | 启用 Telegram 时填写 |
+| `plugins.entries.*.enabled` | 各 IM 插件是否启用 | 按需关闭未使用插件 |
+| `env.vars.OPENAI_API_KEY` | 给某些内部能力复用的 API Key | 通常保持与主 key 一致 |
+
+## IM 接入
+
+### Telegram
+
+这是安装器支持最完整的渠道，建议优先从 Telegram 开始：
+
+1. 在 Telegram 搜索 `@BotFather`
+2. 发送 `/newbot` 创建机器人，并拿到 Bot Token
+3. 安装器询问 `Set up Telegram Bot now?` 时选择 `Y`
+4. 粘贴 Bot Token，安装器会把它写入 `~/.openclaw/openclaw.json`
+5. 安装器自动重启网关后，给机器人发送任意一条消息
+6. 第一位发送消息的人会被自动配对为 owner
+7. 如果自动配对失败，执行：
+
+```bash
+openclaw pairing list
+openclaw pairing approve <code>
+```
+
+手动补写 Telegram 配置时，可参考安装器写入的结构：
+
+```json
+{
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "botToken": "123456789:ABCdef...",
+      "dmPolicy": "pairing",
+      "groupPolicy": "allowlist",
+      "streaming": "off"
+    }
+  },
+  "plugins": {
+    "entries": {
+      "telegram": { "enabled": true }
+    }
+  }
+}
+```
+
+### 其他 IM 平台
+
+安装器会预启用以下插件入口：
+
+- `dingtalk`
+- `openclaw-wecom`
+- `qqbot`
+- `discord`
+- `slack`
+- `feishu`
+
+但这些渠道通常还需要你自己补充平台凭证和对应的 `channels.<name>` 配置。推荐流程是：
+
+1. 先在对应平台创建机器人或应用
+2. 把平台凭证写入 `~/.openclaw/openclaw.json`
+3. 确认对应 `plugins.entries.<name>.enabled` 为 `true`
+4. 重启 OpenClaw 服务
+5. 通过日志验证该渠道是否成功加载
+
+| 平台 | 安装器状态 | 你还需要做什么 |
+|------|------------|----------------|
+| Telegram | 支持交互式配置 | 填 Bot Token，完成 owner 配对 |
+| 钉钉 | 插件会安装并启用 | 补充机器人凭证和对应 channel 配置 |
+| 企业微信 | 插件会安装并启用 | 补充企业应用凭证和对应 channel 配置 |
+| QQ Bot | 插件会安装并启用 | 补充机器人凭证和对应 channel 配置 |
+| Discord / Slack / 飞书 | 插件入口已启用 | 按各自机器人配置要求补充 channel 凭证 |
+
+<Note>
+如果你准备把 OpenClaw 接入团队 IM，强烈建议为团队机器人单独创建 Crazyrouter token，并设置更严格的模型白名单和配额。
+</Note>
+
+## 服务管理与日志
 
 <Tabs>
   <Tab title="Linux (systemd)">
     ```bash
-    systemctl --user status openclaw    # 查看状态
-    journalctl --user -u openclaw -f    # 查看日志
-    systemctl --user restart openclaw   # 重启
-    systemctl --user stop openclaw      # 停止
+    systemctl --user status openclaw
+    systemctl --user start openclaw
+    systemctl --user restart openclaw
+    systemctl --user stop openclaw
+    journalctl --user -u openclaw -f
     ```
+
+    说明：安装器会尝试执行 `loginctl enable-linger $(whoami)`，这样即使你退出 SSH，会话外的用户级服务也能继续运行。
   </Tab>
   <Tab title="macOS (launchd)">
     ```bash
-    tail -f ~/.openclaw/openclaw.log    # 查看日志
-    # 重启
-    launchctl stop com.crazyrouter.openclaw && launchctl start com.crazyrouter.openclaw
-    # 停止
+    launchctl list | grep openclaw
+    launchctl start com.crazyrouter.openclaw
     launchctl stop com.crazyrouter.openclaw
+    launchctl stop com.crazyrouter.openclaw && launchctl start com.crazyrouter.openclaw
+    tail -f ~/.openclaw/openclaw.log
+    cat ~/.openclaw/openclaw.err
+    ```
+
+    说明：macOS 下 `openclaw.log` 通常看运行日志，`openclaw.err` 更适合排查启动失败。
+  </Tab>
+</Tabs>
+
+## 性能与成本建议
+
+- 默认先用 `claude-sonnet-4-6`，确认整体流程跑通后再做模型分工
+- 高频日常问答或机器人通知场景，优先尝试 `gpt-4.1-mini` 或 `gemini-3-flash-preview`
+- 编码类工作流单独切到 `gpt-5.3-codex`
+- 团队场景把 Telegram / 企业 IM / WebUI 分成不同 token，便于成本核算和风险隔离
+- 只保留必要插件和必要模型，减少误调用成本
+
+## 升级指南
+
+最稳妥的升级方式是重新运行安装器，因为它会一起处理 OpenClaw 包、补丁和服务脚本：
+
+<Steps>
+  <Step title="备份当前配置">
+    ```bash
+    cp ~/.openclaw/openclaw.json ~/.openclaw/openclaw.json.bak
+    ```
+  </Step>
+  <Step title="重新执行安装脚本">
+    ```bash
+    curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-openclaw/main/install.sh | bash
+    ```
+  </Step>
+  <Step title="检查自定义配置是否需要回填">
+    如果你手动加过 Telegram 以外的 channel 或改过默认模型，重新对比 `openclaw.json`，确保这些自定义项仍然存在。
+  </Step>
+  <Step title="重启并验证">
+    重新打开 WebUI，确认模型、日志和已接入的 IM 渠道都正常。
+  </Step>
+</Steps>
+
+如果你明确知道自己只想升级 OpenClaw npm 包，也可以先执行 `npm install -g openclaw@latest`，再重启服务；但这种方式不会帮你重新应用安装器里的补丁与脚本更新。
+
+## 卸载指南
+
+<Tabs>
+  <Tab title="Linux">
+    ```bash
+    systemctl --user disable --now openclaw
+    rm -f ~/.config/systemd/user/openclaw.service
+    systemctl --user daemon-reload
+    rm -rf ~/.openclaw
+    npm uninstall -g openclaw
+    ```
+  </Tab>
+  <Tab title="macOS">
+    ```bash
+    launchctl stop com.crazyrouter.openclaw
+    launchctl unload ~/Library/LaunchAgents/com.crazyrouter.openclaw.plist
+    rm -f ~/Library/LaunchAgents/com.crazyrouter.openclaw.plist
+    rm -rf ~/.openclaw
+    npm uninstall -g openclaw
     ```
   </Tab>
 </Tabs>
 
-## 支持的 IM 平台
+如果你当初是专门为了 OpenClaw 安装 Node.js，也可以在确认没有其他项目依赖后再手动移除 Node.js。
 
-<CardGroup cols={3}>
-  <Card title="Telegram" icon="telegram">
-    安装时交互式设置，自动配对 owner
-  </Card>
-  <Card title="Discord" icon="discord">
-    通过 OpenClaw 插件接入
-  </Card>
-  <Card title="钉钉" icon="message">
-    安装时自动配置插件
-  </Card>
-  <Card title="企业微信" icon="building">
-    安装时自动配置插件
-  </Card>
-  <Card title="QQ Bot" icon="comments">
-    安装时自动配置插件
-  </Card>
-  <Card title="Slack / 飞书" icon="hashtag">
-    通过 OpenClaw 插件接入
-  </Card>
-</CardGroup>
+## 常见错误与修复
 
-## 系统要求
+| 现象 | 常见原因 | 修复方式 |
+|------|----------|----------|
+| WebUI 打不开 | 服务未启动、端口被占用、主机防火墙未放行 | 先看服务状态，再检查 `18789` 端口和防火墙 |
+| 页面能打开但一直要求登录 | `gateway.auth.token` 不对，或你访问的不是自动登录地址 | 重新读取安装器输出的 `?token=...` 链接，必要时检查 `openclaw.json` |
+| 401 unauthorized | `models.providers.*.apiKey` 里的 Crazyrouter key 无效或已失效 | 更新 API Key 后重启服务 |
+| 403 / model not allowed | OpenClaw 正在请求的模型不在 Crazyrouter token 白名单中 | 在 token 设置里放行对应模型 |
+| 429 / 配额耗尽 | token 超额或速率限制触发 | 提高配额、换更便宜模型，或拆分 token |
+| 修改模型后仍调用旧模型 | 服务未重启，或改错了 provider 路径 | 检查 `agents.defaults.model.primary`，然后重启 |
+| Telegram Bot 不回复 | 未写入 `botToken`、未完成 owner 配对，或服务未重启 | 检查 `channels.telegram`、重启服务、重新发消息触发配对 |
+| Linux 安装后提示服务可能未启动 | systemd 用户服务失败 | 运行 `journalctl --user -u openclaw -f` 看错误 |
+| macOS 安装后提示服务可能未启动 | launchd 启动失败 | 查看 `~/.openclaw/openclaw.err` |
 
-- Linux (x64/arm64) 或 macOS (x64/arm64)
-- 1-2 GB 内存
-- 可访问互联网
-- Crazyrouter API Key
+## FAQ
 
-<Card title="GitHub 仓库" icon="github" href="https://github.com/xujfcn/crazyrouter-openclaw">
-  查看源码、提交 Issue 或贡献代码
+### 应该使用哪个地址作为 Crazyrouter 后端？
+
+默认保持安装器写入的值即可：OpenAI 兼容 provider 用 `https://crazyrouter.com/v1`，Claude / MiniMax 原生兼容 provider 用 `https://crazyrouter.com`。
+
+### 应该保留哪个默认模型？
+
+大多数情况下先保留 `claude-sonnet-4-6`。如果你主要把 OpenClaw 当代码助手，再切到 `gpt-5.3-codex`。
+
+### 为什么模型列表里看不到我想用的模型？
+
+通常是你的 Crazyrouter token 没放行该模型，或你改成了错误的 provider 前缀。
+
+### 为什么 Telegram 私聊可以，群聊不行？
+
+安装器默认把 Telegram 组策略设为 `allowlist`。你需要按自己的使用需求继续调整 Telegram channel 配置。
+
+### 怎样最安全地对外开放 OpenClaw？
+
+最少要做到三件事：限制来源访问、保护好 `gateway.auth.token`、为 OpenClaw 使用单独的 Crazyrouter token。若直接暴露公网，建议再加反向代理和额外访问控制。
+
+<Card title="查看安装脚本仓库" icon="github" href="https://github.com/xujfcn/crazyrouter-openclaw">
+  查看安装脚本、提交 Issue，或手动审查一键安装逻辑。
 </Card>

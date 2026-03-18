@@ -1,50 +1,254 @@
 ---
 title: 'Coze 配置教程'
-description: '在 Coze 工作流中配置 Crazyrouter API'
+description: '在 Coze（扣子）里通过 HTTP/API 插件或工作流节点调用 Crazyrouter，并明确区分公开可用方案与企业版自定义模型方案'
 ---
 
-## 概述
+Coze（扣子）是字节跳动推出的智能体与工作流平台，适合做 Bot、工作流编排、插件调用和多渠道发布。对接 Crazyrouter 时，最稳妥、最适合公开文档的路径，不是直接假设“所有版本都能自定义模型”，而是优先走 HTTP / API 插件或工作流 HTTP 请求节点。
 
-Coze（扣子）是字节跳动推出的 AI Bot 开发平台，支持通过插件调用外部 API。
+## 先说结论
 
-## 配置方法
+对于绝大多数 Crazyrouter 用户，Coze 当前更推荐这两条路：
 
-### 通过 HTTP 插件调用
+- 方案 1：通过 `基于 API 创建` 的插件调用 Crazyrouter
+- 方案 2：在工作流里通过 HTTP 请求节点调用 Crazyrouter
+
+不建议把“直接在 Coze 模型管理里接入 Crazyrouter 自定义模型”写成公开主线教程，原因是：
+
+- 不同版本、不同区域、不同套餐的 Coze 能力差异较大
+- 扣子当前官方套餐文档明确提到，`自定义模型` 属于企业旗舰版能力之一
+- 因此对公开文档来说，更稳妥的主线应该是 HTTP / API 插件路线
+
+<Warning>
+这页最重要的准确性原则是：把 Coze 的公开主线写成“HTTP / API 插件调用 Crazyrouter”，而不是默认所有用户都能直接在模型管理里挂自定义上游。
+</Warning>
+
+## 适合谁用
+
+- 想在 Coze Bot 或工作流里接入 Crazyrouter 的用户
+- 想把 Crazyrouter 作为外部模型调用节点的人
+- 想先做最小可验证链路，而不是一上来就走企业版自定义模型能力的人
+- 想让 Bot 通过插件或工作流访问多模型能力的人
+
+## 推荐接法
+
+### 公开主线：HTTP / API 插件路线
+
+推荐参数：
+
+- 请求方法：`POST`
+- URL：`https://crazyrouter.com/v1/chat/completions`
+- Header：
+  - `Authorization: Bearer sk-xxx`
+  - `Content-Type: application/json`
+- 首个验证模型：`gpt-4.1`
+
+### 为什么先推荐这条路
+
+因为它：
+
+- 最不依赖 Coze 套餐差异
+- 最容易定位是“Coze 配置问题”还是“Crazyrouter token / 模型问题”
+- 最适合在公开文档里做稳定说明
+
+## 系统要求与前置条件
+
+| 项目 | 说明 |
+|------|------|
+| Crazyrouter 账号 | 先在 [crazyrouter.com](https://crazyrouter.com) 注册 |
+| Crazyrouter token | 建议为 Coze 单独创建一个 token |
+| Coze 账号 | 需要可创建 Bot / 工作流 / 插件 |
+| 发布能力 | 至少能调试 Bot 或工作流 |
+| 可用模型 | 至少放行 1 个聊天模型 |
+
+建议初始白名单：
+
+- `gpt-4.1`
+- `gpt-4.1-mini`
+- `claude-sonnet-4-6`
+
+## 方案 1：通过 API 插件接入 Crazyrouter
 
 <Steps>
-  <Step title="创建插件">
-    在 Coze 工作台中，进入 `插件` → `创建插件` → 选择 `基于 API 创建`
+  <Step title="第 1 步：在 Crazyrouter 创建 Coze 专用 token">
+    第一次只建议放行：
+
+    - `gpt-4.1`
+    - `gpt-4.1-mini`
+
+    先不要一开始就开放太多模型，排障会更简单。
   </Step>
-  <Step title="配置 API">
-    - **请求方法**: POST
-    - **URL**: `https://crazyrouter.com/v1/chat/completions`
-    - **Headers**:
-      - `Authorization`: `Bearer sk-xxx`
-      - `Content-Type`: `application/json`
+
+  <Step title="第 2 步：在 Coze 创建 API 插件">
+    进入 Coze 工作台后，按你当前版本的界面进入：
+
+    - `插件`
+    - `创建插件`
+    - 选择 `基于 API 创建` 或相近名称入口
+
+    <Note>
+    Coze 的界面名称可能因版本、区域或产品线不同而略有变化，但核心思路都是：创建一个对外 HTTP API 的插件。
+    </Note>
   </Step>
-  <Step title="配置请求体">
+
+  <Step title="第 3 步：配置请求方法与 URL">
+    填写：
+
+    - `Method`: `POST`
+    - `URL`: `https://crazyrouter.com/v1/chat/completions`
+  </Step>
+
+  <Step title="第 4 步：配置请求头">
+    填写：
+
+    ```text
+    Authorization: Bearer sk-xxx
+    Content-Type: application/json
+    ```
+  </Step>
+
+  <Step title="第 5 步：配置最小请求体">
+    第一次建议先用最小请求体：
+
     ```json
     {
-      "model": "gpt-4o",
+      "model": "gpt-4.1",
       "messages": [
-        {"role": "user", "content": "{{input}}"}
+        {
+          "role": "user",
+          "content": "{{input}}"
+        }
       ]
     }
     ```
+
+    如果你的插件界面支持参数映射，可以把用户输入映射到 `{{input}}` 这类占位变量。
   </Step>
-  <Step title="在 Bot 中使用">
-    在 Bot 的工作流中添加该插件节点。
+
+  <Step title="第 6 步：先在插件里做连接验证">
+    如果当前版本支持调试插件，先传入一句：
+
+    ```text
+    Reply only OK
+    ```
+
+    确认接口先能稳定返回，再继续挂到 Bot 或工作流里。
+  </Step>
+
+  <Step title="第 7 步：在 Bot 或工作流里调用插件">
+    当插件单独测试通过后，再把它加入：
+
+    - Bot 插件能力
+    - 或工作流节点
+
+    第一次建议先让插件只承担一个简单任务，例如摘要、改写或固定问答。
   </Step>
 </Steps>
 
-### 通过模型配置
+## 方案 2：通过工作流 HTTP 请求节点接入 Crazyrouter
 
-部分 Coze 版本支持自定义模型接入：
+如果你不想单独维护插件，也可以在工作流里直接调用 HTTP 请求节点。
 
-1. 进入 `设置` → `模型管理`
-2. 添加自定义模型
-3. 填写 API 地址和密钥
+### 推荐配置
+
+- 请求方法：`POST`
+- URL：`https://crazyrouter.com/v1/chat/completions`
+- Headers：
+  - `Authorization: Bearer sk-xxx`
+  - `Content-Type: application/json`
+- Body：
+
+```json
+{
+  "model": "gpt-4.1",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{{input}}"
+    }
+  ]
+}
+```
+
+### 推荐验证顺序
+
+1. 先在节点里传固定字符串 `Reply only OK`
+2. 再改成变量输入
+3. 最后再把输出映射到后续节点
+
+## 关于“自定义模型接入”应该怎么理解
+
+Coze 的一些版本或套餐确实可能支持自定义模型接入，但这不应作为 Crazyrouter 公开文档里的默认主线。
+
+原因：
+
+- 扣子官方套餐 FAQ 当前把 `自定义模型` 列为企业旗舰版能力之一
+- 对大多数普通用户来说，公开可复现、最容易验证的仍是 HTTP / API 插件路线
+- 因此这页只把自定义模型能力作为补充背景，不把它写成默认公开教程
+
+## 推荐模型配置
+
+| 使用场景 | 推荐模型 | 原因 |
+|----------|----------|------|
+| 首轮链路验证 | `gpt-4.1` | 最适合先确认 Coze 到 Crazyrouter 的调用链路 |
+| 低成本试运行 | `gpt-4.1-mini` | 成本更低，适合插件与工作流调试 |
+| 更强质量输出 | `claude-sonnet-4-6` | 适合更强解释和内容生成 |
+
+## Token 设置最佳实践
+
+| 设置 | 建议 | 说明 |
+|------|------|------|
+| 专用 token | 必须 | Coze 不要和桌面客户端、IDE 工具共用 token |
+| 模型白名单 | 强烈建议 | 先只放行 1 到 2 个模型 |
+| 配额上限 | 强烈建议 | 工作流循环、插件重试会放大消耗 |
+| 环境隔离 | 建议 | dev / test / production 分开 token |
+| 泄露处理 | 立即轮换 | 插件截图、共享工作区暴露后应立即换 key |
+
+## 验证清单
+
+- [ ] 已创建 Coze 专用 Crazyrouter token
+- [ ] 已优先选择 HTTP / API 插件或工作流 HTTP 请求节点路线
+- [ ] 请求 URL 已设置为 `https://crazyrouter.com/v1/chat/completions`
+- [ ] `Authorization` 头已正确填写 `Bearer sk-xxx`
+- [ ] `Content-Type` 已设置为 `application/json`
+- [ ] 最小请求体已用 `gpt-4.1` 验证成功
+- [ ] 插件或节点单独调试成功
+- [ ] 再挂入 Bot / 工作流后也能成功运行
+- [ ] Crazyrouter 后台日志中能看到对应请求
+
+## 常见错误与修复
+
+| 现象 | 常见原因 | 修复方式 |
+|------|----------|----------|
+| 401 unauthorized | token 错误、过期或复制不完整 | 重新生成 token 并重新填写 `Authorization` 头 |
+| 404 | URL 写错，或少了 `/v1/chat/completions` | 改成完整 URL |
+| 403 / model not allowed | token 未放行当前模型 | 在 Crazyrouter token 设置中放行模型 |
+| `model not found` | 模型名写错 | 先改回 `gpt-4.1` 重新验证 |
+| 插件可创建但 Bot 中调用失败 | 插件输入 / 输出映射不一致 | 先回退到固定字符串调试 |
+| 工作流节点偶发失败 | 节点输入过长、重试过多或并发过高 | 先缩小输入，降低复杂度做最小验证 |
+| 跟着别人的教程找不到“模型管理接入” | 版本或套餐不同 | 回到 HTTP / API 插件主线，不要先依赖企业版能力 |
+
+## FAQ
+
+### Coze 接 Crazyrouter 最推荐哪条路？
+
+公开文档里，优先推荐 HTTP / API 插件或工作流 HTTP 请求节点路线。
+
+### 为什么不把“自定义模型接入”写成主线？
+
+因为 Coze 不同版本和套餐能力差异较大，官方套餐 FAQ 也把 `自定义模型` 作为企业旗舰版能力之一。公开文档更适合写可复现、门槛更低的 HTTP 路线。
+
+### URL 应该填什么？
+
+填 `https://crazyrouter.com/v1/chat/completions`。
+
+### 第一个推荐模型是什么？
+
+先用 `gpt-4.1`。
+
+### 什么时候再增加 Claude 或更多模型？
+
+先把单模型、单节点、单任务跑通，再逐步扩大模型白名单。
 
 <Note>
-  Coze 国际版和国内版的配置方式可能略有不同。建议参考 Coze 官方文档了解最新的自定义模型接入方式。
+如果你的目标是“让 Coze 先稳定调用 Crazyrouter”，最重要的不是追求最复杂的接法，而是先用 HTTP / API 插件把最小链路跑通。
 </Note>
