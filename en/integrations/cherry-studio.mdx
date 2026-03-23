@@ -13,7 +13,7 @@ Using Cherry Studio's custom provider support, you can add Crazyrouter as an Ope
 - Recommended provider type: `OpenAI`
 - API URL: `https://crazyrouter.com`
 - Auth method: `sk-...` token
-- Recommended first validation model: `gpt-4.1`
+- Recommended first validation model: `gpt-5.4`
 
 <Note>
 Cherry Studio's official docs explain that if the upstream endpoint is something like `https://xxx.com/v1/chat/completions`, you usually enter only the root URL in `API URL`. For Crazyrouter, start with `https://crazyrouter.com`, not `https://crazyrouter.com/v1`.
@@ -54,14 +54,13 @@ Cherry Studio only needs a full custom path with a trailing `#` in special non-s
 | Crazyrouter account | Register first at [crazyrouter.com](https://crazyrouter.com) |
 | Crazyrouter token | Create a dedicated `sk-...` token for Cherry Studio |
 | Cherry Studio | Use a current stable desktop build |
-| Available models | Allow at least one chat model such as `gpt-4.1` or `gpt-4.1-mini` |
+| Available models | Allow at least one verified chat model such as `gpt-5.4` |
 
 Recommended starting whitelist:
 
-- `gpt-4.1`
-- `gpt-4.1-mini`
-- `gpt-4o`
+- `gpt-5.4`
 - `claude-sonnet-4-6`
+- `gemini-3-pro-preview`
 
 ## 5-Minute Quick Start
 
@@ -80,10 +79,10 @@ Recommended starting whitelist:
     Then click `Check` to validate the token and URL.
   </Step>
   <Step title="Fetch and add models">
-    Open `Manage`, fetch the model list, and add the models you want to use. Seeing a model in the popup does not always mean it is already enabled in the provider list, so you may still need to click `+` to add it. For first-run validation, start with only one baseline model: `gpt-4.1`.
+    Open `Manage`, fetch the model list, and add the models you want to use. Seeing a model in the popup does not always mean it is already enabled in the provider list, so you may still need to click `+` to add it. For first-run validation, start with only one baseline model: `gpt-5.4`.
   </Step>
   <Step title="Enable the provider and send the first prompt">
-    Turn on the provider toggle, go back to the chat screen, pick `gpt-4.1`, and send a simple prompt such as `Reply only OK`. If you get a normal reply, the setup is working.
+    Turn on the provider toggle, go back to the chat screen, pick `gpt-5.4`, and send a simple prompt such as `Reply only OK`. If you get a normal reply, the setup is working.
   </Step>
 </Steps>
 
@@ -91,13 +90,11 @@ Recommended starting whitelist:
 
 | Use case | Recommended model | Why |
 |----------|-------------------|-----|
-| Default chat model | `gpt-4.1` | Stable and reliable for most desktop chat workflows |
-| Cheap everyday usage | `gpt-4.1-mini` | Fast and inexpensive for frequent prompts |
-| Stronger general-purpose sessions | `gpt-4o` | Good for richer multi-turn interaction |
+| Default chat model | `gpt-5.4` | Verified successfully in production on March 23, 2026, and suited for the OpenAI-compatible baseline |
 | Higher-quality code / long-form help | `claude-sonnet-4-6` | Strong reasoning, writing, and code explanation |
-| Budget fallback | `gemini-2.5-flash` | Useful for lightweight tasks and quick experiments |
+| Gemini fallback path | `gemini-3-pro-preview` | Useful as a second vendor-compatible validation path |
 
-Recommended order: get `gpt-4.1` working first, then add stronger or cheaper models gradually.
+Recommended order: get `gpt-5.4` working first, then add `claude-sonnet-4-6` and `gemini-3-pro-preview`.
 
 ## Token Setup Best Practices
 
@@ -144,16 +141,16 @@ If you enable MCP:
 | 401 unauthorized | token expired, was deleted, or is invalid | create a new token in Crazyrouter and replace it |
 | 403 / model not allowed | the selected model is not in the token whitelist | allow that model in the token settings |
 | 404 | `API URL` was entered as a full endpoint path, or the provider type is wrong | switch back to the `OpenAI` provider type and set the URL to `https://crazyrouter.com` |
-| `Check` still fails even though the URL and key look right | Cherry Studio often validates against the last conversational model currently present in the provider list, and that model may be invalid | keep only `gpt-4.1`, remove suspicious models, and run `Check` again |
+| `Check` still fails even though the URL and key look right | Cherry Studio often validates against the last conversational model currently present in the provider list, and that model may be invalid | keep only `gpt-5.4`, remove suspicious models, and run `Check` again |
 | model list does not load | wrong URL, network problem, or provider not enabled | run `Check`, then confirm the provider toggle and network connectivity |
-| connection works but chat still fails | the added model is incompatible or unavailable | keep only `gpt-4.1` for baseline testing |
-| streaming behaves oddly | model-level or client-version compatibility issue | switch back to `gpt-4.1` and upgrade Cherry Studio |
+| connection works but chat still fails | the added model is incompatible or unavailable | keep only `gpt-5.4` for baseline testing |
+| streaming behaves oddly | model-level or client-version compatibility issue | switch back to `gpt-5.4` and upgrade Cherry Studio |
 | MCP tool calls fail | the issue is in the MCP service, not the model route | disable MCP, confirm the model works, then fix MCP separately |
 
 ## Performance and Cost Tips
 
 - Start with only 1 to 2 models so the first rollout stays easy to debug
-- Use `gpt-4.1-mini` for frequent low-cost chat, then switch to `gpt-4.1` or `claude-sonnet-4-6` for harder tasks
+- Default to `gpt-5.4`, then switch to `claude-sonnet-4-6` for harder long-form and code tasks
 - If you keep long conversations open, give Cherry Studio its own quota cap
 - Since Cherry Studio makes model switching easy, reserve expensive models for heavier work only
 - If usage looks abnormal, check the Crazyrouter logs first for retries or long multi-turn sessions
@@ -174,7 +171,7 @@ Only when your upstream is not using a standard OpenAI route pattern. For normal
 
 ### Which model should I test first?
 
-Start with `gpt-4.1`.
+Start with `gpt-5.4`.
 
 ### Can I configure many models right away?
 

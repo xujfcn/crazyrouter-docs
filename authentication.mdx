@@ -14,7 +14,7 @@ Authorization: Bearer YOUR_API_KEY
 ## 获取 API Key
 
 1. 登录 [Crazyrouter](https://crazyrouter.com)
-2. 进入 [Token 管理](https://crazyrouter.com/token) 页面
+2. 登录后进入 [Token 管理](https://crazyrouter.com/console/token) 页面
 3. 点击「新建令牌」
 4. 设置令牌名称、额度限制、可用模型等
 5. 复制生成的 `sk-` 开头的密钥
@@ -30,7 +30,7 @@ API Key 仅在创建时显示一次，请妥善保存。如果丢失，需要重
 curl https://crazyrouter.com/v1/chat/completions \
   -H "Authorization: Bearer sk-xxxxxxxx" \
   -H "Content-Type: application/json" \
-  -d '{"model": "gpt-4o", "messages": [{"role": "user", "content": "Hi"}]}'
+  -d '{"model": "gpt-5.4", "messages": [{"role": "user", "content": "Hi"}]}'
 ```
 
 ```python Python

@@ -67,7 +67,7 @@ def search_products(query, max_price=None):
 messages = [{"role": "user", "content": "What's the weather like in New York today? Also search for umbrellas"}]
 
 response = client.chat.completions.create(
-    model="gpt-4o",
+    model="gpt-5.4",
     messages=messages,
     tools=tools,
     tool_choice="auto"
@@ -96,7 +96,7 @@ if message.tool_calls:
 
     # 5. Get final response
     final = client.chat.completions.create(
-        model="gpt-4o",
+        model="gpt-5.4",
         messages=messages,
         tools=tools
     )
@@ -107,7 +107,7 @@ if message.tool_calls:
 
 ```python
 response = client.chat.completions.create(
-    model="gpt-4o",
+    model="gpt-5.4",
     messages=messages,
     tools=tools,
     tool_choice={"type": "function", "function": {"name": "get_weather"}}
@@ -116,11 +116,9 @@ response = client.chat.completions.create(
 
 ## Supported Models
 
-Function Calling is supported by the following models:
-- `gpt-4o`, `gpt-4o-mini`, `gpt-4-turbo`
-- `claude-sonnet-4-20250514`, `claude-opus-4-20250514`
-- `gemini-2.5-pro`, `gemini-2.5-flash`
+For the OpenAI-compatible Function Calling examples in this page, use the following verified baseline first:
+- `gpt-5.4`
 
 <Note>
-  Different models have varying levels of Function Calling support. GPT-4o supports parallel function calls, while some models may only support single calls.
+  Tool calling with `gpt-5.4` was verified in Crazyrouter production on March 23, 2026. For other vendors, check their dedicated pages first because request formats and support details can differ.
 </Note>

@@ -55,9 +55,9 @@ BASE_URL=https://crazyrouter.com/v1
 
 建议初始白名单：
 
-- `gpt-4.1`
-- `gpt-4.1-mini`
-- `gpt-5.2`
+- `gpt-5.4`
+- `claude-sonnet-4-6`
+- `gemini-3-pro-preview`
 - `text-embedding-3-large`
 
 ## Python 项目完整接入路径
@@ -122,11 +122,11 @@ npm -v
   <Step title="第 1 步：在 Crazyrouter 创建 LangChain 专用 token">
     第一次只建议放行：
 
-    - `gpt-4.1`
-    - `gpt-4.1-mini`
+    - `gpt-5.4`
+    - `claude-sonnet-4-6`
     - `text-embedding-3-large`
 
-    如果你已经确定会跑更复杂的编码 / 推理场景，再增加 `gpt-5.2` 等更强模型。
+    如果你后续要补更多模型，再按需求扩展，但第一次先坚持最小白名单。
   </Step>
 
   <Step title="第 2 步：先设置环境变量">
@@ -176,7 +176,7 @@ npm -v
     from langchain_openai import ChatOpenAI
 
     llm = ChatOpenAI(
-        model="gpt-4.1",
+        model="gpt-5.4",
         api_key="sk-xxx",
         base_url="https://crazyrouter.com/v1",
         temperature=0,
@@ -201,7 +201,7 @@ npm -v
     from langchain_openai import ChatOpenAI
 
     llm = ChatOpenAI(
-        model="gpt-4.1",
+        model="gpt-5.4",
         api_key=os.environ["OPENAI_API_KEY"],
         base_url="https://crazyrouter.com/v1",
         temperature=0,
@@ -216,7 +216,7 @@ npm -v
     import { ChatOpenAI } from "@langchain/openai";
 
     const llm = new ChatOpenAI({
-      model: "gpt-4.1",
+      model: "gpt-5.4",
       apiKey: process.env.OPENAI_API_KEY,
       configuration: {
         baseURL: "https://crazyrouter.com/v1",
@@ -253,7 +253,7 @@ npm -v
 from langchain_openai import ChatOpenAI
 
 llm = ChatOpenAI(
-    model="gpt-4.1",
+    model="gpt-5.4",
     api_key="sk-xxx",
     base_url="https://crazyrouter.com/v1",
     temperature=0.7,
@@ -286,7 +286,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
 llm = ChatOpenAI(
-    model="gpt-4.1",
+    model="gpt-5.4",
     api_key="sk-xxx",
     base_url="https://crazyrouter.com/v1",
 )
@@ -307,7 +307,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 
 llm = ChatOpenAI(
-    model="gpt-4.1",
+    model="gpt-5.4",
     api_key="sk-xxx",
     base_url="https://crazyrouter.com/v1",
 )
@@ -344,7 +344,7 @@ print(result.content)
 import { ChatOpenAI } from "@langchain/openai";
 
 const llm = new ChatOpenAI({
-  model: "gpt-4.1",
+  model: "gpt-5.4",
   apiKey: process.env.OPENAI_API_KEY,
   configuration: {
     baseURL: "https://crazyrouter.com/v1",
@@ -360,9 +360,9 @@ console.log(response.content);
 
 | 使用场景 | 推荐模型 | 原因 |
 |----------|----------|------|
-| 首轮链路验证 | `gpt-4.1` | 最适合先确认 LangChain 与 Crazyrouter 已连通 |
-| 高频轻任务 | `gpt-4.1-mini` | 成本更低，适合简单链路 |
-| 更强推理与编排 | `gpt-5.2` | 适合复杂流程和更高质量输出 |
+| 首轮链路验证 | `gpt-5.4` | 2026 年 3 月 23 日已在生产环境实测成功，最适合先确认 LangChain 与 Crazyrouter 已连通 |
+| 高质量长文与复杂链路 | `claude-sonnet-4-6` | 适合复杂解释、总结与较重推理任务 |
+| Gemini 备用档 | `gemini-3-pro-preview` | 适合作为第二条兼容性验证路径 |
 | 向量检索 | `text-embedding-3-large` | 适合先做 embedding 基线验证 |
 
 ## Token 设置最佳实践
@@ -392,7 +392,7 @@ console.log(response.content);
 |------|----------|----------|
 | 401 unauthorized | `OPENAI_API_KEY` 错误、过期或复制错误 | 重新生成 token 并重新设置环境变量 |
 | 404 | `base_url` / `baseURL` 写错或漏了 `/v1` | 改成 `https://crazyrouter.com/v1` |
-| `model not found` | 模型名写错或 token 未放行 | 改回 `gpt-4.1` 等已确认模型并检查白名单 |
+| `model not found` | 模型名写错或 token 未放行 | 改回 `gpt-5.4` 等已确认模型并检查白名单 |
 | embeddings 报错 | 忘了放行 embedding 模型 | 给 token 增加 `text-embedding-3-large` |
 | RAG 跑不起来 | 一上来就接了太多组件 | 先回退到单轮聊天，再逐层增加 |
 | 消耗过快 | 链式调用、检索、多轮 Agent 叠加 | 先缩小链路，并单独控制 token 配额 |

@@ -1,0 +1,168 @@
+---
+title: "Reasoning"
+description: "基于生产环境实测，使用 GPT、Claude、Gemini 最新主力模型进行推理与思考"
+---
+
+# Reasoning
+
+本文档只收录 **已在 Crazyrouter 生产环境实际请求验证成功** 的 Reasoning / Thinking 用法。
+
+验证时间：
+
+- `2026-03-22`
+
+已验证模型：
+
+- `gpt-5.4`
+- `claude-opus-4-6-thinking`
+- `gemini-3-pro-preview`
+
+---
+
+## 已验证能力矩阵
+
+| 模型 | 协议 | 端点 | 成功标志 |
+|------|------|------|----------|
+| `gpt-5.4` | OpenAI Responses | `POST /v1/responses` | `output` 中出现 `reasoning` item |
+| `claude-opus-4-6-thinking` | Anthropic Messages | `POST /v1/messages` | 返回 `thinking` block |
+| `gemini-3-pro-preview` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | `usageMetadata` 中出现 `thoughtsTokenCount` |
+
+---
+
+## GPT-5.4
+
+```bash cURL
+curl https://crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.4",
+    "input": "Which is larger, 9.11 or 9.9? Explain briefly.",
+    "reasoning": {
+      "effort": "high",
+      "summary": "detailed"
+    }
+  }'
+```
+
+生产验证返回的关键 `output.type`：
+
+```json
+["reasoning", "message"]
+```
+
+其中 `reasoning` item 的关键字段包括：
+
+```json
+{
+  "type": "reasoning",
+  "summary": [
+    {
+      "type": "summary_text",
+      "text": "..."
+    }
+  ]
+}
+```
+
+说明在 Crazyrouter 当前生产环境里，`gpt-5.4` 的推理能力应以 Responses API 的 `reasoning` item 为准，而不是依赖 Chat Completions 的 `reasoning_content`。
+
+---
+
+## Claude Opus 4.6 Thinking
+
+```bash cURL
+curl https://crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-opus-4-6-thinking",
+    "max_tokens": 320,
+    "thinking": {
+      "type": "enabled",
+      "budget_tokens": 128
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Which is larger, 9.11 or 9.9? Explain briefly."
+      }
+    ]
+  }'
+```
+
+生产验证返回的关键字段：
+
+```json
+{
+  "content": [
+    {
+      "type": "thinking",
+      "thinking": "..."
+    },
+    {
+      "type": "text",
+      "text": "..."
+    }
+  ]
+}
+```
+
+注意：
+
+- `claude-opus-4-6` 基础模型在同日测试中只返回普通 `text`
+- `claude-opus-4-6-thinking` 才验证到明确的 thinking block
+
+因此文档应优先使用 `claude-opus-4-6-thinking` 作为 Claude 4.6 推理示例。
+
+---
+
+## Gemini 3 Pro Preview
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Which is larger, 9.11 or 9.9? Explain briefly."
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "thinkingConfig": {
+        "thinkingBudget": 256
+      },
+      "maxOutputTokens": 512
+    }
+  }'
+```
+
+生产验证返回的关键字段：
+
+- `usageMetadata.thoughtsTokenCount`
+
+这说明在当前生产环境中，`gemini-3-pro-preview` 的 thinking 模式已实际生效。
+
+---
+
+## 当前不写入主结论的组合
+
+- `gpt-5.4` 的 Chat Completions 路由在本轮复核中未稳定返回 `reasoning_content`，因此本页不再把它作为 GPT 主示例
+- `claude-opus-4-6` 基础模型未在本轮验证中返回 thinking block
+- `claude-sonnet-4-6` 未发现同等明确的 thinking 变体模型
+
+---
+
+## 相关文档
+
+- [OpenAI 推理模型](/chat/openai/reasoning)
+- [GPT-5 思考模式](/chat/responses/gpt5-thinking)
+- [AI 思考字段](/reference/thinking)
+- [Claude 原生格式](/chat/anthropic/messages)
+- [Gemini 原生格式](/chat/gemini/native)

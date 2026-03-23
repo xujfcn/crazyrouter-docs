@@ -1,29 +1,30 @@
 ---
 title: "Responses Web 搜索"
-description: "通过 Responses API 使用 Web 搜索工具获取实时信息"
+description: "基于 2026-03-23 Crazyrouter 生产环境验证的 Responses Web Search"
 ---
 
 # Responses Web 搜索
-
-Responses API 内置了 Web 搜索工具，让模型能够搜索互联网获取实时信息。
 
 ```
 POST /v1/responses
 ```
 
+截至 2026 年 3 月 23 日，Crazyrouter 生产环境已验证 `gpt-5.4` 通过 Responses API 使用：
+
+- `tools: [{ "type": "web_search_preview" }]`
+- 返回 `output` 类型顺序 `web_search_call`、`message`
+
 ---
 
-## 基本用法
+## 最小请求
 
-<CodeGroup>
-
-```bash cURL
+```bash
 curl https://crazyrouter.com/v1/responses \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-4o",
-    "input": "今天有什么重要的科技新闻？",
+    "model": "gpt-5.4",
+    "input": "Find one AI news item from March 2026.",
     "tools": [
       {
         "type": "web_search_preview"
@@ -32,128 +33,30 @@ curl https://crazyrouter.com/v1/responses \
   }'
 ```
 
-```python Python
-from openai import OpenAI
-
-client = OpenAI(
-    api_key="YOUR_API_KEY",
-    base_url="https://crazyrouter.com/v1"
-)
-
-response = client.responses.create(
-    model="gpt-4o",
-    input="今天有什么重要的科技新闻？",
-    tools=[
-        {"type": "web_search_preview"}
-    ]
-)
-
-print(response.output_text)
-```
-
-```javascript Node.js
-import OpenAI from "openai";
-
-const client = new OpenAI({
-  apiKey: "YOUR_API_KEY",
-  baseURL: "https://crazyrouter.com/v1",
-});
-
-const response = await client.responses.create({
-  model: "gpt-4o",
-  input: "今天有什么重要的科技新闻？",
-  tools: [{ type: "web_search_preview" }],
-});
-
-console.log(response.output_text);
-```
-
-</CodeGroup>
-
----
-
-## 搜索配置
-
-可以配置搜索上下文大小：
+生产环境实际返回的关键形态：
 
 ```json
 {
-  "model": "gpt-4o",
-  "input": "2026年最新的 AI 模型发布情况",
-  "tools": [
-    {
-      "type": "web_search_preview",
-      "search_context_size": "medium"
-    }
-  ]
-}
-```
-
-| 参数 | 值 | 说明 |
-|------|------|------|
-| `search_context_size` | `low` | 较少搜索上下文，速度快 |
-| `search_context_size` | `medium` | 默认，平衡速度和信息量 |
-| `search_context_size` | `high` | 更多搜索上下文，信息更全面 |
-
----
-
-## 流式搜索
-
-```python Python
-stream = client.responses.create(
-    model="gpt-4o",
-    input="比较 React 和 Vue 的最新版本特性",
-    tools=[{"type": "web_search_preview"}],
-    stream=True
-)
-
-for event in stream:
-    if event.type == "response.output_text.delta":
-        print(event.delta, end="")
-```
-
----
-
-## 响应格式
-
-搜索结果会包含在响应的 output 中：
-
-```json
-{
-  "id": "resp_abc123",
-  "object": "response",
   "output": [
     {
-      "type": "web_search_call",
-      "id": "ws_abc123",
-      "status": "completed"
+      "type": "web_search_call"
     },
     {
-      "type": "message",
-      "role": "assistant",
-      "content": [
-        {
-          "type": "output_text",
-          "text": "根据最新的搜索结果，今天的主要科技新闻包括...",
-          "annotations": [
-            {
-              "type": "url_citation",
-              "start_index": 10,
-              "end_index": 20,
-              "url": "https://example.com/news"
-            }
-          ]
-        }
-      ]
+      "type": "message"
     }
   ]
 }
 ```
 
-<Note>
-  Web 搜索结果中的 `annotations` 字段包含了引用来源的 URL，可以用于展示参考链接。
-</Note>
+---
+
+## 当前判断标准
+
+如果你要确认模型是否真的触发了联网搜索，当前最稳妥的检查项是：
+
+- `output` 中是否出现 `web_search_call`
+- 最终回答是否仍然以 `message` 形式返回
 
 <Warning>
-  Web 搜索会增加响应延迟和 Token 消耗。模型会自动判断是否需要搜索，只在需要实时信息时触发。
+  本页不再保留旧的过时示例，也不把未复测的搜索参数写成当前主文档。
 </Warning>

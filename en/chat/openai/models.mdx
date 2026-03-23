@@ -1,6 +1,6 @@
 ---
 title: "List Models"
-description: "GET /v1/models endpoint to retrieve the list of currently available models"
+description: "Production-revalidated GET /v1/models usage for listing models available to the current token"
 ---
 
 # List Models
@@ -9,15 +9,17 @@ description: "GET /v1/models endpoint to retrieve the list of currently availabl
 GET /v1/models
 ```
 
-Returns the list of models available for the current API Key.
+Returns the list of models available to the current API key.
+
+This page only documents behavior that was revalidated against Crazyrouter production on `2026-03-23`.
 
 ## Authentication
 
-```
+```text
 Authorization: Bearer YOUR_API_KEY
 ```
 
-## Request Example
+## Request example
 
 <CodeGroup>
 
@@ -57,75 +59,87 @@ for (const model of models.data) {
 
 </CodeGroup>
 
-## Response Format
+---
+
+## Current production findings
+
+In the `2026-03-23` production recheck:
+
+- the endpoint returned `200`
+- the top-level `object` was `list`
+- the current model count was `541`
+- the following models were confirmed present:
+  - `gpt-5.4`
+  - `claude-sonnet-4-6`
+  - `claude-opus-4-6-thinking`
+  - `gemini-3-pro-preview`
+
+<Note>
+  The exact count and model set can change with upstream configuration, token permissions, and platform updates. Treat the examples here as current examples, not a fixed complete inventory.
+</Note>
+
+---
+
+## Response example
 
 ```json
 {
   "object": "list",
   "data": [
     {
-      "id": "gpt-4o",
+      "id": "gpt-5.4",
       "object": "model",
       "created": 1700000000,
-      "owned_by": "openai",
-      "permission": [],
-      "root": "gpt-4o",
-      "parent": null
+      "owned_by": "openai"
     },
     {
-      "id": "claude-sonnet-4-20250514",
+      "id": "claude-sonnet-4-6",
       "object": "model",
       "created": 1700000000,
-      "owned_by": "anthropic",
-      "permission": [],
-      "root": "claude-sonnet-4-20250514",
-      "parent": null
+      "owned_by": "anthropic"
     },
     {
-      "id": "gemini-2.5-flash",
+      "id": "claude-opus-4-6-thinking",
       "object": "model",
       "created": 1700000000,
-      "owned_by": "google",
-      "permission": [],
-      "root": "gemini-2.5-flash",
-      "parent": null
+      "owned_by": "anthropic"
     },
     {
-      "id": "deepseek-r1",
+      "id": "gemini-3-pro-preview",
       "object": "model",
       "created": 1700000000,
-      "owned_by": "deepseek",
-      "permission": [],
-      "root": "deepseek-r1",
-      "parent": null
+      "owned_by": "google"
     }
   ]
 }
 ```
 
-## Field Descriptions
+## Common fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | string | Model identifier, used as the `model` parameter in API calls |
+| Field | Type | Meaning |
+|-------|------|---------|
+| `id` | string | Model identifier used in API calls |
 | `object` | string | Always `model` |
-| `created` | integer | Unix timestamp of creation time |
-| `owned_by` | string | Organization that owns the model |
+| `created` | integer | Timestamp |
+| `owned_by` | string | Owning organization or source label |
 
-<Note>
-  The returned model list depends on your API Key permissions. Different tokens may be configured with different available model scopes.
-</Note>
+---
 
-## Get Model Pricing
+## Pricing information
 
-Model pricing information is available through a public endpoint:
+If you also need public pricing data, see:
 
-```bash
+```text
 GET /api/pricing
 ```
 
-```bash cURL
-curl https://crazyrouter.com/api/pricing
-```
+This production recheck confirmed that the endpoint returns a JSON object with common top-level keys such as:
 
-This endpoint returns input/output pricing information for all models and does not require authentication.
+- `data`
+- `popular_models`
+- `supported_endpoint`
+- `vendors`
+
+Related page:
+
+- [Gemini-Compatible OpenAI Model List](/en/chat/gemini/openai-models)

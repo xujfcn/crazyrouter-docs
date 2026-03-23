@@ -17,7 +17,7 @@ The recommended public Crazyrouter path in Zotero is:
 - choose a Zotero AI plugin that supports a custom OpenAI-compatible endpoint
 - enter `https://crazyrouter.com/v1` as the base URL
 - enter `sk-xxx` as the API key
-- use `gpt-4.1` as the first validation model
+- use `gpt-5.4` as the first validation model
 
 <Warning>
 Not every Zotero AI plugin supports a custom upstream URL. If a plugin only exposes an "OpenAI API Key" field and does not provide a `Base URL` or `API URL` setting, it usually cannot be redirected to Crazyrouter directly. That kind of plugin should not be the default public guide.
@@ -52,9 +52,9 @@ So the public Crazyrouter guide should teach users to choose a plugin that suppo
 
 Suggested first-pass allowlist:
 
-- `gpt-4.1`
-- `gpt-4.1-mini`
+- `gpt-5.4`
 - `claude-sonnet-4-6`
+- `gemini-3-pro-preview`
 
 ## Install Zotero
 
@@ -112,7 +112,7 @@ The exact field names vary by plugin, but for a first pass use this pattern:
 | Base API URL / API URL | `https://crazyrouter.com/v1` |
 | Full Endpoint | `https://crazyrouter.com/v1/chat/completions` |
 | API Key | `sk-xxx` |
-| Model | `gpt-4.1` |
+| Model | `gpt-5.4` |
 
 <Tip>
 If the plugin asks for a "base URL", prefer `https://crazyrouter.com/v1`. Only use `https://crazyrouter.com/v1/chat/completions` when the plugin explicitly asks for the full chat endpoint.
@@ -124,8 +124,8 @@ If the plugin asks for a "base URL", prefer `https://crazyrouter.com/v1`. Only u
   <Step title="Step 1: Create a dedicated Crazyrouter token for Zotero">
     For the first pass, only allow:
 
-    - `gpt-4.1`
-    - `gpt-4.1-mini`
+    - `gpt-5.4`
+    - `claude-sonnet-4-6`
 
     Do not open a large model list on day one. A narrow scope is easier to debug.
   </Step>
@@ -159,7 +159,7 @@ If the plugin asks for a "base URL", prefer `https://crazyrouter.com/v1`. Only u
 
     - `Base API URL`: `https://crazyrouter.com/v1`
     - `API Key`: `sk-xxx`
-    - `Model`: `gpt-4.1`
+    - `Model`: `gpt-5.4`
 
     If the plugin supports only a full endpoint field, use:
 
@@ -190,7 +190,7 @@ If the plugin asks for a "base URL", prefer `https://crazyrouter.com/v1`. Only u
 Move in this order:
 
 1. Confirm Zotero and the plugin both open correctly
-2. Validate `gpt-4.1` first
+2. Validate `gpt-5.4` first
 3. Test single-paper summarization
 4. Test translation next
 5. Only then try multi-paper comparison, long-form analysis, or batch tasks
@@ -199,9 +199,9 @@ Move in this order:
 
 | Scenario | Recommended model | Why |
 |------|----------|------|
-| First connection test | `gpt-4.1` | Best first baseline for plugin-to-Crazyrouter validation |
-| Literature translation | `gpt-4.1-mini` | Lower cost for repeated translation work |
+| First connection test | `gpt-5.4` | Verified successfully in production on March 23, 2026, and best for plugin-to-Crazyrouter validation |
 | Deep analysis and explanation | `claude-sonnet-4-6` | Better for long explanations, comparison, and method-level interpretation |
+| Gemini fallback path | `gemini-3-pro-preview` | Useful as a second compatibility-validation path |
 
 ## Good Zotero Workflows For Crazyrouter
 
@@ -238,7 +238,7 @@ If the plugin can write results back into Zotero notes, begin with short summari
 - [ ] A dedicated Crazyrouter token was created for Zotero
 - [ ] The base URL or full endpoint was entered correctly
 - [ ] `sk-xxx` was entered correctly
-- [ ] `gpt-4.1` was used as the first model
+- [ ] `gpt-5.4` was used as the first model
 - [ ] Zotero was restarted if the plugin requires it
 - [ ] A single-paper summarization or translation test succeeded
 - [ ] The request appears in Crazyrouter logs
@@ -251,7 +251,7 @@ If the plugin can write results back into Zotero notes, begin with short summari
 | 401 unauthorized | Token is wrong, incomplete, or expired | Generate a new token and enter it again |
 | 404 | The base URL or full endpoint is wrong | Reset it to `https://crazyrouter.com/v1` or `https://crazyrouter.com/v1/chat/completions` |
 | 403 / model not allowed | The token does not allow that model | Allow the model in Crazyrouter token settings |
-| `model not found` | The model name is wrong | Switch back to `gpt-4.1` and do a minimal validation |
+| `model not found` | The model name is wrong | Switch back to `gpt-5.4` and do a minimal validation |
 | The plugin shows no response or ignores new settings | The plugin needs a Zotero restart | Restart Zotero and try again |
 | Summarization fails without a clear API error | The item has no abstract, the PDF is missing, or the plugin did not receive enough context | Switch to an item with an abstract or an attached PDF |
 | Long-document jobs are very slow | The PDF is too long or the task is too heavy | Reduce the scope to one paragraph, one page, or one paper |
@@ -276,12 +276,12 @@ Prefer `https://crazyrouter.com/v1`.
 
 ### What should the first model be?
 
-Start with `gpt-4.1`.
+Start with `gpt-5.4`.
 
 ### When should I try multi-paper analysis or complex review prompts?
 
 Only after single-paper summarization and single-paper translation are already stable.
 
 <Note>
-If your goal is "make Zotero work with Crazyrouter first", the key is not choosing the fanciest plugin. It is confirming that your plugin truly supports a custom OpenAI-compatible endpoint, and then validating a single-paper summary with `gpt-4.1`.
+If your goal is "make Zotero work with Crazyrouter first", the key is not choosing the fanciest plugin. It is confirming that your plugin truly supports a custom OpenAI-compatible endpoint, and then validating a single-paper summary with `gpt-5.4`.
 </Note>

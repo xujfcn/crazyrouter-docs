@@ -21,7 +21,7 @@ const client = new OpenAI({
 
 async function main() {
   const response = await client.chat.completions.create({
-    model: 'gpt-4o',
+    model: 'gpt-5.4',
     messages: [
       { role: 'system', content: 'You are a helpful assistant.' },
       { role: 'user', content: 'Explain what Node.js is in one sentence' },
@@ -39,7 +39,7 @@ main();
 ```javascript
 async function streamChat() {
   const stream = await client.chat.completions.create({
-    model: 'gpt-4o',
+    model: 'gpt-5.4',
     messages: [{ role: 'user', content: 'Write a poem about programming' }],
     stream: true,
   });
@@ -65,7 +65,7 @@ async function chat(userInput) {
   messages.push({ role: 'user', content: userInput });
 
   const response = await client.chat.completions.create({
-    model: 'gpt-4o',
+    model: 'gpt-5.4',
     messages,
   });
 
@@ -94,12 +94,12 @@ const client = new OpenAI({
 
 client.chat.completions
   .create({
-    model: 'gpt-4o',
+    model: 'gpt-5.4',
     messages: [{ role: 'user', content: 'Hello' }],
   })
   .then((res) => console.log(res.choices[0].message.content));
 ```
 
 <Note>
-  The Node.js openai package requires version 4.x or above. If using an older version, refer to the OpenAI official migration guide to upgrade.
+  These examples default to `gpt-5.4`, which was verified successfully in Crazyrouter production on March 23, 2026. If you need to swap models, prefer other verified options such as `claude-sonnet-4-6` or `gemini-3-pro-preview`.
 </Note>

@@ -1,152 +1,84 @@
 ---
 title: "聊天创作图"
-description: "通过 Chat Completions API 使用支持图片生成的模型在对话中创作图片"
+description: "基于 2026-03-23 Crazyrouter 生产环境验证的 Chat 创图现状与稳定替代方案"
 ---
 
 # 聊天创作图
 
-部分模型（如 `gpt-4o`、`gpt-4o-image`）支持在聊天对话中直接生成图片。模型会根据对话内容自动判断是否需要生成图片，并在回复中返回图片。
+```
+POST /v1/chat/completions
+```
 
-<Note>
-  聊天创作图与独立的 Images API（`/v1/images/generations`）不同。这里是通过聊天对话的方式让模型生成图片，模型可以同时返回文字和图片。
-</Note>
+截至 2026 年 3 月 23 日，Crazyrouter 生产环境对 Chat 创图的实测结果如下：
 
-## 基本用法
+- `gpt-4o` 可正常返回 `200`，但回复里的 `message.content` 是普通字符串，不是标准的图片多段内容
+- `gpt-4o-image` 也可正常返回 `200`，但当前返回形态仍然是文本或 Markdown，其中包含参数块、任务 ID 和预览链接，而不是标准 OpenAI `image_url` 多部分结构
+- 如果你需要稳定、机器可解析的图片结果，当前应优先使用 [`/v1/images/generations`](/images/gpt-image) + `gpt-image-1`
 
-<CodeGroup>
+<Warning>
+  不要再把 Crazyrouter 当前的 Chat 创图响应当成标准 OpenAI `content: [{type: "image_url", ...}]` 结构来解析。
+</Warning>
 
-```bash cURL
+---
+
+## 当前可复现的 Chat 行为
+
+下面的请求在生产环境命中了 `gpt-4o-image`，返回 `200`：
+
+```bash
 curl https://crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-4o",
+    "model": "gpt-4o-image",
     "messages": [
       {
         "role": "user",
-        "content": "画一只在月光下奔跑的猫，赛博朋克风格"
+        "content": "Generate an image of a red square on a white background."
       }
     ],
-    "max_tokens": 4096
+    "max_tokens": 512
   }'
 ```
 
-```python Python
-from openai import OpenAI
+生产环境实际观测到的 `message.content` 是一个字符串，内容类似：
 
-client = OpenAI(
-    api_key="YOUR_API_KEY",
-    base_url="https://crazyrouter.com/v1"
-)
-
-response = client.chat.completions.create(
-    model="gpt-4o",
-    messages=[
-        {
-            "role": "user",
-            "content": "画一只在月光下奔跑的猫，赛博朋克风格"
-        }
-    ],
-    max_tokens=4096
-)
-
-message = response.choices[0].message
-
-# 回复可能包含文字和图片
-for part in message.content:
-    if isinstance(part, dict):
-        if part.get("type") == "text":
-            print(part["text"])
-        elif part.get("type") == "image_url":
-            print("图片 URL:", part["image_url"]["url"])
-```
-
-```javascript Node.js
-import OpenAI from "openai";
-
-const client = new OpenAI({
-  apiKey: "YOUR_API_KEY",
-  baseURL: "https://crazyrouter.com/v1",
-});
-
-const response = await client.chat.completions.create({
-  model: "gpt-4o",
-  messages: [
-    {
-      role: "user",
-      content: "画一只在月光下奔跑的猫，赛博朋克风格",
-    },
-  ],
-  max_tokens: 4096,
-});
-
-console.log(response.choices[0].message.content);
-```
-
-</CodeGroup>
-
-## 响应格式
-
-当模型生成图片时，`content` 字段会返回包含图片的多部分内容：
-
-```json
+```text
 {
-  "id": "chatcmpl-abc123",
-  "object": "chat.completion",
-  "created": 1709123456,
-  "model": "gpt-4o",
-  "choices": [
-    {
-      "index": 0,
-      "message": {
-        "role": "assistant",
-        "content": [
-          {
-            "type": "text",
-            "text": "这是我为你创作的赛博朋克风格月光猫："
-          },
-          {
-            "type": "image_url",
-            "image_url": {
-              "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg..."
-            }
-          }
-        ]
-      },
-      "finish_reason": "stop"
-    }
-  ],
-  "usage": {
-    "prompt_tokens": 20,
-    "completion_tokens": 1024,
-    "total_tokens": 1044
-  }
+  "prompt": "Generate an image of a red square on a white background.",
+  "ratio": "1:1",
+  "n": 1
 }
+
+ID: ...
+Data Preview: https://...
 ```
 
-## 图片编辑
+这说明当前 Chat 路径更像“文本包装后的图片任务结果”，而不是标准化的多段图片消息对象。
 
-你也可以发送一张图片并要求模型对其进行修改：
+---
 
-```python Python
-response = client.chat.completions.create(
-    model="gpt-4o",
-    messages=[
-        {
-            "role": "user",
-            "content": [
-                {"type": "text", "text": "把这张图片改成水彩画风格"},
-                {
-                    "type": "image_url",
-                    "image_url": {"url": "https://example.com/photo.jpg"}
-                }
-            ]
-        }
-    ],
-    max_tokens=4096
-)
+## 稳定路径：Images API
+
+如果你的目标是程序化取图，当前更稳定的方式是：
+
+```bash
+curl -X POST https://crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-image-1",
+    "prompt": "A red square on a white background"
+  }'
 ```
 
-<Warning>
-  图片生成会消耗较多 Token。生成的图片以 Base64 格式返回，请注意响应体积可能较大。
-</Warning>
+2026-03-23 的生产环境实测返回了：
+
+- `data[0].b64_json`
+- `data[0].revised_prompt`
+
+也就是说，当前稳定的自动化消费方式仍然是 Images API，而不是 Chat Completions 的图片兼容路径。
+
+<Note>
+  如果你只是手工试用，`gpt-4o-image` 的 Chat 路径仍然可以观察结果；如果你要做前后端自动化、结果存储或图片后处理，请直接用 [`GPT Image 文档`](/images/gpt-image)。
+</Note>

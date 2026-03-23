@@ -27,7 +27,7 @@ curl https://crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer sk-xxxxxxxx" \
   -d '{
-    "model": "gpt-4o",
+    "model": "gpt-5.4",
     "messages": [{"role": "user", "content": "Hello"}],
     "stream": false
   }'
@@ -42,7 +42,7 @@ curl https://crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer sk-xxxxxxxx" \
   -d '{
-    "model": "gpt-4o",
+    "model": "gpt-5.4",
     "messages": [{"role": "user", "content": "Hello"}],
     "stream": true
   }'
@@ -54,6 +54,6 @@ Streaming responses use the Server-Sent Events (SSE) format. Each event starts w
 
 You can debug the API online using the following methods:
 
-1. **Crazyrouter Playground** - Visit [crazyrouter.com/playground](https://crazyrouter.com/playground) to test directly in your browser
+1. **Crazyrouter Playground** - After signing in, visit [crazyrouter.com/console/playground](https://crazyrouter.com/console/playground) to test directly in your browser
 2. **cURL** - Send requests using the command-line tool
 3. **Postman / Apifox** - Use API debugging tools

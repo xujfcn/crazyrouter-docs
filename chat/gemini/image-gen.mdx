@@ -1,72 +1,50 @@
 ---
 title: "Gemini 图片生成"
-description: "使用 Gemini 模型生成图片，支持宽高比和分辨率控制"
+description: "基于 2026-03-23 Crazyrouter 生产环境验证的 Gemini 图片生成现状"
 ---
 
 # Gemini 图片生成
-
-Gemini 图片生成模型（如 `gemini-2-5-flash-image`、`gemini-3-pro-image-preview`）支持通过对话方式生成图片。
 
 ```
 POST /v1beta/models/{model}:generateContent
 ```
 
+截至 2026 年 3 月 23 日，Crazyrouter 生产环境对 Gemini 图片生成的验证结果如下：
+
+- `gemini-3.1-flash-image-preview` 使用 `responseModalities: ["IMAGE"]` 时，成功返回 `inlineData`
+- `gemini-3-pro-image-preview` 返回的是 `text`，文本中嵌入了 `data:image/...;base64,...` 的 Markdown 图片
+- `gemini-2.5-flash-image` 也返回 `text`，文本中嵌入了 `data:image/...;base64,...`
+- `gemini-2.5-flash-image-preview` 返回 `text`，文本中嵌入了托管图片 URL
+
+<Warning>
+  Gemini 图片模型当前在 Crazyrouter 上并没有统一响应格式。不要假设所有模型都会返回 `inlineData`。
+</Warning>
+
 ---
 
-## 基本图片生成
+## 当前最稳妥的示例模型
 
-<CodeGroup>
+对于“直接拿到图片二进制数据”这个目标，当前最容易处理的是 `gemini-3.1-flash-image-preview`：
 
-```bash cURL
-curl "https://crazyrouter.com/v1beta/models/gemini-2-5-flash-image:generateContent?key=YOUR_API_KEY" \
+```bash
+curl "https://crazyrouter.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
       {
         "role": "user",
         "parts": [
-          {"text": "生成一张日落时分的海边风景画，油画风格"}
+          {"text": "Generate an IMAGE of a simple red square on a white background. Return image output."}
         ]
       }
     ],
     "generationConfig": {
-      "responseModalities": ["TEXT", "IMAGE"]
+      "responseModalities": ["IMAGE"]
     }
   }'
 ```
 
-```python Python
-import google.generativeai as genai
-
-genai.configure(
-    api_key="YOUR_API_KEY",
-    transport="rest",
-    client_options={"api_endpoint": "https://crazyrouter.com"}
-)
-
-model = genai.GenerativeModel("gemini-2-5-flash-image")
-
-response = model.generate_content(
-    "生成一张日落时分的海边风景画，油画风格",
-    generation_config=genai.GenerationConfig(
-        response_modalities=["TEXT", "IMAGE"]
-    )
-)
-
-# 处理响应中的图片
-for part in response.candidates[0].content.parts:
-    if hasattr(part, "text"):
-        print(part.text)
-    elif hasattr(part, "inline_data"):
-        import base64
-        with open("output.png", "wb") as f:
-            f.write(base64.b64decode(part.inline_data.data))
-        print("图片已保存为 output.png")
-```
-
-</CodeGroup>
-
-### 响应格式
+生产环境实际返回的关键形态：
 
 ```json
 {
@@ -75,18 +53,13 @@ for part in response.candidates[0].content.parts:
       "content": {
         "parts": [
           {
-            "text": "这是一幅日落海边的油画风景："
-          },
-          {
             "inlineData": {
               "mimeType": "image/png",
-              "data": "iVBORw0KGgoAAAANSUhEUg..."
+              "data": "iVBORw0KGgoAAA..."
             }
           }
-        ],
-        "role": "model"
-      },
-      "finishReason": "STOP"
+        ]
+      }
     }
   ]
 }
@@ -94,60 +67,20 @@ for part in response.candidates[0].content.parts:
 
 ---
 
-## 宽高比控制
+## 其他已观察到的返回形态
 
-通过提示词或参数控制生成图片的宽高比：
+同一天的生产环境检查里，还观察到以下模型差异：
 
-```bash cURL
-curl "https://crazyrouter.com/v1beta/models/gemini-2-5-flash-image:generateContent?key=YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "contents": [
-      {
-        "role": "user",
-        "parts": [
-          {"text": "生成一张 16:9 宽屏的山水画"}
-        ]
-      }
-    ],
-    "generationConfig": {
-      "responseModalities": ["TEXT", "IMAGE"],
-      "imageGenerationConfig": {
-        "aspectRatio": "16:9"
-      }
-    }
-  }'
-```
+- `gemini-3-pro-image-preview`: `parts[0].text` 是 `![image](data:image/jpeg;base64,...)`
+- `gemini-2.5-flash-image`: `parts[0].text` 是 `![image](data:image/png;base64,...)`
+- `gemini-2.5-flash-image-preview`: `parts[0].text` 是 `![Image](https://...)`
 
-### 支持的宽高比
+如果你要兼容多模型，建议优先按下面顺序解析：
 
-| 宽高比 | 说明 |
-|--------|------|
-| `1:1` | 正方形 |
-| `16:9` | 宽屏横向 |
-| `9:16` | 竖屏纵向 |
-| `4:3` | 标准横向 |
-| `3:4` | 标准纵向 |
-
----
-
-## 图片数量控制
-
-```json
-{
-  "generationConfig": {
-    "responseModalities": ["TEXT", "IMAGE"],
-    "imageGenerationConfig": {
-      "numberOfImages": 4
-    }
-  }
-}
-```
+1. 先检查 `inlineData`
+2. 再检查 `text` 中是否包含 `data:image/`
+3. 最后检查 `text` 中是否包含外链图片 URL
 
 <Note>
-  `responseModalities` 必须包含 `"IMAGE"` 才能让模型生成图片。如果只设置 `"TEXT"`，模型只会返回文字描述。
+  本页没有继续保留宽高比、批量出图等参数说明，因为这些参数在本轮生产验证中没有逐项复测。
 </Note>
-
-<Warning>
-  图片生成消耗的 Token 较多，且响应中的 Base64 图片数据体积较大。建议合理控制生成数量。
-</Warning>

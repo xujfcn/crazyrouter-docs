@@ -1,6 +1,6 @@
 ---
 title: "Gemini 兼容 OpenAI 模型列表"
-description: "GET /v1beta/openai/models 为 Gemini 风格客户端提供 OpenAI 兼容模型列表"
+description: "基于生产环境复核，使用 GET /v1beta/openai/models 获取 OpenAI 风格模型列表"
 ---
 
 # Gemini 兼容 OpenAI 模型列表
@@ -9,19 +9,24 @@ description: "GET /v1beta/openai/models 为 Gemini 风格客户端提供 OpenAI 
 GET /v1beta/openai/models
 ```
 
-这个端点给 Gemini 风格客户端或中间层提供一个兼容的模型列表入口：认证方式可以走 `key` 查询参数或 `x-goog-api-key`，但返回的是 OpenAI 风格的模型列表数据。
+这个端点是一个兼容桥：
+
+- 认证方式可以走 Gemini 风格
+- 返回结构仍是 OpenAI 风格模型列表
+
+本文页只写入 `2026-03-23` 已在 Crazyrouter 生产环境复核过的行为。
 
 ## 什么时候用它
 
-- 你的客户端习惯把 API Key 放在 `?key=` 查询参数里
-- 你的中间层沿用了 `x-goog-api-key` 这样的 Gemini 风格认证
-- 你仍然想拿到 OpenAI 风格的模型列表，而不是 Gemini 原生模型元数据
+- 你的客户端习惯使用 `?key=`
+- 你的中间层已经使用 `x-goog-api-key`
+- 你想拿到 OpenAI 风格的 `list + data[]` 结构，而不是 Gemini 原生模型元数据
 
-如果你是标准 OpenAI 客户端，优先使用 `GET /v1/models`。
+如果你是标准 OpenAI 客户端，优先用 [GET /v1/models](/chat/openai/models)。
 
 ## 认证
 
-支持以下任一方式：
+本轮已复核以下三种方式都可用：
 
 ```http
 Authorization: Bearer YOUR_API_KEY
@@ -44,33 +49,61 @@ curl "https://crazyrouter.com/v1beta/openai/models?key=YOUR_API_KEY"
 ```
 
 ```bash cURL with Header
-curl https://crazyrouter.com/v1beta/openai/models   -H "x-goog-api-key: YOUR_API_KEY"
+curl https://crazyrouter.com/v1beta/openai/models \
+  -H "x-goog-api-key: YOUR_API_KEY"
 ```
 
 </CodeGroup>
+
+---
+
+## 当前生产验证结论
+
+在 `2026-03-23` 的生产复核中：
+
+- `?key=` 请求返回 `200`
+- `x-goog-api-key` 请求返回 `200`
+- 顶层 `object` 为 `list`
+- 顶层 `success` 为 `true`
+- 当前返回模型数量为 `541`
+- `data[]` 中元素的常见字段包括：
+  - `id`
+  - `object`
+  - `created`
+  - `owned_by`
+  - `supported_endpoint_types`
+
+---
 
 ## 响应示例
 
 ```json
 {
+  "object": "list",
+  "success": true,
   "data": [
     {
-      "id": "gpt-4o",
+      "id": "gpt-5.4",
       "object": "model",
-      "created": 1626777600,
+      "created": 1700000000,
       "owned_by": "openai",
       "supported_endpoint_types": ["openai"]
     },
     {
-      "id": "claude-sonnet-4-20250514",
+      "id": "claude-sonnet-4-6",
       "object": "model",
-      "created": 1626777600,
-      "owned_by": "vertex-ai",
-      "supported_endpoint_types": ["anthropic", "openai", "gemini"]
+      "created": 1700000000,
+      "owned_by": "anthropic",
+      "supported_endpoint_types": ["openai", "anthropic"]
+    },
+    {
+      "id": "gemini-3-pro-preview",
+      "object": "model",
+      "created": 1700000000,
+      "owned_by": "google",
+      "supported_endpoint_types": ["openai", "gemini"]
     }
-  ],
-  "object": "list",
-  "success": true
+  ]
 }
 ```
 
@@ -80,11 +113,11 @@ curl https://crazyrouter.com/v1beta/openai/models   -H "x-goog-api-key: YOUR_API
 |------|------|------|
 | `data[]` | array | 当前 Token 可用模型列表 |
 | `id` | string | 模型标识符 |
-| `owned_by` | string | 模型来源或所属渠道 |
-| `supported_endpoint_types` | array | 当前模型支持的接口类型，如 `openai`、`anthropic`、`gemini` |
+| `owned_by` | string | 模型来源或所属组织 |
+| `supported_endpoint_types` | array | 当前模型支持的接口风格 |
 | `object` | string | 固定为 `list` |
-| `success` | boolean | 当前请求是否成功 |
+| `success` | boolean | 请求是否成功 |
 
 <Note>
-该端点本质上是一个兼容桥接入口：认证风格偏 Gemini，返回数据结构偏 OpenAI 模型列表。
+  这个端点不是“只返回 Gemini 模型”。它返回的是当前 Token 可见模型的 OpenAI 风格列表，只是入口和认证方式更适配 Gemini 风格客户端。
 </Note>

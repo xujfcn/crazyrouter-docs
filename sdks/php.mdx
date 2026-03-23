@@ -12,7 +12,7 @@ $apiKey = 'sk-xxx';
 $baseUrl = 'https://crazyrouter.com/v1';
 
 $data = [
-    'model' => 'gpt-4o',
+    'model' => 'gpt-5.4',
     'messages' => [
         ['role' => 'user', 'content' => '你好，用PHP写一个冒泡排序']
     ]
@@ -82,7 +82,7 @@ $apiKey = 'sk-xxx';
 $baseUrl = 'https://crazyrouter.com/v1';
 
 $data = [
-    'model' => 'gpt-4o',
+    'model' => 'gpt-5.4',
     'messages' => [['role' => 'user', 'content' => '讲一个笑话']],
     'stream' => true,
 ];
@@ -114,5 +114,5 @@ echo "\n";
 ```
 
 <Note>
-  PHP 7.4+ 推荐使用 `openai-php/client` 包，提供更友好的 SDK 体验。安装：`composer require openai-php/client`
+  以上聊天示例默认使用 2026 年 3 月 23 日已在生产环境实测成功的 `gpt-5.4`。如果你要切换模型，优先改成同样已验证的 `claude-sonnet-4-6` 或 `gemini-3-pro-preview`。
 </Note>

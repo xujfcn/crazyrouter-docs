@@ -6,7 +6,7 @@ description: 'Make your first API call in 5 minutes'
 ## Step 1: Get Your API Key
 
 1. Visit [Crazyrouter](https://crazyrouter.com) and create an account
-2. Go to the [Token Management](https://crazyrouter.com/token) page
+2. After signing in, go to the [Token Management](https://crazyrouter.com/console/token) page
 3. Click "Create Token" to generate an API Key
 
 ## Step 2: Make a Request
@@ -17,7 +17,7 @@ curl https://crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-4o",
+    "model": "gpt-5.4",
     "messages": [
       {"role": "user", "content": "Hello"}
     ]
@@ -33,7 +33,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gpt-4o",
+    model="gpt-5.4",
     messages=[{"role": "user", "content": "Hello"}]
 )
 print(response.choices[0].message.content)
@@ -48,7 +48,7 @@ const client = new OpenAI({
 });
 
 const response = await client.chat.completions.create({
-  model: 'gpt-4o',
+  model: 'gpt-5.4',
   messages: [{ role: 'user', content: 'Hello' }]
 });
 console.log(response.choices[0].message.content);
@@ -79,6 +79,10 @@ Example of a successful response:
   }
 }
 ```
+
+<Note>
+The `gpt-5.4` example on this quickstart page was revalidated successfully against Crazyrouter production on 2026-03-23.
+</Note>
 
 <Note>
 All OpenAI-compatible clients and frameworks (such as LangChain, LlamaIndex, Cursor, etc.) can be integrated by simply changing the `base_url` and `api_key`.

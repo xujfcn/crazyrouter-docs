@@ -40,7 +40,7 @@ Recommended parameters:
 - Headers:
   - `Authorization: Bearer sk-xxx`
   - `Content-Type: application/json`
-- First validation model: `gpt-4.1`
+- First validation model: `gpt-5.4`
 
 ### Why this route comes first
 
@@ -62,9 +62,9 @@ Because it:
 
 Suggested initial allowlist:
 
-- `gpt-4.1`
-- `gpt-4.1-mini`
+- `gpt-5.4`
 - `claude-sonnet-4-6`
+- `gemini-3-pro-preview`
 
 ## Option 1: Connect Crazyrouter Through An API Plugin
 
@@ -72,8 +72,8 @@ Suggested initial allowlist:
   <Step title="Step 1: Create a dedicated Crazyrouter token for Coze">
     For the first pass, only allow:
 
-    - `gpt-4.1`
-    - `gpt-4.1-mini`
+    - `gpt-5.4`
+    - `claude-sonnet-4-6`
 
     Do not enable too many models on day one. Troubleshooting is easier when the scope is small.
   </Step>
@@ -111,7 +111,7 @@ Suggested initial allowlist:
 
     ```json
     {
-      "model": "gpt-4.1",
+      "model": "gpt-5.4",
       "messages": [
         {
           "role": "user",
@@ -159,7 +159,7 @@ If you do not want to maintain a separate plugin, you can call Crazyrouter direc
 
 ```json
 {
-  "model": "gpt-4.1",
+  "model": "gpt-5.4",
   "messages": [
     {
       "role": "user",
@@ -189,9 +189,9 @@ Reasons:
 
 | Use case | Recommended model | Why |
 |----------|----------|------|
-| First connection test | `gpt-4.1` | Best starting point for validating the Coze-to-Crazyrouter path |
-| Lower-cost test runs | `gpt-4.1-mini` | Cheaper for plugin and workflow debugging |
+| First connection test | `gpt-5.4` | Verified successfully in production on March 23, 2026, and best for validating the Coze-to-Crazyrouter path |
 | Higher-quality output | `claude-sonnet-4-6` | Better for stronger explanation and content generation |
+| Gemini fallback path | `gemini-3-pro-preview` | Useful as a second compatibility-validation path |
 
 ## Token Best Practices
 
@@ -210,7 +210,7 @@ Reasons:
 - [ ] Set the request URL to `https://crazyrouter.com/v1/chat/completions`
 - [ ] Filled the `Authorization` header as `Bearer sk-xxx`
 - [ ] Set `Content-Type` to `application/json`
-- [ ] Validated the smallest request body with `gpt-4.1`
+- [ ] Validated the smallest request body with `gpt-5.4`
 - [ ] Confirmed the plugin or HTTP node works in standalone debugging
 - [ ] Confirmed it still works after attaching to the bot or workflow
 - [ ] Confirmed the request appears in Crazyrouter logs
@@ -222,7 +222,7 @@ Reasons:
 | 401 unauthorized | Token is wrong, expired, or copied incompletely | Generate a new token and re-enter the `Authorization` header |
 | 404 | URL is wrong or missing `/v1/chat/completions` | Change it to the full URL |
 | 403 / model not allowed | The token does not allow that model | Allow the model in Crazyrouter token settings |
-| `model not found` | Model name is wrong | Switch back to `gpt-4.1` and revalidate |
+| `model not found` | Model name is wrong | Switch back to `gpt-5.4` and revalidate |
 | Plugin can be created but fails inside the bot | Input / output mapping is inconsistent | Fall back to a fixed-string test first |
 | Workflow node fails intermittently | Input is too large, retries are too aggressive, or concurrency is too high | Shrink the input and return to a minimal test |
 | You cannot find a "model management" custom-upstream entry from another tutorial | Your version or plan is different | Go back to the HTTP / API plugin route instead of relying on enterprise-only capabilities |
@@ -243,7 +243,7 @@ Use `https://crazyrouter.com/v1/chat/completions`.
 
 ### What should the first model be?
 
-Start with `gpt-4.1`.
+Start with `gpt-5.4`.
 
 ### When should I add Claude or more models?
 

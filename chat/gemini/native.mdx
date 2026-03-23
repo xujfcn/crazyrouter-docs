@@ -1,15 +1,19 @@
 ---
 title: "Gemini 原生格式"
-description: "使用 Gemini 原生 API 格式进行文本生成、流式输出和思考模式"
+description: "基于生产环境复核，使用 Gemini 3 Pro Preview 的原生 API 能力"
 ---
 
 # Gemini 原生格式
 
-Crazyrouter 支持 Google Gemini 的原生 API 格式，包括 `generateContent` 和 `streamGenerateContent` 端点。
+本文页只写入 `2026-03-22` 已在 Crazyrouter 生产环境复核过的 Gemini Native 用法。
+
+当前主示例模型：
+
+- `gemini-3-pro-preview`
 
 ## 端点
 
-```
+```text
 POST /v1beta/models/{model}:generateContent
 POST /v1beta/models/{model}:streamGenerateContent
 ```
@@ -18,69 +22,35 @@ POST /v1beta/models/{model}:streamGenerateContent
 
 通过 URL 参数传入 API Key：
 
-```
+```text
 ?key=YOUR_API_KEY
 ```
 
 ---
 
-## 文本生成
-
-<CodeGroup>
+## 基本文本生成
 
 ```bash cURL
-curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY" \
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
       {
         "role": "user",
         "parts": [
-          {"text": "用简单的语言解释什么是机器学习"}
+          {
+            "text": "Explain machine learning in one sentence."
+          }
         ]
       }
     ],
     "generationConfig": {
-      "temperature": 0.7,
-      "maxOutputTokens": 1024
+      "maxOutputTokens": 128
     }
   }'
 ```
 
-```python Python
-import google.generativeai as genai
-
-genai.configure(
-    api_key="YOUR_API_KEY",
-    transport="rest",
-    client_options={"api_endpoint": "https://crazyrouter.com"}
-)
-
-model = genai.GenerativeModel("gemini-2.5-flash")
-
-response = model.generate_content("用简单的语言解释什么是机器学习")
-
-print(response.text)
-```
-
-```javascript Node.js
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const genAI = new GoogleGenerativeAI("YOUR_API_KEY");
-// 需要配置自定义 baseURL
-
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
-const result = await model.generateContent(
-  "用简单的语言解释什么是机器学习"
-);
-
-console.log(result.response.text());
-```
-
-</CodeGroup>
-
-### 响应格式
+当前生产返回的关键结构：
 
 ```json
 {
@@ -89,20 +59,13 @@ console.log(result.response.text());
       "content": {
         "parts": [
           {
-            "text": "机器学习是人工智能的一个分支..."
+            "text": "...",
+            "thoughtSignature": "..."
           }
-        ],
-        "role": "model"
-      },
-      "finishReason": "STOP",
-      "index": 0
+        ]
+      }
     }
-  ],
-  "usageMetadata": {
-    "promptTokenCount": 12,
-    "candidatesTokenCount": 150,
-    "totalTokenCount": 162
-  }
+  ]
 }
 ```
 
@@ -110,98 +73,156 @@ console.log(result.response.text());
 
 ## 流式生成
 
-<CodeGroup>
+本轮已复核 `streamGenerateContent` 可以通过 SSE 返回增量内容。
 
 ```bash cURL
-curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?key=YOUR_API_KEY&alt=sse" \
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:streamGenerateContent?key=YOUR_API_KEY&alt=sse" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
       {
         "role": "user",
-        "parts": [{"text": "写一篇关于人工智能未来的短文"}]
+        "parts": [
+          {
+            "text": "Write one short sentence about AI."
+          }
+        ]
       }
     ]
   }'
 ```
 
-```python Python
-model = genai.GenerativeModel("gemini-2.5-flash")
+当前生产收到的 SSE 片段形态类似：
 
-response = model.generate_content(
-    "写一篇关于人工智能未来的短文",
-    stream=True
-)
-
-for chunk in response:
-    print(chunk.text, end="")
+```text
+data: {"candidates":[{"content":{"parts":[{"text":"...","thoughtSignature":"..."}]}}]}
 ```
-
-</CodeGroup>
 
 ---
 
-## 多轮对话
+## 结构化输出
+
+当前生产已复核 `responseMimeType + responseSchema` 可用：
 
 ```bash cURL
-curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY" \
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
       {
         "role": "user",
-        "parts": [{"text": "你好，我想学习编程"}]
-      },
-      {
-        "role": "model",
-        "parts": [{"text": "你好！学习编程是个很好的选择。你有什么特定的方向吗？"}]
-      },
-      {
-        "role": "user",
-        "parts": [{"text": "我想学 Python，从哪里开始？"}]
-      }
-    ]
-  }'
-```
-
----
-
-## 思考模式
-
-Gemini 思考模型支持在回答前进行推理：
-
-```bash cURL
-curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "contents": [
-      {
-        "role": "user",
-        "parts": [{"text": "解这个方程：x^3 - 6x^2 + 11x - 6 = 0"}]
+        "parts": [
+          {
+            "text": "Return a JSON object with keys city and country for Tokyo."
+          }
+        ]
       }
     ],
     "generationConfig": {
-      "thinkingConfig": {
-        "thinkingBudget": 8000
-      },
-      "maxOutputTokens": 16000
+      "responseMimeType": "application/json",
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "city": {"type": "string"},
+          "country": {"type": "string"}
+        },
+        "required": ["city", "country"]
+      }
     }
   }'
 ```
 
-### generationConfig 参数
+当前生产验证返回：
 
-| 参数 | 类型 | 说明 |
+```json
+{"city":"Tokyo","country":"Japan"}
+```
+
+---
+
+## Google Search
+
+当前生产已复核 `googleSearch` 工具可用：
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Use Google Search to find one recent headline from a major technology news site."
+          }
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "googleSearch": {}
+      }
+    ]
+  }'
+```
+
+当前生产返回的关键字段包括：
+
+- `groundingMetadata.webSearchQueries`
+- `groundingMetadata.groundingChunks`
+- `groundingMetadata.groundingSupports`
+
+---
+
+## Thinking
+
+当前生产已复核 `thinkingConfig` 可用：
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Which is larger, 9.11 or 9.9? Explain briefly."
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "thinkingConfig": {
+        "thinkingBudget": 256
+      },
+      "maxOutputTokens": 512
+    }
+  }'
+```
+
+当前生产验证的关键标志：
+
+```json
+{
+  "usageMetadata": {
+    "thoughtsTokenCount": 120
+  }
+}
+```
+
+---
+
+## generationConfig 常用字段
+
+| 字段 | 类型 | 说明 |
 |------|------|------|
-| `temperature` | number | 采样温度，0-2 |
 | `maxOutputTokens` | integer | 最大输出 Token 数 |
-| `topP` | number | 核采样参数 |
-| `topK` | integer | Top-K 采样 |
-| `stopSequences` | array | 停止序列 |
-| `responseMimeType` | string | 响应 MIME 类型，如 `application/json` |
-| `responseSchema` | object | JSON Schema 约束输出格式 |
+| `temperature` | number | 采样温度 |
+| `responseMimeType` | string | 结构化输出时的 MIME 类型 |
+| `responseSchema` | object | 结构化输出约束 |
 | `thinkingConfig` | object | 思考模式配置 |
 
 <Note>
-  Gemini 原生格式使用 `contents` 数组和 `parts` 结构，与 OpenAI 的 `messages` 格式不同。如果你更习惯 OpenAI 格式，可以使用 [Gemini OpenAI 兼容格式](/chat/gemini/openai-compat)。
+  Gemini Native 使用 `contents[].parts[]` 结构，而不是 OpenAI 的 `messages` 结构。如果你想走 OpenAI 风格，请改用 [Gemini OpenAI 兼容格式](/chat/gemini/openai-compat)。
 </Note>

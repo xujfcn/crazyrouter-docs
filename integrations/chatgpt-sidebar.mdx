@@ -1,11 +1,11 @@
 ---
 title: 'ChatGPT Sidebar 配置教程'
-description: '在 ChatGPT Sidebar 浏览器扩展中配置 Crazyrouter API'
+description: '在 ChatGPT Sidebar 浏览器扩展中配置 Crazyrouter API，并使用已验证过的最新模型'
 ---
 
 ## 概述
 
-ChatGPT Sidebar 是一款浏览器侧边栏 AI 助手扩展，支持在任意网页上快速调用 AI。
+ChatGPT Sidebar 是浏览器侧边栏 AI 助手扩展，适合在任意网页上做即时问答、翻译、总结和页面辅助阅读。对接 Crazyrouter 时，建议优先使用它的 `Custom API` 或 `OpenAI` 自定义入口，并先用一个已在生产环境实测成功的模型跑通最小链路。
 
 ## 配置步骤
 
@@ -20,19 +20,21 @@ ChatGPT Sidebar 是一款浏览器侧边栏 AI 助手扩展，支持在任意网
     - **API Provider**: 选择 `Custom API` 或 `OpenAI`
     - **API URL**: `https://crazyrouter.com/v1`
     - **API Key**: `sk-xxx`
-    - **Model**: `gpt-4o`
+    - **Model**: `gpt-5.4`
   </Step>
   <Step title="保存">
     保存设置后，在任意网页上点击扩展图标即可使用。
   </Step>
 </Steps>
 
-## 使用场景
+## 推荐模型
 
-- 选中网页文本，右键使用 AI 翻译/总结
-- 在侧边栏中直接与 AI 对话
-- 对当前网页内容进行提问
+| 场景 | 模型 |
+|------|------|
+| 首轮链路验证 | `gpt-5.4` |
+| 高质量长文与解释 | `claude-sonnet-4-6` |
+| Gemini 备用档 | `gemini-3-pro-preview` |
 
 <Note>
-  不同版本的 ChatGPT Sidebar 扩展配置界面可能略有差异，核心配置项都是 API URL 和 API Key。
+  `gpt-5.4` 已于 2026 年 3 月 23 日在 Crazyrouter 生产环境完成实测，适合作为浏览器扩展 OpenAI 兼容主基线。
 </Note>

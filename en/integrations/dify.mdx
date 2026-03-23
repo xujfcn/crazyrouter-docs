@@ -13,7 +13,7 @@ Using Dify's model provider configuration, you can add Crazyrouter as an OpenAI-
 - Recommended entry point: `Settings` → `Model Provider`
 - Base URL: `https://crazyrouter.com/v1`
 - Auth method: `sk-...` token
-- Recommended first validation model: `gpt-4.1`
+- Recommended first validation model: `gpt-5.4`
 
 <Tip>
 Depending on your Dify version or plugin-based distribution, the provider may appear as `OpenAI`, `OpenAI-API-compatible`, `OpenAI Compatible`, or something similar. Pick the OpenAI-compatible provider that lets you set a custom `API Base URL`.
@@ -46,7 +46,7 @@ Do not enter:
 - `https://crazyrouter.com/v1/chat/completions`
 
 <Tip>
-The exact UI label can move between `Model Provider`, `Providers`, localized labels, or plugin-related entry points across Dify versions. Keep the first-pass validation flow unchanged: save the provider first, add only one `LLM` model `gpt-4.1`, and validate with a minimal Chat app before adding anything else.
+The exact UI label can move between `Model Provider`, `Providers`, localized labels, or plugin-related entry points across Dify versions. Keep the first-pass validation flow unchanged: save the provider first, add only one `LLM` model `gpt-5.4`, and validate with a minimal Chat app before adding anything else.
 </Tip>
 
 ## Prerequisites
@@ -56,12 +56,12 @@ The exact UI label can move between `Model Provider`, `Providers`, localized lab
 | Crazyrouter account | Register first at [crazyrouter.com](https://crazyrouter.com) |
 | Crazyrouter token | Create a dedicated `sk-...` token for Dify |
 | Dify | Use a current stable version; provider labels may vary by release |
-| Available models | Allow at least one chat model such as `gpt-4.1` |
+| Available models | Allow at least one verified chat model such as `gpt-5.4` |
 
 Recommended starting whitelist:
 
-- `gpt-4.1`
-- `gpt-4.1-mini`
+- `gpt-5.4`
+- `claude-sonnet-4-6`
 - `text-embedding-3-large`
 - `text-embedding-3-small`
 
@@ -71,7 +71,7 @@ If you plan to use a knowledge base, prepare at least one chat model and one emb
 
 <Steps>
   <Step title="Create a dedicated Dify token">
-    In the Crazyrouter dashboard, create a token named `dify`. For the first pass, allow `gpt-4.1` and one embedding model such as `text-embedding-3-large`.
+    In the Crazyrouter dashboard, create a token named `dify`. For the first pass, allow `gpt-5.4` and one embedding model such as `text-embedding-3-large`.
   </Step>
   <Step title="Open the model provider settings">
     Log in with a workspace admin-capable account and go to `Settings` → `Model Provider`.
@@ -83,7 +83,7 @@ If you plan to use a knowledge base, prepare at least one chat model and one emb
   </Step>
   <Step title="Configure only one chat model first">
     For the first rollout, add a single LLM such as:
-    - `Model`: `gpt-4.1`
+    - `Model`: `gpt-5.4`
     - `Type`: `LLM`
 
     Then create a very simple Chat app or Workflow app for validation. Do not add chat, embeddings, rerank, and workflow tools all at once, or troubleshooting will get mixed together.
@@ -114,9 +114,9 @@ That keeps troubleshooting much cleaner.
 
 | Use case | Recommended model | Why |
 |----------|-------------------|-----|
-| Default workflow chat model | `gpt-4.1` | Stable for most Dify app flows |
-| Lower-cost testing / batch runs | `gpt-4.1-mini` | Better for frequent workflow experiments |
-| Stronger general-purpose workflows | `gpt-4o` | Better for heavier context and interaction |
+| Default workflow chat model | `gpt-5.4` | Verified successfully in production on March 23, 2026, and suited for the main Dify baseline |
+| Higher-quality complex workflows | `claude-sonnet-4-6` | Better for complex explanations, summaries, and long text |
+| Gemini fallback path | `gemini-3-pro-preview` | Useful as a second vendor-compatible validation path |
 | Default embedding model | `text-embedding-3-large` | More reliable knowledge-base quality |
 | Lower-cost embedding model | `text-embedding-3-small` | Good for budget-sensitive indexing |
 
@@ -154,14 +154,14 @@ Recommended order: get the chat model working first, then add embeddings.
 | 401 unauthorized | token expired, was removed, or was copied incorrectly | generate a new token and replace it |
 | 403 / model not allowed | Dify is trying to use a model that is not whitelisted | allow that model in Crazyrouter |
 | 404 | `API Base URL` was entered as the root domain or a full endpoint path | change it to `https://crazyrouter.com/v1` |
-| provider saves but the app still fails | wrong model name or bad app-level parameter choices | fall back to `gpt-4.1` for baseline validation |
+| provider saves but the app still fails | wrong model name or bad app-level parameter choices | fall back to `gpt-5.4` for baseline validation |
 | knowledge-base import fails | the chat path works but embeddings were not configured correctly | validate the embedding model separately, then retry import |
 | workflow cost grows too quickly | batch runs, long context, or many apps share one token | split tokens, add quota caps, and narrow the whitelist |
-| some advanced models behave inconsistently in Dify | model-level parameter compatibility differs across nodes | validate on `gpt-4.1` first, then swap in stronger models gradually |
+| some advanced models behave inconsistently in Dify | model-level parameter compatibility differs across nodes | validate on `gpt-5.4` first, then swap in stronger models gradually |
 
 ## Performance and Cost Tips
 
-- Use `gpt-4.1-mini` for workflow testing first, then move to more expensive models after validation
+- Keep `gpt-5.4` as the workflow baseline during initial validation
 - For the first knowledge-base launch, import a small document set before indexing everything
 - Track chat and embedding traffic separately so cost sources stay visible
 - Set tighter quota caps for batch jobs, scheduled jobs, and internal test environments
@@ -187,7 +187,7 @@ That depends on your Dify version and installed provider plugins. Get chat and e
 
 ### Why does this guide insist on starting with one chat model only?
 
-Because Dify issues can come from the provider layer, model type, app configuration, or knowledge-base chain. Validating a single `gpt-4.1` chat app first makes isolation much easier.
+Because Dify issues can come from the provider layer, model type, app configuration, or knowledge-base chain. Validating a single `gpt-5.4` chat app first makes isolation much easier.
 
 ### Should Dify use multiple tokens?
 

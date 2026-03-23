@@ -1,6 +1,6 @@
 ---
 title: "Create Completion (Legacy)"
-description: "POST /v1/completions legacy text completion endpoint, superseded by Chat Completions"
+description: "Current production status of the POST /v1/completions compatibility endpoint"
 ---
 
 # Create Completion (Legacy)
@@ -10,85 +10,53 @@ POST /v1/completions
 ```
 
 <Warning>
-  This endpoint is deprecated. It is recommended to use `/v1/chat/completions` instead. Newer models may no longer support this endpoint.
+  This is a compatibility endpoint, not the primary recommended path. For new integrations, prefer `/v1/chat/completions` or `/v1/responses`.
 </Warning>
 
-The legacy Completions API accepts a text prompt and returns the model's text completion result. Unlike Chat Completions, it does not use the message list format.
+## Current Production Status
 
-## Request Parameters
+As of March 23, 2026, Crazyrouter production confirms:
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model` | string | Yes | Model name |
-| `prompt` | string\|array | Yes | Input prompt text |
-| `max_tokens` | integer | No | Maximum tokens to generate, default 16 |
-| `temperature` | number | No | Sampling temperature, 0-2 |
-| `top_p` | number | No | Nucleus sampling parameter |
-| `n` | integer | No | Number of completions to generate |
-| `stream` | boolean | No | Whether to stream output |
-| `stop` | string\|array | No | Stop tokens |
-| `echo` | boolean | No | Whether to echo the input |
-| `suffix` | string | No | Completion suffix |
+- the route still exists
+- a request using the classic example model `gpt-3.5-turbo-instruct` returned `503`
+- the error code was `model_not_found`
+- the message said the model was temporarily unavailable
 
-## Example
+In practice, this means the endpoint should be treated as legacy-client compatibility only, not as the default path for new work.
 
-<CodeGroup>
+---
 
-```bash cURL
+## Current Recommendation
+
+1. Use [`Chat Completions`](/chat/openai/completions) for new chat-style integrations
+2. Use [`Responses`](/chat/responses/overview) when you need GPT-5 reasoning, web search, or newer response shapes
+3. Only keep testing `/v1/completions` if you already depend on a legacy client and have confirmed that your legacy model is currently available
+
+---
+
+## Retest Template
+
+If you must verify whether a legacy model still works on this endpoint, first confirm the model ID through [`/v1/models`](/chat/openai/models), then send a minimal request:
+
+```bash
 curl https://crazyrouter.com/v1/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-3.5-turbo-instruct",
-    "prompt": "Write a poem about spring:\n",
-    "max_tokens": 200,
-    "temperature": 0.7
+    "model": "YOUR_LEGACY_MODEL",
+    "prompt": "Say hello in three words.",
+    "max_tokens": 16
   }'
 ```
 
-```python Python
-from openai import OpenAI
-
-client = OpenAI(
-    api_key="YOUR_API_KEY",
-    base_url="https://crazyrouter.com/v1"
-)
-
-response = client.completions.create(
-    model="gpt-3.5-turbo-instruct",
-    prompt="Write a poem about spring:\n",
-    max_tokens=200,
-    temperature=0.7
-)
-
-print(response.choices[0].text)
-```
-
-</CodeGroup>
-
-## Response Format
+Observed production error example:
 
 ```json
 {
-  "id": "cmpl-abc123",
-  "object": "text_completion",
-  "created": 1709123456,
-  "model": "gpt-3.5-turbo-instruct",
-  "choices": [
-    {
-      "text": "\nSpring breeze warms the land anew,\nBlossoms paint the morning dew.\nBirds return to build their nest,\nNature wakes from winter's rest.",
-      "index": 0,
-      "finish_reason": "stop"
-    }
-  ],
-  "usage": {
-    "prompt_tokens": 12,
-    "completion_tokens": 36,
-    "total_tokens": 48
+  "error": {
+    "code": "model_not_found",
+    "message": "Model gpt-3.5-turbo-instruct is temporarily unavailable",
+    "type": "new_api_error"
   }
 }
 ```
-
-<Note>
-  If you are developing a new application, please use the [Chat Completions API](/chat/openai/completions) directly. It is more powerful and supports more models.
-</Note>

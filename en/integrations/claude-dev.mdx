@@ -1,13 +1,13 @@
 ---
 title: 'Claude Dev Setup Guide'
-description: 'Configure Crazyrouter API in the Claude Dev VS Code extension'
+description: 'Configure Crazyrouter API in the Claude Dev VS Code extension with the latest verified Claude models'
 ---
 
 ## Overview
 
-Claude Dev is a VS Code AI programming extension focused on using Claude models for code development.
+Claude Dev is a VS Code AI coding extension suited for Claude-style code explanation, refactoring suggestions, and multi-turn collaboration through Crazyrouter. For public docs, prefer the OpenAI Compatible route first because it is more consistent with the rest of the Crazyrouter integration stack and easier to troubleshoot.
 
-## Configuration Steps
+## Recommended Configuration
 
 <Steps>
   <Step title="Install Extension">
@@ -17,17 +17,12 @@ Claude Dev is a VS Code AI programming extension focused on using Claude models 
     Click the Claude Dev icon in the sidebar to enter settings.
   </Step>
   <Step title="Select Provider">
-    Choose `OpenAI Compatible` or `Anthropic` as the API Provider.
+    Prefer `OpenAI Compatible` as the API provider.
   </Step>
   <Step title="Enter Configuration">
-    **OpenAI Compatible mode:**
     - **Base URL**: `https://crazyrouter.com/v1`
     - **API Key**: `sk-xxx`
-    - **Model**: `claude-sonnet-4-20250514`
-
-    **Anthropic mode:**
-    - **Base URL**: `https://crazyrouter.com`
-    - **API Key**: `sk-xxx`
+    - **Model**: `claude-sonnet-4-6`
   </Step>
 </Steps>
 
@@ -35,9 +30,9 @@ Claude Dev is a VS Code AI programming extension focused on using Claude models 
 
 | Scenario | Model |
 |----------|-------|
-| Daily coding | `claude-sonnet-4-20250514` |
-| Complex refactoring | `claude-opus-4-20250514` |
+| Daily coding | `claude-sonnet-4-6` |
+| Heavier reasoning and planning | `claude-opus-4-6-thinking` |
 
 <Note>
-  Claude Dev and Cline have similar functionality. If you're already using Cline, the configuration is essentially the same.
+  `claude-sonnet-4-6` and `claude-opus-4-6-thinking` match the latest verified Claude model guidance in this doc set. For the smallest first-pass VS Code validation, start with `claude-sonnet-4-6`.
 </Note>

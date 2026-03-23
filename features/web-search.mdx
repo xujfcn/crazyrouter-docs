@@ -1,0 +1,146 @@
+---
+title: "Web Search"
+description: "基于生产环境实测，使用 GPT、Claude、Gemini 最新主力模型进行联网搜索"
+---
+
+# Web Search
+
+本文档只收录 **已在 Crazyrouter 生产环境实际请求验证成功** 的 Web Search 用法。
+
+验证时间：
+
+- `2026-03-22`
+
+已验证模型：
+
+- `gpt-5.4`
+- `claude-sonnet-4-6`
+- `gemini-3-pro-preview`
+
+---
+
+## 已验证能力矩阵
+
+| 模型 | 协议 | 端点 | 成功标志 |
+|------|------|------|----------|
+| `gpt-5.4` | OpenAI Responses | `POST /v1/responses` | `output` 中出现 `web_search_call` |
+| `claude-sonnet-4-6` | OpenAI-compatible Chat | `POST /v1/chat/completions` | 返回 `remote_web_search` 工具调用 |
+| `gemini-3-pro-preview` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | 返回 `groundingMetadata` |
+
+---
+
+## GPT-5.4
+
+```bash cURL
+curl https://crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.4",
+    "input": "Use web search to find one current headline from a major technology news site published recently.",
+    "tools": [
+      {
+        "type": "web_search_preview"
+      }
+    ]
+  }'
+```
+
+生产验证返回的关键 `output.type`：
+
+```json
+["web_search_call", "web_search_call", "message"]
+```
+
+---
+
+## Claude Sonnet 4.6
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "claude-sonnet-4-6",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Find one recent technology headline. Use web search and do not answer from memory."
+      }
+    ],
+    "web_search_options": {
+      "search_context_size": "medium",
+      "user_location": {
+        "approximate": {
+          "timezone": "Asia/Shanghai",
+          "country": "CN"
+        }
+      }
+    },
+    "max_tokens": 200
+  }'
+```
+
+生产验证返回的关键字段：
+
+```json
+{
+  "tool_calls": [
+    {
+      "type": "function",
+      "function": {
+        "name": "remote_web_search"
+      }
+    }
+  ],
+  "finish_reason": "tool_calls"
+}
+```
+
+这说明在 Crazyrouter 的 OpenAI-compatible 路由下，Claude 4.6 的联网搜索会以工具调用形式暴露出来。
+
+首轮联调建议：
+
+- 提示词里明确写出 `Use web search`
+- 同时补一句 `do not answer from memory`
+- 如果提示词过弱，模型可能直接给出文本回答，不一定显式触发 `remote_web_search`
+
+---
+
+## Gemini 3 Pro Preview
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Use Google Search to find one recent headline from a major technology news site."
+          }
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "googleSearch": {}
+      }
+    ]
+  }'
+```
+
+生产验证返回了以下关键字段：
+
+- `groundingMetadata.webSearchQueries`
+- `groundingMetadata.groundingChunks`
+- `groundingMetadata.groundingSupports`
+
+---
+
+## 相关文档
+
+- [Responses Web 搜索](/chat/responses/web-search)
+- [OpenAI Web 搜索](/chat/openai/web-search)
+- [Gemini 工具调用](/chat/gemini/tools)

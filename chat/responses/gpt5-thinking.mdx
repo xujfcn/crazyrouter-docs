@@ -1,11 +1,16 @@
 ---
 title: "GPT-5 思考模式"
-description: "通过 Responses API 启用 GPT-5 的思考/推理模式"
+description: "基于生产环境复核，通过 Responses API 使用 GPT-5.4 的 reasoning 模式"
 ---
 
 # GPT-5 思考模式
 
-GPT-5 支持通过 Responses API 的 `reasoning` 参数启用思考模式，让模型在回答前进行深度推理。
+本文页只写入 `2026-03-22` 已在 Crazyrouter 生产环境复核过的 GPT reasoning 行为。
+
+当前主示例使用：
+
+- `gpt-5.4`
+- `POST /v1/responses`
 
 ```
 POST /v1/responses
@@ -22,10 +27,11 @@ curl https://crazyrouter.com/v1/responses \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-5",
-    "input": "分析以下代码的时间复杂度，并提出优化方案：\ndef two_sum(nums, target):\n    for i in range(len(nums)):\n        for j in range(i+1, len(nums)):\n            if nums[i] + nums[j] == target:\n                return [i, j]",
+    "model": "gpt-5.4",
+    "input": "Which is larger, 9.11 or 9.9? Explain briefly.",
     "reasoning": {
-      "effort": "high"
+      "effort": "high",
+      "summary": "detailed"
     }
   }'
 ```
@@ -39,10 +45,11 @@ client = OpenAI(
 )
 
 response = client.responses.create(
-    model="gpt-5",
-    input="分析以下代码的时间复杂度，并提出优化方案：\ndef two_sum(nums, target):\n    for i in range(len(nums)):\n        for j in range(i+1, len(nums)):\n            if nums[i] + nums[j] == target:\n                return [i, j]",
+    model="gpt-5.4",
+    input="Which is larger, 9.11 or 9.9? Explain briefly.",
     reasoning={
-        "effort": "high"
+        "effort": "high",
+        "summary": "detailed"
     }
 )
 
@@ -58,10 +65,11 @@ const client = new OpenAI({
 });
 
 const response = await client.responses.create({
-  model: "gpt-5",
-  input: "证明：任意三角形的内角和为180度",
+  model: "gpt-5.4",
+  input: "Which is larger, 9.11 or 9.9? Explain briefly.",
   reasoning: {
     effort: "high",
+    summary: "detailed",
   },
 });
 
@@ -72,102 +80,129 @@ console.log(response.output_text);
 
 ---
 
-## reasoning 参数
+## 生产验证到的响应结构
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `effort` | string | 推理深度：`low`（快速）、`medium`（平衡）、`high`（深度） |
-| `summary` | string | 思考摘要：`auto`、`concise`、`detailed` |
+当前生产返回的关键 `output.type`：
 
-### effort 级别对比
+```json
+["reasoning", "message"]
+```
 
-| 级别 | 适用场景 | Token 消耗 |
-|------|---------|-----------|
-| `low` | 简单问题、事实查询 | 低 |
-| `medium` | 一般推理、代码分析 | 中 |
-| `high` | 复杂数学、深度分析 | 高 |
+其中 `reasoning` item 的典型结构为：
+
+```json
+{
+  "id": "rs_xxx",
+  "type": "reasoning",
+  "encrypted_content": "...",
+  "summary": [
+    {
+      "type": "summary_text",
+      "text": "..."
+    }
+  ]
+}
+```
+
+`message` item 中则包含最终输出文本：
+
+```json
+{
+  "type": "message",
+  "content": [
+    {
+      "type": "output_text",
+      "text": "..."
+    }
+  ]
+}
+```
 
 ---
 
-## 获取思考摘要
+## `reasoning` 参数
 
-设置 `summary` 参数可以获取模型的思考过程摘要：
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `effort` | string | 推理力度，当前实测可用值包括 `low`、`medium`、`high` |
+| `summary` | string | 思考摘要粒度，当前实测 `concise`、`detailed` 可用 |
+
+### 一个实用判断
+
+- 只要更强推理，不关心摘要：只传 `effort`
+- 需要拿到可展示的 reasoning 摘要：同时传 `summary`
+
+在当前复核中：
+
+- 只传 `effort` 时，`reasoning` item 存在，但 `summary` 可能为空数组
+- 传 `summary: "detailed"` 时，可以稳定拿到 `summary_text`
+
+---
+
+## 提取思考摘要
 
 ```python Python
 response = client.responses.create(
-    model="gpt-5",
-    input="设计一个高并发的消息队列系统架构",
+    model="gpt-5.4",
+    input="Design a high-concurrency message queue architecture.",
     reasoning={
         "effort": "high",
         "summary": "detailed"
     }
 )
 
-# 输出中可能包含思考摘要
 for item in response.output:
     if item.type == "reasoning":
-        print("思考过程:", item.summary)
+        for part in item.summary:
+            if part.type == "summary_text":
+                print("思考摘要:", part.text)
     elif item.type == "message":
         for content in item.content:
             if content.type == "output_text":
-                print("回答:", content.text)
+                print("最终回答:", content.text)
 ```
 
 ---
 
 ## 流式思考
 
+当前生产环境已复核到以下 Responses SSE 事件名：
+
+- `response.reasoning_summary_part.added`
+- `response.reasoning_summary_text.delta`
+- `response.reasoning_summary_text.done`
+- `response.output_text.delta`
+- `response.output_text.done`
+- `response.completed`
+
+示例：
+
 ```python Python
 stream = client.responses.create(
-    model="gpt-5",
-    input="解释 P=NP 问题为什么重要",
-    reasoning={"effort": "high", "summary": "concise"},
+    model="gpt-5.4",
+    input="Explain briefly why 9.9 is larger than 9.11.",
+    reasoning={
+        "effort": "high",
+        "summary": "detailed"
+    },
     stream=True
 )
 
 for event in stream:
     if event.type == "response.reasoning_summary_text.delta":
-        print(f"[思考] {event.delta}", end="")
+        print(f"[思考摘要] {event.delta}", end="")
     elif event.type == "response.output_text.delta":
         print(event.delta, end="")
 ```
 
 ---
 
-## 结合工具使用
+## 当前建议
 
-思考模式可以与 Function Calling 和 Web 搜索同时使用：
-
-```python Python
-response = client.responses.create(
-    model="gpt-5",
-    input="分析当前全球 AI 芯片市场格局，给出投资建议",
-    reasoning={"effort": "high"},
-    tools=[
-        {"type": "web_search_preview"}
-    ]
-)
-
-print(response.output_text)
-```
-
----
-
-## 与系统指令结合
-
-```python Python
-response = client.responses.create(
-    model="gpt-5",
-    instructions="你是一位资深的软件架构师，擅长分析系统设计问题。",
-    input="设计一个支持百万级用户的实时聊天系统",
-    reasoning={"effort": "high"}
-)
-```
-
-<Note>
-  思考模式下，模型会消耗额外的 Token 用于内部推理。`effort` 越高，消耗的 Token 越多，但回答质量通常也越好。
-</Note>
+- 需要可见 reasoning 字段时，优先选 `gpt-5.4` + Responses API
+- 不要把 `gpt-5.4` Chat Completions 的 `reasoning_content` 当成当前主依赖字段
+- 如果你只关心最终答案，可在 Chat Completions 继续使用 `reasoning_effort`
 
 <Warning>
-  并非所有模型都支持 `reasoning` 参数。目前主要支持 GPT-5 和 o 系列模型。对于不支持的模型，该参数会被忽略。
+  reasoning 模式会提高延迟与 Token 消耗。`effort` 越高，成本通常越高。
 </Warning>

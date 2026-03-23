@@ -1,86 +1,56 @@
 ---
 title: "Gemini Native Format"
-description: "Use the Gemini native API format for text generation, streaming output, and thinking mode"
+description: "Production-revalidated Gemini 3 Pro Preview native API usage on Crazyrouter"
 ---
 
 # Gemini Native Format
 
-Crazyrouter supports Google Gemini's native API format, including the `generateContent` and `streamGenerateContent` endpoints.
+This page only documents Gemini Native behavior that was revalidated against Crazyrouter production on `2026-03-22`.
+
+Current primary example model:
+
+- `gemini-3-pro-preview`
 
 ## Endpoints
 
-```
+```text
 POST /v1beta/models/{model}:generateContent
 POST /v1beta/models/{model}:streamGenerateContent
 ```
 
 ## Authentication
 
-Pass the API Key via URL parameter:
+Pass the API key through the URL parameter:
 
-```
+```text
 ?key=YOUR_API_KEY
 ```
 
 ---
 
-## Text Generation
-
-<CodeGroup>
+## Basic text generation
 
 ```bash cURL
-curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY" \
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
       {
         "role": "user",
         "parts": [
-          {"text": "Explain what machine learning is in simple terms"}
+          {
+            "text": "Explain machine learning in one sentence."
+          }
         ]
       }
     ],
     "generationConfig": {
-      "temperature": 0.7,
-      "maxOutputTokens": 1024
+      "maxOutputTokens": 128
     }
   }'
 ```
 
-```python Python
-import google.generativeai as genai
-
-genai.configure(
-    api_key="YOUR_API_KEY",
-    transport="rest",
-    client_options={"api_endpoint": "https://crazyrouter.com"}
-)
-
-model = genai.GenerativeModel("gemini-2.5-flash")
-
-response = model.generate_content("Explain what machine learning is in simple terms")
-
-print(response.text)
-```
-
-```javascript Node.js
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const genAI = new GoogleGenerativeAI("YOUR_API_KEY");
-// Custom baseURL configuration required
-
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
-const result = await model.generateContent(
-  "Explain what machine learning is in simple terms"
-);
-
-console.log(result.response.text());
-```
-
-</CodeGroup>
-
-### Response Format
+Verified response shape:
 
 ```json
 {
@@ -89,119 +59,170 @@ console.log(result.response.text());
       "content": {
         "parts": [
           {
-            "text": "Machine learning is a branch of artificial intelligence..."
+            "text": "...",
+            "thoughtSignature": "..."
           }
-        ],
-        "role": "model"
-      },
-      "finishReason": "STOP",
-      "index": 0
+        ]
+      }
     }
-  ],
+  ]
+}
+```
+
+---
+
+## Streaming generation
+
+This recheck confirmed that `streamGenerateContent` returns incremental SSE output.
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:streamGenerateContent?key=YOUR_API_KEY&alt=sse" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Write one short sentence about AI."
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+Observed SSE chunk shape:
+
+```text
+data: {"candidates":[{"content":{"parts":[{"text":"...","thoughtSignature":"..."}]}}]}
+```
+
+---
+
+## Structured outputs
+
+This production recheck confirmed that `responseMimeType + responseSchema` works:
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Return a JSON object with keys city and country for Tokyo."
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "responseMimeType": "application/json",
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "city": {"type": "string"},
+          "country": {"type": "string"}
+        },
+        "required": ["city", "country"]
+      }
+    }
+  }'
+```
+
+Verified production output:
+
+```json
+{"city":"Tokyo","country":"Japan"}
+```
+
+---
+
+## Google Search
+
+This production recheck confirmed that the `googleSearch` tool works:
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Use Google Search to find one recent headline from a major technology news site."
+          }
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "googleSearch": {}
+      }
+    ]
+  }'
+```
+
+Verified fields include:
+
+- `groundingMetadata.webSearchQueries`
+- `groundingMetadata.groundingChunks`
+- `groundingMetadata.groundingSupports`
+
+---
+
+## Thinking
+
+This production recheck confirmed that `thinkingConfig` works:
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Which is larger, 9.11 or 9.9? Explain briefly."
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "thinkingConfig": {
+        "thinkingBudget": 256
+      },
+      "maxOutputTokens": 512
+    }
+  }'
+```
+
+Verified marker:
+
+```json
+{
   "usageMetadata": {
-    "promptTokenCount": 12,
-    "candidatesTokenCount": 150,
-    "totalTokenCount": 162
+    "thoughtsTokenCount": 120
   }
 }
 ```
 
 ---
 
-## Streaming Generation
+## Common `generationConfig` fields
 
-<CodeGroup>
-
-```bash cURL
-curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?key=YOUR_API_KEY&alt=sse" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "contents": [
-      {
-        "role": "user",
-        "parts": [{"text": "Write a short essay about the future of artificial intelligence"}]
-      }
-    ]
-  }'
-```
-
-```python Python
-model = genai.GenerativeModel("gemini-2.5-flash")
-
-response = model.generate_content(
-    "Write a short essay about the future of artificial intelligence",
-    stream=True
-)
-
-for chunk in response:
-    print(chunk.text, end="")
-```
-
-</CodeGroup>
-
----
-
-## Multi-Turn Conversation
-
-```bash cURL
-curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "contents": [
-      {
-        "role": "user",
-        "parts": [{"text": "Hi, I want to learn programming"}]
-      },
-      {
-        "role": "model",
-        "parts": [{"text": "Hello! Learning to program is a great choice. Do you have a specific direction in mind?"}]
-      },
-      {
-        "role": "user",
-        "parts": [{"text": "I want to learn Python, where should I start?"}]
-      }
-    ]
-  }'
-```
-
----
-
-## Thinking Mode
-
-Gemini thinking models support reasoning before answering:
-
-```bash cURL
-curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "contents": [
-      {
-        "role": "user",
-        "parts": [{"text": "Solve this equation: x^3 - 6x^2 + 11x - 6 = 0"}]
-      }
-    ],
-    "generationConfig": {
-      "thinkingConfig": {
-        "thinkingBudget": 8000
-      },
-      "maxOutputTokens": 16000
-    }
-  }'
-```
-
-### generationConfig Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `temperature` | number | Sampling temperature, 0-2 |
+| Field | Type | Description |
+|-------|------|-------------|
 | `maxOutputTokens` | integer | Maximum output tokens |
-| `topP` | number | Nucleus sampling parameter |
-| `topK` | integer | Top-K sampling |
-| `stopSequences` | array | Stop sequences |
-| `responseMimeType` | string | Response MIME type, e.g. `application/json` |
-| `responseSchema` | object | JSON Schema to constrain output format |
+| `temperature` | number | Sampling temperature |
+| `responseMimeType` | string | MIME type for structured outputs |
+| `responseSchema` | object | Structured output constraint |
 | `thinkingConfig` | object | Thinking mode configuration |
 
 <Note>
-  Gemini native format uses `contents` arrays and `parts` structures, which differ from OpenAI's `messages` format. If you prefer the OpenAI format, you can use the [Gemini OpenAI-compatible format](/chat/gemini/openai-compat).
+  Gemini Native uses the `contents[].parts[]` structure rather than OpenAI-style `messages`. If you want an OpenAI-style route instead, use [Gemini OpenAI-Compatible Format](/en/chat/gemini/openai-compat).
 </Note>

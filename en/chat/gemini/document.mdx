@@ -1,35 +1,38 @@
 ---
 title: "Gemini Document Understanding"
-description: "Use the Gemini native format for document understanding and formatted output"
+description: "Gemini PDF understanding and structured extraction verified against Crazyrouter production on 2026-03-23"
 ---
 
 # Gemini Document Understanding
-
-Gemini models support understanding PDF documents and other document formats, and can output structured results in specified formats.
 
 ```
 POST /v1beta/models/{model}:generateContent
 ```
 
+As of March 23, 2026, Crazyrouter production has verified that `gemini-3-pro-preview` supports:
+
+- Reading PDFs through `inlineData`
+- Returning parseable JSON when `responseMimeType` and `responseSchema` are provided
+
 ---
 
-## PDF Document Understanding
+## PDF Summary
 
-<CodeGroup>
+The following request successfully read a PDF and returned a summary in production:
 
-```bash cURL
-curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY" \
+```bash
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
       {
         "role": "user",
         "parts": [
-          {"text": "Summarize the core content of this document"},
+          {"text": "Summarize the attached PDF in one sentence."},
           {
             "inlineData": {
               "mimeType": "application/pdf",
-              "data": "JVBERi0xLjQKMSAwIG9iago..."
+              "data": "JVBERi0xLjQK..."
             }
           }
         ]
@@ -38,47 +41,23 @@ curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key
   }'
 ```
 
-```python Python
-import google.generativeai as genai
-
-genai.configure(
-    api_key="YOUR_API_KEY",
-    transport="rest",
-    client_options={"api_endpoint": "https://crazyrouter.com"}
-)
-
-model = genai.GenerativeModel("gemini-2.5-flash")
-
-with open("document.pdf", "rb") as f:
-    pdf_data = f.read()
-
-response = model.generate_content([
-    "Summarize the core content of this document",
-    {"mime_type": "application/pdf", "data": pdf_data}
-])
-
-print(response.text)
-```
-
-</CodeGroup>
+In the production check, the model returned a one-sentence summary of the attached PDF.
 
 ---
 
-## Formatted Output
+## PDF + Structured Output
 
-Use `responseMimeType` and `responseSchema` to control the output format:
+The following request returned JSON text that could be parsed directly with `json.loads()` in production:
 
-### JSON Format Output
-
-```bash cURL
-curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key=YOUR_API_KEY" \
+```bash
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
       {
         "role": "user",
         "parts": [
-          {"text": "Extract key information from this resume"},
+          {"text": "Extract the key topic and whether the document mentions gamma."},
           {
             "inlineData": {
               "mimeType": "application/pdf",
@@ -93,42 +72,16 @@ curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key
       "responseSchema": {
         "type": "object",
         "properties": {
-          "name": {"type": "string"},
-          "email": {"type": "string"},
-          "phone": {"type": "string"},
-          "education": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "school": {"type": "string"},
-                "degree": {"type": "string"},
-                "year": {"type": "string"}
-              }
-            }
-          },
-          "experience": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "company": {"type": "string"},
-                "position": {"type": "string"},
-                "duration": {"type": "string"}
-              }
-            }
-          },
-          "skills": {
-            "type": "array",
-            "items": {"type": "string"}
-          }
-        }
+          "topic": {"type": "string"},
+          "mentions_gamma": {"type": "boolean"}
+        },
+        "required": ["topic", "mentions_gamma"]
       }
     }
   }'
 ```
 
-### Response
+Observed production response:
 
 ```json
 {
@@ -137,57 +90,28 @@ curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash:generateContent?key
       "content": {
         "parts": [
           {
-            "text": "{\"name\":\"John Doe\",\"email\":\"john@example.com\",\"phone\":\"555-0100\",\"education\":[{\"school\":\"MIT\",\"degree\":\"M.S. Computer Science\",\"year\":\"2020\"}],\"experience\":[{\"company\":\"Tech Corp\",\"position\":\"Senior Engineer\",\"duration\":\"2020-2024\"}],\"skills\":[\"Python\",\"Go\",\"Kubernetes\"]}"
+            "text": "{\n  \"topic\": \"Crazyrouter PDF test document\",\n  \"mentions_gamma\": false\n}"
           }
-        ],
-        "role": "model"
-      },
-      "finishReason": "STOP"
+        ]
+      }
     }
   ]
 }
 ```
 
----
+You can parse it directly:
 
-## Table Data Extraction
-
-```python Python
-response = model.generate_content(
-    [
-        "Extract all table data from the document and return in JSON format",
-        {"mime_type": "application/pdf", "data": pdf_data}
-    ],
-    generation_config=genai.GenerationConfig(
-        response_mime_type="application/json"
-    )
-)
-
+```python
 import json
-tables = json.loads(response.text)
-```
 
----
-
-## Document Comparison
-
-```python Python
-with open("v1.pdf", "rb") as f:
-    v1_data = f.read()
-with open("v2.pdf", "rb") as f:
-    v2_data = f.read()
-
-response = model.generate_content([
-    "Compare these two versions of the document and list all changes",
-    {"mime_type": "application/pdf", "data": v1_data},
-    {"mime_type": "application/pdf", "data": v2_data}
-])
+text = response["candidates"][0]["content"]["parts"][0]["text"]
+data = json.loads(text)
 ```
 
 <Note>
-  Using `responseSchema` ensures the model output strictly conforms to the specified JSON structure, making it ideal for data extraction and automation scenarios.
+  This page only confirms the PDF-input path and JSON structured output path. For table extraction, long-document comparison, or other higher-variance workflows, revalidate with your own sample documents first.
 </Note>
 
 <Warning>
-  Large PDF documents consume a significant number of tokens. It is recommended to process documents with more than 50 pages in segments.
+  Large PDFs materially increase input-token usage. Validate prompts and schemas with small documents first, then scale up.
 </Warning>

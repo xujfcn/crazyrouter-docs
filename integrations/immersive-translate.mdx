@@ -13,7 +13,7 @@ description: '在沉浸式翻译浏览器扩展中通过 OpenAI 服务接入 Cra
 - 服务类型：`OpenAI`
 - API Key：你的 `sk-...`
 - 自定义 API 地址：`https://crazyrouter.com/v1/chat/completions`
-- 推荐首个验证模型：`gpt-4.1-mini`
+- 推荐首个验证模型：`gpt-5.4`
 
 <Tip>
 沉浸式翻译和 ChatBox 最大的不同是：这里通常要填完整接口路径，而不是只填根域名。
@@ -50,8 +50,8 @@ https://crazyrouter.com/v1/chat/completions
 
 建议初始白名单：
 
-- `gpt-4.1-mini`
-- `gpt-4.1`
+- `gpt-5.4`
+- `claude-sonnet-4-6`
 
 ## 安装与配置路径
 
@@ -83,8 +83,8 @@ https://crazyrouter.com/v1/chat/completions
   <Step title="第 2 步：在 Crazyrouter 创建专用 token">
     第一次只建议放行：
 
-    - `gpt-4.1-mini`
-    - `gpt-4.1`
+    - `gpt-5.4`
+    - `claude-sonnet-4-6`
 
     先不要一开始就把很多模型都加入翻译场景里。
   </Step>
@@ -102,7 +102,7 @@ https://crazyrouter.com/v1/chat/completions
 
     - `API Key`：你的 `sk-...`
     - `自定义 API 接口地址`：`https://crazyrouter.com/v1/chat/completions`
-    - `模型`：先填 `gpt-4.1-mini`
+    - `模型`：先填 `gpt-5.4`
 
     如果界面里默认把一些参数折叠起来，记得展开 `更多设置` 再看完整字段。
   </Step>
@@ -132,9 +132,9 @@ https://crazyrouter.com/v1/chat/completions
 
 | 使用场景 | 推荐模型 | 原因 |
 |----------|----------|------|
-| 首轮最小验证 | `gpt-4.1-mini` | 成本更低，适合先测通链路 |
-| 日常网页翻译 | `gpt-4.1-mini` | 速度和成本更平衡 |
-| 更高质量翻译 | `gpt-4.1` | 适合更重质量的场景 |
+| 首轮最小验证 | `gpt-5.4` | 2026 年 3 月 23 日已在生产环境实测成功，适合先测通 OpenAI 兼容翻译链路 |
+| 更高质量翻译 | `claude-sonnet-4-6` | 更适合长文解释、润色和较重质量场景 |
+| Gemini 备用档 | `gemini-3-pro-preview` | 适合作为第二条兼容性验证路径，但建议先跑通主链路再尝试 |
 
 ## Token 设置最佳实践
 
@@ -152,7 +152,7 @@ https://crazyrouter.com/v1/chat/completions
 - [ ] 已选择 `OpenAI` 翻译服务
 - [ ] `API Key` 已填写正确
 - [ ] `自定义 API 接口地址` 已设置为 `https://crazyrouter.com/v1/chat/completions`
-- [ ] 首个模型已设置为 `gpt-4.1-mini` 或其他已放行模型
+- [ ] 首个模型已设置为 `gpt-5.4` 或其他已放行模型
 - [ ] 小段选中文本翻译成功
 - [ ] 短网页翻译成功
 - [ ] Crazyrouter 后台日志中能看到对应请求
@@ -166,11 +166,11 @@ https://crazyrouter.com/v1/chat/completions
 | 403 / model not allowed | token 未放行当前模型 | 在 Crazyrouter token 设置中放行模型 |
 | 429 / 不稳定 | 请求频率过高 | 把请求频率调低，先从小文本开始 |
 | 翻长文时失败率更高 | 并发或频率过高 | 先缩小翻译范围，再逐步调高 |
-| 成本上涨过快 | 直接整页、整站或电子书翻译 | 先用 `gpt-4.1-mini`，并控制翻译范围 |
+| 成本上涨过快 | 直接整页、整站或电子书翻译 | 先用 `gpt-5.4` 做小范围验证，并控制翻译范围 |
 
 ## 省钱建议
 
-- 默认先用 `gpt-4.1-mini`
+- 默认先用 `gpt-5.4`
 - 优先翻译选中区域，而不是一上来就整页翻译
 - 长文档先抽样验证质量，再决定是否全量翻译
 - 如果你在多个浏览器里都装了扩展，建议分开 token 做成本统计
@@ -187,7 +187,7 @@ https://crazyrouter.com/v1/chat/completions
 
 ### 第一个推荐模型是什么？
 
-先用 `gpt-4.1-mini`。
+先用 `gpt-5.4`。
 
 ### 为什么第一次不建议直接翻整页或电子书？
 

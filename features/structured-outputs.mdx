@@ -1,0 +1,139 @@
+---
+title: "Structured Outputs"
+description: "基于生产环境实测，使用 GPT 与 Gemini 最新主力模型输出结构化 JSON"
+---
+
+# Structured Outputs
+
+本文档只收录 **已在 Crazyrouter 生产环境实际请求验证成功** 的 Structured Outputs 用法。
+
+验证时间：
+
+- `2026-03-22`
+
+已严格验证成功的模型：
+
+- `gpt-5.4`
+- `gemini-3-pro-preview`
+
+当前不纳入严格成功示例的模型：
+
+- `claude-sonnet-4-6`
+
+原因：
+
+- 在生产环境复核中，`claude-sonnet-4-6` 在当前 OpenAI 兼容 `response_format=json_schema` 请求形态下没有表现出稳定的“严格纯 JSON”行为
+- 先前测试曾出现 fenced code block
+- `2026-03-22` 复核时又出现了空 `content`
+- 因此当前不把它写成“严格结构化输出已验证成功”
+
+---
+
+## 已验证能力矩阵
+
+| 模型 | 协议 | 端点 | 成功标志 |
+|------|------|------|----------|
+| `gpt-5.4` | OpenAI Chat Completions | `POST /v1/chat/completions` | 返回内容可直接 `JSON.parse` |
+| `gemini-3-pro-preview` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | 返回 `application/json` 风格文本，可直接解析 |
+
+---
+
+## GPT-5.4
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.4",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Return a JSON object with keys city and country for Tokyo."
+      }
+    ],
+    "response_format": {
+      "type": "json_schema",
+      "json_schema": {
+        "name": "city_country",
+        "strict": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "city": {"type": "string"},
+            "country": {"type": "string"}
+          },
+          "required": ["city", "country"],
+          "additionalProperties": false
+        }
+      }
+    }
+  }'
+```
+
+生产验证返回：
+
+```json
+{"city":"Tokyo","country":"Japan"}
+```
+
+---
+
+## Gemini 3 Pro Preview
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Return a JSON object with keys city and country for Tokyo."
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "responseMimeType": "application/json",
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "city": {"type": "string"},
+          "country": {"type": "string"}
+        },
+        "required": ["city", "country"]
+      }
+    }
+  }'
+```
+
+生产验证返回：
+
+```json
+{"city":"Tokyo","country":"Japan"}
+```
+
+---
+
+## Claude 4.6 当前结论
+
+在 `2026-03-22` 的生产测试中：
+
+- `claude-sonnet-4-6` 在该请求形态下没有给出稳定可复现的严格 JSON 输出
+- 不同测试轮次里，既出现过 fenced code block，也出现过空 `content`
+- 因此当前不建议把 Claude 4.6 写成“严格 schema 输出已验证成功”
+
+如果后续要把 Claude 4.6 纳入这里，建议先补一轮更细的生产验证，并确认：
+
+- 是否存在更适合的原生协议写法
+- 是否需要额外 system prompt
+- 是否能稳定去掉 code fence
+
+---
+
+## 相关文档
+
+- [OpenAI Structured Output](/chat/openai/structured-output)
+- [Gemini 文档理解](/chat/gemini/document)

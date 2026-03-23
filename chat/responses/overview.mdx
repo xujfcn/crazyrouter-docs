@@ -1,85 +1,86 @@
 ---
 title: "Responses API 概览"
-description: "Responses API 与 Chat Completions API 的对比，以及使用场景说明"
+description: "基于生产环境复核，理解 Crazyrouter 中 Responses API 与 Chat Completions 的取舍"
 ---
 
 # Responses API 概览
 
-Responses API 是 OpenAI 推出的新一代 API 格式，旨在简化多步骤任务和工具调用的开发体验。Crazyrouter 完整支持 Responses API。
+Responses API 是当前 Crazyrouter 上承载 GPT 新能力的主路由之一。
+
+本文页只写入 `2026-03-22` 已在生产环境复核过的结论。
+
+## 当前推荐理解
+
+- 需要可观察的 reasoning 输出：优先用 `/v1/responses`
+- 需要 OpenAI 风格 Web Search：优先用 `/v1/responses`
+- 只做普通聊天或历史项目延续：可继续用 `/v1/chat/completions`
 
 ## Responses API vs Chat Completions API
 
-| 特性 | Responses API | Chat Completions API |
-|------|--------------|---------------------|
+| 维度 | Responses API | Chat Completions API |
+|------|---------------|----------------------|
 | 端点 | `/v1/responses` | `/v1/chat/completions` |
-| 消息格式 | `input` (字符串或数组) | `messages` (数组) |
-| 工具调用 | 内置支持，自动管理上下文 | 需要手动管理消息历史 |
-| 流式格式 | 丰富的事件类型 | 简单的 delta 格式 |
-| 思考模式 | `reasoning` 参数 | `reasoning_effort` 参数 |
-| Web 搜索 | 内置 `web_search` 工具 | 通过 `tools` 参数 |
-| 兼容性 | 较新，部分模型支持 | 广泛支持所有模型 |
+| 输入格式 | `input` | `messages` |
+| 输出形态 | `output[]` item 列表 | `choices[].message` |
+| GPT reasoning | 已复核 `reasoning` item | `reasoning_effort` 可用，但 `reasoning_content` 不稳定 |
+| OpenAI 风格 Web Search | 已复核 `web_search_preview` | 旧式 `web_search` 本轮未拿到稳定触发标志 |
+| 流式事件 | 事件类型更丰富 | 传统 delta SSE |
 
 ---
 
-## 何时使用 Responses API
+## 一个最小可用示例
 
-适合以下场景：
-- 需要内置工具（Web 搜索、文件搜索）
-- 多步骤任务和复杂工具调用
-- 需要丰富的流式事件
-- 使用 GPT-5 等新模型的高级功能
+```python Python
+from openai import OpenAI
 
-## 何时使用 Chat Completions API
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
 
-适合以下场景：
-- 需要最广泛的模型兼容性
-- 简单的对话和文本生成
-- 已有基于 Chat Completions 的代码
-- 使用非 OpenAI 模型（Claude、Gemini 等）
+response = client.responses.create(
+    model="gpt-5.4",
+    input="Explain what a REST API is in one sentence."
+)
+
+print(response.output_text)
+```
+
+当前生产复核中，这类最小请求返回：
+
+```json
+{
+  "object": "response",
+  "output": [
+    {
+      "type": "message"
+    }
+  ]
+}
+```
 
 ---
 
-## 快速对比示例
+## 什么时候优先选 Responses
 
-<Tabs>
-  <Tab title="Responses API">
-    ```python
-    from openai import OpenAI
+- 你要用 `gpt-5.4` 的 reasoning 摘要
+- 你要判断模型是否真的触发了 `web_search_call`
+- 你要消费更丰富的 SSE 事件
 
-    client = OpenAI(
-        api_key="YOUR_API_KEY",
-        base_url="https://crazyrouter.com/v1"
-    )
+相关页：
 
-    response = client.responses.create(
-        model="gpt-4o",
-        input="解释什么是 REST API"
-    )
+- [GPT-5 思考模式](/chat/responses/gpt5-thinking)
+- [Responses Web 搜索](/chat/responses/web-search)
+- [Responses Function Calling](/chat/responses/function-calling)
 
-    print(response.output_text)
-    ```
-  </Tab>
-  <Tab title="Chat Completions API">
-    ```python
-    from openai import OpenAI
+---
 
-    client = OpenAI(
-        api_key="YOUR_API_KEY",
-        base_url="https://crazyrouter.com/v1"
-    )
+## 什么时候继续用 Chat Completions
 
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {"role": "user", "content": "解释什么是 REST API"}
-        ]
-    )
-
-    print(response.choices[0].message.content)
-    ```
-  </Tab>
-</Tabs>
+- 你已有稳定的 Chat Completions 接入代码
+- 你只关心最终答案，不关心 `reasoning` item
+- 你在接 Claude、Gemini 等 OpenAI 兼容模型
 
 <Note>
-  两种 API 可以在同一个项目中混合使用。Crazyrouter 对两种格式都提供完整支持，你可以根据具体需求选择合适的 API。
+  两种 API 可以在同一项目中并存。当前更合理的做法通常不是“全量迁移”，而是把需要新能力的请求切到 `/v1/responses`。
 </Note>

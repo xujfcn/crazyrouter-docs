@@ -1,157 +1,104 @@
 ---
 title: "Reasoning Models"
-description: "Use reasoning models (such as o4-mini, DeepSeek) and control reasoning depth"
+description: "Production-revalidated guidance for using Crazyrouter reasoning features and choosing the right protocol"
 ---
 
 # Reasoning Models
 
-Reasoning Models perform deep thinking before answering, making them suitable for complex tasks like math, coding, and logical reasoning. Crazyrouter supports multiple reasoning models with reasoning depth control.
+This page only documents reasoning behavior that was revalidated against Crazyrouter production on `2026-03-22`.
 
-## Supported Reasoning Models
+For OpenAI-compatible integrations, the current guidance is:
 
-| Model | Description |
-|-------|-------------|
-| `o4-mini` | OpenAI reasoning model, balancing speed and capability |
-| `o3` | OpenAI advanced reasoning model |
-| `o3-mini` | OpenAI lightweight reasoning model |
-| `deepseek-r1` | DeepSeek reasoning model |
-| `deepseek-v3-1` | DeepSeek V3.1 |
-| `claude-sonnet-4-20250514` | Claude with extended thinking support |
-| `gemini-2.5-flash-thinking` | Gemini thinking model |
+- If you only want stronger reasoning and only need the final answer, use Chat Completions with `reasoning_effort`
+- If you need a stable, inspectable reasoning output, prefer the Responses API and see [GPT-5 Thinking Mode](/en/chat/responses/gpt5-thinking)
+
+## Verified combinations
+
+| Route | Model | Request parameter | Current production behavior |
+|-------|-------|-------------------|-----------------------------|
+| Chat Completions | `gpt-5.4` | `reasoning_effort` | Request succeeds and returns a final answer |
+| Responses | `gpt-5.4` | `reasoning.effort` / `reasoning.summary` | `output` includes `reasoning` and `message` items |
 
 ---
 
-## reasoning_effort Parameter
+## Chat Completions: `reasoning_effort`
 
-Control the model's reasoning depth with `reasoning_effort`:
-
-| Value | Description |
-|-------|-------------|
-| `low` | Quick answers, suitable for simple questions |
-| `medium` | Moderate reasoning, balancing speed and quality |
-| `high` | Deep reasoning, suitable for complex problems |
-
-<CodeGroup>
+The following request shape currently works in production:
 
 ```bash cURL
 curl https://crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "o4-mini",
+    "model": "gpt-5.4",
     "messages": [
-      {"role": "user", "content": "Prove that the square root of 2 is irrational"}
+      {
+        "role": "user",
+        "content": "Which is larger, 9.11 or 9.9? Explain briefly."
+      }
     ],
-    "reasoning_effort": "high"
+    "reasoning_effort": "high",
+    "max_tokens": 120
   }'
 ```
 
-```python Python
-from openai import OpenAI
+Available `reasoning_effort` values:
 
-client = OpenAI(
-    api_key="YOUR_API_KEY",
-    base_url="https://crazyrouter.com/v1"
-)
+| Value | Meaning |
+|-------|---------|
+| `low` | Faster response for simpler tasks |
+| `medium` | Balanced default-style setting |
+| `high` | More reasoning for harder tasks |
 
-response = client.chat.completions.create(
-    model="o4-mini",
-    messages=[
-        {"role": "user", "content": "Prove that the square root of 2 is irrational"}
-    ],
-    reasoning_effort="high"
-)
+### Current response behavior
 
-print(response.choices[0].message.content)
-```
+In the `2026-03-22` production recheck:
 
-```javascript Node.js
-import OpenAI from "openai";
+- the request succeeded
+- the final answer was returned in `message.content`
+- `message.reasoning_content` did not reliably contain usable content
 
-const client = new OpenAI({
-  apiKey: "YOUR_API_KEY",
-  baseURL: "https://crazyrouter.com/v1",
-});
-
-const response = await client.chat.completions.create({
-  model: "o4-mini",
-  messages: [{ role: "user", content: "Prove that the square root of 2 is irrational" }],
-  reasoning_effort: "high",
-});
-
-console.log(response.choices[0].message.content);
-```
-
-</CodeGroup>
+So if you only want stronger reasoning, Chat Completions with `reasoning_effort` is still usable. If you need a visible reasoning summary field, do not treat Chat Completions as the primary path.
 
 ---
 
-## thinking Parameter (Thinking Budget)
+## When you need inspectable reasoning output
 
-Some models support precise control of the thinking token budget via the `thinking` parameter:
+The more reliable production path is the Responses API:
 
-```python Python
-response = client.chat.completions.create(
-    model="claude-sonnet-4-20250514",
-    messages=[
-        {"role": "user", "content": "Analyze the time complexity of this algorithm and optimize it"}
-    ],
-    thinking={
-        "type": "enabled",
-        "budget_tokens": 10000
-    },
-    max_tokens=16000
-)
+```bash cURL
+curl https://crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.4",
+    "input": "Which is larger, 9.11 or 9.9? Explain briefly.",
+    "reasoning": {
+      "effort": "high",
+      "summary": "detailed"
+    }
+  }'
 ```
 
-<Note>
-  When using the `thinking` parameter, `max_tokens` must be greater than `budget_tokens`, because `max_tokens` includes both thinking tokens and output tokens.
-</Note>
+Verified `output.type` values:
+
+```json
+["reasoning", "message"]
+```
+
+For concrete response shapes, summary fields, and streaming event names, see:
+
+- [GPT-5 Thinking Mode](/en/chat/responses/gpt5-thinking)
+- [AI Thinking Fields](/en/reference/thinking)
 
 ---
 
-## Streaming Reasoning
+## Current recommendation
 
-Reasoning models also support streaming output. The thinking process and final answer are returned as separate chunks:
-
-```python Python
-stream = client.chat.completions.create(
-    model="o4-mini",
-    messages=[
-        {"role": "user", "content": "Solve a Sudoku puzzle"}
-    ],
-    reasoning_effort="medium",
-    stream=True
-)
-
-for chunk in stream:
-    if chunk.choices[0].delta.content is not None:
-        print(chunk.choices[0].delta.content, end="")
-```
-
----
-
-## DeepSeek Reasoning Models
-
-DeepSeek reasoning models return the thinking process in the response:
-
-```python Python
-response = client.chat.completions.create(
-    model="deepseek-r1",
-    messages=[
-        {"role": "user", "content": "Which is larger, 9.11 or 9.8?"}
-    ]
-)
-
-# The thinking process may be in the reasoning_content field
-message = response.choices[0].message
-print("Answer:", message.content)
-```
+- For new builds that need to log or display reasoning summaries, start with the Responses API
+- For existing Chat Completions integrations that only care about the final answer, `reasoning_effort` is still a valid path
+- Do not assume all OpenAI-compatible reasoning models will reliably expose `reasoning_content`
 
 <Warning>
-  Reasoning models typically consume far more tokens than regular models because the thinking process also consumes tokens. Be mindful of controlling `reasoning_effort` and `budget_tokens` to manage costs.
+  Reasoning requests usually increase both latency and token usage. Higher `reasoning_effort` generally costs more.
 </Warning>
-
-<Note>
-  Reasoning models typically do not support sampling parameters like `temperature` and `top_p`. If these parameters are passed, they may be ignored or return an error.
-</Note>

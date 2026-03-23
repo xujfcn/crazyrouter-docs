@@ -12,7 +12,7 @@ With environment variables or `~/.aider.conf.yml`, Aider can send requests to Cr
 - recommended protocol: `OpenAI-compatible API`
 - base URL: `https://crazyrouter.com/v1`
 - auth variable: `OPENAI_API_KEY`
-- recommended default model string: `openai/gpt-5.3-codex`
+- recommended default model string: `openai/gpt-5.4`
 
 <Tip>
 If your main workflow is `read code -> edit a few places -> inspect the diff -> refine once more`, Aider is often one of the lightest and easiest tools to operationalize.
@@ -42,14 +42,14 @@ For Crazyrouter, use:
 OPENAI_API_BASE=https://crazyrouter.com/v1
 ```
 
-One important accuracy detail: in Aider's official OpenAI-compatible docs, model names are typically written as `openai/<model-name>`. So Crazyrouter's `gpt-5.3-codex` should usually be entered in Aider as:
+One important accuracy detail: in Aider's official OpenAI-compatible docs, model names are typically written as `openai/<model-name>`. So Crazyrouter's `gpt-5.4` should usually be entered in Aider as:
 
 ```text
-openai/gpt-5.3-codex
+openai/gpt-5.4
 ```
 
 <Warning>
-This is one of the most important corrections in this doc upgrade. In your Crazyrouter token allowlist, keep the raw model id such as `gpt-5.3-codex`. But in Aider commands and `~/.aider.conf.yml`, prefer the `openai/...` model form.
+This is one of the most important corrections in this doc upgrade. In your Crazyrouter token allowlist, keep the raw model id such as `gpt-5.4`. But in Aider commands and `~/.aider.conf.yml`, prefer the `openai/...` model form.
 </Warning>
 
 ## Prerequisites
@@ -66,9 +66,9 @@ This is one of the most important corrections in this doc upgrade. In your Crazy
 
 Suggested starter allowlist:
 
-- `gpt-5.3-codex`
-- `gpt-4.1`
+- `gpt-5.4`
 - `claude-sonnet-4-6`
+- `gemini-3-pro-preview`
 
 ## Full Install Path By Operating System
 
@@ -258,7 +258,7 @@ Avoid starting with a plain system-wide `pip install aider-chat`. Aider's own in
 
 <Steps>
   <Step title="Create an Aider-specific token">
-    In Crazyrouter, create a token named something like `aider`. Start by allowing only models such as `gpt-5.3-codex`, `gpt-4.1`, and `claude-sonnet-4-6`.
+    In Crazyrouter, create a token named something like `aider`. Start by allowing only models such as `gpt-5.4`, `claude-sonnet-4-6`, and `gemini-3-pro-preview`.
 
     <Note>
     The allowlist here uses Crazyrouter's raw model ids. Do not add the `openai/` prefix in the Crazyrouter token allowlist itself.
@@ -316,7 +316,7 @@ Avoid starting with a plain system-wide `pip install aider-chat`. Aider's own in
   <Step title="Optionally add a config file">
     Add this to `~/.aider.conf.yml`:
     ```yaml
-    model: openai/gpt-5.3-codex
+    model: openai/gpt-5.4
     openai-api-base: https://crazyrouter.com/v1
     ```
 
@@ -336,7 +336,7 @@ Avoid starting with a plain system-wide `pip install aider-chat`. Aider's own in
   </Step>
   <Step title="Launch Aider inside your repo">
     ```bash
-    aider --model openai/gpt-5.3-codex
+    aider --model openai/gpt-5.4
     ```
   </Step>
   <Step title="Run the first validation">
@@ -348,12 +348,11 @@ Avoid starting with a plain system-wide `pip install aider-chat`. Aider's own in
 
 | Use case | Recommended Aider model string | Raw Crazyrouter model | Why |
 |----------|--------------------------------|-----------------------|-----|
-| default coding driver | `openai/gpt-5.3-codex` | `gpt-5.3-codex` | best fit for code edits, diff reasoning, and repeated repair loops |
-| stable baseline | `openai/gpt-4.1` | `gpt-4.1` | useful for first-pass compatibility checks |
+| default coding driver | `openai/gpt-5.4` | `gpt-5.4` | verified successfully in production on March 23, 2026, and best for the OpenAI-compatible Aider baseline |
 | Claude-style alternative | `openai/claude-sonnet-4-6` | `claude-sonnet-4-6` | good for long-context explanation and steady multi-turn collaboration |
-| cheaper high-frequency tasks | `openai/gpt-4.1-mini` | `gpt-4.1-mini` | useful for lighter prompts and routine adjustments |
+| Gemini fallback path | `openai/gemini-3-pro-preview` | `gemini-3-pro-preview` | useful as a second compatibility-validation path |
 
-Recommended rollout: start with `openai/gpt-5.3-codex`. If cost matters more or you are just validating the path, use `openai/gpt-4.1` first.
+Recommended rollout: start with `openai/gpt-5.4`. Then add `openai/claude-sonnet-4-6` or `openai/gemini-3-pro-preview` only after the baseline path is stable.
 
 ## Token Setup Best Practices
 
@@ -386,15 +385,15 @@ Recommended rollout: start with `openai/gpt-5.3-codex`. If cost matters more or 
 | `401 unauthorized` | wrong, expired, or incomplete API key | generate a new token and set it again |
 | `403` or `model not allowed` | the token does not allow the selected model | allow that model in Crazyrouter token settings |
 | `404` | wrong base URL or missing `/v1` | use `https://crazyrouter.com/v1` |
-| `model not found` | wrong model string or missing the `openai/` prefix in Aider | switch back to `openai/gpt-5.3-codex`, `openai/gpt-4.1`, or another confirmed `openai/...` model string |
-| Aider launches but performs poorly | the model is too weak or the context is too noisy | return to `gpt-5.3-codex` and reduce the context files |
+| `model not found` | wrong model string or missing the `openai/` prefix in Aider | switch back to `openai/gpt-5.4`, `openai/claude-sonnet-4-6`, or another confirmed `openai/...` model string |
+| Aider launches but performs poorly | the model is too weak or the context is too noisy | return to `gpt-5.4` and reduce the context files |
 | config file and env vars behave inconsistently | the two configuration sources conflict | pick one primary source and restart Aider |
 | cost rises too quickly | long sessions and too many context files | clear or restart the session and shrink the context |
 
 ## Performance And Cost Tips
 
 - validate on a small repo first
-- keep `openai/gpt-5.3-codex` as the main model and move lighter work to `openai/gpt-4.1` or `openai/gpt-4.1-mini`
+- keep `openai/gpt-5.4` as the main model and add `openai/claude-sonnet-4-6` only when you need cross-vendor validation
 - split tokens by project type so cost tracking stays clear
 - clear context when the session becomes too long or drifts away from the task
 - after larger edits, review both the Aider diff and Crazyrouter logs
@@ -405,7 +404,7 @@ Recommended rollout: start with `openai/gpt-5.3-codex`. If cost matters more or 
 
 Use `https://crazyrouter.com/v1`.
 
-### Why should the model name usually be `openai/gpt-5.3-codex` instead of just `gpt-5.3-codex`?
+### Why should the model name usually be `openai/gpt-5.4` instead of just `gpt-5.4`?
 
 Because Aider's official OpenAI-compatible guidance uses the `openai/<model-name>` pattern. In Crazyrouter token settings, keep the raw model id. In Aider commands and config, prefer the `openai/...` form.
 
@@ -415,7 +414,7 @@ Both work. Environment variables are faster for a first setup; `~/.aider.conf.ym
 
 ### Which model should I try first?
 
-Start with `openai/gpt-5.3-codex`.
+Start with `openai/gpt-5.4`.
 
 ### Does Aider have to run inside a git repo?
 

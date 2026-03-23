@@ -1,72 +1,50 @@
 ---
 title: "Gemini Image Generation"
-description: "Generate images using Gemini models with aspect ratio and resolution control"
+description: "Current Gemini image-generation behavior verified against Crazyrouter production on 2026-03-23"
 ---
 
 # Gemini Image Generation
-
-Gemini image generation models (such as `gemini-2-5-flash-image`, `gemini-3-pro-image-preview`) support generating images through conversation.
 
 ```
 POST /v1beta/models/{model}:generateContent
 ```
 
+As of March 23, 2026, production checks against Crazyrouter showed:
+
+- `gemini-3.1-flash-image-preview` returned `inlineData` when called with `responseModalities: ["IMAGE"]`
+- `gemini-3-pro-image-preview` returned `text` containing a Markdown image with a `data:image/...;base64,...` payload
+- `gemini-2.5-flash-image` also returned `text` containing `data:image/...;base64,...`
+- `gemini-2.5-flash-image-preview` returned `text` containing a hosted image URL
+
+<Warning>
+  Gemini image models do not currently share one uniform response shape on Crazyrouter. Do not assume every model will return `inlineData`.
+</Warning>
+
 ---
 
-## Basic Image Generation
+## Most Practical Current Example
 
-<CodeGroup>
+For the specific goal of getting image bytes directly, the easiest current model to handle is `gemini-3.1-flash-image-preview`:
 
-```bash cURL
-curl "https://crazyrouter.com/v1beta/models/gemini-2-5-flash-image:generateContent?key=YOUR_API_KEY" \
+```bash
+curl "https://crazyrouter.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
       {
         "role": "user",
         "parts": [
-          {"text": "Generate a seaside landscape painting at sunset, oil painting style"}
+          {"text": "Generate an IMAGE of a simple red square on a white background. Return image output."}
         ]
       }
     ],
     "generationConfig": {
-      "responseModalities": ["TEXT", "IMAGE"]
+      "responseModalities": ["IMAGE"]
     }
   }'
 ```
 
-```python Python
-import google.generativeai as genai
-
-genai.configure(
-    api_key="YOUR_API_KEY",
-    transport="rest",
-    client_options={"api_endpoint": "https://crazyrouter.com"}
-)
-
-model = genai.GenerativeModel("gemini-2-5-flash-image")
-
-response = model.generate_content(
-    "Generate a seaside landscape painting at sunset, oil painting style",
-    generation_config=genai.GenerationConfig(
-        response_modalities=["TEXT", "IMAGE"]
-    )
-)
-
-# Process images in the response
-for part in response.candidates[0].content.parts:
-    if hasattr(part, "text"):
-        print(part.text)
-    elif hasattr(part, "inline_data"):
-        import base64
-        with open("output.png", "wb") as f:
-            f.write(base64.b64decode(part.inline_data.data))
-        print("Image saved as output.png")
-```
-
-</CodeGroup>
-
-### Response Format
+Observed production response shape:
 
 ```json
 {
@@ -75,18 +53,13 @@ for part in response.candidates[0].content.parts:
       "content": {
         "parts": [
           {
-            "text": "Here is an oil painting of a seaside sunset:"
-          },
-          {
             "inlineData": {
               "mimeType": "image/png",
-              "data": "iVBORw0KGgoAAAANSUhEUg..."
+              "data": "iVBORw0KGgoAAA..."
             }
           }
-        ],
-        "role": "model"
-      },
-      "finishReason": "STOP"
+        ]
+      }
     }
   ]
 }
@@ -94,60 +67,20 @@ for part in response.candidates[0].content.parts:
 
 ---
 
-## Aspect Ratio Control
+## Other Observed Output Shapes
 
-Control the aspect ratio of generated images through prompts or parameters:
+The same-day production check also showed these model-specific differences:
 
-```bash cURL
-curl "https://crazyrouter.com/v1beta/models/gemini-2-5-flash-image:generateContent?key=YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "contents": [
-      {
-        "role": "user",
-        "parts": [
-          {"text": "Generate a 16:9 widescreen landscape painting"}
-        ]
-      }
-    ],
-    "generationConfig": {
-      "responseModalities": ["TEXT", "IMAGE"],
-      "imageGenerationConfig": {
-        "aspectRatio": "16:9"
-      }
-    }
-  }'
-```
+- `gemini-3-pro-image-preview`: `parts[0].text` looked like `![image](data:image/jpeg;base64,...)`
+- `gemini-2.5-flash-image`: `parts[0].text` looked like `![image](data:image/png;base64,...)`
+- `gemini-2.5-flash-image-preview`: `parts[0].text` looked like `![Image](https://...)`
 
-### Supported Aspect Ratios
+If you need to support multiple Gemini image models, parse in this order:
 
-| Aspect Ratio | Description |
-|--------------|-------------|
-| `1:1` | Square |
-| `16:9` | Widescreen landscape |
-| `9:16` | Portrait vertical |
-| `4:3` | Standard landscape |
-| `3:4` | Standard portrait |
-
----
-
-## Image Count Control
-
-```json
-{
-  "generationConfig": {
-    "responseModalities": ["TEXT", "IMAGE"],
-    "imageGenerationConfig": {
-      "numberOfImages": 4
-    }
-  }
-}
-```
+1. Check `inlineData` first
+2. Then check whether `text` contains `data:image/`
+3. Then check whether `text` contains a hosted image URL
 
 <Note>
-  `responseModalities` must include `"IMAGE"` for the model to generate images. If only `"TEXT"` is set, the model will only return text descriptions.
+  This page no longer keeps aspect-ratio or multi-image parameter guidance, because those parameters were not revalidated in this production pass.
 </Note>
-
-<Warning>
-  Image generation consumes a significant number of tokens, and the Base64 image data in responses can be large. It is recommended to control the number of generated images appropriately.
-</Warning>

@@ -1,159 +1,160 @@
 ---
 title: "Claude Chat Object"
-description: "Structure of the Anthropic Claude Message object and streaming event types"
+description: "Production-revalidated Anthropic Message object and native SSE events as of 2026-03-23"
 ---
 
 # Claude Chat Object
 
-Crazyrouter supports Anthropic Claude's native Messages API format. This page describes the Message object and streaming event types.
+Crazyrouter supports the Anthropic native Messages API.
 
-## Message Object
+This page only documents Message-object and streaming-event behavior that was revalidated in production on `2026-03-23`.
 
-The complete Message object returned by non-streaming requests:
+## Message object
+
+The current minimal production request uses:
+
+- `model: "claude-sonnet-4-6"`
+- `POST /v1/messages`
+
+Typical production response skeleton:
 
 ```json
 {
-  "id": "msg_abc123",
+  "id": "msg_xxx",
   "type": "message",
   "role": "assistant",
   "content": [
     {
       "type": "text",
-      "text": "Hello! How can I help you?"
+      "text": "..."
     }
   ],
-  "model": "claude-sonnet-4-20250514",
+  "model": "claude-sonnet-4-6",
   "stop_reason": "end_turn",
   "stop_sequence": null,
   "usage": {
     "input_tokens": 15,
-    "output_tokens": 20,
-    "cache_creation_input_tokens": 0,
-    "cache_read_input_tokens": 0
+    "output_tokens": 20
   }
 }
 ```
 
-### Field Descriptions
+### Common fields
 
-| Field | Type | Description |
-|-------|------|-------------|
+| Field | Type | Meaning |
+|-------|------|---------|
 | `id` | string | Unique message identifier |
 | `type` | string | Always `message` |
 | `role` | string | Always `assistant` |
-| `content` | array | List of content blocks, can contain `text` and `tool_use` types |
-| `model` | string | The model actually used |
-| `stop_reason` | string | Stop reason: `end_turn`, `max_tokens`, `stop_sequence`, `tool_use` |
-| `stop_sequence` | string\|null | The sequence that triggered the stop |
+| `content` | array | Content block list |
+| `model` | string | Actual model used |
+| `stop_reason` | string | Stop reason such as `end_turn`, `tool_use`, or `max_tokens` |
 | `usage` | object | Token usage |
 
-### content Block Types
+### Common content block types
 
-**Text block:**
+Text block:
+
 ```json
 {
   "type": "text",
-  "text": "Response content"
+  "text": "..."
 }
 ```
 
-**Tool use block:**
+Tool-use block:
+
 ```json
 {
   "type": "tool_use",
-  "id": "toolu_abc123",
-  "name": "get_weather",
-  "input": {"city": "Beijing"}
+  "id": "toolu_xxx",
+  "name": "get_time",
+  "input": {
+    "timezone": "Asia/Shanghai"
+  }
+}
+```
+
+Thinking block:
+
+```json
+{
+  "type": "thinking",
+  "thinking": "..."
 }
 ```
 
 ---
 
-## Streaming Event Types
+## Streaming event types
 
-Streaming responses use SSE format and include the following event types:
+In the `2026-03-23` production recheck, native streaming for `claude-sonnet-4-6` returned these SSE events:
 
-### message_start
+- `message_start`
+- `content_block_start`
+- `content_block_delta`
+- `content_block_stop`
+- `message_delta`
+- `message_stop`
 
-Sent at the beginning of the stream, contains the Message object (with empty content):
+### Event examples
 
-```
+`message_start`
+
+```text
 event: message_start
-data: {"type":"message_start","message":{"id":"msg_abc123","type":"message","role":"assistant","content":[],"model":"claude-sonnet-4-20250514","stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":15,"output_tokens":0}}}
+data: {"type":"message_start","message":{...}}
 ```
 
-### content_block_start
+`content_block_start`
 
-New content block begins:
-
-```
+```text
 event: content_block_start
 data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}
 ```
 
-### content_block_delta
+`content_block_delta`
 
-Content block incremental update:
-
-```
+```text
 event: content_block_delta
 data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Hello"}}
 ```
 
-### content_block_stop
+`content_block_stop`
 
-Content block ends:
-
-```
+```text
 event: content_block_stop
 data: {"type":"content_block_stop","index":0}
 ```
 
-### message_delta
+`message_delta`
 
-Message-level update (contains stop_reason and output token count):
-
-```
+```text
 event: message_delta
 data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"output_tokens":20}}
 ```
 
-### message_stop
+`message_stop`
 
-Stream ends:
-
-```
+```text
 event: message_stop
 data: {"type":"message_stop"}
 ```
 
 ---
 
-## Complete Streaming Event Sequence
+## Practical interpretation
 
-```
-event: message_start
-data: {"type":"message_start","message":{...}}
-
-event: content_block_start
-data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Hello"}}
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"!"}}
-
-event: content_block_stop
-data: {"type":"content_block_stop","index":0}
-
-event: message_delta
-data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"output_tokens":5}}
-
-event: message_stop
-data: {"type":"message_stop"}
-```
+- If `content` only contains `text`, it is a normal answer
+- If `stop_reason = "tool_use"` and `content` contains `tool_use`, the model is making a tool call
+- If `content` contains `thinking`, the current model and request shape triggered extended thinking
 
 <Note>
-  Crazyrouter fully supports Anthropic's native streaming event format. You can also use Claude models through the OpenAI-compatible format (`/v1/chat/completions`), in which case the streaming format follows the standard OpenAI SSE format.
+  A `thinking` block is not returned by every Claude model by default. The currently revalidated explicit thinking path is `claude-opus-4-6-thinking`.
 </Note>
+
+Related pages:
+
+- [Claude Native Format](/en/chat/anthropic/messages)
+- [Feature Hub: Tool Calling](/en/features/tool-calling)
+- [Feature Hub: Reasoning](/en/features/reasoning)

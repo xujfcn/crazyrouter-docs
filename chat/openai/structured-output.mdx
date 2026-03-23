@@ -1,119 +1,54 @@
 ---
 title: "结构化输出"
-description: "使用 response_format 参数让模型返回结构化的 JSON 数据"
+description: "基于 2026-03-23 Crazyrouter 生产环境验证的 OpenAI 风格结构化输出"
 ---
 
 # 结构化输出
 
-通过 `response_format` 参数，可以让模型按照指定的 JSON Schema 返回结构化数据，确保输出格式可靠且可解析。
-
-## JSON 模式
-
-最简单的结构化输出方式，强制模型返回有效的 JSON：
-
-<CodeGroup>
-
-```bash cURL
-curl https://crazyrouter.com/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "model": "gpt-4o",
-    "messages": [
-      {"role": "system", "content": "你是一个数据提取助手，请以 JSON 格式返回结果。"},
-      {"role": "user", "content": "提取以下文本中的人名和职位：张三是公司的技术总监，李四是产品经理。"}
-    ],
-    "response_format": {"type": "json_object"}
-  }'
+```
+POST /v1/chat/completions
 ```
 
-```python Python
-from openai import OpenAI
-
-client = OpenAI(
-    api_key="YOUR_API_KEY",
-    base_url="https://crazyrouter.com/v1"
-)
-
-response = client.chat.completions.create(
-    model="gpt-4o",
-    messages=[
-        {"role": "system", "content": "你是一个数据提取助手，请以 JSON 格式返回结果。"},
-        {"role": "user", "content": "提取以下文本中的人名和职位：张三是公司的技术总监，李四是产品经理。"}
-    ],
-    response_format={"type": "json_object"}
-)
-
-import json
-data = json.loads(response.choices[0].message.content)
-print(data)
-```
-
-</CodeGroup>
-
-### 响应
-
-```json
-{
-  "people": [
-    {"name": "张三", "title": "技术总监"},
-    {"name": "李四", "title": "产品经理"}
-  ]
-}
-```
+截至 2026 年 3 月 23 日，Crazyrouter 生产环境已验证 `gpt-5.4` + `response_format.type = "json_schema"` 可以返回可直接解析的 JSON。
 
 ---
 
-## JSON Schema 模式
+## 推荐路径：`json_schema`
 
-使用 `json_schema` 类型可以精确定义输出结构，模型会严格遵循 schema：
-
-<CodeGroup>
-
-```bash cURL
+```bash
 curl https://crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-4o",
+    "model": "gpt-5.4",
     "messages": [
-      {"role": "user", "content": "分析这段代码的质量：def add(a, b): return a + b"}
+      {
+        "role": "user",
+        "content": "Return the people and roles from: Alice is CTO. Bob is PM."
+      }
     ],
     "response_format": {
       "type": "json_schema",
       "json_schema": {
-        "name": "code_review",
+        "name": "people_roles",
         "strict": true,
         "schema": {
           "type": "object",
           "properties": {
-            "score": {
-              "type": "integer",
-              "description": "代码质量评分，1-10"
-            },
-            "issues": {
+            "people": {
               "type": "array",
               "items": {
                 "type": "object",
                 "properties": {
-                  "severity": {
-                    "type": "string",
-                    "enum": ["low", "medium", "high"]
-                  },
-                  "description": {
-                    "type": "string"
-                  }
+                  "name": {"type": "string"},
+                  "role": {"type": "string"}
                 },
-                "required": ["severity", "description"],
+                "required": ["name", "role"],
                 "additionalProperties": false
               }
-            },
-            "suggestions": {
-              "type": "array",
-              "items": {"type": "string"}
             }
           },
-          "required": ["score", "issues", "suggestions"],
+          "required": ["people"],
           "additionalProperties": false
         }
       }
@@ -121,85 +56,34 @@ curl https://crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-```python Python
-from openai import OpenAI
-
-client = OpenAI(
-    api_key="YOUR_API_KEY",
-    base_url="https://crazyrouter.com/v1"
-)
-
-response = client.chat.completions.create(
-    model="gpt-4o",
-    messages=[
-        {"role": "user", "content": "分析这段代码的质量：def add(a, b): return a + b"}
-    ],
-    response_format={
-        "type": "json_schema",
-        "json_schema": {
-            "name": "code_review",
-            "strict": True,
-            "schema": {
-                "type": "object",
-                "properties": {
-                    "score": {"type": "integer", "description": "代码质量评分，1-10"},
-                    "issues": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "severity": {"type": "string", "enum": ["low", "medium", "high"]},
-                                "description": {"type": "string"}
-                            },
-                            "required": ["severity", "description"],
-                            "additionalProperties": False
-                        }
-                    },
-                    "suggestions": {"type": "array", "items": {"type": "string"}}
-                },
-                "required": ["score", "issues", "suggestions"],
-                "additionalProperties": False
-            }
-        }
-    }
-)
-
-import json
-result = json.loads(response.choices[0].message.content)
-print(f"评分: {result['score']}/10")
-for issue in result["issues"]:
-    print(f"  [{issue['severity']}] {issue['description']}")
-```
-
-</CodeGroup>
-
-### 响应
+生产环境实际返回的 `message.content` 可直接解析为：
 
 ```json
 {
-  "score": 7,
-  "issues": [
+  "people": [
     {
-      "severity": "low",
-      "description": "缺少类型注解"
+      "name": "Alice",
+      "role": "CTO"
     },
     {
-      "severity": "low",
-      "description": "缺少文档字符串"
+      "name": "Bob",
+      "role": "PM"
     }
-  ],
-  "suggestions": [
-    "添加类型注解：def add(a: int, b: int) -> int",
-    "添加 docstring 说明函数用途",
-    "考虑添加输入验证"
   ]
 }
 ```
 
-<Note>
-  使用 `json_schema` 模式时，设置 `"strict": true` 可以确保模型严格遵循 schema 定义。`additionalProperties` 必须设为 `false`。
-</Note>
+---
 
-<Warning>
-  使用 `json_object` 模式时，必须在 system 或 user 消息中明确提示模型返回 JSON，否则可能导致无限生成。
-</Warning>
+## 代码侧处理
+
+```python
+import json
+
+content = response["choices"][0]["message"]["content"]
+data = json.loads(content)
+```
+
+<Note>
+  本轮生产验证只确认了 `json_schema` 这条严格结构化输出路径。旧式 `json_object` 模式没有在本轮单独复测，因此不再作为当前主示例保留。
+</Note>

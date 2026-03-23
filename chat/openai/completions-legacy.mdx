@@ -1,6 +1,6 @@
 ---
 title: "创建完成 (Legacy)"
-description: "POST /v1/completions 旧版文本补全端点，已被 Chat Completions 取代"
+description: "POST /v1/completions 兼容性端点的当前生产状态"
 ---
 
 # 创建完成 (Legacy)
@@ -10,85 +10,53 @@ POST /v1/completions
 ```
 
 <Warning>
-  此端点已弃用，建议使用 `/v1/chat/completions` 替代。新模型可能不再支持此端点。
+  这是兼容性端点，不是当前主推荐路径。新接入请优先使用 `/v1/chat/completions` 或 `/v1/responses`。
 </Warning>
 
-旧版 Completions API 接受一个文本提示，返回模型的文本补全结果。与 Chat Completions 不同，它不使用消息列表格式。
+## 当前生产状态
 
-## 请求参数
+截至 2026 年 3 月 23 日，Crazyrouter 生产环境确认：
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `model` | string | 是 | 模型名称 |
-| `prompt` | string\|array | 是 | 输入提示文本 |
-| `max_tokens` | integer | 否 | 最大生成 Token 数，默认 16 |
-| `temperature` | number | 否 | 采样温度，0-2 |
-| `top_p` | number | 否 | 核采样参数 |
-| `n` | integer | 否 | 生成数量 |
-| `stream` | boolean | 否 | 是否流式输出 |
-| `stop` | string\|array | 否 | 停止标记 |
-| `echo` | boolean | 否 | 是否回显输入 |
-| `suffix` | string | 否 | 补全后缀 |
+- 路由仍然存在
+- 使用经典示例模型 `gpt-3.5-turbo-instruct` 发起请求时，返回 `503`
+- 错误码为 `model_not_found`
+- 错误信息为“temporarily unavailable”
 
-## 示例
+也就是说，这个端点目前更适合“兼容旧客户端时再按需测试”，而不是作为默认新接入方案。
 
-<CodeGroup>
+---
 
-```bash cURL
+## 当前建议
+
+1. 新项目直接使用 [`Chat Completions`](/chat/openai/completions)
+2. 需要 GPT-5 推理、Web Search 等新能力时，优先使用 [`Responses`](/chat/responses/overview)
+3. 只有在你已经有旧版客户端、并且确认自己手上的 legacy 模型在当前环境可用时，才继续尝试 `/v1/completions`
+
+---
+
+## Retest 模板
+
+如果你必须验证某个旧模型是否还能走这个端点，建议先用 [`/v1/models`](/chat/openai/models) 确认模型 ID，再做最小请求：
+
+```bash
 curl https://crazyrouter.com/v1/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-3.5-turbo-instruct",
-    "prompt": "写一首关于春天的诗：\n",
-    "max_tokens": 200,
-    "temperature": 0.7
+    "model": "YOUR_LEGACY_MODEL",
+    "prompt": "Say hello in three words.",
+    "max_tokens": 16
   }'
 ```
 
-```python Python
-from openai import OpenAI
-
-client = OpenAI(
-    api_key="YOUR_API_KEY",
-    base_url="https://crazyrouter.com/v1"
-)
-
-response = client.completions.create(
-    model="gpt-3.5-turbo-instruct",
-    prompt="写一首关于春天的诗：\n",
-    max_tokens=200,
-    temperature=0.7
-)
-
-print(response.choices[0].text)
-```
-
-</CodeGroup>
-
-## 响应格式
+本次生产环境实际错误示例：
 
 ```json
 {
-  "id": "cmpl-abc123",
-  "object": "text_completion",
-  "created": 1709123456,
-  "model": "gpt-3.5-turbo-instruct",
-  "choices": [
-    {
-      "text": "\n春风拂面暖意浓，\n桃花朵朵映日红。\n燕子归来寻旧巢，\n柳絮飘飘入碧空。",
-      "index": 0,
-      "finish_reason": "stop"
-    }
-  ],
-  "usage": {
-    "prompt_tokens": 12,
-    "completion_tokens": 36,
-    "total_tokens": 48
+  "error": {
+    "code": "model_not_found",
+    "message": "Model gpt-3.5-turbo-instruct is temporarily unavailable",
+    "type": "new_api_error"
   }
 }
 ```
-
-<Note>
-  如果你正在开发新应用，请直接使用 [Chat Completions API](/chat/openai/completions)。它功能更强大，支持更多模型。
-</Note>

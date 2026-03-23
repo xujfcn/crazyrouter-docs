@@ -51,9 +51,9 @@ Do not use:
 
 Recommended starter allowlist:
 
-- `gpt-4.1`
-- `gpt-4o`
-- `gpt-4.1-mini`
+- `gpt-5.4`
+- `claude-sonnet-4-6`
+- `gemini-3-pro-preview`
 
 <Tip>
 If you also plan to configure Claude Code, Codex, or Cline, do not share the same token with Cursor. Separate tokens make quota control and debugging much easier.
@@ -63,7 +63,7 @@ If you also plan to configure Claude Code, Codex, or Cline, do not share the sam
 
 <Steps>
   <Step title="Create a Cursor-specific token">
-    In Crazyrouter, create a new token and name it something obvious like `cursor`. Start with a small allowlist such as `gpt-4.1` and `gpt-4.1-mini`.
+    In Crazyrouter, create a new token and name it something obvious like `cursor`. Start with a small allowlist such as `gpt-5.4` and `claude-sonnet-4-6`.
   </Step>
   <Step title="Open Cursor settings">
     Open Cursor and go to `Cursor Settings` → `Models`.
@@ -76,7 +76,7 @@ If you also plan to configure Claude Code, Codex, or Cline, do not share the sam
     If your Cursor build does not show `Override OpenAI Base URL`, your current version does not fully expose the custom OpenAI-compatible endpoint path yet. In that case, upgrade Cursor first or wait for improved support on the Cursor side.
   </Step>
   <Step title="Verify the key and pick a model">
-    Click `Verify`. After it succeeds, enable one model for the first validation. `gpt-4.1` is the safest starting point.
+    Click `Verify`. After it succeeds, enable one model for the first validation. `gpt-5.4` is the safest starting point.
   </Step>
   <Step title="Run the first test">
     Open the chat panel and send a simple request such as `Reply with only OK`. If that succeeds, Crazyrouter is connected.
@@ -87,13 +87,11 @@ If you also plan to configure Claude Code, Codex, or Cline, do not share the sam
 
 | Use case | Recommended model | Why |
 |----------|-------------------|-----|
-| default baseline | `gpt-4.1` | stable for code explanation, editing, and general chat |
-| faster and cheaper | `gpt-4.1-mini` | lower-cost option for high-frequency usage |
-| stronger general experience | `gpt-4o` | good for broader coding assistance and multi-turn chat |
-| try stronger coding behavior | `gpt-5.3-codex` | more coding-oriented, but actual usability depends on your Cursor version and BYOK compatibility path |
-| high-quality alternative | `claude-sonnet-4-6` | can work in some custom-model setups, but test it only after the baseline path works |
+| default baseline | `gpt-5.4` | verified successfully in production on March 23, 2026, and stable for the main Cursor OpenAI-compatible path |
+| high-quality code and long-form work | `claude-sonnet-4-6` | stronger for complex explanation, summaries, and code assistance |
+| Gemini fallback path | `gemini-3-pro-preview` | useful as a second compatibility-validation path |
 
-Recommended rollout order: get `gpt-4.1` working first, then experiment with additional custom models.
+Recommended rollout order: get `gpt-5.4` working first, then test `claude-sonnet-4-6` and `gemini-3-pro-preview`.
 
 ## Token Setup Best Practices
 
@@ -126,14 +124,14 @@ Recommended rollout order: get `gpt-4.1` working first, then experiment with add
 | `404` | base URL was set to the root domain or a full endpoint path | use exactly `https://crazyrouter.com/v1` |
 | no models show up or the list looks wrong | Cursor BYOK refresh failed or the current version has compatibility issues | restart Cursor, verify again, and update to the latest stable build if needed |
 | chat works but Tab Completion does not use Crazyrouter | Cursor officially keeps specialized features on built-in models | expected behavior, not a Crazyrouter outage |
-| custom models do not behave correctly | Cursor's custom OpenAI-compatible endpoint support is still inconsistent | get `gpt-4.1` working first, then test other models gradually |
+| custom models do not behave correctly | Cursor's custom OpenAI-compatible endpoint support is still inconsistent | get `gpt-5.4` working first, then test other models gradually |
 | cost jumps unexpectedly | one token is shared across too many tools or the allowlist is too wide | narrow the model set and give Cursor its own quota cap |
 
 ## Performance And Cost Tips
 
-- start with only `gpt-4.1` and `gpt-4.1-mini`
-- use `gpt-4.1-mini` for routine high-frequency chat
-- switch to `gpt-4.1` or `gpt-4o` for heavier refactors and deeper code understanding
+- start with only `gpt-5.4`
+- use `gpt-5.4` for the baseline coding and chat workflow
+- add `claude-sonnet-4-6` or `gemini-3-pro-preview` only after the baseline path is stable
 - split Cursor, Claude Code, and Codex traffic across different tokens
 - if usage looks suspiciously high, inspect Crazyrouter logs and check whether long multi-turn context is driving costs
 
@@ -149,7 +147,7 @@ Because Cursor officially limits custom API keys to standard chat models. Specia
 
 ### Which model should I use first?
 
-Start with `gpt-4.1`. It is a more reliable baseline than jumping straight into broader custom-model experiments.
+Start with `gpt-5.4`. It is the latest OpenAI-compatible baseline already verified in production.
 
 ### Can I use Claude or other non-OpenAI models directly?
 
@@ -157,7 +155,7 @@ You can try them, but first complete a clean OpenAI-compatible baseline setup. W
 
 ### Chat works, but model selection keeps getting weird. What should I do?
 
-Restart Cursor, verify again, and fall back to `gpt-4.1` as the known-good baseline before expanding the config.
+Restart Cursor, verify again, and fall back to `gpt-5.4` as the known-good baseline before expanding the config.
 
 <Note>
 If your main goal is a stable coding workflow through Crazyrouter, Claude Code, Codex, and Cline are often more direct and controllable than Cursor's custom endpoint path. Cursor is best treated as a chat-first and general editing integration.

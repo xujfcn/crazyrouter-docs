@@ -21,7 +21,7 @@ const client = new OpenAI({
 
 async function main() {
   const response = await client.chat.completions.create({
-    model: 'gpt-4o',
+    model: 'gpt-5.4',
     messages: [
       { role: 'system', content: '你是一个有帮助的助手。' },
       { role: 'user', content: '用一句话解释什么是 Node.js' },
@@ -39,7 +39,7 @@ main();
 ```javascript
 async function streamChat() {
   const stream = await client.chat.completions.create({
-    model: 'gpt-4o',
+    model: 'gpt-5.4',
     messages: [{ role: 'user', content: '写一首关于编程的诗' }],
     stream: true,
   });
@@ -65,7 +65,7 @@ async function chat(userInput) {
   messages.push({ role: 'user', content: userInput });
 
   const response = await client.chat.completions.create({
-    model: 'gpt-4o',
+    model: 'gpt-5.4',
     messages,
   });
 
@@ -94,12 +94,12 @@ const client = new OpenAI({
 
 client.chat.completions
   .create({
-    model: 'gpt-4o',
+    model: 'gpt-5.4',
     messages: [{ role: 'user', content: '你好' }],
   })
   .then((res) => console.log(res.choices[0].message.content));
 ```
 
 <Note>
-  Node.js openai 包版本需要 4.x 以上。如果使用旧版本，请参考 OpenAI 官方迁移指南升级。
+  以上示例默认使用 2026 年 3 月 23 日已在生产环境实测成功的 `gpt-5.4`。如果你需要切换模型，优先改成同样已验证的 `claude-sonnet-4-6` 或 `gemini-3-pro-preview`，再根据场景继续扩展。
 </Note>

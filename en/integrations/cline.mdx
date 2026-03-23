@@ -12,7 +12,7 @@ With the OpenAI Compatible provider, Cline can send its agent traffic to Crazyro
 - recommended protocol: `OpenAI-compatible API`
 - base URL: `https://crazyrouter.com/v1`
 - auth format: `sk-...` token
-- recommended default models: `claude-sonnet-4-6` or `gpt-5.3-codex`
+- recommended default models: `claude-sonnet-4-6` or `gpt-5.4`
 
 <Warning>
 Cline can read and write files and execute terminal commands. After the connection works, the real risk is not connectivity but over-granting execution scope. Start with a small repo you know well.
@@ -60,8 +60,8 @@ Unlike Claude Code, Codex, or Aider, the normal Cline-in-VS-Code path usually do
 Suggested starter allowlist:
 
 - `claude-sonnet-4-6`
-- `gpt-5.3-codex`
-- `gpt-4.1`
+- `gpt-5.4`
+- `gemini-3-pro-preview`
 
 ## Full Install Path By Operating System
 
@@ -233,8 +233,8 @@ code --version
     In Crazyrouter, create a token named something like `cline`. For the first pass, allow only:
 
     - `claude-sonnet-4-6`
-    - `gpt-5.3-codex`
-    - `gpt-4.1`
+    - `gpt-5.4`
+    - `gemini-3-pro-preview`
 
     <Note>
     The standard Cline-in-VS-Code path usually stores the API key in the UI rather than through shell env vars. The most important setup decisions here are a dedicated token and a narrow allowlist.
@@ -298,11 +298,10 @@ code --version
 | Use case | Recommended model | Why |
 |----------|-------------------|-----|
 | default agent driver | `claude-sonnet-4-6` | stable for multi-turn planning, code explanation, and long context |
-| stronger coding execution | `gpt-5.3-codex` | better fit for complex edits and agent-style execution |
-| stable compatibility baseline | `gpt-4.1` | useful for first-pass validation |
-| cheaper trial runs | `gpt-4.1-mini` | better for light tasks and frequent small requests |
+| OpenAI-compatible baseline | `gpt-5.4` | verified successfully in production on March 23, 2026, and suited for the main OpenAI-compatible path |
+| Gemini fallback path | `gemini-3-pro-preview` | useful as a second compatibility-validation path |
 
-Recommended rollout: get the workflow stable on `claude-sonnet-4-6` first. If raw code-edit performance matters more, move to `gpt-5.3-codex`.
+Recommended rollout: get the workflow stable on `claude-sonnet-4-6` first. If you also want an OpenAI-compatible baseline, add `gpt-5.4` second.
 
 ## Token Setup Best Practices
 
@@ -346,8 +345,8 @@ Recommended rollout: get the workflow stable on `claude-sonnet-4-6` first. If ra
 ## Performance And Cost Tips
 
 - start with read-only tasks and small edits on first setup
-- use `claude-sonnet-4-6` or `gpt-5.3-codex` for complex refactors
-- move repetitive light tasks to `gpt-4.1-mini`
+- use `claude-sonnet-4-6` or `gpt-5.4` for complex refactors
+- avoid widening the model list too early; keep the first-pass allowlist narrow
 - use different tokens for different workspaces or project types
 - after large tasks, inspect Crazyrouter logs to see the real cost pattern
 

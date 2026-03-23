@@ -27,7 +27,7 @@ curl https://crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer sk-xxxxxxxx" \
   -d '{
-    "model": "gpt-4o",
+    "model": "gpt-5.4",
     "messages": [{"role": "user", "content": "Hello"}],
     "stream": false
   }'
@@ -42,7 +42,7 @@ curl https://crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer sk-xxxxxxxx" \
   -d '{
-    "model": "gpt-4o",
+    "model": "gpt-5.4",
     "messages": [{"role": "user", "content": "Hello"}],
     "stream": true
   }'
@@ -54,6 +54,6 @@ curl https://crazyrouter.com/v1/chat/completions \
 
 你可以使用以下方式在线调试 API：
 
-1. **Crazyrouter Playground** - 访问 [crazyrouter.com/playground](https://crazyrouter.com/playground) 直接在浏览器中测试
+1. **Crazyrouter Playground** - 登录后访问 [crazyrouter.com/console/playground](https://crazyrouter.com/console/playground) 直接在浏览器中测试
 2. **cURL** - 使用命令行工具发送请求
 3. **Postman / Apifox** - 使用 API 调试工具

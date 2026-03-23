@@ -12,7 +12,7 @@ $apiKey = 'sk-xxx';
 $baseUrl = 'https://crazyrouter.com/v1';
 
 $data = [
-    'model' => 'gpt-4o',
+    'model' => 'gpt-5.4',
     'messages' => [
         ['role' => 'user', 'content' => 'Hello, write a bubble sort in PHP']
     ]
@@ -82,7 +82,7 @@ $apiKey = 'sk-xxx';
 $baseUrl = 'https://crazyrouter.com/v1';
 
 $data = [
-    'model' => 'gpt-4o',
+    'model' => 'gpt-5.4',
     'messages' => [['role' => 'user', 'content' => 'Tell me a joke']],
     'stream' => true,
 ];
@@ -114,5 +114,5 @@ echo "\n";
 ```
 
 <Note>
-  For PHP 7.4+, the `openai-php/client` package is recommended for a friendlier SDK experience. Install with: `composer require openai-php/client`
+  The chat examples above default to `gpt-5.4`, which was verified successfully in Crazyrouter production on March 23, 2026. If you switch models, prefer other verified options such as `claude-sonnet-4-6` or `gemini-3-pro-preview`.
 </Note>

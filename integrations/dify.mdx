@@ -13,7 +13,7 @@ Dify 适合做工作流、Agent、知识库和内部 AI 应用平台。对接 Cr
 - 推荐入口：`设置 / Settings` → `模型供应商 / Model Provider`
 - Base URL：`https://crazyrouter.com/v1`
 - 认证方式：`sk-...` token
-- 推荐首次验证模型：`gpt-4.1`
+- 推荐首次验证模型：`gpt-5.4`
 
 <Tip>
 不同 Dify 版本或插件化发行版里，供应商名称可能显示为 `OpenAI`、`OpenAI-API-compatible`、`OpenAI Compatible` 或类似名称。优先选择支持自定义 `API Base URL` 的 OpenAI 兼容入口即可。
@@ -46,7 +46,7 @@ https://crazyrouter.com/v1
 - `https://crazyrouter.com/v1/chat/completions`
 
 <Tip>
-不同 Dify 版本里，界面文案可能会在 `Model Provider`、`模型供应商`、`Providers` 或插件市场入口之间切换，但首轮验证路径不要变：先保存供应商，再只添加一个 `LLM` 模型 `gpt-4.1`，最后再创建最小 Chat 应用验证。
+不同 Dify 版本里，界面文案可能会在 `Model Provider`、`模型供应商`、`Providers` 或插件市场入口之间切换，但首轮验证路径不要变：先保存供应商，再只添加一个 `LLM` 模型 `gpt-5.4`，最后再创建最小 Chat 应用验证。
 </Tip>
 
 ## 前置条件
@@ -56,12 +56,12 @@ https://crazyrouter.com/v1
 | Crazyrouter 账号 | 先在 [crazyrouter.com](https://crazyrouter.com) 注册 |
 | Crazyrouter token | 建议为 Dify 单独创建一个 `sk-...` token |
 | Dify | 建议使用当前稳定版；不同版本的入口名称可能略有差异 |
-| 可用模型 | 至少放行一个聊天模型，如 `gpt-4.1` |
+| 可用模型 | 至少放行一个当天已实测成功的聊天模型，如 `gpt-5.4` |
 
 推荐首批白名单：
 
-- `gpt-4.1`
-- `gpt-4.1-mini`
+- `gpt-5.4`
+- `claude-sonnet-4-6`
 - `text-embedding-3-large`
 - `text-embedding-3-small`
 
@@ -71,7 +71,7 @@ https://crazyrouter.com/v1
 
 <Steps>
   <Step title="创建 Dify 专用 token">
-    在 Crazyrouter 后台创建一个新 token，名称建议写成 `dify`。首次先只开放 `gpt-4.1` 和一个 Embedding 模型，例如 `text-embedding-3-large`。
+    在 Crazyrouter 后台创建一个新 token，名称建议写成 `dify`。首次先只开放 `gpt-5.4` 和一个 Embedding 模型，例如 `text-embedding-3-large`。
   </Step>
   <Step title="进入模型供应商设置">
     使用有工作区管理权限的账号登录 Dify，进入 `设置 / Settings` → `模型供应商 / Model Provider`。
@@ -83,7 +83,7 @@ https://crazyrouter.com/v1
   </Step>
   <Step title="先只配置一个聊天模型">
     首次先添加一个 LLM，例如：
-    - `模型名称 / Model`: `gpt-4.1`
+    - `模型名称 / Model`: `gpt-5.4`
     - `模型类型 / Type`: `LLM`
 
     保存后创建一个最简单的 Chat 应用或 Workflow 应用做验证。不要一开始就同时加聊天、Embedding、Rerank 和工作流工具，不然排障会混在一起。
@@ -114,9 +114,9 @@ https://crazyrouter.com/v1
 
 | 使用场景 | 推荐模型 | 原因 |
 |----------|----------|------|
-| 默认工作流聊天模型 | `gpt-4.1` | 稳定，适合大多数 Dify 流程 |
-| 低成本测试 / 批量调用 | `gpt-4.1-mini` | 更适合高频工作流试运行 |
-| 通用复杂场景 | `gpt-4o` | 多轮交互和复杂输入更友好 |
+| 默认工作流聊天模型 | `gpt-5.4` | 当天已实测成功，适合作为 Dify 聊天主基线 |
+| 高质量复杂场景 | `claude-sonnet-4-6` | 更适合复杂解释、总结与长文本 |
+| Gemini 备用档 | `gemini-3-pro-preview` | 适合做第二条上游兼容性验证路径 |
 | 默认 Embedding | `text-embedding-3-large` | 知识库质量更稳 |
 | 低成本 Embedding | `text-embedding-3-small` | 适合预算敏感的索引场景 |
 
@@ -154,14 +154,14 @@ https://crazyrouter.com/v1
 | 401 unauthorized | token 失效、复制错误或已被删除 | 重新生成 token 并替换 |
 | 403 / model not allowed | Dify 中选用的模型不在 token 白名单里 | 在 Crazyrouter 后台放行对应模型 |
 | 404 | `API Base URL` 写成根域名或完整接口路径 | 改成 `https://crazyrouter.com/v1` |
-| 聊天模型可配但应用报错 | 模型名称填错，或上下文参数配置不合理 | 先回退到 `gpt-4.1` 做基线验证 |
+| 聊天模型可配但应用报错 | 模型名称填错，或上下文参数配置不合理 | 先回退到 `gpt-5.4` 做基线验证 |
 | 知识库导入失败 | 聊天模型已通，但 Embedding 模型没配置好 | 先单独验证 Embedding 配置，再重新导入知识库 |
 | 工作流成本增长很快 | 批量运行、长上下文或多个应用共用同一 token | 拆分 token、设置配额上限并缩小模型范围 |
-| 某些高级模型能力在 Dify 里表现不一致 | 不同模型在 Dify 节点中的参数兼容性不同 | 先用 `gpt-4.1` 跑通基线，再逐步替换为更强模型 |
+| 某些高级模型能力在 Dify 里表现不一致 | 不同模型在 Dify 节点中的参数兼容性不同 | 先用 `gpt-5.4` 跑通基线，再逐步替换为其他模型 |
 
 ## 性能与成本建议
 
-- 工作流默认先用 `gpt-4.1-mini` 做测试，稳定后再切高价模型
+- 工作流默认先用 `gpt-5.4` 做测试，稳定后再补充其他模型
 - 知识库首次上线时，先少量导入文档验证召回质量，再批量导入
 - 把聊天模型与 Embedding 模型分开记账，便于判断成本来源
 - 对批量任务、定时任务和内部测试环境设置更严格的配额上限
@@ -187,7 +187,7 @@ https://crazyrouter.com/v1
 
 ### 为什么这里强调先只配一个聊天模型？
 
-因为 Dify 的问题很容易同时出现在供应商、模型类型、应用参数和知识库链路里。先只跑通一个 `gpt-4.1` 聊天应用，定位会清楚很多。
+因为 Dify 的问题很容易同时出现在供应商、模型类型、应用参数和知识库链路里。先只跑通一个 `gpt-5.4` 聊天应用，定位会清楚很多。
 
 ### Dify 要不要拆分多个 token？
 

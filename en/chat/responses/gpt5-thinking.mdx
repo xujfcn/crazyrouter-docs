@@ -1,11 +1,16 @@
 ---
 title: "GPT-5 Thinking Mode"
-description: "Enable GPT-5's thinking/reasoning mode via the Responses API"
+description: "Production-revalidated GPT-5.4 reasoning via the Responses API"
 ---
 
 # GPT-5 Thinking Mode
 
-GPT-5 supports enabling thinking mode through the Responses API's `reasoning` parameter, allowing the model to perform deep reasoning before answering.
+This page only documents GPT reasoning behavior that was revalidated against Crazyrouter production on `2026-03-22`.
+
+The current primary example uses:
+
+- `gpt-5.4`
+- `POST /v1/responses`
 
 ```
 POST /v1/responses
@@ -13,7 +18,7 @@ POST /v1/responses
 
 ---
 
-## Basic Usage
+## Basic usage
 
 <CodeGroup>
 
@@ -22,10 +27,11 @@ curl https://crazyrouter.com/v1/responses \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-5",
-    "input": "Analyze the time complexity of the following code and propose an optimization:\ndef two_sum(nums, target):\n    for i in range(len(nums)):\n        for j in range(i+1, len(nums)):\n            if nums[i] + nums[j] == target:\n                return [i, j]",
+    "model": "gpt-5.4",
+    "input": "Which is larger, 9.11 or 9.9? Explain briefly.",
     "reasoning": {
-      "effort": "high"
+      "effort": "high",
+      "summary": "detailed"
     }
   }'
 ```
@@ -39,10 +45,11 @@ client = OpenAI(
 )
 
 response = client.responses.create(
-    model="gpt-5",
-    input="Analyze the time complexity of the following code and propose an optimization:\ndef two_sum(nums, target):\n    for i in range(len(nums)):\n        for j in range(i+1, len(nums)):\n            if nums[i] + nums[j] == target:\n                return [i, j]",
+    model="gpt-5.4",
+    input="Which is larger, 9.11 or 9.9? Explain briefly.",
     reasoning={
-        "effort": "high"
+        "effort": "high",
+        "summary": "detailed"
     }
 )
 
@@ -58,10 +65,11 @@ const client = new OpenAI({
 });
 
 const response = await client.responses.create({
-  model: "gpt-5",
-  input: "Prove that the sum of interior angles of any triangle is 180 degrees",
+  model: "gpt-5.4",
+  input: "Which is larger, 9.11 or 9.9? Explain briefly.",
   reasoning: {
     effort: "high",
+    summary: "detailed",
   },
 });
 
@@ -72,102 +80,129 @@ console.log(response.output_text);
 
 ---
 
-## reasoning Parameter
+## Verified response shape
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `effort` | string | Reasoning depth: `low` (quick), `medium` (balanced), `high` (deep) |
-| `summary` | string | Thinking summary: `auto`, `concise`, `detailed` |
+Verified `output.type` values:
 
-### effort Level Comparison
+```json
+["reasoning", "message"]
+```
 
-| Level | Use Cases | Token Consumption |
-|-------|-----------|-------------------|
-| `low` | Simple questions, factual queries | Low |
-| `medium` | General reasoning, code analysis | Medium |
-| `high` | Complex math, deep analysis | High |
+Typical `reasoning` item shape:
+
+```json
+{
+  "id": "rs_xxx",
+  "type": "reasoning",
+  "encrypted_content": "...",
+  "summary": [
+    {
+      "type": "summary_text",
+      "text": "..."
+    }
+  ]
+}
+```
+
+The final answer is returned through the `message` item:
+
+```json
+{
+  "type": "message",
+  "content": [
+    {
+      "type": "output_text",
+      "text": "..."
+    }
+  ]
+}
+```
 
 ---
 
-## Get Thinking Summary
+## `reasoning` parameter
 
-Set the `summary` parameter to get a summary of the model's thinking process:
+| Field | Type | Description |
+|-------|------|-------------|
+| `effort` | string | Reasoning intensity. Verified values include `low`, `medium`, and `high` |
+| `summary` | string | Summary granularity. `concise` and `detailed` were revalidated |
+
+### Practical rule
+
+- If you only want stronger reasoning, send `effort`
+- If you need an inspectable reasoning summary, send both `effort` and `summary`
+
+In the current recheck:
+
+- with only `effort`, the `reasoning` item existed but `summary` could be an empty array
+- with `summary: "detailed"`, `summary_text` was returned reliably
+
+---
+
+## Extract the thinking summary
 
 ```python Python
 response = client.responses.create(
-    model="gpt-5",
-    input="Design a high-concurrency message queue system architecture",
+    model="gpt-5.4",
+    input="Design a high-concurrency message queue architecture.",
     reasoning={
         "effort": "high",
         "summary": "detailed"
     }
 )
 
-# Output may contain thinking summary
 for item in response.output:
     if item.type == "reasoning":
-        print("Thinking process:", item.summary)
+        for part in item.summary:
+            if part.type == "summary_text":
+                print("Thinking summary:", part.text)
     elif item.type == "message":
         for content in item.content:
             if content.type == "output_text":
-                print("Answer:", content.text)
+                print("Final answer:", content.text)
 ```
 
 ---
 
-## Streaming Thinking
+## Streaming thinking
+
+The following Responses SSE event names were revalidated in production:
+
+- `response.reasoning_summary_part.added`
+- `response.reasoning_summary_text.delta`
+- `response.reasoning_summary_text.done`
+- `response.output_text.delta`
+- `response.output_text.done`
+- `response.completed`
+
+Example:
 
 ```python Python
 stream = client.responses.create(
-    model="gpt-5",
-    input="Explain why the P=NP problem is important",
-    reasoning={"effort": "high", "summary": "concise"},
+    model="gpt-5.4",
+    input="Explain briefly why 9.9 is larger than 9.11.",
+    reasoning={
+        "effort": "high",
+        "summary": "detailed"
+    },
     stream=True
 )
 
 for event in stream:
     if event.type == "response.reasoning_summary_text.delta":
-        print(f"[Thinking] {event.delta}", end="")
+        print(f"[Thinking summary] {event.delta}", end="")
     elif event.type == "response.output_text.delta":
         print(event.delta, end="")
 ```
 
 ---
 
-## Combined with Tools
+## Current recommendation
 
-Thinking mode can be used simultaneously with Function Calling and Web Search:
-
-```python Python
-response = client.responses.create(
-    model="gpt-5",
-    input="Analyze the current global AI chip market landscape and provide investment recommendations",
-    reasoning={"effort": "high"},
-    tools=[
-        {"type": "web_search_preview"}
-    ]
-)
-
-print(response.output_text)
-```
-
----
-
-## Combined with System Instructions
-
-```python Python
-response = client.responses.create(
-    model="gpt-5",
-    instructions="You are a senior software architect who specializes in analyzing system design problems.",
-    input="Design a real-time chat system that supports millions of users",
-    reasoning={"effort": "high"}
-)
-```
-
-<Note>
-  In thinking mode, the model consumes additional tokens for internal reasoning. The higher the `effort`, the more tokens consumed, but the answer quality is typically better.
-</Note>
+- If you need a visible reasoning field, prefer `gpt-5.4` with the Responses API
+- Do not treat `gpt-5.4` Chat Completions `reasoning_content` as the current primary contract
+- If you only care about the final answer, Chat Completions with `reasoning_effort` is still fine
 
 <Warning>
-  Not all models support the `reasoning` parameter. Currently it is mainly supported by GPT-5 and o-series models. For unsupported models, this parameter will be ignored.
+  Reasoning mode increases both latency and token usage. Higher `effort` generally costs more.
 </Warning>

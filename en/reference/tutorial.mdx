@@ -1,58 +1,28 @@
 ---
 title: 'Getting Started'
-description: 'Migrate to Crazyrouter from OpenAI or other providers'
+description: 'Production-revalidated starter paths for connecting to Crazyrouter from OpenAI, Anthropic, and Gemini'
 ---
 
-## Overview
+# Getting Started
 
-Crazyrouter is fully compatible with the OpenAI API format. Migrating from OpenAI or other providers requires changing just two parameters:
+This page only documents starter paths that were revalidated against Crazyrouter production on `2026-03-23`.
 
-1. **Base URL** → `https://crazyrouter.com/v1`
-2. **API Key** → Your Crazyrouter `sk-xxx` key
+For the fastest start, separate the integration styles first:
 
-## Get an API Key
+- OpenAI-compatible: `https://crazyrouter.com/v1`
+- Anthropic native: `https://crazyrouter.com`
+- Gemini native: `https://crazyrouter.com/v1beta/models/...`
 
-<Steps>
-  <Step title="Register an Account">
-    Visit [crazyrouter.com](https://crazyrouter.com) to register
-  </Step>
-  <Step title="Top Up Balance">
-    Go to the `Top Up` page and select a top-up amount
-  </Step>
-  <Step title="Create a Token">
-    Go to the `Tokens` page, click `Create Token`, and get an `sk-xxx` format API Key
-  </Step>
-</Steps>
+## Shortest migration rule
+
+When migrating from an OpenAI-compatible client, you usually only change two things:
+
+1. set `base_url` to `https://crazyrouter.com/v1`
+2. replace the key with your Crazyrouter `sk-xxx`
+
+---
 
 ## Migrating from OpenAI
-
-### Before
-
-```python
-from openai import OpenAI
-
-client = OpenAI(
-    api_key="sk-openai-xxx"
-    # Default base_url: https://api.openai.com/v1
-)
-```
-
-### After
-
-```python
-from openai import OpenAI
-
-client = OpenAI(
-    api_key="sk-xxx",  # Crazyrouter API Key
-    base_url="https://crazyrouter.com/v1"  # Crazyrouter URL
-)
-```
-
-No other code changes needed.
-
-## Migrating from Anthropic
-
-### Using OpenAI-Compatible Format
 
 ```python
 from openai import OpenAI
@@ -62,31 +32,75 @@ client = OpenAI(
     base_url="https://crazyrouter.com/v1"
 )
 
-# Call Claude models via OpenAI format
 response = client.chat.completions.create(
-    model="claude-sonnet-4-20250514",
-    messages=[{"role": "user", "content": "Hello"}]
+    model="gpt-5.4",
+    messages=[{"role": "user", "content": "Hello"}],
+    max_tokens=64
 )
 ```
 
-### Using Anthropic Native Format
+This production recheck confirmed that:
+
+- `gpt-5.4` works through `/v1/chat/completions`
+- if you need reasoning summaries or OpenAI-style web search, you should prefer `/v1/responses`
+
+Related pages:
+
+- [Responses API Overview](/en/chat/responses/overview)
+- [GPT-5 Thinking Mode](/en/chat/responses/gpt5-thinking)
+
+---
+
+## Migrating from Anthropic
+
+### Option A: stay on the OpenAI-compatible layer
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="claude-sonnet-4-6",
+    messages=[{"role": "user", "content": "Hello"}],
+    max_tokens=64
+)
+```
+
+### Option B: use native Anthropic Messages
 
 ```python
 import anthropic
 
 client = anthropic.Anthropic(
     api_key="sk-xxx",
-    base_url="https://crazyrouter.com"  # Note: no /v1
+    base_url="https://crazyrouter.com"
 )
 
 response = client.messages.create(
-    model="claude-sonnet-4-20250514",
-    max_tokens=1024,
+    model="claude-sonnet-4-6",
+    max_tokens=128,
     messages=[{"role": "user", "content": "Hello"}]
 )
 ```
 
-## Migrating from Google Gemini
+If you need:
+
+- standard Claude chat: prefer `claude-sonnet-4-6`
+- an explicit thinking block: prefer `claude-opus-4-6-thinking`
+
+Related page:
+
+- [Claude Native Format](/en/chat/anthropic/messages)
+
+---
+
+## Migrating from Gemini
+
+### Option A: OpenAI-compatible layer
 
 ```python
 from openai import OpenAI
@@ -97,14 +111,44 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gemini-2.5-pro",
-    messages=[{"role": "user", "content": "Hello"}]
+    model="gemini-3-pro-preview",
+    messages=[{"role": "user", "content": "Hello"}],
+    max_tokens=64
 )
 ```
 
-## Environment Variables
+### Option B: Gemini native
 
-It's recommended to configure via environment variables to avoid hardcoding keys in your code:
+```bash
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "Hello"}
+        ]
+      }
+    ]
+  }'
+```
+
+If you need:
+
+- simple reuse of existing OpenAI SDK code: start with the compatibility layer
+- structured outputs, Google Search, or thinking: prefer Gemini native
+
+Related pages:
+
+- [Gemini OpenAI-Compatible Format](/en/chat/gemini/openai-compat)
+- [Gemini Native Format](/en/chat/gemini/native)
+
+---
+
+## Environment variables
+
+If you use the OpenAI-compatible route, a good default is:
 
 <Tabs>
   <Tab title="Linux / macOS">
@@ -121,27 +165,26 @@ It's recommended to configure via environment variables to avoid hardcoding keys
   </Tab>
 </Tabs>
 
-Then no parameters needed in your code:
+Then your code can be:
 
 ```python
 from openai import OpenAI
-client = OpenAI()  # Automatically reads environment variables
+client = OpenAI()
 ```
 
-## Compatibility
+---
 
-| Feature | Compatibility |
-|---------|--------------|
-| Chat Completions | Fully compatible |
-| Streaming | Fully compatible |
-| Function Calling | Fully compatible |
-| Vision | Fully compatible |
-| Embeddings | Fully compatible |
-| TTS / STT | Fully compatible |
-| Images (DALL-E) | Fully compatible |
-| Anthropic Messages API | Fully compatible |
-| Gemini Native API | Fully compatible |
+## Starter recommendations
+
+| Goal | Recommended starting path |
+|------|---------------------------|
+| Fastest GPT integration | OpenAI-compatible + `gpt-5.4` |
+| Fastest Claude integration | Anthropic native + `claude-sonnet-4-6` |
+| Fastest Gemini integration | OpenAI-compatible or Gemini native + `gemini-3-pro-preview` |
+| Need reasoning summaries | Responses API |
+| Need a Claude thinking block | `claude-opus-4-6-thinking` |
+| Need Gemini Google Search / thinking / responseSchema | Gemini native |
 
 <Note>
-  Crazyrouter supports OpenAI, Anthropic, and Gemini API formats simultaneously. Choose whichever format you're most familiar with.
+  Crazyrouter supports OpenAI, Anthropic, and Gemini protocols at the same time. In practice, the more reliable approach is usually not forcing every model through one protocol, but choosing the route that best matches the capability you need.
 </Note>

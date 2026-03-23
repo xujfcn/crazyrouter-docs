@@ -1,159 +1,75 @@
 ---
 title: "Special Models"
-description: "Usage methods for special-purpose models, including translation models and OCR recognition models"
+description: "Production-revalidated availability notes for special-purpose models as of 2026-03-23"
 ---
 
 # Special Models
 
-Crazyrouter provides some models with special capabilities. They are called through the standard Chat Completions API but have specific usage patterns.
+This page only documents facts revalidated against Crazyrouter production on `2026-03-23`.
+
+Unlike the main capability pages, special-purpose models are much more likely to change with channel inventory, temporary upstream outages, or token-level availability. So this page no longer treats older examples as stable-success patterns by default.
+
+## Current recheck results
+
+### `qwen-mt-turbo`
+
+Production findings on `2026-03-23`:
+
+- it did not appear in `GET /v1/models`
+- a direct request returned:
+  - `503`
+  - `model_not_found`
+  - `Model qwen-mt-turbo is temporarily unavailable`
+
+So the docs no longer present `qwen-mt-turbo` as a currently stable available model.
+
+### `deepseek-ocr`
+
+Production findings on `2026-03-23`:
+
+- it did appear in `GET /v1/models`
+- but an actual call returned:
+  - `500`
+  - `get_channel_failed`
+  - `model deepseek-ocr is temporarily unavailable, please try again later`
+
+That means it is currently at least "visible in the model list, but not callable right now".
 
 ---
 
-## qwen-mt-turbo (Translation Model)
+## Current recommendation
 
-Qwen Machine Translation model, optimized for high-quality translation. Specify source and target languages through the `translation` parameter.
+- If you need to know whether a special model is usable today, check [GET /v1/models](/en/chat/openai/models) first
+- A model appearing in the list still does not guarantee that it is callable at that moment
+- For these models, your first integration step should be a minimal live probe request
 
-<CodeGroup>
+## Minimal probe template
 
 ```bash cURL
 curl https://crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "qwen-mt-turbo",
+    "model": "YOUR_SPECIAL_MODEL",
     "messages": [
       {
-        "role": "system",
-        "content": "You are a translation assistant."
-      },
-      {
         "role": "user",
-        "content": "Translate the following into English: Artificial intelligence is changing our way of life, from healthcare to transportation, it is everywhere."
+        "content": "Hello"
       }
     ],
-    "translation": {
-      "source_lang": "zh",
-      "target_lang": "en"
-    }
+    "max_tokens": 64
   }'
 ```
 
-```python Python
-import requests
+If the result contains:
 
-response = requests.post(
-    "https://crazyrouter.com/v1/chat/completions",
-    headers={
-        "Authorization": "Bearer YOUR_API_KEY",
-        "Content-Type": "application/json"
-    },
-    json={
-        "model": "qwen-mt-turbo",
-        "messages": [
-            {"role": "system", "content": "You are a translation assistant."},
-            {"role": "user", "content": "Translate the following into English: Artificial intelligence is changing our way of life."}
-        ],
-        "translation": {
-            "source_lang": "zh",
-            "target_lang": "en"
-        }
-    }
-)
+- normal `choices`
+  the channel is currently usable
+- `model_not_found`
+  the model is not currently available to the token
+- `temporarily unavailable` or `get_channel_failed`
+  the model name is visible, but the current serving channel is unavailable
 
-print(response.json()["choices"][0]["message"]["content"])
-```
-
-</CodeGroup>
-
-### Supported Language Codes
-
-| Code | Language | Code | Language |
-|------|----------|------|----------|
-| `zh` | Chinese | `en` | English |
-| `ja` | Japanese | `ko` | Korean |
-| `fr` | French | `de` | German |
-| `es` | Spanish | `ru` | Russian |
-| `pt` | Portuguese | `it` | Italian |
-
----
-
-## deepseek-ocr (OCR Recognition)
-
-DeepSeek OCR model, optimized for text recognition in documents and images. Send images to let the model extract text content.
-
-<CodeGroup>
-
-```bash cURL
-curl https://crazyrouter.com/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "model": "deepseek-ocr",
-    "messages": [
-      {
-        "role": "user",
-        "content": [
-          {"type": "text", "text": "Recognize all text in the image"},
-          {
-            "type": "image_url",
-            "image_url": {
-              "url": "https://example.com/document.png"
-            }
-          }
-        ]
-      }
-    ]
-  }'
-```
-
-```python Python
-from openai import OpenAI
-
-client = OpenAI(
-    api_key="YOUR_API_KEY",
-    base_url="https://crazyrouter.com/v1"
-)
-
-response = client.chat.completions.create(
-    model="deepseek-ocr",
-    messages=[
-        {
-            "role": "user",
-            "content": [
-                {"type": "text", "text": "Recognize all text in the image"},
-                {
-                    "type": "image_url",
-                    "image_url": {"url": "https://example.com/document.png"}
-                }
-            ]
-        }
-    ]
-)
-
-print(response.choices[0].message.content)
-```
-
-</CodeGroup>
-
-### Response Example
-
-```json
-{
-  "id": "chatcmpl-abc123",
-  "object": "chat.completion",
-  "choices": [
-    {
-      "index": 0,
-      "message": {
-        "role": "assistant",
-        "content": "Text content in the image:\n\nInvoice Number: 12345678\nDate: February 20, 2026\nAmount: $1,280.00\n..."
-      },
-      "finish_reason": "stop"
-    }
-  ]
-}
-```
-
-<Note>
-  Extra parameters for special models (such as `translation`) are non-standard extensions by Crazyrouter. Standard OpenAI SDKs may not directly support them. You can pass them via `extra_body` or use HTTP requests directly.
-</Note>
+<Warning>
+  This page is especially likely to age quickly. For translation, OCR, and experimental special-purpose models, always treat the same-day `/v1/models` response plus one real request as the source of truth.
+</Warning>

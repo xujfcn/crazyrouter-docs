@@ -19,7 +19,7 @@ client = OpenAI(
 
 # Synchronous call
 response = client.chat.completions.create(
-    model="gpt-4o",
+    model="gpt-5.4",
     messages=[{"role": "user", "content": "Hello"}],
     temperature=0.7,
     max_tokens=1000
@@ -40,7 +40,7 @@ client = AsyncOpenAI(
 
 async def main():
     response = await client.chat.completions.create(
-        model="gpt-4o",
+        model="gpt-5.4",
         messages=[{"role": "user", "content": "Hello"}]
     )
     print(response.choices[0].message.content)
@@ -58,7 +58,7 @@ pip install langchain-openai
 from langchain_openai import ChatOpenAI
 
 llm = ChatOpenAI(
-    model="gpt-4o",
+    model="gpt-5.4",
     api_key="sk-xxx",
     base_url="https://crazyrouter.com/v1",
     temperature=0.7
@@ -76,7 +76,7 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 
 llm = ChatOpenAI(
-    model="gpt-4o",
+    model="gpt-5.4",
     api_key="sk-xxx",
     base_url="https://crazyrouter.com/v1"
 )
@@ -118,7 +118,7 @@ from llama_index.embeddings.openai import OpenAIEmbedding
 
 # LLM configuration
 llm = OpenAI(
-    model="gpt-4o",
+    model="gpt-5.4",
     api_key="sk-xxx",
     api_base="https://crazyrouter.com/v1"
 )
@@ -138,5 +138,5 @@ print(f"Dimensions: {len(vector)}")
 ```
 
 <Note>
-  Crazyrouter is fully compatible with the OpenAI API format. All frameworks and tools built on the OpenAI SDK can connect by simply changing the `base_url` and `api_key`.
+  The chat examples above default to `gpt-5.4`, which was verified successfully in Crazyrouter production on March 23, 2026. If you replace the model, prefer other verified options such as `claude-sonnet-4-6`; the embedding examples should continue using `text-embedding-3-large`.
 </Note>

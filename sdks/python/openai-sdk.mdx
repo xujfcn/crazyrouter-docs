@@ -19,7 +19,7 @@ client = OpenAI(
 
 # 同步调用
 response = client.chat.completions.create(
-    model="gpt-4o",
+    model="gpt-5.4",
     messages=[{"role": "user", "content": "你好"}],
     temperature=0.7,
     max_tokens=1000
@@ -40,7 +40,7 @@ client = AsyncOpenAI(
 
 async def main():
     response = await client.chat.completions.create(
-        model="gpt-4o",
+        model="gpt-5.4",
         messages=[{"role": "user", "content": "你好"}]
     )
     print(response.choices[0].message.content)
@@ -58,7 +58,7 @@ pip install langchain-openai
 from langchain_openai import ChatOpenAI
 
 llm = ChatOpenAI(
-    model="gpt-4o",
+    model="gpt-5.4",
     api_key="sk-xxx",
     base_url="https://crazyrouter.com/v1",
     temperature=0.7
@@ -76,7 +76,7 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 
 llm = ChatOpenAI(
-    model="gpt-4o",
+    model="gpt-5.4",
     api_key="sk-xxx",
     base_url="https://crazyrouter.com/v1"
 )
@@ -118,7 +118,7 @@ from llama_index.embeddings.openai import OpenAIEmbedding
 
 # LLM 配置
 llm = OpenAI(
-    model="gpt-4o",
+    model="gpt-5.4",
     api_key="sk-xxx",
     api_base="https://crazyrouter.com/v1"
 )
@@ -138,5 +138,5 @@ print(f"维度: {len(vector)}")
 ```
 
 <Note>
-  Crazyrouter 完全兼容 OpenAI API 格式，所有基于 OpenAI SDK 的框架和工具都可以通过修改 `base_url` 和 `api_key` 直接接入。
+  以上聊天示例默认使用 2026 年 3 月 23 日已在生产环境实测成功的 `gpt-5.4`。如果你要替换模型，优先改成同样已验证的 `claude-sonnet-4-6`；Embedding 示例则继续使用 `text-embedding-3-large`。
 </Note>

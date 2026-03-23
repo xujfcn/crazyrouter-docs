@@ -22,7 +22,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gpt-4o",
+    model="gpt-5.4",
     messages=[
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "Explain artificial intelligence in one sentence"}
@@ -42,7 +42,7 @@ response = requests.post(
         "Content-Type": "application/json"
     },
     json={
-        "model": "gpt-4o",
+        "model": "gpt-5.4",
         "messages": [
             {"role": "user", "content": "Explain artificial intelligence in one sentence"}
         ]
@@ -72,7 +72,7 @@ def chat(user_input):
     messages.append({"role": "user", "content": user_input})
 
     response = client.chat.completions.create(
-        model="gpt-4o",
+        model="gpt-5.4",
         messages=messages
     )
 
@@ -94,7 +94,7 @@ from openai import OpenAI
 client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
 
 stream = client.chat.completions.create(
-    model="gpt-4o",
+    model="gpt-5.4",
     messages=[{"role": "user", "content": "Write a poem about programming"}],
     stream=True
 )
@@ -118,7 +118,7 @@ response = requests.post(
         "Content-Type": "application/json"
     },
     json={
-        "model": "gpt-4o",
+        "model": "gpt-5.4",
         "messages": [{"role": "user", "content": "Hello"}],
         "stream": True
     },
@@ -136,5 +136,5 @@ print()
 ```
 
 <Note>
-  The `model` parameter in all examples can be replaced with any model supported by Crazyrouter, such as `claude-sonnet-4-20250514`, `gemini-2.5-pro`, etc.
+  All examples default to `gpt-5.4`, which was verified successfully in Crazyrouter production on March 23, 2026. If you need to swap models, prefer other verified options such as `claude-sonnet-4-6` or `gemini-3-pro-preview`.
 </Note>

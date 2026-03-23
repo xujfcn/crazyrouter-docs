@@ -1,123 +1,155 @@
 ---
 title: 'AI 思考字段'
-description: '理解 AI 模型响应中的思考/推理字段'
+description: '基于生产环境复核，理解 Crazyrouter 中不同协议暴露的 thinking/reasoning 字段'
 ---
 
-## 概述
+# AI 思考字段
 
-部分 AI 模型支持「思考」（Thinking/Reasoning）功能，模型会在生成最终回答前先进行内部推理。思考过程会通过特定字段返回。
+本文页只列出 `2026-03-22` 已在 Crazyrouter 生产环境复核过的 thinking / reasoning 暴露方式。
 
-## 支持思考的模型
+一个关键前提是：不同协议暴露“思考”的方式并不相同。
 
-| 模型 | 思考字段 | 说明 |
-|------|----------|------|
-| `o1` | `reasoning_content` | OpenAI 推理模型 |
-| `o1-mini` | `reasoning_content` | 轻量推理模型 |
-| `o3` | `reasoning_content` | 最新推理模型 |
-| `o3-mini` | `reasoning_content` | 轻量版 |
-| `o4-mini` | `reasoning_content` | 最新轻量推理 |
-| `claude-sonnet-4-20250514` | `thinking` | Claude 扩展思考 |
-| `claude-opus-4-20250514` | `thinking` | Claude 扩展思考 |
-| `gemini-2.5-pro` | `thoughts` | Gemini 思考 |
-| `gemini-2.5-flash-thinking` | `thoughts` | Gemini 思考 |
-| `deepseek-r1` | `reasoning_content` | DeepSeek 推理 |
+- OpenAI Responses 更偏向返回独立的 `reasoning` item
+- Claude 原生 Messages 返回 `thinking` block
+- Gemini Native 当前更容易通过 `usageMetadata.thoughtsTokenCount` 判断思考是否生效
 
-## 响应格式
+## 当前已验证字段
 
-### OpenAI 格式（o1/o3/DeepSeek）
+| 模型 | 协议 | 已验证字段或标志 | 说明 |
+|------|------|------------------|------|
+| `gpt-5.4` | Responses | `output[].type = "reasoning"` | 可配合 `summary` 拿到可展示的摘要 |
+| `claude-opus-4-6-thinking` | Anthropic Messages | `content[].type = "thinking"` | 与 `text` block 并列返回 |
+| `gemini-3-pro-preview` | Gemini Native | `usageMetadata.thoughtsTokenCount` | 说明 thinking budget 已实际消耗 |
+
+<Note>
+  在本轮复核中，`gpt-5.4` Chat Completions 的 `message.reasoning_content` 没有稳定返回可依赖内容，因此这里不把它列为主观察字段。
+</Note>
+
+---
+
+## GPT: Responses `reasoning` item
 
 ```json
 {
-  "choices": [{
-    "message": {
-      "role": "assistant",
-      "content": "最终回答内容",
-      "reasoning_content": "模型的思考过程..."
+  "output": [
+    {
+      "id": "rs_xxx",
+      "type": "reasoning",
+      "encrypted_content": "...",
+      "summary": [
+        {
+          "type": "summary_text",
+          "text": "..."
+        }
+      ]
+    },
+    {
+      "type": "message",
+      "content": [
+        {
+          "type": "output_text",
+          "text": "最终回答"
+        }
+      ]
     }
-  }],
-  "usage": {
-    "prompt_tokens": 100,
-    "completion_tokens": 500,
-    "total_tokens": 600,
-    "completion_tokens_details": {
-      "reasoning_tokens": 350
+  ]
+}
+```
+
+提取方式：
+
+```python
+response = client.responses.create(
+    model="gpt-5.4",
+    input="Which is larger, 9.11 or 9.9?",
+    reasoning={"effort": "high", "summary": "detailed"}
+)
+
+for item in response.output:
+    if item.type == "reasoning":
+        for part in item.summary:
+            if part.type == "summary_text":
+                print("思考摘要:", part.text)
+```
+
+---
+
+## Claude: `thinking` block
+
+```json
+{
+  "content": [
+    {
+      "type": "thinking",
+      "thinking": "..."
+    },
+    {
+      "type": "text",
+      "text": "最终回答"
     }
+  ]
+}
+```
+
+提取方式：
+
+```python
+message = client.messages.create(
+    model="claude-opus-4-6-thinking",
+    max_tokens=320,
+    thinking={
+        "type": "enabled",
+        "budget_tokens": 128
+    },
+    messages=[
+        {"role": "user", "content": "Which is larger, 9.11 or 9.9?"}
+    ]
+)
+
+for block in message.content:
+    if block.type == "thinking":
+        print("思考内容:", block.thinking)
+    elif block.type == "text":
+        print("回答:", block.text)
+```
+
+---
+
+## Gemini: `thoughtsTokenCount`
+
+Gemini Native 在当前复核中，最稳定的观察点不是正文里的可见思考文本，而是用量字段：
+
+```json
+{
+  "usageMetadata": {
+    "thoughtsTokenCount": 120
   }
 }
 ```
 
-### 流式输出中的思考
+这说明：
 
-```json
-// 思考阶段
-{"choices": [{"delta": {"reasoning_content": "让我思考一下..."}}]}
-{"choices": [{"delta": {"reasoning_content": "首先分析..."}}]}
+- thinking budget 已实际参与生成
+- 当前请求确实发生了思考 Token 消耗
 
-// 回答阶段
-{"choices": [{"delta": {"content": "最终答案是..."}}]}
-```
-
-## Claude 扩展思考
-
-使用 Claude 模型时，通过 `thinking` 参数启用扩展思考：
+提取方式：
 
 ```python
-from openai import OpenAI
-
-client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
-
-response = client.chat.completions.create(
-    model="claude-sonnet-4-20250514",
-    messages=[{"role": "user", "content": "证明根号2是无理数"}],
-    extra_body={
-        "thinking": {
-            "type": "enabled",
-            "budget_tokens": 10000
-        }
-    }
-)
-
-# 思考内容在 reasoning_content 字段
-print("思考:", response.choices[0].message.reasoning_content)
-print("回答:", response.choices[0].message.content)
+data = response.json()
+thoughts = data.get("usageMetadata", {}).get("thoughtsTokenCount", 0)
+print("思考 Token:", thoughts)
 ```
 
-## 思考 Token 计费
+---
 
-<Warning>
-  思考 Token 会计入总用量。推理模型的思考 Token 通常占总输出的 50%-80%，请注意成本控制。
-</Warning>
+## 使用时要注意
 
-| 模型 | 思考 Token 计费 |
-|------|----------------|
-| o1/o3 系列 | 按输出 Token 价格计费 |
-| Claude 扩展思考 | 按输出 Token 价格计费 |
-| DeepSeek-R1 | 按输出 Token 价格计费 |
+- 不要假设所有模型都会把完整思考过程明文返回
+- 不要把不同协议的 thinking 字段混用
+- 如果你要做审计、日志或前端展示，先按协议判断该读 `reasoning`、`thinking` 还是 `thoughtsTokenCount`
 
-## 代码示例：提取思考内容
+相关页面：
 
-```python
-response = client.chat.completions.create(
-    model="o3-mini",
-    messages=[{"role": "user", "content": "9.11 和 9.8 哪个大？"}]
-)
-
-msg = response.choices[0].message
-
-# 思考过程
-if hasattr(msg, 'reasoning_content') and msg.reasoning_content:
-    print(f"思考过程:\n{msg.reasoning_content}\n")
-
-# 最终回答
-print(f"回答:\n{msg.content}")
-
-# Token 用量
-usage = response.usage
-print(f"\n总 Token: {usage.total_tokens}")
-if hasattr(usage, 'completion_tokens_details'):
-    print(f"推理 Token: {usage.completion_tokens_details.reasoning_tokens}")
-```
-
-<Note>
-  不是所有模型都支持思考功能。对于不支持的模型，`reasoning_content` 字段不会出现在响应中。
-</Note>
+- [GPT-5 思考模式](/chat/responses/gpt5-thinking)
+- [Claude 原生格式](/chat/anthropic/messages)
+- [Gemini 原生格式](/chat/gemini/native)

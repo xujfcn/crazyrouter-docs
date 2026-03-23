@@ -1,11 +1,11 @@
 ---
 title: 'ChatGPT Sidebar Setup Guide'
-description: 'Configure Crazyrouter API in the ChatGPT Sidebar browser extension'
+description: 'Configure Crazyrouter API in the ChatGPT Sidebar browser extension with the latest verified models'
 ---
 
 ## Overview
 
-ChatGPT Sidebar is a browser sidebar AI assistant extension that supports quick AI access on any web page.
+ChatGPT Sidebar is a browser sidebar AI assistant extension suited for quick Q&A, translation, summarization, and webpage reading help on any site. When connecting it to Crazyrouter, use its `Custom API` or `OpenAI` entry first and validate the route with a production-verified model before expanding the setup.
 
 ## Configuration Steps
 
@@ -20,19 +20,21 @@ ChatGPT Sidebar is a browser sidebar AI assistant extension that supports quick 
     - **API Provider**: Select `Custom API` or `OpenAI`
     - **API URL**: `https://crazyrouter.com/v1`
     - **API Key**: `sk-xxx`
-    - **Model**: `gpt-4o`
+    - **Model**: `gpt-5.4`
   </Step>
   <Step title="Save">
     Save settings. Click the extension icon on any web page to start using it.
   </Step>
 </Steps>
 
-## Use Cases
+## Recommended Models
 
-- Select web text, right-click to translate/summarize with AI
-- Chat directly with AI in the sidebar
-- Ask questions about the current web page content
+| Scenario | Model |
+|----------|-------|
+| First-pass route validation | `gpt-5.4` |
+| Higher-quality long-form explanation | `claude-sonnet-4-6` |
+| Gemini fallback path | `gemini-3-pro-preview` |
 
 <Note>
-  Different versions of the ChatGPT Sidebar extension may have slightly different configuration interfaces. The core settings are always the API URL and API Key.
+  `gpt-5.4` was verified successfully in Crazyrouter production on March 23, 2026, and is the best OpenAI-compatible baseline for this browser-extension path.
 </Note>

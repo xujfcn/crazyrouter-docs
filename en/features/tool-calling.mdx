@@ -1,0 +1,190 @@
+---
+title: "Tool Calling"
+description: "Production-verified tool calling with the latest GPT, Claude, and Gemini models"
+---
+
+# Tool Calling
+
+This page only documents Tool Calling flows that were **verified with real requests against Crazyrouter production**.
+
+Verification date:
+
+- `2026-03-22`
+
+Verified models:
+
+- `gpt-5.4`
+- `claude-sonnet-4-6`
+- `gemini-3-pro-preview`
+
+## Verified matrix
+
+| Model | Protocol | Endpoint | Success marker |
+|------|------|------|----------|
+| `gpt-5.4` | OpenAI Chat Completions | `POST /v1/chat/completions` | Returns `tool_calls` |
+| `claude-sonnet-4-6` | Anthropic Messages | `POST /v1/messages` | Returns `tool_use` block |
+| `gemini-3-pro-preview` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | Returns `functionCall` |
+
+## GPT-5.4
+
+```bash
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.4",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Use the get_time tool for Asia/Shanghai. Do not answer without calling the tool."
+      }
+    ],
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "get_time",
+          "description": "Get the current time for a timezone",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "timezone": { "type": "string" }
+            },
+            "required": ["timezone"],
+            "additionalProperties": false
+          }
+        }
+      }
+    ],
+    "tool_choice": "required"
+  }'
+```
+
+Verified response shape:
+
+```json
+{
+  "tool_calls": [
+    {
+      "type": "function",
+      "function": {
+        "name": "get_time"
+      }
+    }
+  ]
+}
+```
+
+## Claude Sonnet 4.6
+
+```bash
+curl https://crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-sonnet-4-6",
+    "max_tokens": 256,
+    "tools": [
+      {
+        "name": "get_time",
+        "description": "Get the current time for a timezone",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "timezone": { "type": "string" }
+          },
+          "required": ["timezone"]
+        }
+      }
+    ],
+    "tool_choice": {
+      "type": "any"
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Use the get_time tool for Asia/Shanghai. Do not answer directly."
+      }
+    ]
+  }'
+```
+
+Verified response shape:
+
+```json
+{
+  "stop_reason": "tool_use",
+  "content": [
+    {
+      "type": "tool_use",
+      "name": "get_time"
+    }
+  ]
+}
+```
+
+For first-pass validation, use an explicit `tool_choice` and clearly instruct Claude not to answer directly.
+
+## Gemini 3 Pro Preview
+
+```bash
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Use the get_time function for Asia/Shanghai."
+          }
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "functionDeclarations": [
+          {
+            "name": "get_time",
+            "description": "Get the current time for a timezone",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "timezone": { "type": "string" }
+              },
+              "required": ["timezone"]
+            }
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+Verified response shape:
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "functionCall": {
+              "name": "get_time"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+## See Also
+
+- [OpenAI Function Calling](/en/chat/openai/function-calling)
+- [Responses Function Calling](/en/chat/responses/function-calling)
+- [Gemini Tools](/en/chat/gemini/tools)
+- [Claude Native Messages](/en/chat/anthropic/messages)

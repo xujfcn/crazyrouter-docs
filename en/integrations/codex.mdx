@@ -13,7 +13,7 @@ With a custom provider in `~/.codex/config.toml`, Codex CLI can send its request
 - API style used by Codex: `Responses API`
 - base URL: `https://crazyrouter.com/v1`
 - auth variable: `OPENAI_API_KEY`
-- recommended default model: `gpt-5.3-codex`
+- recommended default model: `gpt-5.4`
 
 <Tip>
 If you previously used only the ChatGPT login flow in Codex, switch to the API-key plus custom-provider path for Crazyrouter. It gives you cleaner control over models, logs, quota, and billing.
@@ -24,7 +24,7 @@ If you previously used only the ChatGPT login flow in Codex, switch to the API-k
 - users who want Crazyrouter in a terminal agent workflow
 - repo-scale edits, reviews, and automated coding tasks
 - teams that want Codex traffic billed separately from Cursor or Claude Code
-- coding-first workflows built around models such as `gpt-5.3-codex`
+- coding-first workflows built around currently verified latest OpenAI models
 
 ## Protocol Used
 
@@ -48,13 +48,13 @@ Crazyrouter supports `/v1/responses`, so this Codex CLI integration can use the 
 | Git | `git 2.23+` is recommended |
 | Node.js | `Node.js 20+` is recommended |
 | Codex CLI | Use a current stable version |
-| Allowed models | Allow at least one coding-friendly model such as `gpt-5.3-codex` |
+| Allowed models | Allow at least one coding-friendly model such as `gpt-5.4` |
 
 Suggested starter allowlist:
 
-- `gpt-5.3-codex`
-- `gpt-5.2`
-- `gpt-4.1`
+- `gpt-5.4`
+- `claude-sonnet-4-6`
+- `gemini-3-pro-preview`
 
 ## Full Install Paths By OS
 
@@ -220,9 +220,9 @@ Besides package managers, the official Codex GitHub repository also publishes bi
   <Step title="Step 4: Create a dedicated Crazyrouter token for Codex">
     In Crazyrouter, create a token named something like `codex`. For the first pass, allow only:
 
-    - `gpt-5.3-codex`
-    - `gpt-5.2`
-    - `gpt-4.1`
+    - `gpt-5.4`
+    - `claude-sonnet-4-6`
+    - `gemini-3-pro-preview`
 
     This keeps first-pass debugging and cost control much simpler.
   </Step>
@@ -279,7 +279,7 @@ Besides package managers, the official Codex GitHub repository also publishes bi
         ```bash
         mkdir -p ~/.codex
         cat > ~/.codex/config.toml <<'EOF'
-        model = "gpt-5.3-codex"
+        model = "gpt-5.4"
         model_provider = "crazyrouter"
 
         [model_providers.crazyrouter]
@@ -289,7 +289,7 @@ Besides package managers, the official Codex GitHub repository also publishes bi
         wire_api = "responses"
 
         [profiles.crazyrouter]
-        model = "gpt-5.3-codex"
+        model = "gpt-5.4"
         model_provider = "crazyrouter"
         approval_policy = "on-request"
         sandbox_mode = "workspace-write"
@@ -300,7 +300,7 @@ Besides package managers, the official Codex GitHub repository also publishes bi
         ```powershell
         New-Item -ItemType Directory -Force "$HOME/.codex" | Out-Null
         @'
-        model = "gpt-5.3-codex"
+        model = "gpt-5.4"
         model_provider = "crazyrouter"
 
         [model_providers.crazyrouter]
@@ -310,7 +310,7 @@ Besides package managers, the official Codex GitHub repository also publishes bi
         wire_api = "responses"
 
         [profiles.crazyrouter]
-        model = "gpt-5.3-codex"
+        model = "gpt-5.4"
         model_provider = "crazyrouter"
         approval_policy = "on-request"
         sandbox_mode = "workspace-write"
@@ -377,12 +377,11 @@ Besides package managers, the official Codex GitHub repository also publishes bi
 
 | Use case | Recommended model | Why |
 |----------|-------------------|-----|
-| default coding driver | `gpt-5.3-codex` | strongest fit for code generation, edits, and agent-style workflows |
-| balanced daily work | `gpt-5.2` | better balance of capability and cost |
-| stable fallback baseline | `gpt-4.1` | good for first-pass validation |
-| cheaper high-frequency runs | `gpt-4.1-mini` | useful for lighter prompts and repeated small tests |
+| default coding driver | `gpt-5.4` | verified successfully in production on March 23, 2026, and best suited for the main Codex / Responses API baseline |
+| Claude-style alternative | `claude-sonnet-4-6` | better for complex explanation, long-form summaries, and multi-turn collaboration |
+| Gemini fallback path | `gemini-3-pro-preview` | useful as a second compatibility-validation path |
 
-Recommended rollout: get `gpt-5.3-codex` working first. If cost matters more, fall back to `gpt-5.2` or `gpt-4.1`.
+Recommended rollout: get `gpt-5.4` working first. Then add `claude-sonnet-4-6` or `gemini-3-pro-preview` only after the baseline path is stable.
 
 ## Token Setup Best Practices
 
@@ -424,7 +423,7 @@ Recommended rollout: get `gpt-5.3-codex` working first. If cost matters more, fa
 ## Performance And Cost Tips
 
 - validate first in a small repo, not a huge production repo
-- keep `gpt-5.3-codex` as the main driver, but use `gpt-5.2` for lighter daily work
+- keep `gpt-5.4` as the main driver, then add `claude-sonnet-4-6` only when you need cross-vendor validation
 - separate Codex from IDE tools for cleaner cost attribution
 - use stricter quota caps for higher-risk repos or CI jobs
 - when spend spikes, inspect Crazyrouter logs first to see whether agent loops are the cause
@@ -453,7 +452,7 @@ Yes. For Crazyrouter, you should still use `OPENAI_API_KEY` plus the custom prov
 
 ### Which model should I try first?
 
-Start with `gpt-5.3-codex`.
+Start with `gpt-5.4`.
 
 <Note>
 If you want the smoothest terminal agent workflow on the OpenAI / Responses API path, Codex is one of the most important Crazyrouter integrations to configure well.

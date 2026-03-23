@@ -1,36 +1,74 @@
 ---
 title: "Gemini OpenAI-Compatible Format"
-description: "Use Gemini models through the OpenAI-compatible /v1/chat/completions endpoint"
+description: "Production-revalidated Gemini 3 Pro Preview via /v1/chat/completions"
 ---
 
 # Gemini OpenAI-Compatible Format
 
-You can call Gemini models through the standard OpenAI Chat Completions API format without learning the Gemini native API.
+You can call Gemini through the OpenAI Chat Completions compatible route.
 
 ```
 POST /v1/chat/completions
 ```
 
+This page only documents compatibility-layer behavior that was revalidated against Crazyrouter production on `2026-03-22`.
+
+Current primary example model:
+
+- `gemini-3-pro-preview`
+
+## Current conclusion
+
+This production recheck confirmed that:
+
+- `gemini-3-pro-preview` works through `/v1/chat/completions` for normal text chat
+- streaming returns standard `chat.completion.chunk` SSE objects
+- for Gemini-specific capabilities such as structured outputs, Google Search, and thinking, you should still prefer [Gemini Native Format](/en/chat/gemini/native)
+
 ---
 
-## Basic Conversation
-
-<CodeGroup>
+## Basic conversation
 
 ```bash cURL
 curl https://crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gemini-2.5-flash",
+    "model": "gemini-3-pro-preview",
     "messages": [
-      {"role": "system", "content": "You are a knowledgeable assistant."},
-      {"role": "user", "content": "Explain quantum entanglement"}
+      {
+        "role": "system",
+        "content": "You are a concise assistant."
+      },
+      {
+        "role": "user",
+        "content": "Explain quantum entanglement in one sentence."
+      }
     ],
-    "temperature": 0.7,
-    "max_tokens": 1024
+    "max_tokens": 128
   }'
 ```
+
+Verified response shape:
+
+```json
+{
+  "object": "chat.completion",
+  "model": "gemini-3-pro-preview",
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "..."
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Python example
 
 ```python Python
 from openai import OpenAI
@@ -41,147 +79,54 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gemini-2.5-flash",
+    model="gemini-3-pro-preview",
     messages=[
-        {"role": "system", "content": "You are a knowledgeable assistant."},
-        {"role": "user", "content": "Explain quantum entanglement"}
+        {"role": "system", "content": "You are a concise assistant."},
+        {"role": "user", "content": "Explain quantum entanglement in one sentence."}
     ],
-    temperature=0.7,
-    max_tokens=1024
+    max_tokens=128
 )
 
 print(response.choices[0].message.content)
 ```
 
-```javascript Node.js
-import OpenAI from "openai";
-
-const client = new OpenAI({
-  apiKey: "YOUR_API_KEY",
-  baseURL: "https://crazyrouter.com/v1",
-});
-
-const response = await client.chat.completions.create({
-  model: "gemini-2.5-flash",
-  messages: [
-    { role: "system", content: "You are a knowledgeable assistant." },
-    { role: "user", content: "Explain quantum entanglement" },
-  ],
-  temperature: 0.7,
-  max_tokens: 1024,
-});
-
-console.log(response.choices[0].message.content);
-```
-
-</CodeGroup>
-
 ---
 
-## Vision Understanding
+## Streaming output
 
-```python Python
-response = client.chat.completions.create(
-    model="gemini-2.5-flash",
-    messages=[
-        {
-            "role": "user",
-            "content": [
-                {"type": "text", "text": "Describe this image"},
-                {
-                    "type": "image_url",
-                    "image_url": {"url": "https://example.com/photo.jpg"}
-                }
-            ]
-        }
-    ],
-    max_tokens=1024
-)
-```
-
----
-
-## File Understanding
-
-Send PDFs and other files through the OpenAI-compatible format:
-
-```python Python
-import base64
-
-with open("document.pdf", "rb") as f:
-    pdf_base64 = base64.b64encode(f.read()).decode("utf-8")
-
-response = client.chat.completions.create(
-    model="gemini-2.5-flash",
-    messages=[
-        {
-            "role": "user",
-            "content": [
-                {"type": "text", "text": "Summarize this document"},
-                {
-                    "type": "image_url",
-                    "image_url": {
-                        "url": f"data:application/pdf;base64,{pdf_base64}"
-                    }
-                }
-            ]
-        }
-    ],
-    max_tokens=2048
-)
-```
-
----
-
-## Image Generation
-
-Use Gemini image generation models through the OpenAI-compatible format:
-
-```python Python
-response = client.chat.completions.create(
-    model="gemini-2-5-flash-image",
-    messages=[
-        {
-            "role": "user",
-            "content": "Draw a cute cat playing in a garden"
-        }
-    ],
-    max_tokens=4096
-)
-
-# The response may contain Base64 images
-print(response.choices[0].message.content)
-```
-
----
-
-## Streaming Output
+This production recheck also confirmed streaming compatibility:
 
 ```python Python
 stream = client.chat.completions.create(
-    model="gemini-2.5-flash",
+    model="gemini-3-pro-preview",
     messages=[
-        {"role": "user", "content": "Implement a simple HTTP server in Go"}
+        {"role": "user", "content": "Write one short sentence about AI."}
     ],
-    max_tokens=2048,
+    max_tokens=64,
     stream=True
 )
 
 for chunk in stream:
-    if chunk.choices[0].delta.content is not None:
-        print(chunk.choices[0].delta.content, end="")
+    delta = chunk.choices[0].delta
+    if delta.content is not None:
+        print(delta.content, end="")
 ```
 
-## Available Gemini Models
+Observed SSE shape:
 
-| Model | Description |
-|-------|-------------|
-| `gemini-2.5-pro` | Gemini 2.5 Pro, strongest capability |
-| `gemini-2.5-flash` | Gemini 2.5 Flash, fast response |
-| `gemini-2.5-flash-thinking` | Flash with thinking capability |
-| `gemini-2-5-flash-image` | Flash with image generation support |
-| `gemini-3-pro-image-preview` | Gemini 3 Pro image preview |
+```text
+data: {"object":"chat.completion.chunk","model":"gemini-3-pro-preview",...}
+data: {"choices":[{"delta":{"content":"..."}}],...}
+data: [DONE]
+```
+
+---
+
+## When to use compatible vs native
+
+- If you already have OpenAI SDK code and only need standard chat, use the compatible route
+- If you need Gemini-native structured outputs, Google Search, thinking, or native metadata, use [Gemini Native Format](/en/chat/gemini/native)
 
 <Note>
-  When using Gemini through the OpenAI-compatible format, Crazyrouter automatically converts requests to Gemini native format and converts responses back to OpenAI format. Most features work normally, but certain Gemini-specific features (such as code execution, Google Search) require using the [native format](/chat/gemini/native).
+  This page does not treat vision, file understanding, or image-generation through the compatibility layer as primary examples, not because they are necessarily unsupported, but because they were not revalidated in the same production pass.
 </Note>

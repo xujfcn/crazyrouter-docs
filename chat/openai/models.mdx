@@ -1,6 +1,6 @@
 ---
 title: "列出模型"
-description: "GET /v1/models 端点，获取当前可用的模型列表"
+description: "基于生产环境复核，使用 GET /v1/models 获取当前 Token 可用模型列表"
 ---
 
 # 列出模型
@@ -11,9 +11,11 @@ GET /v1/models
 
 返回当前 API Key 可用的模型列表。
 
+本文页只写入 `2026-03-23` 已在 Crazyrouter 生产环境复核过的行为。
+
 ## 认证
 
-```
+```text
 Authorization: Bearer YOUR_API_KEY
 ```
 
@@ -57,75 +59,87 @@ for (const model of models.data) {
 
 </CodeGroup>
 
-## 响应格式
+---
+
+## 当前生产验证结论
+
+在 `2026-03-23` 的生产复核中：
+
+- 端点返回 `200`
+- 顶层 `object` 为 `list`
+- 当前返回模型数量为 `541`
+- 以下模型已确认出现在返回列表中：
+  - `gpt-5.4`
+  - `claude-sonnet-4-6`
+  - `claude-opus-4-6-thinking`
+  - `gemini-3-pro-preview`
+
+<Note>
+  模型总数和具体列表会随渠道配置、令牌权限和平台更新而变化，不应把文档示例当成固定全集。
+</Note>
+
+---
+
+## 响应示例
 
 ```json
 {
   "object": "list",
   "data": [
     {
-      "id": "gpt-4o",
+      "id": "gpt-5.4",
       "object": "model",
       "created": 1700000000,
-      "owned_by": "openai",
-      "permission": [],
-      "root": "gpt-4o",
-      "parent": null
+      "owned_by": "openai"
     },
     {
-      "id": "claude-sonnet-4-20250514",
+      "id": "claude-sonnet-4-6",
       "object": "model",
       "created": 1700000000,
-      "owned_by": "anthropic",
-      "permission": [],
-      "root": "claude-sonnet-4-20250514",
-      "parent": null
+      "owned_by": "anthropic"
     },
     {
-      "id": "gemini-2.5-flash",
+      "id": "claude-opus-4-6-thinking",
       "object": "model",
       "created": 1700000000,
-      "owned_by": "google",
-      "permission": [],
-      "root": "gemini-2.5-flash",
-      "parent": null
+      "owned_by": "anthropic"
     },
     {
-      "id": "deepseek-r1",
+      "id": "gemini-3-pro-preview",
       "object": "model",
       "created": 1700000000,
-      "owned_by": "deepseek",
-      "permission": [],
-      "root": "deepseek-r1",
-      "parent": null
+      "owned_by": "google"
     }
   ]
 }
 ```
 
-## 字段说明
+## 常看字段
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `id` | string | 模型标识符，用于 API 调用时的 `model` 参数 |
+| `id` | string | 调用 API 时传入的模型标识符 |
 | `object` | string | 固定为 `model` |
-| `created` | integer | 创建时间的 Unix 时间戳 |
-| `owned_by` | string | 模型所属组织 |
+| `created` | integer | 时间戳 |
+| `owned_by` | string | 模型所属组织或来源标识 |
 
-<Note>
-  返回的模型列表取决于你的 API Key 权限。不同的 Token 可能配置了不同的可用模型范围。
-</Note>
+---
 
-## 获取模型定价
+## 定价信息
 
-模型定价信息可通过公开端点获取：
+如果你还需要公共定价信息，可查看：
 
-```bash
+```text
 GET /api/pricing
 ```
 
-```bash cURL
-curl https://crazyrouter.com/api/pricing
-```
+本轮生产复核确认该端点返回 JSON 对象，常见顶层字段包括：
 
-该端点返回所有模型的输入/输出价格信息，无需认证。
+- `data`
+- `popular_models`
+- `supported_endpoint`
+- `vendors`
+
+相关页面：
+
+- [Gemini 兼容 OpenAI 模型列表](/chat/gemini/openai-models)

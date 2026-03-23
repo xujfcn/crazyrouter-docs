@@ -1,58 +1,28 @@
 ---
 title: '接入教程'
-description: '从 OpenAI 或其他服务商迁移到 Crazyrouter'
+description: '基于生产环境复核，从 OpenAI、Anthropic、Gemini 接入 Crazyrouter 的起步路径'
 ---
 
-## 概述
+# 接入教程
 
-Crazyrouter 完全兼容 OpenAI API 格式，从 OpenAI 或其他服务商迁移只需修改两个参数：
+本文页只写入 `2026-03-23` 已在 Crazyrouter 生产环境复核过的起步路径。
 
-1. **Base URL** → `https://crazyrouter.com/v1`
-2. **API Key** → 你的 Crazyrouter `sk-xxx` 密钥
+如果你要最快开始，先区分三类接法：
 
-## 获取 API Key
+- OpenAI 兼容：`https://crazyrouter.com/v1`
+- Anthropic 原生：`https://crazyrouter.com`
+- Gemini 原生：`https://crazyrouter.com/v1beta/models/...`
 
-<Steps>
-  <Step title="注册账号">
-    访问 [crazyrouter.com](https://crazyrouter.com) 注册账号
-  </Step>
-  <Step title="充值余额">
-    进入 `充值` 页面，选择充值金额
-  </Step>
-  <Step title="创建令牌">
-    进入 `令牌` 页面，点击 `新建令牌`，获取 `sk-xxx` 格式的 API Key
-  </Step>
-</Steps>
+## 最短迁移原则
+
+从 OpenAI 兼容客户端迁移到 Crazyrouter，通常只需要改两项：
+
+1. `base_url` 改成 `https://crazyrouter.com/v1`
+2. `api_key` 改成 Crazyrouter 的 `sk-xxx`
+
+---
 
 ## 从 OpenAI 迁移
-
-### 修改前
-
-```python
-from openai import OpenAI
-
-client = OpenAI(
-    api_key="sk-openai-xxx"
-    # 默认 base_url: https://api.openai.com/v1
-)
-```
-
-### 修改后
-
-```python
-from openai import OpenAI
-
-client = OpenAI(
-    api_key="sk-xxx",  # Crazyrouter API Key
-    base_url="https://crazyrouter.com/v1"  # Crazyrouter 地址
-)
-```
-
-其他代码完全不需要改动。
-
-## 从 Anthropic 迁移
-
-### 使用 OpenAI 兼容格式
 
 ```python
 from openai import OpenAI
@@ -62,31 +32,75 @@ client = OpenAI(
     base_url="https://crazyrouter.com/v1"
 )
 
-# Claude 模型通过 OpenAI 格式调用
 response = client.chat.completions.create(
-    model="claude-sonnet-4-20250514",
-    messages=[{"role": "user", "content": "你好"}]
+    model="gpt-5.4",
+    messages=[{"role": "user", "content": "Hello"}],
+    max_tokens=64
 )
 ```
 
-### 使用 Anthropic 原生格式
+本轮生产复核确认：
+
+- `gpt-5.4` 通过 `/v1/chat/completions` 可正常返回
+- 如果你需要 reasoning 摘要或 OpenAI 风格 web search，优先切到 `/v1/responses`
+
+相关页面：
+
+- [Responses API 概览](/chat/responses/overview)
+- [GPT-5 思考模式](/chat/responses/gpt5-thinking)
+
+---
+
+## 从 Anthropic 迁移
+
+### 方案 A：继续走 OpenAI 兼容层
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="claude-sonnet-4-6",
+    messages=[{"role": "user", "content": "Hello"}],
+    max_tokens=64
+)
+```
+
+### 方案 B：走 Anthropic 原生 Messages
 
 ```python
 import anthropic
 
 client = anthropic.Anthropic(
     api_key="sk-xxx",
-    base_url="https://crazyrouter.com"  # 注意：不加 /v1
+    base_url="https://crazyrouter.com"
 )
 
 response = client.messages.create(
-    model="claude-sonnet-4-20250514",
-    max_tokens=1024,
-    messages=[{"role": "user", "content": "你好"}]
+    model="claude-sonnet-4-6",
+    max_tokens=128,
+    messages=[{"role": "user", "content": "Hello"}]
 )
 ```
 
-## 从 Google Gemini 迁移
+如果你要：
+
+- 普通 Claude 对话：优先 `claude-sonnet-4-6`
+- 明确需要 thinking block：优先 `claude-opus-4-6-thinking`
+
+相关页面：
+
+- [Claude 原生格式](/chat/anthropic/messages)
+
+---
+
+## 从 Gemini 迁移
+
+### 方案 A：OpenAI 兼容层
 
 ```python
 from openai import OpenAI
@@ -97,14 +111,44 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gemini-2.5-pro",
-    messages=[{"role": "user", "content": "你好"}]
+    model="gemini-3-pro-preview",
+    messages=[{"role": "user", "content": "Hello"}],
+    max_tokens=64
 )
 ```
 
+### 方案 B：Gemini 原生
+
+```bash
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "Hello"}
+        ]
+      }
+    ]
+  }'
+```
+
+如果你要：
+
+- 只复用现有 OpenAI SDK 代码：先走兼容层
+- 需要结构化输出、Google Search、thinking：优先走 Gemini 原生
+
+相关页面：
+
+- [Gemini OpenAI 兼容格式](/chat/gemini/openai-compat)
+- [Gemini 原生格式](/chat/gemini/native)
+
+---
+
 ## 环境变量方式
 
-推荐通过环境变量配置，避免在代码中硬编码密钥：
+如果你走 OpenAI 兼容层，推荐先配：
 
 <Tabs>
   <Tab title="Linux / macOS">
@@ -121,27 +165,26 @@ response = client.chat.completions.create(
   </Tab>
 </Tabs>
 
-然后代码中无需指定参数：
+然后代码里可直接：
 
 ```python
 from openai import OpenAI
-client = OpenAI()  # 自动读取环境变量
+client = OpenAI()
 ```
 
-## 兼容性说明
+---
 
-| 功能 | 兼容性 |
-|------|--------|
-| Chat Completions | 完全兼容 |
-| Streaming | 完全兼容 |
-| Function Calling | 完全兼容 |
-| Vision (识图) | 完全兼容 |
-| Embeddings | 完全兼容 |
-| TTS / STT | 完全兼容 |
-| Images (DALL-E) | 完全兼容 |
-| Anthropic Messages API | 完全兼容 |
-| Gemini Native API | 完全兼容 |
+## 起步建议
+
+| 目标 | 推荐起步方式 |
+|------|--------------|
+| 最快接入 GPT | OpenAI 兼容 + `gpt-5.4` |
+| 最快接入 Claude | Anthropic 原生 + `claude-sonnet-4-6` |
+| 最快接入 Gemini | OpenAI 兼容或 Gemini 原生 + `gemini-3-pro-preview` |
+| 要 reasoning 摘要 | Responses API |
+| 要 Claude thinking block | `claude-opus-4-6-thinking` |
+| 要 Gemini Google Search / thinking / responseSchema | Gemini 原生 |
 
 <Note>
-  Crazyrouter 同时支持 OpenAI、Anthropic、Gemini 三种 API 格式。你可以根据需要选择最熟悉的格式。
+  Crazyrouter 同时支持 OpenAI、Anthropic、Gemini 三种协议。更稳的做法通常不是“所有模型都强行走同一协议”，而是按能力选最合适的入口。
 </Note>

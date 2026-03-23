@@ -51,9 +51,9 @@ https://crazyrouter.com/v1
 
 推荐先放行这些模型之一：
 
-- `gpt-4.1`
-- `gpt-4o`
-- `gpt-4.1-mini`
+- `gpt-5.4`
+- `claude-sonnet-4-6`
+- `gemini-3-pro-preview`
 
 <Tip>
 如果你后续还要配置 Claude Code、Codex、Cline，不要和 Cursor 共用同一个 token。单独拆 token 更方便排查和控费。
@@ -63,7 +63,7 @@ https://crazyrouter.com/v1
 
 <Steps>
   <Step title="创建 Cursor 专用 token">
-    在 Crazyrouter 后台创建一个新 token，名称建议直接写 `cursor`。先开启少量模型白名单，例如 `gpt-4.1` 与 `gpt-4.1-mini`。
+    在 Crazyrouter 后台创建一个新 token，名称建议直接写 `cursor`。先开启少量模型白名单，例如 `gpt-5.4` 与 `claude-sonnet-4-6`。
   </Step>
   <Step title="打开 Cursor 设置">
     打开 Cursor，进入 `Cursor Settings` → `Models`。
@@ -76,7 +76,7 @@ https://crazyrouter.com/v1
     如果你的 Cursor 版本没有看到 `Override OpenAI Base URL`，说明当前版本的自定义 OpenAI 兼容端点支持不完整，需要先升级 Cursor，或等待 Cursor 侧进一步完善该能力。
   </Step>
   <Step title="验证密钥并选择模型">
-    点击 `Verify`。通过后，优先启用一个模型做首次验证，建议先选 `gpt-4.1`。
+    点击 `Verify`。通过后，优先启用一个模型做首次验证，建议先选 `gpt-5.4`。
   </Step>
   <Step title="完成首次测试">
     打开 Cursor 的聊天面板，发送一句简单请求，例如：`Reply with only OK`。只要成功返回，就说明 Crazyrouter 接通了。
@@ -87,13 +87,11 @@ https://crazyrouter.com/v1
 
 | 使用场景 | 推荐模型 | 原因 |
 |----------|----------|------|
-| 默认主力 | `gpt-4.1` | 稳定，适合代码解释、编辑和常规对话 |
-| 更快更省 | `gpt-4.1-mini` | 成本更低，适合高频问答 |
-| 更强通用体验 | `gpt-4o` | 适合通用编程辅助和多轮对话 |
-| 尝试更强编码能力 | `gpt-5.3-codex` | 更偏代码场景，但可用性取决于你的 Cursor 版本和 BYOK 路径兼容性 |
-| 高质量替代项 | `claude-sonnet-4-6` | 某些自定义模型配置场景可用，但建议在基础接通后再尝试 |
+| 默认主力 | `gpt-5.4` | 2026 年 3 月 23 日已在生产环境实测成功，适合作为 Cursor OpenAI 兼容主基线 |
+| 高质量代码与长文 | `claude-sonnet-4-6` | 更适合复杂解释、总结和代码辅助 |
+| Gemini 备用档 | `gemini-3-pro-preview` | 适合作为第二条兼容性验证路径 |
 
-推荐顺序：先用 `gpt-4.1` 跑通，再逐步尝试自定义模型。
+推荐顺序：先用 `gpt-5.4` 跑通，再逐步尝试 `claude-sonnet-4-6` 和 `gemini-3-pro-preview`。
 
 ## Token 设置最佳实践
 
@@ -126,14 +124,14 @@ https://crazyrouter.com/v1
 | 404 | Base URL 填成了根域名或具体接口路径 | 统一改成 `https://crazyrouter.com/v1` |
 | 模型列表不对或没有模型 | Cursor BYOK 刷新失败，或版本兼容性问题 | 重启 Cursor，重新 Verify，必要时升级到最新稳定版 |
 | 聊天能用但 Tab 补全不走 Crazyrouter | Cursor 官方限制：专用能力仍会走内置模型 | 这是预期行为，不是 Crazyrouter 故障 |
-| 自定义模型无法使用 | Cursor 对自定义 OpenAI 兼容端点支持不稳定 | 先用 `gpt-4.1` 跑通，再逐步尝试其他模型 |
+| 自定义模型无法使用 | Cursor 对自定义 OpenAI 兼容端点支持不稳定 | 先用 `gpt-5.4` 跑通，再逐步尝试其他模型 |
 | 成本异常升高 | 多个功能共用同一 token，或白名单过宽 | 缩小模型范围，并为 Cursor 单独设置额度 |
 
 ## 性能与成本建议
 
-- 第一阶段先只开 `gpt-4.1` 和 `gpt-4.1-mini`
-- 高频日常问答优先走 `gpt-4.1-mini`
-- 复杂重构、长对话或更重的代码理解再切 `gpt-4.1` 或 `gpt-4o`
+- 第一阶段先只开 `gpt-5.4`
+- 复杂代码解释、总结和重构优先走 `gpt-5.4`
+- 如果你要做多供应商验证，再补 `claude-sonnet-4-6` 与 `gemini-3-pro-preview`
 - 如果你同时在用 Claude Code / Codex，务必拆分 token 统计成本
 - 遇到可疑高消耗时，先回看 Crazyrouter 日志确认是不是 Cursor 的多轮上下文导致
 
@@ -149,7 +147,7 @@ https://crazyrouter.com/v1
 
 ### 第一次推荐用哪个模型？
 
-先用 `gpt-4.1`。它比一开始就尝试更多自定义模型更稳。
+先用 `gpt-5.4`。它是当前已实测成功的最新 OpenAI 兼容基线。
 
 ### 能不能直接用 Claude 或其他模型？
 
@@ -157,7 +155,7 @@ https://crazyrouter.com/v1
 
 ### 聊天正常但模型选择总是乱掉怎么办？
 
-先重启 Cursor，再重新 Verify；如果问题仍存在，优先回退到 `gpt-4.1` 这种最稳的基线模型。
+先重启 Cursor，再重新 Verify；如果问题仍存在，优先回退到 `gpt-5.4` 这种已实测成功的基线模型。
 
 <Note>
 如果你主要想把 Crazyrouter 用在稳定的编码工作流里，Claude Code、Codex、Cline 往往比 Cursor 的自定义端点路径更直接可控。Cursor 更适合先接入聊天和常规编辑辅助。

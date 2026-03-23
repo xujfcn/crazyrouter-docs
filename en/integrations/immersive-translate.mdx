@@ -13,7 +13,7 @@ With Immersive Translate's OpenAI service setup, you can send requests to Crazyr
 - service type: `OpenAI`
 - API key: your `sk-...`
 - custom API URL: `https://crazyrouter.com/v1/chat/completions`
-- recommended first validation model: `gpt-4.1-mini`
+- recommended first validation model: `gpt-5.4`
 
 <Tip>
 The most important difference between Immersive Translate and ChatBox is this: here you should usually start with the full endpoint path, not just the root domain.
@@ -50,8 +50,8 @@ Do not start by entering only the root domain such as `https://crazyrouter.com`,
 
 Suggested starter allowlist:
 
-- `gpt-4.1-mini`
-- `gpt-4.1`
+- `gpt-5.4`
+- `claude-sonnet-4-6`
 
 ## Install And Setup Path
 
@@ -83,8 +83,8 @@ Suggested starter allowlist:
   <Step title="Step 2: Create a dedicated Crazyrouter token">
     For the first pass, allow only:
 
-    - `gpt-4.1-mini`
-    - `gpt-4.1`
+    - `gpt-5.4`
+    - `claude-sonnet-4-6`
 
     Do not start by allowing a wide model set in a translation scenario.
   </Step>
@@ -102,7 +102,7 @@ Suggested starter allowlist:
 
     - `API Key`: your `sk-...`
     - `Custom API URL`: `https://crazyrouter.com/v1/chat/completions`
-    - `Model`: start with `gpt-4.1-mini`
+    - `Model`: start with `gpt-5.4`
 
     If some fields are hidden by default, expand `More Settings` first.
   </Step>
@@ -132,9 +132,9 @@ Suggested starter allowlist:
 
 | Use case | Recommended model | Why |
 |----------|-------------------|-----|
-| first-pass minimal validation | `gpt-4.1-mini` | lower cost and ideal for proving the route works |
-| everyday webpage translation | `gpt-4.1-mini` | better speed and cost balance |
-| higher-quality translation | `gpt-4.1` | better for more quality-sensitive content |
+| first-pass minimal validation | `gpt-5.4` | verified successfully in production on March 23, 2026, and best for proving the OpenAI-compatible route works |
+| higher-quality translation | `claude-sonnet-4-6` | better for long-form explanation, refinement, and more quality-sensitive content |
+| Gemini fallback path | `gemini-3-pro-preview` | useful as a second compatibility-validation path after the baseline is already stable |
 
 ## Token Setup Best Practices
 
@@ -152,7 +152,7 @@ Suggested starter allowlist:
 - [ ] `OpenAI` is selected as the translation service
 - [ ] `API Key` is entered correctly
 - [ ] `Custom API URL` is `https://crazyrouter.com/v1/chat/completions`
-- [ ] the first model is `gpt-4.1-mini` or another allowed model
+- [ ] the first model is `gpt-5.4` or another allowed model
 - [ ] a short selected paragraph translates successfully
 - [ ] a short webpage translates successfully
 - [ ] Crazyrouter logs show the matching request
@@ -166,11 +166,11 @@ Suggested starter allowlist:
 | `403` or `model not allowed` | the token does not allow the selected model | allow that model in Crazyrouter token settings |
 | `429` or unstable behavior | the request rate is too high | lower the request rate and validate on smaller text first |
 | long pages fail more often | concurrency or rate is too high | reduce scope first, then increase gradually |
-| cost rises too fast | you started with full-page or full-document translation immediately | begin with `gpt-4.1-mini` and translate smaller scope first |
+| cost rises too fast | you started with full-page or full-document translation immediately | begin with `gpt-5.4` on a smaller scope first |
 
 ## Cost Tips
 
-- default to `gpt-4.1-mini`
+- default to `gpt-5.4`
 - translate selected text first instead of full pages immediately
 - sample long content first before translating all of it
 - if you install the extension on multiple browsers, separate the tokens for cleaner cost tracking
@@ -187,7 +187,7 @@ Because Immersive Translate's official OpenAI custom-address path is better alig
 
 ### Which model should I try first?
 
-Start with `gpt-4.1-mini`.
+Start with `gpt-5.4`.
 
 ### Why not translate full pages or ebooks immediately?
 

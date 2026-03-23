@@ -44,7 +44,7 @@ New-Api-User: 1
 </ParamField>
 
 <ParamField body="model_limits" type="string">
-  Model restriction config as a string, usually a JSON string such as `["gpt-4o","claude-sonnet-4-20250514"]`
+  Model restriction config as a string, usually a JSON string such as `["gpt-5.4","claude-sonnet-4-6"]`
 </ParamField>
 
 <ParamField body="allow_ips" type="string">
@@ -90,7 +90,7 @@ response = requests.post(
         "unlimited_quota": False,
         "expired_time": -1,
         "model_limits_enabled": True,
-        "model_limits": json.dumps(["gpt-4o", "claude-sonnet-4-20250514"]),
+        "model_limits": json.dumps(["gpt-5.4", "claude-sonnet-4-6"]),
         "allow_ips": "203.0.113.10"
     }
 )
@@ -108,7 +108,7 @@ curl -X POST https://crazyrouter.com/api/token/ \
     "remain_quota": 100000,
     "expired_time": -1,
     "model_limits_enabled": true,
-    "model_limits": "[\"gpt-4o\"]"
+    "model_limits": "[\"gpt-5.4\"]"
   }'
 ```
 

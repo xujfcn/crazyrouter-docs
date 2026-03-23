@@ -19,7 +19,7 @@ ChatBox 是一款常见的跨平台 AI 客户端，支持 Windows、macOS、Linu
 - API Host：`https://crazyrouter.com`
 - API Path：保持默认或留空
 - API Key：`sk-xxx`
-- 首个验证模型：`gpt-4.1`
+- 首个验证模型：`gpt-5.4`
 
 <Note>
 根据 ChatBox 官方文档，`API Path` 一般不需要手动填写，默认就是 OpenAI 兼容聊天路径。因此在 Crazyrouter 文档里，推荐把 `API Host` 写成根域名 `https://crazyrouter.com`，不要先手动补 `/v1/chat/completions`。
@@ -43,9 +43,9 @@ ChatBox 是一款常见的跨平台 AI 客户端，支持 Windows、macOS、Linu
 
 建议首轮只放行：
 
-- `gpt-4.1`
-- `gpt-4.1-mini`
+- `gpt-5.4`
 - `claude-sonnet-4-6`
+- `gemini-3-pro-preview`
 
 ## 安装 ChatBox
 
@@ -90,8 +90,8 @@ ChatBox 不同版本界面名称可能略有不同，常见入口包括：
   <Step title="第 1 步：在 Crazyrouter 创建 ChatBox 专用 token">
     第一次建议只放行 1 到 2 个模型，例如：
 
-    - `gpt-4.1`
-    - `gpt-4.1-mini`
+    - `gpt-5.4`
+    - `claude-sonnet-4-6`
 
     这样更容易定位问题，不会因为模型太多导致排障范围过大。
   </Step>
@@ -123,12 +123,12 @@ ChatBox 不同版本界面名称可能略有不同，常见入口包括：
   <Step title="第 5 步：添加首个模型">
     第一次只建议加一个模型：
 
-    - `gpt-4.1`
+    - `gpt-5.4`
 
     等最小链路验证通过后，再逐步加入：
 
-    - `gpt-4.1-mini`
     - `claude-sonnet-4-6`
+    - `gemini-3-pro-preview`
   </Step>
 
   <Step title="第 6 步：使用 Check 或 Save 先做连通性测试">
@@ -138,7 +138,7 @@ ChatBox 不同版本界面名称可能略有不同，常见入口包括：
   </Step>
 
   <Step title="第 7 步：在主界面做首轮最小验证">
-    新建一个聊天，确保当前模型是 `gpt-4.1`，输入：
+    新建一个聊天，确保当前模型是 `gpt-5.4`，输入：
 
     ```text
     Reply only OK
@@ -153,7 +153,7 @@ ChatBox 不同版本界面名称可能略有不同，常见入口包括：
 建议按这个顺序做，不要一上来就开很多模型和功能：
 
 1. 先只配 1 个 token
-2. 先只配 1 个模型 `gpt-4.1`
+2. 先只配 1 个模型 `gpt-5.4`
 3. 先只做纯文本聊天验证
 4. 再增加第二个模型
 5. 最后再启用知识库、文件问答或复杂会话参数
@@ -162,9 +162,9 @@ ChatBox 不同版本界面名称可能略有不同，常见入口包括：
 
 | 场景 | 推荐模型 | 原因 |
 |------|----------|------|
-| 首轮连通性验证 | `gpt-4.1` | 最适合先验证配置是否正确 |
-| 低成本常用对话 | `gpt-4.1-mini` | 成本更低，适合长时间日常使用 |
-| 更强写作与解释 | `claude-sonnet-4-6` | 更适合复杂说明、润色、总结 |
+| 首轮连通性验证 | `gpt-5.4` | 当天已实测成功，最适合做 OpenAI 兼容基线验证 |
+| 高质量写作与解释 | `claude-sonnet-4-6` | 更适合复杂说明、润色、总结 |
+| Gemini 备用档 | `gemini-3-pro-preview` | 适合在同一客户端中补一个非 OpenAI 系模型做交叉验证 |
 
 ## ChatBox 常见功能怎么搭配 Crazyrouter
 
@@ -186,9 +186,9 @@ ChatBox 不同版本界面名称可能略有不同，常见入口包括：
 
 适合在 ChatBox 里做不同任务分工，例如：
 
-- 日常快问快答：`gpt-4.1-mini`
+- 默认基线聊天：`gpt-5.4`
 - 重要总结与写作：`claude-sonnet-4-6`
-- 首轮标准验证：`gpt-4.1`
+- 首轮标准验证：`gpt-5.4`
 
 ## 参数建议
 
@@ -218,7 +218,7 @@ ChatBox 不同版本界面名称可能略有不同，常见入口包括：
 - [ ] `API Host` 已填写为 `https://crazyrouter.com`
 - [ ] `API Path` 已保持默认或留空
 - [ ] 已成功填写 `sk-xxx`
-- [ ] 已先只添加 `gpt-4.1`
+- [ ] 已先只添加 `gpt-5.4`
 - [ ] 已通过 `Check` 或最小对话完成验证
 - [ ] Crazyrouter 后台日志中能看到对应请求
 
@@ -229,7 +229,7 @@ ChatBox 不同版本界面名称可能略有不同，常见入口包括：
 | 401 unauthorized | token 错误、复制不完整或已失效 | 重新生成 token 并重新粘贴 |
 | 404 | Host 或 Path 填错 | Host 改回 `https://crazyrouter.com`，Path 保持默认 |
 | 403 / model not allowed | token 没放行当前模型 | 在 Crazyrouter token 设置中放行该模型 |
-| `model not found` | 模型名拼写错误 | 先改回 `gpt-4.1` 做最小验证 |
+| `model not found` | 模型名拼写错误 | 先改回 `gpt-5.4` 做最小验证 |
 | 保存成功但聊天失败 | Provider 选错，或模型未真正添加 | 重新检查 provider 类型和模型列表 |
 | 知识库问答很慢或失败 | 文件太大、一次任务太复杂 | 先回退到小文件和纯文本问答 |
 | 不确定要不要填 `/v1` | 当前版本通常不需要手动填完整路径 | 先用根域名 Host，Path 留空或默认 |
@@ -250,12 +250,12 @@ ChatBox 不同版本界面名称可能略有不同，常见入口包括：
 
 ### 第一个模型推荐填什么？
 
-先填 `gpt-4.1`。
+先填 `gpt-5.4`。
 
 ### 什么时候再加更多模型和知识库？
 
 等最小聊天链路验证通过后，再逐步增加。
 
 <Note>
-如果你的目标是“先把 ChatBox 跑通”，最好的做法不是一次性配很多模型和功能，而是先用 `gpt-4.1` 把最小聊天链路验证成功。
+如果你的目标是“先把 ChatBox 跑通”，最好的做法不是一次性配很多模型和功能，而是先用 `gpt-5.4` 把最小聊天链路验证成功。
 </Note>

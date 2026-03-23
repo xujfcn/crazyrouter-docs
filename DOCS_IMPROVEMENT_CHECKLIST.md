@@ -1,6 +1,6 @@
 # Crazyrouter Docs Improvement Checklist
 
-Last updated: 2026-03-18
+Last updated: 2026-03-23
 
 ## Rules
 
@@ -17,6 +17,7 @@ Last updated: 2026-03-18
 - [x] Expand OpenClaw into a full usage guide
 - [x] Upgrade priority application guides
 - [x] Upgrade secondary application guides
+- [x] Add production-verified unified capability pages
 
 ## A. Fix Existing Doc Inconsistencies
 
@@ -113,6 +114,72 @@ Last updated: 2026-03-18
 - [x] Expand `integrations/chatbox.mdx` and `en/integrations/chatbox.mdx` with official-provider-aligned host/path guidance, model rollout order, knowledge-base notes, and troubleshooting
 - [x] Expand `integrations/zotero.mdx` and `en/integrations/zotero.mdx` with plugin-selection guidance, custom-endpoint boundary notes, staged academic validation, and troubleshooting
 
+## J. Information Architecture
+
+- [x] Add top-level `核心能力` / `Features` navigation groups to surface tool calling, structured outputs, web search, reasoning, vision, and PDF-related pages without forcing users to choose a protocol first
+
+## K. Unified Capability Pages
+
+- [x] Add `features/tool-calling.mdx` and `en/features/tool-calling.mdx`
+- [x] Add `features/structured-outputs.mdx` and `en/features/structured-outputs.mdx`
+- [x] Add `features/web-search.mdx` and `en/features/web-search.mdx`
+- [x] Add `features/reasoning.mdx` and `en/features/reasoning.mdx`
+- [x] Revalidate the four capability pages against Crazyrouter production on `2026-03-22` and narrow claims to reproducible response markers
+
+## L. Reasoning Protocol Cleanup
+
+- [x] Rework `chat/openai/reasoning.mdx` and `en/chat/openai/reasoning.mdx` to separate Chat `reasoning_effort` from Responses-visible reasoning
+- [x] Rework `chat/responses/gpt5-thinking.mdx` and `en/chat/responses/gpt5-thinking.mdx` to use production-verified `gpt-5.4` response shapes and stream events
+- [x] Rework `reference/thinking.mdx` and `en/reference/thinking.mdx` to document protocol-specific thinking fields instead of outdated cross-protocol assumptions
+
+## M. Protocol Page Refresh
+
+- [x] Rework `chat/openai/web-search.mdx` and `en/chat/openai/web-search.mdx` to document the currently verified Responses-based web-search path
+- [x] Rework `chat/anthropic/messages.mdx` and `en/chat/anthropic/messages.mdx` around `claude-sonnet-4-6` and `claude-opus-4-6-thinking`
+- [x] Rework `chat/gemini/native.mdx` and `en/chat/gemini/native.mdx` around `gemini-3-pro-preview` and currently verified native capabilities
+
+## N. Overview Page Refresh
+
+- [x] Rework `chat/gemini/openai-compat.mdx` and `en/chat/gemini/openai-compat.mdx` around `gemini-3-pro-preview`
+- [x] Rework `chat/responses/overview.mdx` and `en/chat/responses/overview.mdx` around the currently verified `gpt-5.4` Responses behavior
+- [x] Rework `chat/openai/overview.mdx` and `en/chat/openai/overview.mdx` to describe the stable Chat Completion object shape without overclaiming optional fields
+
+## O. Model List And Tutorial Refresh
+
+- [x] Rework `chat/openai/models.mdx` and `en/chat/openai/models.mdx` around the `2026-03-23` live `/v1/models` response
+- [x] Rework `chat/gemini/openai-models.mdx` and `en/chat/gemini/openai-models.mdx` around the `2026-03-23` live `/v1beta/openai/models` response
+- [x] Rework `reference/tutorial.mdx` and `en/reference/tutorial.mdx` into production-verified starter paths instead of generic compatibility claims
+
+## P. Endpoint And Special-Model Refresh
+
+- [x] Rework `chat/openai/special-models.mdx` and `en/chat/openai/special-models.mdx` around the `2026-03-23` live availability check
+- [x] Rework `chat/openai/completions.mdx` and `en/chat/openai/completions.mdx` around the current `gpt-5.4` chat object and stream behavior
+- [x] Rework `chat/anthropic/overview.mdx` and `en/chat/anthropic/overview.mdx` around `claude-sonnet-4-6` and the current native SSE event sequence
+
+## Q. Remaining Legacy And Multimodal Cleanup
+
+- [x] Rework `chat/gemini/tools.mdx` and `en/chat/gemini/tools.mdx` around the `2026-03-23` live `gemini-3-pro-preview` tool checks
+- [x] Rework `chat/gemini/document.mdx` and `en/chat/gemini/document.mdx` around the `2026-03-23` live PDF + schema checks
+- [x] Rework `chat/openai/image-creation.mdx` and `en/chat/openai/image-creation.mdx` around the `2026-03-23` observed chat-image response shape and the verified `gpt-image-1` fallback path
+- [x] Rework `chat/openai/completions-legacy.mdx` and `en/chat/openai/completions-legacy.mdx` around the `2026-03-23` legacy-model availability result
+- [x] Rework `chat/gemini/image-gen.mdx` and `en/chat/gemini/image-gen.mdx` around the `2026-03-23` observed per-model output-shape differences
+- [x] Rework `chat/gemini/image-edit.mdx` and `en/chat/gemini/image-edit.mdx` into current availability notes because same-day production retests were unavailable or timed out
+
+## R. Responses And Vision Refresh
+
+- [x] Rework `chat/responses/create.mdx` and `en/chat/responses/create.mdx` around the `2026-03-23` live `gpt-5.4` basic and streaming checks
+- [x] Rework `chat/responses/function-calling.mdx` and `en/chat/responses/function-calling.mdx` around the `2026-03-23` live `function_call` output
+- [x] Rework `chat/responses/web-search.mdx` and `en/chat/responses/web-search.mdx` around the `2026-03-23` live `web_search_call` output
+- [x] Rework `chat/openai/structured-output.mdx` and `en/chat/openai/structured-output.mdx` around the `2026-03-23` live `gpt-5.4` `json_schema` result
+- [x] Rework `chat/openai/function-calling.mdx` and `en/chat/openai/function-calling.mdx` around the `2026-03-23` live `gpt-5.4` `tool_calls` result
+- [x] Rework `chat/openai/vision.mdx` and `en/chat/openai/vision.mdx` around the `2026-03-23` live `gpt-5.4` data-URL image input
+- [x] Rework `chat/anthropic/vision.mdx`, `chat/anthropic/pdf.mdx`, and `chat/anthropic/completions.mdx` plus English counterparts around the `2026-03-23` live `claude-sonnet-4-6` checks
+- [x] Rework `chat/gemini/vision.mdx` and `en/chat/gemini/vision.mdx` around the `2026-03-23` live `gemini-3-pro-preview` image-input check
+
+## S. Entry-Page Example Refresh
+
+- [x] Update `quickstart.mdx`, `making-requests.mdx`, and `authentication.mdx` plus English counterparts to use the `2026-03-23` production-verified `gpt-5.4` starter example
+
 ## Completion Log
 
 - 2026-03-18: Created `crazyrouter-docs/DOCS_IMPROVEMENT_CHECKLIST.md` and initialized the tracking workflow.
@@ -172,3 +239,15 @@ Last updated: 2026-03-18
 - 2026-03-18: Expanded `integrations/coze.mdx` and `en/integrations/coze.mdx` to reposition the public guide around Coze API plugins and workflow HTTP request nodes, explicitly avoid overclaiming enterprise custom-model support, and add staged validation, token-scope guidance, and troubleshooting.
 - 2026-03-18: Expanded `integrations/chatbox.mdx` and `en/integrations/chatbox.mdx` into fuller desktop guides covering provider selection, root-host plus default-path setup, staged model rollout, knowledge-base rollout order, token hygiene, and practical ChatBox troubleshooting for Crazyrouter.
 - 2026-03-18: Expanded `integrations/zotero.mdx` and `en/integrations/zotero.mdx` into fuller research-workflow guides that distinguish between plugins with custom OpenAI-compatible endpoint support and plugins that only accept official OpenAI keys, while adding Zotero desktop install notes, staged single-paper validation, token hygiene, and troubleshooting.
+- 2026-03-22: Added top-level `核心能力` / `Features` groups to `docs.json` so users can find tool calling, structured outputs, web search, reasoning, vision, and PDF capabilities directly from navigation before picking a protocol-specific guide.
+- 2026-03-22: Added unified capability hub pages in `features/` and `en/features/` for tool calling, structured outputs, web search, and reasoning so users can start from capability first, then drill into protocol-specific docs.
+- 2026-03-22: Revalidated those four capability pages with real requests against `https://crazyrouter.com` and tightened them to the current production behavior: `gpt-5.4` reasoning now uses Responses `reasoning` items as the verified path, Claude tool-calling examples now use a stronger reproducible `/v1/messages` pattern, Claude web search is documented with an explicit prompt that reliably surfaces `remote_web_search`, and Claude structured output remains excluded from strict-success claims because the response shape is not yet stable.
+- 2026-03-22: Reworked `chat/openai/reasoning.mdx`, `chat/responses/gpt5-thinking.mdx`, and `reference/thinking.mdx` plus their English counterparts using the same production recheck: Chat Completions reasoning is now documented as a final-answer path rather than a stable visible-trace path, GPT Responses reasoning is documented with the current `reasoning` item shape and verified SSE event names, and the thinking reference now distinguishes Responses `reasoning`, Claude `thinking`, and Gemini `thoughtsTokenCount` instead of mixing them together.
+- 2026-03-22: Reworked `chat/openai/web-search.mdx`, `chat/anthropic/messages.mdx`, and `chat/gemini/native.mdx` plus their English counterparts using the same production-first rule: OpenAI web search now documents the verified `gpt-5.4` Responses path instead of the older Chat `web_search` pattern, Claude Messages now uses the current `claude-sonnet-4-6` / `claude-opus-4-6-thinking` models and verified auth/tool/thinking behavior, and Gemini Native now uses `gemini-3-pro-preview` with verified text, SSE streaming, structured outputs, Google Search, and thinking markers.
+- 2026-03-22: Reworked `chat/gemini/openai-compat.mdx`, `chat/responses/overview.mdx`, and `chat/openai/overview.mdx` plus their English counterparts so the overview layer no longer lags behind the feature pages: Gemini OpenAI-compatible docs now use the verified `gemini-3-pro-preview` compatibility path, the Responses overview now frames `/v1/responses` around the currently verified `gpt-5.4` reasoning and web-search behavior, and the Chat Completion object page now treats `reasoning_content` as optional rather than a guaranteed cross-model field.
+- 2026-03-23: Reworked `chat/openai/models.mdx`, `chat/gemini/openai-models.mdx`, and `reference/tutorial.mdx` plus their English counterparts using a fresh same-day production recheck: `/v1/models` and `/v1beta/openai/models` are now documented with current response shape, auth, and example model IDs such as `gpt-5.4`, `claude-sonnet-4-6`, and `gemini-3-pro-preview`, while the tutorial now focuses on production-verified starter routes instead of broad generic compatibility claims.
+- 2026-03-23: Reworked `chat/openai/special-models.mdx`, `chat/openai/completions.mdx`, and `chat/anthropic/overview.mdx` plus their English counterparts using the same-day production check: the special-models page now documents current availability instead of stale success examples because `qwen-mt-turbo` was not present and `deepseek-ocr` was temporarily unavailable, the Chat Completions page now uses the current `gpt-5.4` response and SSE chunk shape, and the Anthropic overview now uses `claude-sonnet-4-6` with the currently observed native SSE event sequence.
+- 2026-03-23: Reworked `chat/gemini/tools.mdx`, `chat/gemini/document.mdx`, `chat/openai/image-creation.mdx`, `chat/openai/completions-legacy.mdx`, `chat/gemini/image-gen.mdx`, and `chat/gemini/image-edit.mdx` plus their English counterparts using same-day production checks: Gemini tools are now documented around the verified `gemini-3-pro-preview` tool markers, Gemini document understanding is narrowed to verified PDF and schema-output paths, Chat image creation now documents the currently observed text-wrapped `gpt-4o-image` behavior and points stable automation to `gpt-image-1`, the legacy completions page now records the current `gpt-3.5-turbo-instruct` unavailability result, Gemini image generation now explains the observed per-model output-shape differences, and Gemini image editing is narrowed to a current availability note because all same-day retests failed or timed out.
+- 2026-03-23: Reworked `chat/responses/create.mdx`, `chat/responses/function-calling.mdx`, `chat/responses/web-search.mdx`, `chat/openai/structured-output.mdx`, `chat/openai/vision.mdx`, `chat/anthropic/vision.mdx`, `chat/anthropic/pdf.mdx`, `chat/anthropic/completions.mdx`, and `chat/gemini/vision.mdx` plus their English counterparts using same-day production checks: Responses docs now use `gpt-5.4` and current output markers such as `message`, `function_call`, and `web_search_call`; OpenAI structured output and vision now keep only the revalidated `json_schema` and data-URL image-input paths; Claude OpenAI-compatible chat, native vision, and native PDF docs now use `claude-sonnet-4-6` with current response shapes; and Gemini vision is narrowed to the revalidated `gemini-3-pro-preview` image-input path.
+- 2026-03-23: Reworked `chat/openai/function-calling.mdx` and `en/chat/openai/function-calling.mdx` using the same-day production check so the Chat Completions tool-calling page now uses `gpt-5.4` and the currently observed `tool_calls` response shape instead of older `gpt-4o` examples.
+- 2026-03-23: Updated `quickstart.mdx`, `making-requests.mdx`, and `authentication.mdx` plus their English counterparts so the highest-visibility starter examples now use the same-day production-verified `gpt-5.4` model instead of older `gpt-4o` examples.

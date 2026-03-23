@@ -1,95 +1,27 @@
 ---
 title: "Claude Vision"
-description: "Use Claude models for image understanding, supporting both native format and OpenAI-compatible format"
+description: "Claude image understanding verified against Crazyrouter production on 2026-03-23"
 ---
 
 # Claude Vision
 
-Claude models support powerful visual understanding capabilities. You can send images through either the native format or the OpenAI-compatible format.
+As of March 23, 2026, Crazyrouter production has verified two Claude image-input paths:
 
-## Native Format (/v1/messages)
+- native `POST /v1/messages` with `type: "image"` and Base64 PNG
+- OpenAI-compatible `POST /v1/chat/completions` with `type: "image_url"` and a data URL
 
-### Send Image via URL
+---
 
-<CodeGroup>
+## Native Format: `/v1/messages`
 
-```bash cURL
+```bash
 curl https://crazyrouter.com/v1/messages \
   -H "Content-Type: application/json" \
   -H "x-api-key: YOUR_API_KEY" \
   -H "anthropic-version: 2023-06-01" \
   -d '{
-    "model": "claude-sonnet-4-20250514",
-    "max_tokens": 1024,
-    "messages": [
-      {
-        "role": "user",
-        "content": [
-          {
-            "type": "image",
-            "source": {
-              "type": "url",
-              "url": "https://example.com/photo.jpg"
-            }
-          },
-          {
-            "type": "text",
-            "text": "Describe the content of this image"
-          }
-        ]
-      }
-    ]
-  }'
-```
-
-```python Python
-import anthropic
-
-client = anthropic.Anthropic(
-    api_key="YOUR_API_KEY",
-    base_url="https://crazyrouter.com"
-)
-
-message = client.messages.create(
-    model="claude-sonnet-4-20250514",
-    max_tokens=1024,
-    messages=[
-        {
-            "role": "user",
-            "content": [
-                {
-                    "type": "image",
-                    "source": {
-                        "type": "url",
-                        "url": "https://example.com/photo.jpg"
-                    }
-                },
-                {
-                    "type": "text",
-                    "text": "Describe the content of this image"
-                }
-            ]
-        }
-    ]
-)
-
-print(message.content[0].text)
-```
-
-</CodeGroup>
-
-### Send Image via Base64
-
-<CodeGroup>
-
-```bash cURL
-curl https://crazyrouter.com/v1/messages \
-  -H "Content-Type: application/json" \
-  -H "x-api-key: YOUR_API_KEY" \
-  -H "anthropic-version: 2023-06-01" \
-  -d '{
-    "model": "claude-sonnet-4-20250514",
-    "max_tokens": 1024,
+    "model": "claude-sonnet-4-6",
+    "max_tokens": 128,
     "messages": [
       {
         "role": "user",
@@ -99,12 +31,12 @@ curl https://crazyrouter.com/v1/messages \
             "source": {
               "type": "base64",
               "media_type": "image/png",
-              "data": "iVBORw0KGgoAAAANSUhEUg..."
+              "data": "iVBORw0KGgoAAA..."
             }
           },
           {
             "type": "text",
-            "text": "What is in this image?"
+            "text": "What color is this image?"
           }
         ]
       }
@@ -112,100 +44,41 @@ curl https://crazyrouter.com/v1/messages \
   }'
 ```
 
-```python Python
-import anthropic
-import base64
+This production check returned:
 
-client = anthropic.Anthropic(
-    api_key="YOUR_API_KEY",
-    base_url="https://crazyrouter.com"
-)
-
-with open("image.png", "rb") as f:
-    image_data = base64.standard_b64encode(f.read()).decode("utf-8")
-
-message = client.messages.create(
-    model="claude-sonnet-4-20250514",
-    max_tokens=1024,
-    messages=[
-        {
-            "role": "user",
-            "content": [
-                {
-                    "type": "image",
-                    "source": {
-                        "type": "base64",
-                        "media_type": "image/png",
-                        "data": image_data
-                    }
-                },
-                {
-                    "type": "text",
-                    "text": "What is in this image?"
-                }
-            ]
-        }
-    ]
-)
-
-print(message.content[0].text)
-```
-
-</CodeGroup>
+- `model: "claude-sonnet-4-6"`
+- `content[0].type = "text"`
 
 ---
 
-## OpenAI-Compatible Format (/v1/chat/completions)
+## OpenAI-Compatible Format: `/v1/chat/completions`
 
-Send images to Claude using the standard OpenAI format:
-
-<CodeGroup>
-
-```python Python
-from openai import OpenAI
-
-client = OpenAI(
-    api_key="YOUR_API_KEY",
-    base_url="https://crazyrouter.com/v1"
-)
-
-response = client.chat.completions.create(
-    model="claude-sonnet-4-20250514",
-    messages=[
-        {
-            "role": "user",
-            "content": [
-                {"type": "text", "text": "Describe this image"},
-                {
-                    "type": "image_url",
-                    "image_url": {
-                        "url": "https://example.com/photo.jpg"
-                    }
-                }
-            ]
-        }
+```bash
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "claude-sonnet-4-6",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {"type": "text", "text": "What color is this image?"},
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "data:image/png;base64,iVBORw0KGgoAAA..."
+            }
+          }
+        ]
+      }
     ],
-    max_tokens=1024
-)
-
-print(response.choices[0].message.content)
+    "max_tokens": 128
+  }'
 ```
 
-</CodeGroup>
-
-## Supported Image Formats
-
-| Format | MIME Type |
-|--------|-----------|
-| JPEG | `image/jpeg` |
-| PNG | `image/png` |
-| GIF | `image/gif` |
-| WebP | `image/webp` |
+In the 2026-03-23 production check, `message.content` came back as plain text describing the image color.
 
 <Note>
-  Claude's native format uses `type: "image"` with a `source` object, while the OpenAI-compatible format uses `type: "image_url"` with an `image_url` object. Crazyrouter handles the format conversion automatically.
+  This page keeps only the Base64 PNG / data-URL paths that were revalidated successfully. Remote URLs, additional image formats, and more complex multi-image cases were not rechecked item by item in this pass.
 </Note>
-
-<Warning>
-  Individual images should not exceed 20MB. Higher resolution images consume more tokens.
-</Warning>

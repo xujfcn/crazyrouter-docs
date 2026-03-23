@@ -1,9 +1,9 @@
 ---
 title: 'Python Vision'
-description: 'Python image recognition with GPT-4o and Claude'
+description: 'Python image recognition with gpt-5.4 and Claude'
 ---
 
-## GPT-4o Vision - URL Method
+## gpt-5.4 Vision - URL Method
 
 ```python
 from openai import OpenAI
@@ -11,7 +11,7 @@ from openai import OpenAI
 client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
 
 response = client.chat.completions.create(
-    model="gpt-4o",
+    model="gpt-5.4",
     messages=[{
         "role": "user",
         "content": [
@@ -29,7 +29,7 @@ response = client.chat.completions.create(
 print(response.choices[0].message.content)
 ```
 
-## GPT-4o Vision - Local Image
+## gpt-5.4 Vision - Local Image
 
 ```python
 import base64
@@ -42,7 +42,7 @@ with open("photo.jpg", "rb") as f:
     image_data = base64.b64encode(f.read()).decode("utf-8")
 
 response = client.chat.completions.create(
-    model="gpt-4o",
+    model="gpt-5.4",
     messages=[{
         "role": "user",
         "content": [
@@ -64,7 +64,7 @@ print(response.choices[0].message.content)
 
 ```python
 response = client.chat.completions.create(
-    model="gpt-4o",
+    model="gpt-5.4",
     messages=[{
         "role": "user",
         "content": [
@@ -84,7 +84,7 @@ Claude models also support vision through the OpenAI-compatible format:
 
 ```python
 response = client.chat.completions.create(
-    model="claude-sonnet-4-20250514",
+    model="claude-sonnet-4-6",
     messages=[{
         "role": "user",
         "content": [
@@ -107,13 +107,9 @@ print(response.choices[0].message.content)
 
 | Model | Description |
 |-------|-------------|
-| `gpt-4o` | OpenAI flagship multimodal model |
-| `gpt-4o-mini` | Lightweight version, faster |
-| `claude-sonnet-4-20250514` | Anthropic Claude Sonnet |
-| `claude-opus-4-20250514` | Anthropic Claude Opus |
-| `gemini-2.5-pro` | Google Gemini Pro |
-| `gemini-2.5-flash` | Google Gemini Flash |
+| `gpt-5.4` | OpenAI-compatible vision model verified successfully in production on March 23, 2026 |
+| `claude-sonnet-4-6` | Claude OpenAI-compatible vision model verified successfully in production |
 
 <Note>
-  Image size should not exceed 20MB. Base64 encoding adds approximately 33% to the data size, so URL method is recommended for large images.
+  Vision input with `gpt-5.4` and `claude-sonnet-4-6` was verified in Crazyrouter production on March 23, 2026. Image size should not exceed 20MB; base64 encoding adds approximately 33% to the payload size, so URL method is recommended for larger files.
 </Note>

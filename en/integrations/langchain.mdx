@@ -55,9 +55,9 @@ In LangChain, that usually maps to:
 
 Suggested starter allowlist:
 
-- `gpt-4.1`
-- `gpt-4.1-mini`
-- `gpt-5.2`
+- `gpt-5.4`
+- `claude-sonnet-4-6`
+- `gemini-3-pro-preview`
 - `text-embedding-3-large`
 
 ## Full Python Path
@@ -122,11 +122,11 @@ npm -v
   <Step title="Step 1: Create a LangChain-specific Crazyrouter token">
     For the first pass, allow only:
 
-    - `gpt-4.1`
-    - `gpt-4.1-mini`
+    - `gpt-5.4`
+    - `claude-sonnet-4-6`
     - `text-embedding-3-large`
 
-    Add stronger models such as `gpt-5.2` only after the basic route is already stable.
+    Add more models only after the basic route is already stable.
   </Step>
 
   <Step title="Step 2: Set the environment variable first">
@@ -176,7 +176,7 @@ npm -v
     from langchain_openai import ChatOpenAI
 
     llm = ChatOpenAI(
-        model="gpt-4.1",
+        model="gpt-5.4",
         api_key="sk-xxx",
         base_url="https://crazyrouter.com/v1",
         temperature=0,
@@ -201,7 +201,7 @@ npm -v
     from langchain_openai import ChatOpenAI
 
     llm = ChatOpenAI(
-        model="gpt-4.1",
+        model="gpt-5.4",
         api_key=os.environ["OPENAI_API_KEY"],
         base_url="https://crazyrouter.com/v1",
         temperature=0,
@@ -216,7 +216,7 @@ npm -v
     import { ChatOpenAI } from "@langchain/openai";
 
     const llm = new ChatOpenAI({
-      model: "gpt-4.1",
+      model: "gpt-5.4",
       apiKey: process.env.OPENAI_API_KEY,
       configuration: {
         baseURL: "https://crazyrouter.com/v1",
@@ -253,7 +253,7 @@ npm -v
 from langchain_openai import ChatOpenAI
 
 llm = ChatOpenAI(
-    model="gpt-4.1",
+    model="gpt-5.4",
     api_key="sk-xxx",
     base_url="https://crazyrouter.com/v1",
     temperature=0.7,
@@ -286,7 +286,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
 llm = ChatOpenAI(
-    model="gpt-4.1",
+    model="gpt-5.4",
     api_key="sk-xxx",
     base_url="https://crazyrouter.com/v1",
 )
@@ -307,7 +307,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 
 llm = ChatOpenAI(
-    model="gpt-4.1",
+    model="gpt-5.4",
     api_key="sk-xxx",
     base_url="https://crazyrouter.com/v1",
 )
@@ -344,7 +344,7 @@ print(result.content)
 import { ChatOpenAI } from "@langchain/openai";
 
 const llm = new ChatOpenAI({
-  model: "gpt-4.1",
+  model: "gpt-5.4",
   apiKey: process.env.OPENAI_API_KEY,
   configuration: {
     baseURL: "https://crazyrouter.com/v1",
@@ -360,9 +360,9 @@ console.log(response.content);
 
 | Use case | Recommended model | Why |
 |----------|-------------------|-----|
-| first-pass validation | `gpt-4.1` | easiest baseline for proving that LangChain and Crazyrouter are connected |
-| high-frequency light tasks | `gpt-4.1-mini` | lower cost for simpler chains |
-| stronger reasoning and orchestration | `gpt-5.2` | better for more complex flows |
+| first-pass validation | `gpt-5.4` | verified successfully in production on March 23, 2026, and best for proving that LangChain and Crazyrouter are connected |
+| higher-quality long-form and complex chains | `claude-sonnet-4-6` | better for complex explanation, summaries, and heavier reasoning |
+| Gemini fallback path | `gemini-3-pro-preview` | useful as a second compatibility-validation path |
 | vector retrieval | `text-embedding-3-large` | strong first embedding baseline |
 
 ## Token Setup Best Practices
@@ -392,7 +392,7 @@ console.log(response.content);
 |---------|--------------|-----|
 | `401 unauthorized` | wrong, expired, or badly pasted `OPENAI_API_KEY` | generate a new token and set it again |
 | `404` | wrong `base_url` or missing `/v1` | use `https://crazyrouter.com/v1` |
-| `model not found` | wrong model name or the token does not allow it | switch back to `gpt-4.1` and check the allowlist |
+| `model not found` | wrong model name or the token does not allow it | switch back to `gpt-5.4` and check the allowlist |
 | embeddings fail | the embedding model was not allowed | add `text-embedding-3-large` to the token allowlist |
 | RAG fails in many places | too many components were added at once | go back to single-turn chat, then rebuild step by step |
 | spend rises too quickly | chains, retrieval, and multi-turn agent loops are stacking cost | reduce scope and separate budgets by environment |

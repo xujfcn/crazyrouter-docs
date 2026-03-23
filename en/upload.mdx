@@ -21,7 +21,7 @@ The best option is to upload files to your own S3 / R2 / OSS / COS / CDN bucket 
 
 Typical use cases:
 
-- GPT-4o / Claude / Gemini vision
+- GPT / Claude / Gemini vision
 - image editing
 - image-to-video
 - workflow tool integrations
@@ -50,7 +50,7 @@ from openai import OpenAI
 client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
 
 response = client.chat.completions.create(
-    model="gpt-4o",
+    model="gpt-5.4",
     messages=[{
         "role": "user",
         "content": [
@@ -67,7 +67,7 @@ curl https://crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer sk-xxx" \
   -d '{
-    "model": "gpt-4o",
+    "model": "gpt-5.4",
     "messages": [{
       "role": "user",
       "content": [

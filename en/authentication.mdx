@@ -14,7 +14,7 @@ Authorization: Bearer YOUR_API_KEY
 ## Getting an API Key
 
 1. Log in to [Crazyrouter](https://crazyrouter.com)
-2. Go to the [Token Management](https://crazyrouter.com/token) page
+2. After signing in, go to the [Token Management](https://crazyrouter.com/console/token) page
 3. Click "Create Token"
 4. Set the token name, quota limit, available models, etc.
 5. Copy the generated key starting with `sk-`
@@ -30,7 +30,7 @@ The API Key is only displayed once at creation time. Please save it securely. If
 curl https://crazyrouter.com/v1/chat/completions \
   -H "Authorization: Bearer sk-xxxxxxxx" \
   -H "Content-Type: application/json" \
-  -d '{"model": "gpt-4o", "messages": [{"role": "user", "content": "Hi"}]}'
+  -d '{"model": "gpt-5.4", "messages": [{"role": "user", "content": "Hi"}]}'
 ```
 
 ```python Python

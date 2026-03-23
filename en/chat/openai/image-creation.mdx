@@ -1,152 +1,84 @@
 ---
 title: "Chat Image Generation"
-description: "Generate images in conversations using models that support image generation via the Chat Completions API"
+description: "Chat-image behavior and stable alternatives verified against Crazyrouter production on 2026-03-23"
 ---
 
 # Chat Image Generation
 
-Some models (such as `gpt-4o`, `gpt-4o-image`) support generating images directly within chat conversations. The model automatically determines whether to generate an image based on the conversation context and returns the image in its response.
+```
+POST /v1/chat/completions
+```
 
-<Note>
-  Chat image generation is different from the standalone Images API (`/v1/images/generations`). Here, the model generates images through chat conversation and can return both text and images simultaneously.
-</Note>
+As of March 23, 2026, production checks against Crazyrouter showed:
 
-## Basic Usage
+- `gpt-4o` returns `200`, but `message.content` is plain text, not standard multipart image content
+- `gpt-4o-image` also returns `200`, but the current response shape is still text or Markdown containing a parameter block, an ID, and a preview link, not the standard OpenAI `image_url` multipart structure
+- If you need stable, machine-readable image output, the current recommended path is [`/v1/images/generations`](/images/gpt-image) with `gpt-image-1`
 
-<CodeGroup>
+<Warning>
+  Do not parse the current Crazyrouter chat-image response as if it were standard OpenAI `content: [{type: "image_url", ...}]`.
+</Warning>
 
-```bash cURL
+---
+
+## Currently Reproducible Chat Behavior
+
+The following request hit `gpt-4o-image` in production and returned `200`:
+
+```bash
 curl https://crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-4o",
+    "model": "gpt-4o-image",
     "messages": [
       {
         "role": "user",
-        "content": "Draw a cat running under moonlight in cyberpunk style"
+        "content": "Generate an image of a red square on a white background."
       }
     ],
-    "max_tokens": 4096
+    "max_tokens": 512
   }'
 ```
 
-```python Python
-from openai import OpenAI
+The observed `message.content` was a string shaped roughly like:
 
-client = OpenAI(
-    api_key="YOUR_API_KEY",
-    base_url="https://crazyrouter.com/v1"
-)
-
-response = client.chat.completions.create(
-    model="gpt-4o",
-    messages=[
-        {
-            "role": "user",
-            "content": "Draw a cat running under moonlight in cyberpunk style"
-        }
-    ],
-    max_tokens=4096
-)
-
-message = response.choices[0].message
-
-# The response may contain both text and images
-for part in message.content:
-    if isinstance(part, dict):
-        if part.get("type") == "text":
-            print(part["text"])
-        elif part.get("type") == "image_url":
-            print("Image URL:", part["image_url"]["url"])
-```
-
-```javascript Node.js
-import OpenAI from "openai";
-
-const client = new OpenAI({
-  apiKey: "YOUR_API_KEY",
-  baseURL: "https://crazyrouter.com/v1",
-});
-
-const response = await client.chat.completions.create({
-  model: "gpt-4o",
-  messages: [
-    {
-      role: "user",
-      content: "Draw a cat running under moonlight in cyberpunk style",
-    },
-  ],
-  max_tokens: 4096,
-});
-
-console.log(response.choices[0].message.content);
-```
-
-</CodeGroup>
-
-## Response Format
-
-When the model generates an image, the `content` field returns multipart content containing the image:
-
-```json
+```text
 {
-  "id": "chatcmpl-abc123",
-  "object": "chat.completion",
-  "created": 1709123456,
-  "model": "gpt-4o",
-  "choices": [
-    {
-      "index": 0,
-      "message": {
-        "role": "assistant",
-        "content": [
-          {
-            "type": "text",
-            "text": "Here is the cyberpunk-style moonlight cat I created for you:"
-          },
-          {
-            "type": "image_url",
-            "image_url": {
-              "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg..."
-            }
-          }
-        ]
-      },
-      "finish_reason": "stop"
-    }
-  ],
-  "usage": {
-    "prompt_tokens": 20,
-    "completion_tokens": 1024,
-    "total_tokens": 1044
-  }
+  "prompt": "Generate an image of a red square on a white background.",
+  "ratio": "1:1",
+  "n": 1
 }
+
+ID: ...
+Data Preview: https://...
 ```
 
-## Image Editing
+That means the current chat path behaves more like text-wrapped image-task output than a standardized multipart image message object.
 
-You can also send an image and ask the model to modify it:
+---
 
-```python Python
-response = client.chat.completions.create(
-    model="gpt-4o",
-    messages=[
-        {
-            "role": "user",
-            "content": [
-                {"type": "text", "text": "Convert this image to watercolor painting style"},
-                {
-                    "type": "image_url",
-                    "image_url": {"url": "https://example.com/photo.jpg"}
-                }
-            ]
-        }
-    ],
-    max_tokens=4096
-)
+## Stable Path: Images API
+
+If you need programmatic image retrieval, use:
+
+```bash
+curl -X POST https://crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-image-1",
+    "prompt": "A red square on a white background"
+  }'
 ```
 
-<Warning>
-  Image generation consumes a significant number of tokens. Generated images are returned in Base64 format, so be aware that response sizes can be large.
-</Warning>
+The 2026-03-23 production check returned:
+
+- `data[0].b64_json`
+- `data[0].revised_prompt`
+
+So the stable automation path is still the Images API, not the chat-image compatibility path.
+
+<Note>
+  If you are only testing manually, the `gpt-4o-image` chat path is still useful for observation. If you need backend automation, storage, or post-processing, use the [`GPT Image docs`](/images/gpt-image) directly.
+</Note>

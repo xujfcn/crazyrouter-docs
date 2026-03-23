@@ -1,11 +1,11 @@
 ---
 title: 'GPT Academic 配置教程'
-description: '在 GPT Academic 中配置 Crazyrouter API'
+description: '在 GPT Academic 中配置 Crazyrouter API，并切换到当前已验证过的最新模型'
 ---
 
 ## 概述
 
-GPT Academic（学术版 GPT）是一个面向学术场景的 AI 工具，支持论文润色、翻译、代码解释等功能。
+GPT Academic（学术版 GPT）面向论文润色、翻译、代码解释等场景。对接 Crazyrouter 时，建议继续使用它的 OpenAI URL 重定向方式，但默认模型要切换到当前已在生产环境验证过的最新可用模型。
 
 ## 配置方法
 
@@ -20,11 +20,11 @@ API_URL_REDIRECT = {
 }
 
 # 或者直接设置
-LLM_MODEL = "gpt-4o"
+LLM_MODEL = "gpt-5.4"
 AVAIL_LLM_MODELS = [
-    "gpt-4o", "gpt-4o-mini",
-    "claude-sonnet-4-20250514",
-    "gemini-2.5-pro"
+    "gpt-5.4",
+    "claude-sonnet-4-6",
+    "gemini-3-pro-preview"
 ]
 ```
 
@@ -33,6 +33,7 @@ AVAIL_LLM_MODELS = [
 ```bash
 export API_KEY=sk-xxx
 export API_URL_REDIRECT='{"https://api.openai.com/v1/chat/completions": "https://crazyrouter.com/v1/chat/completions"}'
+export LLM_MODEL=gpt-5.4
 ```
 
 ### Docker 部署
@@ -45,10 +46,18 @@ services:
       - "22303:22303"
     environment:
       - API_KEY=sk-xxx
-      - LLM_MODEL=gpt-4o
+      - LLM_MODEL=gpt-5.4
       - API_URL_REDIRECT={"https://api.openai.com/v1/chat/completions": "https://crazyrouter.com/v1/chat/completions"}
 ```
 
+## 推荐模型
+
+| 场景 | 模型 | 说明 |
+|------|------|------|
+| 首轮学术助手验证 | `gpt-5.4` | 2026 年 3 月 23 日已在生产环境实测成功，最适合作为 OpenAI 兼容基线 |
+| 高质量长文总结 | `claude-sonnet-4-6` | 更适合复杂解释、长文重写和总结 |
+| Gemini 备用档 | `gemini-3-pro-preview` | 适合补充第二条供应商兼容性验证路径 |
+
 <Note>
-  GPT Academic 的 URL 重定向功能可以将所有 OpenAI API 请求转发到 Crazyrouter，无需修改其他代码。
+  GPT Academic 的 URL 重定向能力可以把 OpenAI 请求直接转到 Crazyrouter。建议先只用 `gpt-5.4` 跑通最小会话，再逐步增加模型列表和复杂插件能力。
 </Note>

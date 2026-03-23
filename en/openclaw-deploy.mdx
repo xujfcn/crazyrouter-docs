@@ -49,7 +49,7 @@ The installer binds the gateway to LAN scope by default (`bind: lan`). If the ma
 
 <Steps>
   <Step title="Create a dedicated Crazyrouter token">
-    In Crazyrouter, create a dedicated `sk-...` token for OpenClaw. Start with a small model allowlist such as `claude-sonnet-4-6`, `gpt-5.3-codex`, and `gemini-3-flash-preview`.
+    In Crazyrouter, create a dedicated `sk-...` token for OpenClaw. Start with a small model allowlist such as `claude-sonnet-4-6`, `gpt-5.4`, and `gemini-3-pro-preview`.
   </Step>
   <Step title="Run the installer">
     ```bash
@@ -81,20 +81,19 @@ The installer sets `claude-sonnet-4-6` as the default primary model. To change t
 | Use case | Recommended model | Why |
 |----------|-------------------|-----|
 | Default daily assistant | `claude-sonnet-4-6` | Strong balance of quality, stability, and cost |
-| Coding / agent work | `gpt-5.3-codex` | Better fit for code generation, edits, and tool use |
+| Coding / agent work | `gpt-5.4` | Verified successfully in production on March 23, 2026, and suited for the main OpenAI-compatible coding and agent baseline |
 | Highest answer quality | `claude-opus-4-6` | Stronger complex reasoning and writing quality |
-| Cheap high-volume traffic | `gpt-4.1-mini` | Better for routine bot traffic and light tasks |
-| Long-context analysis | `gemini-3.1-pro-preview` | Very large context window for long docs and logs |
+| Gemini fallback path | `gemini-3-pro-preview` | Useful as a second compatibility-validation path |
 | Heavy reasoning | `deepseek-r1` | Useful when you want stronger reasoning behavior |
 
-Example: switch the default model to `gpt-5.3-codex`
+Example: switch the default model to `gpt-5.4`
 
 ```json
 {
   "agents": {
     "defaults": {
       "model": {
-        "primary": "crazyrouter/gpt-5.3-codex"
+        "primary": "crazyrouter/gpt-5.4"
       }
     }
   }
@@ -161,7 +160,7 @@ OpenClaw uses at least two credential types: the Crazyrouter `sk-...` API key fo
 |-----------|---------|----------------|
 | `models.providers.crazyrouter.apiKey` | Crazyrouter OpenAI-compatible key | rotate API key |
 | `models.providers.crazyrouter.baseUrl` | OpenAI-compatible base URL | usually keep `https://crazyrouter.com/v1` |
-| `agents.defaults.model.primary` | default primary model | switch to `gpt-5.3-codex`, `claude-opus-4-6`, and so on |
+| `agents.defaults.model.primary` | default primary model | switch to `gpt-5.4`, `claude-opus-4-6-thinking`, and so on |
 | `gateway.port` | WebUI / gateway port | move to a different port |
 | `gateway.auth.token` | WebUI login token | rotate immediately if exposed |
 | `gateway.bind` | listener scope | default is `lan` |
@@ -271,8 +270,8 @@ If OpenClaw will be connected to a team IM workspace, create a separate Crazyrou
 ## Performance And Cost Tips
 
 - start with `claude-sonnet-4-6` until the whole flow is stable
-- switch routine bot traffic to `gpt-4.1-mini` or `gemini-3-flash-preview`
-- use `gpt-5.3-codex` only for coding-heavy agent workflows
+- keep routine bot traffic on `claude-sonnet-4-6` or move selected tasks to `gemini-3-pro-preview`
+- use `gpt-5.4` for coding-heavy agent workflows
 - split WebUI, Telegram, and team IM usage across different tokens for better cost tracking
 - keep only the models and plugins you actually need
 
@@ -348,7 +347,7 @@ Leave the installer defaults unless you are intentionally changing provider mode
 
 ### Which default model should I keep first?
 
-For most users, keep `claude-sonnet-4-6` first. If OpenClaw is mainly a coding assistant, switch to `gpt-5.3-codex`.
+For most users, keep `claude-sonnet-4-6` first. If OpenClaw is mainly a coding assistant, switch to `gpt-5.4`.
 
 ### Why is my expected model missing?
 

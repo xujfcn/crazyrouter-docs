@@ -1,32 +1,55 @@
 ---
 title: "Web 搜索"
-description: "通过 Chat Completions API 启用 Web 搜索功能，让模型获取实时信息"
+description: "基于生产环境复核，使用 Crazyrouter 的 OpenAI 风格联网搜索能力"
 ---
 
 # Web 搜索
 
-部分模型支持在对话中进行 Web 搜索，获取实时信息后再生成回答。通过在 `tools` 中添加 `web_search` 工具来启用。
+本文页只写入 `2026-03-22` 已在 Crazyrouter 生产环境复核过的 OpenAI 风格 Web Search 用法。
 
-## 基本用法
+当前主推荐路径：
 
-<CodeGroup>
+- `gpt-5.4`
+- `POST /v1/responses`
+- `tools: [{ "type": "web_search_preview" }]`
+
+## 当前主结论
+
+在今天的生产复核里：
+
+- `gpt-5.4` 通过 Responses API 可以稳定返回 `web_search_call`
+- 旧式 Chat Completions `tools: [{ "type": "web_search" }]` 探针请求虽然返回 `200`，但本轮没有拿到可验证的搜索触发信号，因此这里不把它写成主示例
+
+---
+
+## 已验证请求
 
 ```bash cURL
-curl https://crazyrouter.com/v1/chat/completions \
+curl https://crazyrouter.com/v1/responses \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-4o",
-    "messages": [
-      {"role": "user", "content": "今天的科技新闻有哪些？"}
-    ],
+    "model": "gpt-5.4",
+    "input": "Use web search to find one current technology headline published recently.",
     "tools": [
       {
-        "type": "web_search"
+        "type": "web_search_preview"
       }
     ]
   }'
 ```
+
+当前生产验证返回的关键 `output.type`：
+
+```json
+["web_search_call", "message"]
+```
+
+这说明搜索步骤和最终回答是分开返回的。
+
+---
+
+## Python 示例
 
 ```python Python
 from openai import OpenAI
@@ -36,82 +59,61 @@ client = OpenAI(
     base_url="https://crazyrouter.com/v1"
 )
 
-response = client.chat.completions.create(
-    model="gpt-4o",
-    messages=[
-        {"role": "user", "content": "今天的科技新闻有哪些？"}
-    ],
+response = client.responses.create(
+    model="gpt-5.4",
+    input="Use web search to find one current technology headline published recently.",
     tools=[
-        {"type": "web_search"}
+        {"type": "web_search_preview"}
     ]
 )
 
-print(response.choices[0].message.content)
+print(response.output_text)
 ```
 
-```javascript Node.js
-import OpenAI from "openai";
+---
 
-const client = new OpenAI({
-  apiKey: "YOUR_API_KEY",
-  baseURL: "https://crazyrouter.com/v1",
-});
+## 如何判断是否真的触发了搜索
 
-const response = await client.chat.completions.create({
-  model: "gpt-4o",
-  messages: [{ role: "user", content: "今天的科技新闻有哪些？" }],
-  tools: [{ type: "web_search" }],
-});
-
-console.log(response.choices[0].message.content);
-```
-
-</CodeGroup>
-
-## 流式搜索
+推荐直接检查 `response.output`：
 
 ```python Python
-stream = client.chat.completions.create(
-    model="gpt-4o",
-    messages=[
-        {"role": "user", "content": "2026年最新的 AI 模型有哪些？"}
-    ],
-    tools=[{"type": "web_search"}],
-    stream=True
-)
-
-for chunk in stream:
-    if chunk.choices[0].delta.content is not None:
-        print(chunk.choices[0].delta.content, end="")
+for item in response.output:
+    print(item.type)
 ```
 
-## 搜索配置
+如果输出里出现：
 
-可以通过 `web_search` 工具的参数控制搜索行为：
+```text
+web_search_call
+message
+```
+
+就说明模型先做了搜索，再返回最终回答。
+
+---
+
+## 不建议继续把它写成主示例的旧写法
+
+本轮生产探针还检查了 Chat Completions 的旧写法：
 
 ```json
 {
   "tools": [
     {
-      "type": "web_search",
-      "web_search": {
-        "enable": true,
-        "search_context_size": "medium"
-      }
+      "type": "web_search"
     }
   ]
 }
 ```
 
-| 参数 | 类型 | 说明 |
-|------|------|------|
-| `enable` | boolean | 是否启用搜索 |
-| `search_context_size` | string | 搜索上下文大小：`low`、`medium`、`high` |
+结果是：
 
-<Note>
-  Web 搜索会增加响应延迟和 Token 消耗。模型会自动判断是否需要搜索，只有在需要实时信息时才会触发搜索。
-</Note>
+- 请求返回 `200`
+- 但未拿到稳定可验证的搜索触发标志
 
-<Warning>
-  并非所有模型都支持 Web 搜索功能。如果模型不支持，`web_search` 工具会被忽略。
-</Warning>
+因此当前 Crazyrouter 文档里，OpenAI 风格 Web Search 应优先按 Responses API 来写。
+
+相关页面：
+
+- [Responses Web 搜索](/chat/responses/web-search)
+- [核心能力：Web Search](/features/web-search)

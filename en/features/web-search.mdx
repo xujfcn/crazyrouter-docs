@@ -1,0 +1,130 @@
+---
+title: "Web Search"
+description: "Production-verified web search with the latest GPT, Claude, and Gemini models"
+---
+
+# Web Search
+
+This page only documents Web Search flows that were **verified with real requests against Crazyrouter production**.
+
+Verification date:
+
+- `2026-03-22`
+
+Verified models:
+
+- `gpt-5.4`
+- `claude-sonnet-4-6`
+- `gemini-3-pro-preview`
+
+## Verified matrix
+
+| Model | Protocol | Endpoint | Success marker |
+|------|------|------|----------|
+| `gpt-5.4` | OpenAI Responses | `POST /v1/responses` | `output` includes `web_search_call` |
+| `claude-sonnet-4-6` | OpenAI-compatible Chat | `POST /v1/chat/completions` | Returns `remote_web_search` tool call |
+| `gemini-3-pro-preview` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | Returns `groundingMetadata` |
+
+## GPT-5.4
+
+```bash
+curl https://crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.4",
+    "input": "Use web search to find one current headline from a major technology news site published recently.",
+    "tools": [
+      {
+        "type": "web_search_preview"
+      }
+    ]
+  }'
+```
+
+Verified output types:
+
+```json
+["web_search_call", "web_search_call", "message"]
+```
+
+## Claude Sonnet 4.6
+
+```bash
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "claude-sonnet-4-6",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Find one recent technology headline. Use web search and do not answer from memory."
+      }
+    ],
+    "web_search_options": {
+      "search_context_size": "medium",
+      "user_location": {
+        "approximate": {
+          "timezone": "Asia/Shanghai",
+          "country": "CN"
+        }
+      }
+    },
+    "max_tokens": 200
+  }'
+```
+
+Verified response shape:
+
+```json
+{
+  "tool_calls": [
+    {
+      "type": "function",
+      "function": {
+        "name": "remote_web_search"
+      }
+    }
+  ],
+  "finish_reason": "tool_calls"
+}
+```
+
+For first-pass validation, explicitly tell Claude to use web search and not answer from memory. With weaker prompts, it may answer directly without surfacing the tool call.
+
+## Gemini 3 Pro Preview
+
+```bash
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Use Google Search to find one recent headline from a major technology news site."
+          }
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "googleSearch": {}
+      }
+    ]
+  }'
+```
+
+Verified production fields:
+
+- `groundingMetadata.webSearchQueries`
+- `groundingMetadata.groundingChunks`
+- `groundingMetadata.groundingSupports`
+
+## See Also
+
+- [Responses Web Search](/en/chat/responses/web-search)
+- [OpenAI Web Search](/en/chat/openai/web-search)
+- [Gemini Tools](/en/chat/gemini/tools)
