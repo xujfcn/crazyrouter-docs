@@ -140,6 +140,10 @@ This production recheck confirmed that the endpoint returns a JSON object with c
 - `supported_endpoint`
 - `vendors`
 
+<Note>
+  Use `supported_endpoint_types` / `public_endpoint_types` from `GET /api/pricing` for endpoint support. `openai` maps to `POST /v1/chat/completions`, `anthropic` maps to `POST /v1/messages`, and only `openai-response` maps to `POST /v1/responses`. Claude currently exposes `openai` + `anthropic`, not `openai-response`.
+</Note>
+
 Related page:
 
 - [Gemini-Compatible OpenAI Model List](/en/chat/gemini/openai-models)

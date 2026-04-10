@@ -32,7 +32,7 @@ Authorization: Bearer YOUR_API_KEY
 
 ```bash cURL
 curl -X POST https://crazyrouter.com/v1/video/generations   -H "Content-Type: application/json"   -H "Authorization: Bearer YOUR_API_KEY"   -d '{
-    "model": "veo3.1",
+    "model": "veo-3.1-quality",
     "prompt": "A cinematic shot of waves hitting a cliff at sunset"
   }'
 ```
@@ -54,7 +54,7 @@ curl -X POST https://crazyrouter.com/v1/video/generations   -H "Content-Type: ap
 ```json
 {
   "code": "get_channel_failed",
-  "message": "model veo3.1 is temporarily unavailable, please try again later",
+  "message": "model veo-3.1-quality is temporarily unavailable, please try again later",
   "data": null
 }
 ```

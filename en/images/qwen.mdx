@@ -1,27 +1,42 @@
 ---
-title: "Qwen Image Editing"
-description: "Use the Qwen image editing model for intelligent image editing"
+title: "Qwen Image"
+description: "Use the Qwen Image family through the OpenAI Images-compatible public contract"
 ---
 
-# Qwen Image Editing
+# Qwen Image
 
 ```
 POST /v1/images/generations
 ```
 
-Use the `qwen-image-edit-2509` model for intelligent image editing, compatible with the OpenAI Images API format.
+Crazyrouter exposes the first batch of `Qwen Image` generation models through the OpenAI Images-compatible public contract. Clients keep using `/v1/images/generations`; Alibaba official and third-party channels stay internal as providers only.
 
-## Request Parameters
+## Public Models
+
+| Model | Upstream execution shape | Customer-facing capability | Verification |
+|------|---------------------------|----------------------------|--------------|
+| `qwen-image-plus` | async generation | text-to-image | verified |
+| `qwen-image-max` | sync generation | text-to-image | verified |
+| `qwen-image-2.0` | sync generation | text-to-image | verified |
+| `qwen-image-2.0-pro` | sync generation | text-to-image | Beta |
+
+<Note>
+  `qwen-image-2.0-pro` is already aligned in protocol and code, but the production carrier evidence is still being closed, so it remains Beta for now.
+</Note>
+
+## Public Contract
+
+### Request Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `model` | string | Yes | Fixed as `qwen-image-edit-2509` |
-| `prompt` | string | Yes | Edit description |
-| `image` | string | Yes | Original image URL |
-| `n` | integer | No | Number of images, default 1 |
-| `size` | string | No | Output size |
+| `model` | string | Yes | `qwen-image-plus`, `qwen-image-max`, `qwen-image-2.0`, or `qwen-image-2.0-pro` |
+| `prompt` | string | Yes | text-to-image prompt |
+| `size` | string | No | output size; use sizes currently exposed by the model page or playground |
+| `n` | integer | No | number of images, default `1` |
+| `response_format` | string | No | `url` or `b64_json` |
 
-## Request Examples
+### Request Example
 
 <CodeGroup>
 
@@ -30,76 +45,60 @@ curl -X POST https://crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "qwen-image-edit-2509",
-    "prompt": "Replace the sky in the image with a starry night",
-    "image": "https://example.com/landscape.jpg",
-    "n": 1
+    "model": "qwen-image-max",
+    "prompt": "A premium perfume poster with soft studio lighting and the title Morning Mist in Chinese",
+    "size": "1024x1024",
+    "n": 1,
+    "response_format": "url"
   }'
 ```
 
 ```python Python
-import requests
+from openai import OpenAI
 
-response = requests.post(
-    "https://crazyrouter.com/v1/images/generations",
-    headers={
-        "Content-Type": "application/json",
-        "Authorization": "Bearer YOUR_API_KEY"
-    },
-    json={
-        "model": "qwen-image-edit-2509",
-        "prompt": "Replace the sky in the image with a starry night",
-        "image": "https://example.com/landscape.jpg",
-        "n": 1
-    }
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
 )
 
-data = response.json()
-print(data["data"][0]["url"])
+response = client.images.generate(
+    model="qwen-image-max",
+    prompt="A premium perfume poster with soft studio lighting and the title Morning Mist in Chinese",
+    size="1024x1024",
+    n=1
+)
+
+print(response.data[0].url)
 ```
 
 </CodeGroup>
 
-## Response Example
+### Response Example
 
 ```json
 {
   "created": 1709123456,
   "data": [
     {
-      "url": "https://crazyrouter.com/files/qwen_edit_abc123.png"
+      "url": "https://crazyrouter.com/files/qwen_image_abc123.png"
     }
   ]
 }
 ```
 
-## Use Cases
+## Official Billing Truth
 
-- Replace image backgrounds
-- Modify specific elements in an image
-- Add or remove objects
-- Style transfer
+The current official truth for Qwen Image is billing per successfully generated image, not input/output token display pricing.
 
-### Example: Remove Object
+| Model | Official billing | Official price | Current doc state |
+|------|-------------------|----------------|-------------------|
+| `qwen-image-plus` | per image | `¥0.20 / image` | verified |
+| `qwen-image-max` | per image | `¥0.50 / image` | verified |
+| `qwen-image-2.0` | per image | `¥0.20 / image` | verified |
+| `qwen-image-2.0-pro` | per image | `¥0.50 / image` | Beta |
 
-```json
-{
-  "model": "qwen-image-edit-2509",
-  "prompt": "Remove the watermark from the image",
-  "image": "https://example.com/photo_with_watermark.jpg"
-}
-```
+## Scope Notes
 
-### Example: Style Transfer
-
-```json
-{
-  "model": "qwen-image-edit-2509",
-  "prompt": "Convert the photo to cartoon style",
-  "image": "https://example.com/photo.jpg"
-}
-```
-
-<Note>
-  The Qwen image editing model has excellent understanding of Chinese instructions. Using Chinese descriptions for editing requests is recommended.
-</Note>
+- This first batch commits only the public `text-to-image` capability. Additional upstream multimodal abilities are not exposed as separate customer protocols yet.
+- Providers may run async or sync upstream paths internally, but the customer-facing contract remains the same OpenAI Images request/response shape.
+- The edit model `qwen-image-edit-2509` is not part of this first-batch generation closure. Treat editing as a separate capability decision.

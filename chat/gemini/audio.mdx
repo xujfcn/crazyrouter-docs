@@ -1,0 +1,75 @@
+---
+title: "Gemini 音频理解"
+description: "基于 2026-04-08 Crazyrouter 本站成功请求经验整理的 Gemini 原生音频理解"
+---
+
+# Gemini 音频理解
+
+```text
+POST /v1beta/models/{model}:generateContent
+```
+
+截至 `2026-04-08`，Crazyrouter 本站与本地 `4000` 端口复测表明：
+
+- `gemini-2.5-pro` 可以读取 `audio/wav`
+- 当前已稳定跑通的主链路是 `inlineData`
+- 对短音频做转写、语言判断、摘要说明都可以直接通过文本提示完成
+
+---
+
+## 已验证的最小请求
+
+```bash
+curl "https://crazyrouter.com/v1beta/models/gemini-2.5-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "inlineData": {
+              "mimeType": "audio/wav",
+              "data": "BASE64_WAV_DATA"
+            }
+          },
+          {
+            "text": "请返回 JSON，字段为 transcript、language、summary。"
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "maxOutputTokens": 512
+    }
+  }'
+```
+
+生产环境同类成功返回的关键形态：
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "```json\n{\n  \"transcript\": \"叮\",\n  \"language\": \"zh-CN\",\n  \"summary\": \"音频中包含一个简短的提示音。\"\n}\n```"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+## 请求要点
+
+- 音频理解优先使用 `inlineData`
+- `mimeType` 与真实音频格式保持一致，例如 `audio/wav`、`audio/mpeg`
+- `data` 只填 Base64 内容，不要带 Data URL 前缀
+- 如果你需要严格 JSON，可再叠加 [结构化输出](/features/structured-outputs) 约束
+
+<Note>
+  当前页面写的是已经跑通的短音频理解主路径。更长音频、实时流和语音生成请分别看现有 [STT](/audio/stt)、[Realtime](/audio/realtime)、[TTS](/audio/tts) 页面。
+</Note>

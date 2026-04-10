@@ -9,7 +9,7 @@ description: "Current availability note for Gemini image editing on Crazyrouter 
 POST /v1beta/models/{model}:generateContent
 ```
 
-As of March 23, 2026, a minimal production check against Crazyrouter showed:
+As of March 23, 2026, a minimal production check against native Gemini image editing on Crazyrouter showed:
 
 - `gemini-3.1-flash-image-preview` returned `500`
 - `gemini-2.5-flash-image-preview` returned `500`
@@ -20,19 +20,28 @@ The observed 500 error was:
 - `code: "get_channel_failed"`
 - `message`: model temporarily unavailable, please try again later
 
-That means the native Gemini "send an input image and get an edited image back" path should not currently be documented as a stable success workflow on Crazyrouter production.
+That means the native Gemini `generateContent` path for "send an input image and get an edited image back" should not currently be documented as a stable success workflow on Crazyrouter production.
 
 <Warning>
-  Until this path is revalidated successfully, do not depend on Gemini image editing for production automation.
+  Until this path is revalidated successfully, do not depend on native Gemini image editing for production automation.
 </Warning>
+
+<Note>
+  If your goal is stable customer-facing image editing rather than the native Gemini protocol itself, start with the Nano Banana family pages:
+  [Nano Banana](/en/images/nano-banana),
+  [Nano Banana Pro](/en/images/nano-banana-pro),
+  and [Nano Banana 2](/en/images/nano-banana-2).
+  Their current public contract is narrowed to URL input through `image_input`.
+</Note>
 
 ---
 
 ## Current Recommendation
 
-1. If your goal is Gemini text-to-image, use [Gemini Image Generation](/chat/gemini/image-gen)
-2. If you must evaluate Gemini image editing, run a same-day production retest with a minimal input image first
-3. If you receive `500 get_channel_failed` or `524`, stop there and wait for channel recovery before scaling traffic
+1. If your goal is Gemini text-to-image, use [Gemini Image Generation](/en/chat/gemini/image-gen)
+2. If your goal is stable customer-facing image editing, use [Nano Banana](/en/images/nano-banana), [Nano Banana Pro](/en/images/nano-banana-pro), or [Nano Banana 2](/en/images/nano-banana-2)
+3. If you must evaluate native Gemini image editing, run a same-day production retest with a minimal input image first
+4. If you receive `500 get_channel_failed` or `524`, stop there and wait for channel recovery before scaling traffic
 
 ---
 

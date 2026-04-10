@@ -14,6 +14,10 @@ As of March 23, 2026, Crazyrouter production has verified `gpt-5.4` on the Respo
 - `tools: [{ "type": "web_search_preview" }]`
 - an `output` sequence of `web_search_call`, then `message`
 
+<Note>
+  Claude does not currently support `POST /v1/responses`. For Claude web search, use `POST /v1/chat/completions` or the native Claude path instead.
+</Note>
+
 ---
 
 ## Minimal Request

@@ -9,6 +9,10 @@ Responses API 是当前 Crazyrouter 上承载 GPT 新能力的主路由之一。
 
 本文页只写入 `2026-03-22` 已在生产环境复核过的结论。
 
+<Note>
+  当前生产验证范围内，Claude 仅支持 `POST /v1/messages` 和 `POST /v1/chat/completions`，不支持 `POST /v1/responses`。Responses 相关页面默认只应按 GPT 路径理解。
+</Note>
+
 ## 当前推荐理解
 
 - 需要可观察的 reasoning 输出：优先用 `/v1/responses`

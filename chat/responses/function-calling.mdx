@@ -11,6 +11,10 @@ POST /v1/responses
 
 截至 2026 年 3 月 23 日，Crazyrouter 生产环境已验证 `gpt-5.4` 在 Responses API 下可稳定返回 `function_call`。
 
+<Note>
+  Claude 当前不支持 `POST /v1/responses`。如果你需要 Claude 的工具调用，请改用 `POST /v1/messages` 或 `POST /v1/chat/completions`。
+</Note>
+
 ---
 
 ## 第一步：让模型产出函数调用

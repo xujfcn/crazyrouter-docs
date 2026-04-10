@@ -1,63 +1,191 @@
 ---
 title: "Seedance"
-description: "使用 Seedance 模型进行首尾帧和参考图视频生成"
+description: "使用 Seedance 原生 API 生成视频"
 ---
 
 # Seedance
 
-Seedance 是字节跳动/豆包推出的视频生成模型，支持首尾帧视频和参考图视频生成。
+Seedance 是字节跳动 / 豆包的视频生成模型族。Crazyrouter 当前对客保留火山原生 `/volc/v1/*` 协议，不再把旧统一视频接口里的 `seedance-lite` 作为公开主协议。
 
-## 首尾帧视频
+## 当前公开模型
 
-通过提供首帧和尾帧图片，生成平滑的过渡视频。
+| 模型 | 当前公开定位 |
+|------|------|
+| `doubao-seedance-1-0-lite-t2v-250428` | 文生视频 |
+| `doubao-seedance-1-0-lite-i2v-250428` | 单图生视频 |
+| `doubao-seedance-1-0-pro-250528` | 通用高质量视频生成 |
+| `doubao-seedance-1-0-pro-fast-251015` | 通用快速视频生成 |
+| `doubao-seedance-1-5-pro-251215` | 更高阶版本，后续可继续扩展官方能力参数 |
+| `doubao-seedance-2-0-260128` | Seedance 2.0 官方多模态视频生成 |
+| `doubao-seedance-2-0-fast-260128` | Seedance 2.0 Fast 官方多模态视频生成 |
 
-### 通过统一视频 API
+## 提交视频任务
 
 ```
-POST /v1/video/create
+POST /volc/v1/contents/generations/tasks
 ```
+
+### 当前公开请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `model` | string | 是 | 对客模型名，使用上表中的 canonical 模型名 |
+| `content` | array | 是 | 输入内容数组 |
+| `content[].type` | string | 是 | 当前支持 `text`、`image_url`、`video_url`、`audio_url`、`draft_task` |
+| `content[].text` | string | 条件必填 | `type=text` 时填写提示词 |
+| `content[].image_url.url` | string | 条件必填 | `type=image_url` 时填写图片 URL |
+| `content[].video_url.url` | string | 条件必填 | `type=video_url` 时填写参考视频 URL |
+| `content[].audio_url.url` | string | 条件必填 | `type=audio_url` 时填写参考音频 URL |
+| `content[].role` | string | 可选 | Seedance 2.0 支持 `first_frame`、`last_frame`、`reference_image`、`reference_video`、`reference_audio` |
+| `generate_audio` | boolean | 可选 | Seedance 2.0 支持是否生成音频 |
+| `ratio` | string | 可选 | 输出比例，例如 `16:9` |
+| `resolution` | string | 可选 | Seedance 2.0 / 2.0 fast 当前仅支持 `480p`、`720p` |
+| `duration` | integer | 可选 | Seedance 2.0 / 2.0 fast 支持 `4-15` 或 `-1` |
+| `watermark` | boolean | 可选 | 是否添加水印 |
+| `seed` | integer | 可选 | 随机种子 |
+
+### Seedance 2.0 官方能力边界
+
+- 支持四模态输入：文本、图片、视频、音频。
+- 支持多模态参考：最多 `9` 张图片、`3` 个视频、`3` 个音频，混合文件总数上限 `12`。
+- 图片格式：`jpeg`、`png`、`webp`、`bmp`、`tiff`、`gif`；单张图片大小 `< 30MB`。
+- 视频格式：`mp4`、`mov`；最多 `3` 个视频参考，总时长建议在 `[2, 15]s`，总文件大小 `< 50MB`。
+- 音频格式：`mp3`、`wav`；最多 `3` 个音频参考，总时长 `<= 15s`，总文件大小 `< 15MB`。
+- 音频不能单独输入，至少需要同时提供 `1` 个图片或视频参考。
+- 生成时长支持 `4-15s`，也支持 `-1` 交给上游使用默认时长。
+- 支持 `480p`、`720p`；`1080p` 当前不适用于 Seedance 2.0 / 2.0 fast。
+- `frames` 当前不适用于 Seedance 2.0 / 2.0 fast。
+- `camera_fixed` 当前不适用于 Seedance 2.0 / 2.0 fast。
+- 产品形态上，Seedance 2.0 当前主要分为“首尾帧”和“全能参考”两类入口；对 API 而言统一体现在 `content[].role` 与 `content[].type`。
+- 上游当前对上传写实真人脸素材有合规限制，包含清晰写实人脸的图片或视频参考可能直接被上游拦截。
+
+### Seedance 2.0 官方计费真值
+
+| 模型 | 官方计费方式 | 官方单价 |
+|------|------|------|
+| `doubao-seedance-2-0-260128` | 按输出 tokens 计费 | 含视频输入 `28 元 / 百万输出 Tokens`；不含视频输入 `46 元 / 百万输出 Tokens` |
+| `doubao-seedance-2-0-fast-260128` | 按输出 tokens 计费 | 含视频输入 `22 元 / 百万输出 Tokens`；不含视频输入 `37 元 / 百万输出 Tokens` |
+
+<Note>
+  远程 URL 素材的 MIME、时长、大小最终由上游校验；Crazyrouter 当前会在提交前校验数量、时长参数、音频不能单独输入、以及 480p/720p / `frames` / `camera_fixed` 等显式边界。
+</Note>
+
+### 文生视频示例
+
+<CodeGroup>
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/v1/video/create \
+curl -X POST https://crazyrouter.com/volc/v1/contents/generations/tasks \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "seedance-lite",
-    "prompt": "平滑过渡，人物从微笑变为大笑",
-    "images": [
-      "https://example.com/start_frame.jpg",
-      "https://example.com/end_frame.jpg"
-    ],
-    "aspect_ratio": "16:9"
+    "model": "doubao-seedance-1-0-lite-t2v-250428",
+    "content": [
+      {
+        "type": "text",
+        "text": "镜头缓慢推进，一只白色海鸥从海面掠过，日落金光反射在海浪上"
+      }
+    ]
   }'
 ```
 
-### 响应示例
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/volc/v1/contents/generations/tasks",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "doubao-seedance-1-0-lite-t2v-250428",
+        "content": [
+            {
+                "type": "text",
+                "text": "镜头缓慢推进，一只白色海鸥从海面掠过，日落金光反射在海浪上"
+            }
+        ]
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### 单图生视频示例
+
+```bash cURL
+curl -X POST https://crazyrouter.com/volc/v1/contents/generations/tasks \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "doubao-seedance-1-0-lite-i2v-250428",
+    "content": [
+      {
+        "type": "text",
+        "text": "人物自然转身，头发被风轻轻吹起"
+      },
+      {
+        "type": "image_url",
+        "image_url": {
+          "url": "https://example.com/portrait.png"
+        }
+      }
+    ]
+  }'
+```
+
+### Seedance 2.0 多模态示例
+
+```bash cURL
+curl -X POST https://crazyrouter.com/volc/v1/contents/generations/tasks \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "doubao-seedance-2-0-260128",
+    "content": [
+      {
+        "type": "text",
+        "text": "海边女孩在日落时回头，镜头更有电影感，环境声自然"
+      },
+      {
+        "type": "image_url",
+        "image_url": {
+          "url": "https://example.com/first-frame.png"
+        },
+        "role": "reference_image"
+      },
+      {
+        "type": "video_url",
+        "video_url": {
+          "url": "https://example.com/reference-video.mp4"
+        },
+        "role": "reference_video"
+      },
+      {
+        "type": "audio_url",
+        "audio_url": {
+          "url": "https://example.com/reference-audio.mp3"
+        },
+        "role": "reference_audio"
+      }
+    ],
+    "generate_audio": true,
+    "ratio": "16:9",
+    "duration": 11,
+    "watermark": false
+  }'
+```
+
+### 提交成功响应示例
 
 ```json
 {
-  "id": "seedance_task_abc123",
-  "status": "processing",
-  "status_update_time": 1709123456
+  "id": "cgt_task_abc123",
+  "task_id": "cgt_task_abc123"
 }
-```
-
----
-
-## 参考图视频
-
-使用单张参考图生成视频：
-
-```bash cURL
-curl -X POST https://crazyrouter.com/v1/video/create \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "model": "seedance-lite",
-    "prompt": "图片中的人物开始跳舞",
-    "images": ["https://example.com/portrait.jpg"],
-    "aspect_ratio": "9:16"
-  }'
 ```
 
 ---
@@ -65,11 +193,11 @@ curl -X POST https://crazyrouter.com/v1/video/create \
 ## 查询任务
 
 ```
-GET /v1/video/query?id={task_id}
+GET /volc/v1/contents/generations/tasks/{task_id}
 ```
 
 ```bash cURL
-curl "https://crazyrouter.com/v1/video/query?id=seedance_task_abc123" \
+curl https://crazyrouter.com/volc/v1/contents/generations/tasks/cgt_task_abc123 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
@@ -77,21 +205,37 @@ curl "https://crazyrouter.com/v1/video/query?id=seedance_task_abc123" \
 
 ```json
 {
-  "id": "seedance_task_abc123",
+  "id": "cgt_task_abc123",
+  "object": "video",
+  "model": "doubao-seedance-1-0-lite-t2v-250428",
   "status": "completed",
-  "status_update_time": 1709123520,
-  "video_url": "https://crazyrouter.com/files/seedance_abc123.mp4"
+  "progress": 100,
+  "created_at": 1774580000,
+  "completed_at": 1774580030,
+  "seconds": "5",
+  "metadata": {
+    "url": "https://media.crazyrouter.com/task-artifacts/2026/03/28/seedance/cgt_task_abc123.mp4",
+    "artifact_url": "https://media.crazyrouter.com/task-artifacts/2026/03/28/seedance/cgt_task_abc123.mp4",
+    "resolution": "720p",
+    "ratio": "16:9",
+    "frames_per_second": 24
+  }
 }
 ```
 
----
+### 任务状态
 
-## 可用模型
-
-| 模型 | 说明 |
+| 状态 | 说明 |
 |------|------|
-| `seedance-lite` | Seedance 轻量版，速度快 |
+| `queued` | 已提交或排队中 |
+| `in_progress` | 正在生成 |
+| `completed` | 已完成，可从 `metadata.url` 取回结果 |
+| `failed` | 终态失败 |
 
 <Note>
-  Seedance 在人物动作和表情变化方面表现出色，特别适合人像视频生成。
+  当前公开文档只承诺 native `/volc/v1/*` 路径与 canonical 模型名。旧 `seedance-lite` 仅保留为历史口径，不再作为新的对客主协议。
+</Note>
+
+<Note>
+  Seedance 官方价格真值当前按 `per_output_token` 维护，不是按秒；如果 pricing 页面后续做平台归一化展示，应明确那是平台售卖口径，不是官方原生单位。
 </Note>

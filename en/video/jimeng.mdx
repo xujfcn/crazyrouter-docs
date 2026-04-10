@@ -5,7 +5,16 @@ description: "Use the Jimeng API to generate videos"
 
 # Jimeng
 
-Jimeng is a video generation service by ByteDance.
+Jimeng is ByteDance's video generation service. On Crazyrouter, the recommended public contract is the `/jimeng/*` family. We do not expose the upstream `Action + Version` form as the primary customer-facing API.
+
+## Currently Verified Scope
+
+- `POST /jimeng/submit/videos` is verified for `jimeng-video-3.0` text-to-video
+- single-image input and single-image `recamera` are verified
+- the currently stable positive-sample mainline is concentrated on `1080P`
+- `720P / recamera` is still a `ch119` carrier-level follow-up and is not being expanded into the current public hard contract
+- query results prefer Crazyrouter archived media URLs such as `https://media.crazyrouter.com/...`
+- the `expired` re-probe path is closed, but naturally expired samples are still a passive background tail item and do not block the mainline contract
 
 ## Submit Video Task
 
@@ -13,16 +22,26 @@ Jimeng is a video generation service by ByteDance.
 POST /jimeng/submit/videos
 ```
 
+### Recommended Public Model
+
+- `jimeng-video-3.0`: current primary public model
+
 ### Request Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `model` | string | Yes | Model name |
-| `prompt` | string | Yes | Video description prompt |
-| `image_url` | string | No | Reference image URL (image-to-video) |
-| `aspect_ratio` | string | No | Aspect ratio |
+| `model` | string | Yes | Public model name. `jimeng-video-3.0` is recommended |
+| `prompt` | string | Conditionally | Strongly recommended for text-to-video; also recommended for `recamera` motion intent |
+| `duration` | integer | No | Recommended values: `5` or `10` |
+| `aspect_ratio` | string | No | Aspect ratio such as `16:9` or `9:16` |
+| `image_url` | string | No | Single-image URL input |
+| `binary_data_base64` | string[] | No | Single-image Base64 input |
+| `image_urls` | string[] | No | Compatibility array form; do not treat it as a public multi-reference hard contract |
+| `template_id` | string | No | Single-image `recamera` template, for example `handheld` |
+| `camera_strength` | string | No | Single-image `recamera` strength, for example `weak`, `medium`, `strong` |
+| `req_key` | string | No | Reserved for debugging or compatibility flows; not recommended for normal integration |
 
-### Request Examples
+### Text-to-Video Example
 
 <CodeGroup>
 
@@ -31,8 +50,10 @@ curl -X POST https://crazyrouter.com/jimeng/submit/videos \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "jimeng-video-1",
-    "prompt": "A goldfish swimming in water, sunlight sparkling on the surface"
+    "model": "jimeng-video-3.0",
+    "prompt": "A gentle camera push-in on an orange cat yawning by the window in soft morning light",
+    "duration": 5,
+    "aspect_ratio": "9:16"
   }'
 ```
 
@@ -46,8 +67,10 @@ response = requests.post(
         "Authorization": "Bearer YOUR_API_KEY"
     },
     json={
-        "model": "jimeng-video-1",
-        "prompt": "A goldfish swimming in water, sunlight sparkling on the surface"
+        "model": "jimeng-video-3.0",
+        "prompt": "A gentle camera push-in on an orange cat yawning by the window in soft morning light",
+        "duration": 5,
+        "aspect_ratio": "9:16"
     }
 )
 
@@ -56,15 +79,31 @@ print(response.json())
 
 </CodeGroup>
 
-### Response Example
+### Single-Image `recamera` Example
 
 ```json
 {
-  "code": 0,
-  "message": "success",
-  "data": {
-    "task_id": "jimeng_abc123"
-  }
+  "model": "jimeng-video-3.0",
+  "prompt": "Natural handheld push-in while the subject slightly turns",
+  "image_url": "https://example.com/portrait.png",
+  "duration": 5,
+  "aspect_ratio": "9:16",
+  "template_id": "handheld",
+  "camera_strength": "medium"
+}
+```
+
+### Successful Submit Response
+
+```json
+{
+  "id": "2526913314163451526",
+  "task_id": "2526913314163451526",
+  "object": "video",
+  "model": "jimeng-video-3.0",
+  "status": "",
+  "progress": 0,
+  "created_at": 1774570545
 }
 ```
 
@@ -77,20 +116,23 @@ GET /jimeng/fetch/{task_id}
 ```
 
 ```bash cURL
-curl https://crazyrouter.com/jimeng/fetch/jimeng_abc123 \
+curl https://crazyrouter.com/jimeng/fetch/2526913314163451526 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-### Response Example (Completed)
+### Completed Response Example
 
 ```json
 {
-  "code": 0,
-  "message": "success",
+  "code": "success",
+  "message": "",
   "data": {
-    "task_id": "jimeng_abc123",
-    "status": "SUCCESS",
-    "video_url": "https://cdn.jimeng.com/videos/..."
+    "error": null,
+    "format": "mp4",
+    "metadata": null,
+    "status": "succeeded",
+    "task_id": "2526913314163451526",
+    "url": "https://media.crazyrouter.com/task-artifacts/2026/03/27/51/generate/2526913314163451526.mp4"
   }
 }
 ```
@@ -99,11 +141,15 @@ curl https://crazyrouter.com/jimeng/fetch/jimeng_abc123 \
 
 | Status | Description |
 |--------|-------------|
-| `SUBMITTED` | Submitted |
-| `PROCESSING` | Processing |
-| `SUCCESS` | Succeeded |
-| `FAILED` | Failed |
+| `queued` | submitted or waiting in queue |
+| `processing` | generation in progress |
+| `succeeded` | completed and ready to fetch from `url` |
+| `failed` | terminal failure |
 
 <Note>
-  Jimeng has excellent understanding of Chinese prompts. Using Chinese descriptions is recommended.
+  The current public docs only commit to single-image input and single-image `recamera`. Do not document `image_urls` as a public multi-reference hard contract, and do not recommend `frames` as a public parameter. Unsupported `frames` values may be accepted at submit time and then fail later at the upstream pipeline stage.
+</Note>
+
+<Note>
+  The public doc is intentionally constrained to the verified stable scope: `jimeng-video-3.0 + text-to-video / single-image input / single-image recamera`. Whether `720P / recamera` is expanded later depends on carrier-level sample follow-up rather than additional passthrough code.
 </Note>

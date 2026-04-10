@@ -9,20 +9,24 @@ description: "使用 Kling API 生成图像"
 POST /kling/v1/images/generations
 ```
 
-使用 Kling 模型生成高质量图像。
+当前公开文档只承诺 Kling 图像生成主路径。不要把尚未公开建模的 image-side 扩展字段误写成已稳定对客 contract。
+
+## 当前已验证范围
+
+- `kling-v1-5` 图片生成已完成 bounded 验证
+- 成功结果会优先返回 Crazyrouter 归档地址，如 `https://media.crazyrouter.com/...png`
 
 ## 请求参数
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| `model_name` | string | 是 | 模型名称：`kling-v1`、`kling-v1-5`、`kling-v1-6` |
+| `model` | string | 否 | 当前常用示例为 `kling-v1-5` |
 | `prompt` | string | 是 | 图像描述提示词 |
 | `negative_prompt` | string | 否 | 负面提示词 |
-| `image` | string | 否 | 参考图片 URL（图生图） |
-| `image_fidelity` | number | 否 | 图片保真度，0-1 |
-| `n` | integer | 否 | 生成数量，默认 1 |
-| `aspect_ratio` | string | 否 | 宽高比：`1:1`、`16:9`、`9:16`、`4:3`、`3:4`、`3:2`、`2:3` |
-| `callback_url` | string | 否 | 任务完成回调地址 |
+| `aspect_ratio` | string | 否 | 如 `1:1`、`16:9`、`9:16` |
+| `n` | integer | 否 | 生成数量，默认 `1` |
+| `callback_url` | string | 否 | 回调地址 |
+| `external_task_id` | string | 否 | 业务侧自定义任务 ID |
 
 ## 请求示例
 
@@ -33,11 +37,11 @@ curl -X POST https://crazyrouter.com/kling/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model_name": "kling-v1-6",
-    "prompt": "一幅中国水墨画风格的山水画，远处有瀑布",
-    "negative_prompt": "模糊, 低质量",
-    "n": 1,
-    "aspect_ratio": "16:9"
+    "model": "kling-v1-5",
+    "prompt": "一只戴着墨镜的柴犬，写实摄影风格",
+    "negative_prompt": "blurry, low quality",
+    "aspect_ratio": "1:1",
+    "n": 1
   }'
 ```
 
@@ -51,10 +55,11 @@ response = requests.post(
         "Authorization": "Bearer YOUR_API_KEY"
     },
     json={
-        "model_name": "kling-v1-6",
-        "prompt": "一幅中国水墨画风格的山水画，远处有瀑布",
-        "n": 1,
-        "aspect_ratio": "16:9"
+        "model": "kling-v1-5",
+        "prompt": "一只戴着墨镜的柴犬，写实摄影风格",
+        "negative_prompt": "blurry, low quality",
+        "aspect_ratio": "1:1",
+        "n": 1
     }
 )
 
@@ -63,32 +68,17 @@ print(response.json())
 
 </CodeGroup>
 
-## 响应示例
+## 提交成功响应示例
 
 ```json
 {
-  "code": 0,
-  "message": "success",
-  "data": {
-    "task_id": "kling_img_abc123",
-    "task_status": "submitted"
-  }
-}
-```
-
----
-
-## 图生图
-
-传入 `image` 参数进行图生图：
-
-```json
-{
-  "model_name": "kling-v1-6",
-  "prompt": "将照片转换为动漫风格",
-  "image": "https://example.com/photo.jpg",
-  "image_fidelity": 0.6,
-  "aspect_ratio": "1:1"
+  "created_at": 1774536039,
+  "id": "2037177945839673344",
+  "model": "kling-v1-5",
+  "object": "video",
+  "progress": 0,
+  "status": "",
+  "task_id": "2037177945839673344"
 }
 ```
 
@@ -101,7 +91,7 @@ GET /kling/v1/images/generations/{task_id}
 ```
 
 ```bash cURL
-curl https://crazyrouter.com/kling/v1/images/generations/kling_img_abc123 \
+curl https://crazyrouter.com/kling/v1/images/generations/2037177945839673344 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
@@ -109,23 +99,19 @@ curl https://crazyrouter.com/kling/v1/images/generations/kling_img_abc123 \
 
 ```json
 {
-  "code": 0,
-  "message": "success",
+  "code": "success",
+  "message": "",
   "data": {
-    "task_id": "kling_img_abc123",
-    "task_status": "succeed",
-    "task_result": {
-      "images": [
-        {
-          "index": 0,
-          "url": "https://cdn.klingai.com/images/..."
-        }
-      ]
-    }
+    "error": null,
+    "format": "png",
+    "metadata": null,
+    "status": "succeeded",
+    "task_id": "2037177945839673344",
+    "url": "https://media.crazyrouter.com/task-artifacts/2026/03/26/50/imageGenerate/2037177945839673344.png"
   }
 }
 ```
 
 <Note>
-  Kling 图像生成为异步任务，提交后需通过查询接口获取结果。
+  Kling 图像生成是异步任务。提交后请通过查询接口获取终态结果。当前页面不把图生图、`image_fidelity` 等 image-side 扩展参数写成公开硬 contract。
 </Note>

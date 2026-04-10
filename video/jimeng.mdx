@@ -5,7 +5,16 @@ description: "使用即梦 (Jimeng) API 生成视频"
 
 # 即梦
 
-即梦（Jimeng）是字节跳动推出的视频生成服务。
+即梦（Jimeng）是字节跳动的视频生成服务。Crazyrouter 当前对客推荐只使用 `/jimeng/*` 路径，不直接把上游 `Action + Version` 暴露成主协议。
+
+## 当前已验证范围
+
+- `POST /jimeng/submit/videos` 已验证可提交 `jimeng-video-3.0` 文生视频
+- 单图输入和单图 `recamera` 已验证可用
+- 当前稳定正样本主链集中在 `1080P`
+- `720P / recamera` 仍是 `ch119` 的 carrier 级 follow-up，不作为当前公开 hard contract 扩写范围
+- 查询结果会优先返回 Crazyrouter 已归档的媒体地址，例如 `https://media.crazyrouter.com/...`
+- `expired` 候选任务的复抓路径已经闭环，但自然过期样本仍在后台等待更长留存窗口，不影响主链路接入
 
 ## 提交视频任务
 
@@ -13,16 +22,26 @@ description: "使用即梦 (Jimeng) API 生成视频"
 POST /jimeng/submit/videos
 ```
 
+### 当前推荐模型
+
+- `jimeng-video-3.0`：当前主推荐对客模型
+
 ### 请求参数
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| `model` | string | 是 | 模型名称 |
-| `prompt` | string | 是 | 视频描述提示词 |
-| `image_url` | string | 否 | 参考图片 URL（图生视频） |
-| `aspect_ratio` | string | 否 | 宽高比 |
+| `model` | string | 是 | 对客模型名，当前推荐 `jimeng-video-3.0` |
+| `prompt` | string | 条件必填 | 文生视频建议必填；`recamera` 也建议补充动作描述 |
+| `duration` | integer | 否 | 推荐使用 `5` 或 `10` |
+| `aspect_ratio` | string | 否 | 比例，如 `16:9`、`9:16` |
+| `image_url` | string | 否 | 单图 URL 输入 |
+| `binary_data_base64` | string[] | 否 | 单图 Base64 输入 |
+| `image_urls` | string[] | 否 | 兼容数组写法；当前不应把它当成多参考图公开承诺 |
+| `template_id` | string | 否 | 单图 `recamera` 模板，如 `handheld` |
+| `camera_strength` | string | 否 | 单图 `recamera` 强度，如 `weak`、`medium`、`strong` |
+| `req_key` | string | 否 | 调试或兼容场景使用，普通接入不建议显式传 |
 
-### 请求示例
+### 文生视频示例
 
 <CodeGroup>
 
@@ -31,8 +50,10 @@ curl -X POST https://crazyrouter.com/jimeng/submit/videos \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "jimeng-video-1",
-    "prompt": "一条金鱼在水中游动，水面波光粼粼"
+    "model": "jimeng-video-3.0",
+    "prompt": "镜头缓慢推进，一只橘猫在窗边打哈欠，晨光柔和",
+    "duration": 5,
+    "aspect_ratio": "9:16"
   }'
 ```
 
@@ -46,8 +67,10 @@ response = requests.post(
         "Authorization": "Bearer YOUR_API_KEY"
     },
     json={
-        "model": "jimeng-video-1",
-        "prompt": "一条金鱼在水中游动，水面波光粼粼"
+        "model": "jimeng-video-3.0",
+        "prompt": "镜头缓慢推进，一只橘猫在窗边打哈欠，晨光柔和",
+        "duration": 5,
+        "aspect_ratio": "9:16"
     }
 )
 
@@ -56,15 +79,31 @@ print(response.json())
 
 </CodeGroup>
 
-### 响应示例
+### 单图 `recamera` 示例
 
 ```json
 {
-  "code": 0,
-  "message": "success",
-  "data": {
-    "task_id": "jimeng_abc123"
-  }
+  "model": "jimeng-video-3.0",
+  "prompt": "镜头自然手持推进，人物轻微转身",
+  "image_url": "https://example.com/portrait.png",
+  "duration": 5,
+  "aspect_ratio": "9:16",
+  "template_id": "handheld",
+  "camera_strength": "medium"
+}
+```
+
+### 提交成功响应示例
+
+```json
+{
+  "id": "2526913314163451526",
+  "task_id": "2526913314163451526",
+  "object": "video",
+  "model": "jimeng-video-3.0",
+  "status": "",
+  "progress": 0,
+  "created_at": 1774570545
 }
 ```
 
@@ -77,7 +116,7 @@ GET /jimeng/fetch/{task_id}
 ```
 
 ```bash cURL
-curl https://crazyrouter.com/jimeng/fetch/jimeng_abc123 \
+curl https://crazyrouter.com/jimeng/fetch/2526913314163451526 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
@@ -85,12 +124,15 @@ curl https://crazyrouter.com/jimeng/fetch/jimeng_abc123 \
 
 ```json
 {
-  "code": 0,
-  "message": "success",
+  "code": "success",
+  "message": "",
   "data": {
-    "task_id": "jimeng_abc123",
-    "status": "SUCCESS",
-    "video_url": "https://cdn.jimeng.com/videos/..."
+    "error": null,
+    "format": "mp4",
+    "metadata": null,
+    "status": "succeeded",
+    "task_id": "2526913314163451526",
+    "url": "https://media.crazyrouter.com/task-artifacts/2026/03/27/51/generate/2526913314163451526.mp4"
   }
 }
 ```
@@ -99,11 +141,15 @@ curl https://crazyrouter.com/jimeng/fetch/jimeng_abc123 \
 
 | 状态 | 说明 |
 |------|------|
-| `SUBMITTED` | 已提交 |
-| `PROCESSING` | 处理中 |
-| `SUCCESS` | 成功 |
-| `FAILED` | 失败 |
+| `queued` | 已提交或排队中 |
+| `processing` | 正在生成 |
+| `succeeded` | 已完成，`url` 可直接取回 |
+| `failed` | 终态失败 |
 
 <Note>
-  即梦对中文提示词有良好的理解能力，推荐使用中文描述。
+  当前公开文档只承诺单图输入和单图 `recamera`。不要把 `image_urls` 误写成即梦多参考图硬 contract，也不要把 `frames` 当成推荐公开参数；不受支持的 `frames` 值可能会在上游算法阶段延迟失败。
+</Note>
+
+<Note>
+  目前公开文档按已验证稳定范围收口：`jimeng-video-3.0 + 文生视频 / 单图输入 / 单图 recamera`。`720P / recamera` 是否进一步放开，取决于后续 carrier 样本复验，而不是仓库代码是否还能继续透传。
 </Note>

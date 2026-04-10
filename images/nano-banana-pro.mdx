@@ -1,0 +1,209 @@
+---
+title: "Nano Banana Pro"
+description: "使用 nano-banana-pro 进行基于参考图的生成与编辑，兼容 OpenAI Images API"
+---
+
+# Nano Banana Pro
+
+```
+POST /v1/images/generations
+```
+
+使用 `nano-banana-pro` 进行图片生成和参考图编辑，统一走 `OpenAI Images API` 风格的公开协议。
+
+## 这页覆盖什么
+
+- 本页只覆盖 `nano-banana-pro`
+- 客户请求入口统一是 `POST /v1/images/generations`
+- 输入图片字段统一是 `image_input`
+- 当前公开协议收紧为 `image_input` 的 URL 引用，不对外暴露 `image` 或 `data:` 输入
+- 背后承载可以是 Gemini / Vertex 等 provider，但这些 provider 细节不属于客户协议的一部分
+
+## 能力状态
+
+| 能力 / 规格 | 状态 | 说明 |
+|------|------|------|
+| `T2I` | `Beta` | 历史有覆盖，但当前公开 artifact 集仍以编辑 / 参考图路径为主 |
+| `I2I + 1K` | `Verified` | 单图编辑 live 已闭环 |
+| `I2I + 4K` | `Verified` | `4K + 21:9 + png/jpg` live 已闭环 |
+| `Reference + 1..2 refs` | `Verified` | `2` 图 live 已闭环 |
+| `2K` | `Beta` | 当前公开 artifact 仍待补充 |
+| 更高多图上限 / 精确 `30 MiB` 边界 | `Beta` | 当前公开 contract 不承诺 |
+
+<Note>
+  Pricing 页面与这页文档使用同一套状态口径：`Verified` 表示当前已有最小 live 闭环，`Beta` 表示官方能力存在但当前公开验证或边界仍在补充。
+</Note>
+
+## 当前已验证能力
+
+以下结论基于 `2026-03-31` 的 live 验证：
+
+- 官方 Vertex `channel 318 (vertexsophie)` 直连已验证：
+  - `2` 张参考图可用
+- 本地 `4000` 端口、固定 `channel 318` 已验证：
+  - 单张 `WEBP` URL 参考图可用
+  - 单张 `JPEG` URL 参考图可用
+  - `2` 张 `PNG` URL 参考图可用
+  - `resolution: "1K"` 可用
+  - `resolution: "4K"` 可用
+  - `aspect_ratio: "1:1"` 可用
+  - `aspect_ratio: "21:9"` 可用
+  - `output_format: "png"` 可用
+  - `output_format: "jpg"` 可用
+  - 响应可直接返回 `data[].url`
+
+以下能力当前不要对客户写成已完全承诺：
+
+- 精确多图上限是否为 `8` 或更高
+- `2K`
+- 精确大文件 URL 上限
+- 精确 `30 MiB` 边界
+- 其他 `aspect_ratio` 组合
+- `output_compression` 的精确语义边界
+
+<Warning>
+  `nano-banana-pro` 当前只对外承诺 `image_input` URL 输入。`image` 字段会被服务端拒绝，`data:` / Base64 也不属于当前公开协议。
+</Warning>
+
+---
+
+## 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `model` | string | 是 | 固定为 `nano-banana-pro` |
+| `prompt` | string | 是 | 生成或编辑指令 |
+| `image_input` | string 或 string[] | 否 | 参考图 URL；当前公开保守范围先写 `1` 到 `2` 张 |
+| `resolution` | string | 否 | 当前公开承诺 `1K`、`4K` |
+| `aspect_ratio` | string | 否 | 当前公开承诺 `1:1`、`21:9` |
+| `output_format` | string | 否 | 当前公开承诺 `png`、`jpg` |
+| `n` | integer | 否 | 生成数量，默认 `1` |
+
+### 多图当前状态
+
+- `2` 张：已验证
+- 更高张数：上游 exact max 仍待补测，暂不对外承诺
+
+### 路由说明
+
+- 单图请求可以命中常规可用承载
+- 多图请求当前只会路由到官方 `Gemini / Vertex` carrier
+- 这是服务端内部路由策略，客户协议保持不变
+
+---
+
+## 请求示例
+
+### 单图编辑
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "nano-banana-pro",
+    "prompt": "把这张商品图改成超宽横幅 KV，背景更简洁，保留主体结构",
+    "image_input": [
+      "https://help-static-aliyun-doc.aliyuncs.com/file-manage-files/zh-CN/20250925/fpakfo/image36.webp"
+    ],
+    "resolution": "4K",
+    "aspect_ratio": "21:9",
+    "output_format": "png"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/v1/images/generations",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "nano-banana-pro",
+        "prompt": "把这张商品图改成超宽横幅 KV，背景更简洁，保留主体结构",
+        "image_input": [
+            "https://help-static-aliyun-doc.aliyuncs.com/file-manage-files/zh-CN/20250925/fpakfo/image36.webp"
+        ],
+        "resolution": "4K",
+        "aspect_ratio": "21:9",
+        "output_format": "png"
+    }
+)
+
+data = response.json()
+print(data["data"][0]["url"])
+```
+
+</CodeGroup>
+
+### 双图参考
+
+```json
+{
+  "model": "nano-banana-pro",
+  "prompt": "融合两张参考图的主体与构图，生成一张高质量主视觉图",
+  "image_input": [
+    "https://example.com/ref-1.png",
+    "https://example.com/ref-2.png"
+  ],
+  "resolution": "1K",
+  "aspect_ratio": "1:1"
+}
+```
+
+---
+
+## 响应示例
+
+默认建议直接消费 `data[].url`：
+
+```json
+{
+  "created": 1774846705,
+  "data": [
+    {
+      "url": "https://media.crazyrouter.com/task-artifacts/2026/03/30/sync-image/20260331073825672515332JyP6hAcs-1.png"
+    }
+  ]
+}
+```
+
+如果你需要拿到最终生图结果，直接读取 `data[0].url` 即可。当前 Crazyrouter 会把上游内联图片归档成可访问 URL，再返回给客户。
+
+---
+
+## 已验证结果摘要
+
+| 项目 | 当前状态 |
+|------|----------|
+| 单张 URL 参考图 | 已验证 |
+| `2` 张 URL 参考图 | 已验证 |
+| `WEBP` URL | 已验证 |
+| `JPEG` URL | 已验证 |
+| `PNG` URL | 已验证 |
+| `1K` | 已验证 |
+| `4K` | 已验证 |
+| `1:1` | 已验证 |
+| `21:9` | 已验证 |
+| `output_format = png` | 已验证 |
+| `output_format = jpg` | 已验证 |
+| 精确 `8` 图上限 | `Beta` |
+| 精确 `30 MiB` URL 边界 | `Beta` |
+| `2K` | `Beta` |
+
+## 当前已知限制
+
+- 不接受 `image`
+- 不接受 `data:` / Base64 作为公开输入协议
+- 当前文档不承诺高于 `2` 张的多图输入
+- 当前文档不承诺精确 `30 MiB` URL 边界
+- 当前文档不承诺所有截图列出的比例和参数都已经完全闭环
+
+<Note>
+  如果你需要 Gemini 原生 `generateContent` 形式的图片接口，请看 [Gemini 图片生成](/chat/gemini/image-gen) 与 [Gemini 图片编辑](/chat/gemini/image-edit)。如果你更看重多图张数，参考 [Nano Banana](/images/nano-banana) 与 [Nano Banana 2](/images/nano-banana-2)。
+</Note>

@@ -1,51 +1,112 @@
 ---
 title: "Doubao Seedream"
-description: "Use Doubao Seedream models for image generation, supporting text-to-image, image-to-image, multi-image fusion, and group output"
+description: "Use the Doubao Seedream family through the OpenAI Images-compatible public contract"
 ---
 
 # Doubao Seedream
 
-Doubao Seedream is an image generation model by ByteDance, supporting high-quality text-to-image and image-to-image generation.
-
-## Supported Models
-
-| Model | Description |
-|-------|-------------|
-| `doubao-seedream-3-0` | Seedream 3.0 |
-| `doubao-seedream-4-0` | Seedream 4.0 |
-| `doubao-seedream-4-5` | Seedream 4.5, latest version |
-
----
-
-## Text-to-Image
-
 ```
-POST /fal-ai/seedream/text-to-image
+POST /v1/images/generations
 ```
+
+Crazyrouter exposes the `Seedream` image family through the OpenAI Images-compatible public contract. Clients keep using `/v1/images/generations`; ByteDance official and other third-party channels stay internal as providers only.
+
+## Public Models
+
+| Model | Official counterpart | Customer-facing capability | Doc state |
+|------|----------------------|----------------------------|-----------|
+| `doubao-seedream-4-0` | Seedream 4.0 | text-to-image, image-to-image, multi-reference, grouped output | Beta |
+| `doubao-seedream-4-5` | Seedream 4.5 | text-to-image, image-to-image, multi-reference, grouped output | Beta |
+| `doubao-seedream-5-0` | Seedream 5.0 lite | text-to-image, image-to-image, multi-reference, grouped output | Beta |
+| `doubao-seedream-3-0` | Seedream 3.0 | compatibility only | Legacy |
+
+<Note>
+  “Beta” here means the customer-facing contract and official capability definition are aligned first, while production carrier closure and live artifact evidence are still being completed.
+</Note>
+
+## Public Contract
 
 ### Request Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `prompt` | string | Yes | Image description prompt |
-| `model` | string | No | Model name, defaults to `doubao-seedream-4-5` |
-| `size` | string | No | Image size, e.g. `1024x1024` |
-| `n` | integer | No | Number of images to generate |
-| `negative_prompt` | string | No | Negative prompt |
+| `model` | string | Yes | `doubao-seedream-4-0`, `doubao-seedream-4-5`, or `doubao-seedream-5-0` |
+| `prompt` | string | Yes | generation prompt |
+| `image_input` | string or string[] | No | reference image URL(s); official 4.0 / 4.5 / 5.0 lite currently document up to `14` images |
+| `size` | string | No | output size. `Seedream 4.5` officially supports `2K`, `4K`, and explicit width×height inside the official range |
+| `n` | integer | No | output image count, default `1` |
+| `response_format` | string | No | `url` or `b64_json` |
+| `watermark` | boolean | No | whether to enable watermark |
+| `sequential_image_generation` | string | No | `auto` or `disabled`; used for grouped-output semantics |
+| `optimize_prompt_options` | object | No | official prompt optimization options; `Seedream 4.5` and `5.0 lite` are currently aligned only with `mode: "standard"` |
 
-### Request Example
+### Reference Image Limits
+
+- `Seedream 4.0`, `4.5`, and `5.0 lite` officially support up to `14` reference images
+- maximum single reference image size is `10MB`
+- officially supported input formats now include `jpeg`, `png`, `webp`, `bmp`, `tiff`, and `gif`
+- officially supported input aspect-ratio range is `1/16` to `16`
+
+### Request Examples
+
+<CodeGroup>
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/fal-ai/seedream/text-to-image \
+curl -X POST https://crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "prompt": "A cute Shiba Inu wearing a kimono, sitting under a cherry blossom tree",
     "model": "doubao-seedream-4-5",
-    "size": "1024x1024",
-    "n": 1
+    "prompt": "A premium product poster featuring a transparent glass perfume bottle with soft morning haze lighting and a minimal Chinese title",
+    "size": "2K",
+    "n": 1,
+    "response_format": "url",
+    "watermark": false,
+    "optimize_prompt_options": {
+      "mode": "standard"
+    }
   }'
 ```
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "doubao-seedream-4-5",
+    "prompt": "Generate a group of product posters for the same character while keeping the subject consistent and varying the camera angle and composition",
+    "image_input": [
+      "https://example.com/ref-1.png",
+      "https://example.com/ref-2.png"
+    ],
+    "size": "2K",
+    "sequential_image_generation": "auto",
+    "response_format": "url",
+    "optimize_prompt_options": {
+      "mode": "standard"
+    }
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.images.generate(
+    model="doubao-seedream-4-5",
+    prompt="A premium product poster featuring a transparent glass perfume bottle with soft morning haze lighting and a minimal Chinese title",
+    size="2K",
+    n=1
+)
+
+print(response.data[0].url)
+```
+
+</CodeGroup>
 
 ### Response Example
 
@@ -54,102 +115,25 @@ curl -X POST https://crazyrouter.com/fal-ai/seedream/text-to-image \
   "created": 1709123456,
   "data": [
     {
-      "url": "https://crazyrouter.com/files/seedream_abc123.png"
+      "url": "https://crazyrouter.com/files/seedream_image_abc123.png"
     }
   ]
 }
 ```
 
----
+## Official Billing Truth
 
-## Image-to-Image
+The currently confirmed official truth is billing per successfully generated image, not token-display pricing.
 
-```
-POST /fal-ai/seedream/image-to-image
-```
+| Model | Official billing | Official price | Current doc state |
+|------|-------------------|----------------|-------------------|
+| `doubao-seedream-4-0` | per image | `$0.03 / image` | officially aligned |
+| `doubao-seedream-4-5` | per image | `$0.04 / image` | officially aligned |
+| `doubao-seedream-5-0` | per image | official price still pending confirmation | Beta |
 
-Generate new images based on a reference image.
+## Alignment Notes
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `prompt` | string | Yes | Description prompt |
-| `image` | string | Yes | Reference image URL |
-| `strength` | number | No | Variation strength, 0-1, higher values produce more variation |
-
-```bash cURL
-curl -X POST https://crazyrouter.com/fal-ai/seedream/image-to-image \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "prompt": "Convert the photo to oil painting style",
-    "image": "https://example.com/photo.jpg",
-    "strength": 0.7
-  }'
-```
-
----
-
-## Multi-Image Fusion
-
-```
-POST /fal-ai/seedream/multi-image-fusion
-```
-
-Fuse multiple images to generate a new image.
-
-```bash cURL
-curl -X POST https://crazyrouter.com/fal-ai/seedream/multi-image-fusion \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "prompt": "Fuse the style and content of both images",
-    "images": [
-      "https://example.com/image1.jpg",
-      "https://example.com/image2.jpg"
-    ]
-  }'
-```
-
----
-
-## Group Output
-
-```
-POST /fal-ai/seedream/group-output
-```
-
-Generate multiple images with different angles or styles in a single request.
-
-```bash cURL
-curl -X POST https://crazyrouter.com/fal-ai/seedream/group-output \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "prompt": "A modern minimalist living room design",
-    "n": 4,
-    "size": "1024x1024"
-  }'
-```
-
----
-
-## Seedance Video
-
-Doubao also provides Seedance video generation capabilities using the `seedance-lite` model.
-
-```bash cURL
-curl -X POST https://crazyrouter.com/v1/video/create \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "model": "seedance-lite",
-    "prompt": "A cat chasing butterflies in a garden",
-    "aspect_ratio": "16:9"
-  }'
-```
-
-For detailed Seedance video API documentation, see [Seedance Video](/en/video/seedance).
-
-<Note>
-  Seedream models have excellent understanding of Chinese prompts. Using Chinese descriptions is recommended for better results.
-</Note>
+- The customer-facing contract has been narrowed to `/v1/images/generations`
+- `Seedream 4.5` currently centers on official `2K` and `4K` sizing, with default `2048x2048`
+- `optimize_prompt_options.mode` is currently aligned only as `standard` for `Seedream 4.5` and `5.0 lite`; `fast` is not a public commitment yet
+- `Seedream 3.0` stays as a compatibility alias, but the official-alignment focus of this page is now `4.0 / 4.5 / 5.0 lite`

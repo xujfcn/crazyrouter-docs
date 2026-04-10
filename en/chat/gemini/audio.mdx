@@ -1,0 +1,75 @@
+---
+title: "Gemini Audio Understanding"
+description: "Gemini native audio understanding documented from successful Crazyrouter request patterns on 2026-04-08"
+---
+
+# Gemini Audio Understanding
+
+```text
+POST /v1beta/models/{model}:generateContent
+```
+
+As of `2026-04-08`, successful Crazyrouter and local `:4000` retests show:
+
+- `gemini-2.5-pro` can read `audio/wav`
+- the currently verified primary path is `inlineData`
+- short audio classification, transcription, language hints, and summaries can be requested directly in text
+
+---
+
+## Verified Minimal Request
+
+```bash
+curl "https://crazyrouter.com/v1beta/models/gemini-2.5-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "inlineData": {
+              "mimeType": "audio/wav",
+              "data": "BASE64_WAV_DATA"
+            }
+          },
+          {
+            "text": "Return JSON with transcript, language, and summary."
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "maxOutputTokens": 512
+    }
+  }'
+```
+
+Observed successful response shape:
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "```json\n{\n  \"transcript\": \"ding\",\n  \"language\": \"zh-CN\",\n  \"summary\": \"The audio contains one short notification sound.\"\n}\n```"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+## Request Notes
+
+- Prefer `inlineData` for audio understanding
+- Keep `mimeType` aligned with the actual format, such as `audio/wav` or `audio/mpeg`
+- Put raw Base64 into `data` without a Data URL prefix
+- If you need strict JSON instead of JSON-looking text, combine this route with [Structured Outputs](/en/features/structured-outputs)
+
+<Note>
+  This page only covers the short-audio understanding path that was actually rechecked successfully. For longer STT workflows, realtime audio, or TTS, see the existing [STT](/en/audio/stt), [Realtime](/en/audio/realtime), and [TTS](/en/audio/tts) pages.
+</Note>

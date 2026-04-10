@@ -15,6 +15,10 @@ POST /v1/responses
 - 基础文本请求的 `output` 当前可稳定拿到 `message`
 - 流式请求可稳定观察到 `response.created`、`response.in_progress`、`response.output_item.added`、`response.content_part.added`、`response.output_text.delta`
 
+<Note>
+  Claude 当前不支持 `POST /v1/responses`。如果你在接 Claude，请改用 `POST /v1/messages` 或 `POST /v1/chat/completions`。
+</Note>
+
 ---
 
 ## 基本请求

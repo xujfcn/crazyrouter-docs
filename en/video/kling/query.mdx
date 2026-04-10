@@ -1,46 +1,70 @@
 ---
 title: "Kling Task Query"
-description: "Query the status and results of Kling video and image generation tasks"
+description: "Query the status and results of Kling video, image-generation, and virtual try-on tasks"
 ---
 
 # Kling Task Query
 
-## Query Text-to-Video Task
+## Queryable Task Paths
 
-```
-GET /kling/v1/videos/text2video/{task_id}
-```
-
-```bash cURL
-curl https://crazyrouter.com/kling/v1/videos/text2video/kling_t2v_abc123 \
-  -H "Authorization: Bearer YOUR_API_KEY"
-```
-
-## Query Image-to-Video Task
-
-```
-GET /kling/v1/videos/image2video/{task_id}
-```
-
-```bash cURL
-curl https://crazyrouter.com/kling/v1/videos/image2video/kling_i2v_abc123 \
-  -H "Authorization: Bearer YOUR_API_KEY"
-```
-
----
+| Path | Purpose |
+|------|---------|
+| `GET /kling/v1/videos/text2video/{task_id}` | Query a text-to-video task |
+| `GET /kling/v1/videos/image2video/{task_id}` | Query an image-to-video task |
+| `GET /kling/v1/videos/multi-image2video/{task_id}` | Query a multi-image reference video task |
+| `GET /kling/v1/videos/omni-video/{task_id}` | Query an omni-video task |
+| `GET /kling/v1/images/generations/{task_id}` | Query an image-generation task |
+| `GET /kling/v1/images/kolors-virtual-try-on/{task_id}` | Query a virtual try-on task |
 
 ## Response Format
+
+All Kling query endpoints return the same task envelope:
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "error": null,
+    "format": "mp4",
+    "metadata": null,
+    "status": "succeeded",
+    "task_id": "866168216002236456",
+    "url": "https://media.crazyrouter.com/task-artifacts/2026/03/26/50/textGenerate/866168216002236456.m4v"
+  }
+}
+```
+
+### Queued
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "error": null,
+    "format": "mp4",
+    "metadata": null,
+    "status": "queued",
+    "task_id": "task_abc123",
+    "url": ""
+  }
+}
+```
 
 ### Processing
 
 ```json
 {
-  "code": 0,
-  "message": "success",
+  "code": "success",
+  "message": "",
   "data": {
-    "task_id": "kling_t2v_abc123",
-    "task_status": "processing",
-    "task_status_msg": "Video generating"
+    "error": null,
+    "format": "mp4",
+    "metadata": null,
+    "status": "processing",
+    "task_id": "task_abc123",
+    "url": ""
   }
 }
 ```
@@ -49,21 +73,15 @@ curl https://crazyrouter.com/kling/v1/videos/image2video/kling_i2v_abc123 \
 
 ```json
 {
-  "code": 0,
-  "message": "success",
+  "code": "success",
+  "message": "",
   "data": {
-    "task_id": "kling_t2v_abc123",
-    "task_status": "succeed",
-    "task_status_msg": "Success",
-    "task_result": {
-      "videos": [
-        {
-          "id": "video_001",
-          "url": "https://cdn.klingai.com/videos/...",
-          "duration": "5.0"
-        }
-      ]
-    }
+    "error": null,
+    "format": "mp4",
+    "metadata": null,
+    "status": "succeeded",
+    "task_id": "866168216002236456",
+    "url": "https://media.crazyrouter.com/task-artifacts/2026/03/26/50/textGenerate/866168216002236456.m4v"
   }
 }
 ```
@@ -72,12 +90,18 @@ curl https://crazyrouter.com/kling/v1/videos/image2video/kling_i2v_abc123 \
 
 ```json
 {
-  "code": 0,
-  "message": "success",
+  "code": "success",
+  "message": "",
   "data": {
-    "task_id": "kling_t2v_abc123",
-    "task_status": "failed",
-    "task_status_msg": "Content moderation failed"
+    "error": {
+      "message": "content moderation failed",
+      "code": "task_failed"
+    },
+    "format": "mp4",
+    "metadata": null,
+    "status": "failed",
+    "task_id": "task_abc123",
+    "url": ""
   }
 }
 ```
@@ -86,14 +110,14 @@ curl https://crazyrouter.com/kling/v1/videos/image2video/kling_i2v_abc123 \
 
 | Status | Description |
 |--------|-------------|
-| `submitted` | Submitted |
-| `processing` | Processing |
-| `succeed` | Succeeded |
-| `failed` | Failed |
+| `queued` | submitted or waiting in queue |
+| `processing` | generation in progress |
+| `succeeded` | completed and directly fetchable via `url` |
+| `failed` | terminal failure |
 
 ---
 
-## Complete Workflow Example
+## End-to-End Example
 
 ```python Python
 import requests
@@ -106,31 +130,37 @@ headers = {
     "Authorization": f"Bearer {API_KEY}"
 }
 
-# 1. Submit text-to-video task
-resp = requests.post(f"{BASE_URL}/kling/v1/videos/text2video", headers=headers, json={
-    "model_name": "kling-v1-6",
-    "prompt": "A cat chasing butterflies in a garden",
-    "duration": "5",
-    "aspect_ratio": "16:9"
-})
-task_id = resp.json()["data"]["task_id"]
+# 1. Submit a text-to-video task
+resp = requests.post(
+    f"{BASE_URL}/kling/v1/videos/text2video",
+    headers=headers,
+    json={
+        "model_name": "kling-v2-5-turbo",
+        "prompt": "A cat chasing butterflies in a garden",
+        "duration": "5",
+        "aspect_ratio": "16:9"
+    }
+)
+task_id = resp.json()["task_id"]
 
 # 2. Poll for results
 while True:
-    resp = requests.get(f"{BASE_URL}/kling/v1/videos/text2video/{task_id}", headers=headers)
+    resp = requests.get(
+        f"{BASE_URL}/kling/v1/videos/text2video/{task_id}",
+        headers=headers
+    )
     data = resp.json()["data"]
 
-    if data["task_status"] == "succeed":
-        video_url = data["task_result"]["videos"][0]["url"]
-        print(f"Video URL: {video_url}")
+    if data["status"] == "succeeded":
+        print(f"Video URL: {data['url']}")
         break
-    elif data["task_status"] == "failed":
-        print(f"Failed: {data['task_status_msg']}")
+    if data["status"] == "failed":
+        print(f"Failed: {data['error']}")
         break
 
     time.sleep(10)
 ```
 
 <Note>
-  A polling interval of 10 seconds is recommended. Video generation typically takes 2-5 minutes.
+  Kling standard-video, omni-video, image-generation, and try-on tasks may all return Crazyrouter archived URLs under `media.crazyrouter.com/...`. Client integrations should consume `url` directly instead of depending on upstream raw CDN URLs.
 </Note>

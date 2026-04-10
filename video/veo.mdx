@@ -1,17 +1,62 @@
 ---
 title: "Veo 3.1"
-description: "使用 Google Veo 3.1 模型生成视频"
+description: "通过 Crazyrouter 统一视频 API 调用 Veo 3.1 Fast 与 Veo 3.1 Quality"
 ---
 
 # Veo 3.1
 
-Google Veo 3.1 是目前最先进的视频生成模型之一，支持高质量的文生视频和图生视频。
+当前 Crazyrouter 对客公开的 Veo 3.1 模型为：
+
+- `veo-3.1-fast`
+- `veo-3.1-quality`
+
+这两个名称是对客 public alias。内部 canonical provider 名称不会直接暴露给客户。
 
 ## 通过统一视频 API 调用
 
 ```
 POST /v1/video/create
 ```
+
+当前这页只覆盖已经对客收口的能力：
+
+- 文本生视频
+- 单图生视频
+
+Google 官方文档中的 `referenceImages`、style reference、以及更细的 provider-native 模式，不属于当前公开 contract。
+
+### 当前可用模型
+
+| 模型 | 说明 |
+|------|------|
+| `veo-3.1-fast` | 更偏低延迟，适合更快拿到首个可用结果 |
+| `veo-3.1-quality` | 更偏质量优先，适合默认主展示 |
+
+### 能力状态
+
+| 能力 / 规格 | 状态 | 说明 |
+|------|------|------|
+| 文生视频 `720P / 1080P` | `Verified` | 当前公开 contract 已收口 |
+| 单图生视频 `720P / 1080P` | `Verified` | 当前公开 contract 已收口 |
+| 音频开启行 | `Beta` | 官方能力存在，但当前公开 artifact 仍待补充 |
+| `start_end` | `Beta` | 当前公开页尚未承诺 |
+| `referenceImages` / reference assets | `Beta` | 当前公开页尚未承诺 |
+| `4K` | `Beta` | 当前公开页尚未承诺 |
+
+<Note>
+  Pricing 页面与这页文档使用同一套状态口径：`Verified` 表示当前已有最小 live 闭环，`Beta` 表示官方能力存在但当前公开验证或边界仍在补充。
+</Note>
+
+### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `model` | string | 是 | `veo-3.1-fast` 或 `veo-3.1-quality` |
+| `prompt` | string | 是 | 视频描述提示词 |
+| `aspect_ratio` | string | 否 | 当前公开建议使用 `16:9` 或 `9:16` |
+| `size` | string | 否 | 当前公开建议使用 `720P` 或 `1080P` |
+| `images` | array | 否 | 单图生视频时传 `1` 张图片 URL |
+| `duration` | integer | 否 | 常见值为 `8` |
 
 ### 请求示例
 
@@ -22,7 +67,7 @@ curl -X POST https://crazyrouter.com/v1/video/create \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "veo3.1-components",
+    "model": "veo-3.1-quality",
     "prompt": "A cinematic shot of a spaceship landing on Mars, dust clouds rising, golden hour lighting",
     "aspect_ratio": "16:9"
   }'
@@ -38,7 +83,7 @@ response = requests.post(
         "Authorization": "Bearer YOUR_API_KEY"
     },
     json={
-        "model": "veo3.1-components",
+        "model": "veo-3.1-quality",
         "prompt": "A cinematic shot of a spaceship landing on Mars",
         "aspect_ratio": "16:9"
     }
@@ -58,6 +103,23 @@ print(f"任务 ID: {task_id}")
   "status": "processing",
   "status_update_time": 1709123456
 }
+```
+
+---
+
+## 单图生视频示例
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/video/create \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "veo-3.1-fast",
+    "prompt": "The person in the image slowly turns their head and smiles",
+    "images": ["https://example.com/portrait.jpg"],
+    "aspect_ratio": "9:16",
+    "size": "720P"
+  }'
 ```
 
 ---
@@ -84,35 +146,6 @@ curl "https://crazyrouter.com/v1/video/query?id=veo_task_abc123" \
 }
 ```
 
----
-
-## 通过 Fal.ai 格式调用
-
-```
-POST /fal-ai/veo3/run
-```
-
-```bash cURL
-curl -X POST https://crazyrouter.com/fal-ai/veo3/run \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "prompt": "A cinematic shot of a spaceship landing on Mars",
-    "aspect_ratio": "16:9",
-    "duration": "8s"
-  }'
-```
-
----
-
-## 可用模型
-
-| 模型 | 说明 |
-|------|------|
-| `veo3.1-components` | Veo 3.1，最新版本 |
-| `veo3` | Veo 3 |
-| `veo2` | Veo 2 |
-
 <Note>
-  Veo 3.1 生成的视频质量极高，但生成时间较长（通常 3-8 分钟）。建议轮询间隔为 15 秒。
+  Google 官方文档还描述了 Veo 3.1 的 `reference asset images`、以及更细的 provider-native 能力边界。当前 Crazyrouter 对客公开页先只承诺 `veo-3.1-fast` / `veo-3.1-quality` 下的文生视频与单图生视频；如果后续开放更多 Veo 一级能力，会单独补文档与验证记录。
 </Note>

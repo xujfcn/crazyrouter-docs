@@ -11,16 +11,17 @@ description: "Kling 高级功能：虚拟试穿"
 POST /kling/v1/images/kolors-virtual-try-on
 ```
 
-将服装图片应用到人物照片上。
+当前公开接通的 Kling 高级能力只有虚拟试穿。该路径已经完成 bounded 成功验证，并已打通 `任务成功 -> R2 归档 -> media.crazyrouter.com` 闭环。
 
 ### 请求参数
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| `model_name` | string | 是 | 模型名称 |
-| `human_image` | string | 是 | 人物照片 URL |
-| `cloth_image` | string | 是 | 服装图片 URL |
+| `model_name` | string | 否 | 常见模型：`kolors-virtual-try-on-v1`、`kolors-virtual-try-on-v1-5` |
+| `human_image` | string | 是 | 人物图，支持 URL 或 Base64 |
+| `cloth_image` | string | 是 | 服装图，支持 URL 或 Base64 |
 | `callback_url` | string | 否 | 回调地址 |
+| `external_task_id` | string | 否 | 业务侧自定义任务 ID |
 
 ### 请求示例
 
@@ -31,8 +32,22 @@ curl -X POST https://crazyrouter.com/kling/v1/images/kolors-virtual-try-on \
   -d '{
     "model_name": "kolors-virtual-try-on-v1",
     "human_image": "https://example.com/person.jpg",
-    "cloth_image": "https://example.com/dress.jpg"
+    "cloth_image": "https://example.com/jacket.jpg"
   }'
+```
+
+### 提交成功响应示例
+
+```json
+{
+  "created_at": 1774585120,
+  "id": "866361099762425934",
+  "model": "kolors-virtual-try-on-v1",
+  "object": "video",
+  "progress": 0,
+  "status": "",
+  "task_id": "866361099762425934"
+}
 ```
 
 ## 查询试穿任务
@@ -42,10 +57,24 @@ GET /kling/v1/images/kolors-virtual-try-on/{task_id}
 ```
 
 ```bash cURL
-curl https://crazyrouter.com/kling/v1/images/kolors-virtual-try-on/kling_tryon_abc123 \
+curl https://crazyrouter.com/kling/v1/images/kolors-virtual-try-on/866361099762425934 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
+### 响应示例（已完成）
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "status": "succeeded",
+    "task_id": "866361099762425934",
+    "url": "https://media.crazyrouter.com/task-artifacts/2026/03/27/50/tryOnGenerate/866361099762425934.png"
+  }
+}
+```
+
 <Note>
-  当前公开接通的 Kling 高级能力为虚拟试穿。口型同步、视频延长、视频特效等其它高级能力仍未对外开放，不应按已可用接口调用。
+  当前不要把口型同步、视频延长、视频特效等其它 Kling 高级能力写成已开放接口。它们仍未进入 Crazyrouter 的公开 contract。
 </Note>

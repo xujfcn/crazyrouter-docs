@@ -1,138 +1,136 @@
 ---
 title: "Wan Video"
-description: "Use Wan models for text-to-video, image-to-video, and first-last frame video generation"
+description: "Wan video family overview. Customers use the Ali Bailian-compatible contract while Crazyrouter can route to official or third-party providers internally"
 ---
 
 # Wan Video
 
-Wan is a video generation model by Alibaba, supporting text-to-video, image-to-video, and first-last frame video generation.
+The Wan family is currently exposed through the Ali Bailian-compatible public contract:
 
-## Text-to-Video
+- `POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis`
+- `GET /alibailian/api/v1/tasks/{task_id}`
 
-```
-POST /fal-ai/wan/text-to-video
-```
+For the full request and task-query schema, see [Ali Bailian Video API](/en/video/alibailian). This page closes only the first batch of public `Wan` models, capabilities, and billing truth.
 
-### Request Parameters
+## First-Batch Models
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `prompt` | string | Yes | Video description prompt |
-| `model` | string | No | Model name, e.g. `wan-ai/wan2.1-t2v-14b` |
-| `aspect_ratio` | string | No | Aspect ratio: `16:9`, `9:16`, `1:1` |
-| `duration` | string | No | Video duration |
-| `negative_prompt` | string | No | Negative prompt |
-
-### Request Examples
-
-<CodeGroup>
-
-```bash cURL
-curl -X POST https://crazyrouter.com/fal-ai/wan/text-to-video \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "prompt": "A time-lapse of a flower blooming in a garden, soft natural lighting",
-    "aspect_ratio": "16:9"
-  }'
-```
-
-```python Python
-import requests
-
-response = requests.post(
-    "https://crazyrouter.com/fal-ai/wan/text-to-video",
-    headers={
-        "Content-Type": "application/json",
-        "Authorization": "Bearer YOUR_API_KEY"
-    },
-    json={
-        "prompt": "A time-lapse of a flower blooming in a garden",
-        "aspect_ratio": "16:9"
-    }
-)
-
-print(response.json())
-```
-
-</CodeGroup>
-
-### Response Example
-
-```json
-{
-  "video": {
-    "url": "https://fal.media/files/.../output.mp4",
-    "content_type": "video/mp4"
-  },
-  "seed": 42
-}
-```
-
----
-
-## Image-to-Video
-
-```
-POST /fal-ai/wan/image-to-video
-```
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `prompt` | string | Yes | Video description |
-| `image_url` | string | Yes | Reference image URL |
-| `aspect_ratio` | string | No | Aspect ratio |
-
-```bash cURL
-curl -X POST https://crazyrouter.com/fal-ai/wan/image-to-video \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "prompt": "The flower in the image starts swaying in the wind",
-    "image_url": "https://example.com/flower.jpg"
-  }'
-```
-
----
-
-## First-Last Frame Video
-
-```
-POST /fal-ai/wan/first-last-frame
-```
-
-Provide first and last frame images to generate a transition video.
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `prompt` | string | No | Transition description |
-| `first_frame_url` | string | Yes | First frame image URL |
-| `last_frame_url` | string | Yes | Last frame image URL |
-
-```bash cURL
-curl -X POST https://crazyrouter.com/fal-ai/wan/first-last-frame \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "prompt": "Smooth morphing transition",
-    "first_frame_url": "https://example.com/frame_start.jpg",
-    "last_frame_url": "https://example.com/frame_end.jpg"
-  }'
-```
-
-Also available via the Unified Video API:
-
-```json
-{
-  "model": "wan-ai/wan2.1-i2v-14b-720p",
-  "prompt": "Smooth transition",
-  "images": [
-    "https://example.com/frame_start.jpg",
-    "https://example.com/frame_end.jpg"
-  ]
-}
-```
+| Model | Customer-facing capability | Official billing truth | Current state |
+|------|-----------------------------|------------------------|---------------|
+| `wan2.5-t2v-preview` | text-to-video | per second | verified |
+| `wan2.5-i2v-preview` | image-to-video | per second | verified |
+| `wan2.2-t2v-plus` | text-to-video | per second | verified |
+| `wan2.2-i2v-plus` | image-to-video | per second | verified |
+| `wan2.2-i2v-flash` | image-to-video | per second | verified |
+| `wan2.2-kf2v-flash` | first-last-frame video | per second | Beta |
+| `wan2.2-s2v` | subject-reference video | per second | Beta |
 
 <Note>
-  Wan models excel at natural scenes and human motion. The first-last frame mode is ideal for creating smooth scene transitions.
+  `wan2.2-kf2v-flash` and `wan2.2-s2v` are already aligned in code and billing capability buckets, but their live artifact closure is still in progress, so they remain Beta.
 </Note>
+
+## Capabilities And Official Prices
+
+| Model | Capability bucket | Resolution | Official price |
+|------|--------------------|------------|----------------|
+| `wan2.5-t2v-preview` | text-to-video | `480P / 720P / 1080P` | `¥0.30 / ¥0.60 / ¥1.00 / sec` |
+| `wan2.5-i2v-preview` | image-to-video | `480P / 720P / 1080P` | `¥0.30 / ¥0.60 / ¥1.00 / sec` |
+| `wan2.2-t2v-plus` | text-to-video | `480P / 1080P` | `¥0.14 / ¥0.70 / sec` |
+| `wan2.2-i2v-plus` | image-to-video | `480P / 1080P` | `¥0.14 / ¥0.70 / sec` |
+| `wan2.2-i2v-flash` | image-to-video | `480P / 720P / 1080P` | `¥0.10 / ¥0.20 / ¥0.48 / sec` |
+| `wan2.2-kf2v-flash` | first-last-frame video | `480P / 720P / 1080P` | `¥0.10 / ¥0.20 / ¥0.48 / sec` |
+| `wan2.2-s2v` | subject-reference video | `480P / 720P` | `¥0.50 / ¥0.90 / sec` |
+
+## Protocol Conventions
+
+### 1. Text-to-video
+
+- Key fields: `model`, `input.prompt`, `parameters.resolution`, `parameters.duration`
+- Typical models: `wan2.5-t2v-preview`, `wan2.2-t2v-plus`
+
+### 2. Image-to-video
+
+- Key field: `input.img_url`
+- Typical models: `wan2.5-i2v-preview`, `wan2.2-i2v-plus`, `wan2.2-i2v-flash`
+
+### 3. First-last-frame video
+
+- Key fields: `input.first_frame_url`, `input.last_frame_url`
+- Typical model: `wan2.2-kf2v-flash`
+
+### 4. Subject-reference video
+
+- Key field: `input.image_url`
+- Typical model: `wan2.2-s2v`
+
+## Request Examples
+
+### Image-to-video
+
+```bash cURL
+curl -X POST https://crazyrouter.com/alibailian/api/v1/services/aigc/video-generation/video-synthesis \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "wan2.5-i2v-preview",
+    "input": {
+      "prompt": "Make the subject turn toward the camera",
+      "img_url": "https://example.com/first-frame.png"
+    },
+    "parameters": {
+      "resolution": "720P",
+      "duration": 5,
+      "prompt_extend": true,
+      "audio": true
+    }
+  }'
+```
+
+### First-last-frame video
+
+```json
+{
+  "model": "wan2.2-kf2v-flash",
+  "input": {
+    "prompt": "A smooth transition from day to night",
+    "first_frame_url": "https://example.com/frame-start.png",
+    "last_frame_url": "https://example.com/frame-end.png"
+  },
+  "parameters": {
+    "resolution": "720P",
+    "duration": 5
+  }
+}
+```
+
+### Subject-reference video
+
+```json
+{
+  "model": "wan2.2-s2v",
+  "input": {
+    "prompt": "Animate the reference portrait with light natural speaking motion",
+    "image_url": "https://example.com/portrait.png",
+    "audio_url": "https://example.com/voice.mp3"
+  },
+  "parameters": {
+    "resolution": "720P",
+    "duration": 5
+  }
+}
+```
+
+## Task Retrieval
+
+Wan remains an async task family. After creation, query:
+
+```http
+GET /alibailian/api/v1/tasks/{task_id}
+```
+
+When `output.task_status` reaches success, use `output.video_url` as the final video result.
+
+## Scope Notes
+
+- The customer-facing contract is the Ali Bailian-compatible path. The old Fal-only route description is no longer the source of truth.
+- Crazyrouter can internally route to official, ApiPass, Kie, or other third-party providers, but those providers do not define customer protocols.
+- Beta rows can still be shown publicly now; after launch, use production task logs to close live evidence and then remove the Beta label.

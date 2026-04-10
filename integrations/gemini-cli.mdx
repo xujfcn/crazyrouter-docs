@@ -1,20 +1,33 @@
 ---
 title: 'Gemini CLI 配置教程'
-description: '在 Gemini CLI 中配置 Crazyrouter API，并切换到当前已验证过的 Gemini 最新模型'
+description: '在 Gemini CLI 中配置 Crazyrouter API，并使用已经过真实请求验证的模型与认证方式'
 ---
 
 ## 概述
 
-Gemini CLI 是 Google 的命令行 AI 助手。通过配置 Crazyrouter 的 Gemini 原生入口，你可以在命令行中直接使用已在生产环境验证过的 Gemini 最新模型。
+Gemini CLI 是 Google 的命令行 AI 助手。通过配置 Crazyrouter 的 Gemini 原生入口，你可以在命令行中直接使用已经在本站生产环境完成真实请求验证的 Gemini 模型。
 
 ## 配置方法
 
 ### 环境变量
 
+Gemini CLI 当前版本在 API Key 模式下，至少需要显式提供 `GEMINI_API_KEY`。如果你要接入 Crazyrouter 的 Gemini 原生入口，建议同时配置这 3 个环境变量：
+
 ```bash
 export GEMINI_API_KEY=sk-xxx
-export GEMINI_BASE_URL=https://crazyrouter.com
+export GEMINI_MODEL=gemini-3.1-pro-preview
+export GOOGLE_GEMINI_BASE_URL=https://crazyrouter.com
 ```
+
+Windows PowerShell:
+
+```powershell
+$env:GEMINI_API_KEY="sk-xxx"
+$env:GEMINI_MODEL="gemini-3.1-pro-preview"
+$env:GOOGLE_GEMINI_BASE_URL="https://crazyrouter.com"
+```
+
+如果你希望每次打开终端自动生效，可以写入 `~/.gemini/.env` 或 PowerShell profile。
 
 ### 配置文件
 
@@ -22,10 +35,33 @@ export GEMINI_BASE_URL=https://crazyrouter.com
 
 ```json
 {
+  "security": {
+    "auth": {
+      "selectedType": "gemini-api-key"
+    }
+  },
   "apiKey": "sk-xxx",
   "baseUrl": "https://crazyrouter.com",
-  "model": "gemini-3-pro-preview"
+  "model": {
+    "name": "gemini-3.1-pro-preview"
+  }
 }
+```
+
+注意：
+
+- 不要把认证方式保留为 `oauth-personal`，否则 CLI 会继续走 Google 登录。
+- 不要把 `model` 写成字符串，当前版本应使用 `model.name`。
+- 仅写 `settings.json` 在部分场景下还不够，命令行模式仍可能要求 `GEMINI_API_KEY` 环境变量。
+
+### `.gemini/.env` 示例
+
+你也可以直接写入 `~/.gemini/.env`：
+
+```bash
+GEMINI_API_KEY=sk-xxx
+GEMINI_MODEL=gemini-3.1-pro-preview
+GOOGLE_GEMINI_BASE_URL=https://crazyrouter.com
 ```
 
 ### 启动
@@ -38,8 +74,8 @@ gemini
 
 | 模型 | 说明 |
 |------|------|
-| `gemini-3-pro-preview` | 2026 年 3 月 23 日已在生产环境实测成功，适合作为 Gemini CLI 主基线 |
+| `gemini-3.1-pro-preview` | 2026 年 4 月 8 日已在 Crazyrouter 生产环境通过 Gemini CLI 真实请求实测成功，适合作为当前主基线 |
 
 <Note>
-  Crazyrouter 同时支持 Gemini 原生 API 格式和 OpenAI 兼容格式。Gemini CLI 使用 Gemini 原生格式，文档中的 `gemini-3-pro-preview` 已完成生产环境实测。
+  Crazyrouter 同时支持 Gemini 原生 API 格式和 OpenAI 兼容格式。Gemini CLI 使用 Gemini 原生格式。本文档中的 `gemini-3.1-pro-preview`、`gemini-api-key` 认证方式，以及 `GOOGLE_GEMINI_BASE_URL=https://crazyrouter.com` 已基于真实 CLI 请求验证通过。
 </Note>

@@ -1,46 +1,70 @@
 ---
 title: "Kling 任务查询"
-description: "查询 Kling 视频和图像生成任务的状态和结果"
+description: "查询 Kling 视频、图片生成和虚拟试穿任务的状态与结果"
 ---
 
 # Kling 任务查询
 
-## 查询文生视频任务
+## 可查询的任务路径
 
-```
-GET /kling/v1/videos/text2video/{task_id}
-```
-
-```bash cURL
-curl https://crazyrouter.com/kling/v1/videos/text2video/kling_t2v_abc123 \
-  -H "Authorization: Bearer YOUR_API_KEY"
-```
-
-## 查询图生视频任务
-
-```
-GET /kling/v1/videos/image2video/{task_id}
-```
-
-```bash cURL
-curl https://crazyrouter.com/kling/v1/videos/image2video/kling_i2v_abc123 \
-  -H "Authorization: Bearer YOUR_API_KEY"
-```
-
----
+| 路径 | 用途 |
+|------|------|
+| `GET /kling/v1/videos/text2video/{task_id}` | 查询文生视频任务 |
+| `GET /kling/v1/videos/image2video/{task_id}` | 查询图生视频任务 |
+| `GET /kling/v1/videos/multi-image2video/{task_id}` | 查询参考图生视频任务 |
+| `GET /kling/v1/videos/omni-video/{task_id}` | 查询 Omni 视频任务 |
+| `GET /kling/v1/images/generations/{task_id}` | 查询图片生成任务 |
+| `GET /kling/v1/images/kolors-virtual-try-on/{task_id}` | 查询虚拟试穿任务 |
 
 ## 响应格式
+
+所有 Kling 查询接口统一返回同一类任务结构：
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "error": null,
+    "format": "mp4",
+    "metadata": null,
+    "status": "succeeded",
+    "task_id": "866168216002236456",
+    "url": "https://media.crazyrouter.com/task-artifacts/2026/03/26/50/textGenerate/866168216002236456.m4v"
+  }
+}
+```
+
+### 排队中
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "error": null,
+    "format": "mp4",
+    "metadata": null,
+    "status": "queued",
+    "task_id": "task_abc123",
+    "url": ""
+  }
+}
+```
 
 ### 处理中
 
 ```json
 {
-  "code": 0,
-  "message": "success",
+  "code": "success",
+  "message": "",
   "data": {
-    "task_id": "kling_t2v_abc123",
-    "task_status": "processing",
-    "task_status_msg": "视频生成中"
+    "error": null,
+    "format": "mp4",
+    "metadata": null,
+    "status": "processing",
+    "task_id": "task_abc123",
+    "url": ""
   }
 }
 ```
@@ -49,21 +73,15 @@ curl https://crazyrouter.com/kling/v1/videos/image2video/kling_i2v_abc123 \
 
 ```json
 {
-  "code": 0,
-  "message": "success",
+  "code": "success",
+  "message": "",
   "data": {
-    "task_id": "kling_t2v_abc123",
-    "task_status": "succeed",
-    "task_status_msg": "成功",
-    "task_result": {
-      "videos": [
-        {
-          "id": "video_001",
-          "url": "https://cdn.klingai.com/videos/...",
-          "duration": "5.0"
-        }
-      ]
-    }
+    "error": null,
+    "format": "mp4",
+    "metadata": null,
+    "status": "succeeded",
+    "task_id": "866168216002236456",
+    "url": "https://media.crazyrouter.com/task-artifacts/2026/03/26/50/textGenerate/866168216002236456.m4v"
   }
 }
 ```
@@ -72,12 +90,18 @@ curl https://crazyrouter.com/kling/v1/videos/image2video/kling_i2v_abc123 \
 
 ```json
 {
-  "code": 0,
-  "message": "success",
+  "code": "success",
+  "message": "",
   "data": {
-    "task_id": "kling_t2v_abc123",
-    "task_status": "failed",
-    "task_status_msg": "内容审核未通过"
+    "error": {
+      "message": "content moderation failed",
+      "code": "task_failed"
+    },
+    "format": "mp4",
+    "metadata": null,
+    "status": "failed",
+    "task_id": "task_abc123",
+    "url": ""
   }
 }
 ```
@@ -86,10 +110,10 @@ curl https://crazyrouter.com/kling/v1/videos/image2video/kling_i2v_abc123 \
 
 | 状态 | 说明 |
 |------|------|
-| `submitted` | 已提交 |
-| `processing` | 处理中 |
-| `succeed` | 成功 |
-| `failed` | 失败 |
+| `queued` | 已提交或排队中 |
+| `processing` | 正在生成 |
+| `succeeded` | 已完成，`url` 可直接访问 |
+| `failed` | 终态失败 |
 
 ---
 
@@ -107,30 +131,36 @@ headers = {
 }
 
 # 1. 提交文生视频任务
-resp = requests.post(f"{BASE_URL}/kling/v1/videos/text2video", headers=headers, json={
-    "model_name": "kling-v1-6",
-    "prompt": "一只猫咪在花园里追蝴蝶",
-    "duration": "5",
-    "aspect_ratio": "16:9"
-})
-task_id = resp.json()["data"]["task_id"]
+resp = requests.post(
+    f"{BASE_URL}/kling/v1/videos/text2video",
+    headers=headers,
+    json={
+        "model_name": "kling-v2-5-turbo",
+        "prompt": "一只猫咪在花园里追蝴蝶",
+        "duration": "5",
+        "aspect_ratio": "16:9"
+    }
+)
+task_id = resp.json()["task_id"]
 
 # 2. 轮询查询
 while True:
-    resp = requests.get(f"{BASE_URL}/kling/v1/videos/text2video/{task_id}", headers=headers)
+    resp = requests.get(
+        f"{BASE_URL}/kling/v1/videos/text2video/{task_id}",
+        headers=headers
+    )
     data = resp.json()["data"]
 
-    if data["task_status"] == "succeed":
-        video_url = data["task_result"]["videos"][0]["url"]
-        print(f"视频地址: {video_url}")
+    if data["status"] == "succeeded":
+        print(f"视频地址: {data['url']}")
         break
-    elif data["task_status"] == "failed":
-        print(f"失败: {data['task_status_msg']}")
+    if data["status"] == "failed":
+        print(f"失败: {data['error']}")
         break
 
     time.sleep(10)
 ```
 
 <Note>
-  建议轮询间隔为 10 秒，视频生成通常需要 2-5 分钟。
+  Kling 的标准视频、Omni 视频、图片和试穿任务结果都可能返回站内归档地址 `media.crazyrouter.com/...`。对客户端来说，优先消费 `url` 即可，无需再解析上游原始 CDN。
 </Note>

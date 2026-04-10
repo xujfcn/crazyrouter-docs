@@ -12,6 +12,10 @@ description: "基于生产环境复核，通过 Responses API 使用 GPT-5.4 的
 - `gpt-5.4`
 - `POST /v1/responses`
 
+<Note>
+  Claude 当前不支持 `POST /v1/responses`。如果你在接 Claude，请使用 `POST /v1/messages` 或 `POST /v1/chat/completions`，不要套用本页的 Responses 请求形态。
+</Note>
+
 ```
 POST /v1/responses
 ```

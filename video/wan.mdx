@@ -1,138 +1,136 @@
 ---
 title: "Wan 视频"
-description: "使用 Wan 模型进行文生视频、图生视频和首尾帧视频生成"
+description: "Wan 视频模型总览。对外优先使用阿里百炼兼容协议，Crazyrouter 内部承载可来自官方或第三方 provider"
 ---
 
 # Wan 视频
 
-Wan 是阿里巴巴推出的视频生成模型，支持文生视频、图生视频和首尾帧视频生成。
+Wan 系列当前对外优先使用阿里百炼兼容协议：
 
-## 文生视频
+- `POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis`
+- `GET /alibailian/api/v1/tasks/{task_id}`
 
-```
-POST /fal-ai/wan/text-to-video
-```
+完整请求体和任务查询格式请查看 [阿里百炼视频接口](/video/alibailian)。本页只收口当前首批对外开放的 `Wan` 模型、能力和计费口径。
 
-### 请求参数
+## 首批模型
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `prompt` | string | 是 | 视频描述提示词 |
-| `model` | string | 否 | 模型名称，如 `wan-ai/wan2.1-t2v-14b` |
-| `aspect_ratio` | string | 否 | 宽高比：`16:9`、`9:16`、`1:1` |
-| `duration` | string | 否 | 视频时长 |
-| `negative_prompt` | string | 否 | 负面提示词 |
-
-### 请求示例
-
-<CodeGroup>
-
-```bash cURL
-curl -X POST https://crazyrouter.com/fal-ai/wan/text-to-video \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "prompt": "A time-lapse of a flower blooming in a garden, soft natural lighting",
-    "aspect_ratio": "16:9"
-  }'
-```
-
-```python Python
-import requests
-
-response = requests.post(
-    "https://crazyrouter.com/fal-ai/wan/text-to-video",
-    headers={
-        "Content-Type": "application/json",
-        "Authorization": "Bearer YOUR_API_KEY"
-    },
-    json={
-        "prompt": "A time-lapse of a flower blooming in a garden",
-        "aspect_ratio": "16:9"
-    }
-)
-
-print(response.json())
-```
-
-</CodeGroup>
-
-### 响应示例
-
-```json
-{
-  "video": {
-    "url": "https://fal.media/files/.../output.mp4",
-    "content_type": "video/mp4"
-  },
-  "seed": 42
-}
-```
-
----
-
-## 图生视频
-
-```
-POST /fal-ai/wan/image-to-video
-```
-
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `prompt` | string | 是 | 视频描述 |
-| `image_url` | string | 是 | 参考图片 URL |
-| `aspect_ratio` | string | 否 | 宽高比 |
-
-```bash cURL
-curl -X POST https://crazyrouter.com/fal-ai/wan/image-to-video \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "prompt": "The flower in the image starts swaying in the wind",
-    "image_url": "https://example.com/flower.jpg"
-  }'
-```
-
----
-
-## 首尾帧视频
-
-```
-POST /fal-ai/wan/first-last-frame
-```
-
-提供首帧和尾帧图片，生成过渡视频。
-
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `prompt` | string | 否 | 过渡描述 |
-| `first_frame_url` | string | 是 | 首帧图片 URL |
-| `last_frame_url` | string | 是 | 尾帧图片 URL |
-
-```bash cURL
-curl -X POST https://crazyrouter.com/fal-ai/wan/first-last-frame \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "prompt": "Smooth morphing transition",
-    "first_frame_url": "https://example.com/frame_start.jpg",
-    "last_frame_url": "https://example.com/frame_end.jpg"
-  }'
-```
-
-也可通过统一视频 API 调用：
-
-```json
-{
-  "model": "wan-ai/wan2.1-i2v-14b-720p",
-  "prompt": "Smooth transition",
-  "images": [
-    "https://example.com/frame_start.jpg",
-    "https://example.com/frame_end.jpg"
-  ]
-}
-```
+| 模型 | 对客能力 | 官方计费口径 | 当前状态 |
+|------|----------|--------------|----------|
+| `wan2.5-t2v-preview` | 文生视频 | 按秒 | 已验证 |
+| `wan2.5-i2v-preview` | 图生视频 | 按秒 | 已验证 |
+| `wan2.2-t2v-plus` | 文生视频 | 按秒 | 已验证 |
+| `wan2.2-i2v-plus` | 图生视频 | 按秒 | 已验证 |
+| `wan2.2-i2v-flash` | 图生视频 | 按秒 | 已验证 |
+| `wan2.2-kf2v-flash` | 首尾帧生视频 | 按秒 | Beta |
+| `wan2.2-s2v` | 主体参考生视频 | 按秒 | Beta |
 
 <Note>
-  Wan 模型在自然场景和人物动作方面表现出色，首尾帧模式适合制作平滑的场景过渡。
+  `wan2.2-kf2v-flash` 与 `wan2.2-s2v` 已经完成代码和计费能力桶对齐，但当前 live artifact 还在继续补齐，所以先保留 Beta 标记。
 </Note>
+
+## 能力与官方价格
+
+| 模型 | 能力桶 | 分辨率 | 官方单价 |
+|------|--------|--------|----------|
+| `wan2.5-t2v-preview` | 文生视频 | `480P / 720P / 1080P` | `¥0.30 / ¥0.60 / ¥1.00 / 秒` |
+| `wan2.5-i2v-preview` | 图生视频 | `480P / 720P / 1080P` | `¥0.30 / ¥0.60 / ¥1.00 / 秒` |
+| `wan2.2-t2v-plus` | 文生视频 | `480P / 1080P` | `¥0.14 / ¥0.70 / 秒` |
+| `wan2.2-i2v-plus` | 图生视频 | `480P / 1080P` | `¥0.14 / ¥0.70 / 秒` |
+| `wan2.2-i2v-flash` | 图生视频 | `480P / 720P / 1080P` | `¥0.10 / ¥0.20 / ¥0.48 / 秒` |
+| `wan2.2-kf2v-flash` | 首尾帧生视频 | `480P / 720P / 1080P` | `¥0.10 / ¥0.20 / ¥0.48 / 秒` |
+| `wan2.2-s2v` | 主体参考生视频 | `480P / 720P` | `¥0.50 / ¥0.90 / 秒` |
+
+## 协议约定
+
+### 1. 文生视频
+
+- 重点字段：`model`、`input.prompt`、`parameters.resolution`、`parameters.duration`
+- 典型模型：`wan2.5-t2v-preview`、`wan2.2-t2v-plus`
+
+### 2. 图生视频
+
+- 重点字段：`input.img_url`
+- 典型模型：`wan2.5-i2v-preview`、`wan2.2-i2v-plus`、`wan2.2-i2v-flash`
+
+### 3. 首尾帧生视频
+
+- 重点字段：`input.first_frame_url`、`input.last_frame_url`
+- 典型模型：`wan2.2-kf2v-flash`
+
+### 4. 主体参考生视频
+
+- 重点字段：`input.image_url`
+- 典型模型：`wan2.2-s2v`
+
+## 请求示例
+
+### 图生视频
+
+```bash cURL
+curl -X POST https://crazyrouter.com/alibailian/api/v1/services/aigc/video-generation/video-synthesis \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "wan2.5-i2v-preview",
+    "input": {
+      "prompt": "让画面中的人物转头看向镜头",
+      "img_url": "https://example.com/first-frame.png"
+    },
+    "parameters": {
+      "resolution": "720P",
+      "duration": 5,
+      "prompt_extend": true,
+      "audio": true
+    }
+  }'
+```
+
+### 首尾帧生视频
+
+```json
+{
+  "model": "wan2.2-kf2v-flash",
+  "input": {
+    "prompt": "镜头从白天平滑过渡到夜晚",
+    "first_frame_url": "https://example.com/frame-start.png",
+    "last_frame_url": "https://example.com/frame-end.png"
+  },
+  "parameters": {
+    "resolution": "720P",
+    "duration": 5
+  }
+}
+```
+
+### 主体参考生视频
+
+```json
+{
+  "model": "wan2.2-s2v",
+  "input": {
+    "prompt": "让参考人物自然说话并有轻微头部动作",
+    "image_url": "https://example.com/portrait.png",
+    "audio_url": "https://example.com/voice.mp3"
+  },
+  "parameters": {
+    "resolution": "720P",
+    "duration": 5
+  }
+}
+```
+
+## 任务取回
+
+Wan 当前仍是异步任务模型。客户创建任务后，需要使用：
+
+```http
+GET /alibailian/api/v1/tasks/{task_id}
+```
+
+当 `output.task_status` 进入成功态后，从 `output.video_url` 获取最终视频结果。
+
+## 边界说明
+
+- 本页对客协议以阿里百炼兼容路径为主，不再延续旧的 Fal 专属路径说明。
+- Crazyrouter 内部可以把官方、ApiPass、Kie 或其他第三方作为 provider，但这些 provider 不单独定义客户协议。
+- 当前 Beta 行可以先对客展示；上线后应结合生产任务日志继续补 live evidence，成功闭环后再去掉 Beta 标记。

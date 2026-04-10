@@ -1,63 +1,191 @@
 ---
 title: "Seedance"
-description: "Use Seedance models for first-last frame and reference image video generation"
+description: "Use the native Seedance API for video generation"
 ---
 
 # Seedance
 
-Seedance is a video generation model by ByteDance/Doubao, supporting first-last frame video and reference image video generation.
+Seedance is ByteDance / Doubao's video generation family. On Crazyrouter, the public contract stays on the native `/volc/v1/*` surface. The old unified-video `seedance-lite` alias is no longer the primary customer-facing protocol.
 
-## First-Last Frame Video
+## Current Public Models
 
-Generate smooth transition videos by providing first and last frame images.
+| Model | Current public positioning |
+|-------|----------------------------|
+| `doubao-seedance-1-0-lite-t2v-250428` | text-to-video |
+| `doubao-seedance-1-0-lite-i2v-250428` | single-image image-to-video |
+| `doubao-seedance-1-0-pro-250528` | general higher-quality generation |
+| `doubao-seedance-1-0-pro-fast-251015` | general faster generation |
+| `doubao-seedance-1-5-pro-251215` | higher-end version with room for later official capability expansion |
+| `doubao-seedance-2-0-260128` | official Seedance 2.0 multimodal video generation |
+| `doubao-seedance-2-0-fast-260128` | official Seedance 2.0 Fast multimodal video generation |
 
-### Via Unified Video API
+## Submit a Video Task
 
 ```
-POST /v1/video/create
+POST /volc/v1/contents/generations/tasks
 ```
+
+### Current Public Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model` | string | Yes | Public model name. Use one of the canonical model names above |
+| `content` | array | Yes | Input content array |
+| `content[].type` | string | Yes | Supported values are `text`, `image_url`, `video_url`, `audio_url`, and `draft_task` |
+| `content[].text` | string | Conditionally | Required when `type=text` |
+| `content[].image_url.url` | string | Conditionally | Required when `type=image_url` |
+| `content[].video_url.url` | string | Conditionally | Required when `type=video_url` |
+| `content[].audio_url.url` | string | Conditionally | Required when `type=audio_url` |
+| `content[].role` | string | Optional | Seedance 2.0 supports `first_frame`, `last_frame`, `reference_image`, `reference_video`, and `reference_audio` |
+| `generate_audio` | boolean | Optional | Whether to generate audio on Seedance 2.0 |
+| `ratio` | string | Optional | Output aspect ratio such as `16:9` |
+| `resolution` | string | Optional | Seedance 2.0 / 2.0 fast currently supports only `480p` and `720p` |
+| `duration` | integer | Optional | Seedance 2.0 / 2.0 fast supports `4-15` or `-1` |
+| `watermark` | boolean | Optional | Whether to add watermark |
+| `seed` | integer | Optional | Random seed |
+
+### Seedance 2.0 Official Capability Boundary
+
+- Supports four input modalities: text, image, video, and audio.
+- Supports multimodal references: up to `9` images, `3` videos, and `3` audios, with a mixed file limit of `12`.
+- Image formats: `jpeg`, `png`, `webp`, `bmp`, `tiff`, `gif`; each image must stay under `30MB`.
+- Video formats: `mp4`, `mov`; up to `3` video references, recommended combined duration in `[2, 15]s`, total file size under `50MB`.
+- Audio formats: `mp3`, `wav`; up to `3` audio references, combined duration `<= 15s`, total file size under `15MB`.
+- Audio cannot be provided alone. At least `1` image or video reference is required with it.
+- Output duration supports `4-15s`, and `-1` can be passed through to let the upstream use its default behavior.
+- Supports `480p` and `720p`; `1080p` is currently unsupported on Seedance 2.0 / 2.0 fast.
+- `frames` is currently unsupported for Seedance 2.0 / 2.0 fast.
+- `camera_fixed` is currently unsupported for Seedance 2.0 / 2.0 fast.
+- In the product UI, Seedance 2.0 is currently exposed mainly as “first/last frame” and “omni reference” entry points; on the API side those semantics map to `content[].role` and `content[].type`.
+- Upstream compliance currently blocks clearly realistic human-face image or video uploads.
+
+### Official Seedance 2.0 Pricing Truth
+
+| Model | Official billing mode | Official price |
+|------|------|------|
+| `doubao-seedance-2-0-260128` | per output token | `28 CNY / 1M output tokens` with video input; `46 CNY / 1M output tokens` without video input |
+| `doubao-seedance-2-0-fast-260128` | per output token | `22 CNY / 1M output tokens` with video input; `37 CNY / 1M output tokens` without video input |
+
+<Note>
+  MIME, duration, and file-size enforcement for remote URL assets is ultimately handled by the upstream. Crazyrouter currently pre-validates count limits, duration parameter boundaries, the no-audio-only rule, and explicit unsupported fields such as `frames`, `camera_fixed`, and non-480p/720p output requests.
+</Note>
+
+### Text-to-Video Example
+
+<CodeGroup>
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/v1/video/create \
+curl -X POST https://crazyrouter.com/volc/v1/contents/generations/tasks \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "seedance-lite",
-    "prompt": "Smooth transition, person changes from smiling to laughing",
-    "images": [
-      "https://example.com/start_frame.jpg",
-      "https://example.com/end_frame.jpg"
-    ],
-    "aspect_ratio": "16:9"
+    "model": "doubao-seedance-1-0-lite-t2v-250428",
+    "content": [
+      {
+        "type": "text",
+        "text": "A slow push-in shot of a white seagull skimming over the ocean with golden sunset reflections on the waves"
+      }
+    ]
   }'
 ```
 
-### Response Example
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/volc/v1/contents/generations/tasks",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "doubao-seedance-1-0-lite-t2v-250428",
+        "content": [
+            {
+                "type": "text",
+                "text": "A slow push-in shot of a white seagull skimming over the ocean with golden sunset reflections on the waves"
+            }
+        ]
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### Single-Image Image-to-Video Example
+
+```bash cURL
+curl -X POST https://crazyrouter.com/volc/v1/contents/generations/tasks \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "doubao-seedance-1-0-lite-i2v-250428",
+    "content": [
+      {
+        "type": "text",
+        "text": "The subject turns naturally while wind lightly moves the hair"
+      },
+      {
+        "type": "image_url",
+        "image_url": {
+          "url": "https://example.com/portrait.png"
+        }
+      }
+    ]
+  }'
+```
+
+### Seedance 2.0 Multimodal Example
+
+```bash cURL
+curl -X POST https://crazyrouter.com/volc/v1/contents/generations/tasks \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "doubao-seedance-2-0-260128",
+    "content": [
+      {
+        "type": "text",
+        "text": "A girl turns back on the beach at sunset, with more cinematic motion and natural ambient sound"
+      },
+      {
+        "type": "image_url",
+        "image_url": {
+          "url": "https://example.com/first-frame.png"
+        },
+        "role": "reference_image"
+      },
+      {
+        "type": "video_url",
+        "video_url": {
+          "url": "https://example.com/reference-video.mp4"
+        },
+        "role": "reference_video"
+      },
+      {
+        "type": "audio_url",
+        "audio_url": {
+          "url": "https://example.com/reference-audio.mp3"
+        },
+        "role": "reference_audio"
+      }
+    ],
+    "generate_audio": true,
+    "ratio": "16:9",
+    "duration": 11,
+    "watermark": false
+  }'
+```
+
+### Successful Submit Response
 
 ```json
 {
-  "id": "seedance_task_abc123",
-  "status": "processing",
-  "status_update_time": 1709123456
+  "id": "cgt_task_abc123",
+  "task_id": "cgt_task_abc123"
 }
-```
-
----
-
-## Reference Image Video
-
-Generate video using a single reference image:
-
-```bash cURL
-curl -X POST https://crazyrouter.com/v1/video/create \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "model": "seedance-lite",
-    "prompt": "The person in the image starts dancing",
-    "images": ["https://example.com/portrait.jpg"],
-    "aspect_ratio": "9:16"
-  }'
 ```
 
 ---
@@ -65,33 +193,49 @@ curl -X POST https://crazyrouter.com/v1/video/create \
 ## Query Task
 
 ```
-GET /v1/video/query?id={task_id}
+GET /volc/v1/contents/generations/tasks/{task_id}
 ```
 
 ```bash cURL
-curl "https://crazyrouter.com/v1/video/query?id=seedance_task_abc123" \
+curl https://crazyrouter.com/volc/v1/contents/generations/tasks/cgt_task_abc123 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-### Response Example (Completed)
+### Completed Response Example
 
 ```json
 {
-  "id": "seedance_task_abc123",
+  "id": "cgt_task_abc123",
+  "object": "video",
+  "model": "doubao-seedance-1-0-lite-t2v-250428",
   "status": "completed",
-  "status_update_time": 1709123520,
-  "video_url": "https://crazyrouter.com/files/seedance_abc123.mp4"
+  "progress": 100,
+  "created_at": 1774580000,
+  "completed_at": 1774580030,
+  "seconds": "5",
+  "metadata": {
+    "url": "https://media.crazyrouter.com/task-artifacts/2026/03/28/seedance/cgt_task_abc123.mp4",
+    "artifact_url": "https://media.crazyrouter.com/task-artifacts/2026/03/28/seedance/cgt_task_abc123.mp4",
+    "resolution": "720p",
+    "ratio": "16:9",
+    "frames_per_second": 24
+  }
 }
 ```
 
----
+### Task Status
 
-## Available Models
-
-| Model | Description |
-|-------|-------------|
-| `seedance-lite` | Seedance Lite, fast generation |
+| Status | Description |
+|--------|-------------|
+| `queued` | submitted or waiting in queue |
+| `in_progress` | generation in progress |
+| `completed` | completed and ready from `metadata.url` |
+| `failed` | terminal failure |
 
 <Note>
-  Seedance excels at human motion and facial expression changes, making it particularly suitable for portrait video generation.
+  The public docs now only commit to the native `/volc/v1/*` route family and canonical model names. The old `seedance-lite` label is retained only as historical context, not as the primary contract for new integrations.
+</Note>
+
+<Note>
+  The official Seedance pricing truth is currently tracked as `per_output_token`, not per-second. If the pricing page later shows a normalized platform billing unit, that should be treated as the platform sell-side view rather than the native official unit.
 </Note>

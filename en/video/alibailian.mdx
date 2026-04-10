@@ -1,16 +1,30 @@
 ---
 title: "Ali Bailian Video API"
-description: "Ali Bailian-compatible video routes for task creation through /alibailian/api/v1/services/aigc/video-generation/video-synthesis and task lookup through /tasks/{task_id}"
+description: "Ali Bailian-compatible video routes. Clients use /alibailian/api/v1/* while Crazyrouter now proxies upstream to official DashScope /api/v1/* endpoints"
 ---
 
 # Ali Bailian Video API
 
 Crazyrouter exposes Ali Bailian-compatible video routes so applications already using DashScope / Ali Bailian video formats can migrate with minimal path changes.
 
+## What This Page Covers
+
+- This page documents the Ali-compatible public alias exposed by Crazyrouter, so client requests should continue using `/alibailian/api/v1/*`
+- Internally, Crazyrouter now talks to the official DashScope upstream through `/api/v1/*`
+- If you want Crazyrouter's unified video API rather than the Ali-compatible migration path, use `/v1/video/generations`
+- Actual model availability still depends on your token allowlist, pricing configuration, and current production channel bindings; do not assume every upstream Ali model is enabled by default
+
 ## Supported Endpoints
 
 - `POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis`
 - `GET /alibailian/api/v1/tasks/{task_id}`
+
+## Internal Upstream Mapping
+
+- Public compatibility submit path: `POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis`
+- Public compatibility query path: `GET /alibailian/api/v1/tasks/{task_id}`
+- Crazyrouter upstream submit path: `POST /api/v1/services/aigc/video-generation/video-synthesis`
+- Crazyrouter upstream query path: `GET /api/v1/tasks/{task_id}`
 
 ## Authentication
 
@@ -46,7 +60,10 @@ POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis
 ### Request Example
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/alibailian/api/v1/services/aigc/video-generation/video-synthesis   -H "Content-Type: application/json"   -H "Authorization: Bearer YOUR_API_KEY"   -d '{
+curl -X POST https://crazyrouter.com/alibailian/api/v1/services/aigc/video-generation/video-synthesis \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
     "model": "wan2.5-i2v-preview",
     "input": {
       "prompt": "Change the lighting",
@@ -81,7 +98,8 @@ GET /alibailian/api/v1/tasks/{task_id}
 ### Request Example
 
 ```bash cURL
-curl https://crazyrouter.com/alibailian/api/v1/tasks/a55bfe14-6e78-4b9d-b97d-128420399ed1   -H "Authorization: Bearer YOUR_API_KEY"
+curl https://crazyrouter.com/alibailian/api/v1/tasks/a55bfe14-6e78-4b9d-b97d-128420399ed1 \
+  -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
 ### Response Example
@@ -121,5 +139,5 @@ curl https://crazyrouter.com/alibailian/api/v1/tasks/a55bfe14-6e78-4b9d-b97d-128
 ```
 
 <Note>
-This path family is primarily for protocol-compatible migration. The request and response bodies stay much closer to native DashScope / Bailian conventions than to Crazyrouter's unified video schema.
+This path family is primarily for protocol-compatible migration. The request and response bodies stay much closer to native DashScope / Bailian conventions than to Crazyrouter's unified video schema. It also does not mean every Ali video model is publicly enabled on Crazyrouter; treat current pricing, token allowlists, and live channel bindings as the source of truth.
 </Note>

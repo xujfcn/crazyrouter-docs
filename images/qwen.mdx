@@ -1,27 +1,42 @@
 ---
-title: "Qwen 图片编辑"
-description: "使用 Qwen 图片编辑模型进行图像编辑"
+title: "Qwen Image"
+description: "使用 Qwen Image 系列模型进行文生图，客户端继续使用 OpenAI Images 兼容协议"
 ---
 
-# Qwen 图片编辑
+# Qwen Image
 
 ```
 POST /v1/images/generations
 ```
 
-使用 `qwen-image-edit-2509` 模型进行智能图片编辑，兼容 OpenAI Images API 格式。
+Crazyrouter 当前对外以 OpenAI Images 兼容协议开放 `Qwen Image` 首批生成模型。客户继续使用统一的 `/v1/images/generations`，阿里官方与第三方承载只作为内部 provider，不单独暴露客户协议。
 
-## 请求参数
+## 当前开放模型
+
+| 模型 | 上游执行形态 | 当前对客能力 | 验证状态 |
+|------|--------------|--------------|----------|
+| `qwen-image-plus` | 异步生成 | 文生图 | 已验证 |
+| `qwen-image-max` | 同步生成 | 文生图 | 已验证 |
+| `qwen-image-2.0` | 同步生成 | 文生图 | 已验证 |
+| `qwen-image-2.0-pro` | 同步生成 | 文生图 | Beta |
+
+<Note>
+  `qwen-image-2.0-pro` 当前已经完成协议与代码对齐，但生产承载证据还在补齐，所以先按 Beta 标注。
+</Note>
+
+## 客户协议
+
+### 请求参数
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| `model` | string | 是 | 固定为 `qwen-image-edit-2509` |
-| `prompt` | string | 是 | 编辑描述 |
-| `image` | string | 是 | 原始图片 URL |
-| `n` | integer | 否 | 生成数量，默认 1 |
-| `size` | string | 否 | 输出尺寸 |
+| `model` | string | 是 | `qwen-image-plus`、`qwen-image-max`、`qwen-image-2.0`、`qwen-image-2.0-pro` |
+| `prompt` | string | 是 | 文生图提示词 |
+| `size` | string | 否 | 输出尺寸。建议使用当前模型页或 playground 给出的受支持尺寸 |
+| `n` | integer | 否 | 生成张数，默认 `1` |
+| `response_format` | string | 否 | `url` 或 `b64_json` |
 
-## 请求示例
+### 请求示例
 
 <CodeGroup>
 
@@ -30,76 +45,60 @@ curl -X POST https://crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "qwen-image-edit-2509",
-    "prompt": "将图片中的天空替换为星空",
-    "image": "https://example.com/landscape.jpg",
-    "n": 1
+    "model": "qwen-image-max",
+    "prompt": "一张具有高级感的产品海报，主体是一瓶玻璃香水，柔和棚拍光线，中文标题“晨雾”",
+    "size": "1024x1024",
+    "n": 1,
+    "response_format": "url"
   }'
 ```
 
 ```python Python
-import requests
+from openai import OpenAI
 
-response = requests.post(
-    "https://crazyrouter.com/v1/images/generations",
-    headers={
-        "Content-Type": "application/json",
-        "Authorization": "Bearer YOUR_API_KEY"
-    },
-    json={
-        "model": "qwen-image-edit-2509",
-        "prompt": "将图片中的天空替换为星空",
-        "image": "https://example.com/landscape.jpg",
-        "n": 1
-    }
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
 )
 
-data = response.json()
-print(data["data"][0]["url"])
+response = client.images.generate(
+    model="qwen-image-max",
+    prompt="一张具有高级感的产品海报，主体是一瓶玻璃香水，柔和棚拍光线，中文标题“晨雾”",
+    size="1024x1024",
+    n=1
+)
+
+print(response.data[0].url)
 ```
 
 </CodeGroup>
 
-## 响应示例
+### 响应示例
 
 ```json
 {
   "created": 1709123456,
   "data": [
     {
-      "url": "https://crazyrouter.com/files/qwen_edit_abc123.png"
+      "url": "https://crazyrouter.com/files/qwen_image_abc123.png"
     }
   ]
 }
 ```
 
-## 使用场景
+## 官方计费口径
 
-- 替换图片背景
-- 修改图片中的特定元素
-- 添加或移除物体
-- 风格转换
+Qwen Image 当前官方真值按成功生成图片张数计费，不按输入/输出 token 展示。
 
-### 示例：移除物体
+| 模型 | 官方口径 | 官方单价 | 当前文档状态 |
+|------|----------|----------|--------------|
+| `qwen-image-plus` | 按图 | `¥0.20 / 图` | 已验证 |
+| `qwen-image-max` | 按图 | `¥0.50 / 图` | 已验证 |
+| `qwen-image-2.0` | 按图 | `¥0.20 / 图` | 已验证 |
+| `qwen-image-2.0-pro` | 按图 | `¥0.50 / 图` | Beta |
 
-```json
-{
-  "model": "qwen-image-edit-2509",
-  "prompt": "移除图片中的水印",
-  "image": "https://example.com/photo_with_watermark.jpg"
-}
-```
+## 边界说明
 
-### 示例：风格转换
-
-```json
-{
-  "model": "qwen-image-edit-2509",
-  "prompt": "将照片转换为卡通风格",
-  "image": "https://example.com/photo.jpg"
-}
-```
-
-<Note>
-  Qwen 图片编辑模型对中文指令有良好的理解能力，推荐使用中文描述编辑需求。
-</Note>
+- 本页首批只承诺 `文生图` 对客能力，不把上游更多多模态能力直接外露成客户协议。
+- `Qwen Image` 的 provider 侧可能存在异步或同步差异，但客户侧继续使用统一的 OpenAI Images 请求/响应格式。
+- 图片编辑模型 `qwen-image-edit-2509` 不在本页这批“生成模型收口”范围内；如需编辑能力，应按编辑模型的当前开放状态单独评估。

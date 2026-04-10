@@ -14,6 +14,10 @@ POST /v1/responses
 - `tools: [{ "type": "web_search_preview" }]`
 - 返回 `output` 类型顺序 `web_search_call`、`message`
 
+<Note>
+  Claude 当前不支持 `POST /v1/responses`。如果你在接 Claude Web Search，请改用 `POST /v1/chat/completions` 或 Claude 原生接口。
+</Note>
+
 ---
 
 ## 最小请求

@@ -15,6 +15,10 @@ As of March 23, 2026, Crazyrouter production has verified:
 - basic text requests currently return `output` items of type `message`
 - streaming requests consistently expose `response.created`, `response.in_progress`, `response.output_item.added`, `response.content_part.added`, and `response.output_text.delta`
 
+<Note>
+  Claude does not currently support `POST /v1/responses`. Use `POST /v1/messages` or `POST /v1/chat/completions` for Claude instead.
+</Note>
+
 ---
 
 ## Basic Request

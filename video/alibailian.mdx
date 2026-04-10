@@ -1,16 +1,30 @@
 ---
 title: "阿里百炼视频接口"
-description: "阿里百炼兼容视频接口，支持通过 /alibailian/api/v1/services/aigc/video-generation/video-synthesis 提交任务，并通过 /tasks/{task_id} 查询结果"
+description: "阿里百炼兼容视频接口。对外使用 /alibailian/api/v1/* 兼容路径，Crazyrouter 内部已对接 DashScope 官方 /api/v1/* 上游"
 ---
 
 # 阿里百炼视频接口
 
 Crazyrouter 提供阿里百炼兼容的视频路径，适合已经接入 DashScope / 阿里百炼视频格式的应用直接迁移。
 
+## 这页覆盖什么
+
+- 这页描述的是 Crazyrouter 对外暴露的阿里兼容别名，客户请求继续使用 `/alibailian/api/v1/*`
+- Crazyrouter 内部对接的官方上游已经统一为 DashScope `/api/v1/*` 路径
+- 如果你要走 Crazyrouter 统一视频接口，而不是阿里兼容迁移路径，请改用 `/v1/video/generations`
+- 当前模型是否可调用，仍取决于你的 token 白名单、模型定价和当前生产挂载状态；不要把阿里上游全部模型默认视为已开通
+
 ## 支持的端点
 
 - `POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis`
 - `GET /alibailian/api/v1/tasks/{task_id}`
+
+## 内部上游路径说明
+
+- 对外兼容提交路径：`POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis`
+- 对外兼容查询路径：`GET /alibailian/api/v1/tasks/{task_id}`
+- Crazyrouter 内部提交上游：`POST /api/v1/services/aigc/video-generation/video-synthesis`
+- Crazyrouter 内部查询上游：`GET /api/v1/tasks/{task_id}`
 
 ## 认证
 
@@ -46,7 +60,10 @@ POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis
 ### 请求示例
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/alibailian/api/v1/services/aigc/video-generation/video-synthesis   -H "Content-Type: application/json"   -H "Authorization: Bearer YOUR_API_KEY"   -d '{
+curl -X POST https://crazyrouter.com/alibailian/api/v1/services/aigc/video-generation/video-synthesis \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
     "model": "wan2.5-i2v-preview",
     "input": {
       "prompt": "改变一下光线",
@@ -81,7 +98,8 @@ GET /alibailian/api/v1/tasks/{task_id}
 ### 请求示例
 
 ```bash cURL
-curl https://crazyrouter.com/alibailian/api/v1/tasks/a55bfe14-6e78-4b9d-b97d-128420399ed1   -H "Authorization: Bearer YOUR_API_KEY"
+curl https://crazyrouter.com/alibailian/api/v1/tasks/a55bfe14-6e78-4b9d-b97d-128420399ed1 \
+  -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
 ### 响应示例
@@ -121,5 +139,5 @@ curl https://crazyrouter.com/alibailian/api/v1/tasks/a55bfe14-6e78-4b9d-b97d-128
 ```
 
 <Note>
-阿里百炼这组路径更适合“协议兼容迁移”。请求体和返回体会更贴近原始 DashScope / 百炼风格，而不是 Crazyrouter 的统一视频格式。
+阿里百炼这组路径更适合“协议兼容迁移”。请求体和返回体会更贴近原始 DashScope / 百炼风格，而不是 Crazyrouter 的统一视频格式。它也不等同于“Crazyrouter 已对外公开全部阿里视频模型”；具体开放情况仍以当期 pricing、模型白名单和实际承载为准。
 </Note>

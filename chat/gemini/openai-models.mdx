@@ -119,5 +119,9 @@ curl https://crazyrouter.com/v1beta/openai/models \
 | `success` | boolean | 请求是否成功 |
 
 <Note>
+  `supported_endpoint_types` 的路径含义以 `GET /api/pricing` 返回的 `supported_endpoint` 为准。当前 `openai` 对应 `POST /v1/chat/completions`，`anthropic` 对应 `POST /v1/messages`，`openai-response` 才对应 `POST /v1/responses`。Claude 当前公开支持的是 `openai` + `anthropic`，不支持 `openai-response`。
+</Note>
+
+<Note>
   这个端点不是“只返回 Gemini 模型”。它返回的是当前 Token 可见模型的 OpenAI 风格列表，只是入口和认证方式更适配 Gemini 风格客户端。
 </Note>

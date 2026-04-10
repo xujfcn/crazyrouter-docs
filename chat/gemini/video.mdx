@@ -1,0 +1,75 @@
+---
+title: "Gemini 视频理解"
+description: "基于 2026-04-08 Crazyrouter 本站成功请求经验整理的 Gemini 原生视频理解"
+---
+
+# Gemini 视频理解
+
+```text
+POST /v1beta/models/{model}:generateContent
+```
+
+截至 `2026-04-08`，Crazyrouter 本站与本地 `4000` 端口复测表明：
+
+- `gemini-2.5-pro` 可以读取 `video/mp4`
+- 当前已稳定跑通的主链路是 `fileData.fileUri`
+- 视频文件需要是 Gemini 上游可访问的公网 URL
+
+---
+
+## 已验证的最小请求
+
+```bash
+curl "https://crazyrouter.com/v1beta/models/gemini-2.5-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "fileData": {
+              "mimeType": "video/mp4",
+              "fileUri": "https://example.com/demo.mp4"
+            }
+          },
+          {
+            "text": "请用一句中文回答：视频里的主体是什么，如何运动，镜头是否固定。"
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "maxOutputTokens": 512
+    }
+  }'
+```
+
+生产环境同类成功返回的关键形态：
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "视频里的主体是一个红色小球，它从左向右滚动，镜头是固定的。"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+## 请求要点
+
+- 视频理解当前主推荐写法是 `fileData.fileUri`
+- `mimeType` 按真实文件填写，例如 `video/mp4`
+- `fileUri` 必须能被 Gemini 上游访问
+- 如果文件在私有网络、需要鉴权、或 URL 不可直连，当前很容易失败
+
+<Note>
+  图片理解优先用 `inlineData`，不要把图片的成功写法直接照搬到视频。图片请看 [Gemini 图片理解](/chat/gemini/vision)。
+</Note>

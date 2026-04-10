@@ -11,6 +11,10 @@ POST /v1/responses
 
 As of March 23, 2026, Crazyrouter production has verified that `gpt-5.4` on the Responses API reliably returns `function_call`.
 
+<Note>
+  Claude does not currently support `POST /v1/responses`. If you need Claude tool calling, use `POST /v1/messages` or `POST /v1/chat/completions`.
+</Note>
+
 ---
 
 ## Step 1: Let the Model Produce a Function Call

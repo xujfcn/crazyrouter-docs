@@ -36,7 +36,7 @@ Codex CLI currently works best with a custom `model_provider` configured like th
 - `wire_api = "responses"`
 
 <Note>
-Crazyrouter supports `/v1/responses`, so this Codex CLI integration can use the Responses API directly.
+Crazyrouter supports `/v1/responses`, so this Codex CLI integration can use the Responses API directly. But this path should currently be treated as GPT-only guidance because Claude does not support `POST /v1/responses`.
 </Note>
 
 ## System Requirements And Prerequisites
@@ -53,8 +53,6 @@ Crazyrouter supports `/v1/responses`, so this Codex CLI integration can use the 
 Suggested starter allowlist:
 
 - `gpt-5.4`
-- `claude-sonnet-4-6`
-- `gemini-3-pro-preview`
 
 ## Full Install Paths By OS
 
@@ -221,8 +219,6 @@ Besides package managers, the official Codex GitHub repository also publishes bi
     In Crazyrouter, create a token named something like `codex`. For the first pass, allow only:
 
     - `gpt-5.4`
-    - `claude-sonnet-4-6`
-    - `gemini-3-pro-preview`
 
     This keeps first-pass debugging and cost control much simpler.
   </Step>
@@ -378,10 +374,8 @@ Besides package managers, the official Codex GitHub repository also publishes bi
 | Use case | Recommended model | Why |
 |----------|-------------------|-----|
 | default coding driver | `gpt-5.4` | verified successfully in production on March 23, 2026, and best suited for the main Codex / Responses API baseline |
-| Claude-style alternative | `claude-sonnet-4-6` | better for complex explanation, long-form summaries, and multi-turn collaboration |
-| Gemini fallback path | `gemini-3-pro-preview` | useful as a second compatibility-validation path |
 
-Recommended rollout: get `gpt-5.4` working first. Then add `claude-sonnet-4-6` or `gemini-3-pro-preview` only after the baseline path is stable.
+If you need Claude, use the native Claude `POST /v1/messages` path or OpenAI-compatible `POST /v1/chat/completions` instead of putting Claude onto the Codex `wire_api = "responses"` route.
 
 ## Token Setup Best Practices
 
@@ -423,7 +417,7 @@ Recommended rollout: get `gpt-5.4` working first. Then add `claude-sonnet-4-6` o
 ## Performance And Cost Tips
 
 - validate first in a small repo, not a huge production repo
-- keep `gpt-5.4` as the main driver, then add `claude-sonnet-4-6` only when you need cross-vendor validation
+- keep `gpt-5.4` as the main driver and get the GPT / Responses baseline working first
 - separate Codex from IDE tools for cleaner cost attribution
 - use stricter quota caps for higher-risk repos or CI jobs
 - when spend spikes, inspect Crazyrouter logs first to see whether agent loops are the cause
@@ -442,6 +436,10 @@ For first-time setup, prefer the PowerShell path in this guide. It is the easies
 
 Because Codex CLI's custom-provider path is designed around the Responses API, and Crazyrouter supports `/v1/responses`.
 
+### Why is Claude no longer recommended here?
+
+Because Claude currently supports only `POST /v1/messages` and `POST /v1/chat/completions`, not `POST /v1/responses`. The Codex path here is fixed to `wire_api = "responses"`, so Claude should not be presented as a recommended model for this route.
+
 ### Why should I make a Git snapshot before the first real task?
 
 Because Codex can edit files and run commands. A clean snapshot makes review and rollback much easier.
@@ -455,5 +453,5 @@ Yes. For Crazyrouter, you should still use `OPENAI_API_KEY` plus the custom prov
 Start with `gpt-5.4`.
 
 <Note>
-If you want the smoothest terminal agent workflow on the OpenAI / Responses API path, Codex is one of the most important Crazyrouter integrations to configure well.
+If you want the smoothest terminal agent workflow on the OpenAI / Responses API path, configure Codex around the GPT / Responses route. If you want Claude first, switch to Claude Code or the native Claude API docs instead.
 </Note>
