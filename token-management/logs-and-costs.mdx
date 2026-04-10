@@ -1,0 +1,294 @@
+---
+title: '调用日志与花费监控'
+description: '通过管理接口查询 API Key 列表、调用日志、汇总额度与美元花费'
+---
+
+## 适用场景
+
+当客户需要对每个 API Key 做监控时，推荐使用 Crazyrouter 的管理接口组合，而不是直接拿业务侧 `sk-xxx` 去查询：
+
+- 获取当前账号下的 API Key 列表
+- 按时间范围、Key 名称、模型名称查询调用日志
+- 汇总某个 Key 的总消耗额度
+- 基于系统汇率参数换算美元花费
+
+<Note>
+  管理接口使用的是用户身份认证，不是模型调用时使用的业务 Token。
+</Note>
+
+## 认证方式
+
+管理接口必须同时携带以下两个请求头：
+
+```text
+Authorization: Bearer {access_token}
+New-Api-User: {user_id}
+```
+
+- `access_token`：用户登录后生成的访问令牌，用于控制台/管理接口认证
+- `New-Api-User`：当前用户 ID，必须与 `access_token` 对应的用户一致
+- `sk-xxx`：业务调用 Token，只用于模型调用，不用于 `/api/token/*`、`/api/log/*` 这类管理接口
+
+## 推荐接入流程
+
+建议按以下顺序接入：
+
+1. 调用 `/api/token/` 获取当前账号下的 Key 列表
+2. 按 `token_name` 调用 `/api/log/self` 拉取某个 Key 的明细日志
+3. 调用 `/api/log/self/stat` 获取同条件下的汇总额度
+4. 调用 `/api/status` 获取 `quota_per_unit`
+5. 使用 `quota / quota_per_unit` 换算美元花费
+
+## 1. 获取 API Key 列表
+
+```bash cURL
+curl "https://crazyrouter.com/api/token/?p=1&page_size=100" \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 485"
+```
+
+响应示例：
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "page": 1,
+    "page_size": 100,
+    "total": 1,
+    "items": [
+      {
+        "id": 409,
+        "name": "gptai",
+        "key": "sk-xxxxxxxxxxxxxxxx",
+        "status": 2,
+        "used_quota": 16605808,
+        "model_limits_enabled": true,
+        "model_limits": "kimi-k2.5"
+      }
+    ]
+  }
+}
+```
+
+建议客户保存以下字段用于后续监控：
+
+- `id`
+- `name`
+- `status`
+- `used_quota`
+- `model_limits_enabled`
+- `model_limits`
+
+## 2. 查询某个 Key 的调用日志
+
+通过 `/api/log/self` 查询当前用户自己的消费日志，建议至少带上：
+
+- `type`
+- `token_name`
+- `start_timestamp`
+- `end_timestamp`
+- `p`
+- `page_size`
+
+示例：
+
+```bash cURL
+curl "https://crazyrouter.com/api/log/self?type=2&token_name=gptai&start_timestamp=1771334901&end_timestamp=1772309095&p=1&page_size=5" \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 485"
+```
+
+响应示例：
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "page": 1,
+    "page_size": 5,
+    "total": 4988,
+    "items": [
+      {
+        "created_at": 1772308747,
+        "token_name": "gptai",
+        "model_name": "deepseek-chat",
+        "quota": 3188,
+        "cost_usd": 0.006376,
+        "prompt_tokens": 884,
+        "completion_tokens": 397,
+        "use_time": 16.48,
+        "is_stream": true,
+        "ip": "203.0.113.10",
+        "other": {
+          "client": "openai-python",
+          "request_id": "req_xxx",
+          "request_method": "POST",
+          "request_path": "/v1/chat/completions",
+          "http_status": 200,
+          "discount": 0
+        }
+      }
+    ]
+  }
+}
+```
+
+### 关键字段说明
+
+| 字段 | 说明 |
+|------|------|
+| `token_name` | 命中的是哪个业务 Key |
+| `model_name` | 实际计费模型 |
+| `quota` | 本次请求扣减的系统额度 |
+| `cost_usd` | 本次请求折算的美元花费 |
+| `prompt_tokens` | 输入 token |
+| `completion_tokens` | 输出 token |
+| `use_time` | 请求耗时，单位秒 |
+| `other.request_id` | 请求 ID，适合做链路追踪 |
+| `other.client` | 调用客户端标识 |
+| `other.request_path` | 具体命中的接口路径 |
+| `other.http_status` | 上游响应状态码 |
+
+<Note>
+  `cost_usd` 为按系统换算口径返回的美元花费，计算方式为 `quota / quota_per_unit`。如果你的生产环境尚未升级到包含该字段的版本，可先使用汇总额度自行换算。
+</Note>
+
+## 3. 查询汇总消耗
+
+如果不需要逐条日志，只想做监控面板或日报，推荐调用汇总接口：
+
+```bash cURL
+curl "https://crazyrouter.com/api/log/self/stat?type=2&token_name=gptai&start_timestamp=1771334901&end_timestamp=1772309095" \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 485"
+```
+
+响应示例：
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "quota": 16605808,
+    "rpm": 0,
+    "tpm": 0
+  }
+}
+```
+
+其中：
+
+- `quota`：该筛选条件下的总消耗额度
+- `rpm`、`tpm`：当前接口保留字段，可用于扩展监控
+
+## 4. 换算美元花费
+
+系统换算参数可通过公开接口 `/api/status` 获取：
+
+```bash cURL
+curl "https://crazyrouter.com/api/status"
+```
+
+响应中关注：
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "quota_per_unit": 500000,
+    "quota_display_type": "USD",
+    "usd_exchange_rate": 7.3
+  }
+}
+```
+
+换算公式：
+
+```text
+cost_usd = quota / quota_per_unit
+```
+
+示例：
+
+```text
+16605808 / 500000 = 33.211616 USD
+```
+
+## Python 接入示例
+
+```python
+import requests
+
+BASE_URL = "https://crazyrouter.com"
+ACCESS_TOKEN = "your_access_token"
+USER_ID = "485"
+TOKEN_NAME = "gptai"
+
+headers = {
+    "Authorization": f"Bearer {ACCESS_TOKEN}",
+    "New-Api-User": USER_ID,
+    "User-Agent": "Mozilla/5.0",
+}
+
+token_resp = requests.get(
+    f"{BASE_URL}/api/token/",
+    params={"p": 1, "page_size": 100},
+    headers=headers,
+    timeout=30,
+)
+token_resp.raise_for_status()
+tokens = token_resp.json()["data"]["items"]
+
+log_resp = requests.get(
+    f"{BASE_URL}/api/log/self/stat",
+    params={
+        "type": 2,
+        "token_name": TOKEN_NAME,
+        "start_timestamp": 1771334901,
+        "end_timestamp": 1772309095,
+    },
+    headers=headers,
+    timeout=30,
+)
+log_resp.raise_for_status()
+quota = log_resp.json()["data"]["quota"]
+
+status_resp = requests.get(f"{BASE_URL}/api/status", timeout=30)
+status_resp.raise_for_status()
+quota_per_unit = status_resp.json()["data"]["quota_per_unit"]
+
+cost_usd = quota / quota_per_unit
+
+print("tokens:", [item["name"] for item in tokens])
+print("quota:", quota)
+print("cost_usd:", round(cost_usd, 6))
+```
+
+## 监控建议
+
+对客户侧监控，推荐至少落以下维度：
+
+- 按 `token_name` 统计调用次数、总额度、总花费
+- 按 `model_name` 统计模型消耗分布
+- 按 `other.request_path` 区分 `/v1/chat/completions`、`/v1/responses` 等接口
+- 按 `other.http_status` 统计成功率与失败率
+- 按 `other.request_id` 保留问题排查链路
+
+## 常见问题
+
+### 为什么管理接口不能直接使用 `sk-xxx`？
+
+因为 `sk-xxx` 是业务调用凭证，由 `TokenAuth` 中间件校验；而 `/api/token/*`、`/api/log/self*` 这类管理接口走的是用户身份认证，需要 `access_token` 和 `New-Api-User`。
+
+### 是否可以按某个 Key 查自己的日志？
+
+可以。推荐通过 `token_name` 过滤 `/api/log/self` 和 `/api/log/self/stat`。
+
+### 是否可以直接通过 API 拿到花费金额？
+
+如果服务端版本已支持 `cost_usd` 字段，则日志明细中可直接获取单条请求的美元花费。对于汇总口径，建议使用 `quota / quota_per_unit` 自行换算，结果与控制台展示口径一致。
