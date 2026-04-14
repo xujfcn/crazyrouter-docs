@@ -1,6 +1,6 @@
 ---
 title: "Gemini Image Editing"
-description: "Current availability note for Gemini image editing on Crazyrouter production as of 2026-03-23"
+description: "Current Gemini image-editing availability note updated from the 2026-04-14 Crazyrouter production retest"
 ---
 
 # Gemini Image Editing
@@ -9,29 +9,21 @@ description: "Current availability note for Gemini image editing on Crazyrouter 
 POST /v1beta/models/{model}:generateContent
 ```
 
-As of March 23, 2026, a minimal production check against native Gemini image editing on Crazyrouter showed:
+As of April 14, 2026, the latest Crazyrouter retest for Gemini image-editing-related routes showed:
 
-- `gemini-3.1-flash-image-preview` returned `500`
-- `gemini-2.5-flash-image-preview` returned `500`
-- `gemini-2.5-flash-image` returned `524`
+- native `gemini-3.1-flash-image-preview:generateContent` can now return image output again
+- native `gemini-2.5-flash-image:generateContent` can also return image output, but billing consistency is still under review
+- the Nano Banana-family public Images-compatible route through `POST /v1/images/generations` is currently unhealthy
 
-The observed 500 error was:
-
-- `code: "get_channel_failed"`
-- `message`: model temporarily unavailable, please try again later
-
-That means the native Gemini `generateContent` path for "send an input image and get an edited image back" should not currently be documented as a stable success workflow on Crazyrouter production.
+The unhealthy path right now is the older public Images-compatible layer, not every Gemini-native image path. For editing and reference-image workloads, the current guidance should converge on native Gemini `generateContent`.
 
 <Warning>
-  Until this path is revalidated successfully, do not depend on native Gemini image editing for production automation.
+  Do not keep documenting Nano Banana-family `POST /v1/images/generations` as the stable image-editing route. `nano-banana-2` should move to `gemini-3.1-flash-image-preview:generateContent`, while `nano-banana` remains controlled-testing only.
 </Warning>
 
 <Note>
-  If your goal is stable customer-facing image editing rather than the native Gemini protocol itself, start with the Nano Banana family pages:
-  [Nano Banana](/en/images/nano-banana),
-  [Nano Banana Pro](/en/images/nano-banana-pro),
-  and [Nano Banana 2](/en/images/nano-banana-2).
-  Their current public contract is narrowed to URL input through `image_input`.
+  The more usable path right now is [Nano Banana 2](/en/images/nano-banana-2), which now points to native Gemini `gemini-3.1-flash-image-preview:generateContent`.
+  [Nano Banana](/en/images/nano-banana) now keeps only the controlled-test note for `gemini-2.5-flash-image:generateContent`, not a stable production recommendation.
 </Note>
 
 ---
@@ -39,15 +31,15 @@ That means the native Gemini `generateContent` path for "send an input image and
 ## Current Recommendation
 
 1. If your goal is Gemini text-to-image, use [Gemini Image Generation](/en/chat/gemini/image-gen)
-2. If your goal is stable customer-facing image editing, use [Nano Banana](/en/images/nano-banana), [Nano Banana Pro](/en/images/nano-banana-pro), or [Nano Banana 2](/en/images/nano-banana-2)
-3. If you must evaluate native Gemini image editing, run a same-day production retest with a minimal input image first
-4. If you receive `500 get_channel_failed` or `524`, stop there and wait for channel recovery before scaling traffic
+2. If your goal is a currently usable reference-image editing route, start with [Nano Banana 2](/en/images/nano-banana-2)
+3. If you must evaluate `nano-banana`, follow the controlled-test guidance on [Nano Banana](/en/images/nano-banana)
+4. Do not keep treating `POST /v1/images/generations` as the default entry point for the Nano Banana family
 
 ---
 
 ## Retest Template
 
-This is the minimal request template used for retesting. It shows how to recheck the path, not a currently stable success example:
+This is now the more recommended minimal template for retesting or integration. The same workload should no longer be documented through `/v1/images/generations`:
 
 ```bash
 curl "https://crazyrouter.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=YOUR_API_KEY" \

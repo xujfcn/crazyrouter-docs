@@ -1,194 +1,99 @@
 ---
 title: "Nano Banana 2"
-description: "Use nano-banana-2 for reference-image generation and editing through the OpenAI Images API"
+description: "As of 2026-04-14, nano-banana-2 should use native Gemini generateContent; /v1/images/generations is no longer recommended"
 ---
 
 # Nano Banana 2
 
 ```
-POST /v1/images/generations
+Recommended path
+POST /v1beta/models/gemini-3.1-flash-image-preview:generateContent
 ```
 
-Use `nano-banana-2` for image generation and reference-image editing through one public `OpenAI Images API` style contract.
+As of `2026-04-14`, the latest Crazyrouter production retest for `nano-banana-2` showed:
 
-## What This Page Covers
-
-- This page only covers `nano-banana-2`
-- The customer-facing entry point is `POST /v1/images/generations`
-- The input image field is `image_input`
-- The current public contract is limited to URL references in `image_input`; `image` and `data:` inputs are not exposed publicly
-- Gemini / Vertex and other providers may sit behind this route, but those provider details are not part of the customer contract
-
-## Capability Status
-
-| Capability / Spec | Status | Notes |
-|-----------|--------|-------|
-| `T2I` | `Beta` | Historical coverage exists, but the current public artifact bundle is still centered on edit/reference |
-| `I2I + 1K` | `Verified` | The single-image edit live path is closed |
-| `I2I + 2K + 16:9` | `Verified` | `2K + 16:9` has a live artifact |
-| `Reference + 1..14 refs` | `Verified` | `14` refs work and `15` refs are rejected by the current guard |
-| `Reference + 2K` | `Beta` | `14` refs and `2K` are both validated independently, but the combined edge is not yet closed as one artifact |
-| `4K` / `JPEG` / exact `30 MiB` / official direct truth | `Beta` | Still not committed in the current public contract |
-
-<Note>
-  The Pricing page and this doc use the same status language: `Verified` means there is a current minimal live artifact, while `Beta` means the official capability exists but the public validation set or edge coverage is still being completed.
-</Note>
-
-## Currently Validated Capabilities
-
-The following results come from the local March 30, 2026 validation on `localhost:4000` pinned to `channel 315 (vetexjian)`:
-
-- single-reference editing works
-- `2` reference images work
-- `14` reference images work
-- `15` reference images are rejected
-- `resolution: "1K"` works
-- `resolution: "2K"` with `aspect_ratio: "16:9"` works
-- `WEBP` URL references were verified
-- `PNG` has at least one successful source, but source-to-source stability is still not fully closed
-
-Do not present the following as fully promised customer-facing capability yet:
-
-- exact large-file URL limit
-- exact `30 MiB` boundary
-- stable `JPEG` URL support
-- official direct Gemini truth
+- `nano-banana-2` currently maps to `gemini-3.1-flash-image-preview`
+- the recommended route is now native Gemini `generateContent`
+- `POST /v1/images/generations` is no longer recommended for `nano-banana-2`
+- the same-day production retest on the native path succeeded and billing looked normal
 
 <Warning>
-  `nano-banana-2` currently exposes only `image_input` URL input publicly. The `image` field is rejected by the service, and `data:` / Base64 is not part of the current public contract.
+  Do not keep documenting `nano-banana-2` as a stable `/v1/images/generations` model. The recommended entry point is now native Gemini `POST /v1beta/models/gemini-3.1-flash-image-preview:generateContent`.
 </Warning>
 
----
+## Current Status
 
-## Request Parameters
+| Item | Status | Notes |
+|------|------|------|
+| Alias mapping | confirmed | `nano-banana-2 -> gemini-3.1-flash-image-preview` |
+| Native Gemini `generateContent` | recommended | succeeded in the `2026-04-14` production retest |
+| Native-path billing | currently normal | billing and consumption looked aligned in the same-day probe |
+| OpenAI Images `POST /v1/images/generations` | not recommended | failed in both production and local `4000` retests |
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model` | string | Yes | Fixed as `nano-banana-2` |
-| `prompt` | string | Yes | Generation or edit instruction |
-| `image_input` | string or string[] | No | Reference image URL(s); currently `1` to `14` |
-| `resolution` | string | No | `1K` and `2K` are live-validated; code also accepts `4K`, but this pass does not promise it yet |
-| `aspect_ratio` | string | No | `1:1` and `16:9` are live-validated; additional allowed values are listed below |
-| `n` | integer | No | Number of images, default `1` |
-| `response_format` | string | No | Recommended to omit and consume `data[].url` directly |
+## Current Risks
 
-### Currently Accepted `aspect_ratio` Values
+### 1. The public Images-compatible route is currently unhealthy
 
-`1:1`, `1:4`, `1:8`, `2:3`, `3:2`, `3:4`, `4:1`, `4:3`, `4:5`, `5:4`, `8:1`, `9:16`, `16:9`, `21:9`, `auto`
+When `nano-banana-2` is sent through `POST /v1/images/generations`, the `2026-04-14` production and local `4000` retests both reproduced these failures:
 
-### Multi-Image Limit
+- `Unknown name "imageOutputOptions" at 'generation_config.image_config'`
+- `not supported model for image generation`
+- `get_channel_failed`
 
-- `1` to `14` references: current public range
-- `15+`: rejected with `at most 14 reference images are currently supported for nano-banana-2`
+That is why `/v1/images/generations` should no longer be documented as the stable public path for this model alias.
 
----
+### 2. The native response must still be parsed as Gemini-native output
 
-## Request Examples
+Even on the recommended route, the client should parse Gemini-native output:
 
-### Single-Image Edit
+1. Read `candidates[].content.parts[].inlineData` first
+2. Do not assume an OpenAI Images-style `data[].url` payload
+3. If you later expand to other Gemini image models, also handle `text`-wrapped `data:image/...` payloads or hosted URLs
 
-<CodeGroup>
+## Current Recommendation
 
-```bash cURL
+1. For production use of `nano-banana-2`, switch directly to `gemini-3.1-flash-image-preview:generateContent`
+2. Do not use `POST /v1/images/generations` with `model: "nano-banana-2"`
+3. For automation, parse `inlineData` first
+
+## Recommended Request Template
+
+```bash
+curl "https://crazyrouter.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Generate an IMAGE of a clean ecommerce hero shot on a white background. Return image output."
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "responseModalities": ["IMAGE"]
+    }
+  }'
+```
+
+## Legacy Route
+
+The following legacy pattern is no longer recommended:
+
+```bash
 curl -X POST https://crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "nano-banana-2",
-    "prompt": "Turn this product photo into a clean white-background ecommerce hero shot while preserving the subject",
-    "image_input": [
-      "https://help-static-aliyun-doc.aliyuncs.com/file-manage-files/zh-CN/20250925/fpakfo/image36.webp"
-    ],
-    "resolution": "1K",
-    "aspect_ratio": "1:1"
+    "prompt": "..."
   }'
 ```
 
-```python Python
-import requests
-
-response = requests.post(
-    "https://crazyrouter.com/v1/images/generations",
-    headers={
-        "Content-Type": "application/json",
-        "Authorization": "Bearer YOUR_API_KEY"
-    },
-    json={
-        "model": "nano-banana-2",
-        "prompt": "Turn this product photo into a clean white-background ecommerce hero shot while preserving the subject",
-        "image_input": [
-            "https://help-static-aliyun-doc.aliyuncs.com/file-manage-files/zh-CN/20250925/fpakfo/image36.webp"
-        ],
-        "resolution": "1K",
-        "aspect_ratio": "1:1"
-    }
-)
-
-data = response.json()
-print(data["data"][0]["url"])
-```
-
-</CodeGroup>
-
-### Multi-Reference Input
-
-```json
-{
-  "model": "nano-banana-2",
-  "prompt": "Blend the subject and composition from these references into one new poster image",
-  "image_input": [
-    "https://example.com/ref-1.webp",
-    "https://example.com/ref-2.webp",
-    "https://example.com/ref-3.webp"
-  ],
-  "resolution": "2K",
-  "aspect_ratio": "16:9"
-}
-```
-
----
-
-## Response Example
-
-The recommended automation path is to consume `data[].url`:
-
-```json
-{
-  "created": 1774885716,
-  "data": [
-    {
-      "url": "https://media.crazyrouter.com/task-artifacts/2026/03/30/sync-image/20260330234836357407163eDKH9nsz-1.jpeg"
-    }
-  ]
-}
-```
-
-To retrieve the generated image, read `data[0].url`. Crazyrouter currently archives upstream inline image output and returns a public URL to the client.
-
----
-
-## Validation Snapshot
-
-| Item | Current Status |
-|------|----------------|
-| single URL reference | verified |
-| `2` URL references | verified |
-| `14` URL references | verified |
-| `15` URL references | verified as rejected |
-| `WEBP` URL | verified |
-| `PNG` URL | `Beta` |
-| `JPEG` URL | `Beta` |
-| `1K` | verified |
-| `2K + 16:9` | verified |
-| exact `30 MiB` URL boundary | `Beta` |
-
-## Current Known Limits
-
-- `image` is not accepted
-- `data:` / Base64 is not part of the public input contract
-- the docs do not promise stable `JPEG` URL behavior yet
-- the docs do not promise the exact `30 MiB` URL boundary yet
+This is not a one-off outage. The same failure pattern reproduced in both production and local `4000` retests.
 
 <Note>
-  If you need Gemini native `generateContent` image endpoints, see [Gemini Image Generation](/en/chat/gemini/image-gen) and [Gemini Image Editing](/en/chat/gemini/image-edit). For stable customer-facing integration, prefer the `/v1/images/generations` contract documented on this page.
+  For more details on native Gemini image requests, see [Gemini Image Generation](/en/chat/gemini/image-gen). If you still have older code using the Nano Banana-family Images API, migrate `nano-banana-2` to the native Gemini path documented here.
 </Note>

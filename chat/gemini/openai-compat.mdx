@@ -128,8 +128,7 @@ data: [DONE]
 - 需要 Gemini 的结构化输出、Google Search、thinking、原生字段：优先用 [Gemini 原生格式](/chat/gemini/native)
 
 <Note>
-  这页仍然只覆盖 `/v1/chat/completions` 兼容层，不把 Gemini 背后的图片能力混进来。如果你要接 Crazyrouter 当前已经收敛的公开图片协议，请直接看 Nano Banana family 的 `/v1/images/generations` 页面：
-  [Nano Banana](/images/nano-banana)、
-  [Nano Banana Pro](/images/nano-banana-pro)、
-  [Nano Banana 2](/images/nano-banana-2)。
+  这页仍然只覆盖 `/v1/chat/completions` 兼容层，不把 Gemini 背后的图片能力混进来。对于图片工作负载，当前不要再把 Nano Banana family 写成 `/v1/images/generations` 的稳定公开协议。
+  当前更推荐的入口是 [Nano Banana 2](/images/nano-banana-2) 对应的 Gemini 原生 `POST /v1beta/models/gemini-3.1-flash-image-preview:generateContent`。
+  [Nano Banana](/images/nano-banana) 当前只保留受控测试说明。
 </Note>

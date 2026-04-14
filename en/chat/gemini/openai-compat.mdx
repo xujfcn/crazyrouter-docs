@@ -128,8 +128,7 @@ data: [DONE]
 - If you need Gemini-native structured outputs, Google Search, thinking, or native metadata, use [Gemini Native Format](/en/chat/gemini/native)
 
 <Note>
-  This page still only covers the `/v1/chat/completions` compatibility layer and does not fold Gemini-backed image behavior into it. If you need Crazyrouter's current public image contract, use the Nano Banana family pages for `POST /v1/images/generations`:
-  [Nano Banana](/en/images/nano-banana),
-  [Nano Banana Pro](/en/images/nano-banana-pro),
-  and [Nano Banana 2](/en/images/nano-banana-2).
+  This page still only covers the `/v1/chat/completions` compatibility layer and does not fold Gemini-backed image behavior into it. For image workloads, do not keep documenting the Nano Banana family as a stable `/v1/images/generations` contract.
+  The currently preferred entry point is [Nano Banana 2](/en/images/nano-banana-2), which now points to native Gemini `POST /v1beta/models/gemini-3.1-flash-image-preview:generateContent`.
+  [Nano Banana](/en/images/nano-banana) remains controlled-testing only.
 </Note>

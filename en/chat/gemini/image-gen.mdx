@@ -1,6 +1,6 @@
 ---
 title: "Gemini Image Generation"
-description: "Current Gemini image-generation behavior verified against Crazyrouter production on 2026-03-23"
+description: "Current Gemini image-generation behavior updated from the 2026-04-14 Crazyrouter production retest"
 ---
 
 # Gemini Image Generation
@@ -9,7 +9,7 @@ description: "Current Gemini image-generation behavior verified against Crazyrou
 POST /v1beta/models/{model}:generateContent
 ```
 
-As of March 23, 2026, production checks against Crazyrouter showed:
+As of April 14, 2026, the latest production retest against Crazyrouter showed:
 
 - `gemini-3.1-flash-image-preview` returned `inlineData` when called with `responseModalities: ["IMAGE"]`
 - `gemini-3-pro-image-preview` returned `text` containing a Markdown image with a `data:image/...;base64,...` payload
@@ -19,6 +19,10 @@ As of March 23, 2026, production checks against Crazyrouter showed:
 <Warning>
   Gemini image models do not currently share one uniform response shape on Crazyrouter. Do not assume every model will return `inlineData`.
 </Warning>
+
+<Note>
+  If you are migrating from the Nano Banana family, do not keep using `/v1/images/generations`. `nano-banana-2` should now move directly to `gemini-3.1-flash-image-preview:generateContent`. `nano-banana` can return image output through `gemini-2.5-flash-image:generateContent`, but billing consistency is still under review.
+</Note>
 
 ---
 
