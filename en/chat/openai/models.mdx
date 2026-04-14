@@ -11,7 +11,7 @@ GET /v1/models
 
 Returns the list of models available to the current API key.
 
-This page only documents behavior that was revalidated against Crazyrouter production on `2026-03-23`.
+This page only documents behavior that was revalidated against Crazyrouter production on `2026-04-14`.
 
 ## Authentication
 
@@ -63,11 +63,12 @@ for (const model of models.data) {
 
 ## Current production findings
 
-In the `2026-03-23` production recheck:
+In the `2026-04-14` production recheck:
 
 - the endpoint returned `200`
+- the top-level `success` field was `true`
 - the top-level `object` was `list`
-- the current model count was `541`
+- the current model count was `605`
 - the following models were confirmed present:
   - `gpt-5.4`
   - `claude-sonnet-4-6`
@@ -84,6 +85,7 @@ In the `2026-03-23` production recheck:
 
 ```json
 {
+  "success": true,
   "object": "list",
   "data": [
     {
@@ -118,6 +120,7 @@ In the `2026-03-23` production recheck:
 
 | Field | Type | Meaning |
 |-------|------|---------|
+| `success` | boolean | Whether the request succeeded |
 | `id` | string | Model identifier used in API calls |
 | `object` | string | Always `model` |
 | `created` | integer | Timestamp |
