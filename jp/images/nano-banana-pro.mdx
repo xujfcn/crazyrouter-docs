@@ -1,0 +1,209 @@
+---
+title: "Nano Banana Pro"
+description: "Use nano-banana-pro for reference-image generation and editing through the OpenAI Images API"
+---
+
+# Nano Banana Pro
+
+```
+POST /v1/images/generations
+```
+
+Use `nano-banana-pro` for image generation and reference-image editing through one public `OpenAI Images API` style contract.
+
+## What This Page Covers
+
+- This page only covers `nano-banana-pro`
+- The customer-facing entry point is `POST /v1/images/generations`
+- The input image field is `image_input`
+- The current public contract is limited to URL references in `image_input`; `image` and `data:` inputs are not exposed publicly
+- Gemini / Vertex and other providers may sit behind this route, but those provider details are not part of the customer contract
+
+## Capability Status
+
+| Capability / Spec | Status | Notes |
+|-----------|--------|-------|
+| `T2I` | `Beta` | Historical coverage exists, but the current public artifact bundle is still centered on edit/reference flows |
+| `I2I + 1K` | `Verified` | The single-image edit live path is closed |
+| `I2I + 4K` | `Verified` | `4K + 21:9 + png/jpg` has a live artifact |
+| `Reference + 1..2 refs` | `Verified` | `2`-reference live verification is closed |
+| `2K` | `Beta` | The current public artifact is still pending |
+| higher multi-reference limits / exact `30 MiB` boundary | `Beta` | Not committed in the current public contract |
+
+<Note>
+  The Pricing page and this doc use the same status language: `Verified` means there is a current minimal live artifact, while `Beta` means the official capability exists but the public validation set or edge coverage is still being completed.
+</Note>
+
+## Currently Validated Capabilities
+
+The following conclusions come from live validation on March 31, 2026:
+
+- official Vertex `channel 318 (vertexsophie)` direct truth:
+  - `2` reference images work
+- local relay on `localhost:4000`, pinned to `channel 318`, verified:
+  - single `WEBP` URL reference works
+  - single `JPEG` URL reference works
+  - `2` `PNG` URL references work
+  - `resolution: "1K"` works
+  - `resolution: "4K"` works
+  - `aspect_ratio: "1:1"` works
+  - `aspect_ratio: "21:9"` works
+  - `output_format: "png"` works
+  - `output_format: "jpg"` works
+  - the response returns `data[].url`
+
+Do not present the following as fully promised customer-facing capability yet:
+
+- whether the exact multi-image limit is `8` or higher
+- `2K`
+- exact large-file URL limit
+- exact `30 MiB` boundary
+- additional `aspect_ratio` combinations
+- exact `output_compression` semantics
+
+<Warning>
+  `nano-banana-pro` currently exposes only `image_input` URL input publicly. The `image` field is rejected by the service, and `data:` / Base64 is not part of the current public contract.
+</Warning>
+
+---
+
+## Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model` | string | Yes | Fixed as `nano-banana-pro` |
+| `prompt` | string | Yes | Generation or edit instruction |
+| `image_input` | string or string[] | No | Reference image URL(s); current public-safe range is conservatively `1` to `2` |
+| `resolution` | string | No | Current public promise is `1K` and `4K` |
+| `aspect_ratio` | string | No | Current public promise is `1:1` and `21:9` |
+| `output_format` | string | No | Current public promise is `png` and `jpg` |
+| `n` | integer | No | Number of images, default `1` |
+
+### Current Multi-Image Status
+
+- `2` references: verified
+- higher counts: exact upstream max is still pending, so do not promise it publicly yet
+
+### Routing Note
+
+- single-image requests can use normal available carriers
+- multi-image requests are currently routed only to official `Gemini / Vertex` carriers
+- that is a server-side routing rule; the customer contract stays the same
+
+---
+
+## Request Examples
+
+### Single-Image Edit
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "nano-banana-pro",
+    "prompt": "Turn this product image into an ultra-wide hero KV with a cleaner background while preserving the subject",
+    "image_input": [
+      "https://help-static-aliyun-doc.aliyuncs.com/file-manage-files/zh-CN/20250925/fpakfo/image36.webp"
+    ],
+    "resolution": "4K",
+    "aspect_ratio": "21:9",
+    "output_format": "png"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/v1/images/generations",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "nano-banana-pro",
+        "prompt": "Turn this product image into an ultra-wide hero KV with a cleaner background while preserving the subject",
+        "image_input": [
+            "https://help-static-aliyun-doc.aliyuncs.com/file-manage-files/zh-CN/20250925/fpakfo/image36.webp"
+        ],
+        "resolution": "4K",
+        "aspect_ratio": "21:9",
+        "output_format": "png"
+    }
+)
+
+data = response.json()
+print(data["data"][0]["url"])
+```
+
+</CodeGroup>
+
+### Two-Reference Input
+
+```json
+{
+  "model": "nano-banana-pro",
+  "prompt": "Blend the subject and composition from these two references into one high-quality hero visual",
+  "image_input": [
+    "https://example.com/ref-1.png",
+    "https://example.com/ref-2.png"
+  ],
+  "resolution": "1K",
+  "aspect_ratio": "1:1"
+}
+```
+
+---
+
+## Response Example
+
+The recommended automation path is to consume `data[].url`:
+
+```json
+{
+  "created": 1774846705,
+  "data": [
+    {
+      "url": "https://media.crazyrouter.com/task-artifacts/2026/03/30/sync-image/20260331073825672515332JyP6hAcs-1.png"
+    }
+  ]
+}
+```
+
+To retrieve the generated image, read `data[0].url`. Crazyrouter currently archives upstream inline image output and returns a public URL to the client.
+
+---
+
+## Validation Snapshot
+
+| Item | Current Status |
+|------|----------------|
+| single URL reference | verified |
+| `2` URL references | verified |
+| `WEBP` URL | verified |
+| `JPEG` URL | verified |
+| `PNG` URL | verified |
+| `1K` | verified |
+| `4K` | verified |
+| `1:1` | verified |
+| `21:9` | verified |
+| `output_format = png` | verified |
+| `output_format = jpg` | verified |
+| exact `8`-image ceiling | `Beta` |
+| exact `30 MiB` URL boundary | `Beta` |
+| `2K` | `Beta` |
+
+## Current Known Limits
+
+- `image` is not accepted
+- `data:` / Base64 is not part of the public input contract
+- the docs do not promise more than `2` references yet
+- the docs do not promise the exact `30 MiB` URL boundary yet
+- the docs do not promise full closure on every screenshot-listed ratio or parameter yet
+
+<Note>
+  If you need Gemini native `generateContent` image endpoints, see [Gemini Image Generation](/jp/chat/gemini/image-gen) and [Gemini Image Editing](/jp/chat/gemini/image-edit). If you care more about reference-count breadth, also see [Nano Banana](/jp/images/nano-banana) and [Nano Banana 2](/jp/images/nano-banana-2).
+</Note>

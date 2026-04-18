@@ -1,0 +1,152 @@
+---
+title: "List Models"
+description: "Production-revalidated GET /v1/models usage for listing models available to the current token"
+---
+
+# List Models
+
+```
+GET /v1/models
+```
+
+Returns the list of models available to the current API key.
+
+This page only documents behavior that was revalidated against Crazyrouter production on `2026-04-14`.
+
+## Authentication
+
+```text
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Request example
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/models \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+models = client.models.list()
+
+for model in models.data:
+    print(model.id)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const models = await client.models.list();
+
+for (const model of models.data) {
+  console.log(model.id);
+}
+```
+
+</CodeGroup>
+
+---
+
+## Current production findings
+
+In the `2026-04-14` production recheck:
+
+- the endpoint returned `200`
+- the top-level `success` field was `true`
+- the top-level `object` was `list`
+- the current model count was `605`
+- the following models were confirmed present:
+  - `gpt-5.4`
+  - `claude-sonnet-4-6`
+  - `claude-opus-4-6-thinking`
+  - `gemini-3-pro-preview`
+
+<Note>
+  The exact count and model set can change with upstream configuration, token permissions, and platform updates. Treat the examples here as current examples, not a fixed complete inventory.
+</Note>
+
+---
+
+## Response example
+
+```json
+{
+  "success": true,
+  "object": "list",
+  "data": [
+    {
+      "id": "gpt-5.4",
+      "object": "model",
+      "created": 1700000000,
+      "owned_by": "openai"
+    },
+    {
+      "id": "claude-sonnet-4-6",
+      "object": "model",
+      "created": 1700000000,
+      "owned_by": "anthropic"
+    },
+    {
+      "id": "claude-opus-4-6-thinking",
+      "object": "model",
+      "created": 1700000000,
+      "owned_by": "anthropic"
+    },
+    {
+      "id": "gemini-3-pro-preview",
+      "object": "model",
+      "created": 1700000000,
+      "owned_by": "google"
+    }
+  ]
+}
+```
+
+## Common fields
+
+| Field | Type | Meaning |
+|-------|------|---------|
+| `success` | boolean | Whether the request succeeded |
+| `id` | string | Model identifier used in API calls |
+| `object` | string | Always `model` |
+| `created` | integer | Timestamp |
+| `owned_by` | string | Owning organization or source label |
+
+---
+
+## Pricing information
+
+If you also need public pricing data, see:
+
+```text
+GET /api/pricing
+```
+
+This production recheck confirmed that the endpoint returns a JSON object with common top-level keys such as:
+
+- `data`
+- `popular_models`
+- `supported_endpoint`
+- `vendors`
+
+<Note>
+  Use `supported_endpoint_types` / `public_endpoint_types` from `GET /api/pricing` for endpoint support. `openai` maps to `POST /v1/chat/completions`, `anthropic` maps to `POST /v1/messages`, and only `openai-response` maps to `POST /v1/responses`. Claude currently exposes `openai` + `anthropic`, not `openai-response`.
+</Note>
+
+Related page:
+
+- [Gemini-Compatible OpenAI Model List](/jp/chat/gemini/openai-models)

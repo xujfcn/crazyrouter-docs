@@ -1,0 +1,182 @@
+---
+title: "Grok 画像モデル"
+description: "grok-imagine-image と grok-4-image で画像を生成し、対応パラメータと違いを確認する"
+---
+
+# Grok 画像モデル
+
+```text
+POST /v1/images/generations
+```
+
+Grok 画像モデルは OpenAI 互換の Images パスで呼び出します。現在は次の 2 つのモデル名を区別してください。
+
+| Model | 説明 | 推奨 |
+|-------|------|------|
+| `grok-imagine-image` | xAI 公式の画像モデル名。公式価格 `$0.02 / image` で課金 | 新規連携に推奨 |
+| `grok-4-image` | サードパーティ互換チャネル上の履歴/互換モデル名 | 安全なサブセットのみ利用 |
+
+<Warning>
+  `grok-4-image` は xAI 公式のモデル名ではありません。`grok-imagine-image` と完全に同等であるとは仮定しないでください。新規連携では `grok-imagine-image` を優先してください。
+</Warning>
+
+## grok-imagine-image パラメータ
+
+| Parameter | Type | Required | 説明 |
+|-----------|------|----------|------|
+| `model` | string | Yes | `grok-imagine-image` を指定 |
+| `prompt` | string | Yes | 画像生成プロンプト |
+| `n` | integer | No | 生成枚数。公式範囲は `1` から `10`。コスト管理のため最初は `1` を推奨 |
+| `response_format` | string | No | `url` または `b64_json`。Crazyrouter の実運用経路では `url` が安定 |
+| `aspect_ratio` | string | No | 例: `1:1`、`16:9`、`9:16`、`3:2`、`auto` |
+| `resolution` | string | No | `1k` または `2k` |
+
+<Note>
+  `aspect_ratio` と `resolution` は xAI 画像エンドポイントの拡張パラメータです。OpenAI Python SDK では `extra_body` 経由で渡してください。cURL や Node.js SDK では JSON body に直接入れられます。
+</Note>
+
+次のパラメータは渡さないでください。
+
+| Parameter | 理由 |
+|-----------|------|
+| `size` | xAI では未対応。送信すると `Argument not supported: size` が返ることがあります |
+| `quality` | xAI 画像エンドポイントでは未対応 |
+| `style` | xAI 画像エンドポイントでは未対応 |
+
+## grok-imagine-image の例
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "grok-imagine-image",
+    "prompt": "A tiny yellow cube on a plain white background, minimal product photo",
+    "n": 1,
+    "response_format": "url",
+    "aspect_ratio": "1:1",
+    "resolution": "1k"
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1",
+)
+
+response = client.images.generate(
+    model="grok-imagine-image",
+    prompt="A tiny yellow cube on a plain white background, minimal product photo",
+    n=1,
+    response_format="url",
+    extra_body={
+        "aspect_ratio": "1:1",
+        "resolution": "1k",
+    },
+)
+
+print(response.data[0].url)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const response = await client.images.generate({
+  model: "grok-imagine-image",
+  prompt: "A tiny yellow cube on a plain white background, minimal product photo",
+  n: 1,
+  response_format: "url",
+  aspect_ratio: "1:1",
+  resolution: "1k",
+});
+
+console.log(response.data[0].url);
+```
+
+</CodeGroup>
+
+## レスポンス例
+
+実際のレスポンスには `url`、`mime_type`、`revised_prompt` などが含まれる場合があります。
+
+```json
+{
+  "created": 1776527939,
+  "data": [
+    {
+      "url": "https://...",
+      "mime_type": "image/jpeg",
+      "revised_prompt": "A tiny yellow cube on a plain white background..."
+    }
+  ]
+}
+```
+
+<Note>
+  `response_format: "url"` で返る画像 URL は一時リンクです。永続的に利用する場合は、生成後にダウンロードまたは保存してください。
+</Note>
+
+## grok-4-image の違い
+
+`grok-4-image` では次の安全なサブセットのみを推奨します。
+
+| Parameter | 対応状況 |
+|-----------|----------|
+| `model` | `grok-4-image` を指定 |
+| `prompt` | 対応 |
+| `n` | `1` のみ推奨。実運用テストでは `n=2` で 1 枚だけ返り、2 枚分課金される可能性がありました。ゲートウェイ側では `1` に制限しています |
+| `response_format` | `url` が安定。`b64_json` は受け付けられる場合がありますが、実運用経路では `url` が返ることがあります |
+| `aspect_ratio` | リクエスト上は受け付けますが、サードパーティチャネルが厳密に反映するかは出力ごとに確認してください |
+| `resolution` | リクエスト上は受け付けますが、サードパーティチャネルが厳密に反映するかは出力ごとに確認してください |
+
+`grok-4-image` で次の内容は保証しないでください。
+
+- 複数画像 `n > 1`
+- `b64_json` の確実な base64 出力
+- `size`
+- `quality`
+- `style`
+- 画像編集機能
+
+## grok-4-image の例
+
+```bash
+curl -X POST https://crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "grok-4-image",
+    "prompt": "A single red cube on a plain white background, product photo",
+    "n": 1,
+    "response_format": "url"
+  }'
+```
+
+## 課金
+
+| Model | 現在の課金 |
+|-------|------------|
+| `grok-imagine-image` | `$0.02 / image`、割引なし |
+| `grok-4-image` | 現在の pricing は `$0.08 * 0.55 = $0.044 / image` |
+
+<Note>
+  実際の pricing ページと利用ログが最終的な基準です。Grok 画像モデルは入力/出力 token ではなく、画像枚数で課金されます。
+</Note>
+
+## よくあるエラー
+
+| Error | 対応 |
+|-------|------|
+| `Argument not supported: size` | `size` を送らず、`aspect_ratio` と `resolution` を使ってください |
+| `model_price_error` | モデル価格が未設定、またはトークン権限が不足しています |
+| `model_not_found` | モデル名、トークン権限、チャネル可用性を `GET /v1/models` で確認してください |

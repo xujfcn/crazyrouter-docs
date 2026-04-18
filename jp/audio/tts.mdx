@@ -1,0 +1,111 @@
+---
+title: "Text-to-Speech (TTS)"
+description: "Use POST /v1/audio/speech to convert text to speech"
+---
+
+# Text-to-Speech (TTS)
+
+```
+POST /v1/audio/speech
+```
+
+Convert text to natural speech, compatible with the OpenAI TTS API format.
+
+## Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model` | string | Yes | Model name: `gpt-4o-mini-tts`, `tts-1`, `tts-1-hd` |
+| `input` | string | Yes | Text to convert, max 4096 characters |
+| `voice` | string | Yes | Voice character |
+| `response_format` | string | No | Output format: `mp3` (default), `opus`, `aac`, `flac`, `wav`, `pcm` |
+| `speed` | number | No | Speed, 0.25-4.0, default 1.0 |
+
+### Available Voices
+
+| Voice | Characteristics |
+|-------|----------------|
+| `alloy` | Neutral, balanced |
+| `echo` | Male, steady |
+| `fable` | Male, warm |
+| `onyx` | Male, deep |
+| `nova` | Female, lively |
+| `shimmer` | Female, soft |
+
+## Request Examples
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/audio/speech \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o-mini-tts",
+    "input": "Hello, welcome to the Crazyrouter API. What a beautiful day!",
+    "voice": "nova",
+    "response_format": "mp3",
+    "speed": 1.0
+  }' \
+  --output speech.mp3
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.audio.speech.create(
+    model="gpt-4o-mini-tts",
+    input="Hello, welcome to the Crazyrouter API. What a beautiful day!",
+    voice="nova",
+    response_format="mp3",
+    speed=1.0
+)
+
+response.stream_to_file("speech.mp3")
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+import fs from "fs";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const response = await client.audio.speech.create({
+  model: "gpt-4o-mini-tts",
+  input: "Hello, welcome to the Crazyrouter API.",
+  voice: "nova",
+});
+
+const buffer = Buffer.from(await response.arrayBuffer());
+fs.writeFileSync("speech.mp3", buffer);
+```
+
+</CodeGroup>
+
+The response is a binary audio stream. Save it directly to a file.
+
+---
+
+## Model Comparison
+
+| Model | Quality | Latency | Description |
+|-------|---------|---------|-------------|
+| `tts-1` | Standard | Low | Suitable for real-time scenarios |
+| `tts-1-hd` | HD | Medium | More natural speech |
+| `gpt-4o-mini-tts` | Highest | Medium | Latest model, supports more languages and emotions |
+
+<Note>
+  `gpt-4o-mini-tts` supports multiple languages and automatically detects the input text language to use the corresponding pronunciation.
+</Note>
+
+<Warning>
+  The response is a binary audio stream, not JSON. Use `--output` or stream-write to a file.
+</Warning>

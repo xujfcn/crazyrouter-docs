@@ -1,0 +1,84 @@
+---
+title: "Claude Vision"
+description: "Claude image understanding verified against Crazyrouter production on 2026-03-23"
+---
+
+# Claude Vision
+
+As of March 23, 2026, Crazyrouter production has verified two Claude image-input paths:
+
+- native `POST /v1/messages` with `type: "image"` and Base64 PNG
+- OpenAI-compatible `POST /v1/chat/completions` with `type: "image_url"` and a data URL
+
+---
+
+## Native Format: `/v1/messages`
+
+```bash
+curl https://crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-sonnet-4-6",
+    "max_tokens": 128,
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "image",
+            "source": {
+              "type": "base64",
+              "media_type": "image/png",
+              "data": "iVBORw0KGgoAAA..."
+            }
+          },
+          {
+            "type": "text",
+            "text": "What color is this image?"
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+This production check returned:
+
+- `model: "claude-sonnet-4-6"`
+- `content[0].type = "text"`
+
+---
+
+## OpenAI-Compatible Format: `/v1/chat/completions`
+
+```bash
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "claude-sonnet-4-6",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {"type": "text", "text": "What color is this image?"},
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "data:image/png;base64,iVBORw0KGgoAAA..."
+            }
+          }
+        ]
+      }
+    ],
+    "max_tokens": 128
+  }'
+```
+
+In the 2026-03-23 production check, `message.content` came back as plain text describing the image color.
+
+<Note>
+  This page keeps only the Base64 PNG / data-URL paths that were revalidated successfully. Remote URLs, additional image formats, and more complex multi-image cases were not rechecked item by item in this pass.
+</Note>

@@ -1,0 +1,70 @@
+---
+title: "Video Generation Alias"
+description: "POST /v1/video/generations compatibility alias for clients that already depend on this video-generation path"
+---
+
+# Video Generation Alias
+
+```
+POST /v1/video/generations
+```
+
+This is a Crazyrouter compatibility alias for clients or middleware that are already pinned to the `/v1/video/generations` path.
+
+## Authentication
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## When To Use It
+
+- your client is hardcoded to `/v1/video/generations`
+- you are migrating an older video workflow and do not want to change the path
+- you need to preserve compatibility with an existing third-party request shape
+
+For new integrations, prefer:
+
+- `POST /v1/videos`: closer to the official OpenAI video format
+- `POST /v1/video/create`: Crazyrouter's unified video format
+
+## Minimal Request Example
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/video/generations   -H "Content-Type: application/json"   -H "Authorization: Bearer YOUR_API_KEY"   -d '{
+    "model": "veo-3.1-quality",
+    "prompt": "A cinematic shot of waves hitting a cliff at sunset"
+  }'
+```
+
+## Typical Success Response
+
+```json
+{
+  "id": "video_task_abc123",
+  "status": "processing",
+  "status_update_time": 1709123456
+}
+```
+
+## Error Response Verified Locally
+
+On the local `http://127.0.0.1:4000` environment, this route was verified to exist. When the model is temporarily unavailable, it returns a business error rather than `404`:
+
+```json
+{
+  "code": "get_channel_failed",
+  "message": "model veo-3.1-quality is temporarily unavailable, please try again later",
+  "data": null
+}
+```
+
+## Notes
+
+- request fields vary by video model and upstream capability
+- model availability depends on the token whitelist and current upstream state
+- after task creation, query status with `GET /v1/video/generations/{task_id}`
+
+<Note>
+This route is a compatibility alias. It does not guarantee that every video model shares the exact same body schema. If you are starting fresh and do not need legacy path compatibility, prefer `/v1/videos` or `/v1/video/create`.
+</Note>

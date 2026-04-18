@@ -1,0 +1,116 @@
+---
+title: "MiniMax Video"
+description: "Use the MiniMax/Hailuo API to generate videos"
+---
+
+# MiniMax Video
+
+MiniMax (Hailuo) provides high-quality video generation capabilities.
+
+## Create Video
+
+```
+POST /minimax/v1/video_generation
+```
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model` | string | Yes | Model name, e.g. `video-01`, `video-01-live2d` |
+| `prompt` | string | Yes | Video description prompt |
+| `first_frame_image` | string | No | First frame image URL |
+
+### Request Examples
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/minimax/v1/video_generation \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "video-01",
+    "prompt": "A kitten napping in the sunlight, a gentle breeze ruffling its fur"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/minimax/v1/video_generation",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "video-01",
+        "prompt": "A kitten napping in the sunlight, a gentle breeze ruffling its fur"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### Response Example
+
+```json
+{
+  "task_id": "minimax_video_abc123",
+  "base_resp": {
+    "status_code": 0,
+    "status_msg": "success"
+  }
+}
+```
+
+---
+
+## Image-to-Video
+
+```json
+{
+  "model": "video-01",
+  "prompt": "The person in the image starts smiling",
+  "first_frame_image": "https://example.com/portrait.jpg"
+}
+```
+
+---
+
+## Query Task
+
+```
+GET /minimax/v1/query/video_generation?task_id={task_id}
+```
+
+```bash cURL
+curl "https://crazyrouter.com/minimax/v1/query/video_generation?task_id=minimax_video_abc123" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Response Example (Completed)
+
+```json
+{
+  "task_id": "minimax_video_abc123",
+  "status": "Success",
+  "file_id": "file_abc123",
+  "base_resp": {
+    "status_code": 0,
+    "status_msg": "success"
+  }
+}
+```
+
+### Task Status
+
+| Status | Description |
+|--------|-------------|
+| `Queueing` | Queued |
+| `Processing` | Processing |
+| `Success` | Succeeded |
+| `Fail` | Failed |

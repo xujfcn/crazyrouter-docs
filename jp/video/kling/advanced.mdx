@@ -1,0 +1,80 @@
+---
+title: "Kling Advanced Features"
+description: "Kling advanced features: virtual try-on"
+---
+
+# Kling Advanced Features
+
+## Virtual Try-On
+
+```
+POST /kling/v1/images/kolors-virtual-try-on
+```
+
+Virtual try-on is the only currently exposed Kling advanced capability. This path has completed bounded success verification, including the `task success -> R2 archive -> media.crazyrouter.com` flow.
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model_name` | string | No | Common models: `kolors-virtual-try-on-v1`, `kolors-virtual-try-on-v1-5` |
+| `human_image` | string | Yes | Person image. URL or Base64 is supported |
+| `cloth_image` | string | Yes | Clothing image. URL or Base64 is supported |
+| `callback_url` | string | No | Callback URL |
+| `external_task_id` | string | No | Custom business task ID |
+
+### Request Example
+
+```bash cURL
+curl -X POST https://crazyrouter.com/kling/v1/images/kolors-virtual-try-on \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model_name": "kolors-virtual-try-on-v1",
+    "human_image": "https://example.com/person.jpg",
+    "cloth_image": "https://example.com/jacket.jpg"
+  }'
+```
+
+### Successful Submit Response
+
+```json
+{
+  "created_at": 1774585120,
+  "id": "866361099762425934",
+  "model": "kolors-virtual-try-on-v1",
+  "object": "video",
+  "progress": 0,
+  "status": "",
+  "task_id": "866361099762425934"
+}
+```
+
+## Query Try-On Task
+
+```
+GET /kling/v1/images/kolors-virtual-try-on/{task_id}
+```
+
+```bash cURL
+curl https://crazyrouter.com/kling/v1/images/kolors-virtual-try-on/866361099762425934 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Completed Response Example
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "status": "succeeded",
+    "task_id": "866361099762425934",
+    "url": "https://media.crazyrouter.com/task-artifacts/2026/03/27/50/tryOnGenerate/866361099762425934.png"
+  }
+}
+```
+
+<Note>
+  Do not document lip sync, video extension, or effects as publicly available Kling endpoints. They are still outside Crazyrouter's public contract.
+</Note>

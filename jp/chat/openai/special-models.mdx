@@ -1,0 +1,75 @@
+---
+title: "Special Models"
+description: "Production-revalidated availability notes for special-purpose models as of 2026-03-23"
+---
+
+# Special Models
+
+This page only documents facts revalidated against Crazyrouter production on `2026-03-23`.
+
+Unlike the main capability pages, special-purpose models are much more likely to change with channel inventory, temporary upstream outages, or token-level availability. So this page no longer treats older examples as stable-success patterns by default.
+
+## Current recheck results
+
+### `qwen-mt-turbo`
+
+Production findings on `2026-03-23`:
+
+- it did not appear in `GET /v1/models`
+- a direct request returned:
+  - `503`
+  - `model_not_found`
+  - `Model qwen-mt-turbo is temporarily unavailable`
+
+So the docs no longer present `qwen-mt-turbo` as a currently stable available model.
+
+### `deepseek-ocr`
+
+Production findings on `2026-03-23`:
+
+- it did appear in `GET /v1/models`
+- but an actual call returned:
+  - `500`
+  - `get_channel_failed`
+  - `model deepseek-ocr is temporarily unavailable, please try again later`
+
+That means it is currently at least "visible in the model list, but not callable right now".
+
+---
+
+## Current recommendation
+
+- If you need to know whether a special model is usable today, check [GET /v1/models](/jp/chat/openai/models) first
+- A model appearing in the list still does not guarantee that it is callable at that moment
+- For these models, your first integration step should be a minimal live probe request
+
+## Minimal probe template
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "YOUR_SPECIAL_MODEL",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Hello"
+      }
+    ],
+    "max_tokens": 64
+  }'
+```
+
+If the result contains:
+
+- normal `choices`
+  the channel is currently usable
+- `model_not_found`
+  the model is not currently available to the token
+- `temporarily unavailable` or `get_channel_failed`
+  the model name is visible, but the current serving channel is unavailable
+
+<Warning>
+  This page is especially likely to age quickly. For translation, OCR, and experimental special-purpose models, always treat the same-day `/v1/models` response plus one real request as the source of truth.
+</Warning>

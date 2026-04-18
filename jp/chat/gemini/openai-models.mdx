@@ -1,0 +1,127 @@
+---
+title: "Gemini-Compatible OpenAI Model List"
+description: "Production-revalidated GET /v1beta/openai/models usage for retrieving an OpenAI-style model list"
+---
+
+# Gemini-Compatible OpenAI Model List
+
+```
+GET /v1beta/openai/models
+```
+
+This endpoint is a compatibility bridge:
+
+- the auth style can be Gemini-like
+- the response shape is still OpenAI-style model-list JSON
+
+This page only documents behavior that was revalidated against Crazyrouter production on `2026-03-23`.
+
+## When to use it
+
+- your client prefers `?key=`
+- your middleware already uses `x-goog-api-key`
+- you want an OpenAI-style `list + data[]` response rather than native Gemini model metadata
+
+If you are using a normal OpenAI-compatible client, prefer [GET /v1/models](/jp/chat/openai/models).
+
+## Authentication
+
+This recheck confirmed that all three of the following work:
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+```http
+x-goog-api-key: YOUR_API_KEY
+```
+
+```text
+GET /v1beta/openai/models?key=YOUR_API_KEY
+```
+
+## Request examples
+
+<CodeGroup>
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/openai/models?key=YOUR_API_KEY"
+```
+
+```bash cURL with Header
+curl https://crazyrouter.com/v1beta/openai/models \
+  -H "x-goog-api-key: YOUR_API_KEY"
+```
+
+</CodeGroup>
+
+---
+
+## Current production findings
+
+In the `2026-03-23` production recheck:
+
+- the `?key=` request returned `200`
+- the `x-goog-api-key` request returned `200`
+- the top-level `object` was `list`
+- the top-level `success` was `true`
+- the current model count was `541`
+- common fields inside `data[]` included:
+  - `id`
+  - `object`
+  - `created`
+  - `owned_by`
+  - `supported_endpoint_types`
+
+---
+
+## Response example
+
+```json
+{
+  "object": "list",
+  "success": true,
+  "data": [
+    {
+      "id": "gpt-5.4",
+      "object": "model",
+      "created": 1700000000,
+      "owned_by": "openai",
+      "supported_endpoint_types": ["openai"]
+    },
+    {
+      "id": "claude-sonnet-4-6",
+      "object": "model",
+      "created": 1700000000,
+      "owned_by": "anthropic",
+      "supported_endpoint_types": ["openai", "anthropic"]
+    },
+    {
+      "id": "gemini-3-pro-preview",
+      "object": "model",
+      "created": 1700000000,
+      "owned_by": "google",
+      "supported_endpoint_types": ["openai", "gemini"]
+    }
+  ]
+}
+```
+
+## Field notes
+
+| Field | Type | Meaning |
+|------|------|---------|
+| `data[]` | array | Models available to the current token |
+| `id` | string | Model identifier |
+| `owned_by` | string | Upstream source or owner label |
+| `supported_endpoint_types` | array | Supported API styles for the model |
+| `object` | string | Always `list` |
+| `success` | boolean | Whether the request succeeded |
+
+<Note>
+  Read the path meaning of `supported_endpoint_types` from `supported_endpoint` in `GET /api/pricing`. At the moment, `openai` maps to `POST /v1/chat/completions`, `anthropic` maps to `POST /v1/messages`, and only `openai-response` maps to `POST /v1/responses`. Claude currently exposes `openai` + `anthropic`, not `openai-response`.
+</Note>
+
+<Note>
+  This endpoint does not return only Gemini models. It returns the OpenAI-style model list visible to the current token, but exposes it through a Gemini-friendly access path.
+</Note>

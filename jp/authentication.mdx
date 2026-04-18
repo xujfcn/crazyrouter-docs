@@ -1,0 +1,65 @@
+---
+title: '認証'
+description: 'API キーの取得方法と使い方'
+---
+
+## Bearer Token 認証
+
+すべての API リクエストでは、HTTP ヘッダーに API キーを指定します。
+
+```text
+Authorization: Bearer YOUR_API_KEY
+```
+
+## API キーを取得する
+
+1. [Crazyrouter](https://crazyrouter.com) にログインします。
+2. [Token Management](https://crazyrouter.com/console/token) ページを開きます。
+3. 「Create Token」をクリックします。
+4. トークン名、利用上限、利用可能モデルなどを設定します。
+5. `sk-` で始まる生成済みキーをコピーします。
+
+<Warning>
+  API キーは作成時に一度だけ表示されます。必ず安全な場所に保存してください。紛失した場合は、新しいキーを作成する必要があります。
+</Warning>
+
+## 利用例
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Authorization: Bearer sk-xxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "gpt-5.4", "messages": [{"role": "user", "content": "Hi"}]}'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxxxxxxx",
+    base_url="https://crazyrouter.com/v1"
+)
+```
+
+```javascript Node.js
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: 'sk-xxxxxxxx',
+  baseURL: 'https://crazyrouter.com/v1'
+});
+```
+
+</CodeGroup>
+
+## トークン権限
+
+トークン作成時には、次の項目を設定できます。
+
+- **Name**: 用途を識別するための名前
+- **Quota Limit**: 利用できる上限額
+- **Expiration Time**: 有効期限
+- **Available Models**: 呼び出し可能なモデル
+- **IP Whitelist**: 呼び出し元 IP の制限

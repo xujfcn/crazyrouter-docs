@@ -1,0 +1,136 @@
+---
+title: 'Update Token'
+description: 'Update the configuration of an existing token'
+api: 'PUT /api/token/'
+---
+
+## Overview
+
+Modify the name, quota, expiration time, model permissions, and other settings of an existing token.
+
+<Note>
+  The `/api/token/*` endpoints are mainly for Crazyrouter dashboard automation around API key management. They require a user `access token` plus the `New-Api-User` header, and are not the normal interface for `sk-xxx` model calls.
+</Note>
+
+## Authentication
+
+Use user-side authentication with these headers:
+
+```text
+Authorization: Bearer your_access_token
+New-Api-User: 1
+```
+
+## Request Parameters
+
+<ParamField body="id" type="integer" required>
+  Token ID
+</ParamField>
+
+<ParamField body="name" type="string">
+  Token name
+</ParamField>
+
+<ParamField body="remain_quota" type="integer">
+  Remaining quota
+</ParamField>
+
+<ParamField body="unlimited_quota" type="boolean">
+  Whether quota is unlimited
+</ParamField>
+
+<ParamField body="expired_time" type="integer">
+  Expiration timestamp, `-1` means never expires
+</ParamField>
+
+<ParamField body="model_limits_enabled" type="boolean">
+  Whether to enable the model whitelist
+</ParamField>
+
+<ParamField body="model_limits" type="string">
+  Model restriction config string, for example `["gpt-5.4","claude-sonnet-4-6"]`
+</ParamField>
+
+<ParamField body="status" type="integer">
+  Status: 1=enabled, 2=disabled
+</ParamField>
+
+<ParamField body="allow_ips" type="string">
+  IP whitelist string
+</ParamField>
+
+<ParamField body="group" type="string">
+  Group
+</ParamField>
+
+## Response Format
+
+The current endpoint returns the updated token object:
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "id": 10,
+    "name": "Production-Updated",
+    "status": 1,
+    "remain_quota": 200000,
+    "unlimited_quota": false,
+    "model_limits_enabled": true,
+    "model_limits": "[\"gpt-5.4\",\"claude-sonnet-4-6\"]",
+    "allow_ips": "203.0.113.10",
+    "group": "default"
+  }
+}
+```
+
+## Code Examples
+
+<CodeGroup>
+
+```python Python
+import json
+import requests
+
+headers = {
+    "Authorization": "Bearer your_access_token",
+    "New-Api-User": "1",
+    "Content-Type": "application/json",
+    "User-Agent": "Mozilla/5.0"
+}
+
+response = requests.put(
+    "https://crazyrouter.com/api/token/",
+    headers=headers,
+    json={
+        "id": 10,
+        "name": "Production-Updated",
+        "remain_quota": 200000,
+        "model_limits_enabled": True,
+        "model_limits": json.dumps(["gpt-5.4", "claude-sonnet-4-6"])
+    }
+)
+
+print(response.json())
+```
+
+```bash cURL
+curl -X PUT https://crazyrouter.com/api/token/ \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 1" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": 10,
+    "name": "Production-Updated",
+    "remain_quota": 200000,
+    "model_limits_enabled": true,
+    "model_limits": "[\"gpt-5.4\"]"
+  }'
+```
+
+</CodeGroup>
+
+<Warning>
+  Updating a token does not regenerate the API key. If you need a new key, delete the token and create a new one.
+</Warning>

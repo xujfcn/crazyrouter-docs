@@ -1,0 +1,140 @@
+---
+title: "Speech-to-Text (STT)"
+description: "Use POST /v1/audio/transcriptions to convert speech to text"
+---
+
+# Speech-to-Text (STT)
+
+```
+POST /v1/audio/transcriptions
+```
+
+Transcribe audio files to text, compatible with the OpenAI Whisper API format.
+
+## Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `file` | file | Yes | Audio file (multipart/form-data) |
+| `model` | string | Yes | Model name: `whisper-1`, `gpt-4o-transcribe` |
+| `language` | string | No | Audio language (ISO-639-1 format), e.g. `zh`, `en`, `ja` |
+| `response_format` | string | No | Output format: `json` (default), `text`, `srt`, `verbose_json`, `vtt` |
+| `temperature` | number | No | Sampling temperature, 0-1 |
+| `prompt` | string | No | Prompt to help the model understand context |
+
+### Supported Audio Formats
+
+`mp3`, `mp4`, `mpeg`, `mpga`, `m4a`, `wav`, `webm`
+
+## Request Examples
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/audio/transcriptions \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F file=@audio.mp3 \
+  -F model=whisper-1 \
+  -F language=en \
+  -F response_format=json
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+with open("audio.mp3", "rb") as audio_file:
+    transcript = client.audio.transcriptions.create(
+        model="whisper-1",
+        file=audio_file,
+        language="en",
+        response_format="json"
+    )
+
+print(transcript.text)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+import fs from "fs";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const transcript = await client.audio.transcriptions.create({
+  model: "whisper-1",
+  file: fs.createReadStream("audio.mp3"),
+  language: "en",
+});
+
+console.log(transcript.text);
+```
+
+</CodeGroup>
+
+## Response Examples
+
+### JSON Format
+
+```json
+{
+  "text": "Hello, welcome to the Crazyrouter API. Today we'll introduce the speech-to-text feature."
+}
+```
+
+### verbose_json Format
+
+```json
+{
+  "task": "transcribe",
+  "language": "english",
+  "duration": 5.2,
+  "text": "Hello, welcome to the Crazyrouter API.",
+  "segments": [
+    {
+      "id": 0,
+      "start": 0.0,
+      "end": 2.5,
+      "text": "Hello, welcome to the Crazyrouter API."
+    }
+  ]
+}
+```
+
+### SRT Format
+
+```
+1
+00:00:00,000 --> 00:00:02,500
+Hello, welcome to the Crazyrouter API.
+```
+
+---
+
+## Audio Translation
+
+```
+POST /v1/audio/translations
+```
+
+Translate non-English audio to English text. Parameters are the same as the transcription endpoint.
+
+```python Python
+with open("chinese_audio.mp3", "rb") as audio_file:
+    translation = client.audio.translations.create(
+        model="whisper-1",
+        file=audio_file
+    )
+
+print(translation.text)  # Outputs English translation
+```
+
+<Note>
+  Specifying the `language` parameter can improve transcription accuracy. Audio file size limit is 25MB.
+</Note>

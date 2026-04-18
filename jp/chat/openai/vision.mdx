@@ -1,0 +1,68 @@
+---
+title: "Vision via Chat"
+description: "OpenAI-style vision input verified against Crazyrouter production on 2026-03-23"
+---
+
+# Vision via Chat
+
+```
+POST /v1/chat/completions
+```
+
+As of March 23, 2026, Crazyrouter production has verified:
+
+- `gpt-5.4` can read images through the OpenAI-style `image_url` input shape
+- a `data:image/png;base64,...` data URL succeeds and returns a text answer
+- the current `message.content` is plain text, not a multipart content array
+
+---
+
+## Verified Minimal Request
+
+```bash
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.4",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {"type": "text", "text": "What color is this image?"},
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "data:image/png;base64,iVBORw0KGgoAAA..."
+            }
+          }
+        ]
+      }
+    ],
+    "max_tokens": 100
+  }'
+```
+
+In the 2026-03-23 production check, `gpt-5.4` returned:
+
+```json
+{
+  "model": "gpt-5.4",
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "Red."
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Current Recommendation
+
+- Use `gpt-5.4` first for new vision-understanding integrations
+- This page only keeps the data-URL path that was revalidated successfully
+- Remote URLs, multi-image inputs, and `detail` handling were not rechecked item by item in this pass, so revalidate them against production before relying on them

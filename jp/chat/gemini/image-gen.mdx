@@ -1,0 +1,90 @@
+---
+title: "Gemini Image Generation"
+description: "Current Gemini image-generation behavior updated from the 2026-04-14 Crazyrouter production retest"
+---
+
+# Gemini Image Generation
+
+```
+POST /v1beta/models/{model}:generateContent
+```
+
+As of April 14, 2026, the latest production retest against Crazyrouter showed:
+
+- `gemini-3.1-flash-image-preview` returned `inlineData` when called with `responseModalities: ["IMAGE"]`
+- `gemini-3-pro-image-preview` returned `text` containing a Markdown image with a `data:image/...;base64,...` payload
+- `gemini-2.5-flash-image` also returned `text` containing `data:image/...;base64,...`
+- `gemini-2.5-flash-image-preview` returned `text` containing a hosted image URL
+
+<Warning>
+  Gemini image models do not currently share one uniform response shape on Crazyrouter. Do not assume every model will return `inlineData`.
+</Warning>
+
+<Note>
+  If you are migrating from the Nano Banana family, do not keep using `/v1/images/generations`. `nano-banana-2` should now move directly to `gemini-3.1-flash-image-preview:generateContent`. `nano-banana` can return image output through `gemini-2.5-flash-image:generateContent`, but billing consistency is still under review.
+</Note>
+
+---
+
+## Most Practical Current Example
+
+For the specific goal of getting image bytes directly, the easiest current model to handle is `gemini-3.1-flash-image-preview`:
+
+```bash
+curl "https://crazyrouter.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "Generate an IMAGE of a simple red square on a white background. Return image output."}
+        ]
+      }
+    ],
+    "generationConfig": {
+      "responseModalities": ["IMAGE"]
+    }
+  }'
+```
+
+Observed production response shape:
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "inlineData": {
+              "mimeType": "image/png",
+              "data": "iVBORw0KGgoAAA..."
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Other Observed Output Shapes
+
+The same-day production check also showed these model-specific differences:
+
+- `gemini-3-pro-image-preview`: `parts[0].text` looked like `![image](data:image/jpeg;base64,...)`
+- `gemini-2.5-flash-image`: `parts[0].text` looked like `![image](data:image/png;base64,...)`
+- `gemini-2.5-flash-image-preview`: `parts[0].text` looked like `![Image](https://...)`
+
+If you need to support multiple Gemini image models, parse in this order:
+
+1. Check `inlineData` first
+2. Then check whether `text` contains `data:image/`
+3. Then check whether `text` contains a hosted image URL
+
+<Note>
+  This page no longer keeps aspect-ratio or multi-image parameter guidance, because those parameters were not revalidated in this production pass.
+</Note>

@@ -1,0 +1,66 @@
+---
+title: "Responses Web Search"
+description: "Responses web search verified against Crazyrouter production on 2026-03-23"
+---
+
+# Responses Web Search
+
+```
+POST /v1/responses
+```
+
+As of March 23, 2026, Crazyrouter production has verified `gpt-5.4` on the Responses API using:
+
+- `tools: [{ "type": "web_search_preview" }]`
+- an `output` sequence of `web_search_call`, then `message`
+
+<Note>
+  Claude does not currently support `POST /v1/responses`. For Claude web search, use `POST /v1/chat/completions` or the native Claude path instead.
+</Note>
+
+---
+
+## Minimal Request
+
+```bash
+curl https://crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.4",
+    "input": "Find one AI news item from March 2026.",
+    "tools": [
+      {
+        "type": "web_search_preview"
+      }
+    ]
+  }'
+```
+
+Observed production response shape:
+
+```json
+{
+  "output": [
+    {
+      "type": "web_search_call"
+    },
+    {
+      "type": "message"
+    }
+  ]
+}
+```
+
+---
+
+## Current Verification Rule
+
+If you need to confirm that the model actually searched the web, the safest current checks are:
+
+- whether `web_search_call` appears in `output`
+- whether the final answer still arrives as a `message`
+
+<Warning>
+  This page no longer keeps older outdated examples, and it does not document un-revalidated search parameters as the current primary path.
+</Warning>

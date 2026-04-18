@@ -1,0 +1,155 @@
+---
+title: 'AI Thinking Fields'
+description: 'Production-revalidated guide to the thinking and reasoning fields exposed by different Crazyrouter protocols'
+---
+
+# AI Thinking Fields
+
+This page only lists thinking and reasoning surfaces that were revalidated against Crazyrouter production on `2026-03-22`.
+
+The key point is that different protocols expose "thinking" differently:
+
+- OpenAI Responses returns a standalone `reasoning` item
+- Claude native Messages returns a `thinking` block
+- Gemini Native is most reliably observed through `usageMetadata.thoughtsTokenCount`
+
+## Currently verified fields
+
+| Model | Protocol | Verified field or marker | Notes |
+|-------|----------|--------------------------|-------|
+| `gpt-5.4` | Responses | `output[].type = "reasoning"` | Can return displayable summaries when `summary` is requested |
+| `claude-opus-4-6-thinking` | Anthropic Messages | `content[].type = "thinking"` | Returned alongside a `text` block |
+| `gemini-3-pro-preview` | Gemini Native | `usageMetadata.thoughtsTokenCount` | Confirms thinking tokens were actually used |
+
+<Note>
+  In the current recheck, `gpt-5.4` Chat Completions did not reliably return usable `message.reasoning_content`, so it is not treated as the primary observable field here.
+</Note>
+
+---
+
+## GPT: Responses `reasoning` item
+
+```json
+{
+  "output": [
+    {
+      "id": "rs_xxx",
+      "type": "reasoning",
+      "encrypted_content": "...",
+      "summary": [
+        {
+          "type": "summary_text",
+          "text": "..."
+        }
+      ]
+    },
+    {
+      "type": "message",
+      "content": [
+        {
+          "type": "output_text",
+          "text": "Final answer"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Extraction example:
+
+```python
+response = client.responses.create(
+    model="gpt-5.4",
+    input="Which is larger, 9.11 or 9.9?",
+    reasoning={"effort": "high", "summary": "detailed"}
+)
+
+for item in response.output:
+    if item.type == "reasoning":
+        for part in item.summary:
+            if part.type == "summary_text":
+                print("Thinking summary:", part.text)
+```
+
+---
+
+## Claude: `thinking` block
+
+```json
+{
+  "content": [
+    {
+      "type": "thinking",
+      "thinking": "..."
+    },
+    {
+      "type": "text",
+      "text": "Final answer"
+    }
+  ]
+}
+```
+
+Extraction example:
+
+```python
+message = client.messages.create(
+    model="claude-opus-4-6-thinking",
+    max_tokens=320,
+    thinking={
+        "type": "enabled",
+        "budget_tokens": 128
+    },
+    messages=[
+        {"role": "user", "content": "Which is larger, 9.11 or 9.9?"}
+    ]
+)
+
+for block in message.content:
+    if block.type == "thinking":
+        print("Thinking:", block.thinking)
+    elif block.type == "text":
+        print("Answer:", block.text)
+```
+
+---
+
+## Gemini: `thoughtsTokenCount`
+
+In the current production recheck, the most reliable observable signal was not a visible reasoning paragraph in the body, but a usage field:
+
+```json
+{
+  "usageMetadata": {
+    "thoughtsTokenCount": 120
+  }
+}
+```
+
+This indicates that:
+
+- the thinking budget was actually used
+- the request consumed thinking tokens during generation
+
+Extraction example:
+
+```python
+data = response.json()
+thoughts = data.get("usageMetadata", {}).get("thoughtsTokenCount", 0)
+print("Thinking tokens:", thoughts)
+```
+
+---
+
+## Usage notes
+
+- Do not assume every model returns raw chain-of-thought text
+- Do not mix thinking fields across protocols
+- For logging, auditing, or UI display, decide per protocol whether to read `reasoning`, `thinking`, or `thoughtsTokenCount`
+
+Related pages:
+
+- [GPT-5 Thinking Mode](/jp/chat/responses/gpt5-thinking)
+- [Claude Native Messages](/jp/chat/anthropic/messages)
+- [Gemini Native API](/jp/chat/gemini/native)

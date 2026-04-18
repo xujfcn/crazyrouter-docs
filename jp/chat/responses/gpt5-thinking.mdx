@@ -1,0 +1,212 @@
+---
+title: "GPT-5 Thinking Mode"
+description: "Production-revalidated GPT-5.4 reasoning via the Responses API"
+---
+
+# GPT-5 Thinking Mode
+
+This page only documents GPT reasoning behavior that was revalidated against Crazyrouter production on `2026-03-22`.
+
+The current primary example uses:
+
+- `gpt-5.4`
+- `POST /v1/responses`
+
+<Note>
+  Claude does not currently support `POST /v1/responses`. If you are integrating Claude, use `POST /v1/messages` or `POST /v1/chat/completions` instead of the request shape on this page.
+</Note>
+
+```
+POST /v1/responses
+```
+
+---
+
+## Basic usage
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.4",
+    "input": "Which is larger, 9.11 or 9.9? Explain briefly.",
+    "reasoning": {
+      "effort": "high",
+      "summary": "detailed"
+    }
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.responses.create(
+    model="gpt-5.4",
+    input="Which is larger, 9.11 or 9.9? Explain briefly.",
+    reasoning={
+        "effort": "high",
+        "summary": "detailed"
+    }
+)
+
+print(response.output_text)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const response = await client.responses.create({
+  model: "gpt-5.4",
+  input: "Which is larger, 9.11 or 9.9? Explain briefly.",
+  reasoning: {
+    effort: "high",
+    summary: "detailed",
+  },
+});
+
+console.log(response.output_text);
+```
+
+</CodeGroup>
+
+---
+
+## Verified response shape
+
+Verified `output.type` values:
+
+```json
+["reasoning", "message"]
+```
+
+Typical `reasoning` item shape:
+
+```json
+{
+  "id": "rs_xxx",
+  "type": "reasoning",
+  "encrypted_content": "...",
+  "summary": [
+    {
+      "type": "summary_text",
+      "text": "..."
+    }
+  ]
+}
+```
+
+The final answer is returned through the `message` item:
+
+```json
+{
+  "type": "message",
+  "content": [
+    {
+      "type": "output_text",
+      "text": "..."
+    }
+  ]
+}
+```
+
+---
+
+## `reasoning` parameter
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `effort` | string | Reasoning intensity. Verified values include `low`, `medium`, and `high` |
+| `summary` | string | Summary granularity. `concise` and `detailed` were revalidated |
+
+### Practical rule
+
+- If you only want stronger reasoning, send `effort`
+- If you need an inspectable reasoning summary, send both `effort` and `summary`
+
+In the current recheck:
+
+- with only `effort`, the `reasoning` item existed but `summary` could be an empty array
+- with `summary: "detailed"`, `summary_text` was returned reliably
+
+---
+
+## Extract the thinking summary
+
+```python Python
+response = client.responses.create(
+    model="gpt-5.4",
+    input="Design a high-concurrency message queue architecture.",
+    reasoning={
+        "effort": "high",
+        "summary": "detailed"
+    }
+)
+
+for item in response.output:
+    if item.type == "reasoning":
+        for part in item.summary:
+            if part.type == "summary_text":
+                print("Thinking summary:", part.text)
+    elif item.type == "message":
+        for content in item.content:
+            if content.type == "output_text":
+                print("Final answer:", content.text)
+```
+
+---
+
+## Streaming thinking
+
+The following Responses SSE event names were revalidated in production:
+
+- `response.reasoning_summary_part.added`
+- `response.reasoning_summary_text.delta`
+- `response.reasoning_summary_text.done`
+- `response.output_text.delta`
+- `response.output_text.done`
+- `response.completed`
+
+Example:
+
+```python Python
+stream = client.responses.create(
+    model="gpt-5.4",
+    input="Explain briefly why 9.9 is larger than 9.11.",
+    reasoning={
+        "effort": "high",
+        "summary": "detailed"
+    },
+    stream=True
+)
+
+for event in stream:
+    if event.type == "response.reasoning_summary_text.delta":
+        print(f"[Thinking summary] {event.delta}", end="")
+    elif event.type == "response.output_text.delta":
+        print(event.delta, end="")
+```
+
+---
+
+## Current recommendation
+
+- If you need a visible reasoning field, prefer `gpt-5.4` with the Responses API
+- Do not treat `gpt-5.4` Chat Completions `reasoning_content` as the current primary contract
+- If you only care about the final answer, Chat Completions with `reasoning_effort` is still fine
+
+<Warning>
+  Reasoning mode increases both latency and token usage. Higher `effort` generally costs more.
+</Warning>

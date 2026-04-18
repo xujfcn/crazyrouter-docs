@@ -1,0 +1,170 @@
+---
+title: "Create Chat Completion"
+description: "Production-oriented usage of POST /v1/chat/completions based on current live behavior"
+---
+
+# Create Chat Completion
+
+```
+POST /v1/chat/completions
+```
+
+Generates model responses from a message list and supports both non-streaming and streaming output.
+
+This page only documents common behavior revalidated against Crazyrouter production on `2026-03-23`.
+
+## Authentication
+
+```text
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Core parameters
+
+| Parameter | Type | Required | Meaning |
+|-----------|------|----------|---------|
+| `model` | string | Yes | Model name such as `gpt-5.4`, `claude-sonnet-4-6`, or `gemini-3-pro-preview` |
+| `messages` | array | Yes | Message list |
+| `stream` | boolean | No | Whether to stream output |
+| `max_tokens` | integer | No | Maximum output tokens |
+| `temperature` | number | No | Sampling temperature |
+| `response_format` | object | No | Structured output constraint |
+| `tools` | array | No | Tool list |
+| `tool_choice` | string\|object | No | Tool-selection strategy |
+| `stream_options` | object | No | Streaming extras such as `include_usage` |
+
+<Note>
+  Optional parameter support varies by model. Client code should rely on the stable common fields first rather than assuming every model supports the same advanced options.
+</Note>
+
+---
+
+## Non-streaming request
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.4",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a helpful assistant."
+      },
+      {
+        "role": "user",
+        "content": "Explain artificial intelligence in one sentence."
+      }
+    ],
+    "max_tokens": 64
+  }'
+```
+
+Typical production shape:
+
+```json
+{
+  "object": "chat.completion",
+  "model": "gpt-5.4",
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "...",
+        "reasoning_content": null,
+        "tool_calls": null
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}
+```
+
+### Important interpretation
+
+- `message.content` is the most stable final-text field
+- `message.tool_calls` only appears when the model is requesting tool execution
+- `message.reasoning_content` may exist as a key, but should not currently be treated as guaranteed usable content
+
+---
+
+## Streaming request
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.4",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Explain AI in one short sentence."
+      }
+    ],
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    },
+    "max_tokens": 64
+  }'
+```
+
+This production recheck confirmed that:
+
+- streaming returns `chat.completion.chunk`
+- SSE chunks are sent as `data: ...`
+- the stream still ends with `data: [DONE]`
+
+Observed SSE shape:
+
+```text
+data: {"object":"chat.completion.chunk","model":"gpt-5.4","choices":[{"delta":{"role":"assistant","content":"AI","reasoning_content":null,"tool_calls":null}}]}
+```
+
+```text
+data: [DONE]
+```
+
+---
+
+## Python example
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+stream = client.chat.completions.create(
+    model="gpt-5.4",
+    messages=[
+        {"role": "user", "content": "Explain AI in one short sentence."}
+    ],
+    stream=True,
+    stream_options={"include_usage": True},
+    max_tokens=64
+)
+
+for chunk in stream:
+    delta = chunk.choices[0].delta
+    if delta.content is not None:
+        print(delta.content, end="")
+```
+
+---
+
+## Current recommendation
+
+- For normal text chat, use `/v1/chat/completions`
+- For reasoning summaries or OpenAI-style web search, prefer `/v1/responses`
+- For more specific capability guarantees, use the dedicated capability pages rather than this generic endpoint page
+
+Related pages:
+
+- [Chat Completion Object](/jp/chat/openai/overview)
+- [Reasoning Models](/jp/chat/openai/reasoning)
+- [Web Search](/jp/chat/openai/web-search)

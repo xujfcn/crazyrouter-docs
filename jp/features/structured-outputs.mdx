@@ -1,0 +1,115 @@
+---
+title: "Structured Outputs"
+description: "Production-verified structured JSON output with the latest GPT and Gemini models"
+---
+
+# Structured Outputs
+
+This page only documents Structured Output flows that were **verified with real requests against Crazyrouter production**.
+
+Verification date:
+
+- `2026-03-22`
+
+Strictly verified models:
+
+- `gpt-5.4`
+- `gemini-3-pro-preview`
+
+Not included as a strict-success example:
+
+- `claude-sonnet-4-6`
+
+Reason:
+
+- Under the current OpenAI-compatible `response_format=json_schema` request shape, `claude-sonnet-4-6` did not show stable strict-JSON behavior across production checks
+- Earlier testing produced JSON wrapped in Markdown code fences
+- The `2026-03-22` recheck returned empty `content`
+- Because the result is not stable or strictly parseable, it is not treated as a verified strict structured-output success example
+
+## Verified matrix
+
+| Model | Protocol | Endpoint | Success marker |
+|------|------|------|----------|
+| `gpt-5.4` | OpenAI Chat Completions | `POST /v1/chat/completions` | Response can be parsed directly as JSON |
+| `gemini-3-pro-preview` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | Returns JSON text matching schema |
+
+## GPT-5.4
+
+```bash
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.4",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Return a JSON object with keys city and country for Tokyo."
+      }
+    ],
+    "response_format": {
+      "type": "json_schema",
+      "json_schema": {
+        "name": "city_country",
+        "strict": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "city": { "type": "string" },
+            "country": { "type": "string" }
+          },
+          "required": ["city", "country"],
+          "additionalProperties": false
+        }
+      }
+    }
+  }'
+```
+
+Verified production output:
+
+```json
+{"city":"Tokyo","country":"Japan"}
+```
+
+## Gemini 3 Pro Preview
+
+```bash
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Return a JSON object with keys city and country for Tokyo."
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "responseMimeType": "application/json",
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "city": { "type": "string" },
+          "country": { "type": "string" }
+        },
+        "required": ["city", "country"]
+      }
+    }
+  }'
+```
+
+Verified production output:
+
+```json
+{"city":"Tokyo","country":"Japan"}
+```
+
+## See Also
+
+- [OpenAI Structured Output](/jp/chat/openai/structured-output)
+- [Gemini Document Understanding](/jp/chat/gemini/document)

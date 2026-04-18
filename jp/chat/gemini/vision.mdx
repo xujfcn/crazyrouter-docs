@@ -1,0 +1,72 @@
+---
+title: "Gemini Image Understanding"
+description: "Gemini native image understanding documented from successful Crazyrouter request patterns on 2026-04-08"
+---
+
+# Gemini Image Understanding
+
+```
+POST /v1beta/models/{model}:generateContent
+```
+
+As of `2026-04-08`, successful Crazyrouter and local `:4000` retests show:
+
+- `gemini-2.5-pro` can reliably read images through `inlineData`
+- remote image URLs through `fileData.fileUri` have shown repeated fetch and upstream-body failures
+- the primary recommended request shape for image understanding is therefore `inlineData`
+
+---
+
+## Verified Minimal Request
+
+```bash
+curl "https://crazyrouter.com/v1beta/models/gemini-2.5-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "inlineData": {
+              "mimeType": "image/png",
+              "data": "BASE64_PNG_DATA"
+            }
+          },
+          {
+            "text": "Describe this image in one short sentence."
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+Observed production response shape:
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "This image shows a smooth multi-color gradient background."
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+## Request Notes
+
+- Prefer `inlineData` for image understanding
+- Keep `mimeType` aligned with the actual file format, such as `image/png` or `image/jpeg`
+- Put raw Base64 into `data` without the `data:image/...;base64,` prefix
+- If you only have a remote image URL, do not treat it as the current primary Gemini image-understanding path on Crazyrouter
+
+<Note>
+  For video understanding, see [Gemini Video Understanding](/jp/chat/gemini/video). For audio understanding, see [Gemini Audio Understanding](/jp/chat/gemini/audio).
+</Note>

@@ -1,0 +1,62 @@
+---
+title: "Create Completion (Legacy)"
+description: "Current production status of the POST /v1/completions compatibility endpoint"
+---
+
+# Create Completion (Legacy)
+
+```
+POST /v1/completions
+```
+
+<Warning>
+  This is a compatibility endpoint, not the primary recommended path. For new integrations, prefer `/v1/chat/completions` or `/v1/responses`.
+</Warning>
+
+## Current Production Status
+
+As of March 23, 2026, Crazyrouter production confirms:
+
+- the route still exists
+- a request using the classic example model `gpt-3.5-turbo-instruct` returned `503`
+- the error code was `model_not_found`
+- the message said the model was temporarily unavailable
+
+In practice, this means the endpoint should be treated as legacy-client compatibility only, not as the default path for new work.
+
+---
+
+## Current Recommendation
+
+1. Use [`Chat Completions`](/chat/openai/completions) for new chat-style integrations
+2. Use [`Responses`](/chat/responses/overview) when you need GPT-5 reasoning, web search, or newer response shapes
+3. Only keep testing `/v1/completions` if you already depend on a legacy client and have confirmed that your legacy model is currently available
+
+---
+
+## Retest Template
+
+If you must verify whether a legacy model still works on this endpoint, first confirm the model ID through [`/v1/models`](/chat/openai/models), then send a minimal request:
+
+```bash
+curl https://crazyrouter.com/v1/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "YOUR_LEGACY_MODEL",
+    "prompt": "Say hello in three words.",
+    "max_tokens": 16
+  }'
+```
+
+Observed production error example:
+
+```json
+{
+  "error": {
+    "code": "model_not_found",
+    "message": "Model gpt-3.5-turbo-instruct is temporarily unavailable",
+    "type": "new_api_error"
+  }
+}
+```

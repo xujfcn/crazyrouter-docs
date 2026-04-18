@@ -1,0 +1,83 @@
+---
+title: "Claude OpenAI-Compatible Chat"
+description: "Claude Chat Completions compatibility path verified against Crazyrouter production on 2026-03-23"
+---
+
+# Claude OpenAI-Compatible Chat
+
+```
+POST /v1/chat/completions
+```
+
+As of March 23, 2026, Crazyrouter production has verified:
+
+- non-stream `claude-sonnet-4-6` requests return `object: "chat.completion"`
+- the current `message` reliably includes `role` and `content`
+- streaming requests return `chat.completion.chunk`
+- the SSE stream still ends with `data: [DONE]`
+
+---
+
+## Non-Streaming Request
+
+```bash
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "claude-sonnet-4-6",
+    "messages": [
+      {"role": "system", "content": "You are a concise assistant."},
+      {"role": "user", "content": "Compare PostgreSQL and MySQL in one paragraph."}
+    ],
+    "max_tokens": 256,
+    "temperature": 0.2
+  }'
+```
+
+Observed response shape:
+
+```json
+{
+  "object": "chat.completion",
+  "model": "claude-sonnet-4-6",
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "PostgreSQL and MySQL are both popular..."
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Streaming Request
+
+```bash
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "claude-sonnet-4-6",
+    "messages": [
+      {"role": "user", "content": "Say hello in one sentence."}
+    ],
+    "max_tokens": 128,
+    "stream": true
+  }'
+```
+
+The 2026-03-23 production streaming probe began like this:
+
+```text
+data: {"object":"chat.completion.chunk","model":"claude-sonnet-4-6","choices":[{"delta":{"role":"assistant"}}]}
+data: {"object":"chat.completion.chunk","model":"claude-sonnet-4-6","choices":[{"delta":{"content":"Hello! ..."}}]}
+data: [DONE]
+```
+
+<Note>
+  If you need Claude-native `thinking`, native tool blocks, or document inputs, prefer [Claude Messages](/chat/anthropic/messages).
+</Note>

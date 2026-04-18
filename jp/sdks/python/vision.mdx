@@ -1,0 +1,115 @@
+---
+title: 'Python Vision'
+description: 'Python image recognition with gpt-5.4 and Claude'
+---
+
+## gpt-5.4 Vision - URL Method
+
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+
+response = client.chat.completions.create(
+    model="gpt-5.4",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "Describe the content of this image"},
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": "https://example.com/photo.jpg"
+                }
+            }
+        ]
+    }]
+)
+
+print(response.choices[0].message.content)
+```
+
+## gpt-5.4 Vision - Local Image
+
+```python
+import base64
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+
+# Read local image and convert to base64
+with open("photo.jpg", "rb") as f:
+    image_data = base64.b64encode(f.read()).decode("utf-8")
+
+response = client.chat.completions.create(
+    model="gpt-5.4",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "What's in this image?"},
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/jpeg;base64,{image_data}"
+                }
+            }
+        ]
+    }]
+)
+
+print(response.choices[0].message.content)
+```
+
+## Multi-Image Comparison
+
+```python
+response = client.chat.completions.create(
+    model="gpt-5.4",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "Compare the differences between these two images"},
+            {"type": "image_url", "image_url": {"url": "https://example.com/img1.jpg"}},
+            {"type": "image_url", "image_url": {"url": "https://example.com/img2.jpg"}}
+        ]
+    }]
+)
+
+print(response.choices[0].message.content)
+```
+
+## Claude Vision
+
+Claude models also support vision through the OpenAI-compatible format:
+
+```python
+response = client.chat.completions.create(
+    model="claude-sonnet-4-6",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "Describe this image in detail"},
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/png;base64,{image_data}"
+                }
+            }
+        ]
+    }],
+    max_tokens=1024
+)
+
+print(response.choices[0].message.content)
+```
+
+## Supported Vision Models
+
+| Model | Description |
+|-------|-------------|
+| `gpt-5.4` | OpenAI-compatible vision model verified successfully in production on March 23, 2026 |
+| `claude-sonnet-4-6` | Claude OpenAI-compatible vision model verified successfully in production |
+
+<Note>
+  Vision input with `gpt-5.4` and `claude-sonnet-4-6` was verified in Crazyrouter production on March 23, 2026. Image size should not exceed 20MB; base64 encoding adds approximately 33% to the payload size, so URL method is recommended for larger files.
+</Note>

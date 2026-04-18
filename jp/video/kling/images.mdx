@@ -1,0 +1,117 @@
+---
+title: "Kling Image Generation"
+description: "Use the Kling API to generate images"
+---
+
+# Kling Image Generation
+
+```
+POST /kling/v1/images/generations
+```
+
+The current public docs only commit to the main Kling image-generation path. Do not document undocumented image-side extensions as if they were already a stable public contract.
+
+## Currently Verified Scope
+
+- `kling-v1-5` image generation has completed bounded verification
+- successful results prefer Crazyrouter archived URLs such as `https://media.crazyrouter.com/...png`
+
+## Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model` | string | No | Common validated example: `kling-v1-5` |
+| `prompt` | string | Yes | Image prompt |
+| `negative_prompt` | string | No | Negative prompt |
+| `aspect_ratio` | string | No | Such as `1:1`, `16:9`, `9:16` |
+| `n` | integer | No | Number of images, default `1` |
+| `callback_url` | string | No | Callback URL |
+| `external_task_id` | string | No | Custom business task ID |
+
+## Request Example
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/kling/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "kling-v1-5",
+    "prompt": "A realistic shiba inu wearing sunglasses",
+    "negative_prompt": "blurry, low quality",
+    "aspect_ratio": "1:1",
+    "n": 1
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/kling/v1/images/generations",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "kling-v1-5",
+        "prompt": "A realistic shiba inu wearing sunglasses",
+        "negative_prompt": "blurry, low quality",
+        "aspect_ratio": "1:1",
+        "n": 1
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+## Successful Submit Response
+
+```json
+{
+  "created_at": 1774536039,
+  "id": "2037177945839673344",
+  "model": "kling-v1-5",
+  "object": "video",
+  "progress": 0,
+  "status": "",
+  "task_id": "2037177945839673344"
+}
+```
+
+---
+
+## Query Image Task
+
+```
+GET /kling/v1/images/generations/{task_id}
+```
+
+```bash cURL
+curl https://crazyrouter.com/kling/v1/images/generations/2037177945839673344 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Completed Response Example
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "error": null,
+    "format": "png",
+    "metadata": null,
+    "status": "succeeded",
+    "task_id": "2037177945839673344",
+    "url": "https://media.crazyrouter.com/task-artifacts/2026/03/26/50/imageGenerate/2037177945839673344.png"
+  }
+}
+```
+
+<Note>
+  Kling image generation is asynchronous. Query the task for terminal output. This page intentionally does not document image-to-image, `image_fidelity`, or other image-side extension parameters as a public hard contract.
+</Note>

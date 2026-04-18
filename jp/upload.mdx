@@ -1,0 +1,89 @@
+---
+title: 'Image Upload Guidance'
+description: 'How to provide image URLs and use model-native upload flows'
+---
+
+## Current status
+
+Crazyrouter does not currently expose a public generic image-hosting endpoint.
+
+Do not depend on the following endpoint:
+
+```text
+POST /api/upload
+```
+
+## Recommended approaches
+
+### 1. Use your own object storage or CDN
+
+The best option is to upload files to your own S3 / R2 / OSS / COS / CDN bucket first, then pass the resulting public URL to Crazyrouter endpoints that support image input.
+
+Typical use cases:
+
+- GPT / Claude / Gemini vision
+- image editing
+- image-to-video
+- workflow tool integrations
+
+### 2. Use model-native upload flows
+
+Some models and upstream APIs already support multipart uploads or dedicated upload routes. Use the model-specific endpoint when available.
+
+Examples:
+
+- Midjourney image upload: `POST /mj/submit/upload-discord-images`
+- OpenAI-compatible image edits: `POST /v1/images/edits`
+- audio transcription: `POST /v1/audio/transcriptions`
+
+### 3. Save files in your own backend first, then send URLs
+
+If users upload local files to your app, your backend should store the file, generate a public URL, and then call Crazyrouter with that URL.
+
+## Example: use a public image URL for vision
+
+<CodeGroup>
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+
+response = client.chat.completions.create(
+    model="gpt-5.4",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "Describe this image"},
+            {"type": "image_url", "image_url": {"url": "https://example.com/photo.jpg"}}
+        ]
+    }]
+)
+print(response.choices[0].message.content)
+```
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer sk-xxx" \
+  -d '{
+    "model": "gpt-5.4",
+    "messages": [{
+      "role": "user",
+      "content": [
+        {"type": "text", "text": "Describe this image"},
+        {"type": "image_url", "image_url": {"url": "https://example.com/photo.jpg"}}
+      ]
+    }]
+  }'
+```
+
+</CodeGroup>
+
+<Warning>
+  If the image URL is not publicly reachable, the upstream model usually cannot read it.
+</Warning>
+
+<Note>
+  If Crazyrouter exposes a public generic upload API again in the future, this page will be updated into a formal endpoint reference.
+</Note>

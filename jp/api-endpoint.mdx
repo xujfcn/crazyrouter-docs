@@ -1,0 +1,70 @@
+---
+title: 'API エンドポイント'
+description: 'Crazyrouter の主要 API エンドポイント一覧'
+---
+
+## API Base URL
+
+```text
+https://crazyrouter.com
+```
+
+## 主なエンドポイント
+
+### Chat API
+
+| Endpoint | Method | 説明 |
+|----------|--------|------|
+| `/v1/chat/completions` | POST | OpenAI Chat 互換形式 |
+| `/v1/messages` | POST | Anthropic Claude 形式 |
+| `/v1/responses` | POST | OpenAI Responses API |
+| `/v1/completions` | POST | レガシー Completions |
+
+### Gemini ネイティブ形式
+
+| Endpoint | Method | 説明 |
+|----------|--------|------|
+| `/v1beta/models/{model}:generateContent` | POST | コンテンツ生成 |
+| `/v1beta/models/{model}:streamGenerateContent` | POST | ストリーミング生成 |
+
+### 画像 API
+
+| Endpoint | Method | 説明 |
+|----------|--------|------|
+| `/v1/images/generations` | POST | OpenAI 互換の画像生成 |
+| `/v1/images/edits` | POST | 画像編集 |
+| `/mj/submit/imagine` | POST | Midjourney 画像生成 |
+| `/ideogram/v1/ideogram-v3/generate` | POST | Ideogram V3 |
+| `/kling/v1/images/generations` | POST | Kling 画像生成 |
+
+### 動画 API
+
+| Endpoint | Method | 説明 |
+|----------|--------|------|
+| `/v1/video/create` | POST | 統一動画作成 |
+| `/v1/video/query` | GET | 統一動画照会 |
+| `/kling/v1/videos/text2video` | POST | Kling テキストから動画 |
+| `/kling/v1/videos/image2video` | POST | Kling 画像から動画 |
+| `/jimeng/submit/videos` | POST | Jimeng 動画送信 |
+| `/luma/generations` | POST | Luma 動画生成 |
+| `/runwayml/v1/tasks` | POST | Runway 動画生成 |
+
+### 音声 API
+
+| Endpoint | Method | 説明 |
+|----------|--------|------|
+| `/v1/audio/speech` | POST | Text-to-Speech |
+| `/v1/audio/transcriptions` | POST | Speech-to-Text |
+| `/suno/submit/music` | POST | Suno 音楽生成 |
+
+### その他
+
+| Endpoint | Method | 説明 |
+|----------|--------|------|
+| `/v1/embeddings` | POST | 埋め込み |
+| `/v1/rerank` | POST | リランキング |
+| `/v1/models` | GET | モデル一覧 |
+
+<Note>
+  すべてのエンドポイントは HTTPS に対応しています。OpenAI 互換クライアントを使う場合は、`base_url` を `https://crazyrouter.com/v1` に設定してください。
+</Note>

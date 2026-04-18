@@ -1,0 +1,46 @@
+---
+title: 'はじめに'
+description: 'Crazyrouter - オールインワン AI モデル API ゲートウェイ'
+---
+
+Crazyrouter は、複数の AI モデルを 1 つの API キーで利用できる AI API ゲートウェイです。OpenAI、Anthropic Claude、Google Gemini、Midjourney、Suno、Kling など、主要な AI サービスを統一されたエンドポイントから呼び出せます。
+
+## 主な特徴
+
+- **統一 API**: 1 つの API キーで複数モデルにアクセス
+- **複数形式に対応**: OpenAI 互換、Anthropic ネイティブ、Gemini ネイティブ形式をサポート
+- **幅広いモデル**: チャット、画像、動画、音声、音楽、埋め込み、リランキングに対応
+- **従量課金**: 利用量に応じた柔軟な課金
+- **スマートルーティング**: 利用可能なチャネルを自動選択し、必要に応じてフェイルオーバー
+
+## 対応 API 種別
+
+| 種別 | 説明 | 代表的なモデル |
+|------|------|----------------|
+| Chat Completions | テキスト会話、画像入力、推論 | GPT、Claude、Gemini、Grok |
+| 画像生成 | テキストから画像生成、画像編集 | GPT Image、Grok Image、Midjourney、Flux |
+| 動画生成 | テキスト/画像から動画生成 | Sora、Kling、Luma、Veo、Runway |
+| 音声処理 | TTS、STT | GPT-4o Audio、Whisper |
+| 音楽生成 | 楽曲生成 | Suno |
+| 埋め込み | テキストのベクトル化 | text-embedding 系モデル |
+| リランキング | 検索結果の再順位付け | BGE reranker など |
+
+## はじめる
+
+<CardGroup cols={2}>
+  <Card title="クイックスタート" icon="rocket" href="/jp/quickstart">
+    5 分で最初の API リクエストを実行します
+  </Card>
+  <Card title="API エンドポイント" icon="globe" href="/jp/api-endpoint">
+    利用できる API エンドポイントを確認します
+  </Card>
+  <Card title="認証" icon="key" href="/jp/authentication">
+    API キーの取得と使い方を確認します
+  </Card>
+  <Card title="モデル料金" icon="tag" href="https://crazyrouter.com/pricing">
+    各モデルの料金を確認します
+  </Card>
+  <Card title="サービスステータス" icon="signal-stream" href="https://crazyrouter.com/status">
+    Crazyrouter の稼働状況を確認します
+  </Card>
+</CardGroup>

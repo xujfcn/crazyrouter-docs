@@ -1,0 +1,148 @@
+---
+title: "Grok モデル"
+description: "OpenAI Chat Completions 形式で Grok テキストモデルを呼び出す"
+---
+
+# Grok モデル
+
+```text
+POST /v1/chat/completions
+```
+
+Grok テキストモデルは OpenAI 互換の Chat Completions 形式で呼び出せます。`base_url` を Crazyrouter に向け、`model` に Grok のモデル ID を指定してください。
+
+<Note>
+  モデルの可用性は、チャネル状態、トークン権限、pricing 設定によって変わります。本番利用前に、同じ API キーで `GET /v1/models` を呼び出し、対象モデルが表示されることを確認してください。
+</Note>
+
+## よく使うモデル
+
+| Model | 説明 |
+|-------|------|
+| `grok-4` | Grok 4 メインモデル |
+| `grok-4-fast` | Grok 4 fast 変種 |
+| `grok-4-fast-non-reasoning` | Grok 4 fast 非推論変種 |
+| `grok-4-fast-reasoning` | Grok 4 fast 推論変種 |
+| `grok-4.1` | Grok 4.1 |
+| `grok-4.1-fast` | Grok 4.1 fast |
+| `grok-4.1-thinking` | Grok 4.1 thinking |
+| `grok-4.2` | Grok 4.2 |
+| `grok-4-0709` | 日付付き Grok 4 モデル |
+
+<Warning>
+  古い `grok-2` / `grok-3` 系の名前は履歴呼び出しや互換設定に残っている場合がありますが、公開 pricing では主に `grok-4*` 系を維持しています。新規連携では `grok-4`、`grok-4.1`、`grok-4.2`、または fast/reasoning 変種を優先してください。
+</Warning>
+
+## 最小リクエスト
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "grok-4",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Reply with one short sentence: what is Grok?"
+      }
+    ],
+    "temperature": 0.7,
+    "max_tokens": 120
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1",
+)
+
+response = client.chat.completions.create(
+    model="grok-4",
+    messages=[
+        {"role": "user", "content": "Reply with one short sentence: what is Grok?"}
+    ],
+    temperature=0.7,
+    max_tokens=120,
+)
+
+print(response.choices[0].message.content)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const response = await client.chat.completions.create({
+  model: "grok-4",
+  messages: [
+    { role: "user", content: "Reply with one short sentence: what is Grok?" },
+  ],
+  temperature: 0.7,
+  max_tokens: 120,
+});
+
+console.log(response.choices[0].message.content);
+```
+
+</CodeGroup>
+
+## ストリーミング
+
+`stream: true` を設定すると SSE ストリーミングを利用できます。
+
+```bash
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "grok-4-fast",
+    "stream": true,
+    "messages": [
+      {
+        "role": "user",
+        "content": "Write a concise API migration checklist."
+      }
+    ]
+  }'
+```
+
+## 推論モデル
+
+モデル名に `reasoning` または `thinking` を含む Grok モデルでは、リクエスト形式をシンプルに保つことを推奨します。
+
+```json
+{
+  "model": "grok-4-fast-reasoning",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Compare two implementation options and explain the tradeoffs."
+    }
+  ],
+  "max_tokens": 800
+}
+```
+
+<Note>
+  推論フィールド、検索フィールド、実験的パラメータの対応状況は上流チャネルによって異なります。チャネルをまたいだ安定利用では、`model`、`messages`、`temperature`、`top_p`、`max_tokens`、`stream` など標準的な OpenAI Chat フィールドを優先してください。
+</Note>
+
+## 関連する画像モデル
+
+Grok の画像生成は Chat Completions ではなく、次の Images API を使用します。
+
+```text
+POST /v1/images/generations
+```
+
+画像モデルのパラメータは [Grok 画像モデル](/jp/images/grok) を参照してください。

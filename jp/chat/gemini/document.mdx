@@ -1,0 +1,117 @@
+---
+title: "Gemini Document Understanding"
+description: "Gemini PDF understanding and structured extraction verified against Crazyrouter production on 2026-03-23"
+---
+
+# Gemini Document Understanding
+
+```
+POST /v1beta/models/{model}:generateContent
+```
+
+As of March 23, 2026, Crazyrouter production has verified that `gemini-3-pro-preview` supports:
+
+- Reading PDFs through `inlineData`
+- Returning parseable JSON when `responseMimeType` and `responseSchema` are provided
+
+---
+
+## PDF Summary
+
+The following request successfully read a PDF and returned a summary in production:
+
+```bash
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "Summarize the attached PDF in one sentence."},
+          {
+            "inlineData": {
+              "mimeType": "application/pdf",
+              "data": "JVBERi0xLjQK..."
+            }
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+In the production check, the model returned a one-sentence summary of the attached PDF.
+
+---
+
+## PDF + Structured Output
+
+The following request returned JSON text that could be parsed directly with `json.loads()` in production:
+
+```bash
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "Extract the key topic and whether the document mentions gamma."},
+          {
+            "inlineData": {
+              "mimeType": "application/pdf",
+              "data": "JVBERi0xLjQK..."
+            }
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "responseMimeType": "application/json",
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "topic": {"type": "string"},
+          "mentions_gamma": {"type": "boolean"}
+        },
+        "required": ["topic", "mentions_gamma"]
+      }
+    }
+  }'
+```
+
+Observed production response:
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\n  \"topic\": \"Crazyrouter PDF test document\",\n  \"mentions_gamma\": false\n}"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+You can parse it directly:
+
+```python
+import json
+
+text = response["candidates"][0]["content"]["parts"][0]["text"]
+data = json.loads(text)
+```
+
+<Note>
+  This page only confirms the PDF-input path and JSON structured output path. For table extraction, long-document comparison, or other higher-variance workflows, revalidate with your own sample documents first.
+</Note>
+
+<Warning>
+  Large PDFs materially increase input-token usage. Validate prompts and schemas with small documents first, then scale up.
+</Warning>

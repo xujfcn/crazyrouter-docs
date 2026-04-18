@@ -1,0 +1,79 @@
+---
+title: 'HTTP ステータスコードとエラー処理'
+description: 'API のステータスコードとエラーレスポンスの読み方'
+---
+
+## HTTP ステータスコード
+
+| Status Code | 説明 |
+|-------------|------|
+| 200 | リクエスト成功 |
+| 400 | リクエストパラメータが不正 |
+| 401 | 認証失敗。API キーが無効または未指定 |
+| 403 | 権限不足。トークンが対象モデルを利用できない |
+| 429 | レート制限超過 |
+| 500 | 内部サーバーエラー |
+| 502 | 上流サービスが利用不可 |
+| 503 | サービスが一時的に利用不可 |
+
+## エラーレスポンス形式
+
+```json
+{
+  "error": {
+    "message": "Error description",
+    "type": "error_type",
+    "code": "error_code"
+  }
+}
+```
+
+## よくあるエラー
+
+### 401 - Authentication Failed
+
+```json
+{
+  "error": {
+    "message": "Invalid API key",
+    "type": "authentication_error",
+    "code": "invalid_api_key"
+  }
+}
+```
+
+**対応**: API キーが正しく、`sk-` で始まっているか確認してください。
+
+### 429 - Rate Limited
+
+```json
+{
+  "error": {
+    "message": "Rate limit exceeded",
+    "type": "rate_limit_error",
+    "code": "rate_limit_exceeded"
+  }
+}
+```
+
+**対応**: リクエスト頻度を下げるか、必要に応じて上限引き上げを相談してください。
+
+### 403 - Insufficient Balance
+
+```json
+{
+  "error": {
+    "message": "Insufficient quota",
+    "type": "insufficient_quota",
+    "code": "insufficient_quota"
+  }
+}
+```
+
+**対応**: [top-up page](https://crazyrouter.com/topup) から残高を追加してください。
+
+## リトライ方針
+
+- 429 は指数バックオフでリトライします。
+- 500/502/503 は数秒待ってからリトライします。
+- 400/401/403 はリクエスト内容、認証情報、モデル権限を確認します。

@@ -1,0 +1,66 @@
+---
+title: "Gemini Image Editing"
+description: "Current Gemini image-editing availability note updated from the 2026-04-14 Crazyrouter production retest"
+---
+
+# Gemini Image Editing
+
+```
+POST /v1beta/models/{model}:generateContent
+```
+
+As of April 14, 2026, the latest Crazyrouter retest for Gemini image-editing-related routes showed:
+
+- native `gemini-3.1-flash-image-preview:generateContent` can now return image output again
+- native `gemini-2.5-flash-image:generateContent` can also return image output, but billing consistency is still under review
+- the Nano Banana-family public Images-compatible route through `POST /v1/images/generations` is currently unhealthy
+
+The unhealthy path right now is the older public Images-compatible layer, not every Gemini-native image path. For editing and reference-image workloads, the current guidance should converge on native Gemini `generateContent`.
+
+<Warning>
+  Do not keep documenting Nano Banana-family `POST /v1/images/generations` as the stable image-editing route. `nano-banana-2` should move to `gemini-3.1-flash-image-preview:generateContent`, while `nano-banana` remains controlled-testing only.
+</Warning>
+
+<Note>
+  The more usable path right now is [Nano Banana 2](/jp/images/nano-banana-2), which now points to native Gemini `gemini-3.1-flash-image-preview:generateContent`.
+  [Nano Banana](/jp/images/nano-banana) now keeps only the controlled-test note for `gemini-2.5-flash-image:generateContent`, not a stable production recommendation.
+</Note>
+
+---
+
+## Current Recommendation
+
+1. If your goal is Gemini text-to-image, use [Gemini Image Generation](/jp/chat/gemini/image-gen)
+2. If your goal is a currently usable reference-image editing route, start with [Nano Banana 2](/jp/images/nano-banana-2)
+3. If you must evaluate `nano-banana`, follow the controlled-test guidance on [Nano Banana](/jp/images/nano-banana)
+4. Do not keep treating `POST /v1/images/generations` as the default entry point for the Nano Banana family
+
+---
+
+## Retest Template
+
+This is now the more recommended minimal template for retesting or integration. The same workload should no longer be documented through `/v1/images/generations`:
+
+```bash
+curl "https://crazyrouter.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "Edit this image: change the background to blue and keep the main square visible. Return image output."},
+          {
+            "inlineData": {
+              "mimeType": "image/png",
+              "data": "iVBORw0KGgoAAA..."
+            }
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "responseModalities": ["IMAGE"]
+    }
+  }'
+```

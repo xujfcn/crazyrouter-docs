@@ -1,0 +1,104 @@
+---
+title: "Reasoning Models"
+description: "Production-revalidated guidance for using Crazyrouter reasoning features and choosing the right protocol"
+---
+
+# Reasoning Models
+
+This page only documents reasoning behavior that was revalidated against Crazyrouter production on `2026-03-22`.
+
+For OpenAI-compatible integrations, the current guidance is:
+
+- If you only want stronger reasoning and only need the final answer, use Chat Completions with `reasoning_effort`
+- If you need a stable, inspectable reasoning output, prefer the Responses API and see [GPT-5 Thinking Mode](/jp/chat/responses/gpt5-thinking)
+
+## Verified combinations
+
+| Route | Model | Request parameter | Current production behavior |
+|-------|-------|-------------------|-----------------------------|
+| Chat Completions | `gpt-5.4` | `reasoning_effort` | Request succeeds and returns a final answer |
+| Responses | `gpt-5.4` | `reasoning.effort` / `reasoning.summary` | `output` includes `reasoning` and `message` items |
+
+---
+
+## Chat Completions: `reasoning_effort`
+
+The following request shape currently works in production:
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.4",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Which is larger, 9.11 or 9.9? Explain briefly."
+      }
+    ],
+    "reasoning_effort": "high",
+    "max_tokens": 120
+  }'
+```
+
+Available `reasoning_effort` values:
+
+| Value | Meaning |
+|-------|---------|
+| `low` | Faster response for simpler tasks |
+| `medium` | Balanced default-style setting |
+| `high` | More reasoning for harder tasks |
+
+### Current response behavior
+
+In the `2026-03-22` production recheck:
+
+- the request succeeded
+- the final answer was returned in `message.content`
+- `message.reasoning_content` did not reliably contain usable content
+
+So if you only want stronger reasoning, Chat Completions with `reasoning_effort` is still usable. If you need a visible reasoning summary field, do not treat Chat Completions as the primary path.
+
+---
+
+## When you need inspectable reasoning output
+
+The more reliable production path is the Responses API:
+
+```bash cURL
+curl https://crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.4",
+    "input": "Which is larger, 9.11 or 9.9? Explain briefly.",
+    "reasoning": {
+      "effort": "high",
+      "summary": "detailed"
+    }
+  }'
+```
+
+Verified `output.type` values:
+
+```json
+["reasoning", "message"]
+```
+
+For concrete response shapes, summary fields, and streaming event names, see:
+
+- [GPT-5 Thinking Mode](/jp/chat/responses/gpt5-thinking)
+- [AI Thinking Fields](/jp/reference/thinking)
+
+---
+
+## Current recommendation
+
+- For new builds that need to log or display reasoning summaries, start with the Responses API
+- For existing Chat Completions integrations that only care about the final answer, `reasoning_effort` is still a valid path
+- Do not assume all OpenAI-compatible reasoning models will reliably expose `reasoning_content`
+
+<Warning>
+  Reasoning requests usually increase both latency and token usage. Higher `reasoning_effort` generally costs more.
+</Warning>

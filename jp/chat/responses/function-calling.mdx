@@ -1,0 +1,103 @@
+---
+title: "Responses Function Calling"
+description: "Responses tool calling verified against Crazyrouter production on 2026-03-23"
+---
+
+# Responses Function Calling
+
+```
+POST /v1/responses
+```
+
+As of March 23, 2026, Crazyrouter production has verified that `gpt-5.4` on the Responses API reliably returns `function_call`.
+
+<Note>
+  Claude does not currently support `POST /v1/responses`. If you need Claude tool calling, use `POST /v1/messages` or `POST /v1/chat/completions`.
+</Note>
+
+---
+
+## Step 1: Let the Model Produce a Function Call
+
+```bash
+curl https://crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.4",
+    "input": "What is the weather in Beijing? Use the tool.",
+    "tools": [
+      {
+        "type": "function",
+        "name": "get_weather",
+        "description": "Get weather info for a city",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "city": {"type": "string"}
+          },
+          "required": ["city"],
+          "additionalProperties": false
+        }
+      }
+    ]
+  }'
+```
+
+Observed production response shape:
+
+```json
+{
+  "output": [
+    {
+      "type": "function_call",
+      "name": "get_weather",
+      "arguments": "{\"city\":\"Beijing\"}"
+    }
+  ]
+}
+```
+
+---
+
+## Step 2: Return the Tool Result
+
+Once you receive the `function_call`, send your actual tool result back as `function_call_output`:
+
+```json
+{
+  "model": "gpt-5.4",
+  "input": [
+    {
+      "type": "function_call",
+      "call_id": "call_123",
+      "name": "get_weather",
+      "arguments": "{\"city\":\"Beijing\"}"
+    },
+    {
+      "type": "function_call_output",
+      "call_id": "call_123",
+      "output": "{\"temperature\":22,\"condition\":\"sunny\"}"
+    }
+  ],
+  "tools": [
+    {
+      "type": "function",
+      "name": "get_weather",
+      "description": "Get weather info for a city",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "city": {"type": "string"}
+        },
+        "required": ["city"],
+        "additionalProperties": false
+      }
+    }
+  ]
+}
+```
+
+<Note>
+  This page keeps only the `function_call` path that was reproduced in production. For more complex multi-tool chains or streamed argument deltas, revalidate on the same day before depending on them.
+</Note>

@@ -1,0 +1,90 @@
+---
+title: "Responses API Overview"
+description: "Production-revalidated guidance for choosing between Responses API and Chat Completions on Crazyrouter"
+---
+
+# Responses API Overview
+
+The Responses API is currently one of the main routes for newer GPT capabilities on Crazyrouter.
+
+This page only documents conclusions that were revalidated against production on `2026-03-22`.
+
+<Note>
+  In the current production-verified scope, Claude supports only `POST /v1/messages` and `POST /v1/chat/completions`, not `POST /v1/responses`. Treat the Responses pages as GPT-first guidance.
+</Note>
+
+## Current framing
+
+- If you need inspectable reasoning output, prefer `/v1/responses`
+- If you need OpenAI-style web search, prefer `/v1/responses`
+- If you only need ordinary chat or want to keep an existing integration, `/v1/chat/completions` is still fine
+
+## Responses API vs Chat Completions API
+
+| Dimension | Responses API | Chat Completions API |
+|-----------|---------------|----------------------|
+| Endpoint | `/v1/responses` | `/v1/chat/completions` |
+| Input shape | `input` | `messages` |
+| Output shape | `output[]` item list | `choices[].message` |
+| GPT reasoning | Verified `reasoning` item | `reasoning_effort` works, but `reasoning_content` is not stable |
+| OpenAI-style web search | Verified `web_search_preview` path | The older `web_search` shape did not produce a stable verifiable trigger in this round |
+| Streaming | Richer event types | Traditional delta SSE |
+
+---
+
+## Smallest useful example
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.responses.create(
+    model="gpt-5.4",
+    input="Explain what a REST API is in one sentence."
+)
+
+print(response.output_text)
+```
+
+In the current production recheck, this kind of minimal request returned:
+
+```json
+{
+  "object": "response",
+  "output": [
+    {
+      "type": "message"
+    }
+  ]
+}
+```
+
+---
+
+## When to prefer Responses
+
+- You need `gpt-5.4` reasoning summaries
+- You need to verify whether the model actually triggered `web_search_call`
+- You want richer SSE events
+
+Related pages:
+
+- [GPT-5 Thinking Mode](/jp/chat/responses/gpt5-thinking)
+- [Responses Web Search](/jp/chat/responses/web-search)
+- [Responses Function Calling](/jp/chat/responses/function-calling)
+
+---
+
+## When to keep Chat Completions
+
+- You already have a stable Chat Completions integration
+- You only care about the final answer, not the `reasoning` item
+- You are integrating Claude, Gemini, or other OpenAI-compatible models
+
+<Note>
+  Both APIs can coexist in the same project. In practice, the better pattern is usually not a full migration, but moving only the requests that need newer capabilities onto `/v1/responses`.
+</Note>

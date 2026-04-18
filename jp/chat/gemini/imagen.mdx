@@ -1,0 +1,134 @@
+---
+title: "Imagen 4"
+description: "Google Imagen 4 image generation model, called through the Gemini API"
+---
+
+# Imagen 4
+
+Google Imagen 4 is a professional image generation model, called through the Gemini API endpoint.
+
+<Warning>
+  Imagen 4 is currently in development. Features and availability may change.
+</Warning>
+
+```
+POST /v1beta/models/imagen-4:generateContent
+```
+
+---
+
+## Basic Usage
+
+<CodeGroup>
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/imagen-4:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "A golden Labrador retriever running on a sunny meadow, photographic quality, shallow depth of field"}
+        ]
+      }
+    ],
+    "generationConfig": {
+      "responseModalities": ["IMAGE"],
+      "imageGenerationConfig": {
+        "numberOfImages": 1,
+        "aspectRatio": "16:9"
+      }
+    }
+  }'
+```
+
+```python Python
+import google.generativeai as genai
+import base64
+
+genai.configure(
+    api_key="YOUR_API_KEY",
+    transport="rest",
+    client_options={"api_endpoint": "https://crazyrouter.com"}
+)
+
+model = genai.GenerativeModel("imagen-4")
+
+response = model.generate_content(
+    "A golden Labrador retriever running on a sunny meadow, photographic quality",
+    generation_config=genai.GenerationConfig(
+        response_modalities=["IMAGE"],
+        image_generation_config={
+            "number_of_images": 1,
+            "aspect_ratio": "16:9"
+        }
+    )
+)
+
+for part in response.candidates[0].content.parts:
+    if hasattr(part, "inline_data"):
+        with open("imagen_output.png", "wb") as f:
+            f.write(base64.b64decode(part.inline_data.data))
+        print("Image saved")
+```
+
+</CodeGroup>
+
+### Response Format
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "inlineData": {
+              "mimeType": "image/png",
+              "data": "iVBORw0KGgoAAAANSUhEUg..."
+            }
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP"
+    }
+  ]
+}
+```
+
+---
+
+## Parameter Description
+
+### imageGenerationConfig
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `numberOfImages` | integer | Number of images to generate, 1-4 |
+| `aspectRatio` | string | Aspect ratio: `1:1`, `16:9`, `9:16`, `4:3`, `3:4` |
+
+---
+
+## Batch Generation
+
+```json
+{
+  "generationConfig": {
+    "responseModalities": ["IMAGE"],
+    "imageGenerationConfig": {
+      "numberOfImages": 4,
+      "aspectRatio": "1:1"
+    }
+  }
+}
+```
+
+<Note>
+  Imagen 4 is a pure image generation model, so `responseModalities` should be set to `["IMAGE"]`. If you need text descriptions alongside images, use the Gemini image generation model instead.
+</Note>
+
+<Note>
+  For Imagen 4 prompts, it is recommended to use detailed descriptive language including style, lighting, composition, and other details for better generation results.
+</Note>

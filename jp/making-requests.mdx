@@ -1,0 +1,59 @@
+---
+title: 'リクエストの作成'
+description: 'Crazyrouter API へ正しくリクエストする方法'
+---
+
+## リクエスト形式
+
+API リクエストは HTTPS と JSON リクエストボディを使用します。
+
+### 必須ヘッダー
+
+| Header | Value | 説明 |
+|--------|-------|------|
+| `Authorization` | `Bearer YOUR_API_KEY` | API 認証キー |
+| `Content-Type` | `application/json` | リクエストボディ形式 |
+
+### 任意ヘッダー
+
+| Header | Value | 説明 |
+|--------|-------|------|
+| `Accept` | `application/json` | レスポンス形式 |
+
+## リクエスト例
+
+```bash
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer sk-xxxxxxxx" \
+  -d '{
+    "model": "gpt-5.4",
+    "messages": [{"role": "user", "content": "Hello"}],
+    "stream": false
+  }'
+```
+
+## ストリーミング
+
+`stream: true` を設定すると、SSE 形式のストリーミング出力を利用できます。
+
+```bash
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer sk-xxxxxxxx" \
+  -d '{
+    "model": "gpt-5.4",
+    "messages": [{"role": "user", "content": "Hello"}],
+    "stream": true
+  }'
+```
+
+ストリーミングレスポンスは Server-Sent Events 形式です。各イベントは `data: ` で始まり、最後は `data: [DONE]` で終了します。
+
+## オンラインデバッグ
+
+次の方法で API をテストできます。
+
+- **Crazyrouter Playground**: ログイン後、[crazyrouter.com/console/playground](https://crazyrouter.com/console/playground) でブラウザから直接テスト
+- **cURL**: コマンドラインからリクエスト送信
+- **Postman / Apifox**: API デバッグツールを利用

@@ -1,0 +1,130 @@
+---
+title: "Fal.ai Images"
+description: "Text-to-image generation and image editing via Fal.ai endpoints"
+---
+
+# Fal.ai Images
+
+Crazyrouter proxies Fal.ai image generation endpoints, supporting text-to-image and image editing.
+
+## Text-to-Image
+
+```
+POST /fal-ai/nano-banana
+```
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `prompt` | string | Yes | Image description prompt |
+| `negative_prompt` | string | No | Negative prompt |
+| `image_size` | string | No | Image size: `square_hd`, `landscape_4_3`, `portrait_4_3`, `landscape_16_9`, `portrait_16_9` |
+| `num_images` | integer | No | Number of images, default 1 |
+| `seed` | integer | No | Random seed |
+| `guidance_scale` | number | No | Guidance strength |
+| `num_inference_steps` | integer | No | Number of inference steps |
+
+### Request Examples
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/fal-ai/nano-banana \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "A majestic eagle soaring over snow-capped mountains at sunrise",
+    "image_size": "landscape_16_9",
+    "num_images": 1
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/fal-ai/nano-banana",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "prompt": "A majestic eagle soaring over snow-capped mountains at sunrise",
+        "image_size": "landscape_16_9",
+        "num_images": 1
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### Response Example
+
+```json
+{
+  "images": [
+    {
+      "url": "https://fal.media/files/...",
+      "width": 1344,
+      "height": 768,
+      "content_type": "image/jpeg"
+    }
+  ],
+  "seed": 42,
+  "prompt": "A majestic eagle soaring over snow-capped mountains at sunrise"
+}
+```
+
+---
+
+## Image Editing
+
+```
+POST /fal-ai/nano-banana/edit
+```
+
+Edit an existing image.
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `prompt` | string | Yes | Edit description |
+| `image_url` | string | Yes | Original image URL |
+| `mask_url` | string | No | Mask image URL |
+| `strength` | number | No | Edit strength, 0-1 |
+
+### Request Example
+
+```bash cURL
+curl -X POST https://crazyrouter.com/fal-ai/nano-banana/edit \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "Add a rainbow in the sky",
+    "image_url": "https://example.com/landscape.jpg",
+    "strength": 0.6
+  }'
+```
+
+### Response Example
+
+```json
+{
+  "images": [
+    {
+      "url": "https://fal.media/files/...",
+      "width": 1024,
+      "height": 1024,
+      "content_type": "image/jpeg"
+    }
+  ]
+}
+```
+
+<Note>
+  Fal.ai endpoints support multiple underlying models. For available models, refer to the [Model Pricing](https://crazyrouter.com/pricing) page.
+</Note>

@@ -1,0 +1,89 @@
+---
+title: "Structured Outputs"
+description: "OpenAI-style structured output verified against Crazyrouter production on 2026-03-23"
+---
+
+# Structured Outputs
+
+```
+POST /v1/chat/completions
+```
+
+As of March 23, 2026, Crazyrouter production has verified that `gpt-5.4` with `response_format.type = "json_schema"` returns directly parseable JSON.
+
+---
+
+## Recommended Path: `json_schema`
+
+```bash
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.4",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Return the people and roles from: Alice is CTO. Bob is PM."
+      }
+    ],
+    "response_format": {
+      "type": "json_schema",
+      "json_schema": {
+        "name": "people_roles",
+        "strict": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {"type": "string"},
+                  "role": {"type": "string"}
+                },
+                "required": ["name", "role"],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": ["people"],
+          "additionalProperties": false
+        }
+      }
+    }
+  }'
+```
+
+The observed production `message.content` parsed directly as:
+
+```json
+{
+  "people": [
+    {
+      "name": "Alice",
+      "role": "CTO"
+    },
+    {
+      "name": "Bob",
+      "role": "PM"
+    }
+  ]
+}
+```
+
+---
+
+## Consumer-Side Handling
+
+```python
+import json
+
+content = response["choices"][0]["message"]["content"]
+data = json.loads(content)
+```
+
+<Note>
+  This production pass only revalidated the strict `json_schema` path. The older `json_object` mode was not rechecked separately, so it is no longer kept as the primary example here.
+</Note>

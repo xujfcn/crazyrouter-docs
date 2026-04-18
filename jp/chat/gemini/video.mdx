@@ -1,0 +1,75 @@
+---
+title: "Gemini Video Understanding"
+description: "Gemini native video understanding documented from successful Crazyrouter request patterns on 2026-04-08"
+---
+
+# Gemini Video Understanding
+
+```text
+POST /v1beta/models/{model}:generateContent
+```
+
+As of `2026-04-08`, successful Crazyrouter and local `:4000` retests show:
+
+- `gemini-2.5-pro` can read `video/mp4`
+- the currently verified primary path is `fileData.fileUri`
+- the video URL must be publicly reachable by the Gemini upstream
+
+---
+
+## Verified Minimal Request
+
+```bash
+curl "https://crazyrouter.com/v1beta/models/gemini-2.5-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "fileData": {
+              "mimeType": "video/mp4",
+              "fileUri": "https://example.com/demo.mp4"
+            }
+          },
+          {
+            "text": "Describe the main subject, motion, and whether the camera is static."
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "maxOutputTokens": 512
+    }
+  }'
+```
+
+Observed successful response shape:
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "The main subject is a red ball rolling from left to right, and the camera is static."
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+## Request Notes
+
+- The primary recommended path for video understanding is `fileData.fileUri`
+- Set `mimeType` to the real file type, such as `video/mp4`
+- `fileUri` must be reachable by the Gemini upstream
+- Private-network URLs, signed flows that cannot be crawled, or inaccessible storage links are likely to fail
+
+<Note>
+  Do not assume the image-understanding request shape is the same as the video-understanding request shape. Images currently work best through `inlineData`, while the verified video path here uses `fileData.fileUri`.
+</Note>
