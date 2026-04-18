@@ -1,0 +1,184 @@
+---
+title: "Grok 图片模型"
+description: "使用 grok-imagine-image 和 grok-4-image 生成图片，并了解参数差异"
+---
+
+# Grok 图片模型
+
+```
+POST /v1/images/generations
+```
+
+Grok 图片模型使用 OpenAI Images 兼容路径调用。当前应区分两个模型名：
+
+| 模型 | 说明 | 建议 |
+|------|------|------|
+| `grok-imagine-image` | 官方 xAI 图片模型名，按官方价 `$0.02 / image` 计费 | 推荐用于新接入 |
+| `grok-4-image` | 第三方兼容渠道上的历史/兼容模型名 | 仅建议按子集参数使用 |
+
+<Warning>
+  `grok-4-image` 不是官方 xAI 的模型名，不能假设它和 `grok-imagine-image` 完全等价。新接入优先使用 `grok-imagine-image`。
+</Warning>
+
+## grok-imagine-image 参数
+
+`grok-imagine-image` 当前按官方图片接口口径使用：
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `model` | string | 是 | 使用 `grok-imagine-image` |
+| `prompt` | string | 是 | 图片描述提示词 |
+| `n` | integer | 否 | 生成数量，官方范围 `1` 到 `10`。如果需要稳定成本控制，建议先用 `1` |
+| `response_format` | string | 否 | `url` 或 `b64_json`。当前生产实测 `url` 稳定 |
+| `aspect_ratio` | string | 否 | 如 `1:1`、`16:9`、`9:16`、`3:2`、`auto` |
+| `resolution` | string | 否 | `1k` 或 `2k` |
+
+<Note>
+  `aspect_ratio` 和 `resolution` 是 xAI 图片接口的扩展参数。使用 OpenAI Python SDK 时请通过 `extra_body` 传入，使用 cURL 或 Node.js SDK 时可以直接放在 JSON body 中。
+</Note>
+
+不应传入这些参数：
+
+| 参数 | 原因 |
+|------|------|
+| `size` | xAI 官方接口不支持，传入会返回 `Argument not supported: size` |
+| `quality` | xAI 官方接口不支持 |
+| `style` | xAI 官方接口不支持 |
+
+## grok-imagine-image 示例
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "grok-imagine-image",
+    "prompt": "A tiny yellow cube on a plain white background, minimal product photo",
+    "n": 1,
+    "response_format": "url",
+    "aspect_ratio": "1:1",
+    "resolution": "1k"
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1",
+)
+
+response = client.images.generate(
+    model="grok-imagine-image",
+    prompt="A tiny yellow cube on a plain white background, minimal product photo",
+    n=1,
+    response_format="url",
+    extra_body={
+        "aspect_ratio": "1:1",
+        "resolution": "1k",
+    },
+)
+
+print(response.data[0].url)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const response = await client.images.generate({
+  model: "grok-imagine-image",
+  prompt: "A tiny yellow cube on a plain white background, minimal product photo",
+  n: 1,
+  response_format: "url",
+  aspect_ratio: "1:1",
+  resolution: "1k",
+});
+
+console.log(response.data[0].url);
+```
+
+</CodeGroup>
+
+## 响应示例
+
+实际响应可能包含 `url`、`mime_type`、`revised_prompt` 等字段：
+
+```json
+{
+  "created": 1776527939,
+  "data": [
+    {
+      "url": "https://...",
+      "mime_type": "image/jpeg",
+      "revised_prompt": "A tiny yellow cube on a plain white background..."
+    }
+  ]
+}
+```
+
+<Note>
+  `response_format: "url"` 返回的图片链接是临时链接，请在生成后及时下载或转存。
+</Note>
+
+## grok-4-image 参数差异
+
+`grok-4-image` 当前建议只使用下面的安全子集：
+
+| 参数 | 支持情况 |
+|------|----------|
+| `model` | 使用 `grok-4-image` |
+| `prompt` | 支持 |
+| `n` | 仅建议 `1`。生产实测 `n=2` 可能只返回 1 张图，但按 2 张计费；网关已收敛为只允许 `1` |
+| `response_format` | `url` 稳定。`b64_json` 请求可接受，但生产实测仍返回 `url` |
+| `aspect_ratio` | 请求可接受，但第三方渠道是否严格执行需以实际返回为准 |
+| `resolution` | 请求可接受，但第三方渠道是否严格执行需以实际返回为准 |
+
+不要对 `grok-4-image` 承诺：
+
+- 多图 `n > 1`
+- `b64_json` 一定返回 base64
+- `size`
+- `quality`
+- `style`
+- 图片编辑能力
+
+## grok-4-image 示例
+
+```bash
+curl -X POST https://crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "grok-4-image",
+    "prompt": "A single red cube on a plain white background, product photo",
+    "n": 1,
+    "response_format": "url"
+  }'
+```
+
+## 计费说明
+
+| 模型 | 当前计费 |
+|------|----------|
+| `grok-imagine-image` | `$0.02 / image`，不设置折扣 |
+| `grok-4-image` | 当前 pricing 为 `$0.08 * 0.55 = $0.044 / image` |
+
+<Note>
+  以实际 pricing 页面和消费日志为准。图片模型按张计费，不按输入/输出 token 计费。
+</Note>
+
+## 常见错误
+
+| 错误 | 处理方式 |
+|------|----------|
+| `Argument not supported: size` | 不要给 Grok 图片模型传 `size`，改用 `aspect_ratio` 和 `resolution` |
+| `model_price_error` | 目标模型未配置价格或令牌无权限，先检查 pricing 和模型列表 |
+| `model_not_found` | 模型名、令牌权限或渠道可用性不匹配，先用 `GET /v1/models` 确认 |

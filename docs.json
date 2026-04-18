@@ -3,8 +3,9 @@
   "theme": "mint",
   "name": "Crazyrouter",
   "logo": {
-    "dark": "/logo/dark.svg",
-    "light": "/logo/light.svg"
+    "dark": "/logo/wordmark-dark.svg",
+    "light": "/logo/wordmark-light.svg",
+    "href": "/"
   },
   "favicon": "/favicon.ico",
   "colors": {
@@ -18,7 +19,24 @@
       "method": "bearer"
     }
   },
+  "contextual": {
+    "options": ["copy"],
+    "display": "header"
+  },
   "navigation": {
+    "global": {
+      "languages": [
+        {
+          "language": "cn",
+          "default": true,
+          "href": "/"
+        },
+        {
+          "language": "en",
+          "href": "/en/introduction"
+        }
+      ]
+    },
     "languages": [
       {
         "language": "cn",
@@ -60,6 +78,7 @@
               "chat/openai/structured-output",
               "chat/openai/reasoning",
               "chat/openai/web-search",
+              "chat/openai/grok",
               "chat/openai/completions-legacy",
               "chat/openai/special-models",
               "chat/openai/models"
@@ -113,6 +132,7 @@
               "images/ideogram/v3",
               "images/ideogram/legacy",
               "images/gpt-image",
+              "images/grok",
               "images/nano-banana",
               "images/nano-banana-pro",
               "images/nano-banana-2",
@@ -275,6 +295,7 @@
               "en/chat/openai/structured-output",
               "en/chat/openai/reasoning",
               "en/chat/openai/web-search",
+              "en/chat/openai/grok",
               "en/chat/openai/completions-legacy",
               "en/chat/openai/special-models",
               "en/chat/openai/models"
@@ -328,6 +349,7 @@
               "en/images/ideogram/v3",
               "en/images/ideogram/legacy",
               "en/images/gpt-image",
+              "en/images/grok",
               "en/images/nano-banana",
               "en/images/nano-banana-pro",
               "en/images/nano-banana-2",

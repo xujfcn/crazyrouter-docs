@@ -13,7 +13,7 @@ As of March 23, 2026, production checks against Crazyrouter showed:
 
 - `gpt-4o` returns `200`, but `message.content` is plain text, not standard multipart image content
 - `gpt-4o-image` also returns `200`, but the current response shape is still text or Markdown containing a parameter block, an ID, and a preview link, not the standard OpenAI `image_url` multipart structure
-- If you need stable, machine-readable image output, the current recommended path is [`/v1/images/generations`](/en/images/gpt-image) with `gpt-image-1`
+- If you need stable, machine-readable image output, the current recommended path is [`/v1/images/generations`](/en/images/gpt-image) with `gpt-image-1`; for Grok image models, see [`Grok Image Models`](/en/images/grok)
 - If you need reference-image editing or multi-image input, do not keep treating the Nano Banana family as a stable `/v1/images/generations` entry point. Start with the native Gemini path documented on [`Nano Banana 2`](/en/images/nano-banana-2); [`Nano Banana`](/en/images/nano-banana) is currently controlled-testing only
 
 <Warning>
@@ -81,5 +81,5 @@ The 2026-03-23 production check returned:
 So the stable automation path is still the Images API, not the chat-image compatibility path.
 
 <Note>
-  If you are only testing manually, the `gpt-4o-image` chat path is still useful for observation. If you need backend automation, storage, or post-processing, use the [`GPT Image docs`](/en/images/gpt-image) directly. If your workload depends on reference-image editing or multi-image input, start with the native Gemini route documented on [`Nano Banana 2`](/en/images/nano-banana-2). Do not keep treating Nano Banana-family `/v1/images/generations` as the stable recommendation.
+  If you are only testing manually, the `gpt-4o-image` chat path is still useful for observation. If you need backend automation, storage, or post-processing, use the [`GPT Image docs`](/en/images/gpt-image) or [`Grok Image Models`](/en/images/grok). If your workload depends on reference-image editing or multi-image input, start with the native Gemini route documented on [`Nano Banana 2`](/en/images/nano-banana-2). Do not keep treating Nano Banana-family `/v1/images/generations` as the stable recommendation.
 </Note>
