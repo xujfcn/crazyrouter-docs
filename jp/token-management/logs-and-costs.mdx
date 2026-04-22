@@ -185,7 +185,71 @@ Where:
 - `quota`: total consumed quota under the current filter
 - `rpm` and `tpm`: reserved fields for extended monitoring
 
-## 4. Convert Quota to USD Cost
+## 4. Query Current Account Balance
+
+If the customer does not only want per-key monitoring, but also wants to display the current Crazyrouter account balance directly in their own admin panel, call `/api/user/self`.
+
+Use the same management-auth headers:
+
+```bash cURL
+curl "https://crazyrouter.com/api/user/self" \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 4004"
+```
+
+Example response:
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "id": 4004,
+    "username": "google_4004",
+    "quota": 11000000,
+    "used_quota": 0,
+    "request_count": 0,
+    "group": "default"
+  }
+}
+```
+
+Key fields:
+
+| Field | Description |
+|------|------|
+| `quota` | Current remaining balance in internal quota units |
+| `used_quota` | Historical used amount in internal quota units |
+| `request_count` | Historical request count |
+| `group` | Current account group |
+
+Conversion:
+
+```text
+balance_usd = quota / quota_per_unit
+used_usd = used_quota / quota_per_unit
+```
+
+Example:
+
+```text
+quota = 11000000
+quota_per_unit = 500000
+
+balance_usd = 11000000 / 500000 = 22
+```
+
+So the example above means:
+
+```text
+$22.00
+```
+
+<Note>
+  `/api/user/self` is better for displaying the current total account balance. `/api/log/self` and `/api/log/self/stat` are better for analyzing usage by time range, business key, or model.
+</Note>
+
+## 5. Convert Quota to USD Cost
 
 System conversion metadata is available from the public `/api/status` endpoint:
 

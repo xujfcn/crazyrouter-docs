@@ -185,7 +185,71 @@ curl "https://crazyrouter.com/api/log/self/stat?type=2&token_name=gptai&start_ti
 - `quota`：该筛选条件下的总消耗额度
 - `rpm`、`tpm`：当前接口保留字段，可用于扩展监控
 
-## 4. 换算美元花费
+## 4. 查询当前账户余额
+
+如果客户不只是想按某个业务 Key 做监控，而是想直接在自己的后台展示 Crazyrouter 账户当前余额，可以调用 `/api/user/self`。
+
+请求头与其他管理接口一致：
+
+```bash cURL
+curl "https://crazyrouter.com/api/user/self" \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 4004"
+```
+
+响应示例：
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "id": 4004,
+    "username": "google_4004",
+    "quota": 11000000,
+    "used_quota": 0,
+    "request_count": 0,
+    "group": "default"
+  }
+}
+```
+
+关键字段：
+
+| 字段 | 说明 |
+|------|------|
+| `quota` | 当前剩余额度，单位为系统内部 quota |
+| `used_quota` | 历史已使用额度，单位为系统内部 quota |
+| `request_count` | 历史请求次数 |
+| `group` | 当前账号分组 |
+
+换算方法：
+
+```text
+balance_usd = quota / quota_per_unit
+used_usd = used_quota / quota_per_unit
+```
+
+示例：
+
+```text
+quota = 11000000
+quota_per_unit = 500000
+
+balance_usd = 11000000 / 500000 = 22
+```
+
+也就是说，上述示例余额为：
+
+```text
+$22.00
+```
+
+<Note>
+  `/api/user/self` 更适合“展示当前账户总余额”；`/api/log/self` 和 `/api/log/self/stat` 更适合“按时间范围、按 Key、按模型”做消耗分析。
+</Note>
+
+## 5. 换算美元花费
 
 系统换算参数可通过公开接口 `/api/status` 获取：
 
