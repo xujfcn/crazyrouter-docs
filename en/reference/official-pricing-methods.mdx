@@ -1,0 +1,272 @@
+---
+title: 'Official Model Pricing Methods'
+description: 'Explain how each Crazyrouter model name maps to upstream official pricing rules'
+---
+
+# Official Model Pricing Methods
+
+This page explains upstream vendor pricing rules only. It does not describe Crazyrouter resale prices.
+
+- Upstream pricing: the vendor's own `input`, `output`, `cached input`, `tool call`, `search grounding`, `prompt caching`, and similar billing rules
+- Crazyrouter pricing: Crazyrouter's own sell price, multiplier, discount, channel variation, and settlement logic
+
+<Note>
+  This page reflects vendor documentation checked on `2026-04-27`. Vendors can change prices, preview-model policies, long-context rules, search-tool fees, and caching behavior. Recheck the official source links before relying on any number in production.
+</Note>
+
+## Official Example Price Table
+
+The examples below intentionally use the most common pricing tier that is easiest to map to budget planning:
+
+- Anthropic: standard API price, excluding `Fast mode`, `US-only inference`, and Batch discounts
+- OpenAI: `Standard` price, excluding Batch, Priority, and Regional Processing surcharges
+- Gemini: `Standard` price, usually the text/image/video default path, and for `Gemini 3*` models the `<= 200K prompt` tier
+- xAI: if the public static docs do not list a standalone price for the exact routed name, this page says so explicitly
+- Z.AI: the official `Text Models` price
+- MiniMax: the main table uses `Pay as You Go`; subscription-style pricing is listed separately under `Token Plan`
+
+<Note>
+  Unless otherwise noted, prices below are `USD / 1M tokens`.
+</Note>
+
+### Anthropic Example Prices
+
+| Crazyrouter Name | Official Model | Base Input | Cache 5m / 1h / Hit | Output | Notes |
+| --- | --- | --- | --- | --- | --- |
+| `claude-sonnet-4-6` | `claude-sonnet-4-6` | `$3` | `$3.75 / $6 / $0.30` | `$15` | `1M context` uses the standard rate; Batch is roughly `50% off` |
+| `claude-opus-4-6` | `claude-opus-4-6` | `$5` | `$6.25 / $10 / $0.50` | `$25` | `Fast mode` is billed at `6x` the standard price |
+| `claude-opus-4-7` | `claude-opus-4-7` | `$5` | `$6.25 / $10 / $0.50` | `$25` | `US-only inference` has an extra regional multiplier in the official docs |
+| `claude-sonnet-4-5-20250929` | `claude-sonnet-4-5` snapshot | `$3` | `$3.75 / $6 / $0.30` | `$15` | Snapshot IDs keep the `Sonnet 4.5` price; they do not define a separate pricing table |
+
+### OpenAI Example Prices
+
+| Crazyrouter Name | Official Model | Input | Cached input | Output | Notes |
+| --- | --- | --- | --- | --- | --- |
+| `gpt-54` | `gpt-5.4` | `$2.50` | `$0.25` | `$15.00` | Standard price applies below `270K` context; long-context multipliers apply above that |
+| `gpt-4o` | `gpt-4o` | `$2.50` | `$1.25` | `$10.00` | Classic three-part token pricing |
+| `gpt-5` | `gpt-5` | `$1.25` | `$0.125` | `$10.00` | Tool charges are separate |
+| `gpt-51-codex-max` | `gpt-5.1-codex-max` | `$1.25` | `$0.125` | `$10.00` | Commonly used in Codex and agentic coding workflows, but still billed with the standard three-part structure |
+| `gpt-5-mini` | `gpt-5-mini` | `$0.25` | `$0.025` | `$2.00` | Lower-cost GPT-5 variant |
+| `gpt-5-nano` | `gpt-5-nano` | `$0.05` | `$0.005` | `$0.40` | Lowest-cost GPT-5 route |
+| `gpt-5.2` | `gpt-5.2` | `$1.75` | `$0.175` | `$14.00` | Earlier flagship tier, still standard three-part token pricing |
+| `gpt-5.5` | `gpt-5.5` | `$5.00` | `$0.50` | `$30.00` | Current flagship tier; the official standard-price note applies below `270K` context |
+
+### Gemini Example Prices
+
+| Crazyrouter Name | Official Model | Standard Input | Standard Cache | Standard Output | Notes |
+| --- | --- | --- | --- | --- | --- |
+| `gemini-3.1-pro-preview` | `gemini-3.1-pro-preview` | `$2.00` | `$0.20` + `$4.50 / 1M tok / hr` storage | `$12.00` | `<= 200K` prompt tier; `> 200K` becomes `$4 / $0.40 / $18`; Google also lists Search and Maps free quotas plus `$14 / 1,000 search queries` |
+| `gemini-3-pro-preview` | `gemini-3-pro-preview` | `$2.00 (<= 200K)` / `$4.00 (> 200K)` | The public model page does not currently break out cache price separately | `$12.00 (<= 200K)` / `$18.00 (> 200K)` | The model page exposes direct input/output examples; use the live Gemini pricing page for the latest caching and grounding matrix |
+| `gemini-2.5-flash-lite` | `gemini-2.5-flash-lite` | `$0.10` for text / image / video | `$0.01` for text / image / video + `$1.00 / 1M tok / hr` storage | `$0.40` | Audio input is `$0.30`, audio cache is `$0.03`; Search is `1,500 RPD` free then `$35 / 1,000 grounded prompts` |
+
+### xAI Example Prices
+
+| Crazyrouter Name | Official Mapping | Prompt / Cached / Output | Tool Fees | Notes |
+| --- | --- | --- | --- | --- |
+| `grok-4.1-thinking` | Internal reasoning route | The public static docs do not list a standalone `grok-4.1-thinking` token price | `web_search $5 / 1k`, `x_search $5 / 1k`, `code_execution $5 / 1k`, `attachment_search $10 / 1k`, `collections_search $2.50 / 1k` | `reasoning tokens` are billed at the `completion token price` |
+| `grok-4.1` | Internal Grok 4.1 route | The public static docs do not list a standalone `grok-4.1` token price | same as above | The Crazyrouter route name should not be treated as a public xAI static SKU |
+
+<Note>
+  What the current xAI static docs reliably expose is the token-category structure, tool-invocation pricing, Batch `50% off`, and the instruction to check model details or the console for model-specific token prices. Since `grok-4.1` and `grok-4.1-thinking` are not individually priced in the static public docs, this page does not assign another SKU's numbers to them.
+</Note>
+
+### Z.AI / GLM Example Prices
+
+| Crazyrouter Name | Official Model | Input | Cached input | Cached input storage | Output | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| `glm-5` | `GLM-5` | `$1.0` | `$0.2` | `Limited-time Free` | `$3.2` | `Web Search` is billed separately at `$0.01 / use` |
+
+### MiniMax Example Prices
+
+#### Pay as You Go
+
+| Crazyrouter Name | Official Model | Input | Prompt caching read | Prompt caching write | Output | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| `MiniMax-M27` | `MiniMax-M2.7` | `$0.3` | `$0.06` | `$0.375` | `$1.2` | This is the clearest tier to use for direct API budgeting |
+
+#### Token Plan
+
+| Plan | Monthly Price | `M2.7` Quota |
+| --- | --- | --- |
+| Starter | `$10 / month` | `1,500 requests / 5hrs` |
+| Plus | `$20 / month` | `4,500 requests / 5hrs` |
+| Max | `$50 / month` | `15,000 requests / 5hrs` |
+
+## Anthropic
+
+Anthropic pricing is not just a simple `input / output` split. The official structure breaks out:
+
+- `Base Input Tokens`
+- `5m Cache Writes`
+- `1h Cache Writes`
+- `Cache Hits & Refreshes`
+- `Output Tokens`
+
+Two common rules also matter:
+
+- `Batch API` usually bills input and output at roughly `50% off`
+- Prompt caching follows the public multiplier rules: `5-minute cache write = 1.25x input`, `1-hour cache write = 2x input`, and `cache hit = 0.1x input`
+
+| Crazyrouter Name | Official Mapping | Official Billing Method | Notes |
+| --- | --- | --- | --- |
+| `claude-sonnet-4-6` | Anthropic `claude-sonnet-4-6` | billed as `base input / 5m cache write / 1h cache write / cache hit / output` | Anthropic explicitly documents `Sonnet 4.6` with `1M context`, still using standard pricing |
+| `claude-opus-4-6` | Anthropic `claude-opus-4-6` | billed as `base input / 5m cache write / 1h cache write / cache hit / output` | `Opus 4.6` also supports `1M context`; `Fast mode` uses a separate multiplier |
+| `claude-opus-4-7` | Anthropic `claude-opus-4-7` | billed as `base input / 5m cache write / 1h cache write / cache hit / output` | `Opus 4.7` is a distinct model on the official Anthropic pricing surface |
+| `claude-sonnet-4-5-20250929` | Anthropic snapshot ID `claude-sonnet-4-5-20250929`, usually displayed publicly as `claude-sonnet-4-5` | still billed under the `Sonnet 4.5` `base input / cache write / cache hit / output` structure | Snapshot IDs are dated API names, not separate product prices |
+
+Official links:
+
+- Anthropic Pricing: [platform.claude.com/docs/en/about-claude/pricing](https://platform.claude.com/docs/en/about-claude/pricing)
+- Anthropic Models Overview: [platform.claude.com/docs/en/about-claude/models/overview](https://platform.claude.com/docs/en/about-claude/models/overview)
+
+## OpenAI
+
+OpenAI pricing is the most uniform of the set. The public structure is usually:
+
+- `Input`
+- `Cached input`
+- `Output`
+
+Common extra rules:
+
+- `Responses API` itself does not add a separate model fee; billing still follows the selected model's token rates
+- `Web search`, containers/code execution, Computer Use, and other tools are billed separately
+- `Batch API` usually discounts token pricing by about `50%`
+
+| Crazyrouter Name | Official Mapping | Official Billing Method | Notes |
+| --- | --- | --- | --- |
+| `gpt-54` | internal alias, usually meaning OpenAI `gpt-5.4` | billed as `input / cached input / output` | the public standard price applies below `270K` context; regional processing endpoints add another surcharge |
+| `gpt-4o` | OpenAI `gpt-4o` | billed as `input / cached input / output` | classic unified OpenAI pricing structure |
+| `gpt-5` | OpenAI `gpt-5` | billed as `input / cached input / output` | tool usage is billed separately; there is no separate public "thinking token price" line item |
+| `gpt-51-codex-max` | should map to OpenAI `gpt-5.1-codex-max` | billed as `input / cached input / output` | Codex-oriented naming, but the public price structure still matches the regular GPT-5.1 token format |
+| `gpt-5-mini` | OpenAI `gpt-5-mini` | billed as `input / cached input / output` | smaller lower-cost tier |
+| `gpt-5-nano` | OpenAI `gpt-5-nano` | billed as `input / cached input / output` | nano tier, same billing structure |
+| `gpt-5.2` | OpenAI `gpt-5.2` | billed as `input / cached input / output` | still part of the GPT-5 pricing pattern |
+| `gpt-5.5` | OpenAI `gpt-5.5` | billed as `input / cached input / output` | current flagship tier; use the latest long-context notes from OpenAI before production rollout |
+
+Official links:
+
+- OpenAI Pricing: [openai.com/api/pricing](https://openai.com/api/pricing/)
+- OpenAI Docs Pricing: [platform.openai.com/docs/pricing](https://platform.openai.com/docs/pricing/)
+- OpenAI Models: [developers.openai.com/api/docs/models](https://developers.openai.com/api/docs/models)
+
+## Google Gemini
+
+Gemini pricing differs the most from OpenAI and Anthropic because Google often publishes multiple processing modes:
+
+- `Standard`
+- `Batch`
+- `Flex`
+- `Priority`
+
+And it often breaks out:
+
+- `Input`
+- `Output (including thinking tokens)`
+- `Context caching price`
+- `Context caching storage`
+- `Grounding with Google Search`
+- `Grounding with Google Maps`
+
+| Crazyrouter Name | Official Mapping | Official Billing Method | Notes |
+| --- | --- | --- | --- |
+| `gemini-3.1-pro-preview` | Google `gemini-3.1-pro-preview`, often displayed internally as `gemini-3.1-pro` | officially split by `Standard / Batch / Flex / Priority`, and then by `input / output / caching / search grounding / maps grounding` | preview model, with separate `<= 200K` and `> 200K` prompt pricing tiers |
+| `gemini-3-pro-preview` | compatibility name; usually best understood as public `gemini-3-pro` / `gemini-3-pro-preview` | the model page explicitly shows two-tier `input / output` pricing; use the live pricing page for the latest cache, search, and maps treatment | preview model, and the public examples also use `<= 200K` and `> 200K` tiers |
+| `gemini-2.5-flash-lite` | Google `gemini-2.5-flash-lite` | priced by `Standard / Batch / Flex / Priority`, with separate `input / output / context caching / storage / Google Search / Google Maps` | stable model rather than preview; official output pricing explicitly includes thinking tokens |
+
+Official links:
+
+- Gemini Pricing: [ai.google.dev/gemini-api/docs/pricing](https://ai.google.dev/gemini-api/docs/pricing)
+- Gemini Models: [ai.google.dev/models/gemini](https://ai.google.dev/models/gemini)
+
+## xAI Grok
+
+xAI pricing is best understood as token categories plus tool billing, rather than a separate pricing table for every visible route name:
+
+- `Prompt tokens`
+- `Cached prompt tokens`
+- `Completion tokens`
+- `Reasoning tokens`
+
+xAI also explicitly states:
+
+- `Reasoning tokens` are billed at the `completion token price`
+- `Web Search`, `X Search`, `Code Execution`, and similar server-side tools are billed separately per `1,000` calls
+- `Batch API` usually applies a `50%` token discount
+
+| Crazyrouter Name | Official Mapping | Official Billing Method | Notes |
+| --- | --- | --- | --- |
+| `grok-4.1-thinking` | internal reasoning route; conceptually closest to a Grok 4.1 reasoning configuration | billed using the xAI token-category model: `prompt / cached prompt / completion / reasoning`, plus tool invocation fees when relevant | the public xAI pricing docs emphasize SKU-style names such as `grok-4-1-fast-reasoning`; this route name should not be treated as an official standalone public SKU |
+| `grok-4.1` | internal Grok 4.1 route; conceptually closer to a non-thinking Grok 4.1 configuration | still follows the same xAI token-category billing logic, with tools billed separately | for production budgeting, rely on the current xAI public token and tool rules, not on the internal route name alone |
+
+Official links:
+
+- xAI Models and Pricing: [docs.x.ai/developers/models](https://docs.x.ai/developers/models)
+- xAI Consumption and Rate Limits: [docs.x.ai/developers/rate-limits](https://docs.x.ai/developers/rate-limits)
+- xAI Prompt Caching Pricing: [docs.x.ai/developers/advanced-api-usage/prompt-caching/usage-and-pricing](https://docs.x.ai/developers/advanced-api-usage/prompt-caching/usage-and-pricing)
+
+## Z.AI / GLM
+
+Z.AI `GLM-5` pricing is close to the OpenAI pattern, but it adds cache storage as its own line item:
+
+- `Input`
+- `Cached Input`
+- `Cached Input Storage`
+- `Output`
+
+Built-in tools such as `Web Search` are priced separately per use.
+
+| Crazyrouter Name | Official Mapping | Official Billing Method | Notes |
+| --- | --- | --- | --- |
+| `glm-5` | Z.AI `GLM-5` | billed as `input / cached input / cached input storage / output` | official `Web Search` is charged separately, so token price alone is not the full cost picture |
+
+Official links:
+
+- Z.AI Pricing: [docs.z.ai/guides/overview/pricing](https://docs.z.ai/guides/overview/pricing)
+- GLM-5 Overview: [docs.z.ai/guides/llm/glm-5](https://docs.z.ai/guides/llm/glm-5)
+
+## MiniMax
+
+MiniMax is the one vendor here where two official commercial modes matter:
+
+- `Pay as You Go`
+- `Token Plan`
+
+That means:
+
+- `Pay as You Go` is the normal token-priced API path
+- `Token Plan` is subscription-style and, for `M2.7`, often described as a `requests per 5-hour rolling window` capacity product rather than plain token billing
+
+| Crazyrouter Name | Official Mapping | Official Billing Method | Notes |
+| --- | --- | --- | --- |
+| `MiniMax-M27` | should map to `MiniMax-M2.7` | under `Pay as You Go`, billed as `input / output / prompt caching read / prompt caching write`; under `Token Plan`, billed as `requests / 5hrs` capacity | for production API budgeting, start with `Pay as You Go`; evaluate `Token Plan` separately for heavy coding or interactive usage |
+
+Official links:
+
+- MiniMax Pricing Overview: [platform.minimax.io/docs/pricing/overview](https://platform.minimax.io/docs/pricing/overview)
+- MiniMax Pay as You Go: [platform.minimax.io/docs/guides/pricing-paygo](https://platform.minimax.io/docs/guides/pricing-paygo)
+- MiniMax Token Plan: [platform.minimax.io/docs/guides/pricing-token-plan](https://platform.minimax.io/docs/guides/pricing-token-plan)
+
+## Summary
+
+If you only need a quick mental model of how each vendor bills, the shortest version is:
+
+- Anthropic: `base input + cache write/read + output`
+- OpenAI: `input + cached input + output`, with tools billed separately
+- Gemini: `multiple processing modes + input/output + caching + search/maps grounding`
+- xAI: `prompt/cached/completion/reasoning`, with server-side tools billed separately
+- Z.AI: `input + cached input + cached storage + output`
+- MiniMax: `token pay-as-you-go` or `subscription-style capacity plan`
+
+<Warning>
+  This page explains upstream official pricing rules, not Crazyrouter selling prices. For actual recharge, billing, multiplier, and discount behavior, use Crazyrouter pricing pages, the console, and `/api/pricing`.
+</Warning>
+
+## Related Internal Pages
+
+- [OpenAI Model List](/en/chat/openai/models)
+- [Gemini-Compatible OpenAI Model List](/en/chat/gemini/openai-models)
+- [Claude Native Format](/en/chat/anthropic/messages)
+- [Gemini Native Format](/en/chat/gemini/native)
+- [Grok Models](/en/chat/openai/grok)
+- [Get Token Models](/en/token-management/models)

@@ -1,0 +1,272 @@
+---
+title: '公式モデル課金方式'
+description: 'Crazyrouter 上のモデル名が上流ベンダーの公式課金ルールとどう対応するかを説明します'
+---
+
+# 公式モデル課金方式
+
+このページは上流ベンダーの公式課金ルールだけを説明します。Crazyrouter の販売価格を説明するページではありません。
+
+- 上流公式価格: ベンダー自身の `input`、`output`、`cached input`、`tool call`、`search grounding`、`prompt caching` などの課金ルール
+- Crazyrouter 価格: Crazyrouter 側の販売価格、倍率、割引、チャネル差、精算ルール
+
+<Note>
+  このページは `2026-04-27` 時点で確認したベンダー公式文書に基づいています。ベンダーは価格、preview モデル、長文脈、検索ツール、キャッシュ課金を変更することがあります。実運用前に必ず公式リンクを再確認してください。
+</Note>
+
+## 公式単価のサンプル表
+
+以下のサンプルは、予算見積もりに最も使いやすい代表的な課金枠だけを抜き出しています。
+
+- Anthropic: 標準 API 価格。`Fast mode`、`US-only inference`、Batch 割引は除外
+- OpenAI: `Standard` 価格。Batch、Priority、Regional Processing 加算は除外
+- Gemini: `Standard` 価格。通常の text / image / video ルートを前提にし、`Gemini 3*` では `<= 200K prompt` 枠を基準に記載
+- xAI: 公開静的ドキュメントに対象ルート名の単独価格がない場合は、そのまま「未単列」と明記
+- Z.AI: 公式 `Text Models` の価格
+- MiniMax: 主表は `Pay as You Go`、サブスク型は `Token Plan` として別記
+
+<Note>
+  特記がない限り、以下の価格は `USD / 1M tokens` です。
+</Note>
+
+### Anthropic の価格例
+
+| Crazyrouter 名 | 公式モデル | Base Input | Cache 5m / 1h / Hit | Output | 補足 |
+| --- | --- | --- | --- | --- | --- |
+| `claude-sonnet-4-6` | `claude-sonnet-4-6` | `$3` | `$3.75 / $6 / $0.30` | `$15` | `1M context` でも標準価格。Batch は概ね `5 割引` |
+| `claude-opus-4-6` | `claude-opus-4-6` | `$5` | `$6.25 / $10 / $0.50` | `$25` | `Fast mode` は標準価格の `6x` |
+| `claude-opus-4-7` | `claude-opus-4-7` | `$5` | `$6.25 / $10 / $0.50` | `$25` | `US-only inference` には追加倍率あり |
+| `claude-sonnet-4-5-20250929` | `claude-sonnet-4-5` のスナップショット | `$3` | `$3.75 / $6 / $0.30` | `$15` | スナップショット ID は `Sonnet 4.5` の価格を継承し、別価格ではありません |
+
+### OpenAI の価格例
+
+| Crazyrouter 名 | 公式モデル | Input | Cached input | Output | 補足 |
+| --- | --- | --- | --- | --- | --- |
+| `gpt-54` | `gpt-5.4` | `$2.50` | `$0.25` | `$15.00` | 標準価格は `270K` 未満の文脈に適用。超長文脈では追加倍率あり |
+| `gpt-4o` | `gpt-4o` | `$2.50` | `$1.25` | `$10.00` | OpenAI の典型的な 3 段階課金 |
+| `gpt-5` | `gpt-5` | `$1.25` | `$0.125` | `$10.00` | ツール料金は別課金 |
+| `gpt-51-codex-max` | `gpt-5.1-codex-max` | `$1.25` | `$0.125` | `$10.00` | Codex / agentic coding 向けに使われやすいが、課金構造は通常の 3 段階のまま |
+| `gpt-5-mini` | `gpt-5-mini` | `$0.25` | `$0.025` | `$2.00` | 低価格の GPT-5 系 |
+| `gpt-5-nano` | `gpt-5-nano` | `$0.05` | `$0.005` | `$0.40` | 最低価格帯の GPT-5 系 |
+| `gpt-5.2` | `gpt-5.2` | `$1.75` | `$0.175` | `$14.00` | 旧フラグシップ帯だが課金構造は同じ |
+| `gpt-5.5` | `gpt-5.5` | `$5.00` | `$0.50` | `$30.00` | 現行フラグシップ帯。標準価格の注記は `270K` 未満の文脈に適用 |
+
+### Gemini の価格例
+
+| Crazyrouter 名 | 公式モデル | Standard 入力 | Standard キャッシュ | Standard 出力 | 補足 |
+| --- | --- | --- | --- | --- | --- |
+| `gemini-3.1-pro-preview` | `gemini-3.1-pro-preview` | `$2.00` | `$0.20` + `$4.50 / 1M tok / hr` storage | `$12.00` | `<= 200K` tier。`> 200K` では `$4 / $0.40 / $18`。Search / Maps は無料枠後に `$14 / 1,000 search queries` |
+| `gemini-3-pro-preview` | `gemini-3-pro-preview` | `$2.00 (<= 200K)` / `$4.00 (> 200K)` | 公開モデルページではキャッシュ価格が独立表記されていません | `$12.00 (<= 200K)` / `$18.00 (> 200K)` | モデルページでは input / output 例が明示されます。最新の caching / grounding は Gemini live pricing page を参照してください |
+| `gemini-2.5-flash-lite` | `gemini-2.5-flash-lite` | `$0.10` for text / image / video | `$0.01` for text / image / video + `$1.00 / 1M tok / hr` storage | `$0.40` | Audio input は `$0.30`、audio cache は `$0.03`。Search は `1,500 RPD` 無料後に `$35 / 1,000 grounded prompts` |
+
+### xAI の価格例
+
+| Crazyrouter 名 | 公式対応 | Prompt / Cached / Output | Tool 料金 | 補足 |
+| --- | --- | --- | --- | --- |
+| `grok-4.1-thinking` | 内部 reasoning ルート | 公開静的ドキュメントには `grok-4.1-thinking` の単独 token 価格がありません | `web_search $5 / 1k`、`x_search $5 / 1k`、`code_execution $5 / 1k`、`attachment_search $10 / 1k`、`collections_search $2.50 / 1k` | `reasoning tokens` は `completion token price` で課金 |
+| `grok-4.1` | 内部 Grok 4.1 ルート | 公開静的ドキュメントには `grok-4.1` の単独 token 価格がありません | 同上 | Crazyrouter の内部ルート名をそのまま xAI の公開 SKU とみなすべきではありません |
+
+<Note>
+  xAI の現行公開静的ドキュメントで安定して確認できるのは、token の分類ルール、tool invocation 料金、Batch `5 割引`、およびモデル別 token 単価はモデル詳細または console で確認するという運用です。`grok-4.1` と `grok-4.1-thinking` は静的公開ページに単独価格がないため、このページでは他 SKU の数字を流用しません。
+</Note>
+
+### Z.AI / GLM の価格例
+
+| Crazyrouter 名 | 公式モデル | Input | Cached input | Cached input storage | Output | 補足 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `glm-5` | `GLM-5` | `$1.0` | `$0.2` | `Limited-time Free` | `$3.2` | `Web Search` は別途 `$0.01 / use` |
+
+### MiniMax の価格例
+
+#### Pay as You Go
+
+| Crazyrouter 名 | 公式モデル | Input | Prompt caching read | Prompt caching write | Output | 補足 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `MiniMax-M27` | `MiniMax-M2.7` | `$0.3` | `$0.06` | `$0.375` | `$1.2` | API 予算見積もりではこの枠が最も使いやすいです |
+
+#### Token Plan
+
+| Plan | 月額 | `M2.7` 枠 |
+| --- | --- | --- |
+| Starter | `$10 / month` | `1,500 requests / 5hrs` |
+| Plus | `$20 / month` | `4,500 requests / 5hrs` |
+| Max | `$50 / month` | `15,000 requests / 5hrs` |
+
+## Anthropic
+
+Anthropic の課金は単純な `input / output` だけではなく、次のように分かれています。
+
+- `Base Input Tokens`
+- `5m Cache Writes`
+- `1h Cache Writes`
+- `Cache Hits & Refreshes`
+- `Output Tokens`
+
+また、共通ルールとして次も重要です。
+
+- `Batch API` は概ね input / output が `5 割引`
+- Prompt caching は `5-minute cache write = 1.25x input`、`1-hour cache write = 2x input`、`cache hit = 0.1x input`
+
+| Crazyrouter 名 | 公式対応 | 公式課金方式 | 補足 |
+| --- | --- | --- | --- |
+| `claude-sonnet-4-6` | Anthropic `claude-sonnet-4-6` | `base input / 5m cache write / 1h cache write / cache hit / output` | `Sonnet 4.6` は `1M context` でも標準課金 |
+| `claude-opus-4-6` | Anthropic `claude-opus-4-6` | `base input / 5m cache write / 1h cache write / cache hit / output` | `Opus 4.6` も `1M context` をサポート。`Fast mode` には別倍率あり |
+| `claude-opus-4-7` | Anthropic `claude-opus-4-7` | `base input / 5m cache write / 1h cache write / cache hit / output` | `Opus 4.7` は Anthropic の公開価格表で独立モデルとして扱われます |
+| `claude-sonnet-4-5-20250929` | Anthropic snapshot ID `claude-sonnet-4-5-20250929`、公開表示は通常 `claude-sonnet-4-5` | `Sonnet 4.5` と同じ `base input / cache write / cache hit / output` | 日付付き snapshot ID は別価格ではなく API 名の違いです |
+
+公式リンク:
+
+- Anthropic Pricing: [platform.claude.com/docs/en/about-claude/pricing](https://platform.claude.com/docs/en/about-claude/pricing)
+- Anthropic Models Overview: [platform.claude.com/docs/en/about-claude/models/overview](https://platform.claude.com/docs/en/about-claude/models/overview)
+
+## OpenAI
+
+OpenAI の課金構造は最も揃っていて、基本的には次の 3 項目です。
+
+- `Input`
+- `Cached input`
+- `Output`
+
+追加で覚えておくべきルール:
+
+- `Responses API` 自体に別のモデル課金はなく、選択したモデルの token 単価に従います
+- `Web search`、containers/code execution、Computer Use などのツールは別課金です
+- `Batch API` は概ね token 単価が `5 割引`
+
+| Crazyrouter 名 | 公式対応 | 公式課金方式 | 補足 |
+| --- | --- | --- | --- |
+| `gpt-54` | 内部 alias。通常は OpenAI `gpt-5.4` を指します | `input / cached input / output` | 公開標準価格は `270K` 未満の文脈に適用。regional processing endpoint には追加料金あり |
+| `gpt-4o` | OpenAI `gpt-4o` | `input / cached input / output` | OpenAI の標準的な統一課金 |
+| `gpt-5` | OpenAI `gpt-5` | `input / cached input / output` | ツールは別課金で、公開価格表に独立した thinking token 行はありません |
+| `gpt-51-codex-max` | OpenAI `gpt-5.1-codex-max` に対応 | `input / cached input / output` | Codex 向けの命名ですが、課金構造は通常の GPT-5.1 と同じです |
+| `gpt-5-mini` | OpenAI `gpt-5-mini` | `input / cached input / output` | 低価格の小型帯 |
+| `gpt-5-nano` | OpenAI `gpt-5-nano` | `input / cached input / output` | nano 帯でも課金構造は同じです |
+| `gpt-5.2` | OpenAI `gpt-5.2` | `input / cached input / output` | GPT-5 系の課金構造を継承 |
+| `gpt-5.5` | OpenAI `gpt-5.5` | `input / cached input / output` | 現行フラグシップ帯。実運用前には OpenAI の長文脈ルールを再確認してください |
+
+公式リンク:
+
+- OpenAI Pricing: [openai.com/api/pricing](https://openai.com/api/pricing/)
+- OpenAI Docs Pricing: [platform.openai.com/docs/pricing](https://platform.openai.com/docs/pricing/)
+- OpenAI Models: [developers.openai.com/api/docs/models](https://developers.openai.com/api/docs/models)
+
+## Google Gemini
+
+Gemini は OpenAI / Anthropic と違い、複数の処理モードを明示することが多いです。
+
+- `Standard`
+- `Batch`
+- `Flex`
+- `Priority`
+
+さらに、次のような項目を分けて掲載することが一般的です。
+
+- `Input`
+- `Output (including thinking tokens)`
+- `Context caching price`
+- `Context caching storage`
+- `Grounding with Google Search`
+- `Grounding with Google Maps`
+
+| Crazyrouter 名 | 公式対応 | 公式課金方式 | 補足 |
+| --- | --- | --- | --- |
+| `gemini-3.1-pro-preview` | Google `gemini-3.1-pro-preview`、内部表示では `gemini-3.1-pro` と扱うことがあります | `Standard / Batch / Flex / Priority` に加え `input / output / caching / search grounding / maps grounding` に分かれます | preview モデルで、`<= 200K` と `> 200K` の 2 段階価格があります |
+| `gemini-3-pro-preview` | compatibility name。公開的には `gemini-3-pro` / `gemini-3-pro-preview` と理解するのが適切です | モデルページでは 2 段階の `input / output` 価格が明示され、cache / search / maps は live pricing page 参照が安全です | preview モデルで、`<= 200K` と `> 200K` の 2 段階価格が使われます |
+| `gemini-2.5-flash-lite` | Google `gemini-2.5-flash-lite` | `Standard / Batch / Flex / Priority` ごとに `input / output / context caching / storage / Google Search / Google Maps` が定義されます | stable モデルで、official output pricing は thinking tokens を含みます |
+
+公式リンク:
+
+- Gemini Pricing: [ai.google.dev/gemini-api/docs/pricing](https://ai.google.dev/gemini-api/docs/pricing)
+- Gemini Models: [ai.google.dev/models/gemini](https://ai.google.dev/models/gemini)
+
+## xAI Grok
+
+xAI は、モデルごとの別表というより「token の分類 + tool 料金」で理解した方が正確です。
+
+- `Prompt tokens`
+- `Cached prompt tokens`
+- `Completion tokens`
+- `Reasoning tokens`
+
+xAI 公式には次も明記されています。
+
+- `Reasoning tokens` は `completion token price` で課金
+- `Web Search`、`X Search`、`Code Execution` などの server-side tools は `1,000 calls` 単位で別課金
+- `Batch API` は通常 `50%` の token 割引
+
+| Crazyrouter 名 | 公式対応 | 公式課金方式 | 補足 |
+| --- | --- | --- | --- |
+| `grok-4.1-thinking` | 内部 reasoning ルート。概念的には Grok 4.1 reasoning 設定に近い | xAI の token 分類課金 `prompt / cached prompt / completion / reasoning` に tool fees を加えた形 | 公開価格表では `grok-4-1-fast-reasoning` のような SKU 名が前面に出ます。この内部ルート名を独立 public SKU とみなすべきではありません |
+| `grok-4.1` | 内部 Grok 4.1 ルート。概念的には non-thinking 側に近い | 同じ xAI token 分類課金で、tools は別課金 | 本番見積もりでは内部ルート名ではなく、xAI の現行公開 token / tool ルールを基準にしてください |
+
+公式リンク:
+
+- xAI Models and Pricing: [docs.x.ai/developers/models](https://docs.x.ai/developers/models)
+- xAI Consumption and Rate Limits: [docs.x.ai/developers/rate-limits](https://docs.x.ai/developers/rate-limits)
+- xAI Prompt Caching Pricing: [docs.x.ai/developers/advanced-api-usage/prompt-caching/usage-and-pricing](https://docs.x.ai/developers/advanced-api-usage/prompt-caching/usage-and-pricing)
+
+## Z.AI / GLM
+
+Z.AI `GLM-5` の課金構造は OpenAI に近いですが、cache storage が独立項目になっています。
+
+- `Input`
+- `Cached Input`
+- `Cached Input Storage`
+- `Output`
+
+`Web Search` のような built-in tool は別途 use 単位で課金されます。
+
+| Crazyrouter 名 | 公式対応 | 公式課金方式 | 補足 |
+| --- | --- | --- | --- |
+| `glm-5` | Z.AI `GLM-5` | `input / cached input / cached input storage / output` | token 単価だけでは総コストにならず、`Web Search` は別課金です |
+
+公式リンク:
+
+- Z.AI Pricing: [docs.z.ai/guides/overview/pricing](https://docs.z.ai/guides/overview/pricing)
+- GLM-5 Overview: [docs.z.ai/guides/llm/glm-5](https://docs.z.ai/guides/llm/glm-5)
+
+## MiniMax
+
+MiniMax は、ここで扱うベンダーの中で唯一、2 つの商用形態を強く区別する必要があります。
+
+- `Pay as You Go`
+- `Token Plan`
+
+つまり:
+
+- `Pay as You Go` は通常の token ベース API 課金
+- `Token Plan` はサブスク型で、`M2.7` では `5-hour rolling window` あたりの request capacity として説明されることが多い
+
+| Crazyrouter 名 | 公式対応 | 公式課金方式 | 補足 |
+| --- | --- | --- | --- |
+| `MiniMax-M27` | `MiniMax-M2.7` に対応 | `Pay as You Go` では `input / output / prompt caching read / prompt caching write`、`Token Plan` では `requests / 5hrs` capacity | API 予算見積もりではまず `Pay as You Go` を見て、重い coding / interactive 利用では `Token Plan` を別途検討するのが実務的です |
+
+公式リンク:
+
+- MiniMax Pricing Overview: [platform.minimax.io/docs/pricing/overview](https://platform.minimax.io/docs/pricing/overview)
+- MiniMax Pay as You Go: [platform.minimax.io/docs/guides/pricing-paygo](https://platform.minimax.io/docs/guides/pricing-paygo)
+- MiniMax Token Plan: [platform.minimax.io/docs/guides/pricing-token-plan](https://platform.minimax.io/docs/guides/pricing-token-plan)
+
+## 要約
+
+各ベンダーの課金構造を最短で覚えるなら、次の見方で十分です。
+
+- Anthropic: `base input + cache write/read + output`
+- OpenAI: `input + cached input + output`、tools は別課金
+- Gemini: `複数 processing modes + input/output + caching + search/maps grounding`
+- xAI: `prompt/cached/completion/reasoning`、server-side tools は別課金
+- Z.AI: `input + cached input + cached storage + output`
+- MiniMax: `token pay-as-you-go` または `subscription-style capacity plan`
+
+<Warning>
+  このページは上流ベンダーの公式課金ルールを説明するもので、Crazyrouter の販売価格を説明するものではありません。実際の充值、扣费、倍率、割引は Crazyrouter の pricing ページ、console、`/api/pricing` を参照してください。
+</Warning>
+
+## 関連ページ
+
+- [OpenAI Model List](/jp/chat/openai/models)
+- [Gemini-Compatible OpenAI Model List](/jp/chat/gemini/openai-models)
+- [Claude Native Format](/jp/chat/anthropic/messages)
+- [Gemini Native Format](/jp/chat/gemini/native)
+- [Grok モデル](/jp/chat/openai/grok)
+- [Get Token Models](/jp/token-management/models)
