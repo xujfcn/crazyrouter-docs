@@ -1,0 +1,272 @@
+---
+title: '模型官方定价方式'
+description: '按模型说明 Crazyrouter 站内名称对应的上游官方计费口径'
+---
+
+# 模型官方定价方式
+
+本文只解释上游厂商的官方计费口径，不等同于 Crazyrouter 的实际售价。
+
+- 上游官方口径：厂商自己的 `input`、`output`、`cached input`、`tool call`、`search grounding`、`prompt caching` 等收费方式
+- Crazyrouter 口径：本站自己的售价、倍率、折扣、渠道差异与结算方式
+
+<Note>
+  本页按 `2026-04-27` 查询到的厂商官方文档整理。厂商会改价，也会调整预览模型、长上下文、搜索工具和缓存规则；上线前请再点官方链接核对一次。
+</Note>
+
+## 官方单价示例表
+
+以下示例只取各厂商最常见、最容易和业务预算直接对应的一档：
+
+- Anthropic：标准 API 价，不含 `Fast mode`、`US-only inference` 乘数和 Batch 折扣
+- OpenAI：`Standard` 价，不含 Batch、Priority、Regional Processing 加价
+- Gemini：`Standard` 价，默认按文本 / 图像 / 视频输入，且对 `Gemini 3*` 取 `<= 200K prompt` 档
+- xAI：若站内路由名没有公开静态单列价，本表会明确写成“未单列”
+- Z.AI：取官方 `Text Models` 价
+- MiniMax：主表取 `Pay as You Go`，订阅制单独列 `Token Plan`
+
+<Note>
+  除特别标注外，下表金额默认都是 `USD / 1M tokens`。
+</Note>
+
+### Anthropic 示例单价
+
+| 站内模型 | 官方对应 | Base Input | Cache 5m / 1h / Hit | Output | 备注 |
+| --- | --- | --- | --- | --- | --- |
+| `claude-sonnet-4-6` | `claude-sonnet-4-6` | `$3` | `$3.75 / $6 / $0.30` | `$15` | `1M context` 按标准价；Batch 约 `5 折` |
+| `claude-opus-4-6` | `claude-opus-4-6` | `$5` | `$6.25 / $10 / $0.50` | `$25` | `Fast mode` 另按 `6x` 标准价 |
+| `claude-opus-4-7` | `claude-opus-4-7` | `$5` | `$6.25 / $10 / $0.50` | `$25` | 若启用 `US-only inference`，官方另有地区乘数 |
+| `claude-sonnet-4-5-20250929` | `claude-sonnet-4-5` 快照 | `$3` | `$3.75 / $6 / $0.30` | `$15` | 快照名沿用 `Sonnet 4.5` 价格，不是另一张价目表 |
+
+### OpenAI 示例单价
+
+| 站内模型 | 官方对应 | Input | Cached input | Output | 备注 |
+| --- | --- | --- | --- | --- | --- |
+| `gpt-54` | `gpt-5.4` | `$2.50` | `$0.25` | `$15.00` | 标准价适用于 `270K` 以下；超长上下文另有乘数 |
+| `gpt-4o` | `gpt-4o` | `$2.50` | `$1.25` | `$10.00` | 经典统一三段式计费 |
+| `gpt-5` | `gpt-5` | `$1.25` | `$0.125` | `$10.00` | 工具费另算 |
+| `gpt-51-codex-max` | `gpt-5.1-codex-max` | `$1.25` | `$0.125` | `$10.00` | 常用于 Codex / agentic coding 工作流，价格结构仍是标准三段式 |
+| `gpt-5-mini` | `gpt-5-mini` | `$0.25` | `$0.025` | `$2.00` | 小模型版本 |
+| `gpt-5-nano` | `gpt-5-nano` | `$0.05` | `$0.005` | `$0.40` | 最低价 GPT-5 路线 |
+| `gpt-5.2` | `gpt-5.2` | `$1.75` | `$0.175` | `$14.00` | 前代旗舰，仍是标准 token 三段式 |
+| `gpt-5.5` | `gpt-5.5` | `$5.00` | `$0.50` | `$30.00` | 当前官方旗舰价；标准价说明适用于 `270K` 以下上下文 |
+
+### Gemini 示例单价
+
+| 站内模型 | 官方对应 | Standard 输入价 | Standard 缓存价 | Standard 输出价 | 备注 |
+| --- | --- | --- | --- | --- | --- |
+| `gemini-3.1-pro-preview` | `gemini-3.1-pro-preview` | `$2.00` | `$0.20` + `$4.50 / 1M tok / hr` 存储 | `$12.00` | `<= 200K` prompt 档；`> 200K` 为 `$4 / $0.40 / $18`；Google 当前对 Gemini 3 家族还单列 Search / Maps 免费额度与 `$14 / 1,000 search queries` |
+| `gemini-3-pro-preview` | `gemini-3-pro-preview` | `$2.00 (<= 200K)` / `$4.00 (> 200K)` | 当前公开模型页未单列缓存价格 | `$12.00 (<= 200K)` / `$18.00 (> 200K)` | Google 当前模型页直接给出输入/输出示例价；完整 caching / grounding 最新矩阵请以 Gemini live pricing page 为准 |
+| `gemini-2.5-flash-lite` | `gemini-2.5-flash-lite` | `$0.10`（text / image / video） | `$0.01`（text / image / video） + `$1.00 / 1M tok / hr` 存储 | `$0.40` | 音频输入是 `$0.30`，音频缓存是 `$0.03`；Search 为 `1,500 RPD` 免费后 `$35 / 1,000 grounded prompts` |
+
+### xAI 示例单价
+
+| 站内模型 | 官方对应 | Prompt / Cached / Output | Tool 费用 | 备注 |
+| --- | --- | --- | --- | --- |
+| `grok-4.1-thinking` | 站内 reasoning 路由 | 官方静态公开页未单列 `grok-4.1-thinking` 独立单价 | `web_search $5 / 1k`、`x_search $5 / 1k`、`code_execution $5 / 1k`、`attachment_search $10 / 1k`、`collections_search $2.50 / 1k` | `reasoning tokens` 按 `completion token price` 收费 |
+| `grok-4.1` | 站内主路由 | 官方静态公开页未单列 `grok-4.1` 独立单价 | 同上 | 站内名更像路由层名称，不应直接等同为 xAI 静态 SKU |
+
+<Note>
+  xAI 当前公开静态文档能稳定核到的是 token 分类规则、tool invocation 费用、Batch `5 折` 与“到模型详情页或 console 查看具体 per-model token price”。由于 `grok-4.1` / `grok-4.1-thinking` 在静态文档里未单列价格，本页不把其他 SKU 的数字硬套给它们。
+</Note>
+
+### Z.AI / GLM 示例单价
+
+| 站内模型 | 官方对应 | Input | Cached input | Cached input storage | Output | 备注 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `glm-5` | `GLM-5` | `$1.0` | `$0.2` | `Limited-time Free` | `$3.2` | `Web Search` 另收 `$0.01 / use` |
+
+### MiniMax 示例单价
+
+#### Pay as You Go
+
+| 站内模型 | 官方对应 | Input | Prompt caching read | Prompt caching write | Output | 备注 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `MiniMax-M27` | `MiniMax-M2.7` | `$0.3` | `$0.06` | `$0.375` | `$1.2` | 这是最适合直接做 API 预算的一档 |
+
+#### Token Plan
+
+| 套餐 | 月费 | `M2.7` 配额 |
+| --- | --- | --- |
+| Starter | `$10 / month` | `1,500 requests / 5hrs` |
+| Plus | `$20 / month` | `4,500 requests / 5hrs` |
+| Max | `$50 / month` | `15,000 requests / 5hrs` |
+
+## Anthropic
+
+Anthropic 这组模型的官方计费方式不是简单的 `input / output` 两栏，而是拆成：
+
+- `Base Input Tokens`
+- `5m Cache Writes`
+- `1h Cache Writes`
+- `Cache Hits & Refreshes`
+- `Output Tokens`
+
+同时还有两条共通规则：
+
+- `Batch API` 输入和输出通常按标准价 `5 折`
+- Prompt caching 的公开倍数规则是：`5 分钟写缓存 = 1.25x input`、`1 小时写缓存 = 2x input`、`读缓存 = 0.1x input`
+
+| 站内模型名 | 官方对应 | 官方计费方式 | 特别说明 |
+| --- | --- | --- | --- |
+| `claude-sonnet-4-6` | Anthropic `claude-sonnet-4-6` | 按 `base input / 5m cache write / 1h cache write / cache hit / output` 计费 | Anthropic 官方已明确 `Sonnet 4.6` 支持 `1M context`，且该长上下文按标准单价计费，不额外抬价 |
+| `claude-opus-4-6` | Anthropic `claude-opus-4-6` | 按 `base input / 5m cache write / 1h cache write / cache hit / output` 计费 | `Opus 4.6` 也支持 `1M context` 标准计费；另外官方单独提供 `Fast mode`，价格是标准价 `6x` |
+| `claude-opus-4-7` | Anthropic `claude-opus-4-7` | 按 `base input / 5m cache write / 1h cache write / cache hit / output` 计费 | `Opus 4.7` 是当前 Anthropic 官方公开价目里的独立型号；如果启用 `US-only inference`，官方文档说明会有 `1.1x` 乘数 |
+| `claude-sonnet-4-5-20250929` | Anthropic 快照 ID `claude-sonnet-4-5-20250929`，公开别名通常写作 `claude-sonnet-4-5` | 仍按 `Sonnet 4.5` 的 `base input / cache write / cache hit / output` 计费 | 这是带日期的 API 快照名，不是另一套单独价格；预算时应按 `Claude Sonnet 4.5` 官方口径理解 |
+
+官方链接：
+
+- Anthropic Pricing: [platform.claude.com/docs/en/about-claude/pricing](https://platform.claude.com/docs/en/about-claude/pricing)
+- Anthropic Models Overview: [platform.claude.com/docs/en/about-claude/models/overview](https://platform.claude.com/docs/en/about-claude/models/overview)
+
+## OpenAI
+
+OpenAI 这组文本模型的官方公开口径最统一，核心都是：
+
+- `Input`
+- `Cached input`
+- `Output`
+
+额外规则通常是：
+
+- `Responses API` 本身不单独加价，仍按所选模型的 token 单价计费
+- `Web search`、容器/代码执行、Computer Use 等工具按工具收费，不包含在纯 token 单价里
+- `Batch API` 输入和输出通常按标准价 `5 折`
+
+| 站内模型名 | 官方对应 | 官方计费方式 | 特别说明 |
+| --- | --- | --- | --- |
+| `gpt-54` | 站内别名，通常对应 OpenAI `gpt-5.4` | 按 `input / cached input / output` 计费 | `gpt-5.4` 的公开标准价适用于 `270K` 以下上下文；区域处理端点另有 `+10%` |
+| `gpt-4o` | OpenAI `gpt-4o` | 按 `input / cached input / output` 计费 | `gpt-4o` 是经典统一口径，没有 Claude 那种单独缓存写入栏位，也没有 Gemini 那种 Search grounding 单独表 |
+| `gpt-5` | OpenAI `gpt-5` | 按 `input / cached input / output` 计费 | 如果在 Responses API 里开工具，工具费用另算；公开价格页没有单列“thinking token 单价” |
+| `gpt-51-codex-max` | 站内应对应 OpenAI `gpt-5.1-codex-max` | 按 `input / cached input / output` 计费 | 这是 Codex 取向型号，但公开价格结构仍与普通 GPT-5.1 文本模型一致；更适合 agentic coding / Codex 工作流理解 |
+| `gpt-5-mini` | OpenAI `gpt-5-mini` | 按 `input / cached input / output` 计费 | 小模型版本，结构不变，只是单价更低 |
+| `gpt-5-nano` | OpenAI `gpt-5-nano` | 按 `input / cached input / output` 计费 | Nano 版本同样沿用标准 token 三段式计费 |
+| `gpt-5.2` | OpenAI `gpt-5.2` | 按 `input / cached input / output` 计费 | `gpt-5.2` 仍属于 GPT-5 系列标准口径；如果调用 Web search / File search / Code interpreter，工具另计 |
+| `gpt-5.5` | OpenAI `gpt-5.5` | 按 `input / cached input / output` 计费 | 当前 OpenAI 官方把它列为旗舰模型；公开价格页说明标准价适用于 `270K` 以下上下文，超长上下文应再看最新详细价目 |
+
+官方链接：
+
+- OpenAI Pricing: [openai.com/api/pricing](https://openai.com/api/pricing/)
+- OpenAI Docs Pricing: [platform.openai.com/docs/pricing](https://platform.openai.com/docs/pricing/)
+- OpenAI Models: [developers.openai.com/api/docs/models](https://developers.openai.com/api/docs/models)
+
+## Google Gemini
+
+Gemini 的官方计费方式与前两家差别最大，通常不只一个标准价，而是同时给出：
+
+- `Standard`
+- `Batch`
+- `Flex`
+- `Priority`
+
+并且会单独列出：
+
+- `Input`
+- `Output (including thinking tokens)`
+- `Context caching price`
+- `Context caching storage`
+- `Grounding with Google Search`
+- `Grounding with Google Maps`
+
+| 站内模型名 | 官方对应 | 官方计费方式 | 特别说明 |
+| --- | --- | --- | --- |
+| `gemini-3.1-pro-preview` | Google `gemini-3.1-pro-preview`，站内展示名通常可写作 `gemini-3.1-pro` | 官方按 `Standard / Batch / Flex / Priority` 四种处理模式分别计费，并对每种模式拆出 `input / output / caching / search grounding / maps grounding` | 这是预览模型；并且 `<= 200K` 与 `> 200K` prompt 是两档价格，不是单一单价 |
+| `gemini-3-pro-preview` | 站内兼容名；公开对应通常按 `gemini-3-pro` / `gemini-3-pro-preview` 理解 | 官方模型页明确给出 `input / output` 两档定价；缓存、search、maps 的最新口径建议以 Google live pricing 页为准 | 也是预览模型；官方模型页给出的示例价同样采用 `<= 200K` 与 `> 200K` 两档上下文定价 |
+| `gemini-2.5-flash-lite` | Google `gemini-2.5-flash-lite` | 按 `Standard / Batch / Flex / Priority` 分档计费，并单列 `input / output / context caching / storage / Google Search / Google Maps` | 这是稳定型号，不是 preview；其 `output` 官方明确写成“包含 thinking tokens” |
+
+官方链接：
+
+- Gemini Pricing: [ai.google.dev/gemini-api/docs/pricing](https://ai.google.dev/gemini-api/docs/pricing)
+- Gemini Models: [ai.google.dev/models/gemini](https://ai.google.dev/models/gemini)
+
+## xAI Grok
+
+xAI 的官方规则重点不是“thinking 模型有没有另一张价格表”，而是把 token 和工具拆开：
+
+- `Prompt tokens`
+- `Cached prompt tokens`
+- `Completion tokens`
+- `Reasoning tokens`
+
+xAI 官方还特别说明：
+
+- `Reasoning tokens` 按 `completion token price` 收费
+- `Web Search`、`X Search`、`Code Execution`、`Collections Search` 等 server-side tools 按 `每 1000 次调用` 单独收费
+- `Batch API` 对 token 类费用通常是 `5 折`
+
+| 站内模型名 | 官方对应 | 官方计费方式 | 特别说明 |
+| --- | --- | --- | --- |
+| `grok-4.1-thinking` | 站内 reasoning 路由；官方语义上对应 Grok 4.1 的 `Thinking` 配置 | 官方口径是 `prompt / cached prompt / completion / reasoning` 四类 token，加上需要时的 tool invocation 费用 | 当前 xAI 公开 API 价目页重点展示的是 `grok-4-1-fast-reasoning` 这类 SKU；因此这里更准确的理解是“按 xAI reasoning 模型官方计费结构结算”，而不是把站内名当成独立官方 SKU |
+| `grok-4.1` | 站内 Grok 4.1 主路由；官方语义上更接近 Grok 4.1 的非思考配置 | 官方口径仍是 `prompt / cached prompt / completion`，如果开搜索、代码执行、附件检索等工具则另算 tool fee | xAI 当前公开 API 页面已更强调 `grok-4.20` 和 `grok-4-1-fast-*`；因此预算时应重点看 xAI 当前公开的 token 类和 tool 类收费规则 |
+
+官方链接：
+
+- xAI Models and Pricing: [docs.x.ai/developers/models](https://docs.x.ai/developers/models)
+- xAI Consumption and Rate Limits: [docs.x.ai/developers/rate-limits](https://docs.x.ai/developers/rate-limits)
+- xAI Prompt Caching Pricing: [docs.x.ai/developers/advanced-api-usage/prompt-caching/usage-and-pricing](https://docs.x.ai/developers/advanced-api-usage/prompt-caching/usage-and-pricing)
+
+## Z.AI / GLM
+
+Z.AI 的 `GLM-5` 官方口径和 OpenAI 类似，但又多了一项缓存存储费：
+
+- `Input`
+- `Cached Input`
+- `Cached Input Storage`
+- `Output`
+
+同时内置工具如 `Web Search` 会按使用次数单独收费。
+
+| 站内模型名 | 官方对应 | 官方计费方式 | 特别说明 |
+| --- | --- | --- | --- |
+| `glm-5` | Z.AI `GLM-5` | 按 `input / cached input / cached input storage / output` 计费 | 如果启用官方内置 `Web Search`，还会按 `per use` 额外收费；这和只看 token 单价不同 |
+
+官方链接：
+
+- Z.AI Pricing: [docs.z.ai/guides/overview/pricing](https://docs.z.ai/guides/overview/pricing)
+- GLM-5 Overview: [docs.z.ai/guides/llm/glm-5](https://docs.z.ai/guides/llm/glm-5)
+
+## MiniMax
+
+MiniMax 这组模型要先区分两种官方售卖方式：
+
+- `Pay as You Go`
+- `Token Plan`
+
+其中：
+
+- `Pay as You Go` 是标准 API 按量计费
+- `Token Plan` 是订阅制，`M2.7` 按 `5 小时滚动窗口的请求额度` 计，不是单纯按 token 结算
+
+| 站内模型名 | 官方对应 | 官方计费方式 | 特别说明 |
+| --- | --- | --- | --- |
+| `MiniMax-M27` | 站内应对应 `MiniMax-M2.7` | 如果走 `Pay as You Go`，按 `input / output / prompt caching read / prompt caching write` 计费；如果走 `Token Plan`，则按 `requests / 5hrs` 的订阅额度计 | 这是本页里最不一样的一家。做生产预算时，优先看 `Pay as You Go`；做开发者重度编码使用时，再看 `Token Plan` 是否更划算 |
+
+官方链接：
+
+- MiniMax Pricing Overview: [platform.minimax.io/docs/pricing/overview](https://platform.minimax.io/docs/pricing/overview)
+- MiniMax Pay as You Go: [platform.minimax.io/docs/guides/pricing-paygo](https://platform.minimax.io/docs/guides/pricing-paygo)
+- MiniMax Token Plan: [platform.minimax.io/docs/guides/pricing-token-plan](https://platform.minimax.io/docs/guides/pricing-token-plan)
+
+## 结论
+
+如果你只是想快速判断“官方到底按什么收费”，可以直接记这几类：
+
+- Anthropic：`base input + cache write/read + output`
+- OpenAI：`input + cached input + output`，工具另计
+- Gemini：`多处理模式 + input/output + caching + search/maps grounding`
+- xAI：`prompt/cached/completion/reasoning`，server-side tools 另计
+- Z.AI：`input + cached input + cached storage + output`
+- MiniMax：`按量 token` 或 `订阅额度` 两套并存
+
+<Warning>
+  本页解释的是“上游官方定价方式”，不是 Crazyrouter 对外售卖价格。实际充值、扣费、倍率和优惠，请以 Crazyrouter 站内 pricing、控制台和 `/api/pricing` 返回为准。
+</Warning>
+
+## 站内相关页面
+
+- [OpenAI 模型列表](/chat/openai/models)
+- [Gemini 兼容 OpenAI 模型列表](/chat/gemini/openai-models)
+- [Claude 原生格式](/chat/anthropic/messages)
+- [Gemini 原生格式](/chat/gemini/native)
+- [Grok 模型](/chat/openai/grok)
+- [获取令牌支持模型](/token-management/models)
