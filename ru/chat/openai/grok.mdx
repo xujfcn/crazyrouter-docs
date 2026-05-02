@@ -1,0 +1,152 @@
+---
+title: "Grok Models"
+description: "Call Grok text models through the OpenAI Chat Completions format"
+---
+
+# Grok Models
+
+```
+POST /v1/chat/completions
+```
+
+Grok text models use the OpenAI-compatible Chat Completions format. Point `base_url` to Crazyrouter and pass the Grok model ID in `model`.
+
+<Note>
+  Model availability depends on channel status, token permissions, and the live pricing configuration. Before production use, call `GET /v1/models` with the same API key and confirm that the target model is visible.
+</Note>
+
+## Common Models
+
+| Model | Description |
+|-------|-------------|
+| `grok-4` | Main Grok 4 model |
+| `grok-4-fast` | Grok 4 fast variant |
+| `grok-4-fast-non-reasoning` | Grok 4 fast non-reasoning variant |
+| `grok-4-fast-reasoning` | Grok 4 fast reasoning variant |
+| `grok-4.1` | Grok 4.1 |
+| `grok-4.1-fast` | Grok 4.1 fast |
+| `grok-4.1-thinking` | Grok 4.1 thinking |
+| `grok-4.2` | Grok 4.2 |
+| `grok-4-0709` | Dated Grok 4 model |
+
+<Warning>
+  Older `grok-2` / `grok-3` names may still appear in historical calls or compatibility setups, but the public pricing surface primarily keeps the `grok-4*` family. New integrations should start with `grok-4`, `grok-4.1`, `grok-4.2`, or the fast/reasoning variants.
+</Warning>
+
+## Minimal Request
+
+<CodeGroup>
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "grok-4",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Reply with one short sentence: what is Grok?"
+      }
+    ],
+    "temperature": 0.7,
+    "max_tokens": 120
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1",
+)
+
+response = client.chat.completions.create(
+    model="grok-4",
+    messages=[
+        {"role": "user", "content": "Reply with one short sentence: what is Grok?"}
+    ],
+    temperature=0.7,
+    max_tokens=120,
+)
+
+print(response.choices[0].message.content)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const response = await client.chat.completions.create({
+  model: "grok-4",
+  messages: [
+    { role: "user", content: "Reply with one short sentence: what is Grok?" },
+  ],
+  temperature: 0.7,
+  max_tokens: 120,
+});
+
+console.log(response.choices[0].message.content);
+```
+
+</CodeGroup>
+
+## Streaming
+
+Set `stream: true` to use SSE streaming.
+
+```bash
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "grok-4-fast",
+    "stream": true,
+    "messages": [
+      {
+        "role": "user",
+        "content": "Write a concise API migration checklist."
+      }
+    ]
+  }'
+```
+
+## Reasoning Variants
+
+For Grok models containing `reasoning` or `thinking` in the name, keep the request shape simple:
+
+```json
+{
+  "model": "grok-4-fast-reasoning",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Compare two implementation options and explain the tradeoffs."
+    }
+  ],
+  "max_tokens": 800
+}
+```
+
+<Note>
+  Reasoning fields, search fields, and experimental parameters can differ by upstream channel. For cross-channel stability, prefer standard OpenAI Chat fields: `model`, `messages`, `temperature`, `top_p`, `max_tokens`, and `stream`.
+</Note>
+
+## Related Image Models
+
+Grok image generation does not use Chat Completions. Use:
+
+```text
+POST /v1/images/generations
+```
+
+See [Grok Image Models](/ru/images/grok) for image parameters.
+
+Related pages:
+
+- [Official Model Pricing Methods](/ru/reference/official-pricing-methods)

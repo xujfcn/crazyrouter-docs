@@ -1,0 +1,457 @@
+---
+title: 'OpenAI Codex CLI Setup Guide'
+description: 'Connect Codex CLI to Crazyrouter with a custom provider for the OpenAI Responses API, with full step-by-step instructions from Git and Node.js to installation commands, config files, and environment variables'
+---
+
+Codex CLI is OpenAI's terminal coding agent for repo edits, code review, large refactors, and command-driven development. For Crazyrouter, the recommended path is the current `config.toml` custom-provider setup, not the older configuration style.
+
+## Overview
+
+With a custom provider in `~/.codex/config.toml`, Codex CLI can send its requests to Crazyrouter:
+
+- recommended protocol: `OpenAI-compatible API`
+- API style used by Codex: `Responses API`
+- base URL: `https://crazyrouter.com/v1`
+- auth variable: `OPENAI_API_KEY`
+- recommended default model: `gpt-5.4`
+
+<Tip>
+If you previously used only the ChatGPT login flow in Codex, switch to the API-key plus custom-provider path for Crazyrouter. It gives you cleaner control over models, logs, quota, and billing.
+</Tip>
+
+## Best For
+
+- users who want Crazyrouter in a terminal agent workflow
+- repo-scale edits, reviews, and automated coding tasks
+- teams that want Codex traffic billed separately from Cursor or Claude Code
+- coding-first workflows built around currently verified latest OpenAI models
+
+## Protocol Used
+
+Recommended protocol: `OpenAI-compatible API`
+
+Codex CLI currently works best with a custom `model_provider` configured like this:
+
+- `base_url = "https://crazyrouter.com/v1"`
+- `wire_api = "responses"`
+
+<Note>
+Crazyrouter supports `/v1/responses`, so this Codex CLI integration can use the Responses API directly. But this path should currently be treated as GPT-only guidance because Claude does not support `POST /v1/responses`.
+</Note>
+
+## System Requirements And Prerequisites
+
+| Item | Notes |
+|------|-------|
+| Crazyrouter account | Create one at [crazyrouter.com](https://crazyrouter.com) |
+| Crazyrouter token | Create a dedicated `sk-...` token for Codex |
+| Git | `git 2.23+` is recommended |
+| Node.js | `Node.js 20+` is recommended |
+| Codex CLI | Use a current stable version |
+| Allowed models | Allow at least one coding-friendly model such as `gpt-5.4` |
+
+Suggested starter allowlist:
+
+- `gpt-5.4`
+
+## Full Install Paths By OS
+
+### Recommended Windows path
+
+On Windows, the simplest path is: `Git` + `Node.js` + `npm global install for Codex` + `PowerShell` for environment variables and config.
+
+Recommended order:
+
+1. Install Git
+2. Install Node.js LTS
+3. Install Codex CLI with npm
+4. Write `OPENAI_API_KEY` through PowerShell
+5. Write `$HOME/.codex/config.toml` through PowerShell
+
+Recommended verification:
+
+```powershell
+git --version
+node -v
+npm -v
+codex --version
+where.exe git
+where.exe node
+where.exe codex
+```
+
+If `codex --version` is still not found, close and reopen PowerShell before retrying.
+
+### Recommended macOS path
+
+On macOS, the smoothest path is usually: `Homebrew` + `Git` + `Node.js` + `brew` or `npm` install for Codex + `~/.zshrc` for persistent environment variables.
+
+Recommended order:
+
+1. Install Xcode Command Line Tools
+2. Install Homebrew if needed
+3. Install Git and Node.js
+4. Install Codex CLI
+5. Persist `OPENAI_API_KEY` in `~/.zshrc`
+6. Write `~/.codex/config.toml`
+
+Recommended verification:
+
+```bash
+git --version
+node -v
+npm -v
+codex --version
+which git
+which node
+which codex
+```
+
+### Alternative Codex install paths
+
+Besides package managers, the official Codex GitHub repository also publishes binary releases. For most users, the recommended defaults are still:
+
+- Windows: `npm install -g @openai/codex`
+- macOS: `brew install --cask codex` or `npm install -g @openai/codex`
+
+## Full Setup From Scratch
+
+<Steps>
+  <Step title="Step 1: Install Git">
+    If Git is not installed yet, install it first and add a global identity.
+
+    <Tabs>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        winget install --id Git.Git -e --source winget
+        git --version
+        ```
+      </Tab>
+      <Tab title="macOS">
+        ```bash
+        xcode-select --install
+        git --version
+        ```
+        Or:
+        ```bash
+        brew install git
+        git --version
+        ```
+      </Tab>
+      <Tab title="Ubuntu / Debian">
+        ```bash
+        sudo apt update
+        sudo apt install -y git
+        git --version
+        ```
+      </Tab>
+    </Tabs>
+
+    Then run:
+
+    ```bash
+    git config --global user.name "Your Name"
+    git config --global user.email "you@example.com"
+    git config --global init.defaultBranch main
+    ```
+  </Step>
+
+  <Step title="Step 2: Install Node.js 20+">
+    Codex CLI is a Node.js tool. Make sure Node and npm are ready first.
+
+    <Tabs>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        winget install OpenJS.NodeJS.LTS
+        node -v
+        npm -v
+        ```
+      </Tab>
+      <Tab title="macOS">
+        ```bash
+        brew install node
+        node -v
+        npm -v
+        ```
+      </Tab>
+      <Tab title="Ubuntu / Debian">
+        ```bash
+        sudo apt update
+        sudo apt install -y nodejs npm
+        node -v
+        npm -v
+        ```
+      </Tab>
+    </Tabs>
+
+    If your distro installs an older Node version, upgrade before continuing.
+  </Step>
+
+  <Step title="Step 3: Install Codex CLI">
+    <Tabs>
+      <Tab title="Windows PowerShell">
+        Recommended: use npm global install directly.
+        ```powershell
+        npm install -g @openai/codex
+        codex --version
+        where.exe codex
+        ```
+      </Tab>
+      <Tab title="macOS">
+        Recommended: use Homebrew first.
+        ```bash
+        brew install --cask codex
+        codex --version
+        which codex
+        ```
+
+        If you prefer npm:
+        ```bash
+        npm install -g @openai/codex
+        codex --version
+        which codex
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="Step 4: Create a dedicated Crazyrouter token for Codex">
+    In Crazyrouter, create a token named something like `codex`. For the first pass, allow only:
+
+    - `gpt-5.4`
+
+    This keeps first-pass debugging and cost control much simpler.
+  </Step>
+
+  <Step title="Step 5: Set the temporary environment variable">
+    Codex reads `OPENAI_API_KEY` through the provider config. Start with the current terminal only:
+
+    <Tabs>
+      <Tab title="Linux / macOS">
+        ```bash
+        export OPENAI_API_KEY=sk-xxx
+        echo $OPENAI_API_KEY
+        ```
+      </Tab>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        $env:OPENAI_API_KEY = "sk-xxx"
+        echo $env:OPENAI_API_KEY
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="Step 6: Persist the API key">
+    For regular use, write the API key into your shell profile or user environment variables.
+
+    <Tabs>
+      <Tab title="Linux Bash">
+        ```bash
+        echo 'export OPENAI_API_KEY=sk-xxx' >> ~/.bashrc
+        source ~/.bashrc
+        ```
+      </Tab>
+      <Tab title="macOS / Zsh">
+        ```bash
+        echo 'export OPENAI_API_KEY=sk-xxx' >> ~/.zshrc
+        source ~/.zshrc
+        ```
+      </Tab>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        [System.Environment]::SetEnvironmentVariable("OPENAI_API_KEY", "sk-xxx", "User")
+        $env:OPENAI_API_KEY = "sk-xxx"
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="Step 7: Write ~/.codex/config.toml">
+    Codex CLI reads `~/.codex/config.toml` at startup.
+
+    <Tabs>
+      <Tab title="macOS">
+        ```bash
+        mkdir -p ~/.codex
+        cat > ~/.codex/config.toml <<'EOF'
+        model = "gpt-5.4"
+        model_provider = "crazyrouter"
+
+        [model_providers.crazyrouter]
+        name = "Crazyrouter"
+        base_url = "https://crazyrouter.com/v1"
+        env_key = "OPENAI_API_KEY"
+        wire_api = "responses"
+
+        [profiles.crazyrouter]
+        model = "gpt-5.4"
+        model_provider = "crazyrouter"
+        approval_policy = "on-request"
+        sandbox_mode = "workspace-write"
+        EOF
+        ```
+      </Tab>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        New-Item -ItemType Directory -Force "$HOME/.codex" | Out-Null
+        @'
+        model = "gpt-5.4"
+        model_provider = "crazyrouter"
+
+        [model_providers.crazyrouter]
+        name = "Crazyrouter"
+        base_url = "https://crazyrouter.com/v1"
+        env_key = "OPENAI_API_KEY"
+        wire_api = "responses"
+
+        [profiles.crazyrouter]
+        model = "gpt-5.4"
+        model_provider = "crazyrouter"
+        approval_policy = "on-request"
+        sandbox_mode = "workspace-write"
+        '@ | Set-Content -Path "$HOME/.codex/config.toml"
+        ```
+      </Tab>
+    </Tabs>
+
+    After writing the file, verify it:
+
+    <Tabs>
+      <Tab title="macOS">
+        ```bash
+        cat ~/.codex/config.toml
+        ```
+      </Tab>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        Get-Content $HOME/.codex/config.toml
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="Step 8: Prepare the Git repo and create a first snapshot">
+    If the current folder is not a repo yet:
+
+    ```bash
+    git init
+    git add .
+    git commit -m "chore: initial snapshot before Codex"
+    ```
+
+    If it is already an existing repo, at least inspect the current state first:
+
+    ```bash
+    git status
+    ```
+  </Step>
+
+  <Step title="Step 9: Launch Codex and run the first validation">
+    In the repo, start with a minimal validation first:
+
+    ```bash
+    cd /path/to/your/project
+    codex --profile crazyrouter "Reply only OK"
+    ```
+
+    After that, start interactive mode:
+
+    ```bash
+    codex --profile crazyrouter
+    ```
+
+    Recommended validation order:
+
+    1. `Reply only OK`
+    2. `Read the repository structure only. Do not edit files.`
+    3. `Find the highest-risk file in this repo and explain why, but do not change anything.`
+  </Step>
+</Steps>
+
+## Recommended Model Setup
+
+| Use case | Recommended model | Why |
+|----------|-------------------|-----|
+| default coding driver | `gpt-5.4` | verified successfully in production on March 23, 2026, and best suited for the main Codex / Responses API baseline |
+
+If you need Claude, use the native Claude `POST /v1/messages` path or OpenAI-compatible `POST /v1/chat/completions` instead of putting Claude onto the Codex `wire_api = "responses"` route.
+
+## Token Setup Best Practices
+
+| Setting | Recommendation | Notes |
+|---------|----------------|-------|
+| dedicated token | Required | Do not share a Codex token with Cursor or Claude Code |
+| model allowlist | Strongly recommended | Keep only the models Codex actually needs |
+| IP restriction | Recommended on fixed-egress environments | Be careful on devices that change networks often |
+| quota cap | Strongly recommended | Agent-style execution can consume budget quickly |
+| environment split | Recommended | Use separate tokens for local machines, remote hosts, and CI |
+| leak response | Rotate immediately | Shell history, config backups, or screen shares can expose tokens |
+
+## Verification Checklist
+
+- [ ] `git --version` works
+- [ ] `node -v` works
+- [ ] `codex --version` works
+- [ ] `OPENAI_API_KEY` is set correctly
+- [ ] `~/.codex/config.toml` contains `model_provider = "crazyrouter"`
+- [ ] `base_url` is `https://crazyrouter.com/v1`
+- [ ] `wire_api` is `responses`
+- [ ] the first request succeeds
+- [ ] Crazyrouter logs show the matching request
+- [ ] token quota and allowlist match your intended setup
+
+## Common Errors And Fixes
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| `codex: command not found` | CLI did not install cleanly, or the global npm bin directory is not on PATH | reinstall Codex and ensure the global npm bin path is on PATH |
+| `401 unauthorized` | wrong, expired, or badly pasted `OPENAI_API_KEY` | create a new token and reset the variable |
+| `403` or `model not allowed` | the token does not allow the selected model | allow the required model in Crazyrouter |
+| `404` | `base_url` is wrong or missing `/v1` | change it to `https://crazyrouter.com/v1` |
+| request-shape errors | `wire_api` is not `responses` | set `wire_api = "responses"` |
+| Codex launches but does not use Crazyrouter | `model_provider` is not switched to `crazyrouter` | re-check `config.toml` |
+| Git changes are hard to review | no clean repo snapshot before AI edits | commit a first snapshot before real edits |
+| cost grows too quickly | long context, repeated tool use, or one token shared across repos | split tokens, cap quota, and keep the model allowlist small |
+
+## Performance And Cost Tips
+
+- validate first in a small repo, not a huge production repo
+- keep `gpt-5.4` as the main driver and get the GPT / Responses baseline working first
+- separate Codex from IDE tools for cleaner cost attribution
+- use stricter quota caps for higher-risk repos or CI jobs
+- when spend spikes, inspect Crazyrouter logs first to see whether agent loops are the cause
+
+## FAQ
+
+### Which base URL should I use in Codex CLI?
+
+Use `https://crazyrouter.com/v1`.
+
+### On Windows, should I use PowerShell or Git Bash?
+
+For first-time setup, prefer the PowerShell path in this guide. It is the easiest way to keep user-level environment variables and `$HOME/.codex/config.toml` consistent.
+
+### Why do I need `wire_api = "responses"`?
+
+Because Codex CLI's custom-provider path is designed around the Responses API, and Crazyrouter supports `/v1/responses`.
+
+### Why is Claude no longer recommended here?
+
+Because Claude currently supports only `POST /v1/messages` and `POST /v1/chat/completions`, not `POST /v1/responses`. The Codex path here is fixed to `wire_api = "responses"`, so Claude should not be presented as a recommended model for this route.
+
+### Why should I make a Git snapshot before the first real task?
+
+Because Codex can edit files and run commands. A clean snapshot makes review and rollback much easier.
+
+### If I already used `codex login`, do I still need an API key?
+
+Yes. For Crazyrouter, you should still use `OPENAI_API_KEY` plus the custom provider configuration.
+
+### Which model should I try first?
+
+Start with `gpt-5.4`.
+
+<Note>
+If you want the smoothest terminal agent workflow on the OpenAI / Responses API path, configure Codex around the GPT / Responses route. If you want Claude first, switch to Claude Code or the native Claude API docs instead.
+</Note>

@@ -1,0 +1,119 @@
+---
+title: "Web Search"
+description: "Production-revalidated OpenAI-style web search on Crazyrouter"
+---
+
+# Web Search
+
+This page only documents OpenAI-style web search behavior that was revalidated against Crazyrouter production on `2026-03-22`.
+
+The current primary path is:
+
+- `gpt-5.4`
+- `POST /v1/responses`
+- `tools: [{ "type": "web_search_preview" }]`
+
+## Current conclusion
+
+In today's production recheck:
+
+- `gpt-5.4` via the Responses API reliably returned `web_search_call`
+- the older Chat Completions probe using `tools: [{ "type": "web_search" }]` returned `200`, but did not provide a stable, verifiable search trigger signal, so it is not used as the primary documented pattern
+
+---
+
+## Verified request
+
+```bash cURL
+curl https://crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.4",
+    "input": "Use web search to find one current technology headline published recently.",
+    "tools": [
+      {
+        "type": "web_search_preview"
+      }
+    ]
+  }'
+```
+
+Verified `output.type` values:
+
+```json
+["web_search_call", "message"]
+```
+
+This shows that the search step and the final answer are returned separately.
+
+---
+
+## Python example
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.responses.create(
+    model="gpt-5.4",
+    input="Use web search to find one current technology headline published recently.",
+    tools=[
+        {"type": "web_search_preview"}
+    ]
+)
+
+print(response.output_text)
+```
+
+---
+
+## How to confirm search actually ran
+
+Inspect `response.output` directly:
+
+```python Python
+for item in response.output:
+    print(item.type)
+```
+
+If you see:
+
+```text
+web_search_call
+message
+```
+
+then the model searched first and answered second.
+
+---
+
+## Older pattern not recommended as primary
+
+This production recheck also probed the older Chat Completions shape:
+
+```json
+{
+  "tools": [
+    {
+      "type": "web_search"
+    }
+  ]
+}
+```
+
+Result:
+
+- the request returned `200`
+- but no stable, verifiable search trigger marker was observed
+
+So for Crazyrouter docs, OpenAI-style web search should currently be documented through the Responses API first.
+
+Related pages:
+
+- [Responses Web Search](/ru/chat/responses/web-search)
+- [Feature Hub: Web Search](/ru/features/web-search)

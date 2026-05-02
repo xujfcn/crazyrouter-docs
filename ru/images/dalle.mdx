@@ -1,0 +1,126 @@
+---
+title: "DALL-E"
+description: "Use the DALL-E 3 model to generate and edit images"
+---
+
+# DALL-E
+
+```
+POST /v1/images/generations
+```
+
+Use the DALL-E 3 model to generate images, compatible with the OpenAI Images API format.
+
+## Generate Image
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model` | string | Yes | `dall-e-3` or `dall-e-2` |
+| `prompt` | string | Yes | Image description prompt |
+| `n` | integer | No | Number of images, DALL-E 3 only supports 1 |
+| `size` | string | No | Image size |
+| `quality` | string | No | Quality: `standard` (default), `hd` |
+| `style` | string | No | Style: `vivid` (default), `natural` |
+| `response_format` | string | No | Response format: `url` (default), `b64_json` |
+
+### Size Options
+
+| Model | Supported Sizes |
+|-------|----------------|
+| `dall-e-3` | `1024x1024`, `1792x1024`, `1024x1792` |
+| `dall-e-2` | `256x256`, `512x512`, `1024x1024` |
+
+### Request Examples
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "dall-e-3",
+    "prompt": "A traditional Chinese ink wash painting of mountains and waterfalls shrouded in mist",
+    "n": 1,
+    "size": "1792x1024",
+    "quality": "hd",
+    "style": "natural"
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.images.generate(
+    model="dall-e-3",
+    prompt="A traditional Chinese ink wash painting of mountains and waterfalls shrouded in mist",
+    n=1,
+    size="1792x1024",
+    quality="hd",
+    style="natural"
+)
+
+print(response.data[0].url)
+print(response.data[0].revised_prompt)
+```
+
+</CodeGroup>
+
+### Response Example
+
+```json
+{
+  "created": 1709123456,
+  "data": [
+    {
+      "url": "https://oaidalleapiprodscus.blob.core.windows.net/...",
+      "revised_prompt": "A traditional Chinese ink wash painting depicting a mountainous landscape with a waterfall cascading down rocky cliffs, surrounded by misty clouds..."
+    }
+  ]
+}
+```
+
+---
+
+## Edit Image
+
+```
+POST /v1/images/edits
+```
+
+Use DALL-E 2 for localized image editing.
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.images.edit(
+    model="dall-e-2",
+    image=open("image.png", "rb"),
+    mask=open("mask.png", "rb"),
+    prompt="Add a kitten in the blank area",
+    n=1,
+    size="1024x1024"
+)
+
+print(response.data[0].url)
+```
+
+<Note>
+  DALL-E 3 automatically optimizes your prompt (`revised_prompt`), generating a more detailed description to improve image quality.
+</Note>
+
+<Warning>
+  DALL-E 3 can only generate 1 image per request (`n=1`). For multiple images, send multiple requests.
+</Warning>

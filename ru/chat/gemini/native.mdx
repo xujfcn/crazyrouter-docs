@@ -1,0 +1,238 @@
+---
+title: "Gemini Native Format"
+description: "Production-revalidated Gemini 3 Pro Preview native API usage on Crazyrouter"
+---
+
+# Gemini Native Format
+
+This page only documents Gemini Native behavior that was revalidated against Crazyrouter production on `2026-03-22`.
+
+Current primary example model:
+
+- `gemini-3-pro-preview`
+
+Dedicated multimodal pages based on successful request patterns:
+
+- [Gemini Image Understanding](/ru/chat/gemini/vision)
+- [Gemini Video Understanding](/ru/chat/gemini/video)
+- [Gemini Audio Understanding](/ru/chat/gemini/audio)
+
+## Endpoints
+
+```text
+POST /v1beta/models/{model}:generateContent
+POST /v1beta/models/{model}:streamGenerateContent
+```
+
+## Authentication
+
+Pass the API key through the URL parameter:
+
+```text
+?key=YOUR_API_KEY
+```
+
+---
+
+## Basic text generation
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Explain machine learning in one sentence."
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "maxOutputTokens": 128
+    }
+  }'
+```
+
+Verified response shape:
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "...",
+            "thoughtSignature": "..."
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Streaming generation
+
+This recheck confirmed that `streamGenerateContent` returns incremental SSE output.
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:streamGenerateContent?key=YOUR_API_KEY&alt=sse" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Write one short sentence about AI."
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+Observed SSE chunk shape:
+
+```text
+data: {"candidates":[{"content":{"parts":[{"text":"...","thoughtSignature":"..."}]}}]}
+```
+
+---
+
+## Structured outputs
+
+This production recheck confirmed that `responseMimeType + responseSchema` works:
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Return a JSON object with keys city and country for Tokyo."
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "responseMimeType": "application/json",
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "city": {"type": "string"},
+          "country": {"type": "string"}
+        },
+        "required": ["city", "country"]
+      }
+    }
+  }'
+```
+
+Verified production output:
+
+```json
+{"city":"Tokyo","country":"Japan"}
+```
+
+---
+
+## Google Search
+
+This production recheck confirmed that the `googleSearch` tool works:
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Use Google Search to find one recent headline from a major technology news site."
+          }
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "googleSearch": {}
+      }
+    ]
+  }'
+```
+
+Verified fields include:
+
+- `groundingMetadata.webSearchQueries`
+- `groundingMetadata.groundingChunks`
+- `groundingMetadata.groundingSupports`
+
+---
+
+## Thinking
+
+This production recheck confirmed that `thinkingConfig` works:
+
+```bash cURL
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Which is larger, 9.11 or 9.9? Explain briefly."
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "thinkingConfig": {
+        "thinkingBudget": 256
+      },
+      "maxOutputTokens": 512
+    }
+  }'
+```
+
+Verified marker:
+
+```json
+{
+  "usageMetadata": {
+    "thoughtsTokenCount": 120
+  }
+}
+```
+
+---
+
+## Common `generationConfig` fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `maxOutputTokens` | integer | Maximum output tokens |
+| `temperature` | number | Sampling temperature |
+| `responseMimeType` | string | MIME type for structured outputs |
+| `responseSchema` | object | Structured output constraint |
+| `thinkingConfig` | object | Thinking mode configuration |
+
+<Note>
+  Gemini Native uses the `contents[].parts[]` structure rather than OpenAI-style `messages`. If you want an OpenAI-style route instead, use [Gemini OpenAI-Compatible Format](/ru/chat/gemini/openai-compat).
+</Note>
+
+Related pages:
+
+- [Official Model Pricing Methods](/ru/reference/official-pricing-methods)

@@ -1,0 +1,182 @@
+---
+title: "Grok Image Models"
+description: "Generate images with grok-imagine-image and grok-4-image, including supported parameters and differences"
+---
+
+# Grok Image Models
+
+```
+POST /v1/images/generations
+```
+
+Grok image models use the OpenAI-compatible Images path. There are two names you should treat differently:
+
+| Model | Description | Recommendation |
+|-------|-------------|----------------|
+| `grok-imagine-image` | Official xAI image model name, billed at the official `$0.02 / image` price | Recommended for new integrations |
+| `grok-4-image` | Historical / compatibility model name on third-party compatible channels | Use only the safe subset of parameters |
+
+<Warning>
+  `grok-4-image` is not the official xAI model name. Do not assume it is fully equivalent to `grok-imagine-image`. New integrations should prefer `grok-imagine-image`.
+</Warning>
+
+## grok-imagine-image Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model` | string | Yes | Use `grok-imagine-image` |
+| `prompt` | string | Yes | Image prompt |
+| `n` | integer | No | Number of images, official range `1` to `10`. Use `1` first for stable cost control |
+| `response_format` | string | No | `url` or `b64_json`. The live Crazyrouter path is stable with `url` |
+| `aspect_ratio` | string | No | Examples: `1:1`, `16:9`, `9:16`, `3:2`, `auto` |
+| `resolution` | string | No | `1k` or `2k` |
+
+<Note>
+  `aspect_ratio` and `resolution` are xAI image endpoint extensions. With the OpenAI Python SDK, pass them through `extra_body`; with cURL or the Node.js SDK, put them directly in the JSON body.
+</Note>
+
+Do not pass these parameters:
+
+| Parameter | Reason |
+|-----------|--------|
+| `size` | Not supported by xAI; it returns `Argument not supported: size` |
+| `quality` | Not supported by the xAI image endpoint |
+| `style` | Not supported by the xAI image endpoint |
+
+## grok-imagine-image Example
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "grok-imagine-image",
+    "prompt": "A tiny yellow cube on a plain white background, minimal product photo",
+    "n": 1,
+    "response_format": "url",
+    "aspect_ratio": "1:1",
+    "resolution": "1k"
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1",
+)
+
+response = client.images.generate(
+    model="grok-imagine-image",
+    prompt="A tiny yellow cube on a plain white background, minimal product photo",
+    n=1,
+    response_format="url",
+    extra_body={
+        "aspect_ratio": "1:1",
+        "resolution": "1k",
+    },
+)
+
+print(response.data[0].url)
+```
+
+<Note>
+  Image URLs returned with `response_format: "url"` are temporary. Download or store the image after generation if you need durable access.
+</Note>
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://crazyrouter.com/v1",
+});
+
+const response = await client.images.generate({
+  model: "grok-imagine-image",
+  prompt: "A tiny yellow cube on a plain white background, minimal product photo",
+  n: 1,
+  response_format: "url",
+  aspect_ratio: "1:1",
+  resolution: "1k",
+});
+
+console.log(response.data[0].url);
+```
+
+</CodeGroup>
+
+## Response Example
+
+The live response may include `url`, `mime_type`, and `revised_prompt`:
+
+```json
+{
+  "created": 1776527939,
+  "data": [
+    {
+      "url": "https://...",
+      "mime_type": "image/jpeg",
+      "revised_prompt": "A tiny yellow cube on a plain white background..."
+    }
+  ]
+}
+```
+
+## grok-4-image Differences
+
+Use only this safe subset for `grok-4-image`:
+
+| Parameter | Support |
+|-----------|---------|
+| `model` | Use `grok-4-image` |
+| `prompt` | Supported |
+| `n` | Use `1` only. A live `n=2` test returned 1 image but billed 2 images; the gateway has been narrowed to `1` |
+| `response_format` | `url` is stable. `b64_json` may be accepted but the live route still returned `url` |
+| `aspect_ratio` | Accepted by the request path, but third-party enforcement should be verified per output |
+| `resolution` | Accepted by the request path, but third-party enforcement should be verified per output |
+
+Do not promise these for `grok-4-image`:
+
+- multi-image `n > 1`
+- guaranteed `b64_json` output
+- `size`
+- `quality`
+- `style`
+- image editing
+
+## grok-4-image Example
+
+```bash
+curl -X POST https://crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "grok-4-image",
+    "prompt": "A single red cube on a plain white background, product photo",
+    "n": 1,
+    "response_format": "url"
+  }'
+```
+
+## Billing
+
+| Model | Current Billing |
+|-------|-----------------|
+| `grok-imagine-image` | `$0.02 / image`, no discount |
+| `grok-4-image` | Current pricing is `$0.08 * 0.55 = $0.044 / image` |
+
+<Note>
+  The live pricing page and usage logs are the source of truth. Grok image models are billed per image, not by input/output tokens.
+</Note>
+
+## Common Errors
+
+| Error | Fix |
+|-------|-----|
+| `Argument not supported: size` | Do not send `size`; use `aspect_ratio` and `resolution` |
+| `model_price_error` | The model is missing pricing or the token cannot use it |
+| `model_not_found` | Check the model name, token permissions, and channel availability with `GET /v1/models` |

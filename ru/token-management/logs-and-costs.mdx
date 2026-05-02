@@ -1,0 +1,358 @@
+---
+title: 'Usage Logs and Cost Monitoring'
+description: 'Use management APIs to list API keys, query usage logs, summarize quota, and calculate USD cost'
+---
+
+## Use Cases
+
+If a customer needs monitoring per API key, use the Crazyrouter management APIs instead of trying to query with a business `sk-xxx` token directly:
+
+- List all API keys under the current account
+- Query usage logs by time range, key name, or model name
+- Get summarized quota consumption for a specific key
+- Convert quota into USD cost using system pricing metadata
+
+<Note>
+  Management APIs use user-level authentication, not the business token used for model inference calls.
+</Note>
+
+## Authentication
+
+Management APIs require both headers:
+
+```text
+Authorization: Bearer {access_token}
+New-Api-User: {user_id}
+```
+
+- `access_token`: user access token used for dashboard or management API authentication
+- `New-Api-User`: current user ID, and it must match the user bound to the `access_token`
+- `sk-xxx`: business token for model calls only, not for `/api/token/*` or `/api/log/*` management APIs
+
+## Recommended Integration Flow
+
+Recommended sequence:
+
+1. Call `/api/token/` to get the current account's API key list
+2. Call `/api/log/self` with `token_name` to fetch detailed logs for one key
+3. Call `/api/log/self/stat` to fetch the summarized quota for the same filter
+4. Call `/api/status` to get `quota_per_unit`
+5. Convert quota into USD with `quota / quota_per_unit`
+
+## 1. List API Keys
+
+```bash cURL
+curl "https://crazyrouter.com/api/token/?p=1&page_size=100" \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 485"
+```
+
+Example response:
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "page": 1,
+    "page_size": 100,
+    "total": 1,
+    "items": [
+      {
+        "id": 409,
+        "name": "gptai",
+        "key": "sk-xxxxxxxxxxxxxxxx",
+        "status": 2,
+        "used_quota": 16605808,
+        "model_limits_enabled": true,
+        "model_limits": "kimi-k2.5"
+      }
+    ]
+  }
+}
+```
+
+Recommended fields to persist for monitoring:
+
+- `id`
+- `name`
+- `status`
+- `used_quota`
+- `model_limits_enabled`
+- `model_limits`
+
+## 2. Query Usage Logs for a Specific Key
+
+Use `/api/log/self` to query the current user's own consumption logs. At minimum, send:
+
+- `type`
+- `token_name`
+- `start_timestamp`
+- `end_timestamp`
+- `p`
+- `page_size`
+
+Example:
+
+```bash cURL
+curl "https://crazyrouter.com/api/log/self?type=2&token_name=gptai&start_timestamp=1771334901&end_timestamp=1772309095&p=1&page_size=5" \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 485"
+```
+
+Example response:
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "page": 1,
+    "page_size": 5,
+    "total": 4988,
+    "items": [
+      {
+        "created_at": 1772308747,
+        "token_name": "gptai",
+        "model_name": "deepseek-chat",
+        "quota": 3188,
+        "cost_usd": 0.006376,
+        "prompt_tokens": 884,
+        "completion_tokens": 397,
+        "use_time": 16.48,
+        "is_stream": true,
+        "ip": "203.0.113.10",
+        "other": {
+          "client": "openai-python",
+          "request_id": "req_xxx",
+          "request_method": "POST",
+          "request_path": "/v1/chat/completions",
+          "http_status": 200,
+          "discount": 0
+        }
+      }
+    ]
+  }
+}
+```
+
+### Key Fields
+
+| Field | Description |
+|------|------|
+| `token_name` | Which business key handled the request |
+| `model_name` | The actual billed model |
+| `quota` | System quota consumed by this request |
+| `cost_usd` | USD cost converted from quota |
+| `prompt_tokens` | Input tokens |
+| `completion_tokens` | Output tokens |
+| `use_time` | Request latency in seconds |
+| `other.request_id` | Request ID for tracing |
+| `other.client` | Client identifier |
+| `other.request_path` | Upstream endpoint path |
+| `other.http_status` | Upstream HTTP status code |
+
+<Note>
+  `cost_usd` is derived with `quota / quota_per_unit`. If your production environment has not yet been upgraded to a version that returns this field, you can still calculate cost from the summary quota.
+</Note>
+
+## 3. Query Summary Consumption
+
+If you only need a dashboard, report, or alerting input, use the summary endpoint:
+
+```bash cURL
+curl "https://crazyrouter.com/api/log/self/stat?type=2&token_name=gptai&start_timestamp=1771334901&end_timestamp=1772309095" \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 485"
+```
+
+Example response:
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "quota": 16605808,
+    "rpm": 0,
+    "tpm": 0
+  }
+}
+```
+
+Where:
+
+- `quota`: total consumed quota under the current filter
+- `rpm` and `tpm`: reserved fields for extended monitoring
+
+## 4. Query Current Account Balance
+
+If the customer does not only want per-key monitoring, but also wants to display the current Crazyrouter account balance directly in their own admin panel, call `/api/user/self`.
+
+Use the same management-auth headers:
+
+```bash cURL
+curl "https://crazyrouter.com/api/user/self" \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 4004"
+```
+
+Example response:
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "id": 4004,
+    "username": "google_4004",
+    "quota": 11000000,
+    "used_quota": 0,
+    "request_count": 0,
+    "group": "default"
+  }
+}
+```
+
+Key fields:
+
+| Field | Description |
+|------|------|
+| `quota` | Current remaining balance in internal quota units |
+| `used_quota` | Historical used amount in internal quota units |
+| `request_count` | Historical request count |
+| `group` | Current account group |
+
+Conversion:
+
+```text
+balance_usd = quota / quota_per_unit
+used_usd = used_quota / quota_per_unit
+```
+
+Example:
+
+```text
+quota = 11000000
+quota_per_unit = 500000
+
+balance_usd = 11000000 / 500000 = 22
+```
+
+So the example above means:
+
+```text
+$22.00
+```
+
+<Note>
+  `/api/user/self` is better for displaying the current total account balance. `/api/log/self` and `/api/log/self/stat` are better for analyzing usage by time range, business key, or model.
+</Note>
+
+## 5. Convert Quota to USD Cost
+
+System conversion metadata is available from the public `/api/status` endpoint:
+
+```bash cURL
+curl "https://crazyrouter.com/api/status"
+```
+
+Relevant fields:
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "quota_per_unit": 500000,
+    "quota_display_type": "USD",
+    "usd_exchange_rate": 7.3
+  }
+}
+```
+
+Formula:
+
+```text
+cost_usd = quota / quota_per_unit
+```
+
+Example:
+
+```text
+16605808 / 500000 = 33.211616 USD
+```
+
+## Python Example
+
+```python
+import requests
+
+BASE_URL = "https://crazyrouter.com"
+ACCESS_TOKEN = "your_access_token"
+USER_ID = "485"
+TOKEN_NAME = "gptai"
+
+headers = {
+    "Authorization": f"Bearer {ACCESS_TOKEN}",
+    "New-Api-User": USER_ID,
+    "User-Agent": "Mozilla/5.0",
+}
+
+token_resp = requests.get(
+    f"{BASE_URL}/api/token/",
+    params={"p": 1, "page_size": 100},
+    headers=headers,
+    timeout=30,
+)
+token_resp.raise_for_status()
+tokens = token_resp.json()["data"]["items"]
+
+log_resp = requests.get(
+    f"{BASE_URL}/api/log/self/stat",
+    params={
+        "type": 2,
+        "token_name": TOKEN_NAME,
+        "start_timestamp": 1771334901,
+        "end_timestamp": 1772309095,
+    },
+    headers=headers,
+    timeout=30,
+)
+log_resp.raise_for_status()
+quota = log_resp.json()["data"]["quota"]
+
+status_resp = requests.get(f"{BASE_URL}/api/status", timeout=30)
+status_resp.raise_for_status()
+quota_per_unit = status_resp.json()["data"]["quota_per_unit"]
+
+cost_usd = quota / quota_per_unit
+
+print("tokens:", [item["name"] for item in tokens])
+print("quota:", quota)
+print("cost_usd:", round(cost_usd, 6))
+```
+
+## Monitoring Recommendations
+
+Recommended dimensions for customer-side monitoring:
+
+- Aggregate request count, total quota, and total cost by `token_name`
+- Aggregate consumption distribution by `model_name`
+- Split traffic by `other.request_path`, such as `/v1/chat/completions` and `/v1/responses`
+- Track success and failure rates by `other.http_status`
+- Keep `other.request_id` for incident investigation
+
+## FAQ
+
+### Why can't management APIs use `sk-xxx` directly?
+
+Because `sk-xxx` is validated by the token-auth flow for business requests, while `/api/token/*` and `/api/log/self*` are user-authenticated management APIs that require `access_token` plus `New-Api-User`.
+
+### Can I query my logs for a single key?
+
+Yes. The recommended approach is filtering `/api/log/self` and `/api/log/self/stat` by `token_name`.
+
+### Can I get cost directly via API?
+
+If your server version already exposes `cost_usd`, you can read per-request USD cost directly from log items. For summary-level monitoring, use `quota / quota_per_unit`; this matches the dashboard calculation method.

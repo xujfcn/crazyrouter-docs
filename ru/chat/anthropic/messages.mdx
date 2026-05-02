@@ -1,0 +1,199 @@
+---
+title: "Claude Native Format"
+description: "Production-revalidated Anthropic Messages usage for Claude 4.6 on Crazyrouter"
+---
+
+# Claude Native Format
+
+```
+POST /v1/messages
+```
+
+This page only documents Claude Messages behavior that was revalidated against Crazyrouter production on `2026-03-22`.
+
+Current primary example models:
+
+- `claude-sonnet-4-6`
+- `claude-opus-4-6-thinking`
+
+## Authentication
+
+This recheck confirmed that both of the following auth styles work:
+
+```text
+x-api-key: YOUR_API_KEY
+```
+
+```text
+Authorization: Bearer YOUR_API_KEY
+```
+
+Keep:
+
+```text
+anthropic-version: 2023-06-01
+```
+
+---
+
+## Basic conversation
+
+```bash cURL
+curl https://crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-sonnet-4-6",
+    "max_tokens": 128,
+    "messages": [
+      {
+        "role": "user",
+        "content": "Explain quantum computing in one sentence."
+      }
+    ]
+  }'
+```
+
+Verified response shape:
+
+```json
+{
+  "type": "message",
+  "content": [
+    {
+      "type": "text",
+      "text": "..."
+    }
+  ]
+}
+```
+
+---
+
+## Function calling
+
+In the current production environment, Claude 4.6 tool calling is reproducible through `/v1/messages` and returns `tool_use`.
+
+For first-pass validation, use:
+
+- an explicit `tool_choice`
+- a prompt that clearly says Claude must call the tool and not answer directly
+
+```bash cURL
+curl https://crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-sonnet-4-6",
+    "max_tokens": 256,
+    "tools": [
+      {
+        "name": "get_time",
+        "description": "Get the current time for a timezone",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "timezone": {
+              "type": "string"
+            }
+          },
+          "required": ["timezone"]
+        }
+      }
+    ],
+    "tool_choice": {
+      "type": "any"
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Use the get_time tool for Asia/Shanghai. Do not answer directly."
+      }
+    ]
+  }'
+```
+
+Verified response shape:
+
+```json
+{
+  "stop_reason": "tool_use",
+  "content": [
+    {
+      "type": "tool_use",
+      "name": "get_time",
+      "input": {
+        "timezone": "Asia/Shanghai"
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Extended thinking
+
+In this production recheck, the combination that clearly returned a `thinking` block was:
+
+- `claude-opus-4-6-thinking`
+
+Base `claude-opus-4-6` did not produce an equally explicit thinking block in this round, so the docs prioritize the thinking variant here.
+
+```bash cURL
+curl https://crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-opus-4-6-thinking",
+    "max_tokens": 320,
+    "thinking": {
+      "type": "enabled",
+      "budget_tokens": 128
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Which is larger, 9.11 or 9.9? Explain briefly."
+      }
+    ]
+  }'
+```
+
+Verified response shape:
+
+```json
+{
+  "content": [
+    {
+      "type": "thinking",
+      "thinking": "..."
+    },
+    {
+      "type": "text",
+      "text": "..."
+    }
+  ]
+}
+```
+
+<Warning>
+  When using `thinking`, `max_tokens` must be greater than `budget_tokens`. Thinking tokens are billed as well.
+</Warning>
+
+---
+
+## Current recommendation
+
+- Standard text chat: use `claude-sonnet-4-6`
+- Tool calling: use `claude-sonnet-4-6`, and include `tool_choice` in first-pass validation
+- Explicit thinking blocks: use `claude-opus-4-6-thinking`
+
+Related pages:
+
+- [Feature Hub: Tool Calling](/ru/features/tool-calling)
+- [Feature Hub: Reasoning](/ru/features/reasoning)
+- [Official Model Pricing Methods](/ru/reference/official-pricing-methods)

@@ -1,0 +1,109 @@
+---
+title: "Chat Completion Object"
+description: "Core production-oriented structure of Chat Completion and Chat Completion Chunk objects"
+---
+
+# Chat Completion Object
+
+`/v1/chat/completions` returns `chat.completion` for non-streaming requests and `chat.completion.chunk` for streaming requests.
+
+This page focuses on the most stable, broadly useful OpenAI-compatible response structure on Crazyrouter today.
+
+## Non-streaming object
+
+Minimal production request:
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.4",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Explain what a REST API is in one sentence."
+      }
+    ],
+    "max_tokens": 64
+  }'
+```
+
+Typical production response skeleton:
+
+```json
+{
+  "id": "chatcmpl-xxx",
+  "object": "chat.completion",
+  "created": 1774177466,
+  "model": "gpt-5.4",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "...",
+        "reasoning_content": null,
+        "tool_calls": null
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}
+```
+
+### How to read it
+
+- `message.content` is the final text answer
+- `message.tool_calls` only appears when the model is requesting tool execution
+- `message.reasoning_content` may appear for some models or routes, but should not currently be treated as a guaranteed field
+
+---
+
+## Streaming object
+
+For streaming requests, the server returns `chat.completion.chunk` SSE events:
+
+```json
+{
+  "id": "chatcmpl-xxx",
+  "object": "chat.completion.chunk",
+  "created": 1774177466,
+  "model": "gpt-5.4",
+  "choices": [
+    {
+      "index": 0,
+      "delta": {
+        "role": "assistant",
+        "content": "..."
+      },
+      "finish_reason": null
+    }
+  ]
+}
+```
+
+Common SSE shape:
+
+```text
+data: {"object":"chat.completion.chunk",...}
+data: {"choices":[{"delta":{"content":"..."}}],...}
+data: [DONE]
+```
+
+---
+
+## Fields you will usually care about
+
+| Field | Meaning |
+|-------|---------|
+| `object` | `chat.completion` for non-streaming, `chat.completion.chunk` for streaming |
+| `model` | The actual model used for the response |
+| `choices[].message.content` | Final non-streaming text |
+| `choices[].message.tool_calls` | Non-streaming tool requests |
+| `choices[].delta.content` | Streaming text delta |
+| `choices[].finish_reason` | Stop reason such as `stop`, `length`, or `tool_calls` |
+
+<Note>
+  Upstream models may pass through extra fields. Client code should rely on the stable common fields first rather than assuming every model exposes the same extensions.
+</Note>

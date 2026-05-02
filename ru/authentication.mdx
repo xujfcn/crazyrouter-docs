@@ -1,0 +1,63 @@
+---
+title: 'Аутентификация'
+description: 'Как получить и использовать API-ключи'
+---
+
+## Аутентификация Bearer Token
+
+Все API-запросы требуют API-ключ в заголовке:
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Получение API-ключа
+
+1. Войдите в [Crazyrouter](https://crazyrouter.com)
+2. После входа перейдите на страницу [Token Management](https://crazyrouter.com/console/token)
+3. Нажмите "Create Token"
+4. Укажите имя токена, лимит квоты, доступные модели и другие параметры
+5. Скопируйте созданный ключ, начинающийся с `sk-`
+
+<Warning>
+API-ключ показывается только один раз при создании. Сохраните его в безопасном месте. Если ключ потерян, нужно создать новый.
+</Warning>
+
+## Примеры использования
+
+<CodeGroup>
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Authorization: Bearer sk-xxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "gpt-5.4", "messages": [{"role": "user", "content": "Hi"}]}'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxxxxxxx",
+    base_url="https://crazyrouter.com/v1"
+)
+```
+
+```javascript Node.js
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: 'sk-xxxxxxxx',
+  baseURL: 'https://crazyrouter.com/v1'
+});
+```
+</CodeGroup>
+
+## Управление правами токена
+
+При создании токена можно настроить:
+
+- **Имя**: для удобной идентификации назначения токена
+- **Лимит квоты**: максимальная доступная квота
+- **Срок действия**: период, в течение которого токен действителен
+- **Доступные модели**: ограничение моделей, которые можно вызывать
+- **IP whitelist**: ограничение IP-адресов, с которых разрешены вызовы

@@ -1,0 +1,204 @@
+---
+title: "Gemini Tools"
+description: "Gemini native tool capabilities verified against Crazyrouter production on 2026-03-23"
+---
+
+# Gemini Tools
+
+```
+POST /v1beta/models/{model}:generateContent
+```
+
+As of March 23, 2026, Crazyrouter production has verified that `gemini-3-pro-preview` can reliably trigger these Gemini-native tool capabilities:
+
+- `codeExecution`
+- `googleSearch`
+- `urlContext`
+- `functionDeclarations`
+
+<Note>
+  This page keeps only request patterns and response markers that were reproduced against production.
+</Note>
+
+---
+
+## Code Execution
+
+The following request returned both `executableCode` and `codeExecutionResult` in production:
+
+```bash
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "Use code execution. Compute the sum of the first 20 prime numbers and state the result."}
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "codeExecution": {}
+      }
+    ]
+  }'
+```
+
+Observed response shape:
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "executableCode": {
+              "language": "PYTHON",
+              "code": "..."
+            }
+          },
+          {
+            "codeExecutionResult": {
+              "outcome": "OUTCOME_OK",
+              "output": "639\n"
+            }
+          },
+          {
+            "text": "The sum is 639."
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Google Search
+
+The following request returned `groundingMetadata` in production, confirming that Google Search was actually used:
+
+```bash
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "Use Google Search. What are two AI news items from March 2026?"}
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "googleSearch": {}
+      }
+    ]
+  }'
+```
+
+Current markers to check:
+
+- `candidates[0].groundingMetadata`
+- Normal text output in `candidates[0].content.parts[*].text`
+
+---
+
+## URL Context
+
+The following request returned `urlContextMetadata` in production, along with `groundingMetadata`:
+
+```bash
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "Use URL context to summarize https://example.com/ in one sentence."}
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "urlContext": {}
+      }
+    ]
+  }'
+```
+
+Current markers to check:
+
+- `candidates[0].urlContextMetadata`
+- `candidates[0].groundingMetadata`
+
+---
+
+## Custom Function Calling
+
+The following request returned `functionCall` in production:
+
+```bash
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "What is the weather in Beijing? Use the provided function."}
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "functionDeclarations": [
+          {
+            "name": "get_weather",
+            "description": "Get weather info for a city",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "city": {
+                  "type": "string"
+                }
+              },
+              "required": ["city"]
+            }
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+Observed response shape:
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "functionCall": {
+              "name": "get_weather",
+              "args": {
+                "city": "Beijing"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+To continue the tool loop, send the tool result back with Gemini-native `functionResponse`.

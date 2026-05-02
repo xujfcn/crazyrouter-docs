@@ -1,0 +1,134 @@
+---
+title: "Gemini OpenAI-Compatible Format"
+description: "Production-revalidated Gemini 3 Pro Preview via /v1/chat/completions"
+---
+
+# Gemini OpenAI-Compatible Format
+
+You can call Gemini through the OpenAI Chat Completions compatible route.
+
+```
+POST /v1/chat/completions
+```
+
+This page only documents compatibility-layer behavior that was revalidated against Crazyrouter production on `2026-03-22`.
+
+Current primary example model:
+
+- `gemini-3-pro-preview`
+
+## Current conclusion
+
+This production recheck confirmed that:
+
+- `gemini-3-pro-preview` works through `/v1/chat/completions` for normal text chat
+- streaming returns standard `chat.completion.chunk` SSE objects
+- for Gemini-specific capabilities such as structured outputs, Google Search, and thinking, you should still prefer [Gemini Native Format](/ru/chat/gemini/native)
+
+---
+
+## Basic conversation
+
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gemini-3-pro-preview",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a concise assistant."
+      },
+      {
+        "role": "user",
+        "content": "Explain quantum entanglement in one sentence."
+      }
+    ],
+    "max_tokens": 128
+  }'
+```
+
+Verified response shape:
+
+```json
+{
+  "object": "chat.completion",
+  "model": "gemini-3-pro-preview",
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "..."
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Python example
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="gemini-3-pro-preview",
+    messages=[
+        {"role": "system", "content": "You are a concise assistant."},
+        {"role": "user", "content": "Explain quantum entanglement in one sentence."}
+    ],
+    max_tokens=128
+)
+
+print(response.choices[0].message.content)
+```
+
+---
+
+## Streaming output
+
+This production recheck also confirmed streaming compatibility:
+
+```python Python
+stream = client.chat.completions.create(
+    model="gemini-3-pro-preview",
+    messages=[
+        {"role": "user", "content": "Write one short sentence about AI."}
+    ],
+    max_tokens=64,
+    stream=True
+)
+
+for chunk in stream:
+    delta = chunk.choices[0].delta
+    if delta.content is not None:
+        print(delta.content, end="")
+```
+
+Observed SSE shape:
+
+```text
+data: {"object":"chat.completion.chunk","model":"gemini-3-pro-preview",...}
+data: {"choices":[{"delta":{"content":"..."}}],...}
+data: [DONE]
+```
+
+---
+
+## When to use compatible vs native
+
+- If you already have OpenAI SDK code and only need standard chat, use the compatible route
+- If you need Gemini-native structured outputs, Google Search, thinking, or native metadata, use [Gemini Native Format](/ru/chat/gemini/native)
+
+<Note>
+  This page still only covers the `/v1/chat/completions` compatibility layer and does not fold Gemini-backed image behavior into it. For image workloads, do not keep documenting the Nano Banana family as a stable `/v1/images/generations` contract.
+  The currently preferred entry point is [Nano Banana 2](/ru/images/nano-banana-2), which now points to native Gemini `POST /v1beta/models/gemini-3.1-flash-image-preview:generateContent`.
+  [Nano Banana](/ru/images/nano-banana) remains controlled-testing only.
+</Note>

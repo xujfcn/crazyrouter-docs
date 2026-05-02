@@ -1,0 +1,198 @@
+---
+title: 'Immersive Translate Setup Guide'
+description: 'Connect Crazyrouter to the Immersive Translate browser extension through the OpenAI service path, with custom API URL, model, rate, validation, and troubleshooting guidance'
+---
+
+Immersive Translate is a strong browser extension for webpage translation, bilingual reading, text-selection translation, and document translation. For Crazyrouter, the most reliable route is the extension's officially supported `OpenAI` service path, using the `More Settings` section to enter a custom API address.
+
+## Overview
+
+With Immersive Translate's OpenAI service setup, you can send requests to Crazyrouter with:
+
+- recommended protocol: `OpenAI-compatible API`
+- service type: `OpenAI`
+- API key: your `sk-...`
+- custom API URL: `https://crazyrouter.com/v1/chat/completions`
+- recommended first validation model: `gpt-5.4`
+
+<Tip>
+The most important difference between Immersive Translate and ChatBox is this: here you should usually start with the full endpoint path, not just the root domain.
+</Tip>
+
+## Why This Guide Uses The Full Endpoint Path
+
+According to Immersive Translate's official OpenAI service docs, the extension supports customizing the OpenAI API address in `More Settings`. For Crazyrouter, the safer first-pass value is therefore:
+
+```text
+https://crazyrouter.com/v1/chat/completions
+```
+
+<Warning>
+Do not start by entering only the root domain such as `https://crazyrouter.com`, and do not stop at `/v1`. For Immersive Translate's OpenAI-style path, the safest first validation is the full `/v1/chat/completions` endpoint.
+</Warning>
+
+## Best For
+
+- users who want high-quality AI webpage translation
+- users who want Crazyrouter-based control over translation costs
+- users who want separate budgets by browser or device
+- users who prefer an OpenAI-compatible route for a browser translation extension
+
+## Prerequisites
+
+| Item | Notes |
+|------|-------|
+| Crazyrouter account | Create one at [crazyrouter.com](https://crazyrouter.com) |
+| Crazyrouter token | Create a dedicated token for Immersive Translate |
+| Browser | Chrome, Edge, Firefox, or another supported browser |
+| Immersive Translate extension | Use a current stable release |
+| Allowed models | Allow at least one translation-friendly model |
+
+Suggested starter allowlist:
+
+- `gpt-5.4`
+- `claude-sonnet-4-6`
+
+## Install And Setup Path
+
+### Chrome / Edge Path
+
+1. install Immersive Translate from the extension store
+2. open the extension settings
+3. go to `Translation Services`
+4. choose `OpenAI`
+5. open `More Settings`
+6. enter the Crazyrouter key and full custom API URL
+
+### Firefox Path
+
+1. install Immersive Translate from Firefox Add-ons
+2. open the settings page
+3. go to `Translation Services`
+4. choose `OpenAI`
+5. open `More Settings`
+6. enter the Crazyrouter settings
+
+## Detailed Setup
+
+<Steps>
+  <Step title="Step 1: Install the extension">
+    Install Immersive Translate from the official extension store for your browser.
+  </Step>
+
+  <Step title="Step 2: Create a dedicated Crazyrouter token">
+    For the first pass, allow only:
+
+    - `gpt-5.4`
+    - `claude-sonnet-4-6`
+
+    Do not start by allowing a wide model set in a translation scenario.
+  </Step>
+
+  <Step title="Step 3: Open the OpenAI service configuration">
+    In the extension UI, go to:
+
+    - `Settings`
+    - `Translation Services`
+    - choose `OpenAI`
+  </Step>
+
+  <Step title="Step 4: Enter the API key and custom URL">
+    Fill in:
+
+    - `API Key`: your `sk-...`
+    - `Custom API URL`: `https://crazyrouter.com/v1/chat/completions`
+    - `Model`: start with `gpt-5.4`
+
+    If some fields are hidden by default, expand `More Settings` first.
+  </Step>
+
+  <Step title="Step 5: Lower the request rate for the first pass">
+    Immersive Translate's official OpenAI docs explicitly warn about rate limits. On the first Crazyrouter validation, keep the request rate conservative, especially for long webpages or ebooks.
+
+    Safe starter pattern:
+
+    - keep requests-per-second low
+    - validate with a small page or selected text first
+    - only raise the rate after the setup is already stable
+  </Step>
+
+  <Step title="Step 6: Run the smallest practical validation">
+    Recommended order:
+
+    1. translate a short selected paragraph
+    2. translate a short webpage
+    3. only then try full-page or longer-document translation
+
+    That makes it much easier to tell whether the issue is config-related or simply request-volume-related.
+  </Step>
+</Steps>
+
+## Recommended Model Setup
+
+| Use case | Recommended model | Why |
+|----------|-------------------|-----|
+| first-pass minimal validation | `gpt-5.4` | verified successfully in production on March 23, 2026, and best for proving the OpenAI-compatible route works |
+| higher-quality translation | `claude-sonnet-4-6` | better for long-form explanation, refinement, and more quality-sensitive content |
+| Gemini fallback path | `gemini-3-pro-preview` | useful as a second compatibility-validation path after the baseline is already stable |
+
+## Token Setup Best Practices
+
+| Setting | Recommendation | Notes |
+|---------|----------------|-------|
+| dedicated token | Required | do not share browser translation tokens with IDE or CLI tools |
+| model allowlist | Strongly recommended | start with only 1 to 2 translation models |
+| quota cap | Strongly recommended | full-page and ebook translation can spend much faster than normal chat |
+| device split | Recommended | separate tokens by browser or machine if needed |
+| leak response | Rotate immediately | recordings, screenshots, or browser sync leaks should trigger a key rotation |
+
+## Verification Checklist
+
+- [ ] the extension is installed correctly
+- [ ] `OpenAI` is selected as the translation service
+- [ ] `API Key` is entered correctly
+- [ ] `Custom API URL` is `https://crazyrouter.com/v1/chat/completions`
+- [ ] the first model is `gpt-5.4` or another allowed model
+- [ ] a short selected paragraph translates successfully
+- [ ] a short webpage translates successfully
+- [ ] Crazyrouter logs show the matching request
+
+## Common Errors And Fixes
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| `404` | the API URL is missing `/chat/completions`, or only the root domain was entered | switch to the full `https://crazyrouter.com/v1/chat/completions` URL |
+| `401 unauthorized` | wrong, expired, or incomplete API key | generate a new token and paste it again |
+| `403` or `model not allowed` | the token does not allow the selected model | allow that model in Crazyrouter token settings |
+| `429` or unstable behavior | the request rate is too high | lower the request rate and validate on smaller text first |
+| long pages fail more often | concurrency or rate is too high | reduce scope first, then increase gradually |
+| cost rises too fast | you started with full-page or full-document translation immediately | begin with `gpt-5.4` on a smaller scope first |
+
+## Cost Tips
+
+- default to `gpt-5.4`
+- translate selected text first instead of full pages immediately
+- sample long content first before translating all of it
+- if you install the extension on multiple browsers, separate the tokens for cleaner cost tracking
+
+## FAQ
+
+### What API URL should I enter in Immersive Translate?
+
+Use the full path: `https://crazyrouter.com/v1/chat/completions`.
+
+### Why is this different from ChatBox, where the guide starts from the root domain?
+
+Because Immersive Translate's official OpenAI custom-address path is better aligned with a full endpoint URL, which makes the first validation more reliable.
+
+### Which model should I try first?
+
+Start with `gpt-5.4`.
+
+### Why not translate full pages or ebooks immediately?
+
+Because that amplifies configuration mistakes, rate-limit issues, and cost at the same time. Small text first is the fastest debugging pattern.
+
+<Note>
+If your goal is to manage browser AI translation cost through Crazyrouter, Immersive Translate is one of the most important browser-extension guides to keep detailed and accurate.
+</Note>

@@ -1,0 +1,79 @@
+---
+title: 'HTTP Status Codes & Error Handling'
+description: 'Understanding API status codes and error responses'
+---
+
+## HTTP Status Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 200 | Request successful |
+| 400 | Invalid request parameters |
+| 401 | Authentication failed - API Key is invalid or missing |
+| 403 | Insufficient permissions - Token does not have access to this model |
+| 429 | Rate limit exceeded |
+| 500 | Internal server error |
+| 502 | Upstream service unavailable |
+| 503 | Service temporarily unavailable |
+
+## Error Response Format
+
+```json
+{
+  "error": {
+    "message": "Error description",
+    "type": "error_type",
+    "code": "error_code"
+  }
+}
+```
+
+## Common Errors
+
+### 401 - Authentication Failed
+
+```json
+{
+  "error": {
+    "message": "Invalid API key",
+    "type": "authentication_error",
+    "code": "invalid_api_key"
+  }
+}
+```
+
+**Solution**: Verify that your API Key is correct and starts with `sk-`.
+
+### 429 - Rate Limited
+
+```json
+{
+  "error": {
+    "message": "Rate limit exceeded",
+    "type": "rate_limit_error",
+    "code": "rate_limit_exceeded"
+  }
+}
+```
+
+**Solution**: Reduce your request frequency, or contact support to increase your limit.
+
+### 403 - Insufficient Balance
+
+```json
+{
+  "error": {
+    "message": "Insufficient quota",
+    "type": "insufficient_quota",
+    "code": "insufficient_quota"
+  }
+}
+```
+
+**Solution**: Visit the [top-up page](https://crazyrouter.com/topup) to add funds.
+
+## Retry Recommendations
+
+- For 429 errors, use exponential backoff retry
+- For 500/502/503 errors, wait a few seconds before retrying
+- For 400/401/403 errors, check your request parameters and authentication credentials

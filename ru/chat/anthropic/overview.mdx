@@ -1,0 +1,160 @@
+---
+title: "Claude Chat Object"
+description: "Production-revalidated Anthropic Message object and native SSE events as of 2026-03-23"
+---
+
+# Claude Chat Object
+
+Crazyrouter supports the Anthropic native Messages API.
+
+This page only documents Message-object and streaming-event behavior that was revalidated in production on `2026-03-23`.
+
+## Message object
+
+The current minimal production request uses:
+
+- `model: "claude-sonnet-4-6"`
+- `POST /v1/messages`
+
+Typical production response skeleton:
+
+```json
+{
+  "id": "msg_xxx",
+  "type": "message",
+  "role": "assistant",
+  "content": [
+    {
+      "type": "text",
+      "text": "..."
+    }
+  ],
+  "model": "claude-sonnet-4-6",
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "usage": {
+    "input_tokens": 15,
+    "output_tokens": 20
+  }
+}
+```
+
+### Common fields
+
+| Field | Type | Meaning |
+|-------|------|---------|
+| `id` | string | Unique message identifier |
+| `type` | string | Always `message` |
+| `role` | string | Always `assistant` |
+| `content` | array | Content block list |
+| `model` | string | Actual model used |
+| `stop_reason` | string | Stop reason such as `end_turn`, `tool_use`, or `max_tokens` |
+| `usage` | object | Token usage |
+
+### Common content block types
+
+Text block:
+
+```json
+{
+  "type": "text",
+  "text": "..."
+}
+```
+
+Tool-use block:
+
+```json
+{
+  "type": "tool_use",
+  "id": "toolu_xxx",
+  "name": "get_time",
+  "input": {
+    "timezone": "Asia/Shanghai"
+  }
+}
+```
+
+Thinking block:
+
+```json
+{
+  "type": "thinking",
+  "thinking": "..."
+}
+```
+
+---
+
+## Streaming event types
+
+In the `2026-03-23` production recheck, native streaming for `claude-sonnet-4-6` returned these SSE events:
+
+- `message_start`
+- `content_block_start`
+- `content_block_delta`
+- `content_block_stop`
+- `message_delta`
+- `message_stop`
+
+### Event examples
+
+`message_start`
+
+```text
+event: message_start
+data: {"type":"message_start","message":{...}}
+```
+
+`content_block_start`
+
+```text
+event: content_block_start
+data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}
+```
+
+`content_block_delta`
+
+```text
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Hello"}}
+```
+
+`content_block_stop`
+
+```text
+event: content_block_stop
+data: {"type":"content_block_stop","index":0}
+```
+
+`message_delta`
+
+```text
+event: message_delta
+data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"output_tokens":20}}
+```
+
+`message_stop`
+
+```text
+event: message_stop
+data: {"type":"message_stop"}
+```
+
+---
+
+## Practical interpretation
+
+- If `content` only contains `text`, it is a normal answer
+- If `stop_reason = "tool_use"` and `content` contains `tool_use`, the model is making a tool call
+- If `content` contains `thinking`, the current model and request shape triggered extended thinking
+
+<Note>
+  A `thinking` block is not returned by every Claude model by default. The currently revalidated explicit thinking path is `claude-opus-4-6-thinking`.
+</Note>
+
+Related pages:
+
+- [Claude Native Format](/ru/chat/anthropic/messages)
+- [Feature Hub: Tool Calling](/ru/features/tool-calling)
+- [Feature Hub: Reasoning](/ru/features/reasoning)

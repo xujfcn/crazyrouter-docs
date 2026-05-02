@@ -1,0 +1,89 @@
+---
+title: 'Быстрый старт'
+description: 'Сделайте первый API-вызов за 5 минут'
+---
+
+## Шаг 1. Получите API-ключ
+
+1. Откройте [Crazyrouter](https://crazyrouter.com) и создайте аккаунт
+2. После входа перейдите на страницу [Token Management](https://crazyrouter.com/console/token)
+3. Нажмите "Create Token", чтобы создать API-ключ
+
+## Шаг 2. Отправьте запрос
+
+<CodeGroup>
+```bash cURL
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.4",
+    "messages": [
+      {"role": "user", "content": "Hello"}
+    ]
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="gpt-5.4",
+    messages=[{"role": "user", "content": "Hello"}]
+)
+print(response.choices[0].message.content)
+```
+
+```javascript Node.js
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: 'YOUR_API_KEY',
+  baseURL: 'https://crazyrouter.com/v1'
+});
+
+const response = await client.chat.completions.create({
+  model: 'gpt-5.4',
+  messages: [{ role: 'user', content: 'Hello' }]
+});
+console.log(response.choices[0].message.content);
+```
+</CodeGroup>
+
+## Шаг 3. Проверьте ответ
+
+Пример успешного ответа:
+
+```json
+{
+  "id": "chatcmpl-abc123",
+  "object": "chat.completion",
+  "created": 1677652288,
+  "choices": [{
+    "index": 0,
+    "message": {
+      "role": "assistant",
+      "content": "Hello! How can I help you today?"
+    },
+    "finish_reason": "stop"
+  }],
+  "usage": {
+    "prompt_tokens": 9,
+    "completion_tokens": 12,
+    "total_tokens": 21
+  }
+}
+```
+
+<Note>
+Пример с `gpt-5.4` на этой странице быстрого старта был успешно перепроверен в production-среде Crazyrouter 2026-03-23.
+</Note>
+
+<Note>
+Все OpenAI-совместимые клиенты и фреймворки, например LangChain, LlamaIndex и Cursor, можно подключить простой заменой `base_url` и `api_key`.
+</Note>

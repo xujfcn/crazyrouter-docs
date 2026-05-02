@@ -1,0 +1,79 @@
+---
+title: 'Gemini CLI Setup Guide'
+description: 'Configure Gemini CLI for Crazyrouter using the auth and model settings verified by real requests'
+---
+
+## Overview
+
+Gemini CLI is Google's command-line AI assistant. By configuring Crazyrouter's Gemini-native endpoint, you can use Gemini models that have been verified with real requests in Crazyrouter production.
+
+## Configuration
+
+### Environment Variables
+
+In the current Gemini CLI release, API-key mode still requires `GEMINI_API_KEY` to be present explicitly. For Crazyrouter's Gemini-native endpoint, set these three variables together:
+
+```bash
+export GEMINI_API_KEY=sk-xxx
+export GEMINI_MODEL=gemini-3.1-pro-preview
+export GOOGLE_GEMINI_BASE_URL=https://crazyrouter.com
+```
+
+PowerShell:
+
+```powershell
+$env:GEMINI_API_KEY="sk-xxx"
+$env:GEMINI_MODEL="gemini-3.1-pro-preview"
+$env:GOOGLE_GEMINI_BASE_URL="https://crazyrouter.com"
+```
+
+If you want this to persist across sessions, put the same values into `~/.gemini/.env` or your PowerShell profile.
+
+### Configuration File
+
+Edit `~/.gemini/settings.json`:
+
+```json
+{
+  "security": {
+    "auth": {
+      "selectedType": "gemini-api-key"
+    }
+  },
+  "apiKey": "sk-xxx",
+  "baseUrl": "https://crazyrouter.com",
+  "model": {
+    "name": "gemini-3.1-pro-preview"
+  }
+}
+```
+
+Notes:
+
+- Do not leave the auth mode as `oauth-personal`, or the CLI will continue trying Google sign-in.
+- Do not write `model` as a plain string in current versions; use `model.name`.
+- In some CLI paths, `settings.json` alone is not enough. Headless mode may still require the `GEMINI_API_KEY` environment variable.
+
+### `~/.gemini/.env` Example
+
+```bash
+GEMINI_API_KEY=sk-xxx
+GEMINI_MODEL=gemini-3.1-pro-preview
+GOOGLE_GEMINI_BASE_URL=https://crazyrouter.com
+```
+
+### Launch
+
+```bash
+gemini
+```
+
+## Recommended Model
+
+| Model | Description |
+|-------|-------------|
+| `gemini-3.1-pro-preview` | Verified successfully with a real Gemini CLI request in Crazyrouter production on April 8, 2026, and recommended as the current baseline |
+
+<Note>
+  Crazyrouter supports both the Gemini native API format and the OpenAI-compatible format. Gemini CLI uses the Gemini-native format. The `gemini-3.1-pro-preview` example above, the `gemini-api-key` auth mode, and `GOOGLE_GEMINI_BASE_URL=https://crazyrouter.com` have been validated with a real CLI request.
+</Note>

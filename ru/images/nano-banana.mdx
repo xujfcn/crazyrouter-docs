@@ -1,0 +1,102 @@
+---
+title: "Nano Banana"
+description: "As of 2026-04-14, nano-banana is no longer recommended through /v1/images/generations; this page keeps only the native Gemini controlled-test path"
+---
+
+# Nano Banana
+
+```
+Controlled testing only
+POST /v1beta/models/gemini-2.5-flash-image:generateContent
+```
+
+As of `2026-04-14`, the latest Crazyrouter production retest for `nano-banana` showed:
+
+- `nano-banana` currently maps to `gemini-2.5-flash-image`
+- `POST /v1/images/generations` is no longer recommended for `nano-banana`
+- `gemini-2.5-flash-image:generateContent` can currently return image output
+- but billing consistency on that native path is still under review, so it should be documented only as a controlled-test path, not as a stable production integration
+
+<Warning>
+  Do not keep documenting `nano-banana` as a recommended `/v1/images/generations` model. Even though the native Gemini path can return image output, it should not be presented as a stable production capability until billing consistency is revalidated.
+</Warning>
+
+## Current Status
+
+| Item | Status | Notes |
+|------|------|------|
+| Alias mapping | confirmed | `nano-banana -> gemini-2.5-flash-image` |
+| Native Gemini `generateContent` | returns output | controlled testing only |
+| Native-path billing | risky | the `2026-04-14` production retest showed a mismatch between request success and the observed `used_quota` delta |
+| OpenAI Images `POST /v1/images/generations` | not recommended | failed in both production and local `4000` retests |
+
+## Current Risks
+
+### 1. `/v1/images/generations` is no longer recommended
+
+On `2026-04-14`, both production and local `4000` retests of `nano-banana` through the public Images-compatible route hit the same failure class:
+
+- `Unknown name "imageOutputOptions" at 'generation_config.image_config'`
+- an abnormal billing sample on a failed request
+
+That makes the public Images-compatible route unsuitable as the documented customer entry point for `nano-banana`.
+
+### 2. The native path still has billing-consistency risk
+
+In the current production retest:
+
+- `POST /v1beta/models/gemini-2.5-flash-image:generateContent` returned an image successfully
+- but the consumption log `quota` and the token-side `used_quota` delta did not line up
+
+So this path should currently be documented as "controlled testing only", not as "stable production integration".
+
+## Current Recommendation
+
+1. If you need a usable image-generation or image-editing route right now, start with [Nano Banana 2](/ru/images/nano-banana-2)
+2. If you must evaluate `nano-banana`, use only the native Gemini `generateContent` route
+3. Do not put `nano-banana` into formal production traffic until billing consistency is cleared
+4. Do not use `POST /v1/images/generations` with `model: "nano-banana"`
+
+## Controlled-Test Template
+
+The request below is for same-day controlled testing only. It does not imply stable production readiness:
+
+```bash
+curl "https://crazyrouter.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Generate an IMAGE of a clean banana icon on a white background. Return image output."
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "responseModalities": ["TEXT", "IMAGE"]
+    }
+  }'
+```
+
+## Legacy Route
+
+The following legacy pattern is no longer recommended:
+
+```bash
+curl -X POST https://crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "nano-banana",
+    "prompt": "..."
+  }'
+```
+
+This is not just a documentation cleanup. The route is currently unhealthy in both production and local retests.
+
+<Note>
+  If you need the currently healthier Gemini image path on Crazyrouter, see [Gemini Image Generation](/ru/chat/gemini/image-gen). If you need the more usable Nano Banana-family route right now, start with [Nano Banana 2](/ru/images/nano-banana-2).
+</Note>

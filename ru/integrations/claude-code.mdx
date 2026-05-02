@@ -1,0 +1,420 @@
+---
+title: 'Claude Code Setup Guide'
+description: 'Connect Claude Code to Crazyrouter through the Anthropic Messages API, with full step-by-step instructions from Git and Node.js to installation commands, environment variables, and first-run validation'
+---
+
+Claude Code is one of the best terminal coding tools to connect to Crazyrouter. It speaks the Anthropic Messages API directly and works especially well for code reading, editing, refactoring, command execution, tool use, and long-context repository analysis.
+
+## Overview
+
+With a few environment variables, Claude Code can send Anthropic requests directly to Crazyrouter:
+
+- recommended protocol: `Anthropic Messages API`
+- base URL: `https://crazyrouter.com`
+- auth variable: `ANTHROPIC_API_KEY`
+- recommended default model: `claude-sonnet-4-6`
+
+<Tip>
+Claude Code appends the Anthropic request path itself, so the base URL must stay at the site root: `https://crazyrouter.com`. Do not append `/v1` or `/v1/messages`.
+</Tip>
+
+## Best For
+
+- developers who want Crazyrouter as the backend for Claude Code
+- users who want stable tool use, long context, and terminal-first coding workflows
+- teams that want Claude Code billed separately from Cursor, Codex, or Aider
+- cross-platform setups that need one consistent CLI configuration
+
+## Protocol Used
+
+Recommended protocol: `Anthropic Messages API`
+
+Use:
+
+```text
+ANTHROPIC_BASE_URL=https://crazyrouter.com
+```
+
+Do not use:
+
+- `https://crazyrouter.com/v1`
+- `https://crazyrouter.com/v1/messages`
+- `https://crazyrouter.com/v1/complete`
+
+## System Requirements And Prerequisites
+
+| Item | Notes |
+|------|-------|
+| Crazyrouter account | Create one at [crazyrouter.com](https://crazyrouter.com) |
+| Crazyrouter token | Create a dedicated `sk-...` token for Claude Code |
+| Git | `git 2.23+` is recommended for reviewing and rolling back AI edits |
+| Node.js | `Node.js 18+` is recommended |
+| Claude Code | Use a current stable release |
+| Claude model access | Allow at least `claude-sonnet-4-6` on the token |
+
+Suggested starter allowlist:
+
+- `claude-sonnet-4-6`
+- `claude-opus-4-6`
+
+## Full Install Paths By OS
+
+### Recommended Windows path
+
+On Windows, the safest path is: `Git` + `Node.js` + `npm global install for Claude Code` + `PowerShell` for environment variables.
+
+Recommended order:
+
+1. Install Git
+2. Install Node.js LTS
+3. Install Claude Code with npm
+4. Set temporary variables in PowerShell
+5. Persist user-level variables in PowerShell
+
+Recommended verification:
+
+```powershell
+git --version
+node -v
+npm -v
+claude --version
+where.exe git
+where.exe node
+where.exe claude
+```
+
+If `claude --version` is still not found, close and reopen PowerShell before retrying.
+
+### Recommended macOS path
+
+On macOS, the smoothest path is usually: `Xcode Command Line Tools` + `Homebrew` + `Git` + `Node.js` + `npm global install for Claude Code` + `~/.zshrc` for persistent environment variables.
+
+Recommended order:
+
+1. Install Xcode Command Line Tools
+2. Install Homebrew if needed
+3. Install Git and Node.js
+4. Install Claude Code with npm
+5. Persist variables in `~/.zshrc`
+6. Open a fresh terminal and verify the binary path
+
+Recommended verification:
+
+```bash
+git --version
+node -v
+npm -v
+claude --version
+which git
+which node
+which claude
+```
+
+### Why you should not append API paths manually
+
+Claude Code uses the Anthropic-native protocol. You only provide the site root:
+
+```text
+ANTHROPIC_BASE_URL=https://crazyrouter.com
+```
+
+Do not append `/v1`, `/v1/messages`, or any specific API path the way you would with an OpenAI-compatible client.
+
+## Full Setup From Scratch
+
+<Steps>
+  <Step title="Step 1: Install Git">
+    If Git is not installed yet, install it first before touching Claude Code.
+
+    <Tabs>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        winget install --id Git.Git -e --source winget
+        git --version
+        ```
+      </Tab>
+      <Tab title="macOS">
+        ```bash
+        xcode-select --install
+        git --version
+        ```
+        If you already use Homebrew, you can also run:
+        ```bash
+        brew install git
+        git --version
+        ```
+      </Tab>
+      <Tab title="Ubuntu / Debian">
+        ```bash
+        sudo apt update
+        sudo apt install -y git
+        git --version
+        ```
+      </Tab>
+    </Tabs>
+
+    After installation, set your global identity once:
+
+    ```bash
+    git config --global user.name "Your Name"
+    git config --global user.email "you@example.com"
+    git config --global init.defaultBranch main
+    ```
+  </Step>
+
+  <Step title="Step 2: Install Node.js 18+">
+    Claude Code depends on Node.js. Verify the installed version before going further.
+
+    <Tabs>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        winget install OpenJS.NodeJS.LTS
+        node -v
+        npm -v
+        ```
+      </Tab>
+      <Tab title="macOS">
+        ```bash
+        brew install node
+        node -v
+        npm -v
+        ```
+      </Tab>
+      <Tab title="Ubuntu / Debian">
+        ```bash
+        sudo apt update
+        sudo apt install -y nodejs npm
+        node -v
+        npm -v
+        ```
+      </Tab>
+    </Tabs>
+
+    If `node -v` is still below 18 after installation, upgrade through `nvm` or the official Node installer before continuing.
+  </Step>
+
+  <Step title="Step 3: Install Claude Code">
+    <Tabs>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        npm install -g @anthropic-ai/claude-code
+        claude --version
+        where.exe claude
+        ```
+      </Tab>
+      <Tab title="macOS">
+        ```bash
+        npm install -g @anthropic-ai/claude-code
+        claude --version
+        which claude
+        ```
+      </Tab>
+    </Tabs>
+
+    <Warning>
+    Do not use `sudo npm install -g @anthropic-ai/claude-code`. If global npm permissions are broken, fix the npm/Node environment first instead of forcing a privileged install.
+    </Warning>
+  </Step>
+
+  <Step title="Step 4: Create a dedicated Crazyrouter token for Claude Code">
+    Log in to Crazyrouter and create a separate token named something obvious like `claude-code`.
+
+    For the first pass, allow only:
+
+    - `claude-sonnet-4-6`
+    - `claude-opus-4-6`
+
+    Give it its own budget so it does not share spend with Cursor, Codex, or OpenClaw.
+  </Step>
+
+  <Step title="Step 5: Set temporary environment variables in the current terminal">
+    Start with a temporary setup first. Once validation succeeds, make it persistent.
+
+    <Tabs>
+      <Tab title="macOS / Linux">
+        ```bash
+        export ANTHROPIC_BASE_URL=https://crazyrouter.com
+        export ANTHROPIC_API_KEY=sk-xxx
+        echo $ANTHROPIC_BASE_URL
+        echo $ANTHROPIC_API_KEY
+        ```
+      </Tab>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        $env:ANTHROPIC_BASE_URL = "https://crazyrouter.com"
+        $env:ANTHROPIC_API_KEY = "sk-xxx"
+        echo $env:ANTHROPIC_BASE_URL
+        echo $env:ANTHROPIC_API_KEY
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="Step 6: Persist the environment variables">
+    Temporary variables disappear after the shell closes. For regular use, write them to your shell profile.
+
+    <Tabs>
+      <Tab title="Linux Bash">
+        ```bash
+        echo 'export ANTHROPIC_BASE_URL=https://crazyrouter.com' >> ~/.bashrc
+        echo 'export ANTHROPIC_API_KEY=sk-xxx' >> ~/.bashrc
+        source ~/.bashrc
+        ```
+      </Tab>
+      <Tab title="macOS / Zsh">
+        ```bash
+        echo 'export ANTHROPIC_BASE_URL=https://crazyrouter.com' >> ~/.zshrc
+        echo 'export ANTHROPIC_API_KEY=sk-xxx' >> ~/.zshrc
+        source ~/.zshrc
+        ```
+      </Tab>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        [System.Environment]::SetEnvironmentVariable("ANTHROPIC_BASE_URL", "https://crazyrouter.com", "User")
+        [System.Environment]::SetEnvironmentVariable("ANTHROPIC_API_KEY", "sk-xxx", "User")
+
+        $env:ANTHROPIC_BASE_URL = "https://crazyrouter.com"
+        $env:ANTHROPIC_API_KEY = "sk-xxx"
+        ```
+      </Tab>
+    </Tabs>
+
+    Then open a fresh terminal and re-check:
+
+    <Tabs>
+      <Tab title="macOS / Linux">
+        ```bash
+        claude --version
+        echo $ANTHROPIC_BASE_URL
+        ```
+      </Tab>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        claude --version
+        echo $env:ANTHROPIC_BASE_URL
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="Step 7: Prepare your Git repository">
+    Claude Code can edit files and run commands. For the first validation, use a repo you know well.
+
+    If the current folder is not a Git repo yet:
+
+    ```bash
+    git init
+    git add .
+    git commit -m "chore: initial snapshot before Claude Code"
+    ```
+
+    If it is already an existing repo, at least confirm the current state first:
+
+    ```bash
+    git status
+    ```
+  </Step>
+
+  <Step title="Step 8: Launch Claude Code and complete the first validation">
+    Enter the project directory and run:
+
+    ```bash
+    cd /path/to/your/project
+    claude
+    ```
+
+    For the first validation, use this order:
+
+    1. `Reply with only OK`
+    2. `Read the current repository structure only. Do not modify any files.`
+    3. `Find obvious typos in the README, but do not edit files yet.`
+
+    If all three work and Crazyrouter logs show matching requests, the setup is good.
+  </Step>
+</Steps>
+
+## Recommended Model Setup
+
+| Use case | Recommended model | Why |
+|----------|-------------------|-----|
+| default daily driver | `claude-sonnet-4-6` | best balance of quality, speed, and cost for most coding tasks |
+| difficult refactors | `claude-opus-4-6` | stronger complex reasoning, planning, and code understanding |
+| long-context repo analysis | `claude-sonnet-4-6` | stable and strong for long sessions |
+| cost-sensitive first validation | `claude-sonnet-4-6` | first get the main path working reliably |
+
+Recommended rollout: stabilize normal work on `claude-sonnet-4-6`, then switch to `claude-opus-4-6` only for genuinely heavier tasks.
+
+## Token Setup Best Practices
+
+| Setting | Recommendation | Notes |
+|---------|----------------|-------|
+| dedicated token | Required | Do not share Claude Code tokens with Cursor, Codex, or OpenClaw |
+| model allowlist | Strongly recommended | Most Claude Code setups only need 1 to 2 Claude models |
+| IP restriction | Recommended on fixed-egress environments | Be careful on laptops with changing IPs |
+| quota cap | Strongly recommended | Long sessions and tool use can steadily consume budget |
+| developer / host split | Recommended | Give each developer or shared host its own token |
+| incident rotation | Required | If shell history, recordings, or shared terminals expose the token, rotate it immediately |
+
+## Verification Checklist
+
+- [ ] `git --version` works
+- [ ] `node -v` is at least 18
+- [ ] `claude --version` works
+- [ ] `ANTHROPIC_BASE_URL` is set to `https://crazyrouter.com`
+- [ ] `ANTHROPIC_API_KEY` is set correctly
+- [ ] Claude Code launches successfully
+- [ ] the first plain-text request succeeds
+- [ ] repository read-only inspection works
+- [ ] Crazyrouter logs show the Claude Code traffic
+- [ ] token quota and model allowlist match your intended setup
+
+## Common Errors And Fixes
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| `claude: command not found` | Claude Code did not install cleanly, or the npm global path is not on PATH | reinstall and make sure the global npm bin directory is in PATH |
+| Node version is too old | local Node.js version is below the requirement | upgrade to Node.js 18+ and reinstall Claude Code |
+| `401 unauthorized` | invalid, expired, or badly pasted `ANTHROPIC_API_KEY` | create a new token and set the variables again |
+| `403` or `model not allowed` | the token does not allow the selected Claude model | allow the required model in Crazyrouter |
+| `404` | base URL was set with `/v1` or `/v1/messages` | reset it to `https://crazyrouter.com` |
+| Claude Code still uses old settings | new environment variables were not reloaded | reopen the terminal or run `source ~/.bashrc` / `source ~/.zshrc` |
+| Git changes become messy | no repository snapshot was created before AI edits | commit an initial snapshot before larger changes |
+| cost is higher than expected | long context, repeated tool use, and long sessions | shorten sessions, split tasks, and cap budget per token |
+
+## Performance And Cost Tips
+
+- start with `claude-sonnet-4-6`
+- switch to `claude-opus-4-6` only for hard architecture analysis or heavy refactors
+- validate first in a small repo, not a large production repo
+- check `git status` before each new task
+- watch Crazyrouter logs and quota more closely when tool use becomes frequent
+
+## FAQ
+
+### Which base URL should I use for Claude Code?
+
+Use the site root: `https://crazyrouter.com`
+
+### Why should I not include `/v1` here?
+
+Because Claude Code appends the Anthropic Messages path itself. You only provide the site root.
+
+### What should I use on Windows?
+
+If you mainly develop from the command line, prefer PowerShell or WSL2. In either case, make sure Git, Node.js, and Claude Code itself are installed correctly first.
+
+### On Windows, should I use PowerShell or Git Bash?
+
+For first-time setup, prefer PowerShell. Environment-variable persistence, `where.exe` checks, and user-level configuration are all more direct there.
+
+### Why should I create a Git snapshot before the first real task?
+
+Because Claude Code can edit files and run commands. A clean snapshot makes review and rollback much easier.
+
+### Which model should I try first?
+
+Start with `claude-sonnet-4-6`. It is usually the safest baseline.
+
+<Note>
+If your first priority is Claude-family models plus a terminal-first coding workflow, Claude Code should be near the front of your Crazyrouter integration order.
+</Note>

@@ -1,0 +1,142 @@
+---
+title: "Reasoning"
+description: "Production-verified reasoning and thinking with the latest GPT, Claude, and Gemini models"
+---
+
+# Reasoning
+
+This page only documents reasoning flows that were **verified with real requests against Crazyrouter production**.
+
+Verification date:
+
+- `2026-03-22`
+
+Verified models:
+
+- `gpt-5.4`
+- `claude-opus-4-6-thinking`
+- `gemini-3-pro-preview`
+
+## Verified matrix
+
+| Model | Protocol | Endpoint | Success marker |
+|------|------|------|----------|
+| `gpt-5.4` | OpenAI Responses | `POST /v1/responses` | `output` includes a `reasoning` item |
+| `claude-opus-4-6-thinking` | Anthropic Messages | `POST /v1/messages` | Returns `thinking` block |
+| `gemini-3-pro-preview` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | `usageMetadata` includes `thoughtsTokenCount` |
+
+## GPT-5.4
+
+```bash
+curl https://crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.4",
+    "input": "Which is larger, 9.11 or 9.9? Explain briefly.",
+    "reasoning": {
+      "effort": "high",
+      "summary": "detailed"
+    }
+  }'
+```
+
+Verified output types:
+
+```json
+["reasoning", "message"]
+```
+
+Verified `reasoning` item shape:
+
+```json
+{
+  "type": "reasoning",
+  "summary": [
+    {
+      "type": "summary_text",
+      "text": "..."
+    }
+  ]
+}
+```
+
+## Claude Opus 4.6 Thinking
+
+```bash
+curl https://crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-opus-4-6-thinking",
+    "max_tokens": 320,
+    "thinking": {
+      "type": "enabled",
+      "budget_tokens": 128
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Which is larger, 9.11 or 9.9? Explain briefly."
+      }
+    ]
+  }'
+```
+
+Verified response shape:
+
+```json
+{
+  "content": [
+    {
+      "type": "thinking"
+    },
+    {
+      "type": "text"
+    }
+  ]
+}
+```
+
+## Gemini 3 Pro Preview
+
+```bash
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Which is larger, 9.11 or 9.9? Explain briefly."
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "thinkingConfig": {
+        "thinkingBudget": 256
+      },
+      "maxOutputTokens": 512
+    }
+  }'
+```
+
+Verified production field:
+
+- `usageMetadata.thoughtsTokenCount`
+
+## Current exclusions
+
+- In the current recheck, `gpt-5.4` via Chat Completions did not reliably surface `reasoning_content`, so this page uses the Responses API as the primary GPT example
+- Base `claude-opus-4-6` did not return a thinking block in this verification round
+
+## See Also
+
+- [OpenAI Reasoning](/ru/chat/openai/reasoning)
+- [GPT-5 Thinking](/ru/chat/responses/gpt5-thinking)
+- [Thinking Fields](/ru/reference/thinking)
+- [Claude Native Messages](/ru/chat/anthropic/messages)
+- [Gemini Native API](/ru/chat/gemini/native)

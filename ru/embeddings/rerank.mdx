@@ -1,0 +1,129 @@
+---
+title: 'Rerank'
+description: 'Semantically rerank search results'
+api: 'POST /v1/rerank'
+---
+
+## Overview
+
+Reorder a set of documents by semantic relevance to a query. Commonly used as the second-stage reranking step in RAG (Retrieval-Augmented Generation) pipelines.
+
+<Note>
+  Implemented following the [SiliconFlow Rerank API](https://docs.siliconflow.cn/cn/api-reference/rerank/create-rerank) format.
+</Note>
+
+## Supported Models
+
+| Model | Description |
+|-------|-------------|
+| `BAAI/bge-reranker-v2-m3` | Multilingual reranking model, recommended |
+| `BAAI/bge-reranker-large` | Primarily English |
+
+## Request Parameters
+
+<ParamField body="model" type="string" required>
+  Reranking model name, e.g. `BAAI/bge-reranker-v2-m3`
+</ParamField>
+
+<ParamField body="query" type="string" required>
+  Query text
+</ParamField>
+
+<ParamField body="documents" type="string[]" required>
+  List of documents to rerank
+</ParamField>
+
+<ParamField body="top_n" type="integer">
+  Return the top N results. Defaults to returning all
+</ParamField>
+
+<ParamField body="return_documents" type="boolean" default="true">
+  Whether to include the original document text in the response
+</ParamField>
+
+## Response Format
+
+```json
+{
+  "model": "BAAI/bge-reranker-v2-m3",
+  "results": [
+    {
+      "index": 2,
+      "relevance_score": 0.9875,
+      "document": { "text": "Most relevant document content" }
+    },
+    {
+      "index": 0,
+      "relevance_score": 0.7432,
+      "document": { "text": "Second most relevant document content" }
+    },
+    {
+      "index": 1,
+      "relevance_score": 0.1205,
+      "document": { "text": "Less relevant document content" }
+    }
+  ],
+  "usage": {
+    "total_tokens": 128
+  }
+}
+```
+
+## Code Examples
+
+<CodeGroup>
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/v1/rerank",
+    headers={
+        "Authorization": "Bearer sk-xxx",
+        "Content-Type": "application/json"
+    },
+    json={
+        "model": "BAAI/bge-reranker-v2-m3",
+        "query": "What is a vector database",
+        "documents": [
+            "A vector database is a database system specialized for storing and retrieving high-dimensional vectors",
+            "Relational databases use tables to store structured data",
+            "Vector databases support approximate nearest neighbor search, suitable for semantic retrieval scenarios",
+            "Redis is an in-memory key-value store"
+        ],
+        "top_n": 2,
+        "return_documents": True
+    }
+)
+
+data = response.json()
+for result in data["results"]:
+    print(f"[{result['relevance_score']:.4f}] {result['document']['text']}")
+```
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/rerank \
+  -H "Authorization: Bearer sk-xxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "BAAI/bge-reranker-v2-m3",
+    "query": "What is a vector database",
+    "documents": [
+      "A vector database is a database system specialized for storing and retrieving high-dimensional vectors",
+      "Relational databases use tables to store structured data"
+    ],
+    "top_n": 2
+  }'
+```
+
+</CodeGroup>
+
+## Typical RAG Pipeline
+
+```
+User Query → Embedding Retrieval Top-K → Rerank → LLM Generates Answer
+```
+
+<Warning>
+  The number of input documents for reranking should not exceed 100. Too many documents will increase latency and cost.
+</Warning>

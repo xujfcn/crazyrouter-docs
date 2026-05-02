@@ -1,0 +1,107 @@
+---
+title: 'Create Embeddings'
+description: 'Convert text into vector representations'
+api: 'POST /v1/embeddings'
+---
+
+## Overview
+
+Convert input text into high-dimensional vectors for use in semantic search, clustering, recommendations, and more. Fully compatible with the OpenAI Embeddings API format.
+
+## Supported Models
+
+| Model | Dimensions | Description |
+|-------|-----------|-------------|
+| `text-embedding-3-large` | 3072 | High accuracy, recommended for production |
+| `text-embedding-3-small` | 1536 | Cost-effective |
+| `text-embedding-ada-002` | 1536 | Classic model |
+
+## Request Parameters
+
+<ParamField body="model" type="string" required>
+  Embedding model name, e.g. `text-embedding-3-large`
+</ParamField>
+
+<ParamField body="input" type="string | string[]" required>
+  Text to embed. Supports a single string or an array of strings
+</ParamField>
+
+<ParamField body="encoding_format" type="string" default="float">
+  Return format: `float` or `base64`
+</ParamField>
+
+<ParamField body="dimensions" type="integer">
+  Output vector dimensions (only supported by `text-embedding-3-*` models)
+</ParamField>
+
+## Response Format
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "object": "embedding",
+      "index": 0,
+      "embedding": [0.0023064255, -0.009327292, ...]
+    }
+  ],
+  "model": "text-embedding-3-large",
+  "usage": {
+    "prompt_tokens": 8,
+    "total_tokens": 8
+  }
+}
+```
+
+## Code Examples
+
+<CodeGroup>
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://crazyrouter.com/v1"
+)
+
+response = client.embeddings.create(
+    model="text-embedding-3-large",
+    input="Crazyrouter is an AI model gateway"
+)
+
+embedding = response.data[0].embedding
+print(f"Vector dimensions: {len(embedding)}")
+print(f"First 5 values: {embedding[:5]}")
+```
+
+```python Python (Batch)
+response = client.embeddings.create(
+    model="text-embedding-3-large",
+    input=[
+        "First text",
+        "Second text",
+        "Third text"
+    ]
+)
+
+for item in response.data:
+    print(f"Index {item.index}: dimensions {len(item.embedding)}")
+```
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/embeddings \
+  -H "Authorization: Bearer sk-xxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "text-embedding-3-large",
+    "input": "Crazyrouter is an AI model gateway"
+  }'
+```
+
+</CodeGroup>
+
+<Note>
+  Batch requests support up to 2048 texts per call. Each text should not exceed 8191 tokens.
+</Note>

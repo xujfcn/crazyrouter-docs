@@ -1,0 +1,74 @@
+---
+title: 'API endpoints'
+description: 'Адреса API endpoints и справочник'
+---
+
+## Базовый URL API
+
+```
+https://crazyrouter.com
+```
+
+## Основные endpoints
+
+### Chat API
+
+| Endpoint | Метод | Описание |
+|----------|-------|----------|
+| `/v1/chat/completions` | POST | Формат OpenAI Chat |
+| `/v1/messages` | POST | Формат Anthropic Claude |
+| `/v1/responses` | POST | OpenAI Responses API |
+| `/v1/completions` | POST | Legacy Completions |
+
+### Нативный формат Gemini
+
+| Endpoint | Метод | Описание |
+|----------|-------|----------|
+| `/v1beta/models/{model}:generateContent` | POST | Генерация контента |
+| `/v1beta/models/{model}:streamGenerateContent` | POST | Потоковая генерация |
+
+### Image API
+
+| Endpoint | Метод | Описание |
+|----------|-------|----------|
+| `/v1/images/generations` | POST | Генерация изображений OpenAI |
+| `/v1/images/edits` | POST | Редактирование изображений |
+| `/mj/submit/imagine` | POST | Генерация изображений Midjourney |
+| `/ideogram/v1/ideogram-v3/generate` | POST | Ideogram V3 |
+| `/kling/v1/images/generations` | POST | Генерация изображений Kling |
+| `/kling/v1/images/kolors-virtual-try-on` | POST | Kling virtual try-on |
+
+### Video API
+
+| Endpoint | Метод | Описание |
+|----------|-------|----------|
+| `/v1/video/create` | POST | Единое создание видео |
+| `/v1/video/query` | GET | Единый запрос статуса видео |
+| `/kling/v1/videos/text2video` | POST | Kling text-to-video |
+| `/kling/v1/videos/image2video` | POST | Kling image-to-video |
+| `/kling/v1/videos/multi-image2video` | POST | Видео Kling с несколькими референсами |
+| `/kling/v1/videos/omni-video` | POST | Kling omni-video |
+| `/jimeng/submit/videos` | POST | Отправка задачи Jimeng |
+| `/jimeng/fetch/{task_id}` | GET | Запрос задачи Jimeng |
+| `/luma/generations` | POST | Генерация видео Luma |
+| `/runwayml/v1/tasks` | POST | Генерация видео Runway |
+
+### Audio API
+
+| Endpoint | Метод | Описание |
+|----------|-------|----------|
+| `/v1/audio/speech` | POST | Text-to-Speech (TTS) |
+| `/v1/audio/transcriptions` | POST | Speech-to-Text (STT) |
+| `/suno/submit/music` | POST | Генерация музыки Suno |
+
+### Другие API
+
+| Endpoint | Метод | Описание |
+|----------|-------|----------|
+| `/v1/embeddings` | POST | Embeddings |
+| `/v1/rerank` | POST | Reranking |
+| `/v1/models` | GET | Список моделей |
+
+<Note>
+Все endpoints поддерживают HTTPS. При использовании OpenAI-совместимого клиента просто установите `base_url` в `https://crazyrouter.com/v1`.
+</Note>

@@ -1,0 +1,46 @@
+---
+title: 'Введение'
+description: 'Crazyrouter - единый API-шлюз для AI-моделей'
+---
+
+Crazyrouter - это API-шлюз для AI-моделей, который дает единый доступ к 300+ моделям. Он поддерживает основные AI-сервисы, включая OpenAI, Anthropic Claude, Google Gemini, Midjourney, Suno, Kling и другие.
+
+## Основные возможности
+
+- **Единый интерфейс**: доступ ко всем моделям через один API-ключ
+- **Поддержка разных форматов**: совместимость с OpenAI, Anthropic и нативным форматом Gemini
+- **300+ моделей**: чат, изображения, видео, аудио, музыка, embeddings и rerank
+- **Оплата по факту использования**: гибкая тарификация на основе токенов
+- **Умная маршрутизация**: автоматический выбор оптимального канала и failover
+
+## Поддерживаемые типы API
+
+| Тип | Описание | Примеры моделей |
+|-----|----------|-----------------|
+| Chat Completions | Текстовый диалог, зрение, reasoning | GPT-4o, Claude Opus, Gemini Pro |
+| Генерация изображений | Text-to-image, редактирование изображений | DALL-E 3, Midjourney, Flux, Ideogram |
+| Генерация видео | Text-to-video, image-to-video | Sora, Kling, Luma, Veo 3.1, Runway |
+| Обработка аудио | TTS, STT | GPT-4o-mini-tts, Whisper |
+| Генерация музыки | Создание песен | Suno |
+| Embeddings | Векторизация текста | text-embedding-3-large |
+| Rerank | Переранжирование результатов поиска | BAAI/bge-reranker-v2-m3 |
+
+## Начать работу
+
+<CardGroup cols={2}>
+  <Card title="Быстрый старт" icon="rocket" href="/ru/quickstart">
+    Выполните первый API-вызов за 5 минут
+  </Card>
+  <Card title="API endpoints" icon="globe" href="/ru/api-endpoint">
+    Посмотрите доступные адреса API endpoints
+  </Card>
+  <Card title="Аутентификация" icon="key" href="/ru/authentication">
+    Узнайте, как получить и использовать API-ключ
+  </Card>
+  <Card title="Цены моделей" icon="tag" href="https://crazyrouter.com/pricing">
+    Посмотрите цены для всех моделей
+  </Card>
+  <Card title="Статус сервиса" icon="signal-stream" href="https://crazyrouter.com/status">
+    Проверьте текущий статус Crazyrouter
+  </Card>
+</CardGroup>

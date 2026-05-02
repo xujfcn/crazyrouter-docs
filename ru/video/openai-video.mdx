@@ -1,0 +1,175 @@
+---
+title: "OpenAI Video Format"
+description: "Use the OpenAI-compatible video API format to create, query, and download videos"
+---
+
+# OpenAI Video Format
+
+Crazyrouter supports the official OpenAI video API format, compatible with the OpenAI SDK.
+
+## Create Video
+
+```
+POST /v1/videos
+```
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model` | string | Yes | Model name, e.g. `sora`, `sora-pro` |
+| `prompt` | string | Yes | Video description prompt |
+| `size` | string | No | Video size: `1920x1080`, `1080x1920`, `1080x1080` |
+| `duration` | integer | No | Video duration (seconds) |
+| `image_url` | string | No | Reference image URL |
+| `storyboard` | array | No | Storyboard script |
+| `private` | boolean | No | Whether to use private mode |
+
+### Request Examples
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/videos \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "sora",
+    "prompt": "A timelapse of a city skyline from day to night, clouds moving quickly",
+    "size": "1920x1080",
+    "duration": 10
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/v1/videos",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "sora",
+        "prompt": "A timelapse of a city skyline from day to night",
+        "size": "1920x1080",
+        "duration": 10
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### Response Example
+
+```json
+{
+  "id": "video_abc123",
+  "object": "video",
+  "status": "processing",
+  "created_at": 1709123456
+}
+```
+
+---
+
+## Query Video
+
+```
+GET /v1/videos/{id}
+```
+
+```bash cURL
+curl https://crazyrouter.com/v1/videos/video_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Response Example (Completed)
+
+```json
+{
+  "id": "video_abc123",
+  "object": "video",
+  "status": "completed",
+  "created_at": 1709123456,
+  "video": {
+    "url": "https://crazyrouter.com/files/video_abc123.mp4",
+    "duration": 10,
+    "width": 1920,
+    "height": 1080
+  }
+}
+```
+
+---
+
+## Download Video
+
+```
+GET /v1/videos/{id}/content
+```
+
+Download the video file directly.
+
+```bash cURL
+curl -o output.mp4 https://crazyrouter.com/v1/videos/video_abc123/content \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+---
+
+## Edit Video
+
+Pass `image_url` in the create request for image-to-video:
+
+```json
+{
+  "model": "sora",
+  "prompt": "The scene comes to life with gentle movement",
+  "image_url": "https://example.com/scene.jpg",
+  "size": "1920x1080",
+  "duration": 5
+}
+```
+
+---
+
+## Storyboard
+
+```json
+{
+  "model": "sora",
+  "storyboard": [
+    {"prompt": "Wide shot of a forest at dawn", "duration": 3},
+    {"prompt": "A deer walks into frame", "duration": 4},
+    {"prompt": "Close-up of the deer looking at camera", "duration": 3}
+  ],
+  "size": "1920x1080"
+}
+```
+
+---
+
+## Private Mode
+
+Set `private: true` so the generated video won't appear in the public gallery:
+
+```json
+{
+  "model": "sora",
+  "prompt": "A confidential product demo video",
+  "size": "1920x1080",
+  "private": true
+}
+```
+
+### Task Status
+
+| Status | Description |
+|--------|-------------|
+| `processing` | Processing |
+| `completed` | Completed |
+| `failed` | Failed |

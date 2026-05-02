@@ -1,0 +1,135 @@
+---
+title: 'Status Codes'
+description: 'Status code reference for all API types'
+---
+
+## HTTP Status Codes
+
+| Status Code | Description | Recommended Action |
+|-------------|-------------|-------------------|
+| 200 | Request successful | - |
+| 400 | Bad request parameters | Check request body format and parameters |
+| 401 | Authentication failed | Check if API Key is correct |
+| 403 | Insufficient permissions | Check if the token has access to the requested model |
+| 404 | Resource not found | Check URL path |
+| 429 | Rate limit exceeded | Reduce request frequency or contact admin |
+| 500 | Server-side 5xx error | Safe to retry; may be an internal CrazyRouter error or an upstream 5xx relayed through CrazyRouter |
+| 502 | Gateway or upstream result retrieval failure | Usually means CrazyRouter reached the upstream stage but could not obtain a valid upstream response or result; safe to retry |
+| 503 | Service unavailable | System maintenance in progress |
+
+## Difference Between 500 and 502
+
+- `500` is broader. In CrazyRouter, it can mean either an internal server error on our side or an upstream `5xx` that was returned through our relay.
+- `502` is more specific. It usually means the request reached the gateway or upstream step, but CrazyRouter could not get a valid upstream response or fetch the upstream result, for example because the upstream was unavailable, returned an invalid gateway-level response, or the result URL could not be retrieved.
+- If the same issue keeps happening:
+  - frequent `502` errors usually point to upstream availability, connectivity, or result URL retrieval issues;
+  - frequent `500` errors need log-based classification, and only cases explicitly marked as site-internal or panic-type should be treated as a CrazyRouter-side defect.
+
+## Chat Completions Error Codes
+
+```json
+{
+  "error": {
+    "message": "Error description",
+    "type": "error_type",
+    "code": "error_code"
+  }
+}
+```
+
+| code | Description |
+|------|-------------|
+| `invalid_api_key` | API Key is invalid or expired |
+| `insufficient_quota` | Insufficient balance |
+| `model_not_found` | Model does not exist or is not enabled |
+| `context_length_exceeded` | Input exceeds model context length limit |
+| `rate_limit_exceeded` | Rate limit exceeded |
+| `content_filter` | Content blocked by safety filter |
+
+## Midjourney Task Status Codes
+
+| Status | Description |
+|--------|-------------|
+| `NOT_START` | Task not started |
+| `SUBMITTED` | Submitted |
+| `IN_PROGRESS` | Generating |
+| `SUCCESS` | Generation successful |
+| `FAILURE` | Generation failed |
+| `CANCEL` | Cancelled |
+
+### MJ Error Codes
+
+| code | Description |
+|------|-------------|
+| 1 | Submission successful |
+| 21 | Task already exists |
+| 22 | Queued |
+| 23 | Queue full |
+| 24 | Submission failed |
+
+## Kling Video Status Codes
+
+| Status | Description |
+|--------|-------------|
+| `queued` | Submitted or waiting in queue |
+| `processing` | Processing |
+| `succeeded` | Generation successful |
+| `failed` | Generation failed |
+
+## Jimeng Task Status Codes
+
+| Status | Description |
+|--------|-------------|
+| `queued` | Submitted or waiting in queue |
+| `processing` | Processing |
+| `succeeded` | Generation successful |
+| `failed` | Generation failed |
+
+## Luma Video Status Codes
+
+| Status | Description |
+|--------|-------------|
+| `pending` | Pending |
+| `processing` | Processing |
+| `completed` | Completed |
+| `failed` | Failed |
+
+## Suno Music Status Codes
+
+| Status | Description |
+|--------|-------------|
+| `submitted` | Submitted |
+| `processing` | Generating |
+| `complete` | Completed |
+| `error` | Error |
+
+## Runway Video Status Codes
+
+| Status | Description |
+|--------|-------------|
+| `PENDING` | Pending |
+| `RUNNING` | Generating |
+| `SUCCEEDED` | Succeeded |
+| `FAILED` | Failed |
+
+## General Error Handling Recommendations
+
+<Warning>
+  When encountering a 429 error, do not retry immediately. Use an exponential backoff strategy, starting with a 1-second wait and doubling each time.
+</Warning>
+
+```python
+import time
+import requests
+
+def request_with_retry(url, headers, json_data, max_retries=3):
+    for i in range(max_retries):
+        response = requests.post(url, headers=headers, json=json_data)
+        if response.status_code == 429:
+            wait = 2 ** i
+            print(f"Rate limited, waiting {wait} seconds before retrying...")
+            time.sleep(wait)
+            continue
+        return response
+    return response
+```

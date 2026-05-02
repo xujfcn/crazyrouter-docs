@@ -1,0 +1,181 @@
+---
+title: "Ideogram V3"
+description: "Use the Ideogram V3 API for image generation, editing, blending, reframing, and background replacement"
+---
+
+# Ideogram V3
+
+Ideogram V3 is the latest generation text-to-image model with significant improvements in text rendering and image quality.
+
+## Generate Image
+
+```
+POST /ideogram/v1/ideogram-v3/generate
+```
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `prompt` | string | Yes | Image description prompt |
+| `aspect_ratio` | string | No | Aspect ratio, e.g. `ASPECT_1_1`, `ASPECT_16_9`, `ASPECT_9_16` |
+| `model` | string | No | Model version, defaults to `V_3` |
+| `magic_prompt_option` | string | No | Prompt enhancement: `AUTO`, `ON`, `OFF` |
+| `rendering_speed` | string | No | Rendering speed: `DEFAULT`, `TURBO`, `QUALITY` |
+| `style_type` | string | No | Style type: `AUTO`, `GENERAL`, `REALISTIC`, `DESIGN` |
+| `negative_prompt` | string | No | Negative prompt |
+
+### Request Examples
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/ideogram/v1/ideogram-v3/generate \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "A serene Japanese garden with cherry blossoms, text saying \"Hello World\" on a wooden sign",
+    "aspect_ratio": "ASPECT_16_9",
+    "rendering_speed": "DEFAULT",
+    "style_type": "REALISTIC"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/ideogram/v1/ideogram-v3/generate",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "prompt": "A serene Japanese garden with cherry blossoms",
+        "aspect_ratio": "ASPECT_16_9",
+        "style_type": "REALISTIC"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### Response Example
+
+```json
+{
+  "created": 1709123456,
+  "data": [
+    {
+      "url": "https://ideogram.ai/assets/image/...",
+      "prompt": "A serene Japanese garden with cherry blossoms",
+      "resolution": "1344x768",
+      "is_image_safe": true,
+      "seed": 12345
+    }
+  ]
+}
+```
+
+---
+
+## Edit Image
+
+```
+POST /ideogram/v1/ideogram-v3/edit
+```
+
+Edit and modify an existing image.
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `prompt` | string | Yes | Edit description |
+| `image` | string | Yes | Original image URL or Base64 |
+| `mask` | string | No | Mask image, marking the area to be edited |
+| `style_type` | string | No | Style type |
+
+```bash cURL
+curl -X POST https://crazyrouter.com/ideogram/v1/ideogram-v3/edit \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "Replace the sky with a starry night",
+    "image": "https://example.com/photo.jpg",
+    "mask": "https://example.com/mask.png"
+  }'
+```
+
+---
+
+## Remix Image
+
+```
+POST /ideogram/v1/ideogram-v3/remix
+```
+
+Generate variations based on a reference image and new prompt.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `prompt` | string | Yes | New prompt |
+| `image` | string | Yes | Reference image |
+| `image_weight` | number | No | Reference image weight, 0-100 |
+
+```bash cURL
+curl -X POST https://crazyrouter.com/ideogram/v1/ideogram-v3/remix \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "Same scene but in watercolor painting style",
+    "image": "https://example.com/photo.jpg",
+    "image_weight": 50
+  }'
+```
+
+---
+
+## Reframe
+
+```
+POST /ideogram/v1/ideogram-v3/reframe
+```
+
+Expand the image canvas, generating content beyond the original boundaries.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `image` | string | Yes | Original image |
+| `resolution` | string | No | Target resolution |
+
+---
+
+## Replace Background
+
+```
+POST /ideogram/v1/ideogram-v3/replace-background
+```
+
+Automatically detect the subject and replace the background.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `prompt` | string | Yes | New background description |
+| `image` | string | Yes | Original image |
+
+```bash cURL
+curl -X POST https://crazyrouter.com/ideogram/v1/ideogram-v3/replace-background \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "A tropical beach at sunset",
+    "image": "https://example.com/portrait.jpg"
+  }'
+```
+
+<Note>
+  Ideogram V3 excels at text rendering, making it ideal for scenarios that require text within images.
+</Note>
