@@ -1,0 +1,117 @@
+---
+title: 'Hermes Agent 配置'
+description: '在 Hermes Agent 中配置 Crazyrouter，使用 OpenAI 兼容地址访问 627+ AI 模型'
+icon: 'bot'
+---
+
+通过 [crazyrouter-hermes](https://github.com/xujfcn/crazyrouter-hermes) 可以把 [Hermes Agent](https://github.com/NousResearch/Hermes-Agent) 的模型后端切到 Crazyrouter。配置完成后，Hermes 会使用 `https://crazyrouter.com/v1` 作为 OpenAI 兼容接口，并通过一个 Crazyrouter API Key 调用 Claude、GPT、DeepSeek、Gemini、Qwen 等 627+ 模型。
+
+## 适合谁用
+
+- 已经安装 Hermes Agent，想直接接入 Crazyrouter 的用户
+- 想在本地 Agent 中统一使用 Crazyrouter 模型和额度的用户
+- 想用一条命令完成 `OPENAI_API_KEY`、`OPENAI_BASE_URL` 和默认模型配置的用户
+
+## 前置条件
+
+| 项目 | 说明 |
+|------|------|
+| Hermes Agent | 先在本机安装并确认 Hermes 可启动 |
+| Crazyrouter 账号 | 在 [crazyrouter.com](https://crazyrouter.com) 注册 |
+| Crazyrouter API Key | 建议为 Hermes 单独创建一个 `sk-...` token |
+| 模型权限 | 在 token 里放行你准备在 Hermes 中使用的模型 |
+
+<Tip>
+Hermes 使用 OpenAI 兼容配置接入 Crazyrouter，基础地址固定为 `https://crazyrouter.com/v1`。
+</Tip>
+
+## 一键配置
+
+<Tabs>
+  <Tab title="Linux / macOS / WSL2">
+    ```bash
+    curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup.sh | bash
+    ```
+  </Tab>
+  <Tab title="Windows PowerShell">
+    ```powershell
+    irm https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup.ps1 | iex
+    ```
+  </Tab>
+  <Tab title="Windows CMD">
+    ```bat
+    curl -o setup.bat https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup.bat
+    setup.bat
+    ```
+  </Tab>
+</Tabs>
+
+脚本会引导你输入 Crazyrouter API Key、选择默认模型，并可选测试连接。
+
+<Warning>
+一键脚本会写入本机 Hermes 配置。运行前建议先备份已有的 `~/.hermes/.env` 和 `~/.hermes/config.yaml`。
+</Warning>
+
+## 手动配置
+
+如果你不想运行脚本，也可以手动写入 Hermes 配置文件。
+
+### 环境变量
+
+编辑 `~/.hermes/.env`：
+
+```bash
+OPENAI_API_KEY=sk-your-crazyrouter-key
+OPENAI_BASE_URL=https://crazyrouter.com/v1
+```
+
+### 默认模型
+
+编辑 `~/.hermes/config.yaml`：
+
+```yaml
+model:
+  provider: "custom"
+  default: "claude-opus-4-7"
+  base_url: "https://crazyrouter.com/v1"
+```
+
+把 `default` 改成你在 Crazyrouter token 中已放行的模型即可。
+
+## 切换模型
+
+配置完成后，可以在 Hermes 内随时用 `/model` 切换模型：
+
+```text
+/model claude-opus-4-7
+/model gpt-5.4
+/model claude-sonnet-4.6
+/model gemini-3.1-pro
+/model deepseek-chat
+/model qwen-max
+/model gpt-4o
+```
+
+如果切换后返回 `model not allowed` 或 `403`，通常是当前 Crazyrouter token 没有放行该模型。
+
+## 验证清单
+
+- [ ] `~/.hermes/.env` 中的 `OPENAI_API_KEY` 是有效的 Crazyrouter token
+- [ ] `OPENAI_BASE_URL` 是 `https://crazyrouter.com/v1`
+- [ ] `~/.hermes/config.yaml` 中 `provider` 为 `custom`
+- [ ] 默认模型已在 Crazyrouter token 中放行
+- [ ] Hermes 中发送测试消息可以正常返回
+- [ ] `/model gpt-5.4` 或其他已放行模型可以切换成功
+
+## 常见问题
+
+| 现象 | 常见原因 | 处理方式 |
+|------|----------|----------|
+| 401 unauthorized | API Key 写错、过期或被重置 | 重新生成 Crazyrouter token 并更新 `~/.hermes/.env` |
+| 403 / model not allowed | token 未放行当前模型 | 在 Crazyrouter token 设置中放行对应模型 |
+| 仍然走旧服务商 | Hermes 未读取新配置，或配置文件路径不对 | 重启 Hermes，并检查 `~/.hermes/.env`、`~/.hermes/config.yaml` |
+| 连接超时 | 本机网络无法访问 Crazyrouter | 检查网络代理、防火墙和 DNS |
+
+<Card title="查看 crazyrouter-hermes 仓库" icon="github" href="https://github.com/xujfcn/crazyrouter-hermes">
+  查看一键配置脚本、手动配置示例和最新说明。
+</Card>

@@ -1,0 +1,117 @@
+---
+title: 'Hermes Agent Setup'
+description: 'Configure Hermes Agent with Crazyrouter and use 627+ AI models through the OpenAI-compatible endpoint'
+icon: 'bot'
+---
+
+Use [crazyrouter-hermes](https://github.com/xujfcn/crazyrouter-hermes) to point [Hermes Agent](https://github.com/NousResearch/Hermes-Agent) at Crazyrouter. After setup, Hermes uses `https://crazyrouter.com/v1` as its OpenAI-compatible endpoint and calls Claude, GPT, DeepSeek, Gemini, Qwen, and 627+ other models through a single Crazyrouter API key.
+
+## Best For
+
+- Hermes Agent users who want to use Crazyrouter as the model provider
+- local agent workflows that should share Crazyrouter models and quota
+- users who want a one-command setup for `OPENAI_API_KEY`, `OPENAI_BASE_URL`, and the default model
+
+## Prerequisites
+
+| Item | Notes |
+|------|-------|
+| Hermes Agent | Install Hermes locally and confirm it can start |
+| Crazyrouter account | Create one at [crazyrouter.com](https://crazyrouter.com) |
+| Crazyrouter API key | Create a dedicated `sk-...` token for Hermes |
+| Model access | Allow the models you plan to use in that token |
+
+<Tip>
+Hermes connects to Crazyrouter through OpenAI-compatible settings. Keep the base URL as `https://crazyrouter.com/v1`.
+</Tip>
+
+## One-Click Setup
+
+<Tabs>
+  <Tab title="Linux / macOS / WSL2">
+    ```bash
+    curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup.sh | bash
+    ```
+  </Tab>
+  <Tab title="Windows PowerShell">
+    ```powershell
+    irm https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup.ps1 | iex
+    ```
+  </Tab>
+  <Tab title="Windows CMD">
+    ```bat
+    curl -o setup.bat https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup.bat
+    setup.bat
+    ```
+  </Tab>
+</Tabs>
+
+The script prompts for your Crazyrouter API key, lets you choose a default model, and can optionally test the connection.
+
+<Warning>
+The setup script writes local Hermes config. Back up `~/.hermes/.env` and `~/.hermes/config.yaml` first if you already have custom settings.
+</Warning>
+
+## Manual Setup
+
+If you prefer not to run the script, write the Hermes config manually.
+
+### Environment Variables
+
+Edit `~/.hermes/.env`:
+
+```bash
+OPENAI_API_KEY=sk-your-crazyrouter-key
+OPENAI_BASE_URL=https://crazyrouter.com/v1
+```
+
+### Default Model
+
+Edit `~/.hermes/config.yaml`:
+
+```yaml
+model:
+  provider: "custom"
+  default: "claude-opus-4-7"
+  base_url: "https://crazyrouter.com/v1"
+```
+
+Change `default` to any model allowed by your Crazyrouter token.
+
+## Switch Models
+
+After setup, switch models inside Hermes with `/model`:
+
+```text
+/model claude-opus-4-7
+/model gpt-5.4
+/model claude-sonnet-4.6
+/model gemini-3.1-pro
+/model deepseek-chat
+/model qwen-max
+/model gpt-4o
+```
+
+If switching returns `model not allowed` or `403`, the current Crazyrouter token usually does not allow that model.
+
+## Verification Checklist
+
+- [ ] `OPENAI_API_KEY` in `~/.hermes/.env` is a valid Crazyrouter token
+- [ ] `OPENAI_BASE_URL` is `https://crazyrouter.com/v1`
+- [ ] `provider` in `~/.hermes/config.yaml` is `custom`
+- [ ] the default model is allowed by the Crazyrouter token
+- [ ] Hermes can return a test response
+- [ ] `/model gpt-5.4` or another allowed model switches successfully
+
+## Common Issues
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| `401 unauthorized` | API key is wrong, expired, or rotated | create a new Crazyrouter token and update `~/.hermes/.env` |
+| `403` or `model not allowed` | the token does not allow the selected model | allow that model in the Crazyrouter token settings |
+| Hermes still uses the old provider | Hermes did not reload config, or the wrong config path was edited | restart Hermes and check `~/.hermes/.env` plus `~/.hermes/config.yaml` |
+| Connection timeout | local network cannot reach Crazyrouter | check proxy, firewall, and DNS settings |
+
+<Card title="View the crazyrouter-hermes repository" icon="github" href="https://github.com/xujfcn/crazyrouter-hermes">
+  Review the setup scripts, manual config example, and latest notes.
+</Card>

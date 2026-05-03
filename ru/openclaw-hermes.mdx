@@ -1,0 +1,117 @@
+---
+title: 'Настройка Hermes Agent'
+description: 'Настройте Hermes Agent для работы с Crazyrouter и используйте 627+ AI-моделей через OpenAI-совместимый endpoint'
+icon: 'bot'
+---
+
+С помощью [crazyrouter-hermes](https://github.com/xujfcn/crazyrouter-hermes) можно переключить [Hermes Agent](https://github.com/NousResearch/Hermes-Agent) на Crazyrouter как провайдера моделей. После настройки Hermes использует `https://crazyrouter.com/v1` как OpenAI-совместимый endpoint и вызывает Claude, GPT, DeepSeek, Gemini, Qwen и 627+ других моделей через один API Key Crazyrouter.
+
+## Кому подходит
+
+- пользователям Hermes Agent, которые хотят использовать Crazyrouter как провайдера моделей
+- локальным agent-сценариям, где модели и квоты должны управляться через Crazyrouter
+- тем, кто хочет одной командой настроить `OPENAI_API_KEY`, `OPENAI_BASE_URL` и модель по умолчанию
+
+## Требования
+
+| Пункт | Описание |
+|------|----------|
+| Hermes Agent | Установите Hermes локально и убедитесь, что он запускается |
+| Аккаунт Crazyrouter | Создайте аккаунт на [crazyrouter.com](https://crazyrouter.com) |
+| Crazyrouter API Key | Рекомендуется создать отдельный `sk-...` token для Hermes |
+| Доступ к моделям | Разрешите в token модели, которые планируете использовать |
+
+<Tip>
+Hermes подключается к Crazyrouter через OpenAI-совместимые настройки. Base URL должен быть `https://crazyrouter.com/v1`.
+</Tip>
+
+## Настройка одной командой
+
+<Tabs>
+  <Tab title="Linux / macOS / WSL2">
+    ```bash
+    curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup.sh | bash
+    ```
+  </Tab>
+  <Tab title="Windows PowerShell">
+    ```powershell
+    irm https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup.ps1 | iex
+    ```
+  </Tab>
+  <Tab title="Windows CMD">
+    ```bat
+    curl -o setup.bat https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup.bat
+    setup.bat
+    ```
+  </Tab>
+</Tabs>
+
+Скрипт попросит ввести Crazyrouter API Key, выбрать модель по умолчанию и при необходимости проверить соединение.
+
+<Warning>
+Скрипт записывает локальную конфигурацию Hermes. Если у вас уже есть свои настройки, сначала сделайте резервную копию `~/.hermes/.env` и `~/.hermes/config.yaml`.
+</Warning>
+
+## Ручная настройка
+
+Если вы не хотите запускать скрипт, настройте Hermes вручную.
+
+### Переменные окружения
+
+Отредактируйте `~/.hermes/.env`:
+
+```bash
+OPENAI_API_KEY=sk-your-crazyrouter-key
+OPENAI_BASE_URL=https://crazyrouter.com/v1
+```
+
+### Модель по умолчанию
+
+Отредактируйте `~/.hermes/config.yaml`:
+
+```yaml
+model:
+  provider: "custom"
+  default: "claude-opus-4-7"
+  base_url: "https://crazyrouter.com/v1"
+```
+
+Замените `default` на любую модель, разрешенную в вашем Crazyrouter token.
+
+## Переключение моделей
+
+После настройки переключайте модели внутри Hermes с помощью `/model`:
+
+```text
+/model claude-opus-4-7
+/model gpt-5.4
+/model claude-sonnet-4.6
+/model gemini-3.1-pro
+/model deepseek-chat
+/model qwen-max
+/model gpt-4o
+```
+
+Если при переключении появляется `model not allowed` или `403`, обычно выбранная модель не разрешена в текущем Crazyrouter token.
+
+## Чеклист проверки
+
+- [ ] `OPENAI_API_KEY` в `~/.hermes/.env` является действительным Crazyrouter token
+- [ ] `OPENAI_BASE_URL` равен `https://crazyrouter.com/v1`
+- [ ] `provider` в `~/.hermes/config.yaml` равен `custom`
+- [ ] модель по умолчанию разрешена в Crazyrouter token
+- [ ] Hermes отвечает на тестовое сообщение
+- [ ] `/model gpt-5.4` или другая разрешенная модель переключается успешно
+
+## Частые проблемы
+
+| Симптом | Вероятная причина | Решение |
+|---------|-------------------|---------|
+| `401 unauthorized` | API Key неверный, истек или был заменен | создайте новый Crazyrouter token и обновите `~/.hermes/.env` |
+| `403` или `model not allowed` | token не разрешает выбранную модель | разрешите модель в настройках Crazyrouter token |
+| Hermes все еще использует старого провайдера | Hermes не перечитал конфиг или был изменен не тот файл | перезапустите Hermes и проверьте `~/.hermes/.env` и `~/.hermes/config.yaml` |
+| Таймаут соединения | локальная сеть не может подключиться к Crazyrouter | проверьте proxy, firewall и DNS |
+
+<Card title="Открыть репозиторий crazyrouter-hermes" icon="github" href="https://github.com/xujfcn/crazyrouter-hermes">
+  Посмотрите скрипты настройки, пример ручной конфигурации и актуальные заметки.
+</Card>
