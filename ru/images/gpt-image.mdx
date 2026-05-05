@@ -85,20 +85,20 @@ print(response.data[0].url)
 POST /v1/images/edits
 ```
 
-Edit an existing image with mask-based region editing support.
+Edit an existing image with mask-based region editing support. You can also pass multiple reference images for blending, style transfer, or composition work.
 
 ### Request Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `model` | string | Yes | Fixed as `gpt-image-2` |
-| `image` | file | Yes | Original image file (multipart) |
+| `image` / `image[]` | file or file[] | Yes | Original image or reference image file(s), sent as multipart; `gpt-image-2` supports up to `16` reference images |
 | `prompt` | string | Yes | Edit description |
 | `mask` | file | No | Mask image, transparent areas indicate regions to edit |
 | `n` | integer | No | Number of images to generate |
 | `size` | string | No | Output size |
 
-### Request Example
+### Single-Image Edit Example
 
 ```python Python
 from openai import OpenAI
@@ -119,6 +119,52 @@ response = client.images.edit(
 
 print(response.data[0].url)
 ```
+
+### Multi-Reference Edit Example
+
+Multi-image editing requests must use `multipart/form-data`. Prefer multiple `image[]` fields for reference images; repeated `image` fields are also accepted.
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/images/edits \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "model=gpt-image-2" \
+  -F "prompt=Blend the person from the first image with the background from the second image into one natural campaign visual" \
+  -F "size=1024x1024" \
+  -F "n=1" \
+  -F "image[]=@person.png" \
+  -F "image[]=@background.png"
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/v1/images/edits",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    data={
+        "model": "gpt-image-2",
+        "prompt": "Blend the person from the first image with the background from the second image into one natural campaign visual",
+        "size": "1024x1024",
+        "n": "1",
+    },
+    files=[
+        ("image[]", ("person.png", open("person.png", "rb"), "image/png")),
+        ("image[]", ("background.png", open("background.png", "rb"), "image/png")),
+    ],
+    timeout=240,
+)
+
+response.raise_for_status()
+print(response.json()["data"][0].get("url") or response.json()["data"][0].get("b64_json"))
+```
+
+</CodeGroup>
+
+<Note>
+  `gpt-image-2` multi-reference editing was verified on the production entry point on 2026-05-06. Multi-image requests are routed to official OpenAI carriers that support multi-reference image editing.
+</Note>
 
 <Note>
   GPT Image supports transparent background output. Set `background: "transparent"` and use PNG format.

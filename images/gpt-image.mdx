@@ -85,20 +85,20 @@ print(response.data[0].url)
 POST /v1/images/edits
 ```
 
-基于已有图像进行编辑，支持遮罩区域编辑。
+基于已有图像进行编辑，支持遮罩区域编辑，也支持传入多张参考图做融合、风格迁移或局部组合。
 
 ### 请求参数
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
 | `model` | string | 是 | 固定为 `gpt-image-2` |
-| `image` | file | 是 | 原始图片文件（multipart） |
+| `image` / `image[]` | file 或 file[] | 是 | 原始图片或参考图片文件（multipart）；`gpt-image-2` 最多支持 `16` 张参考图 |
 | `prompt` | string | 是 | 编辑描述 |
 | `mask` | file | 否 | 遮罩图片，透明区域为需要编辑的部分 |
 | `n` | integer | 否 | 生成数量 |
 | `size` | string | 否 | 输出尺寸 |
 
-### 请求示例
+### 单图编辑示例
 
 ```python Python
 from openai import OpenAI
@@ -119,6 +119,52 @@ response = client.images.edit(
 
 print(response.data[0].url)
 ```
+
+### 多图参考编辑示例
+
+多图编辑请求必须使用 `multipart/form-data`。推荐用多个 `image[]` 字段传参考图；服务端也兼容重复的 `image` 字段。
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/images/edits \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "model=gpt-image-2" \
+  -F "prompt=把第一张图的人物与第二张图的背景融合成一张自然的宣传图" \
+  -F "size=1024x1024" \
+  -F "n=1" \
+  -F "image[]=@person.png" \
+  -F "image[]=@background.png"
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://crazyrouter.com/v1/images/edits",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    data={
+        "model": "gpt-image-2",
+        "prompt": "把第一张图的人物与第二张图的背景融合成一张自然的宣传图",
+        "size": "1024x1024",
+        "n": "1",
+    },
+    files=[
+        ("image[]", ("person.png", open("person.png", "rb"), "image/png")),
+        ("image[]", ("background.png", open("background.png", "rb"), "image/png")),
+    ],
+    timeout=240,
+)
+
+response.raise_for_status()
+print(response.json()["data"][0].get("url") or response.json()["data"][0].get("b64_json"))
+```
+
+</CodeGroup>
+
+<Note>
+  `gpt-image-2` 多图参考已在 2026-05-06 生产入口实测通过。多图请求会优先路由到支持多图参考的官方 OpenAI 承载渠道。
+</Note>
 
 <Note>
   GPT Image 支持透明背景输出，设置 `background: "transparent"` 并使用 PNG 格式即可。
