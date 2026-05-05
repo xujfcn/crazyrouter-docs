@@ -1,6 +1,6 @@
 ---
 title: 'Python Image Generation'
-description: 'Python image generation and editing with DALL-E and GPT-Image-1'
+description: 'Python image generation and editing with DALL-E and GPT-Image-2'
 ---
 
 ## DALL-E 3 Image Generation
@@ -30,17 +30,17 @@ print(f"Image URL: {image_url}")
 | `quality` | `standard`, `hd` | Image quality |
 | `style` | `vivid`, `natural` | Style |
 
-## GPT-Image-1 Image Generation
+## GPT-Image-2 Image Generation
 
 ```python
 response = client.images.generate(
-    model="gpt-image-1",
+    model="gpt-image-2",
     prompt="A modern minimalist logo with an artificial intelligence theme",
     size="1024x1024",
     n=1
 )
 
-# GPT-Image-1 returns base64
+# GPT-Image-2 returns base64
 import base64
 image_b64 = response.data[0].b64_json
 with open("logo.png", "wb") as f:
@@ -48,12 +48,12 @@ with open("logo.png", "wb") as f:
 print("Image saved")
 ```
 
-## GPT-Image-1 Image Editing
+## GPT-Image-2 Image Editing
 
 ```python
 # Image editing (requires original image)
 response = client.images.edit(
-    model="gpt-image-1",
+    model="gpt-image-2",
     image=open("original.png", "rb"),
     prompt="Change the background to a beach sunset"
 )
@@ -83,7 +83,7 @@ print("Image saved")
 ```
 
 <Note>
-  DALL-E 3 returns URLs (valid for about 1 hour), while GPT-Image-1 returns base64 data. Download and save promptly.
+  DALL-E 3 returns URLs (valid for about 1 hour), while GPT-Image-2 returns base64 data. Download and save promptly.
 </Note>
 
 <Warning>

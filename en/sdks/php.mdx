@@ -44,11 +44,11 @@ echo $result['choices'][0]['message']['content'];
 $apiKey = 'sk-xxx';
 $baseUrl = 'https://crazyrouter.com/v1';
 
-// Edit image with GPT-Image-1
+// Edit image with GPT-Image-2
 $ch = curl_init($baseUrl . '/images/edits');
 
 $postFields = [
-    'model' => 'gpt-image-1',
+    'model' => 'gpt-image-2',
     'image' => new CURLFile('original.png', 'image/png'),
     'prompt' => 'Change the background to a starry sky',
 ];

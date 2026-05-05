@@ -1,6 +1,6 @@
 ---
 title: 'Python 图像生成'
-description: 'Python 使用 DALL-E 和 GPT-Image-1 生成和编辑图像'
+description: 'Python 使用 DALL-E 和 GPT-Image-2 生成和编辑图像'
 ---
 
 ## DALL-E 3 生成图像
@@ -30,17 +30,17 @@ print(f"图片地址: {image_url}")
 | `quality` | `standard`, `hd` | 图片质量 |
 | `style` | `vivid`, `natural` | 风格 |
 
-## GPT-Image-1 生成图像
+## GPT-Image-2 生成图像
 
 ```python
 response = client.images.generate(
-    model="gpt-image-1",
+    model="gpt-image-2",
     prompt="一个现代简约风格的 Logo，主题是人工智能",
     size="1024x1024",
     n=1
 )
 
-# GPT-Image-1 返回 base64
+# GPT-Image-2 返回 base64
 import base64
 image_b64 = response.data[0].b64_json
 with open("logo.png", "wb") as f:
@@ -48,12 +48,12 @@ with open("logo.png", "wb") as f:
 print("图片已保存")
 ```
 
-## GPT-Image-1 编辑图像
+## GPT-Image-2 编辑图像
 
 ```python
 # 图像编辑（需要原图）
 response = client.images.edit(
-    model="gpt-image-1",
+    model="gpt-image-2",
     image=open("original.png", "rb"),
     prompt="把背景改成海滩日落"
 )
@@ -83,7 +83,7 @@ print("图片已保存")
 ```
 
 <Note>
-  DALL-E 3 返回 URL（有效期约 1 小时），GPT-Image-1 返回 base64 数据。建议及时下载保存。
+  DALL-E 3 返回 URL（有效期约 1 小时），GPT-Image-2 返回 base64 数据。建议及时下载保存。
 </Note>
 
 <Warning>

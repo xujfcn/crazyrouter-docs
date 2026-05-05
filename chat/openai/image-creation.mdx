@@ -13,7 +13,7 @@ POST /v1/chat/completions
 
 - `gpt-4o` 可正常返回 `200`，但回复里的 `message.content` 是普通字符串，不是标准的图片多段内容
 - `gpt-4o-image` 也可正常返回 `200`，但当前返回形态仍然是文本或 Markdown，其中包含参数块、任务 ID 和预览链接，而不是标准 OpenAI `image_url` 多部分结构
-- 如果你需要稳定、机器可解析的图片结果，当前应优先使用 [`/v1/images/generations`](/images/gpt-image) + `gpt-image-1`；如需 Grok 图片模型，请看 [`Grok 图片模型`](/images/grok)
+- 如果你需要稳定、机器可解析的图片结果，当前应优先使用 [`/v1/images/generations`](/images/gpt-image) + `gpt-image-2`；如需 Grok 图片模型，请看 [`Grok 图片模型`](/images/grok)
 - 如果你需要参考图编辑或多图融合，不要再把 Nano Banana family 当成 `/v1/images/generations` 的稳定入口。当前优先看 [`Nano Banana 2`](/images/nano-banana-2) 的 Gemini 原生路径；[`Nano Banana`](/images/nano-banana) 当前只保留受控测试说明
 
 <Warning>
@@ -68,7 +68,7 @@ curl -X POST https://crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-image-1",
+    "model": "gpt-image-2",
     "prompt": "A red square on a white background"
   }'
 ```

@@ -9,6 +9,18 @@ description: 'API 端点地址说明'
 https://crazyrouter.com
 ```
 
+中国地区优化线路：
+
+```
+https://cn.crazyrouter.com
+```
+
+该优化线路仅用于 API 请求。账号登录、充值和控制台仍使用：
+
+```
+https://crazyrouter.com
+```
+
 ## 主要端点
 
 ### 聊天 API
@@ -70,5 +82,5 @@ https://crazyrouter.com
 | `/v1/models` | GET | 模型列表 |
 
 <Note>
-所有端点均支持 HTTPS。使用 OpenAI 兼容客户端时，只需将 `base_url` 设置为 `https://crazyrouter.com/v1`。
+所有端点均支持 HTTPS。使用 OpenAI 兼容客户端时，默认将 `base_url` 设置为 `https://crazyrouter.com/v1`；中国地区可使用优化线路 `https://cn.crazyrouter.com/v1`。账号登录、充值和控制台仍使用 `https://crazyrouter.com`。
 </Note>
