@@ -18,6 +18,10 @@ With a few environment variables, Claude Code can send Anthropic requests direct
 Claude Code appends the Anthropic request path itself, so the base URL must stay at the site root: `https://crazyrouter.com`. Do not append `/v1` or `/v1/messages`.
 </Tip>
 
+<Card title="View the Claude Code one-click setup repository" icon="github" href="https://github.com/xujfcn/crazyrouter-claude-code">
+  If you want a script to install Claude Code and write the Crazyrouter environment variables for you, review the crazyrouter-claude-code repository.
+</Card>
+
 ## Best For
 
 - developers who want Crazyrouter as the backend for Claude Code
@@ -119,6 +123,8 @@ ANTHROPIC_BASE_URL=https://crazyrouter.com
 ```
 
 Do not append `/v1`, `/v1/messages`, or any specific API path the way you would with an OpenAI-compatible client.
+
+If you prefer a script that installs Claude Code and writes the Crazyrouter-related environment variables automatically, see [crazyrouter-claude-code](https://github.com/xujfcn/crazyrouter-claude-code). That repository provides one-click setup scripts for Windows, macOS, and Linux; this guide keeps the full manual path so you can audit each setting.
 
 ## Full Setup From Scratch
 
@@ -418,3 +424,7 @@ Start with `claude-sonnet-4-6`. It is usually the safest baseline.
 <Note>
 If your first priority is Claude-family models plus a terminal-first coding workflow, Claude Code should be near the front of your Crazyrouter integration order.
 </Note>
+
+<Card title="View the crazyrouter-claude-code repository" icon="github" href="https://github.com/xujfcn/crazyrouter-claude-code">
+  Review the one-click setup scripts, README, and latest usage notes.
+</Card>
