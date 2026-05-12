@@ -9,6 +9,30 @@ description: 'API endpoint addresses and reference'
 https://crazyrouter.com
 ```
 
+China-optimized API route:
+
+```text
+https://cn.crazyrouter.com
+```
+
+The China route is for API requests only. Account login, billing, and the dashboard still use:
+
+```text
+https://crazyrouter.com
+```
+
+## Which Base URL To Use
+
+| Use case | Default global route | China-optimized route | Notes |
+|----------|----------------------|-----------------------|-------|
+| OpenAI-compatible SDKs / clients | `https://crazyrouter.com/v1` | `https://cn.crazyrouter.com/v1` | The client appends paths such as `/chat/completions` and `/models` |
+| Claude Code / Anthropic-native clients | `https://crazyrouter.com` | `https://cn.crazyrouter.com` | The client appends `/v1/messages` itself, so do not add `/v1` manually |
+| curl / raw HTTP requests | Full endpoint, for example `https://crazyrouter.com/v1/chat/completions` | Full endpoint, for example `https://cn.crazyrouter.com/v1/chat/completions` | Raw requests must include the full API path |
+
+<Warning>
+If logs show `/v1/v1/models`, `/v1/v1/messages`, or `/v1/messages/v1/messages`, the client is duplicating API paths. For Claude Code / Anthropic-native clients, reset the base URL to the root domain. For OpenAI-compatible clients, keep only the `/v1` base URL.
+</Warning>
+
 ## Main Endpoints
 
 ### Chat API
@@ -70,5 +94,5 @@ https://crazyrouter.com
 | `/v1/models` | GET | Model list |
 
 <Note>
-All endpoints support HTTPS. When using an OpenAI-compatible client, simply set `base_url` to `https://crazyrouter.com/v1`.
+All endpoints support HTTPS. OpenAI-compatible clients use `https://crazyrouter.com/v1` or `https://cn.crazyrouter.com/v1`; Claude Code and other Anthropic-native clients use the root domain, not a `/v1` URL.
 </Note>

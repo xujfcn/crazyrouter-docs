@@ -21,6 +21,18 @@ https://cn.crazyrouter.com
 https://crazyrouter.com
 ```
 
+## 不同客户端应该填写的地址
+
+| 使用方式 | 默认全球线路 | 中国地区优化线路 | 说明 |
+|----------|--------------|------------------|------|
+| OpenAI 兼容 SDK / 客户端 | `https://crazyrouter.com/v1` | `https://cn.crazyrouter.com/v1` | 客户端会在该地址后继续拼接 `/chat/completions`、`/models` 等路径 |
+| Claude Code / Anthropic 原生客户端 | `https://crazyrouter.com` | `https://cn.crazyrouter.com` | 客户端会自己拼接 `/v1/messages`，不要手动加 `/v1` |
+| curl / 手写 HTTP 请求 | 使用完整端点，例如 `https://crazyrouter.com/v1/chat/completions` | 使用完整端点，例如 `https://cn.crazyrouter.com/v1/chat/completions` | 手写请求时需要把完整 API 路径写出来 |
+
+<Warning>
+如果日志中出现 `/v1/v1/models`、`/v1/v1/messages` 或 `/v1/messages/v1/messages`，说明客户端配置里重复拼接了 API 路径。Claude Code / Anthropic 原生客户端请改回根域名；OpenAI 兼容客户端请只保留到 `/v1`。
+</Warning>
+
 ## 主要端点
 
 ### 聊天 API

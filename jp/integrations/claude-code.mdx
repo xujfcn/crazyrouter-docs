@@ -11,11 +11,12 @@ With a few environment variables, Claude Code can send Anthropic requests direct
 
 - recommended protocol: `Anthropic Messages API`
 - base URL: `https://crazyrouter.com`
+- China-optimized base URL: `https://cn.crazyrouter.com`
 - auth variable: `ANTHROPIC_API_KEY`
 - recommended default model: `claude-sonnet-4-6`
 
 <Tip>
-Claude Code appends the Anthropic request path itself, so the base URL must stay at the site root: `https://crazyrouter.com`. Do not append `/v1` or `/v1/messages`.
+Claude Code appends the Anthropic request path itself, so the base URL must stay at the site root: `https://crazyrouter.com` or `https://cn.crazyrouter.com`. Do not append `/v1` or `/v1/messages`.
 </Tip>
 
 <Card title="View the Claude Code one-click setup repository" icon="github" href="https://github.com/xujfcn/crazyrouter-claude-code">
@@ -39,11 +40,19 @@ Use:
 ANTHROPIC_BASE_URL=https://crazyrouter.com
 ```
 
+For the China-optimized API route, use:
+
+```text
+ANTHROPIC_BASE_URL=https://cn.crazyrouter.com
+```
+
 Do not use:
 
 - `https://crazyrouter.com/v1`
 - `https://crazyrouter.com/v1/messages`
 - `https://crazyrouter.com/v1/complete`
+- `https://cn.crazyrouter.com/v1`
+- `https://cn.crazyrouter.com/v1/messages`
 
 ## System Requirements And Prerequisites
 
@@ -120,6 +129,12 @@ Claude Code uses the Anthropic-native protocol. You only provide the site root:
 
 ```text
 ANTHROPIC_BASE_URL=https://crazyrouter.com
+```
+
+The China-optimized route also uses only the site root:
+
+```text
+ANTHROPIC_BASE_URL=https://cn.crazyrouter.com
 ```
 
 Do not append `/v1`, `/v1/messages`, or any specific API path the way you would with an OpenAI-compatible client.
@@ -254,6 +269,8 @@ If you prefer a script that installs Claude Code and writes the Crazyrouter-rela
         ```
       </Tab>
     </Tabs>
+
+    If you use the China-optimized route, set `ANTHROPIC_BASE_URL` to the root domain `https://cn.crazyrouter.com`, not `https://cn.crazyrouter.com/v1`.
   </Step>
 
   <Step title="Step 6: Persist the environment variables">
@@ -284,6 +301,8 @@ If you prefer a script that installs Claude Code and writes the Crazyrouter-rela
         ```
       </Tab>
     </Tabs>
+
+    If you use the China-optimized route, persist `ANTHROPIC_BASE_URL` as `https://cn.crazyrouter.com`.
 
     Then open a fresh terminal and re-check:
 
@@ -350,6 +369,106 @@ If you prefer a script that installs Claude Code and writes the Crazyrouter-rela
 
 Recommended rollout: stabilize normal work on `claude-sonnet-4-6`, then switch to `claude-opus-4-6` only for genuinely heavier tasks.
 
+## Claude Code で Claude 以外のモデルを使う
+
+Claude シリーズに加えて、Crazyrouter は複数のサードパーティモデルを Anthropic Messages プロトコルに変換して提供しています。Claude Code ではモデル名を切り替えるだけで利用できます。以下は **テキスト / system / ツール呼び出し / ストリーミング SSE の 4 項目を実機検証済み** のモデル一覧です。
+
+### 動作確認済みモデル
+
+| モデル ID | 提供元 | ツール呼び出し | ストリーミング | 思考 | 適した用途 |
+|-----------|--------|----------------|----------------|------|------------|
+| `deepseek-v4-pro` | DeepSeek | ✅ | ✅ | — | 汎用コーディング・リファクタ、コスパ最良 |
+| `deepseek-v4-flash` | DeepSeek | ✅ | ✅ | ✅ ネイティブ | 思考ブロックを表示する推論用途 |
+| `deepseek-reasoner` | DeepSeek | ✅ | ✅ | 推論 | 数学・複雑なロジック |
+| `deepseek-chat` / `deepseek-v3` / `deepseek-v3.2` / `deepseek-r1` | DeepSeek | ✅ | ✅ | — | 一般的なテキストタスク |
+| `MiniMax-M2.7` | MiniMax | ✅ | ✅ | ⚠️ text ブロック内に `<think>` タグで出力 | 長文コンテキスト・中国語タスク |
+| `MiniMax-M2.5` | MiniMax | ✅ | ✅ | ⚠️ text ブロック内 | 一般会話 |
+| `MiniMax-M2.1` | MiniMax | ✅ | ✅ | — | 思考なし、出力が最もクリーン |
+| `kimi-k2.5` / `kimi-k2` / `kimi-k2-instruct` | Moonshot Kimi | ✅ | ✅ | — | 長文コンテキスト、中国語中心の作業 |
+| `kimi-k2-thinking` | Moonshot Kimi | ✅ | ✅ | 推論 | 複雑な推論 |
+| `kimi-k2-0711-preview` / `kimi-k2-0905-preview` | Moonshot Kimi | ✅ | ✅ | — | スナップショット版 |
+
+> 検証は `https://crazyrouter.com/v1/messages` に対し、`anthropic-version: 2023-06-01` ヘッダと標準の Anthropic Messages リクエストを用いて実施。
+
+<Warning>
+以下のモデルは現在 Anthropic プロトコルで `get_channel_failed` を返します（プロトコル非対応ではなく上流チャンネルが未稼働のため）。当面は `/v1/chat/completions`（OpenAI プロトコル）経由で利用してください：
+
+- `moonshot-v1-8k` / `moonshot-v1-32k` / `moonshot-v1-128k`
+- `kimi-k2-0905`（`-preview` の付かない版）
+
+`grok-*`、`coze`、`jimeng`、`baidu`、`zhipu`、`tencent`、`xunfei`、`mistral`、`cohere`、`palm` などのチャンネルは Anthropic プロトコル変換が **未実装** のため、Claude Code では使用できません。
+</Warning>
+
+### モデルを切り替える方法
+
+Claude Code は `ANTHROPIC_MODEL` 環境変数、またはセッション内の `/model` コマンドでモデルを選択します。値を上記の任意のモデル ID に置き換えてください。
+
+<Tabs>
+  <Tab title="macOS / Linux">
+    ```bash
+    export ANTHROPIC_BASE_URL=https://crazyrouter.com
+    export ANTHROPIC_API_KEY=sk-xxx
+
+    # 既定で DeepSeek V4 Pro を使う
+    export ANTHROPIC_MODEL=deepseek-v4-pro
+    claude
+
+    # Kimi 思考版に一時切替
+    ANTHROPIC_MODEL=kimi-k2-thinking claude
+
+    # MiniMax に一時切替
+    ANTHROPIC_MODEL=MiniMax-M2.1 claude
+    ```
+  </Tab>
+  <Tab title="Windows PowerShell">
+    ```powershell
+    $env:ANTHROPIC_BASE_URL = "https://crazyrouter.com"
+    $env:ANTHROPIC_API_KEY  = "sk-xxx"
+
+    $env:ANTHROPIC_MODEL = "deepseek-v4-pro"
+    claude
+
+    # 一時切替
+    $env:ANTHROPIC_MODEL = "kimi-k2-thinking"; claude
+    $env:ANTHROPIC_MODEL = "MiniMax-M2.1"; claude
+    ```
+  </Tab>
+</Tabs>
+
+セッション中に切り替えることも可能です：
+
+```text
+/model deepseek-v4-pro
+/model kimi-k2-thinking
+/model MiniMax-M2.1
+```
+
+### 利用上の注意と既知の差異
+
+- **DeepSeek 系**：プロトコル整合性が最も高い。ツール呼び出し・ストリーミング・`stop_reason=tool_use` が Anthropic 仕様と一致し、`deepseek-v4-flash` は `thinking` ブロックをネイティブ返却するため Claude Code に思考ペインが表示されます。**推奨デフォルト：`deepseek-v4-pro`**。
+- **Kimi 系**：長文コンテキストが安定。ツール呼び出しも正常。`kimi-k2-thinking` は推論過程を含み、難しいタスクに有効。
+- **MiniMax 系**：価格表で `supported_endpoint_types` に `anthropic` が明示されている数少ないモデルで、プロトコル層との適合性が最も高い。ただし `M2.5` / `M2.7` は思考過程を通常の text ブロック内で **`<think>...</think>` タグ** にラップして返すため、Claude Code がそのまま表示します。回避策：
+  1. `MiniMax-M2.1` を使う（思考なし）
+  2. system プロンプトで「`<think>` タグや思考過程は出力せず、最終回答のみを返してください」と指示する
+- **Token ホワイトリスト**：Claude Code 専用 token にモデルホワイトリストを設定している場合、上記モデルも Crazyrouter 管理画面で許可してください。さもないと `403 model not allowed` が返ります。
+- **思考と課金**：思考対応モデル（`-thinking`、`-flash`、`reasoner`、`MiniMax-M2.5/2.7`）は出力トークンを多く消費します。Claude Code 専用 token に独立した予算上限を設定することを推奨します。
+
+### モデル動作確認のワンライナー
+
+```bash
+curl -sS https://crazyrouter.com/v1/messages \
+  -H "Authorization: Bearer $ANTHROPIC_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "deepseek-v4-pro",
+    "max_tokens": 32,
+    "messages": [{"role":"user","content":"reply OK"}]
+  }'
+```
+
+`200` が返り、`content[].text` が空でなければ Claude Code でそのモデルを利用できます。
+
 ## Token Setup Best Practices
 
 | Setting | Recommendation | Notes |
@@ -366,7 +485,7 @@ Recommended rollout: stabilize normal work on `claude-sonnet-4-6`, then switch t
 - [ ] `git --version` works
 - [ ] `node -v` is at least 18
 - [ ] `claude --version` works
-- [ ] `ANTHROPIC_BASE_URL` is set to `https://crazyrouter.com`
+- [ ] `ANTHROPIC_BASE_URL` is set to `https://crazyrouter.com` or `https://cn.crazyrouter.com`
 - [ ] `ANTHROPIC_API_KEY` is set correctly
 - [ ] Claude Code launches successfully
 - [ ] the first plain-text request succeeds
@@ -382,7 +501,8 @@ Recommended rollout: stabilize normal work on `claude-sonnet-4-6`, then switch t
 | Node version is too old | local Node.js version is below the requirement | upgrade to Node.js 18+ and reinstall Claude Code |
 | `401 unauthorized` | invalid, expired, or badly pasted `ANTHROPIC_API_KEY` | create a new token and set the variables again |
 | `403` or `model not allowed` | the token does not allow the selected Claude model | allow the required model in Crazyrouter |
-| `404` | base URL was set with `/v1` or `/v1/messages` | reset it to `https://crazyrouter.com` |
+| `404` | base URL was set with `/v1` or `/v1/messages` | reset it to `https://crazyrouter.com` or `https://cn.crazyrouter.com` |
+| logs show `/v1/v1/messages`, `/v1/v1/models`, or `/v1/messages/v1/messages` | Claude Code was given a base URL that already contains `/v1` or a full endpoint, then appended its own path | set `ANTHROPIC_BASE_URL` to the root domain with no path |
 | Claude Code still uses old settings | new environment variables were not reloaded | reopen the terminal or run `source ~/.bashrc` / `source ~/.zshrc` |
 | Git changes become messy | no repository snapshot was created before AI edits | commit an initial snapshot before larger changes |
 | cost is higher than expected | long context, repeated tool use, and long sessions | shorten sessions, split tasks, and cap budget per token |
@@ -400,6 +520,8 @@ Recommended rollout: stabilize normal work on `claude-sonnet-4-6`, then switch t
 ### Which base URL should I use for Claude Code?
 
 Use the site root: `https://crazyrouter.com`
+
+For the China-optimized route, use the site root: `https://cn.crazyrouter.com`
 
 ### Why should I not include `/v1` here?
 

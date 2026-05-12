@@ -13,9 +13,17 @@ description: 'Status code reference for all API types'
 | 403 | Insufficient permissions | Check if the token has access to the requested model |
 | 404 | Resource not found | Check URL path |
 | 429 | Rate limit exceeded | Reduce request frequency or contact admin |
-| 500 | Internal server error | Retry later |
-| 502 | Upstream service error | Upstream channel error, system will auto-retry |
+| 500 | サーバー側 5xx エラー | リトライ可。CrazyRouter 内部エラーの場合もあれば、上流 5xx を CrazyRouter 経由で返している場合もあります |
+| 502 | ゲートウェイまたは上流結果取得失敗 | 通常は CrazyRouter が上流呼び出し段階までは到達したものの、有効な上流レスポンスまたは結果を取得できなかった状態です。リトライ可 |
 | 503 | Service unavailable | System maintenance in progress |
+
+## 500 と 502 の違い
+
+- `500` はより広いサーバー側エラーです。CrazyRouter では、当社側の内部エラーを指す場合もあれば、上流が返した `5xx` をそのまま中継している場合もあります。
+- `502` はより具体的で、CrazyRouter から上流への接続や結果取得の段階で失敗したことを示します。たとえば、上流が到達不能、無効なゲートウェイ応答、または生成結果 URL の取得失敗などです。
+- 同じ問題が続く場合:
+  - `502` が多いときは、上流の可用性、接続性、結果 URL の取得可否を優先して確認してください。
+  - `500` が多いときは、エラー分類やログで切り分けてください。`site_internal` や panic 系として明示されたものだけを CrazyRouter 側の問題として扱うのが適切です。
 
 ## Chat Completions Error Codes
 
