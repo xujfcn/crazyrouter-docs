@@ -1,91 +1,113 @@
 ---
 title: '图片上传说明'
-description: '关于图片 URL、模型原生上传和替代方案的说明'
+description: '上传本地图片并获取 72 小时临时公网 URL，用于图生图、图生视频和识图接口'
 ---
 
-## 当前状态
+Crazyrouter 提供临时公网图片上传接口，用于把本地参考图转换成模型可访问的公网 URL。它适合 Kling、Veo、Seedance、Runway、Luma、MiniMax、Nano Banana Pro、Doubao Seedream 等需要 `image_url`、`image_urls`、`image_list`、`images` 或 `image_input` 的接口。
 
-Crazyrouter 当前没有对外开放通用的公共图床接口。
+<Note>
+  临时图片默认保存 72 小时，到期自动清理。存储期内不单独按天收费；当前按用户上传额度和速率限制防滥用。
+</Note>
 
-这意味着你不应依赖以下端点：
+## 接口概览
 
-```text
-POST /api/upload
-```
+| 场景 | 接口 |
+|------|------|
+| 本地文件上传 | `POST /v1/files/uploads` |
+| Base64 图片上传 | `POST /v1/files/uploads/base64` |
+| 远程图片转存 | `POST /v1/files/uploads/url` |
 
-## 推荐做法
+通用限制：
 
-根据你的使用场景，推荐以下几种方式：
+| 项目 | 当前规则 |
+|------|------|
+| 鉴权 | `Authorization: Bearer YOUR_API_KEY` |
+| 支持格式 | `image/png`、`image/jpeg`、`image/webp`、`image/gif` |
+| 单文件大小 | 20MB |
+| 用户上传额度 | 200MB / 24 小时滚动窗口 |
+| 默认有效期 | 72 小时 |
+| 返回 URL | `https://media.crazyrouter.com/task-artifacts/tmp-inputs/...` |
 
-### 1. 使用你自己的图床或对象存储
-
-最推荐的方式是先把图片上传到你自己的 S3 / R2 / OSS / COS / CDN，得到一个可公网访问的 URL，再把该 URL 传给 Crazyrouter 支持图片输入的接口。
-
-适用场景：
-
-- GPT / Claude / Gemini 识图
-- 图像编辑
-- 图生视频
-- 工作流平台集成
-
-### 2. 直接使用模型原生上传能力
-
-部分模型或上游接口本身支持文件上传、multipart/form-data 或专用上传流程，应优先按照对应文档调用。
-
-例如：
-
-- Midjourney 图片上传：`POST /mj/submit/upload-discord-images`
-- OpenAI 兼容图像编辑：`POST /v1/images/edits`
-- 音频转写：`POST /v1/audio/transcriptions`
-
-### 3. 在业务侧先保存文件，再传 URL
-
-如果你的应用允许用户上传本地图片，建议你的服务端先保存文件并生成访问 URL，然后再调用 Crazyrouter。
-
-## 示例：使用公网图片 URL 进行识图
-
-<CodeGroup>
-
-```python Python
-from openai import OpenAI
-
-client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
-
-response = client.chat.completions.create(
-    model="gpt-5.4",
-    messages=[{
-        "role": "user",
-        "content": [
-            {"type": "text", "text": "描述这张图片"},
-            {"type": "image_url", "image_url": {"url": "https://example.com/photo.jpg"}}
-        ]
-    }]
-)
-print(response.choices[0].message.content)
-```
+## 本地文件上传
 
 ```bash cURL
-curl https://crazyrouter.com/v1/chat/completions \
+curl -X POST https://crazyrouter.com/v1/files/uploads \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "file=@./reference.png" \
+  -F "purpose=model_input"
+```
+
+返回示例：
+
+```json
+{
+  "id": "file_e5bbce820b5941409682a9c5e9ba79f1",
+  "url": "https://media.crazyrouter.com/task-artifacts/tmp-inputs/2026/05/13/user-1/file_e5bbce820b5941409682a9c5e9ba79f1.png",
+  "mime_type": "image/png",
+  "size": 2025,
+  "expires_at": "2026-05-16T04:41:35.0131789Z"
+}
+```
+
+## Base64 上传
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/files/uploads/base64 \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer sk-xxx" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-5.4",
-    "messages": [{
-      "role": "user",
-      "content": [
-        {"type": "text", "text": "描述这张图片"},
-        {"type": "image_url", "image_url": {"url": "https://example.com/photo.jpg"}}
-      ]
-    }]
+    "data": "data:image/png;base64,iVBORw0KGgoAAA...",
+    "filename": "reference.png",
+    "purpose": "model_input"
   }'
 ```
 
-</CodeGroup>
+## 远程 URL 转存
+
+```bash cURL
+curl -X POST https://crazyrouter.com/v1/files/uploads/url \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "url": "https://example.com/reference.png",
+    "filename": "reference.png",
+    "purpose": "model_input"
+  }'
+```
+
+远程 URL 必须是 Crazyrouter 服务端可访问的 `http` 或 `https` 图片地址。系统会做文件大小、MIME 类型和 SSRF 防护检查。
+
+## 实际案例：本地参考图用于 Kling 图生视频
+
+第一步，上传本地参考图：
+
+```bash cURL
+UPLOAD_RESPONSE=$(curl -sS -X POST https://crazyrouter.com/v1/files/uploads \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "file=@./portrait.png" \
+  -F "purpose=model_input")
+
+IMAGE_URL=$(python -c "import json,sys; print(json.load(sys.stdin)['url'])" <<< "$UPLOAD_RESPONSE")
+echo "$IMAGE_URL"
+```
+
+第二步，把返回的 `IMAGE_URL` 传给 Kling 图生视频：
+
+```bash cURL
+curl -X POST https://crazyrouter.com/kling/v1/videos/image2video \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d "{
+    \"model_name\": \"kling-v3\",
+    \"prompt\": \"图片中的人物缓缓转头并微笑，镜头轻微推进，电影级光影\",
+    \"image_urls\": [\"$IMAGE_URL\"],
+    \"duration\": \"5\",
+    \"mode\": \"std\"
+  }"
+```
+
+提交成功后会返回任务 ID。通过 [Kling 任务查询](/video/kling/query) 获取终态视频结果。
 
 <Warning>
-  如果你的图片 URL 不能被公网访问，上游模型通常无法读取该图片。
+  临时 URL 不是永久素材库。请在任务提交前确保 URL 仍未过期，不要把它作为长期业务图片地址保存。
 </Warning>
-
-<Note>
-  如果后续 Crazyrouter 重新开放通用上传接口，本页会更新为正式的接口文档。
-</Note>

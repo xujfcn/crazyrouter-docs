@@ -162,6 +162,30 @@ curl -X POST https://crazyrouter.com/kling/v1/videos/image2video \
 
 官方优先字段是 `image_urls`。`image + image_tail` 仍可继续使用，会被当作首帧 / 尾帧兼容别名。视频任务是异步的，请通过 [任务查询](/video/kling/query) 获取终态结果。
 
+### 本地参考图上传后生成视频
+
+如果参考图在本地，先使用临时图床获取公网 URL，再传给 Kling。临时图片默认保存 72 小时，存储期内不单独按天收费。
+
+```bash cURL
+UPLOAD_RESPONSE=$(curl -sS -X POST https://crazyrouter.com/v1/files/uploads \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "file=@./portrait.png" \
+  -F "purpose=model_input")
+
+IMAGE_URL=$(python -c "import json,sys; print(json.load(sys.stdin)['url'])" <<< "$UPLOAD_RESPONSE")
+
+curl -X POST https://crazyrouter.com/kling/v1/videos/image2video \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d "{
+    \"model_name\": \"kling-v3\",
+    \"prompt\": \"图片中的人物缓缓转头并微笑，镜头轻微推进，电影级光影\",
+    \"image_urls\": [\"$IMAGE_URL\"],
+    \"duration\": \"5\",
+    \"mode\": \"std\"
+  }"
+```
+
 ---
 
 ### 参考图生视频参数
