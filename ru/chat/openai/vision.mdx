@@ -1,6 +1,6 @@
 ---
 title: "Vision via Chat"
-description: "OpenAI-style vision input verified against Crazyrouter production on 2026-03-23"
+description: "Ввод изображений в стиле OpenAI: оба варианта — base64 и удалённый URL"
 ---
 
 # Vision via Chat
@@ -9,22 +9,24 @@ description: "OpenAI-style vision input verified against Crazyrouter production 
 POST /v1/chat/completions
 ```
 
-As of March 23, 2026, Crazyrouter production has verified:
+В продакшене Crazyrouter проверена работа `image_url` в стиле OpenAI на основных визуальных моделях:
 
-- `gpt-5.4` can read images through the OpenAI-style `image_url` input shape
-- a `data:image/png;base64,...` data URL succeeds and returns a text answer
-- the current `message.content` is plain text, not a multipart content array
+- `gpt-4o`, `gpt-4o-mini`, `gpt-4.1`, `gpt-5.4` и другие визуальные модели OpenAI
+- Поддерживаются как data URL `data:image/...;base64,...`, так и публичные `https://` URL
+- `message.content` сейчас возвращается обычной строкой
+
+> Рекомендуемый порядок: для локальных файлов сначала вызывайте [эндпоинт загрузки изображений](/ru/upload), чтобы получить временный URL `media.crazyrouter.com`, затем передавайте его в `image_url`; либо сразу отправляйте base64 data URL. Удалённые публичные URL тоже работают, но должны удовлетворять условиям ниже.
 
 ---
 
-## Verified Minimal Request
+## Через base64 data URL (самый надёжный путь)
 
 ```bash
 curl https://crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-4o-mini",
     "messages": [
       {
         "role": "user",
@@ -43,11 +45,11 @@ curl https://crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-In the 2026-03-23 production check, `gpt-5.4` returned:
+Пример ответа:
 
 ```json
 {
-  "model": "gpt-5.4",
+  "model": "gpt-4o-mini",
   "choices": [
     {
       "message": {
@@ -61,8 +63,49 @@ In the 2026-03-23 production check, `gpt-5.4` returned:
 
 ---
 
-## Current Recommendation
+## Через удалённый https URL
 
-- Use `gpt-5.4` first for new vision-understanding integrations
-- This page only keeps the data-URL path that was revalidated successfully
-- Remote URLs, multi-image inputs, and `detail` handling were not rechecked item by item in this pass, so revalidate them against production before relying on them
+```bash
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o-mini",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {"type": "text", "text": "Describe in 5 words."},
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "https://www.gstatic.com/webp/gallery/1.jpg"
+            }
+          }
+        ]
+      }
+    ],
+    "max_tokens": 40
+  }'
+```
+
+### Ограничения удалённых URL
+
+URL должен быть **доступен с серверов Crazyrouter**, а не просто открываться в браузере. Типичные причины ошибок:
+
+| Сбой | Причина | Решение |
+|------|---------|---------|
+| Домен не резолвится | Приватный/некорректный адрес | Использовать публичный https URL |
+| 403 Forbidden | Некоторые CDN (wikimedia, приватные S3) блокируют серверный UA или требуют Referer | Использовать [эндпоинт загрузки](/ru/upload) или base64 |
+| Content-Type не `image/*` | URL возвращает HTML или редирект на страницу логина | Убедиться, что это прямая ссылка на изображение |
+| Файл больше 20MB | Лимит на размер одного файла | Сжать или обрезать |
+
+Если видите ошибку `Unable to process the image you provided. Please verify the image URL is publicly accessible, or upload it as base64.`, значит URL недоступен серверу — пройдитесь по таблице выше.
+
+---
+
+## Рекомендуемый подход
+
+- Для внутренних ассетов, приватных и непроверенных по доступности изображений: сначала вызовите [`POST /v1/files/uploads`](/ru/upload) и получите 72-часовой URL `media.crazyrouter.com/...`, затем передайте его в `image_url`
+- Для маленьких (< 1MB) и одноразовых изображений: отправляйте base64 data URL напрямую, экономя один лишний запрос
+- Несколько изображений, параметр `detail` и другие продвинутые опции: апстрим OpenAI это поддерживает, передавайте по официальной спецификации OpenAI

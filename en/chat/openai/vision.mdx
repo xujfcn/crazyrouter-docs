@@ -1,6 +1,6 @@
 ---
 title: "Vision via Chat"
-description: "OpenAI-style vision input verified against Crazyrouter production on 2026-03-23"
+description: "OpenAI-style image input, covering both base64 and remote URL usage"
 ---
 
 # Vision via Chat
@@ -9,22 +9,24 @@ description: "OpenAI-style vision input verified against Crazyrouter production 
 POST /v1/chat/completions
 ```
 
-As of March 23, 2026, Crazyrouter production has verified:
+Crazyrouter production has verified OpenAI-style `image_url` input on the usual vision models:
 
-- `gpt-5.4` can read images through the OpenAI-style `image_url` input shape
-- a `data:image/png;base64,...` data URL succeeds and returns a text answer
-- the current `message.content` is plain text, not a multipart content array
+- `gpt-4o`, `gpt-4o-mini`, `gpt-4.1`, `gpt-5.4`, and other OpenAI vision models
+- Both `data:image/...;base64,...` data URLs and public `https://` URLs work
+- The returned `message.content` is currently a plain string
+
+> Recommended order: for local files, use the [image upload endpoint](/en/upload) first to get a `media.crazyrouter.com` temporary URL, then pass it as `image_url`; or send a base64 data URL directly. Remote public URLs also work, but must satisfy the "Remote URL limits" below.
 
 ---
 
-## Verified Minimal Request
+## Using a base64 data URL (most reliable)
 
 ```bash
 curl https://crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-4o-mini",
     "messages": [
       {
         "role": "user",
@@ -43,11 +45,11 @@ curl https://crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-In the 2026-03-23 production check, `gpt-5.4` returned:
+Sample response:
 
 ```json
 {
-  "model": "gpt-5.4",
+  "model": "gpt-4o-mini",
   "choices": [
     {
       "message": {
@@ -61,8 +63,49 @@ In the 2026-03-23 production check, `gpt-5.4` returned:
 
 ---
 
-## Current Recommendation
+## Using a remote https URL
 
-- Use `gpt-5.4` first for new vision-understanding integrations
-- This page only keeps the data-URL path that was revalidated successfully
-- Remote URLs, multi-image inputs, and `detail` handling were not rechecked item by item in this pass, so revalidate them against production before relying on them
+```bash
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o-mini",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {"type": "text", "text": "Describe in 5 words."},
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "https://www.gstatic.com/webp/gallery/1.jpg"
+            }
+          }
+        ]
+      }
+    ],
+    "max_tokens": 40
+  }'
+```
+
+### Remote URL limits
+
+The URL must be **reachable from the Crazyrouter server**, not merely "openable in a browser". Common failure modes:
+
+| Failure | Cause | Fix |
+|---------|-------|-----|
+| Domain cannot resolve | Private/invalid host | Use a public https URL |
+| 403 Forbidden | Some CDNs (wikimedia, private S3) block server UAs or require Referer | Use the [upload endpoint](/en/upload) or base64 |
+| Content-Type not `image/*` | URL returns HTML or redirects to a login page | Make sure it's a direct image link |
+| File over 20MB | Single-file size limit | Compress or crop before uploading |
+
+If you see `Unable to process the image you provided. Please verify the image URL is publicly accessible, or upload it as base64.`, the URL is not reachable from the server — work down the table above.
+
+---
+
+## Recommended practice
+
+- For internal assets, private images, or anything whose reachability is uncertain: call [`POST /v1/files/uploads`](/en/upload) first for a 72-hour `media.crazyrouter.com/...` URL, then pass it to `image_url`
+- For small (< 1MB) or one-off images: send a base64 data URL directly, avoiding an extra upload round-trip
+- Multi-image inputs and `detail` parameter: the OpenAI upstream supports them; pass them through following OpenAI's official spec

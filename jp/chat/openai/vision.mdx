@@ -1,30 +1,32 @@
 ---
-title: "Vision via Chat"
-description: "OpenAI-style vision input verified against Crazyrouter production on 2026-03-23"
+title: "チャット画像認識"
+description: "OpenAI 形式の画像入力。base64 とリモート URL の両方をカバー"
 ---
 
-# Vision via Chat
+# チャット画像認識
 
 ```
 POST /v1/chat/completions
 ```
 
-As of March 23, 2026, Crazyrouter production has verified:
+Crazyrouter 本番環境では、OpenAI 形式の `image_url` 入力をサポートする主要な視覚モデルを検証済みです：
 
-- `gpt-5.4` can read images through the OpenAI-style `image_url` input shape
-- a `data:image/png;base64,...` data URL succeeds and returns a text answer
-- the current `message.content` is plain text, not a multipart content array
+- `gpt-4o`、`gpt-4o-mini`、`gpt-4.1`、`gpt-5.4` などの OpenAI 視覚モデル
+- `data:image/...;base64,...` data URL と公開 `https://` URL の両方が利用可能
+- `message.content` は現在プレーン文字列で返却されます
+
+> 推奨手順：ローカル画像はまず [画像アップロード API](/jp/upload) で `media.crazyrouter.com` の一時 URL に変換してから `image_url` に渡す、あるいは base64 data URL を直接送る。リモート公開 URL も使えますが、後述の「リモート URL の制約」を満たす必要があります。
 
 ---
 
-## Verified Minimal Request
+## base64 data URL を使う（最も確実）
 
 ```bash
 curl https://crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-4o-mini",
     "messages": [
       {
         "role": "user",
@@ -43,11 +45,11 @@ curl https://crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-In the 2026-03-23 production check, `gpt-5.4` returned:
+レスポンス例：
 
 ```json
 {
-  "model": "gpt-5.4",
+  "model": "gpt-4o-mini",
   "choices": [
     {
       "message": {
@@ -61,8 +63,49 @@ In the 2026-03-23 production check, `gpt-5.4` returned:
 
 ---
 
-## Current Recommendation
+## リモート https URL を使う
 
-- Use `gpt-5.4` first for new vision-understanding integrations
-- This page only keeps the data-URL path that was revalidated successfully
-- Remote URLs, multi-image inputs, and `detail` handling were not rechecked item by item in this pass, so revalidate them against production before relying on them
+```bash
+curl https://crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o-mini",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {"type": "text", "text": "Describe in 5 words."},
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "https://www.gstatic.com/webp/gallery/1.jpg"
+            }
+          }
+        ]
+      }
+    ],
+    "max_tokens": 40
+  }'
+```
+
+### リモート URL の制約
+
+URL は **Crazyrouter サーバーから到達可能** である必要があります。「ブラウザで開ける」だけでは不十分です。よくある失敗パターン：
+
+| 失敗 | 原因 | 対処 |
+|------|------|------|
+| ドメインが解決できない | プライベートアドレス、誤入力 | 公開 https URL に変更 |
+| 403 Forbidden | 一部 CDN（wikimedia、プライベート S3 など）がサーバー UA / Referer を拒否 | [アップロード API](/jp/upload) または base64 を使用 |
+| Content-Type が `image/*` ではない | URL が HTML やログインページにリダイレクトしている | 画像直リンクであることを確認 |
+| ファイル 20MB 超 | 単一ファイルサイズ上限 | 圧縮・トリミング |
+
+エラー `Unable to process the image you provided. Please verify the image URL is publicly accessible, or upload it as base64.` が表示された場合、URL がサーバーから到達不能ということなので、上表に沿って切り分けてください。
+
+---
+
+## 推奨運用
+
+- 社内素材、プライベート画像、到達性が不確かな画像：先に [`POST /v1/files/uploads`](/jp/upload) で 72 時間有効な `media.crazyrouter.com/...` URL を取得し、それを `image_url` に渡す
+- 小さい（< 1MB）画像、使い捨ての画像：base64 data URL を直接送り、追加リクエストを省く
+- 複数画像入力、`detail` パラメータなどの高度な使い方：OpenAI 上流で対応済みなので、OpenAI 公式仕様どおりに送れば動作します
