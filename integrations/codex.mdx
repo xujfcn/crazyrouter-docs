@@ -383,6 +383,55 @@ which codex
 
 如果你需要 Claude，请走 Claude 原生 `POST /v1/messages` 或 OpenAI 兼容 `POST /v1/chat/completions`，不要把 Claude 配到 Codex 这条 `wire_api = "responses"` 路线上。
 
+### 国产模型原生支持情况
+
+基于 `2026-05-15` 的生产复测，Crazyrouter 上通过 **原生 `POST /v1/responses`** 并且能被 Codex CLI 正常消费的国产模型，当前只建议按下面口径公开：
+
+| 模型 | 当前结论 | 说明 |
+|------|----------|------|
+| `kimi-k2.5` | 推荐 | `/v1/responses` SSE 可完整返回 `response.completed`，Codex 简单回复和读文件均通过 |
+| `kimi-k2.6` | 推荐 | 与 `kimi-k2.5` 同档，当前可作为国产模型主力候选 |
+| `qwen3.6-plus` | 推荐 | 当前通过原生 Responses 与 Codex 真实客户端验证，但仍建议继续观察 reasoning item 与渠道稳定性 |
+| `MiniMax-M2.7` | 暂不推荐 | 最小 Responses 探针已出现 `convert_request_failed`，读文件任务仍会断在 `response.completed` 前 |
+| `deepseek-v4-pro` | 暂不推荐 | Claude Code 可用，但 Codex 这条 Responses 路由仍会出现 500 / 高需求 / 重连失败 |
+| `glm-5.1` | 暂不推荐 | 当前生产 Responses 原生路由落到不支持该模型的上游，Codex 会报 `stream closed before response.completed` |
+
+如果你想在 Codex 中试国产模型，建议先把 token 白名单缩到：
+
+- `gpt-5.4`
+- `kimi-k2.5`
+- `kimi-k2.6`
+- `qwen3.6-plus`
+
+不建议把 `MiniMax-M2.7`、`deepseek-v4-pro`、`glm-5.1` 直接加入 Codex 默认白名单，除非你明确接受实验性行为和断流重试。
+
+### 切到国产模型的方式
+
+保持 `base_url = "https://crazyrouter.com/v1"` 和 `wire_api = "responses"` 不变，只替换 `model` 字段即可。例如：
+
+```toml
+model = "kimi-k2.5"
+model_provider = "crazyrouter"
+
+[model_providers.crazyrouter]
+name = "Crazyrouter"
+base_url = "https://crazyrouter.com/v1"
+env_key = "OPENAI_API_KEY"
+wire_api = "responses"
+
+[profiles.crazyrouter]
+model = "kimi-k2.5"
+model_provider = "crazyrouter"
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+```
+
+第一次切到国产模型时，建议仍按这个顺序验证：
+
+1. `Reply only OK`
+2. `Read the repository structure only. Do not edit files.`
+3. `Read agent.md and reply with exactly the first Markdown heading text.`
+
 ## Token 设置最佳实践
 
 | 设置 | 建议 | 说明 |

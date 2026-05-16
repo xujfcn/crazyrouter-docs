@@ -371,33 +371,24 @@ ANTHROPIC_BASE_URL=https://cn.crazyrouter.com
 
 ## 在 Claude Code 中使用非 Claude 模型
 
-除了原生 Claude 系列以外，Crazyrouter 还把若干第三方模型转译成了 Anthropic Messages 协议，可以直接在 Claude Code 中通过切换模型名使用。下面列出**经过实测**（文本 / system / 工具调用 / 流式 SSE 四项能力均通过）可在 Claude Code 中工作的型号。
+除了原生 Claude 系列以外，Crazyrouter 也提供了一部分国产模型的 Anthropic Messages 原生接入。下面这份名单只保留 **2026-05-15 生产真实客户端复测** 已验证通过的模型，不再混入未复测的历史型号。
 
 ### 实测可用模型清单
 
-| 模型 ID | 提供方 | 工具调用 | 流式 | thinking | 使用场景 |
-|---------|--------|----------|------|----------|----------|
-| `deepseek-v4-pro` | DeepSeek | ✅ | ✅ | 无 | 通用编码、重构，性价比高 |
-| `deepseek-v4-flash` | DeepSeek | ✅ | ✅ | ✅ 原生 | 带思考链，适合复杂分析 |
-| `deepseek-reasoner` | DeepSeek | ✅ | ✅ | 推理 | 数学 / 复杂逻辑 |
-| `deepseek-chat` / `deepseek-v3` / `deepseek-v3.2` / `deepseek-r1` | DeepSeek | ✅ | ✅ | — | 通用文本任务 |
-| `MiniMax-M2.7` | MiniMax | ✅ | ✅ | ⚠️ 走 text 块，含 `<think>` 标签 | 长上下文中文任务 |
-| `MiniMax-M2.5` | MiniMax | ✅ | ✅ | ⚠️ 走 text 块 | 通用对话 |
-| `MiniMax-M2.1` | MiniMax | ✅ | ✅ | 无 | 不带思考链，输出更干净 |
-| `kimi-k2.5` / `kimi-k2` / `kimi-k2-instruct` | Moonshot Kimi | ✅ | ✅ | — | 长上下文、中文工程任务 |
-| `kimi-k2-thinking` | Moonshot Kimi | ✅ | ✅ | 思考链 | 复杂推理 |
-| `kimi-k2-0711-preview` / `kimi-k2-0905-preview` | Moonshot Kimi | ✅ | ✅ | — | 快照版本 |
+| 模型 ID | 提供方 | `Reply only OK` | 读取 `agent.md` | 当前结论 | 备注 |
+|---------|--------|------------------|------------------|----------|------|
+| `deepseek-v4-pro` | DeepSeek | 通过 | 通过 | Claude Code P0 可用 | 适合通用编码；Codex 侧当前仍不推荐走 Responses |
+| `MiniMax-M2.7` | MiniMax | 通过，但含 `<think>` | 通过，但含 `<think>` | 协议可用 | 严格输出任务体验差 |
+| `kimi-k2.5` | Moonshot Kimi | 通过 | 通过 | Claude Code P0 可用 | 当前是最稳的国产模型候选之一 |
+| `kimi-k2.6` | Moonshot Kimi | 通过 | 通过 | Claude Code P0 可用 | 与 `kimi-k2.5` 同档 |
+| `qwen3.6-plus` | Qwen | 通过 | 通过 | Claude Code P0 可用 | 中文任务可优先尝试 |
+| `glm-5.1` | GLM | 通过 | 通过 | Claude Code P0 可用 | 仅限 Claude Code；Codex 原生 Responses 当前不通过 |
 
-> 上述测试基于 `https://crazyrouter.com/v1/messages` + `anthropic-version: 2023-06-01`，请求体使用标准 Anthropic Messages 报文。
+> 上述测试基于 Claude Code 真实客户端，经 `https://crazyrouter.com` 根域名走原生 `POST /v1/messages` 链路验证。
 
-<Warning>
-以下模型当前在 Anthropic 协议下返回 `get_channel_failed`（属上游渠道未上架，非协议不兼容），请暂时通过 `/v1/chat/completions` 走 OpenAI 协议接入：
-
-- `moonshot-v1-8k` / `moonshot-v1-32k` / `moonshot-v1-128k`
-- `kimi-k2-0905`（不带 `-preview` 后缀）
-
-`grok-*`、`coze`、`jimeng`、`baidu`、`zhipu`、`tencent`、`xunfei`、`mistral`、`cohere`、`palm` 等渠道**未实现** Anthropic 协议转换，无法在 Claude Code 中使用。
-</Warning>
+<Note>
+这张表的口径是“当前已复测可用”，不是“所有理论上可转 Anthropic 协议的第三方模型总表”。如果某个型号没出现在这里，代表当前中文文档没有把它列为 Claude Code 的已验证推荐项。
+</Note>
 
 ### 切换模型的方式
 
@@ -409,15 +400,15 @@ Claude Code 通过 `ANTHROPIC_MODEL` 环境变量或会话内 `/model` 命令选
     export ANTHROPIC_BASE_URL=https://crazyrouter.com
     export ANTHROPIC_API_KEY=sk-xxx
 
-    # 默认切到 DeepSeek V4 Pro
-    export ANTHROPIC_MODEL=deepseek-v4-pro
+    # 临时切到 Kimi K2.5
+    export ANTHROPIC_MODEL=kimi-k2.5
     claude
 
-    # 或临时切到 Kimi 思考版
-    ANTHROPIC_MODEL=kimi-k2-thinking claude
+    # 或临时切到 Qwen
+    ANTHROPIC_MODEL=qwen3.6-plus claude
 
     # 或临时切到 MiniMax
-    ANTHROPIC_MODEL=MiniMax-M2.1 claude
+    ANTHROPIC_MODEL=MiniMax-M2.7 claude
     ```
   </Tab>
   <Tab title="Windows PowerShell">
@@ -425,12 +416,12 @@ Claude Code 通过 `ANTHROPIC_MODEL` 环境变量或会话内 `/model` 命令选
     $env:ANTHROPIC_BASE_URL = "https://crazyrouter.com"
     $env:ANTHROPIC_API_KEY  = "sk-xxx"
 
-    $env:ANTHROPIC_MODEL = "deepseek-v4-pro"
+    $env:ANTHROPIC_MODEL = "kimi-k2.5"
     claude
 
     # 或临时切换
-    $env:ANTHROPIC_MODEL = "kimi-k2-thinking"; claude
-    $env:ANTHROPIC_MODEL = "MiniMax-M2.1"; claude
+    $env:ANTHROPIC_MODEL = "qwen3.6-plus"; claude
+    $env:ANTHROPIC_MODEL = "MiniMax-M2.7"; claude
     ```
   </Tab>
 </Tabs>
@@ -438,20 +429,18 @@ Claude Code 通过 `ANTHROPIC_MODEL` 环境变量或会话内 `/model` 命令选
 也可以在 Claude Code 启动后通过会话命令切换：
 
 ```text
-/model deepseek-v4-pro
-/model kimi-k2-thinking
-/model MiniMax-M2.1
+/model kimi-k2.5
+/model qwen3.6-plus
+/model MiniMax-M2.7
 ```
 
 ### 使用建议与已知差异
 
-- **DeepSeek 系列**：协议兼容度最高，工具调用、流式输出、`stop_reason=tool_use` 与 Anthropic 标准一致；`deepseek-v4-flash` 会原生返回 `thinking` 块，Claude Code 能正确展示思考过程。**首选 `deepseek-v4-pro`**。
-- **Kimi 系列**：长上下文表现稳定，工具调用正常。`kimi-k2-thinking` 会在响应中带思考链，适合复杂任务。
-- **MiniMax 系列**：是定价表里 `supported_endpoint_types` 显式标注 `anthropic` 的少数模型，协议层最贴合。但 `M2.5` / `M2.7` 会把思考过程作为普通 text 块返回，**前后包含 `<think>...</think>` 标签**——Claude Code 会原样显示。两种规避方式：
-  1. 使用 `MiniMax-M2.1`（无 thinking）；
-  2. 在 system 提示中明确："不要输出 `<think>` 标签或思考过程，只返回最终答案"。
-- **Token 白名单**：如果你的 Claude Code 专用 token 已开启模型白名单，需要在 Crazyrouter 后台把上面想用的模型也加入白名单，否则会返回 `403 model not allowed`。
-- **思考链与计费**：带思考的模型（`-thinking`、`-flash`、`reasoner`、`MiniMax-M2.5/2.7`）会消耗额外 output token，建议给 Claude Code 单独配预算上限。
+- **首选顺序**：如果你想在 Claude Code 里优先用国产模型，当前建议从 `kimi-k2.5`、`kimi-k2.6`、`qwen3.6-plus` 开始，再考虑 `deepseek-v4-pro`。
+- **MiniMax 已知差异**：`MiniMax-M2.7` 虽然协议可用，但会把思考过程作为普通文本直接输出，前后带 `<think>...</think>` 标签。对“只输出某一句话”这类严格任务，不建议优先选它。
+- **DeepSeek / GLM 的边界**：`deepseek-v4-pro` 和 `glm-5.1` 在 Claude Code 里可用，不代表它们也适合直接拿去做 Codex 的原生 Responses 配置。这两条链路是两套协议，不要混用兼容结论。
+- **Token 白名单**：如果你的 Claude Code 专用 token 开了模型白名单，需要把想用的国产模型一起加入，否则会返回 `403 model not allowed`。
+- **建议先做真实客户端验证**：先跑一轮 `Reply only OK`，再跑“读取一个文件并只返回标题”的任务，比只测裸 API 更接近 Claude Code 真实使用场景。
 
 ### 一条命令快速验证某个模型是否可用
 
@@ -461,7 +450,7 @@ curl -sS https://crazyrouter.com/v1/messages \
   -H "anthropic-version: 2023-06-01" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "deepseek-v4-pro",
+    "model": "kimi-k2.5",
     "max_tokens": 32,
     "messages": [{"role":"user","content":"reply OK"}]
   }'
@@ -474,7 +463,7 @@ curl -sS https://crazyrouter.com/v1/messages \
 | 设置 | 建议 | 说明 |
 |------|------|------|
 | 专用 token | 必须 | Claude Code 不要和 Cursor、Codex、OpenClaw 共用 token |
-| 模型白名单 | 强烈建议 | Claude Code 场景通常只需要 1 到 2 个 Claude 模型 |
+| 模型白名单 | 强烈建议 | 只放行当前实际要用的 Claude 或国产模型，减少排障和控费复杂度 |
 | IP 限制 | 固定出口环境建议开启 | 笔记本经常变 IP 时谨慎使用 |
 | 配额上限 | 强烈建议 | Claude Code 长会话 + 工具调用容易持续消耗额度 |
 | 开发 / 团队分离 | 建议 | 每个开发者、每台共享主机都单独使用 token |
