@@ -1,67 +1,47 @@
 ---
 title: "Gemini 图片编辑"
-description: "基于 2026-04-14 Crazyrouter 生产环境复测更新的 Gemini 图片编辑可用性说明"
+description: "通过 OpenAI Images API 使用 Gemini / Nano Banana 图片编辑能力"
 ---
 
 # Gemini 图片编辑
 
 ```
-POST /v1beta/models/{model}:generateContent
+POST /v1/images/generations
 ```
 
-截至 2026 年 4 月 14 日，Crazyrouter 对 Gemini 图片编辑相关路径的最新复测结论如下：
-
-- `gemini-3.1-flash-image-preview` 原生 `generateContent` 已重新验证可返回图片
-- `gemini-2.5-flash-image` 原生 `generateContent` 也能返回图片，但计费一致性仍在复核中
-- Nano Banana family 走 `POST /v1/images/generations` 的公开 Images 兼容路径当前不健康
-
-当前不健康的是旧的公开 Images 兼容链路，而不是全部 Gemini 原生图片路径。对图片编辑或参考图工作负载，当前应优先收敛到 Gemini 原生 `generateContent`。
+Gemini / Nano Banana 图片编辑在 Crazyrouter 上统一走 OpenAI Images 兼容入口。用户只需要传 `image_input` URL 和统一参数，服务端会处理 Gemini / Vertex 原生格式转换。
 
 <Warning>
-  当前不要再把 Nano Banana family 的 `POST /v1/images/generations` 写成稳定图片编辑入口。`nano-banana-2` 应优先改用 `gemini-3.1-flash-image-preview:generateContent`；`nano-banana` 仍只建议受控测试。
+  图片编辑、多参考图这类请求通常耗时较长。生产接入请优先使用主承接线路 `https://cn.crazyrouter.com/v1`，完整端点为 `https://cn.crazyrouter.com/v1/images/generations`。
 </Warning>
-
-<Note>
-  当前更可用的路径是：
-  [Nano Banana 2](/images/nano-banana-2) 对应的 `gemini-3.1-flash-image-preview:generateContent`。
-  [Nano Banana](/images/nano-banana) 当前只保留 `gemini-2.5-flash-image:generateContent` 的受控测试说明，不建议直接写成稳定生产能力。
-</Note>
 
 ---
 
 ## 当前建议
 
-1. 如果你的目标是 Gemini 文生图，优先参考 [Gemini 图片生成](/chat/gemini/image-gen)
-2. 如果你的目标是当前可接入的参考图编辑，优先参考 [Nano Banana 2](/images/nano-banana-2)
-3. 如果你必须评估 `nano-banana`，只按 [Nano Banana](/images/nano-banana) 页的受控测试方式验证
-4. 不要再把 `POST /v1/images/generations` 当成 Nano Banana family 的默认入口
+1. 新接入优先使用 `nano-banana-2` 或 `nano-banana-pro`
+2. 图片输入使用 `image_input`，传 URL 或 URL 数组
+3. 不要传 Gemini 原生字段，例如 `generationConfig`、`imageConfig`、`imageOutputOptions`
+4. 客户端超时建议设置为 180 秒以上
 
 ---
 
-## Retest 模板
+## 请求模板
 
-下面是当前更推荐的最小请求模板。它表示“如何用 Gemini 原生路径重测或接入”，不再推荐把相同需求写成 `/v1/images/generations` 教程：
+下面是通过统一 Images API 做参考图编辑的最小请求：
 
 ```bash
-curl "https://crazyrouter.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=YOUR_API_KEY" \
+curl -X POST https://cn.crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "contents": [
-      {
-        "role": "user",
-        "parts": [
-          {"text": "Edit this image: change the background to blue and keep the main square visible. Return image output."},
-          {
-            "inlineData": {
-              "mimeType": "image/png",
-              "data": "iVBORw0KGgoAAA..."
-            }
-          }
-        ]
-      }
+    "model": "nano-banana-2",
+    "prompt": "把参考图背景改成蓝色，保留主体结构和边缘细节",
+    "image_input": [
+      "https://example.com/reference.png"
     ],
-    "generationConfig": {
-      "responseModalities": ["IMAGE"]
-    }
+    "resolution": "1K",
+    "aspect_ratio": "1:1",
+    "output_format": "png"
   }'
 ```

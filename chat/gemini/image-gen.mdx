@@ -1,69 +1,70 @@
 ---
 title: "Gemini 图片生成"
-description: "基于 2026-04-14 Crazyrouter 生产环境复测更新的 Gemini 图片生成现状"
+description: "通过 OpenAI Images API 调用 Gemini / Nano Banana 图片模型"
 ---
 
 # Gemini 图片生成
 
 ```
-POST /v1beta/models/{model}:generateContent
+POST /v1/images/generations
 ```
 
-截至 2026 年 4 月 14 日，Crazyrouter 生产环境对 Gemini 图片生成的最新复测结论如下：
+Crazyrouter 对 Gemini 图片模型统一提供 OpenAI Images 兼容入口。用户侧不需要直接调用 Gemini 原生 `generateContent`，也不需要传 Gemini 原生 `generationConfig.imageConfig`。
 
-- `gemini-3.1-flash-image-preview` 使用 `responseModalities: ["IMAGE"]` 时，成功返回 `inlineData`
-- `gemini-3-pro-image-preview` 返回的是 `text`，文本中嵌入了 `data:image/...;base64,...` 的 Markdown 图片
-- `gemini-2.5-flash-image` 也返回 `text`，文本中嵌入了 `data:image/...;base64,...`
-- `gemini-2.5-flash-image-preview` 返回 `text`，文本中嵌入了托管图片 URL
+| 推荐公开模型名 | 兼容底层模型名 |
+|------|------|
+| `nano-banana` | `gemini-2.5-flash-image` |
+| `nano-banana-pro` | `gemini-3-pro-image-preview` |
+| `nano-banana-2` | `gemini-3.1-flash-image-preview` |
 
 <Warning>
-  Gemini 图片模型当前在 Crazyrouter 上并没有统一响应格式。不要假设所有模型都会返回 `inlineData`。
+  Gemini 图片生成属于长耗时请求。生产接入请优先使用主承接线路 `https://cn.crazyrouter.com/v1`，完整生成端点为 `https://cn.crazyrouter.com/v1/images/generations`。
 </Warning>
 
 <Note>
-  如果你是从 Nano Banana family 迁移过来，当前请不要再走 `/v1/images/generations`。`nano-banana-2` 当前应直接使用 `gemini-3.1-flash-image-preview:generateContent`；`nano-banana` 虽然 `gemini-2.5-flash-image:generateContent` 能返回图片，但计费一致性仍在复核中。
+  推荐在客户代码里使用 `nano-banana`、`nano-banana-pro`、`nano-banana-2`。如果你的系统已经直接写了 `gemini-2.5-flash-image`、`gemini-3-pro-image-preview`、`gemini-3.1-flash-image-preview`，也可以继续通过同一个 Images API 入口调用。
 </Note>
 
 ---
 
-## 当前最稳妥的示例模型
+## 请求参数
 
-对于“直接拿到图片二进制数据”这个目标，当前最容易处理的是 `gemini-3.1-flash-image-preview`：
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `model` | string | 是 | `nano-banana`、`nano-banana-pro`、`nano-banana-2`，或对应 Gemini canonical 名 |
+| `prompt` | string | 是 | 生成或编辑指令 |
+| `image_input` | string 或 string[] | 否 | 参考图 URL；不传则为文生图 |
+| `resolution` | string | 否 | `1K`、`2K`、`4K` |
+| `aspect_ratio` | string | 否 | 如 `1:1`、`16:9`、`9:16`、`21:9`、`auto` |
+| `output_format` | string | 否 | `png`、`jpeg` / `jpg` |
+| `output_compression` | integer | 否 | `0-100`，用于 JPEG 压缩质量 |
+| `n` | integer | 否 | 生成数量，默认 `1` |
+
+不要传这些上游私有字段：`generationConfig`、`imageConfig`、`imageOutputOptions`、`image_output_options`。
+
+## 请求示例
 
 ```bash
-curl "https://crazyrouter.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=YOUR_API_KEY" \
+curl -X POST https://cn.crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "contents": [
-      {
-        "role": "user",
-        "parts": [
-          {"text": "Generate an IMAGE of a simple red square on a white background. Return image output."}
-        ]
-      }
-    ],
-    "generationConfig": {
-      "responseModalities": ["IMAGE"]
-    }
+    "model": "nano-banana-2",
+    "prompt": "A simple red square on a white background, clean vector style",
+    "resolution": "1K",
+    "aspect_ratio": "1:1",
+    "output_format": "png"
   }'
 ```
 
-生产环境实际返回的关键形态：
+响应保持 OpenAI Images 风格：
 
 ```json
 {
-  "candidates": [
+  "created": 1778990000,
+  "data": [
     {
-      "content": {
-        "parts": [
-          {
-            "inlineData": {
-              "mimeType": "image/png",
-              "data": "iVBORw0KGgoAAA..."
-            }
-          }
-        ]
-      }
+      "url": "https://media.crazyrouter.com/task-artifacts/2026/05/17/sync-image/request-id-1.png"
     }
   ]
 }
@@ -71,20 +72,25 @@ curl "https://crazyrouter.com/v1beta/models/gemini-3.1-flash-image-preview:gener
 
 ---
 
-## 其他已观察到的返回形态
+## 参考图编辑
 
-同一天的生产环境检查里，还观察到以下模型差异：
-
-- `gemini-3-pro-image-preview`: `parts[0].text` 是 `![image](data:image/jpeg;base64,...)`
-- `gemini-2.5-flash-image`: `parts[0].text` 是 `![image](data:image/png;base64,...)`
-- `gemini-2.5-flash-image-preview`: `parts[0].text` 是 `![Image](https://...)`
-
-如果你要兼容多模型，建议优先按下面顺序解析：
-
-1. 先检查 `inlineData`
-2. 再检查 `text` 中是否包含 `data:image/`
-3. 最后检查 `text` 中是否包含外链图片 URL
+```bash
+curl -X POST https://cn.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "nano-banana-pro",
+    "prompt": "把参考图改成高级电商海报，保留主体，背景更简洁",
+    "image_input": [
+      "https://example.com/reference.png"
+    ],
+    "resolution": "1K",
+    "aspect_ratio": "1:1",
+    "output_format": "jpeg",
+    "output_compression": 85
+  }'
+```
 
 <Note>
-  本页没有继续保留宽高比、批量出图等参数说明，因为这些参数在本轮生产验证中没有逐项复测。
+  如果你确实需要 Gemini 原生 API 形态，请参考 [Gemini 原生格式](/chat/gemini/native)。但对于图片生成和编辑，推荐客户侧统一使用本页的 Images API。
 </Note>

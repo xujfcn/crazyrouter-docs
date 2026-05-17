@@ -1,99 +1,140 @@
 ---
 title: "Nano Banana 2"
-description: "截至 2026-04-14，nano-banana-2 当前推荐走 Gemini 原生 generateContent；不再推荐 /v1/images/generations"
+description: "使用 nano-banana-2 通过 OpenAI Images API 调用 Gemini 3.1 Flash Image"
 ---
 
 # Nano Banana 2
 
 ```
-当前推荐路径
-POST /v1beta/models/gemini-3.1-flash-image-preview:generateContent
+POST /v1/images/generations
 ```
 
-截至 `2026-04-14`，Crazyrouter 对 `nano-banana-2` 的最新生产复测结论如下：
-
-- `nano-banana-2` 在服务端当前映射到 `gemini-3.1-flash-image-preview`
-- 当前推荐直接调用 Gemini 原生 `generateContent`
-- 当前不再推荐通过 `POST /v1/images/generations` 调用 `nano-banana-2`
-- 同日生产复测中，原生路径请求成功，计费看起来正常
+`nano-banana-2` 是 `gemini-3.1-flash-image-preview` 的公开别名。用户侧统一使用 OpenAI Images 兼容协议；服务端会把 `output_format`、`output_compression`、`resolution`、`aspect_ratio` 等统一参数转换成 Gemini / Vertex 原生请求。
 
 <Warning>
-  不要再把 `nano-banana-2` 写成 `POST /v1/images/generations` 的稳定推荐模型。当前推荐入口已经改为 Gemini 原生 `POST /v1beta/models/gemini-3.1-flash-image-preview:generateContent`。
+  `nano-banana-2` 属于长耗时图片模型。生产接入请优先使用主承接线路 `https://cn.crazyrouter.com/v1`，完整生成端点为 `https://cn.crazyrouter.com/v1/images/generations`。账号登录、充值和控制台仍使用 `https://crazyrouter.com`。
 </Warning>
 
-## 当前状态
+## 模型名
 
-| 项目 | 当前状态 | 说明 |
-|------|------|------|
-| 别名映射 | 已确认 | `nano-banana-2 -> gemini-3.1-flash-image-preview` |
-| Gemini 原生 `generateContent` | 推荐 | `2026-04-14` 生产复测成功 |
-| 原生链路计费 | 当前正常 | 同次探针里扣费与消费日志口径一致 |
-| OpenAI Images `POST /v1/images/generations` | 不推荐 | 生产与本地 `4000` 都复现错误 |
+| 推荐模型名 | 等价底层模型 |
+|------|------|
+| `nano-banana-2` | `gemini-3.1-flash-image-preview` |
 
-## 当前风险
+推荐在客户代码里使用 `nano-banana-2`。如果你的系统已经直接写了 `gemini-3.1-flash-image-preview`，也可以继续通过同一个 `/v1/images/generations` 入口调用。
 
-### 1. 公开 Images 兼容路径当前不健康
+## 请求参数
 
-`nano-banana-2` 走 `POST /v1/images/generations` 时，`2026-04-14` 的生产与本地 `4000` 复测都出现了以下错误簇：
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `model` | string | 是 | 推荐 `nano-banana-2`；也兼容 `gemini-3.1-flash-image-preview` |
+| `prompt` | string | 是 | 生成或编辑指令 |
+| `image_input` | string 或 string[] | 否 | 参考图 URL；不传则为文生图 |
+| `resolution` | string | 否 | `1K`、`2K`、`4K` |
+| `aspect_ratio` | string | 否 | 如 `1:1`、`16:9`、`9:16`、`21:9`、`auto` |
+| `output_format` | string | 否 | `png`、`jpeg` / `jpg` |
+| `output_compression` | integer | 否 | `0-100`，用于 JPEG 压缩质量 |
+| `n` | integer | 否 | 生成数量，默认 `1` |
 
-- `Unknown name "imageOutputOptions" at 'generation_config.image_config'`
-- `not supported model for image generation`
-- `get_channel_failed`
+<Note>
+  不要在客户请求里传 Gemini 原生字段，例如 `generationConfig`、`imageConfig`、`imageOutputOptions`、`image_output_options`。这些字段由 Crazyrouter 在服务端按当前上游协议自动生成。
+</Note>
 
-因此当前不应再把 `/v1/images/generations` 写成它的公开稳定入口。
+## 文生图示例
 
-### 2. 原生响应仍需按 Gemini 形态解析
+<CodeGroup>
 
-虽然当前推荐走原生路径，但客户端仍要按 Gemini 原生响应处理：
-
-1. 优先读取 `candidates[].content.parts[].inlineData`
-2. 不要假设它返回 OpenAI Images 风格的 `data[].url`
-3. 如果后续扩到其他 Gemini 图片模型，还要兼容 `text` 中的 `data:image/...` 或外链 URL
-
-## 当前建议
-
-1. 生产接入 `nano-banana-2` 时，直接改用 `gemini-3.1-flash-image-preview:generateContent`
-2. 不要再使用 `POST /v1/images/generations` + `model: "nano-banana-2"`
-3. 如果你要做自动化取图，优先按 `inlineData` 解析
-
-## 推荐请求模板
-
-```bash
-curl "https://crazyrouter.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "contents": [
-      {
-        "role": "user",
-        "parts": [
-          {
-            "text": "Generate an IMAGE of a clean ecommerce hero shot on a white background. Return image output."
-          }
-        ]
-      }
-    ],
-    "generationConfig": {
-      "responseModalities": ["IMAGE"]
-    }
-  }'
-```
-
-## 旧路径说明
-
-以下旧写法当前已不再推荐：
-
-```bash
-curl -X POST https://crazyrouter.com/v1/images/generations \
+```bash cURL
+curl -X POST https://cn.crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "nano-banana-2",
-    "prompt": "..."
+    "prompt": "A clean ecommerce hero shot of a red apple on a white background",
+    "resolution": "1K",
+    "aspect_ratio": "16:9",
+    "output_format": "jpeg",
+    "output_compression": 85
   }'
 ```
 
-这条路径当前的问题不是单次抖动，而是生产与本地 `4000` 复测都可复现。
+```python Python
+from openai import OpenAI
 
-<Note>
-  如果你需要 Gemini 原生图片协议的更多说明，请看 [Gemini 图片生成](/chat/gemini/image-gen)。如果你是在旧代码里使用 Nano Banana family 的 Images API，请尽快把 `nano-banana-2` 迁移到本页的 Gemini 原生路径。
-</Note>
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://cn.crazyrouter.com/v1",
+)
+
+response = client.images.generate(
+    model="nano-banana-2",
+    prompt="A clean ecommerce hero shot of a red apple on a white background",
+    n=1,
+    extra_body={
+        "resolution": "1K",
+        "aspect_ratio": "16:9",
+        "output_format": "jpeg",
+        "output_compression": 85,
+    },
+)
+
+print(response.data[0].url or response.data[0].b64_json)
+```
+
+</CodeGroup>
+
+## 参考图编辑示例
+
+```bash cURL
+curl -X POST https://cn.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "nano-banana-2",
+    "prompt": "把参考图改成横幅广告图，保留主体，背景更干净",
+    "image_input": [
+      "https://example.com/reference.png"
+    ],
+    "resolution": "1K",
+    "aspect_ratio": "16:9",
+    "output_format": "png"
+  }'
+```
+
+## 响应
+
+响应保持 OpenAI Images 风格。默认优先读取 `data[0].url`；少数兼容渠道可能返回 `data[0].b64_json`。
+
+```json
+{
+  "created": 1778990000,
+  "data": [
+    {
+      "url": "https://media.crazyrouter.com/task-artifacts/2026/05/17/sync-image/request-id-1.png"
+    }
+  ]
+}
+```
+
+## 迁移说明
+
+旧代码如果直接调用：
+
+```text
+POST /v1beta/models/gemini-3.1-flash-image-preview:generateContent
+```
+
+建议迁移到：
+
+```text
+POST https://cn.crazyrouter.com/v1/images/generations
+```
+
+并把 Gemini 原生参数改成统一参数：
+
+| Gemini 原生概念 | Crazyrouter 统一参数 |
+|------|------|
+| `imageConfig.aspectRatio` | `aspect_ratio` |
+| `imageConfig.imageSize` | `resolution` |
+| `imageOutputOptions.mimeType` | `output_format` |
+| `imageOutputOptions.compressionQuality` | `output_compression` |

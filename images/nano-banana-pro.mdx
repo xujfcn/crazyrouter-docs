@@ -11,13 +11,26 @@ POST /v1/images/generations
 
 使用 `nano-banana-pro` 进行图片生成和参考图编辑，统一走 `OpenAI Images API` 风格的公开协议。
 
+<Warning>
+  图片生成、图片编辑、多参考图这类请求通常耗时较长。生产接入请优先使用主承接线路 `https://cn.crazyrouter.com/v1`，完整生成端点为 `https://cn.crazyrouter.com/v1/images/generations`。账号登录、充值和控制台仍使用 `https://crazyrouter.com`。
+</Warning>
+
 ## 这页覆盖什么
 
-- 本页只覆盖 `nano-banana-pro`
+- 本页只覆盖 `nano-banana-pro` / `gemini-3-pro-image-preview`
 - 客户请求入口统一是 `POST /v1/images/generations`
 - 输入图片字段统一是 `image_input`
 - 当前公开协议收紧为 `image_input` 的 URL 引用，不对外暴露 `image` 或 `data:` 输入
 - 背后承载可以是 Gemini / Vertex 等 provider，但这些 provider 细节不属于客户协议的一部分
+- 用户侧不要传 `generationConfig`、`imageConfig`、`imageOutputOptions`、`image_output_options`；这些字段由 Crazyrouter 从统一参数自动转换
+
+## 模型名
+
+| 推荐模型名 | 等价底层模型 |
+|------|------|
+| `nano-banana-pro` | `gemini-3-pro-image-preview` |
+
+推荐在客户代码里使用 `nano-banana-pro`。如果你的系统已经直接写了 `gemini-3-pro-image-preview`，也可以继续通过同一个 `/v1/images/generations` 入口调用。
 
 ## 能力状态
 
@@ -25,7 +38,7 @@ POST /v1/images/generations
 |------|------|------|
 | `T2I` | `Beta` | 历史有覆盖，但当前公开 artifact 集仍以编辑 / 参考图路径为主 |
 | `I2I + 1K` | `Verified` | 单图编辑 live 已闭环 |
-| `I2I + 4K` | `Verified` | `4K + 21:9 + png/jpg` live 已闭环 |
+| `I2I + 4K` | `Verified` | `4K + 21:9 + png/jpeg/jpg` live 已闭环 |
 | `Reference + 1..2 refs` | `Verified` | `2` 图 live 已闭环 |
 | `2K` | `Beta` | 当前公开 artifact 仍待补充 |
 | 更高多图上限 / 精确 `30 MiB` 边界 | `Beta` | 当前公开 contract 不承诺 |
@@ -71,12 +84,13 @@ POST /v1/images/generations
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| `model` | string | 是 | 固定为 `nano-banana-pro` |
+| `model` | string | 是 | 推荐 `nano-banana-pro`；也兼容 `gemini-3-pro-image-preview` |
 | `prompt` | string | 是 | 生成或编辑指令 |
 | `image_input` | string 或 string[] | 否 | 参考图 URL；当前公开保守范围先写 `1` 到 `2` 张 |
 | `resolution` | string | 否 | 当前公开承诺 `1K`、`4K` |
 | `aspect_ratio` | string | 否 | 当前公开承诺 `1:1`、`21:9` |
-| `output_format` | string | 否 | 当前公开承诺 `png`、`jpg` |
+| `output_format` | string | 否 | 当前公开承诺 `png`、`jpeg` / `jpg` |
+| `output_compression` | integer | 否 | `0-100`，用于 JPEG 压缩质量 |
 | `n` | integer | 否 | 生成数量，默认 `1` |
 
 ### 多图当前状态
@@ -99,7 +113,7 @@ POST /v1/images/generations
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/v1/images/generations \
+curl -X POST https://cn.crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -118,7 +132,7 @@ curl -X POST https://crazyrouter.com/v1/images/generations \
 import requests
 
 response = requests.post(
-    "https://crazyrouter.com/v1/images/generations",
+    "https://cn.crazyrouter.com/v1/images/generations",
     headers={
         "Content-Type": "application/json",
         "Authorization": "Bearer YOUR_API_KEY"
@@ -140,6 +154,22 @@ print(data["data"][0]["url"])
 ```
 
 </CodeGroup>
+
+### 文生图
+
+```bash cURL
+curl -X POST https://cn.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "nano-banana-pro",
+    "prompt": "A premium product poster for a red apple, studio lighting, clean background",
+    "resolution": "1K",
+    "aspect_ratio": "1:1",
+    "output_format": "jpeg",
+    "output_compression": 85
+  }'
+```
 
 ### 双图参考
 
@@ -191,7 +221,7 @@ print(data["data"][0]["url"])
 | `1:1` | 已验证 |
 | `21:9` | 已验证 |
 | `output_format = png` | 已验证 |
-| `output_format = jpg` | 已验证 |
+| `output_format = jpeg / jpg` | 已验证 |
 | 精确 `8` 图上限 | `Beta` |
 | 精确 `30 MiB` URL 边界 | `Beta` |
 | `2K` | `Beta` |
@@ -205,5 +235,5 @@ print(data["data"][0]["url"])
 - 当前文档不承诺所有截图列出的比例和参数都已经完全闭环
 
 <Note>
-  如果你需要 Gemini 原生 `generateContent` 形式的图片接口，请看 [Gemini 图片生成](/chat/gemini/image-gen) 与 [Gemini 图片编辑](/chat/gemini/image-edit)。如果你更看重多图张数，参考 [Nano Banana](/images/nano-banana) 与 [Nano Banana 2](/images/nano-banana-2)。
+  如果你需要 Gemini / Nano Banana 图片生成或编辑的统一参数说明，请看 [Gemini 图片生成](/chat/gemini/image-gen) 与 [Gemini 图片编辑](/chat/gemini/image-edit)。如果你需要其他档位，可参考 [Nano Banana](/images/nano-banana) 与 [Nano Banana 2](/images/nano-banana-2)。
 </Note>
