@@ -1,15 +1,20 @@
 ---
 title: "GPT Image"
-description: "使用 GPT Image 模型生成和编辑图像，兼容 OpenAI 格式"
+description: "使用 gpt-image-2 生成和编辑图像，兼容 OpenAI Images API"
 ---
 
 # GPT Image
 
-```
+`gpt-image-2` 通过 OpenAI Images API 兼容路径调用：
+
+```text
 POST /v1/images/generations
+POST /v1/images/edits
 ```
 
-使用 `gpt-image-2` 模型生成图像，兼容 OpenAI Images API 格式。
+<Warning>
+  `gpt-image-2` 图片生成请求请优先使用主承接线路 `https://cn.crazyrouter.com/v1`。完整生成端点为 `https://cn.crazyrouter.com/v1/images/generations`。账号登录、充值和控制台仍使用 `https://crazyrouter.com`。
+</Warning>
 
 ## 生成图像
 
@@ -19,18 +24,25 @@ POST /v1/images/generations
 |------|------|------|------|
 | `model` | string | 是 | 固定为 `gpt-image-2` |
 | `prompt` | string | 是 | 图像描述提示词 |
-| `n` | integer | 否 | 生成数量，默认 1 |
-| `size` | string | 否 | 图片尺寸：`1024x1024`（默认）、`1536x1024`、`1024x1536`、`auto` |
-| `quality` | string | 否 | 质量：`auto`（默认）、`low`、`medium`、`high` |
-| `background` | string | 否 | 背景：`auto`（默认）、`transparent`、`opaque` |
-| `output_format` | string | 否 | 输出格式：`png`（默认）、`jpeg`、`webp` |
+| `n` | integer | 否 | 生成数量，默认 `1`，范围 `1-10` |
+| `size` | string | 否 | `auto` 或 `宽x高`。宽高必须为 16 的倍数，单边不超过 3840，总像素在 655360 到 8294400 之间，长短边比例不超过 3:1。常用值：`1024x1024`、`1536x1024`、`1024x1536` |
+| `quality` | string | 否 | `auto`、`low`、`medium`、`high`。兼容 `hd`，服务端会归一为 `high`；不接受 `standard` |
+| `background` | string | 否 | `auto` 或 `opaque`。`gpt-image-2` 不支持 `transparent` |
+| `output_format` | string | 否 | `png`、`jpeg`、`webp` |
+| `output_compression` | integer | 否 | `0-100`，仅当 `output_format` 为 `jpeg` 或 `webp` 时可用 |
+| `moderation` | string | 否 | `auto` 或 `low` |
+| `stream` | boolean | 否 | 是否使用 SSE 流式响应 |
+| `partial_images` | integer | 否 | `0-3`，仅当 `stream=true` 时可用 |
+| `user` | string | 否 | 终端用户标识 |
+
+以下参数不会被 `gpt-image-2` 接受：`response_format`、`style`、`input_fidelity`、`background=transparent`、`quality=standard`、`output_format=png` 搭配 `output_compression`。
 
 ### 请求示例
 
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/v1/images/generations \
+curl -X POST https://cn.crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -38,7 +50,8 @@ curl -X POST https://crazyrouter.com/v1/images/generations \
     "prompt": "一只穿着宇航服的猫咪在月球上行走，背景是地球",
     "n": 1,
     "size": "1024x1024",
-    "quality": "high"
+    "quality": "low",
+    "output_format": "png"
   }'
 ```
 
@@ -47,7 +60,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="YOUR_API_KEY",
-    base_url="https://crazyrouter.com/v1"
+    base_url="https://cn.crazyrouter.com/v1",
 )
 
 response = client.images.generate(
@@ -55,7 +68,8 @@ response = client.images.generate(
     prompt="一只穿着宇航服的猫咪在月球上行走，背景是地球",
     n=1,
     size="1024x1024",
-    quality="high"
+    quality="low",
+    output_format="png",
 )
 
 print(response.data[0].url)
@@ -63,17 +77,41 @@ print(response.data[0].url)
 
 </CodeGroup>
 
+### 流式生成
+
+`gpt-image-2` 支持 `stream=true`。如果请求中包含 `partial_images`，必须同时开启 `stream`，且取值范围为 `0-3`。
+
+```bash cURL
+curl -N -X POST https://cn.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-image-2",
+    "prompt": "一个蓝色极简验证图标，白色背景",
+    "size": "1024x1024",
+    "quality": "high",
+    "stream": true,
+    "partial_images": 2
+  }'
+```
+
+<Note>
+  `quality=high` 或兼容写法 `quality=hd` 的同步请求可能耗时较长。图片生成业务请优先走 `https://cn.crazyrouter.com/v1`；高质量请求建议使用 `stream=true`，或确保客户端超时大于 180 秒。
+</Note>
+
 ### 响应示例
 
 ```json
 {
-  "created": 1709123456,
+  "created": 1778990000,
   "data": [
     {
-      "url": "https://crazyrouter.com/files/image_abc123.png",
-      "revised_prompt": "A cat wearing a spacesuit walking on the moon's surface with Earth visible in the background"
+      "url": "https://media.crazyrouter.com/task-artifacts/2026/05/17/sync-image/request-id-1.png"
     }
-  ]
+  ],
+  "output_format": "png",
+  "quality": "low",
+  "size": "1024x1024"
 }
 ```
 
@@ -95,8 +133,14 @@ POST /v1/images/edits
 | `image` / `image[]` | file 或 file[] | 是 | 原始图片或参考图片文件（multipart）；`gpt-image-2` 最多支持 `16` 张参考图 |
 | `prompt` | string | 是 | 编辑描述 |
 | `mask` | file | 否 | 遮罩图片，透明区域为需要编辑的部分 |
-| `n` | integer | 否 | 生成数量 |
-| `size` | string | 否 | 输出尺寸 |
+| `n` | integer | 否 | 生成数量，默认 `1`，范围 `1-10` |
+| `size` | string | 否 | 同生成接口 |
+| `quality` | string | 否 | `auto`、`low`、`medium`、`high`；`hd` 会归一为 `high` |
+| `background` | string | 否 | `auto` 或 `opaque` |
+| `output_format` | string | 否 | `png`、`jpeg`、`webp` |
+| `output_compression` | integer | 否 | `0-100`，仅当 `output_format` 为 `jpeg` 或 `webp` 时可用 |
+| `stream` | boolean | 否 | 是否使用 SSE 流式响应 |
+| `partial_images` | integer | 否 | `0-3`，仅当 `stream=true` 时可用 |
 
 ### 单图编辑示例
 
@@ -105,7 +149,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="YOUR_API_KEY",
-    base_url="https://crazyrouter.com/v1"
+    base_url="https://cn.crazyrouter.com/v1",
 )
 
 response = client.images.edit(
@@ -114,7 +158,8 @@ response = client.images.edit(
     mask=open("mask.png", "rb"),
     prompt="在天空中添加一道彩虹",
     n=1,
-    size="1024x1024"
+    size="1024x1024",
+    quality="low",
 )
 
 print(response.data[0].url)
@@ -127,11 +172,12 @@ print(response.data[0].url)
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/v1/images/edits \
+curl -X POST https://cn.crazyrouter.com/v1/images/edits \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -F "model=gpt-image-2" \
   -F "prompt=把第一张图的人物与第二张图的背景融合成一张自然的宣传图" \
   -F "size=1024x1024" \
+  -F "quality=low" \
   -F "n=1" \
   -F "image[]=@person.png" \
   -F "image[]=@background.png"
@@ -141,12 +187,13 @@ curl -X POST https://crazyrouter.com/v1/images/edits \
 import requests
 
 response = requests.post(
-    "https://crazyrouter.com/v1/images/edits",
+    "https://cn.crazyrouter.com/v1/images/edits",
     headers={"Authorization": "Bearer YOUR_API_KEY"},
     data={
         "model": "gpt-image-2",
         "prompt": "把第一张图的人物与第二张图的背景融合成一张自然的宣传图",
         "size": "1024x1024",
+        "quality": "low",
         "n": "1",
     },
     files=[
@@ -163,9 +210,5 @@ print(response.json()["data"][0].get("url") or response.json()["data"][0].get("b
 </CodeGroup>
 
 <Note>
-  `gpt-image-2` 多图参考已在 2026-05-06 生产入口实测通过。多图请求会优先路由到支持多图参考的官方 OpenAI 承载渠道。
-</Note>
-
-<Note>
-  GPT Image 支持透明背景输出，设置 `background: "transparent"` 并使用 PNG 格式即可。
+  `gpt-image-2` 多图参考最多支持 16 张图片。多图请求会优先路由到支持多图参考的官方 OpenAI 承载渠道。
 </Note>

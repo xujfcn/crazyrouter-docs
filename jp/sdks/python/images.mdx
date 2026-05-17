@@ -8,7 +8,7 @@ description: 'Python image generation and editing with DALL-E and GPT-Image-2'
 ```python
 from openai import OpenAI
 
-client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+client = OpenAI(api_key="sk-xxx", base_url="https://cn.crazyrouter.com/v1")
 
 response = client.images.generate(
     model="dall-e-3",
@@ -37,15 +37,12 @@ response = client.images.generate(
     model="gpt-image-2",
     prompt="A modern minimalist logo with an artificial intelligence theme",
     size="1024x1024",
+    quality="low",
+    output_format="png",
     n=1
 )
 
-# GPT-Image-2 returns base64
-import base64
-image_b64 = response.data[0].b64_json
-with open("logo.png", "wb") as f:
-    f.write(base64.b64decode(image_b64))
-print("Image saved")
+print(response.data[0].url or response.data[0].b64_json)
 ```
 
 ## GPT-Image-2 Image Editing
@@ -55,12 +52,12 @@ print("Image saved")
 response = client.images.edit(
     model="gpt-image-2",
     image=open("original.png", "rb"),
-    prompt="Change the background to a beach sunset"
+    prompt="Change the background to a beach sunset",
+    size="1024x1024",
+    quality="low"
 )
 
-import base64
-with open("edited.png", "wb") as f:
-    f.write(base64.b64decode(response.data[0].b64_json))
+print(response.data[0].url or response.data[0].b64_json)
 ```
 
 ## Download and Save Images
@@ -83,7 +80,7 @@ print("Image saved")
 ```
 
 <Note>
-  DALL-E 3 returns URLs (valid for about 1 hour), while GPT-Image-2 returns base64 data. Download and save promptly.
+  Image endpoints usually return `url`; some compatible carriers may return `b64_json`. For production image requests, use the primary route `https://cn.crazyrouter.com/v1`.
 </Note>
 
 <Warning>

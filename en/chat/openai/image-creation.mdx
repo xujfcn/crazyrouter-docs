@@ -64,19 +64,22 @@ That means the current chat path behaves more like text-wrapped image-task outpu
 If you need programmatic image retrieval, use:
 
 ```bash
-curl -X POST https://crazyrouter.com/v1/images/generations \
+curl -X POST https://cn.crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "gpt-image-2",
-    "prompt": "A red square on a white background"
+    "prompt": "A red square on a white background",
+    "size": "1024x1024",
+    "quality": "low",
+    "output_format": "png"
   }'
 ```
 
-The 2026-03-23 production check returned:
+The current `gpt-image-2` stable path uses the primary image route `https://cn.crazyrouter.com/v1`. Responses usually include:
 
-- `data[0].b64_json`
-- `data[0].revised_prompt`
+- `data[0].url`
+- `data[0].b64_json` on some compatible carriers
 
 So the stable automation path is still the Images API, not the chat-image compatibility path.
 

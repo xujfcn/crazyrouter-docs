@@ -64,19 +64,22 @@ Data Preview: https://...
 如果你的目标是程序化取图，当前更稳定的方式是：
 
 ```bash
-curl -X POST https://crazyrouter.com/v1/images/generations \
+curl -X POST https://cn.crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "gpt-image-2",
-    "prompt": "A red square on a white background"
+    "prompt": "A red square on a white background",
+    "size": "1024x1024",
+    "quality": "low",
+    "output_format": "png"
   }'
 ```
 
-2026-03-23 的生产环境实测返回了：
+当前 `gpt-image-2` 稳定路径使用主承接线路 `https://cn.crazyrouter.com/v1`。响应通常返回：
 
-- `data[0].b64_json`
-- `data[0].revised_prompt`
+- `data[0].url`
+- 少数兼容渠道可能返回 `data[0].b64_json`
 
 也就是说，当前稳定的自动化消费方式仍然是 Images API，而不是 Chat Completions 的图片兼容路径。
 

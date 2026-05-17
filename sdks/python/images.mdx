@@ -8,7 +8,7 @@ description: 'Python 使用 DALL-E 和 GPT-Image-2 生成和编辑图像'
 ```python
 from openai import OpenAI
 
-client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+client = OpenAI(api_key="sk-xxx", base_url="https://cn.crazyrouter.com/v1")
 
 response = client.images.generate(
     model="dall-e-3",
@@ -37,15 +37,12 @@ response = client.images.generate(
     model="gpt-image-2",
     prompt="一个现代简约风格的 Logo，主题是人工智能",
     size="1024x1024",
+    quality="low",
+    output_format="png",
     n=1
 )
 
-# GPT-Image-2 返回 base64
-import base64
-image_b64 = response.data[0].b64_json
-with open("logo.png", "wb") as f:
-    f.write(base64.b64decode(image_b64))
-print("图片已保存")
+print(response.data[0].url or response.data[0].b64_json)
 ```
 
 ## GPT-Image-2 编辑图像
@@ -55,12 +52,12 @@ print("图片已保存")
 response = client.images.edit(
     model="gpt-image-2",
     image=open("original.png", "rb"),
-    prompt="把背景改成海滩日落"
+    prompt="把背景改成海滩日落",
+    size="1024x1024",
+    quality="low"
 )
 
-import base64
-with open("edited.png", "wb") as f:
-    f.write(base64.b64decode(response.data[0].b64_json))
+print(response.data[0].url or response.data[0].b64_json)
 ```
 
 ## 下载并保存图片
@@ -83,7 +80,7 @@ print("图片已保存")
 ```
 
 <Note>
-  DALL-E 3 返回 URL（有效期约 1 小时），GPT-Image-2 返回 base64 数据。建议及时下载保存。
+  图片接口通常返回 `url`；少数兼容渠道可能返回 `b64_json`。生产图片请求建议使用主承接线路 `https://cn.crazyrouter.com/v1`。
 </Note>
 
 <Warning>
