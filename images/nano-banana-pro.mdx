@@ -17,7 +17,7 @@ POST /v1/images/generations
 
 ## 这页覆盖什么
 
-- 本页只覆盖 `nano-banana-pro` / `gemini-3-pro-image-preview`
+- 本页只覆盖 `nano-banana-pro` / `nano-banana-pro`
 - 客户请求入口统一是 `POST /v1/images/generations`
 - 输入图片字段统一是 `image_input`
 - 当前公开协议收紧为 `image_input` 的 URL 引用，不对外暴露 `image` 或 `data:` 输入
@@ -28,9 +28,9 @@ POST /v1/images/generations
 
 | 推荐模型名 | 等价底层模型 |
 |------|------|
-| `nano-banana-pro` | `gemini-3-pro-image-preview` |
+| `nano-banana-pro` | `nano-banana-pro` |
 
-推荐在客户代码里使用 `nano-banana-pro`。如果你的系统已经直接写了 `gemini-3-pro-image-preview`，也可以继续通过同一个 `/v1/images/generations` 入口调用。
+推荐在客户代码里使用 `nano-banana-pro`。如果你的系统已经直接写了 `nano-banana-pro`，也可以继续通过同一个 `/v1/images/generations` 入口调用。
 
 ## 能力状态
 
@@ -84,7 +84,7 @@ POST /v1/images/generations
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| `model` | string | 是 | 推荐 `nano-banana-pro`；也兼容 `gemini-3-pro-image-preview` |
+| `model` | string | 是 | 推荐 `nano-banana-pro`；也兼容 `nano-banana-pro` |
 | `prompt` | string | 是 | 生成或编辑指令 |
 | `image_input` | string 或 string[] | 否 | 参考图 URL；当前公开保守范围先写 `1` 到 `2` 张 |
 | `resolution` | string | 否 | 当前公开承诺 `1K`、`4K` |

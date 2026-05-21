@@ -38,7 +38,7 @@ print("语音已保存到 output.mp3")
 ```python
 # 使用 tts-1-hd 获得更高音质
 response = client.audio.speech.create(
-    model="tts-1-hd",
+    model="tts-1-hd-1106",
     voice="nova",
     input="高质量语音合成示例",
     response_format="opus",  # 支持 mp3, opus, aac, flac
@@ -93,5 +93,5 @@ print(translation.text)  # 英文输出
 ```
 
 <Note>
-  TTS 支持的模型包括 `tts-1`、`tts-1-hd` 和 `gpt-4o-mini-tts`。STT 使用 `whisper-1` 模型。
+  TTS 支持的模型包括 `tts-1`、`tts-1-hd-1106` 和 `tts-1`。STT 使用 `whisper-1` 模型。
 </Note>

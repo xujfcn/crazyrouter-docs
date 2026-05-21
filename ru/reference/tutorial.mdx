@@ -90,7 +90,7 @@ response = client.messages.create(
 If you need:
 
 - standard Claude chat: prefer `claude-sonnet-4-6`
-- an explicit thinking block: prefer `claude-opus-4-6-thinking`
+- an explicit thinking block: prefer `claude-opus-4-7`
 
 Related page:
 
@@ -111,7 +111,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gemini-3-pro-preview",
+    model="gemini-3-pro",
     messages=[{"role": "user", "content": "Hello"}],
     max_tokens=64
 )
@@ -120,7 +120,7 @@ response = client.chat.completions.create(
 ### Option B: Gemini native
 
 ```bash
-curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -180,9 +180,9 @@ client = OpenAI()
 |------|---------------------------|
 | Fastest GPT integration | OpenAI-compatible + `gpt-5.4` |
 | Fastest Claude integration | Anthropic native + `claude-sonnet-4-6` |
-| Fastest Gemini integration | OpenAI-compatible or Gemini native + `gemini-3-pro-preview` |
+| Fastest Gemini integration | OpenAI-compatible or Gemini native + `gemini-3-pro` |
 | Need reasoning summaries | Responses API |
-| Need a Claude thinking block | `claude-opus-4-6-thinking` |
+| Need a Claude thinking block | `claude-opus-4-7` |
 | Need Gemini Google Search / thinking / responseSchema | Gemini native |
 
 <Note>

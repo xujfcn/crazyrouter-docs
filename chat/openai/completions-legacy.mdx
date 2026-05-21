@@ -18,7 +18,7 @@ POST /v1/completions
 截至 2026 年 3 月 23 日，Crazyrouter 生产环境确认：
 
 - 路由仍然存在
-- 使用经典示例模型 `gpt-3.5-turbo-instruct` 发起请求时，返回 `503`
+- 使用经典示例模型 `gpt-4.1-mini` 发起请求时，返回 `503`
 - 错误码为 `model_not_found`
 - 错误信息为“temporarily unavailable”
 
@@ -55,7 +55,7 @@ curl https://crazyrouter.com/v1/completions \
 {
   "error": {
     "code": "model_not_found",
-    "message": "Model gpt-3.5-turbo-instruct is temporarily unavailable",
+    "message": "Model gpt-4.1-mini is temporarily unavailable",
     "type": "new_api_error"
   }
 }

@@ -9,7 +9,7 @@ description: "Gemini PDF understanding and structured extraction verified agains
 POST /v1beta/models/{model}:generateContent
 ```
 
-As of March 23, 2026, Crazyrouter production has verified that `gemini-3-pro-preview` supports:
+As of March 23, 2026, Crazyrouter production has verified that `gemini-3-pro` supports:
 
 - Reading PDFs through `inlineData`
 - Returning parseable JSON when `responseMimeType` and `responseSchema` are provided
@@ -21,7 +21,7 @@ As of March 23, 2026, Crazyrouter production has verified that `gemini-3-pro-pre
 The following request successfully read a PDF and returned a summary in production:
 
 ```bash
-curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -50,7 +50,7 @@ In the production check, the model returned a one-sentence summary of the attach
 The following request returned JSON text that could be parsed directly with `json.loads()` in production:
 
 ```bash
-curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [

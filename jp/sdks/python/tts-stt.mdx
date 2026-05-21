@@ -38,7 +38,7 @@ print("Audio saved to output.mp3")
 ```python
 # Use tts-1-hd for higher audio quality
 response = client.audio.speech.create(
-    model="tts-1-hd",
+    model="tts-1-hd-1106",
     voice="nova",
     input="High quality speech synthesis example",
     response_format="opus",  # Supports mp3, opus, aac, flac
@@ -93,5 +93,5 @@ print(translation.text)  # English output
 ```
 
 <Note>
-  TTS supported models include `tts-1`, `tts-1-hd`, and `gpt-4o-mini-tts`. STT uses the `whisper-1` model.
+  TTS supported models include `tts-1`, `tts-1-hd-1106`, and `tts-1`. STT uses the `whisper-1` model.
 </Note>

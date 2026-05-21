@@ -9,7 +9,7 @@ description: "基于 2026-03-23 Crazyrouter 生产环境验证的 Gemini PDF 理
 POST /v1beta/models/{model}:generateContent
 ```
 
-截至 2026 年 3 月 23 日，Crazyrouter 生产环境已验证 `gemini-3-pro-preview` 支持：
+截至 2026 年 3 月 23 日，Crazyrouter 生产环境已验证 `gemini-3-pro` 支持：
 
 - 通过 `inlineData` 读取 PDF
 - 结合 `responseMimeType` + `responseSchema` 输出可解析 JSON
@@ -21,7 +21,7 @@ POST /v1beta/models/{model}:generateContent
 下面的请求在生产环境成功读取 PDF，并返回摘要文本：
 
 ```bash
-curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -50,7 +50,7 @@ curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent
 下面的请求在生产环境成功返回了可直接 `json.loads()` 的 JSON 文本：
 
 ```bash
-curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [

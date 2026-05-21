@@ -1,6 +1,6 @@
 ---
 title: "Claude 原生格式"
-description: "基于生产环境复核，使用 Anthropic Messages API 调用 Claude 4.6"
+description: "基于生产环境复核，使用 Anthropic Messages API 调用 Claude"
 ---
 
 # Claude 原生格式
@@ -14,7 +14,7 @@ POST /v1/messages
 当前主示例模型：
 
 - `claude-sonnet-4-6`
-- `claude-opus-4-6-thinking`
+- `claude-opus-4-7`
 
 ## 认证
 
@@ -73,7 +73,7 @@ curl https://crazyrouter.com/v1/messages \
 
 ## Function Calling
 
-当前生产环境中，Claude 4.6 的工具调用可稳定通过 `/v1/messages` 返回 `tool_use`。
+当前生产环境中，Claude 的工具调用可稳定通过 `/v1/messages` 返回 `tool_use`。
 
 首轮联调建议：
 
@@ -138,9 +138,9 @@ curl https://crazyrouter.com/v1/messages \
 
 本轮生产复核中，明确返回 `thinking` block 的组合是：
 
-- `claude-opus-4-6-thinking`
+- `claude-opus-4-7`
 
-基础版 `claude-opus-4-6` 本轮没有拿到同等明确的 thinking block，因此这里优先写 thinking 变体。
+基础版 `claude-opus-4-6` 本轮没有拿到同等明确的 thinking block，因此这里优先写 thinking 能力。
 
 ```bash cURL
 curl https://crazyrouter.com/v1/messages \
@@ -148,7 +148,7 @@ curl https://crazyrouter.com/v1/messages \
   -H "x-api-key: YOUR_API_KEY" \
   -H "anthropic-version: 2023-06-01" \
   -d '{
-    "model": "claude-opus-4-6-thinking",
+    "model": "claude-opus-4-7",
     "max_tokens": 320,
     "thinking": {
       "type": "enabled",
@@ -190,7 +190,7 @@ curl https://crazyrouter.com/v1/messages \
 
 - 普通文本对话：优先用 `claude-sonnet-4-6`
 - 工具调用：优先用 `claude-sonnet-4-6`，并在首轮验证里加 `tool_choice`
-- 明确需要 thinking block：优先用 `claude-opus-4-6-thinking`
+- 明确需要 thinking block：优先用 `claude-opus-4-7`
 
 相关页面：
 

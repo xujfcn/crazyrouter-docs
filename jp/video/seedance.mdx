@@ -11,13 +11,13 @@ Seedance is ByteDance / Doubao's video generation family. On Crazyrouter, the pu
 
 | Model | Current public positioning |
 |-------|----------------------------|
-| `doubao-seedance-1-0-lite-t2v-250428` | text-to-video |
-| `doubao-seedance-1-0-lite-i2v-250428` | single-image image-to-video |
-| `doubao-seedance-1-0-pro-250528` | general higher-quality generation |
-| `doubao-seedance-1-0-pro-fast-251015` | general faster generation |
-| `doubao-seedance-1-5-pro-251215` | higher-end version with room for later official capability expansion |
-| `doubao-seedance-2-0-260128` | official Seedance 2.0 multimodal video generation |
-| `doubao-seedance-2-0-fast-260128` | official Seedance 2.0 Fast multimodal video generation |
+| `doubao-seedance-1-0-lite-t2v` | text-to-video |
+| `doubao-seedance-1-0-lite-i2v` | single-image image-to-video |
+| `doubao-seedance-1-0-pro` | general higher-quality generation |
+| `doubao-seedance-1-0-pro-fast` | general faster generation |
+| `doubao-seedance-1-5-pro` | higher-end version with room for later official capability expansion |
+| `doubao-seedance-2-0` | official Seedance 2.0 multimodal video generation |
+| `doubao-seedance-2-0-fast` | official Seedance 2.0 Fast multimodal video generation |
 
 ## Submit a Video Task
 
@@ -63,8 +63,8 @@ POST /volc/v1/contents/generations/tasks
 
 | Model | Official billing mode | Official price |
 |------|------|------|
-| `doubao-seedance-2-0-260128` | per output token | `28 CNY / 1M output tokens` with video input; `46 CNY / 1M output tokens` without video input |
-| `doubao-seedance-2-0-fast-260128` | per output token | `22 CNY / 1M output tokens` with video input; `37 CNY / 1M output tokens` without video input |
+| `doubao-seedance-2-0` | per output token | `28 CNY / 1M output tokens` with video input; `46 CNY / 1M output tokens` without video input |
+| `doubao-seedance-2-0-fast` | per output token | `22 CNY / 1M output tokens` with video input; `37 CNY / 1M output tokens` without video input |
 
 <Note>
   MIME, duration, and file-size enforcement for remote URL assets is ultimately handled by the upstream. Crazyrouter currently pre-validates count limits, duration parameter boundaries, the no-audio-only rule, and explicit unsupported fields such as `frames`, `camera_fixed`, and non-480p/720p output requests.
@@ -79,7 +79,7 @@ curl -X POST https://crazyrouter.com/volc/v1/contents/generations/tasks \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "doubao-seedance-1-0-lite-t2v-250428",
+    "model": "doubao-seedance-1-0-lite-t2v",
     "content": [
       {
         "type": "text",
@@ -99,7 +99,7 @@ response = requests.post(
         "Authorization": "Bearer YOUR_API_KEY"
     },
     json={
-        "model": "doubao-seedance-1-0-lite-t2v-250428",
+        "model": "doubao-seedance-1-0-lite-t2v",
         "content": [
             {
                 "type": "text",
@@ -121,7 +121,7 @@ curl -X POST https://crazyrouter.com/volc/v1/contents/generations/tasks \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "doubao-seedance-1-0-lite-i2v-250428",
+    "model": "doubao-seedance-1-0-lite-i2v",
     "content": [
       {
         "type": "text",
@@ -144,7 +144,7 @@ curl -X POST https://crazyrouter.com/volc/v1/contents/generations/tasks \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "doubao-seedance-2-0-260128",
+    "model": "doubao-seedance-2-0",
     "content": [
       {
         "type": "text",
@@ -207,7 +207,7 @@ curl https://crazyrouter.com/volc/v1/contents/generations/tasks/cgt_task_abc123 
 {
   "id": "cgt_task_abc123",
   "object": "video",
-  "model": "doubao-seedance-1-0-lite-t2v-250428",
+  "model": "doubao-seedance-1-0-lite-t2v",
   "status": "completed",
   "progress": 100,
   "created_at": 1774580000,

@@ -18,7 +18,7 @@ POST /v1/completions
 As of March 23, 2026, Crazyrouter production confirms:
 
 - the route still exists
-- a request using the classic example model `gpt-3.5-turbo-instruct` returned `503`
+- a request using the classic example model `gpt-4.1-mini` returned `503`
 - the error code was `model_not_found`
 - the message said the model was temporarily unavailable
 
@@ -55,7 +55,7 @@ Observed production error example:
 {
   "error": {
     "code": "model_not_found",
-    "message": "Model gpt-3.5-turbo-instruct is temporarily unavailable",
+    "message": "Model gpt-4.1-mini is temporarily unavailable",
     "type": "new_api_error"
   }
 }

@@ -18,10 +18,10 @@ Crazyrouter exposes the first batch of `Qwen Image` generation models through th
 | `qwen-image-plus` | async generation | text-to-image | verified |
 | `qwen-image-max` | sync generation | text-to-image | verified |
 | `qwen-image-2.0` | sync generation | text-to-image | verified |
-| `qwen-image-2.0-pro` | sync generation | text-to-image | Beta |
+| `qwen-image-2.0` | sync generation | text-to-image | Beta |
 
 <Note>
-  `qwen-image-2.0-pro` is already aligned in protocol and code, but the production carrier evidence is still being closed, so it remains Beta for now.
+  `qwen-image-2.0` is already aligned in protocol and code, but the production carrier evidence is still being closed, so it remains Beta for now.
 </Note>
 
 ## Public Contract
@@ -30,7 +30,7 @@ Crazyrouter exposes the first batch of `Qwen Image` generation models through th
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `model` | string | Yes | `qwen-image-plus`, `qwen-image-max`, `qwen-image-2.0`, or `qwen-image-2.0-pro` |
+| `model` | string | Yes | `qwen-image-plus`, `qwen-image-max`, `qwen-image-2.0`, or `qwen-image-2.0` |
 | `prompt` | string | Yes | text-to-image prompt |
 | `size` | string | No | output size; use sizes currently exposed by the model page or playground |
 | `n` | integer | No | number of images, default `1` |
@@ -95,10 +95,10 @@ The current official truth for Qwen Image is billing per successfully generated 
 | `qwen-image-plus` | per image | `¥0.20 / image` | verified |
 | `qwen-image-max` | per image | `¥0.50 / image` | verified |
 | `qwen-image-2.0` | per image | `¥0.20 / image` | verified |
-| `qwen-image-2.0-pro` | per image | `¥0.50 / image` | Beta |
+| `qwen-image-2.0` | per image | `¥0.50 / image` | Beta |
 
 ## Scope Notes
 
 - This first batch commits only the public `text-to-image` capability. Additional upstream multimodal abilities are not exposed as separate customer protocols yet.
 - Providers may run async or sync upstream paths internally, but the customer-facing contract remains the same OpenAI Images request/response shape.
-- The edit model `qwen-image-edit-2509` is not part of this first-batch generation closure. Treat editing as a separate capability decision.
+- The edit model `qwen-image-plus` is not part of this first-batch generation closure. Treat editing as a separate capability decision.

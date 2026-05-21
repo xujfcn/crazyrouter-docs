@@ -16,13 +16,13 @@ Reorder a set of documents by semantic relevance to a query. Commonly used as th
 
 | Model | Description |
 |-------|-------------|
-| `BAAI/bge-reranker-v2-m3` | Multilingual reranking model, recommended |
-| `BAAI/bge-reranker-large` | Primarily English |
+| `gte-rerank-v2` | Multilingual reranking model, recommended |
+| `gte-rerank-v2` | Primarily English |
 
 ## Request Parameters
 
 <ParamField body="model" type="string" required>
-  Reranking model name, e.g. `BAAI/bge-reranker-v2-m3`
+  Reranking model name, e.g. `gte-rerank-v2`
 </ParamField>
 
 <ParamField body="query" type="string" required>
@@ -45,7 +45,7 @@ Reorder a set of documents by semantic relevance to a query. Commonly used as th
 
 ```json
 {
-  "model": "BAAI/bge-reranker-v2-m3",
+  "model": "gte-rerank-v2",
   "results": [
     {
       "index": 2,
@@ -83,7 +83,7 @@ response = requests.post(
         "Content-Type": "application/json"
     },
     json={
-        "model": "BAAI/bge-reranker-v2-m3",
+        "model": "gte-rerank-v2",
         "query": "What is a vector database",
         "documents": [
             "A vector database is a database system specialized for storing and retrieving high-dimensional vectors",
@@ -106,7 +106,7 @@ curl -X POST https://crazyrouter.com/v1/rerank \
   -H "Authorization: Bearer sk-xxx" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "BAAI/bge-reranker-v2-m3",
+    "model": "gte-rerank-v2",
     "query": "What is a vector database",
     "documents": [
       "A vector database is a database system specialized for storing and retrieving high-dimensional vectors",

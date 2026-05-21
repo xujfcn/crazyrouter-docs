@@ -56,7 +56,7 @@ Recommended starting whitelist:
 
 - `gpt-5.4`
 - `claude-sonnet-4-6`
-- `gemini-3-pro-preview`
+- `gemini-3-pro`
 
 <Tip>
 If you also plan to connect Crazyrouter to Cursor, Codex, or Claude Code, keep LobeChat on its own token. It makes cost tracking much easier.
@@ -99,7 +99,7 @@ services:
     environment:
       - OPENAI_API_KEY=sk-xxx
       - OPENAI_PROXY_URL=https://crazyrouter.com/v1
-      - OPENAI_MODEL_LIST=gpt-5.4,claude-sonnet-4-6,gemini-3-pro-preview
+      - OPENAI_MODEL_LIST=gpt-5.4,claude-sonnet-4-6,gemini-3-pro
 ```
 
 If you do not want end users to replace the key freely, combine this with the config controls your deployed LobeChat version supports for hosted defaults or restricted client-side customization.
@@ -110,9 +110,9 @@ If you do not want end users to replace the key freely, combine this with the co
 |----------|-------------------|-----|
 | Default main chat model | `gpt-5.4` | Verified successfully in production on March 23, 2026, and suited for the main LobeChat baseline |
 | Higher-quality writing / code help | `claude-sonnet-4-6` | Strong long-form writing and reasoning |
-| Gemini fallback path | `gemini-3-pro-preview` | Useful as a second vendor-compatible validation path |
+| Gemini fallback path | `gemini-3-pro` | Useful as a second vendor-compatible validation path |
 
-Recommended order: get `gpt-5.4` working first, then expand to `claude-sonnet-4-6` and `gemini-3-pro-preview`.
+Recommended order: get `gpt-5.4` working first, then expand to `claude-sonnet-4-6` and `gemini-3-pro`.
 
 ## Token Setup Best Practices
 

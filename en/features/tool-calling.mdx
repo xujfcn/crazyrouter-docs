@@ -15,7 +15,7 @@ Verified models:
 
 - `gpt-5.4`
 - `claude-sonnet-4-6`
-- `gemini-3-pro-preview`
+- `gemini-3-pro`
 
 ## Verified matrix
 
@@ -23,7 +23,7 @@ Verified models:
 |------|------|------|----------|
 | `gpt-5.4` | OpenAI Chat Completions | `POST /v1/chat/completions` | Returns `tool_calls` |
 | `claude-sonnet-4-6` | Anthropic Messages | `POST /v1/messages` | Returns `tool_use` block |
-| `gemini-3-pro-preview` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | Returns `functionCall` |
+| `gemini-3-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | Returns `functionCall` |
 
 ## GPT-5.4
 
@@ -126,10 +126,10 @@ Verified response shape:
 
 For first-pass validation, use an explicit `tool_choice` and clearly instruct Claude not to answer directly.
 
-## Gemini 3 Pro Preview
+## Gemini 3 Pro
 
 ```bash
-curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [

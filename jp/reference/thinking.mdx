@@ -18,8 +18,8 @@ The key point is that different protocols expose "thinking" differently:
 | Model | Protocol | Verified field or marker | Notes |
 |-------|----------|--------------------------|-------|
 | `gpt-5.4` | Responses | `output[].type = "reasoning"` | Can return displayable summaries when `summary` is requested |
-| `claude-opus-4-6-thinking` | Anthropic Messages | `content[].type = "thinking"` | Returned alongside a `text` block |
-| `gemini-3-pro-preview` | Gemini Native | `usageMetadata.thoughtsTokenCount` | Confirms thinking tokens were actually used |
+| `claude-opus-4-7` | Anthropic Messages | `content[].type = "thinking"` | Returned alongside a `text` block |
+| `gemini-3-pro` | Gemini Native | `usageMetadata.thoughtsTokenCount` | Confirms thinking tokens were actually used |
 
 <Note>
   In the current recheck, `gpt-5.4` Chat Completions did not reliably return usable `message.reasoning_content`, so it is not treated as the primary observable field here.
@@ -95,7 +95,7 @@ Extraction example:
 
 ```python
 message = client.messages.create(
-    model="claude-opus-4-6-thinking",
+    model="claude-opus-4-7",
     max_tokens=320,
     thinking={
         "type": "enabled",

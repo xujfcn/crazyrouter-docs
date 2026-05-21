@@ -90,7 +90,7 @@ response = client.messages.create(
 如果你要：
 
 - 普通 Claude 对话：优先 `claude-sonnet-4-6`
-- 明确需要 thinking block：优先 `claude-opus-4-6-thinking`
+- 明确需要 thinking block：优先 `claude-opus-4-7`
 
 相关页面：
 
@@ -111,7 +111,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gemini-3-pro-preview",
+    model="gemini-3-pro",
     messages=[{"role": "user", "content": "Hello"}],
     max_tokens=64
 )
@@ -120,7 +120,7 @@ response = client.chat.completions.create(
 ### 方案 B：Gemini 原生
 
 ```bash
-curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -180,9 +180,9 @@ client = OpenAI()
 |------|--------------|
 | 最快接入 GPT | OpenAI 兼容 + `gpt-5.4` |
 | 最快接入 Claude | Anthropic 原生 + `claude-sonnet-4-6` |
-| 最快接入 Gemini | OpenAI 兼容或 Gemini 原生 + `gemini-3-pro-preview` |
+| 最快接入 Gemini | OpenAI 兼容或 Gemini 原生 + `gemini-3-pro` |
 | 要 reasoning 摘要 | Responses API |
-| 要 Claude thinking block | `claude-opus-4-6-thinking` |
+| 要 Claude thinking block | `claude-opus-4-7` |
 | 要 Gemini Google Search / thinking / responseSchema | Gemini 原生 |
 
 <Note>

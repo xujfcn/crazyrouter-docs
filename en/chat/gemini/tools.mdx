@@ -9,7 +9,7 @@ description: "Gemini native tool capabilities verified against Crazyrouter produ
 POST /v1beta/models/{model}:generateContent
 ```
 
-As of March 23, 2026, Crazyrouter production has verified that `gemini-3-pro-preview` can reliably trigger these Gemini-native tool capabilities:
+As of March 23, 2026, Crazyrouter production has verified that `gemini-3-pro` can reliably trigger these Gemini-native tool capabilities:
 
 - `codeExecution`
 - `googleSearch`
@@ -27,7 +27,7 @@ As of March 23, 2026, Crazyrouter production has verified that `gemini-3-pro-pre
 The following request returned both `executableCode` and `codeExecutionResult` in production:
 
 ```bash
-curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -83,7 +83,7 @@ Observed response shape:
 The following request returned `groundingMetadata` in production, confirming that Google Search was actually used:
 
 ```bash
-curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -114,7 +114,7 @@ Current markers to check:
 The following request returned `urlContextMetadata` in production, along with `groundingMetadata`:
 
 ```bash
-curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -145,7 +145,7 @@ Current markers to check:
 The following request returned `functionCall` in production:
 
 ```bash
-curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [

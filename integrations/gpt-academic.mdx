@@ -24,7 +24,7 @@ LLM_MODEL = "gpt-5.4"
 AVAIL_LLM_MODELS = [
     "gpt-5.4",
     "claude-sonnet-4-6",
-    "gemini-3-pro-preview"
+    "gemini-3-pro"
 ]
 ```
 
@@ -56,7 +56,7 @@ services:
 |------|------|------|
 | 首轮学术助手验证 | `gpt-5.4` | 2026 年 3 月 23 日已在生产环境实测成功，最适合作为 OpenAI 兼容基线 |
 | 高质量长文总结 | `claude-sonnet-4-6` | 更适合复杂解释、长文重写和总结 |
-| Gemini 备用档 | `gemini-3-pro-preview` | 适合补充第二条供应商兼容性验证路径 |
+| Gemini 备用档 | `gemini-3-pro` | 适合补充第二条供应商兼容性验证路径 |
 
 <Note>
   GPT Academic 的 URL 重定向能力可以把 OpenAI 请求直接转到 Crazyrouter。建议先只用 `gpt-5.4` 跑通最小会话，再逐步增加模型列表和复杂插件能力。

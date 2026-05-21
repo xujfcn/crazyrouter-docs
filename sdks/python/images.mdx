@@ -42,7 +42,7 @@ response = client.images.generate(
     n=1
 )
 
-print(response.data[0].url or response.data[0].b64_json)
+print(response.data[0].url)
 ```
 
 ## GPT-Image-2 编辑图像
@@ -57,7 +57,7 @@ response = client.images.edit(
     quality="low"
 )
 
-print(response.data[0].url or response.data[0].b64_json)
+print(response.data[0].url)
 ```
 
 ## 下载并保存图片
@@ -80,7 +80,7 @@ print("图片已保存")
 ```
 
 <Note>
-  图片接口通常返回 `url`；少数兼容渠道可能返回 `b64_json`。生产图片请求建议使用主承接线路 `https://cn.crazyrouter.com/v1`。
+  `gpt-image-2` 通常返回 `data[0].url`。不要给 `gpt-image-2` 传 `response_format`；如需控制图片文件格式，请使用 `output_format="png"`、`"jpeg"` 或 `"webp"`。生产图片请求建议使用主承接线路 `https://cn.crazyrouter.com/v1`。
 </Note>
 
 <Warning>

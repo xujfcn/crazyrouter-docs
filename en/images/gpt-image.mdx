@@ -37,6 +37,10 @@ POST /v1/images/edits
 
 These parameters are rejected for `gpt-image-2`: `response_format`, `style`, `input_fidelity`, `background=transparent`, `quality=standard`, and `output_format=png` with `output_compression`.
 
+<Warning>
+  `response_format` is not a `gpt-image-2` parameter. Do not send `response_format="url"` or `response_format="b64_json"`; use `output_format="png"`, `"jpeg"`, or `"webp"` to choose the image file format, and read `data[0].url` from the response by default. `response_format` notes on DALL-E, Doubao, Qwen, or other image-model pages do not apply to `gpt-image-2`.
+</Warning>
+
 ### Request Examples
 
 <CodeGroup>
@@ -204,7 +208,7 @@ response = requests.post(
 )
 
 response.raise_for_status()
-print(response.json()["data"][0].get("url") or response.json()["data"][0].get("b64_json"))
+print(response.json()["data"][0]["url"])
 ```
 
 </CodeGroup>

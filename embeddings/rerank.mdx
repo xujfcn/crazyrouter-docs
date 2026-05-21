@@ -16,13 +16,13 @@ api: 'POST /v1/rerank'
 
 | 模型 | 说明 |
 |------|------|
-| `BAAI/bge-reranker-v2-m3` | 多语言重排序模型，推荐 |
-| `BAAI/bge-reranker-large` | 英文为主 |
+| `gte-rerank-v2` | 多语言重排序模型，推荐 |
+| `gte-rerank-v2` | 英文为主 |
 
 ## 请求参数
 
 <ParamField body="model" type="string" required>
-  重排序模型名称，如 `BAAI/bge-reranker-v2-m3`
+  重排序模型名称，如 `gte-rerank-v2`
 </ParamField>
 
 <ParamField body="query" type="string" required>
@@ -45,7 +45,7 @@ api: 'POST /v1/rerank'
 
 ```json
 {
-  "model": "BAAI/bge-reranker-v2-m3",
+  "model": "gte-rerank-v2",
   "results": [
     {
       "index": 2,
@@ -83,7 +83,7 @@ response = requests.post(
         "Content-Type": "application/json"
     },
     json={
-        "model": "BAAI/bge-reranker-v2-m3",
+        "model": "gte-rerank-v2",
         "query": "什么是向量数据库",
         "documents": [
             "向量数据库是专门存储和检索高维向量的数据库系统",
@@ -106,7 +106,7 @@ curl -X POST https://crazyrouter.com/v1/rerank \
   -H "Authorization: Bearer sk-xxx" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "BAAI/bge-reranker-v2-m3",
+    "model": "gte-rerank-v2",
     "query": "什么是向量数据库",
     "documents": [
       "向量数据库是专门存储和检索高维向量的数据库系统",

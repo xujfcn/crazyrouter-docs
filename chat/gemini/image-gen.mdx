@@ -13,16 +13,16 @@ Crazyrouter 对 Gemini 图片模型统一提供 OpenAI Images 兼容入口。用
 
 | 推荐公开模型名 | 兼容底层模型名 |
 |------|------|
-| `nano-banana` | `gemini-2.5-flash-image` |
-| `nano-banana-pro` | `gemini-3-pro-image-preview` |
-| `nano-banana-2` | `gemini-3.1-flash-image-preview` |
+| `nano-banana` | `nano-banana` |
+| `nano-banana-pro` | `nano-banana-pro` |
+| `nano-banana-2` | `nano-banana-2` |
 
 <Warning>
   Gemini 图片生成属于长耗时请求。生产接入请优先使用主承接线路 `https://cn.crazyrouter.com/v1`，完整生成端点为 `https://cn.crazyrouter.com/v1/images/generations`。
 </Warning>
 
 <Note>
-  推荐在客户代码里使用 `nano-banana`、`nano-banana-pro`、`nano-banana-2`。如果你的系统已经直接写了 `gemini-2.5-flash-image`、`gemini-3-pro-image-preview`、`gemini-3.1-flash-image-preview`，也可以继续通过同一个 Images API 入口调用。
+  推荐在客户代码里使用 `nano-banana`、`nano-banana-pro`、`nano-banana-2`。如果你的系统已经直接写了 `nano-banana`、`nano-banana-pro`、`nano-banana-2`，也可以继续通过同一个 Images API 入口调用。
 </Note>
 
 ---

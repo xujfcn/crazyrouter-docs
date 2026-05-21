@@ -1,6 +1,6 @@
 ---
 title: "Grok Image Models"
-description: "Generate images with grok-imagine-image and grok-4-image, including supported parameters and differences"
+description: "Generate images with grok-4-image and grok-4-image, including supported parameters and differences"
 ---
 
 # Grok Image Models
@@ -13,18 +13,18 @@ Grok image models use the OpenAI-compatible Images path. There are two names you
 
 | Model | Description | Recommendation |
 |-------|-------------|----------------|
-| `grok-imagine-image` | Official xAI image model name, billed at the official `$0.02 / image` price | Recommended for new integrations |
+| `grok-4-image` | Official xAI image model name, billed at the official `$0.02 / image` price | Recommended for new integrations |
 | `grok-4-image` | Historical / compatibility model name on third-party compatible channels | Use only the safe subset of parameters |
 
 <Warning>
-  `grok-4-image` is not the official xAI model name. Do not assume it is fully equivalent to `grok-imagine-image`. New integrations should prefer `grok-imagine-image`.
+  `grok-4-image` is not the official xAI model name. Do not assume it is fully equivalent to `grok-4-image`. New integrations should prefer `grok-4-image`.
 </Warning>
 
-## grok-imagine-image Parameters
+## grok-4-image Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `model` | string | Yes | Use `grok-imagine-image` |
+| `model` | string | Yes | Use `grok-4-image` |
 | `prompt` | string | Yes | Image prompt |
 | `n` | integer | No | Number of images, official range `1` to `10`. Use `1` first for stable cost control |
 | `response_format` | string | No | `url` or `b64_json`. The live Crazyrouter path is stable with `url` |
@@ -43,7 +43,7 @@ Do not pass these parameters:
 | `quality` | Not supported by the xAI image endpoint |
 | `style` | Not supported by the xAI image endpoint |
 
-## grok-imagine-image Example
+## grok-4-image Example
 
 <CodeGroup>
 
@@ -52,7 +52,7 @@ curl -X POST https://crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "grok-imagine-image",
+    "model": "grok-4-image",
     "prompt": "A tiny yellow cube on a plain white background, minimal product photo",
     "n": 1,
     "response_format": "url",
@@ -70,7 +70,7 @@ client = OpenAI(
 )
 
 response = client.images.generate(
-    model="grok-imagine-image",
+    model="grok-4-image",
     prompt="A tiny yellow cube on a plain white background, minimal product photo",
     n=1,
     response_format="url",
@@ -96,7 +96,7 @@ const client = new OpenAI({
 });
 
 const response = await client.images.generate({
-  model: "grok-imagine-image",
+  model: "grok-4-image",
   prompt: "A tiny yellow cube on a plain white background, minimal product photo",
   n: 1,
   response_format: "url",
@@ -166,7 +166,7 @@ curl -X POST https://crazyrouter.com/v1/images/generations \
 
 | Model | Current Billing |
 |-------|-----------------|
-| `grok-imagine-image` | `$0.02 / image`, no discount |
+| `grok-4-image` | `$0.02 / image`, no discount |
 | `grok-4-image` | Current pricing is `$0.08 * 0.55 = $0.044 / image` |
 
 <Note>

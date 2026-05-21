@@ -14,16 +14,16 @@ Verification date:
 Verified models:
 
 - `gpt-5.4`
-- `claude-opus-4-6-thinking`
-- `gemini-3-pro-preview`
+- `claude-opus-4-7`
+- `gemini-3-pro`
 
 ## Verified matrix
 
 | Model | Protocol | Endpoint | Success marker |
 |------|------|------|----------|
 | `gpt-5.4` | OpenAI Responses | `POST /v1/responses` | `output` includes a `reasoning` item |
-| `claude-opus-4-6-thinking` | Anthropic Messages | `POST /v1/messages` | Returns `thinking` block |
-| `gemini-3-pro-preview` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | `usageMetadata` includes `thoughtsTokenCount` |
+| `claude-opus-4-7` | Anthropic Messages | `POST /v1/messages` | Returns `thinking` block |
+| `gemini-3-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | `usageMetadata` includes `thoughtsTokenCount` |
 
 ## GPT-5.4
 
@@ -61,7 +61,7 @@ Verified `reasoning` item shape:
 }
 ```
 
-## Claude Opus 4.6 Thinking
+## Claude Opus 4.7 Thinking
 
 ```bash
 curl https://crazyrouter.com/v1/messages \
@@ -69,7 +69,7 @@ curl https://crazyrouter.com/v1/messages \
   -H "x-api-key: YOUR_API_KEY" \
   -H "anthropic-version: 2023-06-01" \
   -d '{
-    "model": "claude-opus-4-6-thinking",
+    "model": "claude-opus-4-7",
     "max_tokens": 320,
     "thinking": {
       "type": "enabled",
@@ -99,10 +99,10 @@ Verified response shape:
 }
 ```
 
-## Gemini 3 Pro Preview
+## Gemini 3 Pro
 
 ```bash
-curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [

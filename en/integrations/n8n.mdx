@@ -52,7 +52,7 @@ Recommended starting whitelist:
 
 - `gpt-5.4`
 - `claude-sonnet-4-6`
-- `gemini-3-pro-preview`
+- `gemini-3-pro`
 - `text-embedding-3-large` if you will use vector or retrieval-related flows
 
 ## 5-Minute Quick Start
@@ -144,7 +144,7 @@ Depending on the n8n version, `Base URL` may appear on the credential page or in
 |----------|-------------------|-----|
 | Default workflow model | `gpt-5.4` | Verified successfully in production on March 23, 2026, and suited for the main n8n baseline |
 | Higher-quality complex agent flows | `claude-sonnet-4-6` | Better for more complex explanation and long-form tasks |
-| Gemini fallback path | `gemini-3-pro-preview` | Useful as a second vendor-compatible validation path |
+| Gemini fallback path | `gemini-3-pro` | Useful as a second vendor-compatible validation path |
 | Retrieval / vector-related flows | `text-embedding-3-large` | Good for later vector or search-enhanced pipelines |
 
 Recommended order: get `gpt-5.4` working in a minimal flow, then expand to agents, tools, and batch jobs.

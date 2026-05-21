@@ -37,6 +37,10 @@ POST /v1/images/edits
 
 以下参数不会被 `gpt-image-2` 接受：`response_format`、`style`、`input_fidelity`、`background=transparent`、`quality=standard`、`output_format=png` 搭配 `output_compression`。
 
+<Warning>
+  `response_format` 不是 `gpt-image-2` 参数。不要传 `response_format="url"` 或 `response_format="b64_json"`；请用 `output_format="png"`、`"jpeg"` 或 `"webp"` 控制图片文件格式，并默认读取响应里的 `data[0].url`。DALL-E、Doubao、Qwen 等其他图片模型页面中的 `response_format` 说明不适用于 `gpt-image-2`。
+</Warning>
+
 ### 请求示例
 
 <CodeGroup>
@@ -204,7 +208,7 @@ response = requests.post(
 )
 
 response.raise_for_status()
-print(response.json()["data"][0].get("url") or response.json()["data"][0].get("b64_json"))
+print(response.json()["data"][0]["url"])
 ```
 
 </CodeGroup>

@@ -17,7 +17,7 @@ Use the DALL-E 3 model to generate images, compatible with the OpenAI Images API
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `model` | string | Yes | `dall-e-3` or `dall-e-2` |
+| `model` | string | Yes | `dall-e-3` or `dall-e-3` |
 | `prompt` | string | Yes | Image description prompt |
 | `n` | integer | No | Number of images, DALL-E 3 only supports 1 |
 | `size` | string | No | Image size |
@@ -30,7 +30,7 @@ Use the DALL-E 3 model to generate images, compatible with the OpenAI Images API
 | Model | Supported Sizes |
 |-------|----------------|
 | `dall-e-3` | `1024x1024`, `1792x1024`, `1024x1792` |
-| `dall-e-2` | `256x256`, `512x512`, `1024x1024` |
+| `dall-e-3` | `256x256`, `512x512`, `1024x1024` |
 
 ### Request Examples
 
@@ -106,7 +106,7 @@ client = OpenAI(
 )
 
 response = client.images.edit(
-    model="dall-e-2",
+    model="dall-e-3",
     image=open("image.png", "rb"),
     mask=open("mask.png", "rb"),
     prompt="Add a kitten in the blank area",

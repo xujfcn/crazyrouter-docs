@@ -15,7 +15,7 @@ Gemini CLI 当前版本在 API Key 模式下，至少需要显式提供 `GEMINI_
 
 ```bash
 export GEMINI_API_KEY=sk-xxx
-export GEMINI_MODEL=gemini-3.1-pro-preview
+export GEMINI_MODEL=gemini-3-pro
 export GOOGLE_GEMINI_BASE_URL=https://crazyrouter.com
 ```
 
@@ -23,7 +23,7 @@ Windows PowerShell:
 
 ```powershell
 $env:GEMINI_API_KEY="sk-xxx"
-$env:GEMINI_MODEL="gemini-3.1-pro-preview"
+$env:GEMINI_MODEL="gemini-3-pro"
 $env:GOOGLE_GEMINI_BASE_URL="https://crazyrouter.com"
 ```
 
@@ -43,7 +43,7 @@ $env:GOOGLE_GEMINI_BASE_URL="https://crazyrouter.com"
   "apiKey": "sk-xxx",
   "baseUrl": "https://crazyrouter.com",
   "model": {
-    "name": "gemini-3.1-pro-preview"
+    "name": "gemini-3-pro"
   }
 }
 ```
@@ -60,7 +60,7 @@ $env:GOOGLE_GEMINI_BASE_URL="https://crazyrouter.com"
 
 ```bash
 GEMINI_API_KEY=sk-xxx
-GEMINI_MODEL=gemini-3.1-pro-preview
+GEMINI_MODEL=gemini-3-pro
 GOOGLE_GEMINI_BASE_URL=https://crazyrouter.com
 ```
 
@@ -74,8 +74,8 @@ gemini
 
 | 模型 | 说明 |
 |------|------|
-| `gemini-3.1-pro-preview` | 2026 年 4 月 8 日已在 Crazyrouter 生产环境通过 Gemini CLI 真实请求实测成功，适合作为当前主基线 |
+| `gemini-3-pro` | 2026 年 4 月 8 日已在 Crazyrouter 生产环境通过 Gemini CLI 真实请求实测成功，适合作为当前主基线 |
 
 <Note>
-  Crazyrouter 同时支持 Gemini 原生 API 格式和 OpenAI 兼容格式。Gemini CLI 使用 Gemini 原生格式。本文档中的 `gemini-3.1-pro-preview`、`gemini-api-key` 认证方式，以及 `GOOGLE_GEMINI_BASE_URL=https://crazyrouter.com` 已基于真实 CLI 请求验证通过。
+  Crazyrouter 同时支持 Gemini 原生 API 格式和 OpenAI 兼容格式。Gemini CLI 使用 Gemini 原生格式。本文档中的 `gemini-3-pro`、`gemini-api-key` 认证方式，以及 `GOOGLE_GEMINI_BASE_URL=https://crazyrouter.com` 已基于真实 CLI 请求验证通过。
 </Note>

@@ -10,7 +10,7 @@ Crazyrouter exposes the current public Kling video family through two official m
 | Route Family | Submit Paths | Fetch Paths | Public Models |
 |-----------|-----------|-----------|-----------|
 | Standard Kling video | `POST /kling/v1/videos/text2video` `POST /kling/v1/videos/image2video` `POST /kling/v1/videos/multi-image2video` | `GET /kling/v1/videos/text2video/{task_id}` `GET /kling/v1/videos/image2video/{task_id}` `GET /kling/v1/videos/multi-image2video/{task_id}` | `kling-v2-5-turbo` `kling-v2-6` `kling-v3` |
-| Kling omni-video | `POST /kling/v1/videos/omni-video` | `GET /kling/v1/videos/omni-video/{task_id}` | `kling-v3-omni` `kling-video-o1` |
+| Kling omni-video | `POST /kling/v1/videos/omni-video` | `GET /kling/v1/videos/omni-video/{task_id}` | `kling-v3` `kling-v3` |
 
 All tasks are asynchronous. Successful fetches prefer Crazyrouter archived URLs such as `https://media.crazyrouter.com/...`.
 
@@ -21,8 +21,8 @@ All tasks are asynchronous. Successful fetches prefer Crazyrouter archived URLs 
 | `kling-v2-5-turbo` | Standard Kling video | text-to-video, image-to-video, start-end, reference-video | `Beta` | `mode + duration` |
 | `kling-v2-6` | Standard Kling video | text-to-video, image-to-video, start-end, reference-video, sound, voice control, motion control | `Beta` | `mode + duration + sound + voice control` |
 | `kling-v3` | Standard Kling video | text-to-video, image-to-video, start-end, reference-video, motion control, standard-route element references | `Beta` | `mode + duration + sound`; motion uses a separate billing bucket |
-| `kling-v3-omni` | Kling omni-video | omni-video with image / element / video / voice references | `Beta` | `mode + duration + sound + video input` |
-| `kling-video-o1` | Kling omni-video | single-shot omni-video | `Beta` | `mode + duration + video input` |
+| `kling-v3` | Kling omni-video | omni-video with image / element / video / voice references | `Beta` | `mode + duration + sound + video input` |
+| `kling-v3` | Kling omni-video | single-shot omni-video | `Beta` | `mode + duration + video input` |
 
 <Note>
   The customer-facing contract follows the official Kling capability and field definitions. Third-party channels remain internal providers only. Use the live Pricing page as the source of truth for sell-side prices.
@@ -228,14 +228,14 @@ POST /kling/v1/videos/omni-video
 
 ### Public Models
 
-- `kling-v3-omni`
-- `kling-video-o1`
+- `kling-v3`
+- `kling-v3`
 
 ### Request Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `model_name` | string | Yes | Only `kling-v3-omni` and `kling-video-o1` are accepted on this route |
+| `model_name` | string | Yes | Only `kling-v3` and `kling-v3` are accepted on this route |
 | `prompt` | string | Yes | Official omni prompt that can reference assets from `image_list`, `element_list`, `video_list`, and `voice_list` |
 | `sound` | string | No | Official values are `on` / `off` |
 | `duration` | string/integer | No | Commonly `5`; max duration depends on the selected model's official capability |
@@ -257,7 +257,7 @@ curl -X POST https://crazyrouter.com/kling/v1/videos/omni-video \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model_name": "kling-v3-omni",
+    "model_name": "kling-v3",
     "prompt": "<<<image_1>>> walks toward the camera in a rainy alley",
     "sound": "on",
     "duration": "5",
@@ -273,5 +273,5 @@ curl -X POST https://crazyrouter.com/kling/v1/videos/omni-video \
 ```
 
 <Note>
-  `kling-video-o1` is currently exposed as single-shot omni generation only. `kling-v3-omni` is the broader omni model. The omni route prefers the official `element_list` field and also accepts the compatibility alias `kling_elements`. Fetch omni tasks through `GET /kling/v1/videos/omni-video/{task_id}`.
+  `kling-v3` is currently exposed as single-shot omni generation only. `kling-v3` is the broader omni model. The omni route prefers the official `element_list` field and also accepts the compatibility alias `kling_elements`. Fetch omni tasks through `GET /kling/v1/videos/omni-video/{task_id}`.
 </Note>

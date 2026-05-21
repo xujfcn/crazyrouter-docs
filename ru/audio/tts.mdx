@@ -15,7 +15,7 @@ Convert text to natural speech, compatible with the OpenAI TTS API format.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `model` | string | Yes | Model name: `gpt-4o-mini-tts`, `tts-1`, `tts-1-hd` |
+| `model` | string | Yes | Model name: `tts-1`, `tts-1`, `tts-1-hd-1106` |
 | `input` | string | Yes | Text to convert, max 4096 characters |
 | `voice` | string | Yes | Voice character |
 | `response_format` | string | No | Output format: `mp3` (default), `opus`, `aac`, `flac`, `wav`, `pcm` |
@@ -41,7 +41,7 @@ curl -X POST https://crazyrouter.com/v1/audio/speech \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-4o-mini-tts",
+    "model": "tts-1",
     "input": "Hello, welcome to the Crazyrouter API. What a beautiful day!",
     "voice": "nova",
     "response_format": "mp3",
@@ -59,7 +59,7 @@ client = OpenAI(
 )
 
 response = client.audio.speech.create(
-    model="gpt-4o-mini-tts",
+    model="tts-1",
     input="Hello, welcome to the Crazyrouter API. What a beautiful day!",
     voice="nova",
     response_format="mp3",
@@ -79,7 +79,7 @@ const client = new OpenAI({
 });
 
 const response = await client.audio.speech.create({
-  model: "gpt-4o-mini-tts",
+  model: "tts-1",
   input: "Hello, welcome to the Crazyrouter API.",
   voice: "nova",
 });
@@ -99,11 +99,11 @@ The response is a binary audio stream. Save it directly to a file.
 | Model | Quality | Latency | Description |
 |-------|---------|---------|-------------|
 | `tts-1` | Standard | Low | Suitable for real-time scenarios |
-| `tts-1-hd` | HD | Medium | More natural speech |
-| `gpt-4o-mini-tts` | Highest | Medium | Latest model, supports more languages and emotions |
+| `tts-1-hd-1106` | HD | Medium | More natural speech |
+| `tts-1` | Highest | Medium | Latest model, supports more languages and emotions |
 
 <Note>
-  `gpt-4o-mini-tts` supports multiple languages and automatically detects the input text language to use the corresponding pronunciation.
+  `tts-1` supports multiple languages and automatically detects the input text language to use the corresponding pronunciation.
 </Note>
 
 <Warning>

@@ -61,7 +61,7 @@ Suggested starter allowlist:
 
 - `claude-sonnet-4-6`
 - `gpt-5.4`
-- `gemini-3-pro-preview`
+- `gemini-3-pro`
 
 ## Full Install Path By Operating System
 
@@ -234,7 +234,7 @@ code --version
 
     - `claude-sonnet-4-6`
     - `gpt-5.4`
-    - `gemini-3-pro-preview`
+    - `gemini-3-pro`
 
     <Note>
     The standard Cline-in-VS-Code path usually stores the API key in the UI rather than through shell env vars. The most important setup decisions here are a dedicated token and a narrow allowlist.
@@ -299,7 +299,7 @@ code --version
 |----------|-------------------|-----|
 | default agent driver | `claude-sonnet-4-6` | stable for multi-turn planning, code explanation, and long context |
 | OpenAI-compatible baseline | `gpt-5.4` | verified successfully in production on March 23, 2026, and suited for the main OpenAI-compatible path |
-| Gemini fallback path | `gemini-3-pro-preview` | useful as a second compatibility-validation path |
+| Gemini fallback path | `gemini-3-pro` | useful as a second compatibility-validation path |
 
 Recommended rollout: get the workflow stable on `claude-sonnet-4-6` first. If you also want an OpenAI-compatible baseline, add `gpt-5.4` second.
 

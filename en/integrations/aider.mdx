@@ -68,7 +68,7 @@ Suggested starter allowlist:
 
 - `gpt-5.4`
 - `claude-sonnet-4-6`
-- `gemini-3-pro-preview`
+- `gemini-3-pro`
 
 ## Full Install Path By Operating System
 
@@ -258,7 +258,7 @@ Avoid starting with a plain system-wide `pip install aider-chat`. Aider's own in
 
 <Steps>
   <Step title="Create an Aider-specific token">
-    In Crazyrouter, create a token named something like `aider`. Start by allowing only models such as `gpt-5.4`, `claude-sonnet-4-6`, and `gemini-3-pro-preview`.
+    In Crazyrouter, create a token named something like `aider`. Start by allowing only models such as `gpt-5.4`, `claude-sonnet-4-6`, and `gemini-3-pro`.
 
     <Note>
     The allowlist here uses Crazyrouter's raw model IDs. Use the same raw model IDs in Aider.
@@ -350,9 +350,9 @@ Avoid starting with a plain system-wide `pip install aider-chat`. Aider's own in
 |----------|--------------------------------|-----|
 | default coding driver | `gpt-5.4` | uses Crazyrouter's raw model ID and works as the OpenAI-compatible Aider baseline |
 | Claude-style alternative | `claude-sonnet-4-6` | good for long-context explanation and steady multi-turn collaboration |
-| Gemini fallback path | `gemini-3-pro-preview` | useful as a second compatibility-validation path |
+| Gemini fallback path | `gemini-3-pro` | useful as a second compatibility-validation path |
 
-Recommended rollout: start with `gpt-5.4`. Then add `claude-sonnet-4-6` or `gemini-3-pro-preview` only after the baseline path is stable.
+Recommended rollout: start with `gpt-5.4`. Then add `claude-sonnet-4-6` or `gemini-3-pro` only after the baseline path is stable.
 
 ## Token Setup Best Practices
 

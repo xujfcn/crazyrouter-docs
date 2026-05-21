@@ -9,7 +9,7 @@ description: "使用 nano-banana 通过 OpenAI Images API 生成和编辑图片"
 POST /v1/images/generations
 ```
 
-`nano-banana` 是 `gemini-2.5-flash-image` 的公开别名。用户侧统一使用 OpenAI Images 兼容协议；Gemini / Vertex 原生承载、字段转换和路由选择都由 Crazyrouter 在服务端处理。
+`nano-banana` 是 `nano-banana` 的公开别名。用户侧统一使用 OpenAI Images 兼容协议；Gemini / Vertex 原生承载、字段转换和路由选择都由 Crazyrouter 在服务端处理。
 
 <Warning>
   图片生成、图片编辑、多参考图这类请求通常耗时较长。生产接入请优先使用主承接线路 `https://cn.crazyrouter.com/v1`，完整生成端点为 `https://cn.crazyrouter.com/v1/images/generations`。账号登录、充值和控制台仍使用 `https://crazyrouter.com`。
@@ -19,15 +19,15 @@ POST /v1/images/generations
 
 | 推荐模型名 | 等价底层模型 |
 |------|------|
-| `nano-banana` | `gemini-2.5-flash-image` |
+| `nano-banana` | `nano-banana` |
 
-推荐在客户代码里使用 `nano-banana`。如果你的系统已经直接写了 `gemini-2.5-flash-image`，也可以继续通过同一个 `/v1/images/generations` 入口调用。
+推荐在客户代码里使用 `nano-banana`。如果你的系统已经直接写了 `nano-banana`，也可以继续通过同一个 `/v1/images/generations` 入口调用。
 
 ## 请求参数
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| `model` | string | 是 | 推荐 `nano-banana`；也兼容 `gemini-2.5-flash-image` |
+| `model` | string | 是 | 推荐 `nano-banana`；也兼容 `nano-banana` |
 | `prompt` | string | 是 | 生成或编辑指令 |
 | `image_input` | string 或 string[] | 否 | 参考图 URL；不传则为文生图 |
 | `resolution` | string | 否 | `1K`、`2K`、`4K` |
@@ -119,6 +119,6 @@ curl -X POST https://cn.crazyrouter.com/v1/images/generations \
 
 | 错误写法 | 正确写法 |
 |------|------|
-| 直接调用 `/v1beta/models/gemini-2.5-flash-image:generateContent` | 改用 `POST /v1/images/generations` |
+| 直接调用 `/v1beta/models/nano-banana:generateContent` | 改用 `POST /v1/images/generations` |
 | 在请求中传 `image_output_options` | 改用统一参数 `output_format`、`output_compression` |
 | 只把 base URL 配成 `https://cn.crazyrouter.com` 后又让 SDK 拼 OpenAI 路径 | OpenAI SDK 使用 `https://cn.crazyrouter.com/v1` |

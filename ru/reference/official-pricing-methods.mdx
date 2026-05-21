@@ -55,8 +55,7 @@ The examples below intentionally use the most common pricing tier that is easies
 
 | Crazyrouter Name | Official Model | Standard Input | Standard Cache | Standard Output | Notes |
 | --- | --- | --- | --- | --- | --- |
-| `gemini-3.1-pro-preview` | `gemini-3.1-pro-preview` | `$2.00` | `$0.20` + `$4.50 / 1M tok / hr` storage | `$12.00` | `<= 200K` prompt tier; `> 200K` becomes `$4 / $0.40 / $18`; Google also lists Search and Maps free quotas plus `$14 / 1,000 search queries` |
-| `gemini-3-pro-preview` | `gemini-3-pro-preview` | `$2.00 (<= 200K)` / `$4.00 (> 200K)` | The public model page does not currently break out cache price separately | `$12.00 (<= 200K)` / `$18.00 (> 200K)` | The model page exposes direct input/output examples; use the live Gemini pricing page for the latest caching and grounding matrix |
+| `gemini-3-pro` | `gemini-3-pro` | `$2.00` | `$0.20` + `$4.50 / 1M tok / hr` storage | `$12.00` | `<= 200K` prompt tier; `> 200K` becomes `$4 / $0.40 / $18`; Google also lists Search and Maps free quotas plus `$14 / 1,000 search queries` |
 | `gemini-2.5-flash-lite` | `gemini-2.5-flash-lite` | `$0.10` for text / image / video | `$0.01` for text / image / video + `$1.00 / 1M tok / hr` storage | `$0.40` | Audio input is `$0.30`, audio cache is `$0.03`; Search is `1,500 RPD` free then `$35 / 1,000 grounded prompts` |
 
 ### xAI Example Prices
@@ -170,8 +169,7 @@ And it often breaks out:
 
 | Crazyrouter Name | Official Mapping | Official Billing Method | Notes |
 | --- | --- | --- | --- |
-| `gemini-3.1-pro-preview` | Google `gemini-3.1-pro-preview`, often displayed internally as `gemini-3.1-pro` | officially split by `Standard / Batch / Flex / Priority`, and then by `input / output / caching / search grounding / maps grounding` | preview model, with separate `<= 200K` and `> 200K` prompt pricing tiers |
-| `gemini-3-pro-preview` | compatibility name; usually best understood as public `gemini-3-pro` / `gemini-3-pro-preview` | the model page explicitly shows two-tier `input / output` pricing; use the live pricing page for the latest cache, search, and maps treatment | preview model, and the public examples also use `<= 200K` and `> 200K` tiers |
+| `gemini-3-pro` | Google `gemini-3-pro`, often displayed internally as `gemini-3-pro` | officially split by `Standard / Batch / Flex / Priority`, and then by `input / output / caching / search grounding / maps grounding` | preview model, with separate `<= 200K` and `> 200K` prompt pricing tiers |
 | `gemini-2.5-flash-lite` | Google `gemini-2.5-flash-lite` | priced by `Standard / Batch / Flex / Priority`, with separate `input / output / context caching / storage / Google Search / Google Maps` | stable model rather than preview; official output pricing explicitly includes thinking tokens |
 
 Official links:

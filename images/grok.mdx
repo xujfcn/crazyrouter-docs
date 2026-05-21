@@ -1,6 +1,6 @@
 ---
 title: "Grok 图片模型"
-description: "使用 grok-imagine-image 和 grok-4-image 生成图片，并了解参数差异"
+description: "使用 grok-4-image 和 grok-4-image 生成图片，并了解参数差异"
 ---
 
 # Grok 图片模型
@@ -13,20 +13,20 @@ Grok 图片模型使用 OpenAI Images 兼容路径调用。当前应区分两个
 
 | 模型 | 说明 | 建议 |
 |------|------|------|
-| `grok-imagine-image` | 官方 xAI 图片模型名，按官方价 `$0.02 / image` 计费 | 推荐用于新接入 |
+| `grok-4-image` | 官方 xAI 图片模型名，按官方价 `$0.02 / image` 计费 | 推荐用于新接入 |
 | `grok-4-image` | 第三方兼容渠道上的历史/兼容模型名 | 仅建议按子集参数使用 |
 
 <Warning>
-  `grok-4-image` 不是官方 xAI 的模型名，不能假设它和 `grok-imagine-image` 完全等价。新接入优先使用 `grok-imagine-image`。
+  `grok-4-image` 不是官方 xAI 的模型名，不能假设它和 `grok-4-image` 完全等价。新接入优先使用 `grok-4-image`。
 </Warning>
 
-## grok-imagine-image 参数
+## grok-4-image 参数
 
-`grok-imagine-image` 当前按官方图片接口口径使用：
+`grok-4-image` 当前按官方图片接口口径使用：
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| `model` | string | 是 | 使用 `grok-imagine-image` |
+| `model` | string | 是 | 使用 `grok-4-image` |
 | `prompt` | string | 是 | 图片描述提示词 |
 | `n` | integer | 否 | 生成数量，官方范围 `1` 到 `10`。如果需要稳定成本控制，建议先用 `1` |
 | `response_format` | string | 否 | `url` 或 `b64_json`。当前生产实测 `url` 稳定 |
@@ -45,7 +45,7 @@ Grok 图片模型使用 OpenAI Images 兼容路径调用。当前应区分两个
 | `quality` | xAI 官方接口不支持 |
 | `style` | xAI 官方接口不支持 |
 
-## grok-imagine-image 示例
+## grok-4-image 示例
 
 <CodeGroup>
 
@@ -54,7 +54,7 @@ curl -X POST https://crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "grok-imagine-image",
+    "model": "grok-4-image",
     "prompt": "A tiny yellow cube on a plain white background, minimal product photo",
     "n": 1,
     "response_format": "url",
@@ -72,7 +72,7 @@ client = OpenAI(
 )
 
 response = client.images.generate(
-    model="grok-imagine-image",
+    model="grok-4-image",
     prompt="A tiny yellow cube on a plain white background, minimal product photo",
     n=1,
     response_format="url",
@@ -94,7 +94,7 @@ const client = new OpenAI({
 });
 
 const response = await client.images.generate({
-  model: "grok-imagine-image",
+  model: "grok-4-image",
   prompt: "A tiny yellow cube on a plain white background, minimal product photo",
   n: 1,
   response_format: "url",
@@ -168,7 +168,7 @@ curl -X POST https://crazyrouter.com/v1/images/generations \
 
 | 模型 | 当前计费 |
 |------|----------|
-| `grok-imagine-image` | `$0.02 / image`，不设置折扣 |
+| `grok-4-image` | `$0.02 / image`，不设置折扣 |
 | `grok-4-image` | 当前 pricing 为 `$0.08 * 0.55 = $0.044 / image` |
 
 <Note>

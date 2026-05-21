@@ -15,7 +15,7 @@ POST /v1/audio/speech
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| `model` | string | 是 | 模型名称：`gpt-4o-mini-tts`、`tts-1`、`tts-1-hd` |
+| `model` | string | 是 | 模型名称：`tts-1`、`tts-1`、`tts-1-hd-1106` |
 | `input` | string | 是 | 要转换的文本，最长 4096 字符 |
 | `voice` | string | 是 | 语音角色 |
 | `response_format` | string | 否 | 输出格式：`mp3`（默认）、`opus`、`aac`、`flac`、`wav`、`pcm` |
@@ -41,7 +41,7 @@ curl -X POST https://crazyrouter.com/v1/audio/speech \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-4o-mini-tts",
+    "model": "tts-1",
     "input": "你好，欢迎使用 Crazyrouter API。今天天气真不错！",
     "voice": "nova",
     "response_format": "mp3",
@@ -59,7 +59,7 @@ client = OpenAI(
 )
 
 response = client.audio.speech.create(
-    model="gpt-4o-mini-tts",
+    model="tts-1",
     input="你好，欢迎使用 Crazyrouter API。今天天气真不错！",
     voice="nova",
     response_format="mp3",
@@ -79,7 +79,7 @@ const client = new OpenAI({
 });
 
 const response = await client.audio.speech.create({
-  model: "gpt-4o-mini-tts",
+  model: "tts-1",
   input: "你好，欢迎使用 Crazyrouter API。",
   voice: "nova",
 });
@@ -99,11 +99,11 @@ fs.writeFileSync("speech.mp3", buffer);
 | 模型 | 质量 | 延迟 | 说明 |
 |------|------|------|------|
 | `tts-1` | 标准 | 低 | 适合实时场景 |
-| `tts-1-hd` | 高清 | 中 | 更自然的语音 |
-| `gpt-4o-mini-tts` | 最高 | 中 | 最新模型，支持更多语言和情感 |
+| `tts-1-hd-1106` | 高清 | 中 | 更自然的语音 |
+| `tts-1` | 最高 | 中 | 最新模型，支持更多语言和情感 |
 
 <Note>
-  `gpt-4o-mini-tts` 支持多语言，会自动识别输入文本的语言并使用对应的发音。
+  `tts-1` 支持多语言，会自动识别输入文本的语言并使用对应的发音。
 </Note>
 
 <Warning>

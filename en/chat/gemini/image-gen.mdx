@@ -11,27 +11,27 @@ POST /v1beta/models/{model}:generateContent
 
 As of April 14, 2026, the latest production retest against Crazyrouter showed:
 
-- `gemini-3.1-flash-image-preview` returned `inlineData` when called with `responseModalities: ["IMAGE"]`
-- `gemini-3-pro-image-preview` returned `text` containing a Markdown image with a `data:image/...;base64,...` payload
-- `gemini-2.5-flash-image` also returned `text` containing `data:image/...;base64,...`
-- `gemini-2.5-flash-image-preview` returned `text` containing a hosted image URL
+- `nano-banana-2` returned `inlineData` when called with `responseModalities: ["IMAGE"]`
+- `nano-banana-pro` returned `text` containing a Markdown image with a `data:image/...;base64,...` payload
+- `nano-banana` also returned `text` containing `data:image/...;base64,...`
+- `nano-banana` returned `text` containing a hosted image URL
 
 <Warning>
   Gemini image models do not currently share one uniform response shape on Crazyrouter. Do not assume every model will return `inlineData`.
 </Warning>
 
 <Note>
-  If you are migrating from the Nano Banana family, do not keep using `/v1/images/generations`. `nano-banana-2` should now move directly to `gemini-3.1-flash-image-preview:generateContent`. `nano-banana` can return image output through `gemini-2.5-flash-image:generateContent`, but billing consistency is still under review.
+  If you are migrating from the Nano Banana family, do not keep using `/v1/images/generations`. `nano-banana-2` should now move directly to `nano-banana-2:generateContent`. `nano-banana` can return image output through `nano-banana:generateContent`, but billing consistency is still under review.
 </Note>
 
 ---
 
 ## Most Practical Current Example
 
-For the specific goal of getting image bytes directly, the easiest current model to handle is `gemini-3.1-flash-image-preview`:
+For the specific goal of getting image bytes directly, the easiest current model to handle is `nano-banana-2`:
 
 ```bash
-curl "https://crazyrouter.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=YOUR_API_KEY" \
+curl "https://crazyrouter.com/v1beta/models/nano-banana-2:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -75,9 +75,9 @@ Observed production response shape:
 
 The same-day production check also showed these model-specific differences:
 
-- `gemini-3-pro-image-preview`: `parts[0].text` looked like `![image](data:image/jpeg;base64,...)`
-- `gemini-2.5-flash-image`: `parts[0].text` looked like `![image](data:image/png;base64,...)`
-- `gemini-2.5-flash-image-preview`: `parts[0].text` looked like `![Image](https://...)`
+- `nano-banana-pro`: `parts[0].text` looked like `![image](data:image/jpeg;base64,...)`
+- `nano-banana`: `parts[0].text` looked like `![image](data:image/png;base64,...)`
+- `nano-banana`: `parts[0].text` looked like `![Image](https://...)`
 
 If you need to support multiple Gemini image models, parse in this order:
 

@@ -9,7 +9,7 @@ description: "使用 nano-banana-2 通过 OpenAI Images API 调用 Gemini 3.1 Fl
 POST /v1/images/generations
 ```
 
-`nano-banana-2` 是 `gemini-3.1-flash-image-preview` 的公开别名。用户侧统一使用 OpenAI Images 兼容协议；服务端会把 `output_format`、`output_compression`、`resolution`、`aspect_ratio` 等统一参数转换成 Gemini / Vertex 原生请求。
+`nano-banana-2` 是 `nano-banana-2` 的公开别名。用户侧统一使用 OpenAI Images 兼容协议；服务端会把 `output_format`、`output_compression`、`resolution`、`aspect_ratio` 等统一参数转换成 Gemini / Vertex 原生请求。
 
 <Warning>
   `nano-banana-2` 属于长耗时图片模型。生产接入请优先使用主承接线路 `https://cn.crazyrouter.com/v1`，完整生成端点为 `https://cn.crazyrouter.com/v1/images/generations`。账号登录、充值和控制台仍使用 `https://crazyrouter.com`。
@@ -19,15 +19,15 @@ POST /v1/images/generations
 
 | 推荐模型名 | 等价底层模型 |
 |------|------|
-| `nano-banana-2` | `gemini-3.1-flash-image-preview` |
+| `nano-banana-2` | `nano-banana-2` |
 
-推荐在客户代码里使用 `nano-banana-2`。如果你的系统已经直接写了 `gemini-3.1-flash-image-preview`，也可以继续通过同一个 `/v1/images/generations` 入口调用。
+推荐在客户代码里使用 `nano-banana-2`。如果你的系统已经直接写了 `nano-banana-2`，也可以继续通过同一个 `/v1/images/generations` 入口调用。
 
 ## 请求参数
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| `model` | string | 是 | 推荐 `nano-banana-2`；也兼容 `gemini-3.1-flash-image-preview` |
+| `model` | string | 是 | 推荐 `nano-banana-2`；也兼容 `nano-banana-2` |
 | `prompt` | string | 是 | 生成或编辑指令 |
 | `image_input` | string 或 string[] | 否 | 参考图 URL；不传则为文生图 |
 | `resolution` | string | 否 | `1K`、`2K`、`4K` |
@@ -121,7 +121,7 @@ curl -X POST https://cn.crazyrouter.com/v1/images/generations \
 旧代码如果直接调用：
 
 ```text
-POST /v1beta/models/gemini-3.1-flash-image-preview:generateContent
+POST /v1beta/models/nano-banana-2:generateContent
 ```
 
 建议迁移到：

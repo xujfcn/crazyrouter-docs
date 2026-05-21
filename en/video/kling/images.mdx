@@ -13,14 +13,14 @@ The current public docs only commit to the main Kling image-generation path. Do 
 
 ## Currently Verified Scope
 
-- `kling-v1-5` image generation has completed bounded verification
+- `kling-v2-5-turbo` image generation has completed bounded verification
 - successful results prefer Crazyrouter archived URLs such as `https://media.crazyrouter.com/...png`
 
 ## Request Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `model` | string | No | Common validated example: `kling-v1-5` |
+| `model` | string | No | Common validated example: `kling-v2-5-turbo` |
 | `prompt` | string | Yes | Image prompt |
 | `negative_prompt` | string | No | Negative prompt |
 | `aspect_ratio` | string | No | Such as `1:1`, `16:9`, `9:16` |
@@ -37,7 +37,7 @@ curl -X POST https://crazyrouter.com/kling/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "kling-v1-5",
+    "model": "kling-v2-5-turbo",
     "prompt": "A realistic shiba inu wearing sunglasses",
     "negative_prompt": "blurry, low quality",
     "aspect_ratio": "1:1",
@@ -55,7 +55,7 @@ response = requests.post(
         "Authorization": "Bearer YOUR_API_KEY"
     },
     json={
-        "model": "kling-v1-5",
+        "model": "kling-v2-5-turbo",
         "prompt": "A realistic shiba inu wearing sunglasses",
         "negative_prompt": "blurry, low quality",
         "aspect_ratio": "1:1",
@@ -74,7 +74,7 @@ print(response.json())
 {
   "created_at": 1774536039,
   "id": "2037177945839673344",
-  "model": "kling-v1-5",
+  "model": "kling-v2-5-turbo",
   "object": "video",
   "progress": 0,
   "status": "",

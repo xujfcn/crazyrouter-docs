@@ -1,6 +1,6 @@
 ---
 title: "Gemini 原生格式"
-description: "基于生产环境复核，使用 Gemini 3 Pro Preview 的原生 API 能力"
+description: "基于生产环境复核，使用 Gemini 3 Pro 的原生 API 能力"
 ---
 
 # Gemini 原生格式
@@ -9,7 +9,7 @@ description: "基于生产环境复核，使用 Gemini 3 Pro Preview 的原生 A
 
 当前主示例模型：
 
-- `gemini-3-pro-preview`
+- `gemini-3-pro`
 
 已按成功请求经验单独整理的多模态页面：
 
@@ -37,7 +37,7 @@ POST /v1beta/models/{model}:streamGenerateContent
 ## 基本文本生成
 
 ```bash cURL
-curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -82,7 +82,7 @@ curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent
 本轮已复核 `streamGenerateContent` 可以通过 SSE 返回增量内容。
 
 ```bash cURL
-curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:streamGenerateContent?key=YOUR_API_KEY&alt=sse" \
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro:streamGenerateContent?key=YOUR_API_KEY&alt=sse" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -111,7 +111,7 @@ data: {"candidates":[{"content":{"parts":[{"text":"...","thoughtSignature":"..."
 当前生产已复核 `responseMimeType + responseSchema` 可用：
 
 ```bash cURL
-curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -151,7 +151,7 @@ curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent
 当前生产已复核 `googleSearch` 工具可用：
 
 ```bash cURL
-curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -185,7 +185,7 @@ curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent
 当前生产已复核 `thinkingConfig` 可用：
 
 ```bash cURL
-curl "https://crazyrouter.com/v1beta/models/gemini-3-pro-preview:generateContent?key=YOUR_API_KEY" \
+curl "https://crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [

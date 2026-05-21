@@ -42,7 +42,7 @@ response = client.images.generate(
     n=1
 )
 
-print(response.data[0].url or response.data[0].b64_json)
+print(response.data[0].url)
 ```
 
 ## GPT-Image-2 Image Editing
@@ -57,7 +57,7 @@ response = client.images.edit(
     quality="low"
 )
 
-print(response.data[0].url or response.data[0].b64_json)
+print(response.data[0].url)
 ```
 
 ## Download and Save Images
@@ -80,7 +80,7 @@ print("Image saved")
 ```
 
 <Note>
-  Image endpoints usually return `url`; some compatible carriers may return `b64_json`. For production image requests, use the primary route `https://cn.crazyrouter.com/v1`.
+  `gpt-image-2` usually returns `data[0].url`. Do not send `response_format` with `gpt-image-2`; use `output_format="png"`, `"jpeg"`, or `"webp"` to choose the image file format. For production image requests, use the primary route `https://cn.crazyrouter.com/v1`.
 </Note>
 
 <Warning>

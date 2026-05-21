@@ -12,7 +12,7 @@ POST /v1/chat/completions
 As of March 23, 2026, production checks against Crazyrouter showed:
 
 - `gpt-4o` returns `200`, but `message.content` is plain text, not standard multipart image content
-- `gpt-4o-image` also returns `200`, but the current response shape is still text or Markdown containing a parameter block, an ID, and a preview link, not the standard OpenAI `image_url` multipart structure
+- `gpt-image-2` also returns `200`, but the current response shape is still text or Markdown containing a parameter block, an ID, and a preview link, not the standard OpenAI `image_url` multipart structure
 - If you need stable, machine-readable image output, the current recommended path is [`/v1/images/generations`](/ru/images/gpt-image) with `gpt-image-2`; for Grok image models, see [`Grok Image Models`](/ru/images/grok)
 - If you need reference-image editing or multi-image input, do not keep treating the Nano Banana family as a stable `/v1/images/generations` entry point. Start with the native Gemini path documented on [`Nano Banana 2`](/ru/images/nano-banana-2); [`Nano Banana`](/ru/images/nano-banana) is currently controlled-testing only
 
@@ -24,14 +24,14 @@ As of March 23, 2026, production checks against Crazyrouter showed:
 
 ## Currently Reproducible Chat Behavior
 
-The following request hit `gpt-4o-image` in production and returned `200`:
+The following request hit `gpt-image-2` in production and returned `200`:
 
 ```bash
 curl https://crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-4o-image",
+    "model": "gpt-image-2",
     "messages": [
       {
         "role": "user",
@@ -79,10 +79,11 @@ curl -X POST https://cn.crazyrouter.com/v1/images/generations \
 The current `gpt-image-2` stable path uses the primary image route `https://cn.crazyrouter.com/v1`. Responses usually include:
 
 - `data[0].url`
-- `data[0].b64_json` on some compatible carriers
+
+`gpt-image-2` does not support `response_format`; do not send `response_format="url"` or `response_format="b64_json"`. To choose the image file format, use `output_format="png"`, `"jpeg"`, or `"webp"`.
 
 So the stable automation path is still the Images API, not the chat-image compatibility path.
 
 <Note>
-  If you are only testing manually, the `gpt-4o-image` chat path is still useful for observation. If you need backend automation, storage, or post-processing, use the [`GPT Image docs`](/ru/images/gpt-image) or [`Grok Image Models`](/ru/images/grok). If your workload depends on reference-image editing or multi-image input, start with the native Gemini route documented on [`Nano Banana 2`](/ru/images/nano-banana-2). Do not keep treating Nano Banana-family `/v1/images/generations` as the stable recommendation.
+  If you are only testing manually, the `gpt-image-2` chat path is still useful for observation. If you need backend automation, storage, or post-processing, use the [`GPT Image docs`](/ru/images/gpt-image) or [`Grok Image Models`](/ru/images/grok). If your workload depends on reference-image editing or multi-image input, start with the native Gemini route documented on [`Nano Banana 2`](/ru/images/nano-banana-2). Do not keep treating Nano Banana-family `/v1/images/generations` as the stable recommendation.
 </Note>

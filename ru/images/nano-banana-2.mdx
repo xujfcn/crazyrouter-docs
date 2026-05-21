@@ -7,25 +7,25 @@ description: "As of 2026-04-14, nano-banana-2 should use native Gemini generateC
 
 ```
 Recommended path
-POST /v1beta/models/gemini-3.1-flash-image-preview:generateContent
+POST /v1beta/models/nano-banana-2:generateContent
 ```
 
 As of `2026-04-14`, the latest Crazyrouter production retest for `nano-banana-2` showed:
 
-- `nano-banana-2` currently maps to `gemini-3.1-flash-image-preview`
+- `nano-banana-2` currently maps to `nano-banana-2`
 - the recommended route is now native Gemini `generateContent`
 - `POST /v1/images/generations` is no longer recommended for `nano-banana-2`
 - the same-day production retest on the native path succeeded and billing looked normal
 
 <Warning>
-  Do not keep documenting `nano-banana-2` as a stable `/v1/images/generations` model. The recommended entry point is now native Gemini `POST /v1beta/models/gemini-3.1-flash-image-preview:generateContent`.
+  Do not keep documenting `nano-banana-2` as a stable `/v1/images/generations` model. The recommended entry point is now native Gemini `POST /v1beta/models/nano-banana-2:generateContent`.
 </Warning>
 
 ## Current Status
 
 | Item | Status | Notes |
 |------|------|------|
-| Alias mapping | confirmed | `nano-banana-2 -> gemini-3.1-flash-image-preview` |
+| Alias mapping | confirmed | `nano-banana-2 -> nano-banana-2` |
 | Native Gemini `generateContent` | recommended | succeeded in the `2026-04-14` production retest |
 | Native-path billing | currently normal | billing and consumption looked aligned in the same-day probe |
 | OpenAI Images `POST /v1/images/generations` | not recommended | failed in both production and local `4000` retests |
@@ -52,14 +52,14 @@ Even on the recommended route, the client should parse Gemini-native output:
 
 ## Current Recommendation
 
-1. For production use of `nano-banana-2`, switch directly to `gemini-3.1-flash-image-preview:generateContent`
+1. For production use of `nano-banana-2`, switch directly to `nano-banana-2:generateContent`
 2. Do not use `POST /v1/images/generations` with `model: "nano-banana-2"`
 3. For automation, parse `inlineData` first
 
 ## Recommended Request Template
 
 ```bash
-curl "https://crazyrouter.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=YOUR_API_KEY" \
+curl "https://crazyrouter.com/v1beta/models/nano-banana-2:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [

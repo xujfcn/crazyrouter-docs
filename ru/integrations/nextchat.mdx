@@ -60,7 +60,7 @@ Recommended starting whitelist:
 
 - `gpt-5.4`
 - `claude-sonnet-4-6`
-- `gemini-3-pro-preview`
+- `gemini-3-pro`
 
 ## 5-Minute Quick Start
 
@@ -97,7 +97,7 @@ services:
     environment:
       - OPENAI_API_KEY=sk-xxx
       - BASE_URL=https://crazyrouter.com
-      - CUSTOM_MODELS=+gpt-5.4,+claude-sonnet-4-6,+gemini-3-pro-preview
+      - CUSTOM_MODELS=+gpt-5.4,+claude-sonnet-4-6,+gemini-3-pro
       - HIDE_USER_API_KEY=1
 ```
 
@@ -107,7 +107,7 @@ Common environment variables:
 |----------|-------------------|-------|
 | `OPENAI_API_KEY` | `sk-xxx` | default Crazyrouter token |
 | `BASE_URL` | `https://crazyrouter.com` | use the root domain first, matching the official `BASE_URL` pattern for baseline validation |
-| `CUSTOM_MODELS` | `+gpt-5.4,+claude-sonnet-4-6,+gemini-3-pro-preview` | adds selectable models in the UI |
+| `CUSTOM_MODELS` | `+gpt-5.4,+claude-sonnet-4-6,+gemini-3-pro` | adds selectable models in the UI |
 | `HIDE_USER_API_KEY` | `1` | prevents end users from entering their own key |
 
 ## Recommended Model Setup
@@ -116,7 +116,7 @@ Common environment variables:
 |----------|-------------------|-----|
 | Default main chat model | `gpt-5.4` | Verified successfully in production on March 23, 2026, and suited for the main NextChat baseline |
 | Higher-quality long-form and explanation | `claude-sonnet-4-6` | Better for longer text and more complex explanations |
-| Gemini fallback path | `gemini-3-pro-preview` | Useful as a second vendor-compatible validation path |
+| Gemini fallback path | `gemini-3-pro` | Useful as a second vendor-compatible validation path |
 
 Recommended order: validate `gpt-5.4` first, then expand the list with `CUSTOM_MODELS`.
 

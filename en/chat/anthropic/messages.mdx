@@ -1,6 +1,6 @@
 ---
 title: "Claude Native Format"
-description: "Production-revalidated Anthropic Messages usage for Claude 4.6 on Crazyrouter"
+description: "Production-revalidated Anthropic Messages usage for Claude on Crazyrouter"
 ---
 
 # Claude Native Format
@@ -14,7 +14,7 @@ This page only documents Claude Messages behavior that was revalidated against C
 Current primary example models:
 
 - `claude-sonnet-4-6`
-- `claude-opus-4-6-thinking`
+- `claude-opus-4-7`
 
 ## Authentication
 
@@ -73,7 +73,7 @@ Verified response shape:
 
 ## Function calling
 
-In the current production environment, Claude 4.6 tool calling is reproducible through `/v1/messages` and returns `tool_use`.
+In the current production environment, Claude tool calling is reproducible through `/v1/messages` and returns `tool_use`.
 
 For first-pass validation, use:
 
@@ -138,7 +138,7 @@ Verified response shape:
 
 In this production recheck, the combination that clearly returned a `thinking` block was:
 
-- `claude-opus-4-6-thinking`
+- `claude-opus-4-7`
 
 Base `claude-opus-4-6` did not produce an equally explicit thinking block in this round, so the docs prioritize the thinking variant here.
 
@@ -148,7 +148,7 @@ curl https://crazyrouter.com/v1/messages \
   -H "x-api-key: YOUR_API_KEY" \
   -H "anthropic-version: 2023-06-01" \
   -d '{
-    "model": "claude-opus-4-6-thinking",
+    "model": "claude-opus-4-7",
     "max_tokens": 320,
     "thinking": {
       "type": "enabled",
@@ -190,7 +190,7 @@ Verified response shape:
 
 - Standard text chat: use `claude-sonnet-4-6`
 - Tool calling: use `claude-sonnet-4-6`, and include `tool_choice` in first-pass validation
-- Explicit thinking blocks: use `claude-opus-4-6-thinking`
+- Explicit thinking blocks: use `claude-opus-4-7`
 
 Related pages:
 
