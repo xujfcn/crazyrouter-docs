@@ -1,0 +1,32 @@
+---
+title: 'Вход для AI tools'
+description: 'Точки входа в документацию Crazyrouter для Codex, Claude Code, ChatGPT, Cursor и других AI tools'
+---
+
+Используйте эту страницу, когда нужно дать AI tool доступ к документации Crazyrouter.
+
+## Рекомендуемые точки входа
+
+<CardGroup cols={2}>
+  <Card title="Индекс llms.txt" icon="list" href="https://docs.crazyrouter.com/llms.txt">
+    Компактный индекс ключевых страниц и описаний. Подходит для выбора нужных документов.
+  </Card>
+  <Card title="Полный контекст llms-full.txt" icon="file-text" href="https://docs.crazyrouter.com/llms-full.txt">
+    Единый файл со всей документацией для AI tools, которые умеют читать URL или вставленный текст.
+  </Card>
+  <Card title="Sitemap" icon="sitemap" href="https://docs.crazyrouter.com/sitemap.xml">
+    Стандартный sitemap для поисковиков, crawlers и собственных индексов.
+  </Card>
+  <Card title="Markdown pages" icon="markdown" href="https://docs.crazyrouter.com/ru/quickstart.md">
+    Добавьте `.md` к URL страницы документации, чтобы получить Markdown.
+  </Card>
+</CardGroup>
+
+## Prompt for AI tools
+
+```text
+First read https://docs.crazyrouter.com/llms.txt to identify the relevant pages.
+If full context is needed, read https://docs.crazyrouter.com/llms-full.txt.
+For OpenAI-compatible clients, use base_url https://crazyrouter.com/v1 or https://cn.crazyrouter.com/v1.
+For Claude Code / Anthropic-native clients, use the root domain and do not append /v1.
+```

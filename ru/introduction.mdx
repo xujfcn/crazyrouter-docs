@@ -1,50 +1,55 @@
 ---
-title: 'Введение'
-description: 'Crazyrouter - единый API-шлюз для AI-моделей'
+title: 'Документация Crazyrouter'
+description: 'Быстро находите API, интеграции с инструментами, возможности моделей и AI-readable документацию Crazyrouter'
 ---
 
 <Note>
-  Маршруты доступа Crazyrouter: `https://cn.crazyrouter.com` и `https://crazyrouter.com`. Если вы сталкиваетесь с ошибками Cloudflare timeout или похожими сетевыми проблемами, переключитесь на маршрут `https://cn.crazyrouter.com`.
+  API routes: OpenAI-compatible клиенты обычно используют `https://crazyrouter.com/v1` или `https://cn.crazyrouter.com/v1`; Claude Code и Anthropic-native клиенты используют корневой домен без `/v1`. См. [API Endpoints](/ru/api-endpoint).
 </Note>
 
-Crazyrouter - это API-шлюз для AI-моделей, который дает единый доступ к 300+ моделям. Он поддерживает основные AI-сервисы, включая OpenAI, Anthropic Claude, Google Gemini, Midjourney, Suno, Kling и другие.
+Crazyrouter - это единый API-шлюз для AI-моделей. Один API-ключ дает доступ к текстовым, image, video, audio, embedding, rerank и tool-integration сценариям.
 
-## Основные возможности
-
-- **Единый интерфейс**: доступ ко всем моделям через один API-ключ
-- **Поддержка разных форматов**: совместимость с OpenAI, Anthropic и нативным форматом Gemini
-- **300+ моделей**: чат, изображения, видео, аудио, музыка, embeddings и rerank
-- **Оплата по факту использования**: гибкая тарификация на основе токенов
-- **Умная маршрутизация**: автоматический выбор оптимального канала и failover
-
-## Поддерживаемые типы API
-
-| Тип | Описание | Примеры моделей |
-|-----|----------|-----------------|
-| Chat Completions | Текстовый диалог, зрение, reasoning | GPT-4o, Claude Opus, Gemini Pro |
-| Генерация изображений | Text-to-image, редактирование изображений | DALL-E 3, Midjourney, Flux, Ideogram |
-| Генерация видео | Text-to-video, image-to-video | Sora, Kling, Luma, Veo 3.1, Runway |
-| Обработка аудио | TTS, STT | GPT-4o-mini-tts, Whisper |
-| Генерация музыки | Создание песен | Suno |
-| Embeddings | Векторизация текста | text-embedding-3-large |
-| Rerank | Переранжирование результатов поиска | gte-rerank-v2 |
-
-## Начать работу
+## Выберите задачу
 
 <CardGroup cols={2}>
   <Card title="Быстрый старт" icon="rocket" href="/ru/quickstart">
-    Выполните первый API-вызов за 5 минут
+    Получите API-ключ, настройте base URL и выполните первый запрос за несколько минут.
   </Card>
-  <Card title="API endpoints" icon="globe" href="/ru/api-endpoint">
-    Посмотрите доступные адреса API endpoints
+  <Card title="Интеграции с инструментами" icon="plug" href="/ru/integrations/claude-code">
+    Подключите Claude Code, Codex CLI, Cursor, Cline, Cherry Studio, OpenClaw и другие AI tools.
   </Card>
-  <Card title="Аутентификация" icon="key" href="/ru/authentication">
-    Узнайте, как получить и использовать API-ключ
+  <Card title="Текстовые модели" icon="message" href="/ru/chat/openai/completions">
+    Используйте OpenAI Chat, Claude Messages, Gemini Native и Responses API.
   </Card>
-  <Card title="Цены моделей" icon="tag" href="https://crazyrouter.com/pricing">
-    Посмотрите цены для всех моделей
+  <Card title="Генерация изображений" icon="image" href="/ru/images/gpt-image">
+    Вызывайте GPT Image, Qwen Image, Midjourney, Nano Banana Pro, DALL-E и другие image models.
   </Card>
-  <Card title="Статус сервиса" icon="signal-stream" href="https://crazyrouter.com/status">
-    Проверьте текущий статус Crazyrouter
+  <Card title="Генерация видео" icon="video" href="/ru/video/unified">
+    Интегрируйте Veo, Kling, Seedance, Runway, Luma, Sora, Wan и другие video APIs.
+  </Card>
+  <Card title="Модели и биллинг" icon="tag" href="https://crazyrouter.com/pricing">
+    Проверьте цены, доступность моделей, ошибки, статус сервиса и управление консолью.
   </Card>
 </CardGroup>
+
+## AI-readable docs
+
+<CardGroup cols={2}>
+  <Card title="Вход для AI tools" icon="bot" href="/ru/ai-tools">
+    Точки входа для Codex, Claude Code, ChatGPT, Cursor и других AI tools.
+  </Card>
+  <Card title="Полный контекст" icon="file-text" href="https://docs.crazyrouter.com/llms-full.txt">
+    Единый файл со всей документацией для AI tools, которые умеют читать URL или вставленный текст.
+  </Card>
+</CardGroup>
+
+## Частые страницы
+
+| Задача | Документация |
+| --- | --- |
+| Проверить base URL и маршруты | [API Endpoints](/ru/api-endpoint) |
+| Создать и использовать API key | [Authentication](/ru/authentication) |
+| Подключить Claude Code | [Claude Code](/ru/integrations/claude-code) |
+| Подключить Codex CLI | [Codex CLI](/ru/integrations/codex) |
+| Использовать локальные изображения | [Image Upload](/ru/upload) |
+| Разобрать ошибки запросов | [Error Handling](/ru/error-handling) |

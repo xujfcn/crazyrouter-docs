@@ -1,50 +1,56 @@
 ---
-title: 'Introduction'
-description: 'Crazyrouter - All-in-One AI Model API Gateway'
+title: 'Crazyrouter Docs'
+description: 'Find Crazyrouter API guides, tool integrations, model capabilities, and AI-readable documentation by task'
 ---
 
 <Note>
-  Crazyrouter access routes: `https://cn.crazyrouter.com` and `https://crazyrouter.com`. If you encounter Cloudflare timeout errors or similar network issues, switch to the `https://cn.crazyrouter.com` route.
+  API routes: OpenAI-compatible clients usually use `https://crazyrouter.com/v1` or `https://cn.crazyrouter.com/v1`; Claude Code and Anthropic-native clients use the root domain without `/v1`. See [API Endpoints](/en/api-endpoint).
 </Note>
 
-Crazyrouter is an AI model API aggregation gateway that provides unified access to 300+ AI models. It supports major AI services including OpenAI, Anthropic Claude, Google Gemini, Midjourney, Suno, Kling, and more.
+Crazyrouter is a unified AI model API gateway. Use one API key for text, image, video, audio, embeddings, rerank, and the model access needed by common AI tools.
 
-## Core Features
-
-- **Unified Interface**: Access all models with a single API Key
-- **Multi-Format Support**: Compatible with OpenAI, Anthropic, and Gemini native formats
-- **300+ Models**: Covering chat, image, video, audio, music, and more
-- **Pay-As-You-Go**: Flexible token-based billing
-- **Smart Routing**: Automatic optimal channel selection with failover
-
-## Supported API Types
-
-| Type | Description | Example Models |
-|------|-------------|----------------|
-| Chat Completions | Text conversation, vision, reasoning | GPT-4o, Claude Opus, Gemini Pro |
-| Image Generation | Text-to-image, image editing | DALL-E 3, Midjourney, Flux, Ideogram |
-| Video Generation | Text-to-video, image-to-video | Sora, Kling, Luma, Veo 3.1, Runway |
-| Audio Processing | TTS, STT | GPT-4o-mini-tts, Whisper |
-| Music Generation | Song creation | Suno |
-| Embeddings | Text vectorization | text-embedding-3-large |
-| Reranking | Search result reranking | gte-rerank-v2 |
-
-## Get Started
+## Choose Your Task
 
 <CardGroup cols={2}>
   <Card title="Quick Start" icon="rocket" href="/en/quickstart">
-    Make your first API call in 5 minutes
+    Get an API key, configure the base URL, and make your first request in five minutes.
   </Card>
-  <Card title="API Endpoints" icon="globe" href="/en/api-endpoint">
-    View available API endpoint addresses
+  <Card title="Tool Integrations" icon="plug" href="/en/integrations/claude-code">
+    Connect Claude Code, Codex CLI, Cursor, Cline, Cherry Studio, OpenClaw, and other AI tools.
   </Card>
-  <Card title="Authentication" icon="key" href="/en/authentication">
-    Learn how to obtain and use API Keys
+  <Card title="Text Models" icon="message" href="/en/chat/openai/completions">
+    Use OpenAI Chat, Claude Messages, Gemini Native, and the Responses API.
   </Card>
-  <Card title="Model Pricing" icon="tag" href="https://crazyrouter.com/pricing">
-    View pricing for all models
+  <Card title="Image Generation" icon="image" href="/en/images/gpt-image">
+    Call GPT Image, Qwen Image, Midjourney, Nano Banana Pro, DALL-E, and related image models.
   </Card>
-  <Card title="Service Status" icon="signal-stream" href="https://crazyrouter.com/status">
-    Check the current Crazyrouter service status
+  <Card title="Video Generation" icon="video" href="/en/video/unified">
+    Integrate Veo, Kling, Seedance, Runway, Luma, Sora, Wan, and other video APIs.
+  </Card>
+  <Card title="Models & Billing" icon="tag" href="https://crazyrouter.com/pricing">
+    Review pricing, model availability, errors, service status, and console management.
   </Card>
 </CardGroup>
+
+## AI-Readable Docs
+
+<CardGroup cols={2}>
+  <Card title="AI Tool Entry" icon="bot" href="/en/ai-tools">
+    Documentation entry points for Codex, Claude Code, ChatGPT, Cursor, and other AI tools.
+  </Card>
+  <Card title="Full Docs Context" icon="file-text" href="https://docs.crazyrouter.com/llms-full.txt">
+    Single-file documentation context for AI tools that can read URLs or pasted text.
+  </Card>
+</CardGroup>
+
+## Common Paths
+
+| Goal | Read |
+| --- | --- |
+| Confirm base URLs and regional routes | [API Endpoints](/en/api-endpoint) |
+| Create and use an API key | [Authentication](/en/authentication) |
+| Send your first OpenAI-compatible request | [Quick Start](/en/quickstart) |
+| Connect Claude Code | [Claude Code Setup](/en/integrations/claude-code) |
+| Connect Codex CLI | [Codex CLI Setup](/en/integrations/codex) |
+| Use local images as reference inputs | [Image Upload](/en/upload) |
+| Troubleshoot request errors | [Error Handling](/en/error-handling) |

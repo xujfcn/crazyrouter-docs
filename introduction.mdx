@@ -1,57 +1,56 @@
 ---
-title: '引言'
-description: 'Crazyrouter - 一站式 AI 模型 API 聚合平台'
+title: 'Crazyrouter 文档入口'
+description: '按任务快速找到 Crazyrouter API、工具接入、模型能力和 AI 可读文档'
 ---
 
 <Note>
-  本站接入路径：`https://cn.crazyrouter.com` 和 `https://crazyrouter.com`。如果遇到 Cloudflare 超时或类似网络报错，可切换到 `https://cn.crazyrouter.com` 线路。
+  API 接入路径：OpenAI 兼容客户端通常使用 `https://crazyrouter.com/v1` 或 `https://cn.crazyrouter.com/v1`；Claude Code / Anthropic 原生客户端使用根域名，不要追加 `/v1`。详见 [API 端点](/api-endpoint)。
 </Note>
 
-Crazyrouter 是一个 AI 模型 API 聚合网关，提供对 300+ AI 模型的统一访问接口。支持 OpenAI、Anthropic Claude、Google Gemini、Midjourney、Suno、Kling 等主流 AI 服务。
+Crazyrouter 是统一的 AI 模型 API 网关。你可以用一个 API Key 调用文本、图像、视频、音频、Embedding、Rerank 和第三方工具集成所需的模型能力。
 
-<Note>
-  如果模型字段要求公网图片 URL，而你的素材在本地，可以先使用 Crazyrouter 临时图床上传图片，再把返回的 `https://media.crazyrouter.com/...` 地址传给 Kling、Veo、Seedance、Runway、Luma、MiniMax、Nano Banana Pro、Doubao Seedream 等图生图或图生视频接口。临时图片默认保存 72 小时，存储期内不单独按天收费。详见 [图片上传说明](/upload)。
-</Note>
-
-## 核心特性
-
-- **统一接口**：一个 API Key 访问所有模型
-- **多格式支持**：兼容 OpenAI、Anthropic、Gemini 原生格式
-- **300+ 模型**：覆盖聊天、图像、视频、音频、音乐等
-- **按量计费**：灵活的 Token 计费方式
-- **智能路由**：自动选择最优渠道，故障自动切换
-
-## 支持的 API 类型
-
-| 类型 | 说明 | 示例模型 |
-|------|------|---------|
-| 聊天补全 | 文本对话、识图、推理 | GPT-4o, Claude Opus, Gemini Pro |
-| 图像生成 | 文生图、图编辑 | DALL-E 3, Midjourney, Flux, Ideogram |
-| 视频生成 | 文生视频、图生视频 | Sora, Kling, Luma, Veo 3.1, Runway |
-| 音频处理 | TTS、STT | GPT-4o-mini-tts, Whisper |
-| 音乐生成 | 歌曲创作 | Suno |
-| 嵌入向量 | 文本向量化 | text-embedding-3-large |
-| 重排序 | 搜索结果重排 | gte-rerank-v2 |
-
-## 快速开始
+## 选择你的任务
 
 <CardGroup cols={2}>
   <Card title="快速开始" icon="rocket" href="/quickstart">
-    5 分钟完成第一次 API 调用
+    获取 API Key，配置 Base URL，并在 5 分钟内完成第一次请求。
   </Card>
-  <Card title="API 端点" icon="globe" href="/api-endpoint">
-    查看接口调用地址
+  <Card title="工具接入" icon="plug" href="/integrations/claude-code">
+    接入 Claude Code、Codex CLI、Cursor、Cline、Cherry Studio、OpenClaw 等常用 AI 工具。
   </Card>
-  <Card title="认证方式" icon="key" href="/authentication">
-    了解如何获取和使用 API Key
+  <Card title="文本模型" icon="message" href="/chat/openai/completions">
+    使用 OpenAI Chat、Claude Messages、Gemini Native 和 Responses API。
   </Card>
-  <Card title="模型定价" icon="tag" href="https://crazyrouter.com/pricing">
-    查看各模型价格
+  <Card title="生图" icon="image" href="/images/gpt-image">
+    调用 GPT Image、Qwen Image、Midjourney、Nano Banana Pro、DALL-E 等图片模型。
   </Card>
-  <Card title="本地图片上传" icon="image" href="/upload">
-    上传本地参考图并获取临时公网 URL
+  <Card title="视频" icon="video" href="/video/unified">
+    接入 Veo、Kling、Seedance、Runway、Luma、Sora、Wan 等视频生成接口。
   </Card>
-  <Card title="服务状态" icon="signal-stream" href="https://crazyrouter.com/status">
-    查看 Crazyrouter 当前服务状态
+  <Card title="模型与计费" icon="tag" href="https://crazyrouter.com/pricing">
+    查看模型价格、可用模型、错误处理、服务状态和控制台管理说明。
   </Card>
 </CardGroup>
+
+## AI 工具读取文档
+
+<CardGroup cols={2}>
+  <Card title="AI 可读入口" icon="bot" href="/ai-tools">
+    给 Codex、Claude Code、ChatGPT、Cursor 等 AI 工具使用的文档索引。
+  </Card>
+  <Card title="完整文档上下文" icon="file-text" href="https://docs.crazyrouter.com/llms-full.txt">
+    单文件聚合版文档，适合粘贴或提供给支持 URL 读取的 AI 工具。
+  </Card>
+</CardGroup>
+
+## 高频路径
+
+| 你要做什么 | 推荐阅读 |
+| --- | --- |
+| 确认 Base URL 和线路 | [API 端点](/api-endpoint) |
+| 创建和使用 API Key | [认证方式](/authentication) |
+| 发送第一条 OpenAI 兼容请求 | [快速开始](/quickstart) |
+| 接入 Claude Code | [Claude Code 接入](/integrations/claude-code) |
+| 接入 Codex CLI | [Codex CLI 接入](/integrations/codex) |
+| 使用本地图片作为参考图 | [图片上传说明](/upload) |
+| 排查请求错误 | [错误处理](/error-handling) |

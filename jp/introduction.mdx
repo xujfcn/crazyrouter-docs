@@ -1,50 +1,55 @@
 ---
-title: 'はじめに'
-description: 'Crazyrouter - オールインワン AI モデル API ゲートウェイ'
+title: 'Crazyrouter ドキュメント'
+description: 'タスク別に Crazyrouter API、ツール連携、モデル機能、AI 向けドキュメントを探す'
 ---
 
 <Note>
-  Crazyrouter の接続先は `https://cn.crazyrouter.com` と `https://crazyrouter.com` です。Cloudflare timeout などのネットワークエラーが発生する場合は、`https://cn.crazyrouter.com` ルートへ切り替えてください。
+  API ルート: OpenAI 互換クライアントは通常 `https://crazyrouter.com/v1` または `https://cn.crazyrouter.com/v1` を使います。Claude Code / Anthropic ネイティブクライアントは `/v1` を付けずにルートドメインを使います。詳しくは [API エンドポイント](/jp/api-endpoint) を参照してください。
 </Note>
 
-Crazyrouter は、複数の AI モデルを 1 つの API キーで利用できる AI API ゲートウェイです。OpenAI、Anthropic Claude、Google Gemini、Midjourney、Suno、Kling など、主要な AI サービスを統一されたエンドポイントから呼び出せます。
+Crazyrouter は統一 AI モデル API ゲートウェイです。1 つの API キーで、テキスト、画像、動画、音声、Embedding、Rerank、AI ツール連携に必要なモデルへアクセスできます。
 
-## 主な特徴
-
-- **統一 API**: 1 つの API キーで複数モデルにアクセス
-- **複数形式に対応**: OpenAI 互換、Anthropic ネイティブ、Gemini ネイティブ形式をサポート
-- **幅広いモデル**: チャット、画像、動画、音声、音楽、埋め込み、リランキングに対応
-- **従量課金**: 利用量に応じた柔軟な課金
-- **スマートルーティング**: 利用可能なチャネルを自動選択し、必要に応じてフェイルオーバー
-
-## 対応 API 種別
-
-| 種別 | 説明 | 代表的なモデル |
-|------|------|----------------|
-| Chat Completions | テキスト会話、画像入力、推論 | GPT、Claude、Gemini、Grok |
-| 画像生成 | テキストから画像生成、画像編集 | GPT Image、Grok Image、Midjourney、Flux |
-| 動画生成 | テキスト/画像から動画生成 | Sora、Kling、Luma、Veo、Runway |
-| 音声処理 | TTS、STT | GPT-4o Audio、Whisper |
-| 音楽生成 | 楽曲生成 | Suno |
-| 埋め込み | テキストのベクトル化 | text-embedding 系モデル |
-| リランキング | 検索結果の再順位付け | BGE reranker など |
-
-## はじめる
+## タスクを選択
 
 <CardGroup cols={2}>
   <Card title="クイックスタート" icon="rocket" href="/jp/quickstart">
-    5 分で最初の API リクエストを実行します
+    API キーを取得し、Base URL を設定して、最初のリクエストを実行します。
   </Card>
-  <Card title="API エンドポイント" icon="globe" href="/jp/api-endpoint">
-    利用できる API エンドポイントを確認します
+  <Card title="ツール連携" icon="plug" href="/jp/integrations/claude-code">
+    Claude Code、Codex CLI、Cursor、Cline、Cherry Studio、OpenClaw などを接続します。
   </Card>
-  <Card title="認証" icon="key" href="/jp/authentication">
-    API キーの取得と使い方を確認します
+  <Card title="テキストモデル" icon="message" href="/jp/chat/openai/completions">
+    OpenAI Chat、Claude Messages、Gemini Native、Responses API を使います。
   </Card>
-  <Card title="モデル料金" icon="tag" href="https://crazyrouter.com/pricing">
-    各モデルの料金を確認します
+  <Card title="画像生成" icon="image" href="/jp/images/gpt-image">
+    GPT Image、Qwen Image、Midjourney、Nano Banana Pro、DALL-E などを呼び出します。
   </Card>
-  <Card title="サービスステータス" icon="signal-stream" href="https://crazyrouter.com/status">
-    Crazyrouter の稼働状況を確認します
+  <Card title="動画生成" icon="video" href="/jp/video/unified">
+    Veo、Kling、Seedance、Runway、Luma、Sora、Wan などの動画 API を接続します。
+  </Card>
+  <Card title="モデルと課金" icon="tag" href="https://crazyrouter.com/pricing">
+    料金、モデル availability、エラー、サービスステータス、コンソール管理を確認します。
   </Card>
 </CardGroup>
+
+## AI が読めるドキュメント
+
+<CardGroup cols={2}>
+  <Card title="AI ツール入口" icon="bot" href="/jp/ai-tools">
+    Codex、Claude Code、ChatGPT、Cursor などが読むためのドキュメント入口です。
+  </Card>
+  <Card title="完全な文脈" icon="file-text" href="https://docs.crazyrouter.com/llms-full.txt">
+    AI ツールに渡しやすい単一ファイル版の全ドキュメントです。
+  </Card>
+</CardGroup>
+
+## よく使うページ
+
+| 目的 | ドキュメント |
+| --- | --- |
+| Base URL とルートを確認する | [API エンドポイント](/jp/api-endpoint) |
+| API キーを使う | [認証](/jp/authentication) |
+| Claude Code を接続する | [Claude Code](/jp/integrations/claude-code) |
+| Codex CLI を接続する | [Codex CLI](/jp/integrations/codex) |
+| ローカル画像を参照画像として使う | [画像アップロード](/jp/upload) |
+| エラーを調べる | [エラーハンドリング](/jp/error-handling) |

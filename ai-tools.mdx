@@ -1,0 +1,47 @@
+---
+title: 'AI 工具读取文档'
+description: '给 Codex、Claude Code、ChatGPT、Cursor 等 AI 工具使用的 Crazyrouter 文档入口'
+---
+
+这个页面用于把 Crazyrouter 文档交给 AI 工具读取。优先使用下面这些稳定入口。
+
+## 推荐入口
+
+<CardGroup cols={2}>
+  <Card title="文档索引 llms.txt" icon="list" href="https://docs.crazyrouter.com/llms.txt">
+    精简索引，列出关键页面和说明，适合 AI 先判断应该读取哪些文档。
+  </Card>
+  <Card title="完整上下文 llms-full.txt" icon="file-text" href="https://docs.crazyrouter.com/llms-full.txt">
+    完整聚合版文档，适合需要一次性读取全部上下文的 AI 工具。
+  </Card>
+  <Card title="Sitemap" icon="sitemap" href="https://docs.crazyrouter.com/sitemap.xml">
+    标准 sitemap，适合搜索引擎、爬虫和自建索引程序。
+  </Card>
+  <Card title="Markdown 页面" icon="markdown" href="https://docs.crazyrouter.com/quickstart.md">
+    单页文档可在 URL 后追加 `.md` 读取 Markdown 版本。
+  </Card>
+</CardGroup>
+
+## 给 AI 工具的提示词
+
+```text
+请先读取 https://docs.crazyrouter.com/llms.txt 判断相关页面。
+如果需要完整上下文，再读取 https://docs.crazyrouter.com/llms-full.txt。
+接入 OpenAI 兼容客户端时 base_url 使用 https://crazyrouter.com/v1 或 https://cn.crazyrouter.com/v1。
+接入 Claude Code / Anthropic 原生客户端时使用根域名，不要追加 /v1。
+```
+
+## 最常用文档
+
+| 场景 | 文档 |
+| --- | --- |
+| 第一次接入 | [快速开始](/quickstart) |
+| Base URL 和线路 | [API 端点](/api-endpoint) |
+| API Key | [认证方式](/authentication) |
+| Claude Code | [Claude Code 接入](/integrations/claude-code) |
+| Codex CLI | [Codex CLI 接入](/integrations/codex) |
+| OpenAI Chat | [Create Chat Completion](/chat/openai/completions) |
+| Claude Messages | [Claude Native Format](/chat/anthropic/messages) |
+| Gemini Native | [Gemini Native Format](/chat/gemini/native) |
+| 生图 | [GPT Image](/images/gpt-image) |
+| 视频 | [统一视频接口](/video/unified) |

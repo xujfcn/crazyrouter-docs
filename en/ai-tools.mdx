@@ -1,0 +1,47 @@
+---
+title: 'AI Tool Docs Entry'
+description: 'Crazyrouter documentation entry points for Codex, Claude Code, ChatGPT, Cursor, and other AI tools'
+---
+
+Use this page when you want an AI tool to read Crazyrouter documentation. Prefer these stable entry points.
+
+## Recommended Entry Points
+
+<CardGroup cols={2}>
+  <Card title="Documentation Index: llms.txt" icon="list" href="https://docs.crazyrouter.com/llms.txt">
+    A compact index of key pages and summaries, useful when the AI should decide what to read next.
+  </Card>
+  <Card title="Full Context: llms-full.txt" icon="file-text" href="https://docs.crazyrouter.com/llms-full.txt">
+    A single-file full documentation context for AI tools that can read URLs or pasted text.
+  </Card>
+  <Card title="Sitemap" icon="sitemap" href="https://docs.crazyrouter.com/sitemap.xml">
+    Standard sitemap for search engines, crawlers, and custom indexing jobs.
+  </Card>
+  <Card title="Markdown Pages" icon="markdown" href="https://docs.crazyrouter.com/en/quickstart.md">
+    Add `.md` to a documentation URL to read a single page as Markdown.
+  </Card>
+</CardGroup>
+
+## Prompt for AI Tools
+
+```text
+First read https://docs.crazyrouter.com/llms.txt to identify the relevant pages.
+If full context is needed, read https://docs.crazyrouter.com/llms-full.txt.
+For OpenAI-compatible clients, use base_url https://crazyrouter.com/v1 or https://cn.crazyrouter.com/v1.
+For Claude Code / Anthropic-native clients, use the root domain and do not append /v1.
+```
+
+## Common Pages
+
+| Use case | Docs |
+| --- | --- |
+| First integration | [Quick Start](/en/quickstart) |
+| Base URLs and routes | [API Endpoints](/en/api-endpoint) |
+| API keys | [Authentication](/en/authentication) |
+| Claude Code | [Claude Code Setup](/en/integrations/claude-code) |
+| Codex CLI | [Codex CLI Setup](/en/integrations/codex) |
+| OpenAI Chat | [Create Chat Completion](/en/chat/openai/completions) |
+| Claude Messages | [Claude Native Format](/en/chat/anthropic/messages) |
+| Gemini Native | [Gemini Native Format](/en/chat/gemini/native) |
+| Image generation | [GPT Image](/en/images/gpt-image) |
+| Video generation | [Unified Video API](/en/video/unified) |

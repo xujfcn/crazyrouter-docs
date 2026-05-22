@@ -1,0 +1,32 @@
+---
+title: 'AI ツール向けドキュメント入口'
+description: 'Codex、Claude Code、ChatGPT、Cursor などが Crazyrouter ドキュメントを読むための入口'
+---
+
+AI ツールに Crazyrouter ドキュメントを読ませる場合は、次の安定した入口を使ってください。
+
+## 推奨入口
+
+<CardGroup cols={2}>
+  <Card title="ドキュメント索引 llms.txt" icon="list" href="https://docs.crazyrouter.com/llms.txt">
+    重要ページと概要のコンパクトな索引です。AI が次に読むページを判断する用途に向いています。
+  </Card>
+  <Card title="完全版 llms-full.txt" icon="file-text" href="https://docs.crazyrouter.com/llms-full.txt">
+    全ドキュメントを 1 ファイルにまとめた AI 向けコンテキストです。
+  </Card>
+  <Card title="Sitemap" icon="sitemap" href="https://docs.crazyrouter.com/sitemap.xml">
+    検索エンジン、クローラー、自前のインデックス処理向けの標準 sitemap です。
+  </Card>
+  <Card title="Markdown ページ" icon="markdown" href="https://docs.crazyrouter.com/jp/quickstart.md">
+    各ドキュメント URL に `.md` を付けると Markdown 版を取得できます。
+  </Card>
+</CardGroup>
+
+## AI ツール用プロンプト
+
+```text
+まず https://docs.crazyrouter.com/llms.txt を読んで関連ページを判断してください。
+完全な文脈が必要な場合は https://docs.crazyrouter.com/llms-full.txt を読んでください。
+OpenAI 互換クライアントでは base_url に https://crazyrouter.com/v1 または https://cn.crazyrouter.com/v1 を使います。
+Claude Code / Anthropic native クライアントではルートドメインを使い、/v1 を追加しません。
+```
