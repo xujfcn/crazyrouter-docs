@@ -1,92 +1,84 @@
 ---
-title: 'How to use llms.txt'
-description: 'Use https://docs.crazyrouter.com/llms.txt so AI tools read Crazyrouter docs, models, and API patterns correctly'
+title: 'Give the docs to AI tools'
+description: 'Use https://docs.crazyrouter.com/llms.txt so AI tools can quickly understand the correct Crazyrouter integration patterns'
 ---
 > Last updated: 2026-06-06
 
-# How to use llms.txt
+# Give the docs to AI tools
 
-`https://docs.crazyrouter.com/llms.txt` is the AI-readable Crazyrouter documentation entry point for Codex, Claude Code, ChatGPT, Cursor, Cline, Aider, and similar tools. Users can give this URL directly to an AI tool so it reads the compact index first, then follows the relevant documentation pages.
-
-## Recommended prompt for AI tools
+If you use ChatGPT, Claude, Cursor, Cline, Aider, Codex, or another AI coding tool, give it this documentation entry point:
 
 ```text
-First read https://docs.crazyrouter.com/llms.txt and answer my question using the Crazyrouter documentation index there.
-
-Requirements:
-1. Model names, pricing, billing modes, and endpoint support must align with the data exposed by https://crazyrouter.com/pricing and https://crazyrouter.com/api/pricing?lang=en.
-2. If you need to confirm which models my API key can actually use, call GET https://cn.crazyrouter.com/v1/models with Authorization: Bearer YOUR_API_KEY.
-3. Do not guess model names, prices, or endpoints from stale knowledge. If a model is absent from pricing or /v1/models, say that availability must be confirmed first.
-4. API usage must match the Crazyrouter docs and backend routes. OpenAI-compatible clients use base_url https://cn.crazyrouter.com/v1. Claude / Anthropic-native clients use the root domain https://cn.crazyrouter.com.
-5. Before generating code, choose the correct API from public_endpoint_types or supported_endpoint_types returned by /api/pricing.
+https://docs.crazyrouter.com/llms.txt
 ```
 
-## Runtime sources of truth
+After reading it, the AI tool can find Crazyrouter quickstarts, authentication, API endpoints, model-listing docs, image/video/audio APIs, and integration guides.
 
-| Need to confirm | Source |
+## Copy this prompt
+
+Paste this prompt into your AI tool:
+
+```text
+First read https://docs.crazyrouter.com/llms.txt, then answer my question using the official Crazyrouter docs.
+
+My goal is: [write your task here, for example: use Python to generate a 5-second Sora 2 video]
+
+Please note:
+- OpenAI-compatible SDKs should usually use base_url: https://cn.crazyrouter.com/v1
+- If model names, prices, or billing are involved, use https://crazyrouter.com/pricing as the reference
+- If you are unsure whether a model is available, tell me to confirm it on the Pricing page or with /v1/models
+- Give me runnable code examples
+```
+
+## Common uses
+
+| What you want the AI to do | Suggested wording |
 | --- | --- |
-| Public models, prices, billing modes, endpoint types | [Pricing page](https://crazyrouter.com/pricing) and `GET https://crazyrouter.com/api/pricing?lang=en` |
-| Models available to the current API key | `GET https://cn.crazyrouter.com/v1/models` |
-| Documentation index | `https://docs.crazyrouter.com/llms.txt` |
-| Full documentation context | `https://docs.crazyrouter.com/llms-full.txt` |
-| Single-page Markdown | Add `.md` to a docs URL, for example `https://docs.crazyrouter.com/en/quickstart.md` |
+| Generate integration code | “Read llms.txt, then write a Python/Node.js Crazyrouter API example.” |
+| Use a specific model | “Read llms.txt and confirm which Crazyrouter API endpoint this model should use.” |
+| Configure an IDE or agent | “Read llms.txt and show me how to configure Crazyrouter in Cursor / Cline / Claude Code.” |
+| Debug an error | “Read llms.txt and the error-handling docs, then help me analyze this Crazyrouter API error.” |
+| Generate video or images | “Read llms.txt and give me the Crazyrouter request example for video/image generation.” |
+
+## When to use llms-full.txt
+
+`llms.txt` is a compact index. It helps the AI decide which docs to read first.
+
+If your AI tool can read longer files, or you want to provide the full documentation context at once, also provide:
+
+```text
+https://docs.crazyrouter.com/llms-full.txt
+```
+
+## Where model and pricing data comes from
+
+Models can change based on channels, permissions, and platform configuration. Documentation examples explain the request format; they are not the complete model catalog.
+
+For current public models, pricing, and billing details, use:
+
+```text
+https://crazyrouter.com/pricing
+```
+
+If you already have an API key and want to check which models your token can call, request:
+
+```bash cURL
+curl https://cn.crazyrouter.com/v1/models \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
 
 <Warning>
-Do not treat `llms.txt` as the complete model catalog. Models can change by channel, group, token permission, and pricing configuration. The full model and pricing source of truth is the Pricing page and `/api/pricing`.
+Do not paste a real API key into an untrusted AI tool or public conversation. When asking an AI to write code, use a placeholder such as `YOUR_API_KEY`.
 </Warning>
 
-## Endpoint selection rules
+## Single-page Markdown
 
-Each model item from `GET https://crazyrouter.com/api/pricing?lang=en` can include:
-
-- `model_name`: the public model name to pass in API requests
-- `public_endpoint_types`: user-facing recommended endpoint types; prefer this field when present
-- `supported_endpoint_types`: backend-supported endpoint types
-- `video_pricing` / `image_pricing`: billing details for video or image models
-- `billing_mode` / `display_unit`: billing basis and display unit
-
-Common endpoint types and request paths:
-
-| endpoint type | Request path |
-| --- | --- |
-| `openai` | `POST /v1/chat/completions` |
-| `openai-response` | `POST /v1/responses` |
-| `anthropic` | `POST /v1/messages` |
-| `gemini` | `POST /v1beta/models/{model}:generateContent` |
-| `image-generation` | `POST /v1/images/generations` or `POST /v1/images/edits` |
-| `openai-video` | `POST /v1/video/generations` or `POST /v1/videos` |
-| `unified-video` | `POST /v1/video/create`; query with `GET /v1/video/query` |
-| `kling` | `/kling/v1/videos/*` or `/kling/v1/images/*` |
-| `minimax-video` | `/minimax/v1/video_generation` |
-| `luma` | `/luma/generations` |
-| `runway` | `/runwayml/v1/image_to_video` |
-| `volc-video` | `/volc/v1/contents/generations/tasks` |
-| `ali-video` | `/alibailian/api/v1/services/aigc/video-generation/video-synthesis` |
-
-<Note>
-Endpoint mapping is aligned with the local repository files `router/relay-router.go`, `router/video-router.go`, `controller/pricing.go`, `controller/model.go`, and `common/endpoint_type.go`. Documentation updates should verify those files before changing examples.
-</Note>
-
-## What users should paste
-
-Paste this into an AI tool:
+Many docs pages are also available as Markdown. Add `.md` to the page URL, for example:
 
 ```text
-Read https://docs.crazyrouter.com/llms.txt, then tell me how to use Crazyrouter for [your task]. Confirm that the model and endpoint match the pricing page first.
+https://docs.crazyrouter.com/en/quickstart.md
+https://docs.crazyrouter.com/en/api-endpoint.md
+https://docs.crazyrouter.com/en/video/sora.md
 ```
 
-If the task needs more context, add:
-
-```text
-If llms.txt is not enough, continue reading https://docs.crazyrouter.com/llms-full.txt and the relevant single-page Markdown docs.
-```
-
-## Maintenance requirements
-
-When updating `crazyrouter-docs/llms.txt`:
-
-1. Do not hardcode the full model catalog in `llms.txt`.
-2. Example models must exist in the Pricing page or `/api/pricing`.
-3. Example request paths must exist in both the docs and the local Go routes.
-4. Model availability notes must point users to token-level `/v1/models` results.
-5. After Mintlify deploys the docs, users continue to reference the same URL: `https://docs.crazyrouter.com/llms.txt`.
+If an AI tool cannot read the whole documentation site well, give it `llms.txt` first, then provide the specific `.md` page links it needs.

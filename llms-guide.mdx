@@ -1,92 +1,84 @@
 ---
-title: '如何使用 llms.txt'
-description: '让 AI 工具通过 https://docs.crazyrouter.com/llms.txt 正确读取 Crazyrouter 文档、模型和调用方式'
+title: '把文档交给 AI 工具'
+description: '使用 https://docs.crazyrouter.com/llms.txt 让 AI 工具快速理解 Crazyrouter 的正确接入方式'
 ---
 > 更新日期：2026-06-06
 
-# 如何使用 llms.txt
+# 把文档交给 AI 工具
 
-`https://docs.crazyrouter.com/llms.txt` 是给 Codex、Claude Code、ChatGPT、Cursor、Cline、Aider 等 AI 工具读取的 Crazyrouter 文档入口。用户只需要把这个 URL 发给 AI 工具，AI 就可以先读取精简索引，再按任务继续读取对应文档页面。
-
-## 推荐给 AI 的提示词
+如果你正在用 ChatGPT、Claude、Cursor、Cline、Aider、Codex 等 AI 工具写代码，可以直接把下面这个文档入口发给它：
 
 ```text
-请先读取 https://docs.crazyrouter.com/llms.txt，并基于其中的 Crazyrouter 文档索引回答我的问题。
-
-要求：
-1. 模型名称、价格、计费方式和端点支持必须以 https://crazyrouter.com/pricing 以及 https://crazyrouter.com/api/pricing?lang=zh 暴露的数据为准。
-2. 如果需要确认当前 API Key 实际可用模型，请调用 GET https://cn.crazyrouter.com/v1/models，并使用 Authorization: Bearer YOUR_API_KEY。
-3. 不要根据旧知识猜测模型名、价格或端点；如果 pricing 或 /v1/models 中没有该模型，请说明需要先确认模型是否已开放。
-4. 调用方法必须与 Crazyrouter 文档和后端路由保持一致；OpenAI 兼容客户端使用 base_url https://cn.crazyrouter.com/v1，Claude / Anthropic 原生客户端使用根域名 https://cn.crazyrouter.com。
-5. 生成代码前，先根据 /api/pricing 返回的 public_endpoint_types 或 supported_endpoint_types 选择正确接口。
+https://docs.crazyrouter.com/llms.txt
 ```
 
-## 实时事实源
+AI 工具读取后，可以快速找到 Crazyrouter 的快速开始、认证方式、API 端点、模型列表、图像/视频/音频接口和常见工具接入文档。
 
-| 需要确认什么 | 使用哪个来源 |
+## 推荐复制
+
+把这段提示词复制给 AI 工具：
+
+```text
+请先阅读 https://docs.crazyrouter.com/llms.txt，然后基于 Crazyrouter 官方文档回答我的问题。
+
+我的需求是：[在这里写你的需求，例如：用 Python 调用 Sora 2 生成 5 秒视频]
+
+请注意：
+- OpenAI 兼容 SDK 默认使用 base_url：https://cn.crazyrouter.com/v1
+- 如果涉及模型名称、价格或计费方式，请以 https://crazyrouter.com/pricing 为准
+- 如果不确定某个模型是否可用，请提醒我到 Pricing 页面或 /v1/models 确认
+- 请给出可以直接运行的代码示例
+```
+
+## 常见用法
+
+| 你想让 AI 做什么 | 推荐说法 |
 | --- | --- |
-| 公开模型、价格、计费方式、端点类型 | [Pricing 页面](https://crazyrouter.com/pricing) 和 `GET https://crazyrouter.com/api/pricing?lang=zh` |
-| 当前 API Key 可用模型 | `GET https://cn.crazyrouter.com/v1/models` |
-| 文档索引 | `https://docs.crazyrouter.com/llms.txt` |
-| 完整文档上下文 | `https://docs.crazyrouter.com/llms-full.txt` |
-| 单页 Markdown | 在文档 URL 后追加 `.md`，例如 `https://docs.crazyrouter.com/quickstart.md` |
+| 生成接入代码 | “阅读 llms.txt，然后用 Python/Node.js 写一个 Crazyrouter 调用示例。” |
+| 接入某个模型 | “阅读 llms.txt，并确认这个模型应该使用哪个 Crazyrouter 接口。” |
+| 配置 IDE 或 Agent | “阅读 llms.txt，然后告诉我如何在 Cursor / Cline / Claude Code 中配置 Crazyrouter。” |
+| 排查报错 | “阅读 llms.txt 和错误处理文档，帮我分析这个 Crazyrouter API 报错。” |
+| 生成视频或图片 | “阅读 llms.txt，然后按 Crazyrouter 文档给出视频/图片生成请求示例。” |
+
+## 什么时候用 llms-full.txt
+
+`llms.txt` 是精简索引，适合 AI 先判断应该读取哪些文档。
+
+如果 AI 工具支持读取更长文本，或者你希望它一次性获得完整文档上下文，可以继续提供：
+
+```text
+https://docs.crazyrouter.com/llms-full.txt
+```
+
+## 模型和价格以哪里为准
+
+模型会随渠道、权限和平台配置变化。文档示例只用于说明调用方式，不代表完整模型清单。
+
+查看当前公开模型、价格和计费方式，请使用：
+
+```text
+https://crazyrouter.com/pricing
+```
+
+如果你已经有 API Key，并想确认当前 Token 实际可调用哪些模型，可以请求：
+
+```bash cURL
+curl https://cn.crazyrouter.com/v1/models \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
 
 <Warning>
-不要把 `llms.txt` 当成全量模型清单。模型会随渠道、分组、Token 权限和定价配置变化；全量模型与价格必须以 Pricing 页面和 `/api/pricing` 为准。
+不要把真实 API Key 粘贴到不可信的 AI 工具或公开对话中。需要让 AI 帮你写代码时，使用 `YOUR_API_KEY` 这样的占位符即可。
 </Warning>
 
-## 端点选择规则
+## 单页 Markdown
 
-`GET https://crazyrouter.com/api/pricing?lang=zh` 返回的每个模型条目可能包含：
-
-- `model_name`：调用 API 时使用的公开模型名
-- `public_endpoint_types`：面向用户展示的推荐端点类型，优先使用
-- `supported_endpoint_types`：后端支持的端点类型
-- `video_pricing` / `image_pricing`：视频或图像模型的计费细则
-- `billing_mode` / `display_unit`：计费口径与展示单位
-
-常见端点类型和调用路径：
-
-| endpoint type | 调用路径 |
-| --- | --- |
-| `openai` | `POST /v1/chat/completions` |
-| `openai-response` | `POST /v1/responses` |
-| `anthropic` | `POST /v1/messages` |
-| `gemini` | `POST /v1beta/models/{model}:generateContent` |
-| `image-generation` | `POST /v1/images/generations` 或 `POST /v1/images/edits` |
-| `openai-video` | `POST /v1/video/generations` 或 `POST /v1/videos` |
-| `unified-video` | `POST /v1/video/create`，查询用 `GET /v1/video/query` |
-| `kling` | `/kling/v1/videos/*` 或 `/kling/v1/images/*` |
-| `minimax-video` | `/minimax/v1/video_generation` |
-| `luma` | `/luma/generations` |
-| `runway` | `/runwayml/v1/image_to_video` |
-| `volc-video` | `/volc/v1/contents/generations/tasks` |
-| `ali-video` | `/alibailian/api/v1/services/aigc/video-generation/video-synthesis` |
-
-<Note>
-端点映射与本地仓库中的 `router/relay-router.go`、`router/video-router.go`、`controller/pricing.go`、`controller/model.go`、`common/endpoint_type.go` 保持一致。文档维护时应先核对这些文件，再更新示例。
-</Note>
-
-## 用户应该怎么引用
-
-在 AI 工具里直接贴：
+很多文档页面也可以用 Markdown 形式读取。把页面 URL 后面加上 `.md` 即可，例如：
 
 ```text
-请阅读 https://docs.crazyrouter.com/llms.txt，然后告诉我如何用 Crazyrouter 调用 [你的任务]。请先确认模型和端点是否与 pricing 页面一致。
+https://docs.crazyrouter.com/quickstart.md
+https://docs.crazyrouter.com/api-endpoint.md
+https://docs.crazyrouter.com/video/sora.md
 ```
 
-如果任务需要完整上下文，再追加：
-
-```text
-如果 llms.txt 中的信息不足，请继续读取 https://docs.crazyrouter.com/llms-full.txt 和相关单页 Markdown。
-```
-
-## 维护要求
-
-更新 `crazyrouter-docs/llms.txt` 时遵守以下规则：
-
-1. 不在 `llms.txt` 中硬编码全量模型列表。
-2. 示例模型必须能在 Pricing 页面或 `/api/pricing` 中找到。
-3. 示例调用路径必须能在文档和本地 Go 路由中找到。
-4. 模型可用性说明必须提醒用户以 `/v1/models` 的 Token 级结果为准。
-5. Mintlify 文档部署后，用户继续引用同一个 URL：`https://docs.crazyrouter.com/llms.txt`。
+如果 AI 工具不能很好地读取整个网站，可以先给它 `llms.txt`，再按它需要的页面继续提供对应 `.md` 链接。
