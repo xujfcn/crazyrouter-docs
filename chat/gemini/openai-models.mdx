@@ -2,6 +2,7 @@
 title: "Gemini 兼容 OpenAI 模型列表"
 description: "基于生产环境复核，使用 GET /v1beta/openai/models 获取 OpenAI 风格模型列表"
 ---
+> 更新日期：2026-06-06
 
 # Gemini 兼容 OpenAI 模型列表
 
@@ -45,11 +46,11 @@ GET /v1beta/openai/models?key=YOUR_API_KEY
 <CodeGroup>
 
 ```bash cURL
-curl "https://crazyrouter.com/v1beta/openai/models?key=YOUR_API_KEY"
+curl "https://cn.crazyrouter.com/v1beta/openai/models?key=YOUR_API_KEY"
 ```
 
 ```bash cURL with Header
-curl https://crazyrouter.com/v1beta/openai/models \
+curl https://cn.crazyrouter.com/v1beta/openai/models \
   -H "x-goog-api-key: YOUR_API_KEY"
 ```
 
@@ -83,7 +84,7 @@ curl https://crazyrouter.com/v1beta/openai/models \
   "success": true,
   "data": [
     {
-      "id": "gpt-5.4",
+      "id": "gpt-5.5",
       "object": "model",
       "created": 1700000000,
       "owned_by": "openai",

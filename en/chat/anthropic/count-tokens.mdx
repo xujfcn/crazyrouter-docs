@@ -2,6 +2,7 @@
 title: "Claude Token Counting"
 description: "POST /v1/messages/count_tokens estimate the input token count for a Claude Messages request"
 ---
+> Last updated: 2026-06-06
 
 # Claude Token Counting
 
@@ -36,7 +37,7 @@ If your request also includes `system`, `tools`, tool results, or text content, 
 <CodeGroup>
 
 ```bash cURL
-curl https://crazyrouter.com/v1/messages/count_tokens   -H "Content-Type: application/json"   -H "x-api-key: YOUR_API_KEY"   -H "anthropic-version: 2023-06-01"   -d '{
+curl https://cn.crazyrouter.com/v1/messages/count_tokens   -H "Content-Type: application/json"   -H "x-api-key: YOUR_API_KEY"   -H "anthropic-version: 2023-06-01"   -d '{
     "model": "claude-sonnet-4-6",
     "messages": [
       {"role": "user", "content": "hello"}
@@ -48,7 +49,7 @@ curl https://crazyrouter.com/v1/messages/count_tokens   -H "Content-Type: applic
 import requests
 
 resp = requests.post(
-    "https://crazyrouter.com/v1/messages/count_tokens",
+    "https://cn.crazyrouter.com/v1/messages/count_tokens",
     headers={
         "x-api-key": "YOUR_API_KEY",
         "anthropic-version": "2023-06-01",

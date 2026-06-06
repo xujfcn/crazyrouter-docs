@@ -2,6 +2,7 @@
 title: 'リクエストの作成'
 description: 'Crazyrouter API へ正しくリクエストする方法'
 ---
+> 更新日: 2026-06-06
 
 ## リクエスト形式
 
@@ -23,11 +24,11 @@ API リクエストは HTTPS と JSON リクエストボディを使用します
 ## リクエスト例
 
 ```bash
-curl https://crazyrouter.com/v1/chat/completions \
+curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer sk-xxxxxxxx" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-5.5",
     "messages": [{"role": "user", "content": "Hello"}],
     "stream": false
   }'
@@ -38,11 +39,11 @@ curl https://crazyrouter.com/v1/chat/completions \
 `stream: true` を設定すると、SSE 形式のストリーミング出力を利用できます。
 
 ```bash
-curl https://crazyrouter.com/v1/chat/completions \
+curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer sk-xxxxxxxx" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-5.5",
     "messages": [{"role": "user", "content": "Hello"}],
     "stream": true
   }'

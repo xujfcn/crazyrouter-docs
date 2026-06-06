@@ -2,10 +2,15 @@
 title: 'Making Requests'
 description: 'Learn how to make API requests correctly'
 ---
+> Last updated: 2026-06-06
 
 ## Request Format
 
 All API requests use the HTTPS protocol with JSON request bodies.
+
+<Note>
+Prefer `https://cn.crazyrouter.com/v1` by default. If you are unsure whether a client should use the root domain or `/v1`, check [API Endpoints](https://docs.crazyrouter.com/en/api-endpoint) first.
+</Note>
 
 ### Required Headers
 
@@ -23,11 +28,11 @@ All API requests use the HTTPS protocol with JSON request bodies.
 ## Request Example
 
 ```bash
-curl https://crazyrouter.com/v1/chat/completions \
+curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer sk-xxxxxxxx" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-5.5",
     "messages": [{"role": "user", "content": "Hello"}],
     "stream": false
   }'
@@ -38,11 +43,11 @@ curl https://crazyrouter.com/v1/chat/completions \
 Set `stream: true` to enable SSE streaming output:
 
 ```bash
-curl https://crazyrouter.com/v1/chat/completions \
+curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer sk-xxxxxxxx" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-5.5",
     "messages": [{"role": "user", "content": "Hello"}],
     "stream": true
   }'

@@ -2,6 +2,7 @@
 title: 'PHP 示例'
 description: 'PHP 调用 Crazyrouter API 示例'
 ---
+> 更新日期：2026-06-06
 
 ## 基础对话
 
@@ -9,10 +10,10 @@ description: 'PHP 调用 Crazyrouter API 示例'
 <?php
 
 $apiKey = 'sk-xxx';
-$baseUrl = 'https://crazyrouter.com/v1';
+$baseUrl = 'https://cn.crazyrouter.com/v1';
 
 $data = [
-    'model' => 'gpt-5.4',
+    'model' => 'gpt-5.5',
     'messages' => [
         ['role' => 'user', 'content' => '你好，用PHP写一个冒泡排序']
     ]
@@ -42,7 +43,7 @@ echo $result['choices'][0]['message']['content'];
 <?php
 
 $apiKey = 'sk-xxx';
-$baseUrl = 'https://crazyrouter.com/v1';
+$baseUrl = 'https://cn.crazyrouter.com/v1';
 
 // 使用 GPT-Image-2 编辑图片
 $ch = curl_init($baseUrl . '/images/edits');
@@ -78,10 +79,10 @@ echo "图片地址: " . $imageUrl . "\n";
 <?php
 
 $apiKey = 'sk-xxx';
-$baseUrl = 'https://crazyrouter.com/v1';
+$baseUrl = 'https://cn.crazyrouter.com/v1';
 
 $data = [
-    'model' => 'gpt-5.4',
+    'model' => 'gpt-5.5',
     'messages' => [['role' => 'user', 'content' => '讲一个笑话']],
     'stream' => true,
 ];
@@ -113,5 +114,5 @@ echo "\n";
 ```
 
 <Note>
-  以上聊天示例默认使用 2026 年 3 月 23 日已在生产环境实测成功的 `gpt-5.4`。如果你要切换模型，优先改成同样已验证的 `claude-sonnet-4-6` 或 `gemini-3-pro`。
+  以上聊天示例默认使用 2026 年 3 月 23 日已在生产环境实测成功的 `gpt-5.5`。如果你要切换模型，优先改成同样已验证的 `claude-sonnet-4-6` 或 `gemini-3-pro`。
 </Note>

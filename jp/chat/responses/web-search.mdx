@@ -2,6 +2,7 @@
 title: "Responses Web Search"
 description: "Responses web search verified against Crazyrouter production on 2026-03-23"
 ---
+> 更新日: 2026-06-06
 
 # Responses Web Search
 
@@ -9,7 +10,7 @@ description: "Responses web search verified against Crazyrouter production on 20
 POST /v1/responses
 ```
 
-As of March 23, 2026, Crazyrouter production has verified `gpt-5.4` on the Responses API using:
+As of March 23, 2026, Crazyrouter production has verified `gpt-5.5` on the Responses API using:
 
 - `tools: [{ "type": "web_search_preview" }]`
 - an `output` sequence of `web_search_call`, then `message`
@@ -23,11 +24,11 @@ As of March 23, 2026, Crazyrouter production has verified `gpt-5.4` on the Respo
 ## Minimal Request
 
 ```bash
-curl https://crazyrouter.com/v1/responses \
+curl https://cn.crazyrouter.com/v1/responses \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-5.5",
     "input": "Find one AI news item from March 2026.",
     "tools": [
       {

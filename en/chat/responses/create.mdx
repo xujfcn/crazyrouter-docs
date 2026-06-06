@@ -2,6 +2,7 @@
 title: "Create Response"
 description: "Responses API basics verified against Crazyrouter production on 2026-03-23"
 ---
+> Last updated: 2026-06-06
 
 # Create Response
 
@@ -11,7 +12,7 @@ POST /v1/responses
 
 As of March 23, 2026, Crazyrouter production has verified:
 
-- `gpt-5.4` returns `object: "response"`
+- `gpt-5.5` returns `object: "response"`
 - basic text requests currently return `output` items of type `message`
 - streaming requests consistently expose `response.created`, `response.in_progress`, `response.output_item.added`, `response.content_part.added`, and `response.output_text.delta`
 
@@ -24,11 +25,11 @@ As of March 23, 2026, Crazyrouter production has verified:
 ## Basic Request
 
 ```bash
-curl https://crazyrouter.com/v1/responses \
+curl https://cn.crazyrouter.com/v1/responses \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-5.5",
     "input": "Explain what an API is in one sentence."
   }'
 ```
@@ -38,7 +39,7 @@ Observed production response shape:
 ```json
 {
   "object": "response",
-  "model": "gpt-5.4",
+  "model": "gpt-5.5",
   "output": [
     {
       "type": "message"
@@ -52,11 +53,11 @@ Observed production response shape:
 ## Streaming Request
 
 ```bash
-curl https://crazyrouter.com/v1/responses \
+curl https://cn.crazyrouter.com/v1/responses \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-5.5",
     "input": "Say hello in one sentence.",
     "stream": true
   }'
@@ -81,7 +82,7 @@ So the safest current consumer strategy is:
 
 ## Current Recommendation
 
-- Start new GPT text integrations with `gpt-5.4` on `/v1/responses`
+- Start new GPT text integrations with `gpt-5.5` on `/v1/responses`
 - For tool use, continue with [Responses Function Calling](/chat/responses/function-calling)
 - For live web access, continue with [Responses Web Search](/chat/responses/web-search)
 - For visible reasoning markers, continue with [GPT-5 Thinking](/chat/responses/gpt5-thinking)

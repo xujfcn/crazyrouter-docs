@@ -2,6 +2,7 @@
 title: "Nano Banana 2"
 description: "As of 2026-04-14, nano-banana-2 should use native Gemini generateContent; /v1/images/generations is no longer recommended"
 ---
+> 更新日: 2026-06-06
 
 # Nano Banana 2
 
@@ -59,7 +60,7 @@ Even on the recommended route, the client should parse Gemini-native output:
 ## Recommended Request Template
 
 ```bash
-curl "https://crazyrouter.com/v1beta/models/nano-banana-2:generateContent?key=YOUR_API_KEY" \
+curl "https://cn.crazyrouter.com/v1beta/models/nano-banana-2:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -83,7 +84,7 @@ curl "https://crazyrouter.com/v1beta/models/nano-banana-2:generateContent?key=YO
 The following legacy pattern is no longer recommended:
 
 ```bash
-curl -X POST https://crazyrouter.com/v1/images/generations \
+curl -X POST https://cn.crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{

@@ -2,6 +2,7 @@
 title: "Kling 视频生成"
 description: "使用 Crazyrouter 按官方 Kling 协议进行标准视频和 Omni 视频生成"
 ---
+> 更新日期：2026-06-06
 
 # Kling 视频生成
 
@@ -167,7 +168,7 @@ curl -X POST https://crazyrouter.com/kling/v1/videos/image2video \
 如果参考图在本地，先使用临时图床获取公网 URL，再传给 Kling。临时图片默认保存 72 小时，存储期内不单独按天收费。
 
 ```bash cURL
-UPLOAD_RESPONSE=$(curl -sS -X POST https://crazyrouter.com/v1/files/uploads \
+UPLOAD_RESPONSE=$(curl -sS -X POST https://cn.crazyrouter.com/v1/files/uploads \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -F "file=@./portrait.png" \
   -F "purpose=model_input")

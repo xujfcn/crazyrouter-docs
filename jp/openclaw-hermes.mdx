@@ -3,8 +3,9 @@ title: 'Hermes Agent の設定'
 description: 'Hermes Agent に Crazyrouter を設定し、OpenAI 互換エンドポイント経由で 627 以上の AI モデルを利用します'
 icon: 'robot'
 ---
+> 更新日: 2026-06-06
 
-[crazyrouter-hermes](https://github.com/xujfcn/crazyrouter-hermes) を使うと、[Hermes Agent](https://github.com/NousResearch/Hermes-Agent) のモデルプロバイダーを Crazyrouter に切り替えられます。設定後、Hermes は `https://crazyrouter.com/v1` を OpenAI 互換エンドポイントとして使い、1 つの Crazyrouter API Key で Claude、GPT、DeepSeek、Gemini、Qwen など 627 以上のモデルを呼び出します。
+[crazyrouter-hermes](https://github.com/xujfcn/crazyrouter-hermes) を使うと、[Hermes Agent](https://github.com/NousResearch/Hermes-Agent) のモデルプロバイダーを Crazyrouter に切り替えられます。設定後、Hermes は `https://cn.crazyrouter.com/v1` を OpenAI 互換エンドポイントとして使い、1 つの Crazyrouter API Key で Claude、GPT、DeepSeek、Gemini、Qwen など 627 以上のモデルを呼び出します。
 
 ## 向いている用途
 
@@ -22,7 +23,7 @@ icon: 'robot'
 | モデル権限 | Hermes で使うモデルを token で許可します |
 
 <Tip>
-Hermes は OpenAI 互換設定で Crazyrouter に接続します。Base URL は `https://crazyrouter.com/v1` のままにしてください。
+Hermes は OpenAI 互換設定で Crazyrouter に接続します。Base URL は `https://cn.crazyrouter.com/v1` のままにしてください。
 </Tip>
 
 ## ワンクリック設定
@@ -62,7 +63,7 @@ Hermes は OpenAI 互換設定で Crazyrouter に接続します。Base URL は 
 
 ```bash
 OPENAI_API_KEY=sk-your-crazyrouter-key
-OPENAI_BASE_URL=https://crazyrouter.com/v1
+OPENAI_BASE_URL=https://cn.crazyrouter.com/v1
 ```
 
 ### デフォルトモデル
@@ -72,8 +73,8 @@ OPENAI_BASE_URL=https://crazyrouter.com/v1
 ```yaml
 model:
   provider: "custom"
-  default: "claude-opus-4-7"
-  base_url: "https://crazyrouter.com/v1"
+  default: "claude-opus-4-8"
+  base_url: "https://cn.crazyrouter.com/v1"
 ```
 
 `default` は Crazyrouter token で許可済みのモデル名に変更できます。
@@ -83,8 +84,8 @@ model:
 設定後、Hermes 内で `/model` を使ってモデルを切り替えられます。
 
 ```text
-/model claude-opus-4-7
-/model gpt-5.4
+/model claude-opus-4-8
+/model gpt-5.5
 /model claude-sonnet-4.6
 /model gemini-3-pro
 /model deepseek-chat
@@ -97,11 +98,11 @@ model:
 ## 確認チェックリスト
 
 - [ ] `~/.hermes/.env` の `OPENAI_API_KEY` が有効な Crazyrouter token である
-- [ ] `OPENAI_BASE_URL` が `https://crazyrouter.com/v1` である
+- [ ] `OPENAI_BASE_URL` が `https://cn.crazyrouter.com/v1` である
 - [ ] `~/.hermes/config.yaml` の `provider` が `custom` である
 - [ ] デフォルトモデルが Crazyrouter token で許可されている
 - [ ] Hermes でテストメッセージに応答が返る
-- [ ] `/model gpt-5.4` など、許可済みモデルへの切り替えが成功する
+- [ ] `/model gpt-5.5` など、許可済みモデルへの切り替えが成功する
 
 ## よくある問題
 

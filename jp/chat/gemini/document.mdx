@@ -2,6 +2,7 @@
 title: "Gemini Document Understanding"
 description: "Gemini PDF understanding and structured extraction verified against Crazyrouter production on 2026-03-23"
 ---
+> 更新日: 2026-06-06
 
 # Gemini Document Understanding
 
@@ -21,7 +22,7 @@ As of March 23, 2026, Crazyrouter production has verified that `gemini-3-pro` su
 The following request successfully read a PDF and returned a summary in production:
 
 ```bash
-curl "https://crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://cn.crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -50,7 +51,7 @@ In the production check, the model returned a one-sentence summary of the attach
 The following request returned JSON text that could be parsed directly with `json.loads()` in production:
 
 ```bash
-curl "https://crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://cn.crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [

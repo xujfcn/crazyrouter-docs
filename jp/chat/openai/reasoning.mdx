@@ -2,6 +2,7 @@
 title: "Reasoning Models"
 description: "Production-revalidated guidance for using Crazyrouter reasoning features and choosing the right protocol"
 ---
+> 更新日: 2026-06-06
 
 # Reasoning Models
 
@@ -16,8 +17,8 @@ For OpenAI-compatible integrations, the current guidance is:
 
 | Route | Model | Request parameter | Current production behavior |
 |-------|-------|-------------------|-----------------------------|
-| Chat Completions | `gpt-5.4` | `reasoning_effort` | Request succeeds and returns a final answer |
-| Responses | `gpt-5.4` | `reasoning.effort` / `reasoning.summary` | `output` includes `reasoning` and `message` items |
+| Chat Completions | `gpt-5.5` | `reasoning_effort` | Request succeeds and returns a final answer |
+| Responses | `gpt-5.5` | `reasoning.effort` / `reasoning.summary` | `output` includes `reasoning` and `message` items |
 
 ---
 
@@ -26,11 +27,11 @@ For OpenAI-compatible integrations, the current guidance is:
 The following request shape currently works in production:
 
 ```bash cURL
-curl https://crazyrouter.com/v1/chat/completions \
+curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-5.5",
     "messages": [
       {
         "role": "user",
@@ -67,11 +68,11 @@ So if you only want stronger reasoning, Chat Completions with `reasoning_effort`
 The more reliable production path is the Responses API:
 
 ```bash cURL
-curl https://crazyrouter.com/v1/responses \
+curl https://cn.crazyrouter.com/v1/responses \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-5.5",
     "input": "Which is larger, 9.11 or 9.9? Explain briefly.",
     "reasoning": {
       "effort": "high",

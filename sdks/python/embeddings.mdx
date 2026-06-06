@@ -2,13 +2,14 @@
 title: 'Python Embeddings'
 description: 'Python 调用文本嵌入 API'
 ---
+> 更新日期：2026-06-06
 
 ## 基础用法
 
 ```python
 from openai import OpenAI
 
-client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+client = OpenAI(api_key="sk-xxx", base_url="https://cn.crazyrouter.com/v1")
 
 response = client.embeddings.create(
     model="text-embedding-3-large",

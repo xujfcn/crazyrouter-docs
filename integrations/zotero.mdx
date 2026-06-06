@@ -2,6 +2,7 @@
 title: 'Zotero 配置教程'
 description: '在 Zotero 中通过支持 OpenAI 兼容接口的 AI 插件接入 Crazyrouter，并明确区分可直接接入与不可直接接入的插件类型'
 ---
+> 更新日期：2026-06-06
 
 Zotero 本身是文献管理工具，不直接内置 Crazyrouter 配置入口。实际接入方式通常是：先安装一个支持 AI 调用的 Zotero 插件，再在该插件里填写 Crazyrouter 的 OpenAI 兼容地址、API Key 和模型名。
 
@@ -15,9 +16,9 @@ Zotero 本身是文献管理工具，不直接内置 Crazyrouter 配置入口。
 Crazyrouter 在 Zotero 里的公开推荐接法是：
 
 - 选择一个支持自定义 OpenAI 兼容地址的 Zotero AI 插件
-- 把基础地址填为 `https://crazyrouter.com/v1`
+- 把基础地址填为 `https://cn.crazyrouter.com/v1`
 - 把 API Key 填为 `sk-xxx`
-- 第一个验证模型先用 `gpt-5.4`
+- 第一个验证模型先用 `gpt-5.5`
 
 <Warning>
 不是所有 Zotero AI 插件都支持自定义上游地址。如果某个插件只有“填 OpenAI API Key”的入口、没有 `Base URL` 或 `API URL` 设置，那么它通常不能直接把请求改走 Crazyrouter。这类插件不应作为公开默认教程。
@@ -52,7 +53,7 @@ Crazyrouter 在 Zotero 里的公开推荐接法是：
 
 建议首轮只放行：
 
-- `gpt-5.4`
+- `gpt-5.5`
 - `claude-sonnet-4-6`
 - `gemini-3-pro`
 
@@ -109,13 +110,13 @@ Crazyrouter 在 Zotero 里的公开推荐接法是：
 
 | 插件字段 | 推荐值 |
 |----------|--------|
-| Base API URL / API URL | `https://crazyrouter.com/v1` |
-| Full Endpoint | `https://crazyrouter.com/v1/chat/completions` |
+| Base API URL / API URL | `https://cn.crazyrouter.com/v1` |
+| Full Endpoint | `https://cn.crazyrouter.com/v1/chat/completions` |
 | API Key | `sk-xxx` |
-| Model | `gpt-5.4` |
+| Model | `gpt-5.5` |
 
 <Tip>
-如果插件让你填写的是“基础地址”，优先填 `https://crazyrouter.com/v1`。只有在插件明确要求“完整聊天接口地址”时，再填 `https://crazyrouter.com/v1/chat/completions`。
+如果插件让你填写的是“基础地址”，优先填 `https://cn.crazyrouter.com/v1`。只有在插件明确要求“完整聊天接口地址”时，再填 `https://cn.crazyrouter.com/v1/chat/completions`。
 </Tip>
 
 ## 配置步骤
@@ -124,7 +125,7 @@ Crazyrouter 在 Zotero 里的公开推荐接法是：
   <Step title="第 1 步：创建 Zotero 专用 Crazyrouter token">
     第一次建议只放行：
 
-    - `gpt-5.4`
+    - `gpt-5.5`
     - `claude-sonnet-4-6`
 
     先不要把大量模型一次性全部开放，这样更容易排障。
@@ -157,13 +158,13 @@ Crazyrouter 在 Zotero 里的公开推荐接法是：
   <Step title="第 5 步：填写 Crazyrouter 地址、Key 和模型">
     如果插件支持基础地址模式，推荐填写：
 
-    - `Base API URL`: `https://crazyrouter.com/v1`
+    - `Base API URL`: `https://cn.crazyrouter.com/v1`
     - `API Key`: `sk-xxx`
-    - `Model`: `gpt-5.4`
+    - `Model`: `gpt-5.5`
 
     如果插件只支持完整接口地址，改填：
 
-    - `Endpoint`: `https://crazyrouter.com/v1/chat/completions`
+    - `Endpoint`: `https://cn.crazyrouter.com/v1/chat/completions`
   </Step>
 
   <Step title="第 6 步：如插件要求，重启 Zotero">
@@ -190,7 +191,7 @@ Crazyrouter 在 Zotero 里的公开推荐接法是：
 建议按下面顺序推进：
 
 1. 先验证 Zotero 本体和插件都能正常打开
-2. 先验证 `gpt-5.4`
+2. 先验证 `gpt-5.5`
 3. 先做单篇摘要
 4. 再做翻译
 5. 再做多篇对比、长文分析或批量任务
@@ -199,7 +200,7 @@ Crazyrouter 在 Zotero 里的公开推荐接法是：
 
 | 场景 | 推荐模型 | 原因 |
 |------|----------|------|
-| 首轮链路验证 | `gpt-5.4` | 2026 年 3 月 23 日已在生产环境实测成功，最适合先验证插件到 Crazyrouter 的基础链路 |
+| 首轮链路验证 | `gpt-5.5` | 2026 年 3 月 23 日已在生产环境实测成功，最适合先验证插件到 Crazyrouter 的基础链路 |
 | 深度分析与解释 | `claude-sonnet-4-6` | 更适合复杂总结、方法比较、长文解释 |
 | Gemini 备用档 | `gemini-3-pro` | 适合作为第二条兼容性验证路径 |
 
@@ -236,9 +237,9 @@ Crazyrouter 在 Zotero 里的公开推荐接法是：
 - [ ] 已安装 Zotero 桌面版
 - [ ] 已安装支持自定义 OpenAI 兼容地址的 AI 插件
 - [ ] 已创建 Zotero 专用 Crazyrouter token
-- [ ] 已把基础地址填写为 `https://crazyrouter.com/v1` 或完整接口地址
+- [ ] 已把基础地址填写为 `https://cn.crazyrouter.com/v1` 或完整接口地址
 - [ ] 已正确填写 `sk-xxx`
-- [ ] 已先只配置 `gpt-5.4`
+- [ ] 已先只配置 `gpt-5.5`
 - [ ] 修改设置后已按需重启 Zotero
 - [ ] 已完成单篇摘要或单篇翻译验证
 - [ ] Crazyrouter 后台日志中能看到对应请求
@@ -249,9 +250,9 @@ Crazyrouter 在 Zotero 里的公开推荐接法是：
 |------|----------|----------|
 | 插件里只有 OpenAI Key，没有 Base URL | 插件不支持自定义上游 | 换成支持自定义 `Base API URL` 或 `Endpoint` 的插件 |
 | 401 unauthorized | token 错误、复制不完整或失效 | 重新生成 token 并重新填写 |
-| 404 | 基础地址或完整接口地址填错 | 基础地址改回 `https://crazyrouter.com/v1`，或完整地址改回 `https://crazyrouter.com/v1/chat/completions` |
+| 404 | 基础地址或完整接口地址填错 | 基础地址改回 `https://cn.crazyrouter.com/v1`，或完整地址改回 `https://cn.crazyrouter.com/v1/chat/completions` |
 | 403 / model not allowed | token 没放行当前模型 | 在 Crazyrouter token 设置中放行该模型 |
-| `model not found` | 模型名写错 | 先改回 `gpt-5.4` 做最小验证 |
+| `model not found` | 模型名写错 | 先改回 `gpt-5.5` 做最小验证 |
 | 插件没反应或设置改了不生效 | 插件需要重启 Zotero | 重启 Zotero 后重试 |
 | 摘要失败但接口没报错 | 当前条目没有摘要、PDF 没附件或插件没拿到上下文 | 先换成带摘要或带 PDF 的条目测试 |
 | 长文处理很慢 | PDF 太长或任务过重 | 先缩小到单段、单页或单篇摘要 |
@@ -272,16 +273,16 @@ Crazyrouter 在 Zotero 里的公开推荐接法是：
 
 ### 基础地址应该填什么？
 
-优先填 `https://crazyrouter.com/v1`。
+优先填 `https://cn.crazyrouter.com/v1`。
 
 ### 第一个模型填什么？
 
-先填 `gpt-5.4`。
+先填 `gpt-5.5`。
 
 ### 什么时候再做多篇分析或复杂综述？
 
 等单篇摘要和单篇翻译已经稳定后，再逐步升级任务复杂度。
 
 <Note>
-如果你的目标是“先让 Zotero 跑通 Crazyrouter”，最关键的不是一开始就追求最强插件，而是先确认你选的插件真的支持自定义 OpenAI 兼容地址，然后用 `gpt-5.4` 跑通单篇摘要。
+如果你的目标是“先让 Zotero 跑通 Crazyrouter”，最关键的不是一开始就追求最强插件，而是先确认你选的插件真的支持自定义 OpenAI 兼容地址，然后用 `gpt-5.5` 跑通单篇摘要。
 </Note>

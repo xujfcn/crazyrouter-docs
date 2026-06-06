@@ -2,10 +2,15 @@
 title: '发出请求'
 description: '了解如何正确发出 API 请求'
 ---
+> 更新日期：2026-06-06
 
 ## 请求格式
 
 所有 API 请求使用 HTTPS 协议，请求体使用 JSON 格式。
+
+<Note>
+默认优先使用 `https://cn.crazyrouter.com/v1`。如果你在某个工具里不确定该填根域名还是 `/v1`，先参考 [API Endpoint 说明](https://docs.crazyrouter.com/en/api-endpoint)。
+</Note>
 
 ### 必需的请求头
 
@@ -23,11 +28,11 @@ description: '了解如何正确发出 API 请求'
 ## 请求示例
 
 ```bash
-curl https://crazyrouter.com/v1/chat/completions \
+curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer sk-xxxxxxxx" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-5.5",
     "messages": [{"role": "user", "content": "Hello"}],
     "stream": false
   }'
@@ -38,11 +43,11 @@ curl https://crazyrouter.com/v1/chat/completions \
 设置 `stream: true` 启用 SSE 流式输出：
 
 ```bash
-curl https://crazyrouter.com/v1/chat/completions \
+curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer sk-xxxxxxxx" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-5.5",
     "messages": [{"role": "user", "content": "Hello"}],
     "stream": true
   }'

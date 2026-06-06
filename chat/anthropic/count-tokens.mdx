@@ -2,6 +2,7 @@
 title: "Claude Token 计数"
 description: "POST /v1/messages/count_tokens 预估 Claude Messages 请求的输入 Token 数量"
 ---
+> 更新日期：2026-06-06
 
 # Claude Token 计数
 
@@ -36,7 +37,7 @@ anthropic-version: 2023-06-01
 <CodeGroup>
 
 ```bash cURL
-curl https://crazyrouter.com/v1/messages/count_tokens   -H "Content-Type: application/json"   -H "x-api-key: YOUR_API_KEY"   -H "anthropic-version: 2023-06-01"   -d '{
+curl https://cn.crazyrouter.com/v1/messages/count_tokens   -H "Content-Type: application/json"   -H "x-api-key: YOUR_API_KEY"   -H "anthropic-version: 2023-06-01"   -d '{
     "model": "claude-sonnet-4-6",
     "messages": [
       {"role": "user", "content": "hello"}
@@ -48,7 +49,7 @@ curl https://crazyrouter.com/v1/messages/count_tokens   -H "Content-Type: applic
 import requests
 
 resp = requests.post(
-    "https://crazyrouter.com/v1/messages/count_tokens",
+    "https://cn.crazyrouter.com/v1/messages/count_tokens",
     headers={
         "x-api-key": "YOUR_API_KEY",
         "anthropic-version": "2023-06-01",

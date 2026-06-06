@@ -3,6 +3,7 @@ title: 'Create Embeddings'
 description: 'Convert text into vector representations'
 api: 'POST /v1/embeddings'
 ---
+> Last updated: 2026-06-06
 
 ## Overview
 
@@ -63,7 +64,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="sk-xxx",
-    base_url="https://crazyrouter.com/v1"
+    base_url="https://cn.crazyrouter.com/v1"
 )
 
 response = client.embeddings.create(
@@ -91,7 +92,7 @@ for item in response.data:
 ```
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/v1/embeddings \
+curl -X POST https://cn.crazyrouter.com/v1/embeddings \
   -H "Authorization: Bearer sk-xxx" \
   -H "Content-Type: application/json" \
   -d '{

@@ -2,6 +2,7 @@
 title: "Responses API Overview"
 description: "Production-revalidated guidance for choosing between Responses API and Chat Completions on Crazyrouter"
 ---
+> Last updated: 2026-06-06
 
 # Responses API Overview
 
@@ -39,11 +40,11 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="YOUR_API_KEY",
-    base_url="https://crazyrouter.com/v1"
+    base_url="https://cn.crazyrouter.com/v1"
 )
 
 response = client.responses.create(
-    model="gpt-5.4",
+    model="gpt-5.5",
     input="Explain what a REST API is in one sentence."
 )
 
@@ -67,7 +68,7 @@ In the current production recheck, this kind of minimal request returned:
 
 ## When to prefer Responses
 
-- You need `gpt-5.4` reasoning summaries
+- You need `gpt-5.5` reasoning summaries
 - You need to verify whether the model actually triggered `web_search_call`
 - You want richer SSE events
 

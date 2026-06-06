@@ -1,0 +1,272 @@
+---
+title: "Seedance 2.0 计费说明"
+description: "基于本地代码说明 Seedance 2.0 / 2.0 Fast 的真实结算方式、quota 公式，以及 token 与秒数的关系"
+---
+> 更新日期：2026-06-06
+
+# Seedance 2.0 计费说明
+
+本文只说明 **Crazyrouter 当前代码里的真实结算逻辑**，不是泛泛解释官方价格页。
+
+适用模型：
+
+- `doubao-seedance-2-0`
+- `doubao-seedance-2-0-fast`
+
+接入地址请统一使用 `https://cn.crazyrouter.com`，基础设置参考 [API Endpoint](https://docs.crazyrouter.com/en/api-endpoint)。
+
+## 先说结论
+
+1. `Seedance 2.0` 和 `Seedance 2.0 Fast` 在本地代码里都按 `per_output_token` 结算，不是按秒结算。
+2. 提交任务时，这两类任务的**预扣费默认是 0**。
+3. 任务成功后，系统会根据上游返回的 `TotalTokens` 或 `CompletionTokens` 再做最终扣费。
+4. `duration` 会被记录为任务特征，但**不会参与 Seedance 2.0 的最终扣费公式**。
+5. 因此，代码里**不存在一条固定的“多少 token = 多少秒”全局换算公式**。
+
+## 本地代码里的计费规则
+
+### 1. 命中哪条计费规则
+
+Seedance 2.0 系列的计费规则由“是否包含视频输入”决定：
+
+| 模型 | 条件 | Billing Key | 单价 |
+|------|------|------|------|
+| `doubao-seedance-2-0` | 不含视频输入 | `doubao-seedance-2-0:video0` | `46 / 7 USD / 100万Tokens` |
+| `doubao-seedance-2-0` | 含视频输入 | `doubao-seedance-2-0:video1` | `28 / 7 USD / 100万Tokens` |
+| `doubao-seedance-2-0-fast` | 不含视频输入 | `doubao-seedance-2-0-fast:video0` | `37 / 7 USD / 100万Tokens` |
+| `doubao-seedance-2-0-fast` | 含视频输入 | `doubao-seedance-2-0-fast:video1` | `22 / 7 USD / 100万Tokens` |
+
+这里的 `video0` / `video1` 不是秒数，而是：
+
+- `video0`: 请求里没有视频参考输入
+- `video1`: 请求里带了视频参考输入
+
+对应代码：
+
+- `model/video_billing_seedance.go`
+- `relay/video_billing_runtime.go`
+
+### 2. 提交任务时为什么通常不扣费
+
+在运行时，Seedance 2.0 命中的平台计费模式是 `per_output_token`。这类任务在提交时：
+
+- `BasePrice` 会被记录
+- `Ratio` 会被置为 `0`
+- 所以提交阶段 `quota = int(ratio * QuotaPerUnit)` 结果就是 `0`
+
+对应代码：
+
+- `relay/video_billing_runtime.go`
+- `relay/relay_task.go`
+
+这就是为什么 Seedance 2.0 常见表现是：
+
+- 任务提交成功
+- 先不扣，或预扣为 0
+- 任务完成后再按真实 token 补扣
+
+## 最终扣费公式
+
+任务成功后，系统优先走 `settlePerOutputTokenTaskBilling`。
+
+对 Seedance 系列，代码取 token 的优先级是：
+
+1. `taskResult.TotalTokens`
+2. 如果上面没有，再取 `taskResult.CompletionTokens`
+
+对应代码：
+
+- `controller/task_video.go`
+
+最终价格公式：
+
+```text
+actualPriceUSD =
+  unitPriceUSDPer1MTokens
+  * (billedTokens / 1_000_000)
+  * quantityMultiplier
+  * groupRatio
+  * discount
+```
+
+最终 quota 公式：
+
+```text
+actualQuota = int(actualPriceUSD * QuotaPerUnit)
+```
+
+当前代码中的：
+
+```text
+QuotaPerUnit = 500000
+```
+
+对应代码：
+
+- `controller/task_video.go`
+- `common/constants.go`
+
+## 秒数在代码里扮演什么角色
+
+### 1. `duration` 会被识别和记录
+
+代码会从这些位置解析秒数：
+
+- `req.Duration`
+- `req.Seconds`
+- `metadata.durationSeconds`
+- `metadata.duration_seconds`
+- `metadata.duration`
+- `metadata.seconds`
+
+对应代码：
+
+- `relay/video_billing_runtime.go`
+
+### 2. 但 Seedance 2.0 不按秒结算
+
+虽然 `duration` 会进入任务画像和日志，但 Seedance 2.0 / 2.0 Fast 命中的模式是 `per_output_token`，因此：
+
+- `match.BilledSeconds` 不会参与结算
+- 最终扣费只看上游回传的 token
+
+这和 Veo、Wan 那类 `per_second` 视频模型不同。
+
+## token 和秒数怎么对照
+
+### 结算口径
+
+**不能直接换。**
+
+也就是说，在当前代码里没有这样的规则：
+
+```text
+1 秒 = 固定 N tokens
+```
+
+原因很简单：
+
+- Seedance 2.0 的卖价配置不是 `per_second`
+- 代码也没有把 `duration` 映射成固定 token 档位
+- 最终只认任务完成后的真实 token 用量
+
+### 观测口径
+
+如果你只是想做“这次任务平均每秒消耗多少 token”的复盘，可以在任务完成后做一个**观测值**：
+
+```text
+平均每秒 tokens = billedTokens / requestedDurationSeconds
+```
+
+反过来：
+
+```text
+估算秒数 = billedTokens / 平均每秒 tokens
+```
+
+但这只是事后分析，不是结算公式。
+
+## 两个可直接套用的例子
+
+### 示例 1：`doubao-seedance-2-0-fast`，带视频输入
+
+假设：
+
+- 命中 `doubao-seedance-2-0-fast:video1`
+- 上游返回 `TotalTokens = 1,200,000`
+- `quantityMultiplier = 1`
+- `groupRatio = 1`
+- `discount = 1`
+
+则：
+
+```text
+unitPrice = 22 / 7 = 3.142857 USD / 100万Tokens
+actualPrice = 3.142857 * 1.2 = 3.771428 USD
+actualQuota = int(3.771428 * 500000) = 1885714
+```
+
+如果这次请求的 `duration = 12`，你只能得到一个观测值：
+
+```text
+平均每秒 tokens = 1,200,000 / 12 = 100,000
+```
+
+这个 `100,000 tokens/s` 只对这次任务成立。
+
+### 示例 2：`doubao-seedance-2-0`，不带视频输入
+
+假设：
+
+- 命中 `doubao-seedance-2-0:video0`
+- 上游返回 `CompletionTokens = 800,000`
+- `quantityMultiplier = 1`
+- `groupRatio = 1`
+- `discount = 1`
+
+则：
+
+```text
+unitPrice = 46 / 7 = 6.571428 USD / 100万Tokens
+actualPrice = 6.571428 * 0.8 = 5.257142 USD
+actualQuota = int(5.257142 * 500000) = 2628571
+```
+
+如果请求时填了 `duration = 8`，只能做观测：
+
+```text
+平均每秒 tokens = 800,000 / 8 = 100,000
+```
+
+仍然不能推出“8 秒任务永远就是 80 万 token”。
+
+## 哪些字段值得看
+
+如果你要排查一笔 Seedance 2.0 费用，优先看这些信息：
+
+- 请求是否含视频输入
+- 命中的 `billing_key`
+- 任务完成后上游返回的 `TotalTokens` / `CompletionTokens`
+- 该任务的 `groupRatio`
+- 该模型折扣 `discount`
+- 最终 `task.Quota`
+
+代码里日志和快照也会记录：
+
+- `billing_mode`
+- `billing_key`
+- `billing_total_price`
+- `billing_output_tokens`
+- `billing_billed_tokens`
+- `billing_token_kind`
+- `billing_settled`
+
+对应代码：
+
+- `relay/relay_task.go`
+- `model/task.go`
+- `controller/task_video.go`
+
+## 一句话理解
+
+对 Seedance 2.0 而言：
+
+- `秒数` 是请求特征
+- `token` 是结算依据
+- `quota` 是 `token` 结算后再换算出来的站内额度
+
+所以正确顺序是：
+
+```text
+请求 duration -> 生成完成 -> 上游返回 tokens -> 按 token 算 USD -> 按 USD 算 quota
+```
+
+而不是：
+
+```text
+duration -> 直接扣 quota
+```
+
+<Note>
+  如果后续平台专门给 Seedance 2.0 增加按秒售卖 SKU，那时才会出现稳定的“秒数到价格”映射。但截至 2026-06-06，本地代码还没有这样做。
+</Note>

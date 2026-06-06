@@ -2,6 +2,7 @@
 title: 'クイックスタート'
 description: '5 分で最初の API リクエストを実行する'
 ---
+> 更新日: 2026-06-06
 
 ## Step 1: API キーを取得する
 
@@ -14,11 +15,11 @@ description: '5 分で最初の API リクエストを実行する'
 <CodeGroup>
 
 ```bash cURL
-curl https://crazyrouter.com/v1/chat/completions \
+curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-5.5",
     "messages": [
       {"role": "user", "content": "Hello"}
     ]
@@ -30,11 +31,11 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="YOUR_API_KEY",
-    base_url="https://crazyrouter.com/v1"
+    base_url="https://cn.crazyrouter.com/v1"
 )
 
 response = client.chat.completions.create(
-    model="gpt-5.4",
+    model="gpt-5.5",
     messages=[{"role": "user", "content": "Hello"}]
 )
 print(response.choices[0].message.content)
@@ -45,11 +46,11 @@ import OpenAI from 'openai';
 
 const client = new OpenAI({
   apiKey: 'YOUR_API_KEY',
-  baseURL: 'https://crazyrouter.com/v1'
+  baseURL: 'https://cn.crazyrouter.com/v1'
 });
 
 const response = await client.chat.completions.create({
-  model: 'gpt-5.4',
+  model: 'gpt-5.5',
   messages: [{ role: 'user', content: 'Hello' }]
 });
 console.log(response.choices[0].message.content);
@@ -83,7 +84,7 @@ console.log(response.choices[0].message.content);
 ```
 
 <Note>
-  このクイックスタートの `gpt-5.4` 例は、Crazyrouter 本番環境で 2026-03-23 に検証済みです。
+  このクイックスタートの `gpt-5.5` 例は、Crazyrouter 本番環境で 2026-03-23 に検証済みです。
 </Note>
 
 <Note>

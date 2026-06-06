@@ -2,6 +2,7 @@
 title: "List Models"
 description: "Production-revalidated GET /v1/models usage for listing models available to the current token"
 ---
+> Last updated: 2026-06-06
 
 # List Models
 
@@ -24,7 +25,7 @@ Authorization: Bearer YOUR_API_KEY
 <CodeGroup>
 
 ```bash cURL
-curl https://crazyrouter.com/v1/models \
+curl https://cn.crazyrouter.com/v1/models \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
@@ -33,7 +34,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="YOUR_API_KEY",
-    base_url="https://crazyrouter.com/v1"
+    base_url="https://cn.crazyrouter.com/v1"
 )
 
 models = client.models.list()
@@ -47,7 +48,7 @@ import OpenAI from "openai";
 
 const client = new OpenAI({
   apiKey: "YOUR_API_KEY",
-  baseURL: "https://crazyrouter.com/v1",
+  baseURL: "https://cn.crazyrouter.com/v1",
 });
 
 const models = await client.models.list();
@@ -70,7 +71,7 @@ In the `2026-04-14` production recheck:
 - the top-level `object` was `list`
 - the current model count was `605`
 - the following models were confirmed present:
-  - `gpt-5.4`
+  - `gpt-5.5`
   - `claude-sonnet-4-6`
   - `claude-opus-4-7`
   - `gemini-3-pro`
@@ -89,7 +90,7 @@ In the `2026-04-14` production recheck:
   "object": "list",
   "data": [
     {
-      "id": "gpt-5.4",
+      "id": "gpt-5.5",
       "object": "model",
       "created": 1700000000,
       "owned_by": "openai"

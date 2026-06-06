@@ -2,6 +2,7 @@
 title: "Reasoning"
 description: "Production-verified reasoning and thinking with the latest GPT, Claude, and Gemini models"
 ---
+> 更新日: 2026-06-06
 
 # Reasoning
 
@@ -13,7 +14,7 @@ Verification date:
 
 Verified models:
 
-- `gpt-5.4`
+- `gpt-5.5`
 - `claude-opus-4-7`
 - `gemini-3-pro`
 
@@ -21,18 +22,18 @@ Verified models:
 
 | Model | Protocol | Endpoint | Success marker |
 |------|------|------|----------|
-| `gpt-5.4` | OpenAI Responses | `POST /v1/responses` | `output` includes a `reasoning` item |
+| `gpt-5.5` | OpenAI Responses | `POST /v1/responses` | `output` includes a `reasoning` item |
 | `claude-opus-4-7` | Anthropic Messages | `POST /v1/messages` | Returns `thinking` block |
 | `gemini-3-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | `usageMetadata` includes `thoughtsTokenCount` |
 
 ## GPT-5.4
 
 ```bash
-curl https://crazyrouter.com/v1/responses \
+curl https://cn.crazyrouter.com/v1/responses \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-5.5",
     "input": "Which is larger, 9.11 or 9.9? Explain briefly.",
     "reasoning": {
       "effort": "high",
@@ -64,7 +65,7 @@ Verified `reasoning` item shape:
 ## Claude Opus 4.7 Thinking
 
 ```bash
-curl https://crazyrouter.com/v1/messages \
+curl https://cn.crazyrouter.com/v1/messages \
   -H "Content-Type: application/json" \
   -H "x-api-key: YOUR_API_KEY" \
   -H "anthropic-version: 2023-06-01" \
@@ -102,7 +103,7 @@ Verified response shape:
 ## Gemini 3 Pro
 
 ```bash
-curl "https://crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://cn.crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -130,7 +131,7 @@ Verified production field:
 
 ## Current exclusions
 
-- In the current recheck, `gpt-5.4` via Chat Completions did not reliably surface `reasoning_content`, so this page uses the Responses API as the primary GPT example
+- In the current recheck, `gpt-5.5` via Chat Completions did not reliably surface `reasoning_content`, so this page uses the Responses API as the primary GPT example
 - Base `claude-opus-4-6` did not return a thinking block in this verification round
 
 ## See Also

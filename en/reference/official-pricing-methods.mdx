@@ -2,6 +2,7 @@
 title: 'Official Model Pricing Methods'
 description: 'Explain how each Crazyrouter model name maps to upstream official pricing rules'
 ---
+> Last updated: 2026-06-06
 
 # Official Model Pricing Methods
 
@@ -42,7 +43,7 @@ The examples below intentionally use the most common pricing tier that is easies
 
 | Crazyrouter Name | Official Model | Input | Cached input | Output | Notes |
 | --- | --- | --- | --- | --- | --- |
-| `gpt-54` | `gpt-5.4` | `$2.50` | `$0.25` | `$15.00` | Standard price applies below `270K` context; long-context multipliers apply above that |
+| `gpt-54` | `gpt-5.5` | `$2.50` | `$0.25` | `$15.00` | Standard price applies below `270K` context; long-context multipliers apply above that |
 | `gpt-4o` | `gpt-4o` | `$2.50` | `$1.25` | `$10.00` | Classic three-part token pricing |
 | `gpt-5` | `gpt-5` | `$1.25` | `$0.125` | `$10.00` | Tool charges are separate |
 | `gpt-51-codex-max` | `gpt-5.1-codex-max` | `$1.25` | `$0.125` | `$10.00` | Commonly used in Codex and agentic coding workflows, but still billed with the standard three-part structure |
@@ -134,7 +135,7 @@ Common extra rules:
 
 | Crazyrouter Name | Official Mapping | Official Billing Method | Notes |
 | --- | --- | --- | --- |
-| `gpt-54` | internal alias, usually meaning OpenAI `gpt-5.4` | billed as `input / cached input / output` | the public standard price applies below `270K` context; regional processing endpoints add another surcharge |
+| `gpt-54` | internal alias, usually meaning OpenAI `gpt-5.5` | billed as `input / cached input / output` | the public standard price applies below `270K` context; regional processing endpoints add another surcharge |
 | `gpt-4o` | OpenAI `gpt-4o` | billed as `input / cached input / output` | classic unified OpenAI pricing structure |
 | `gpt-5` | OpenAI `gpt-5` | billed as `input / cached input / output` | tool usage is billed separately; there is no separate public "thinking token price" line item |
 | `gpt-51-codex-max` | should map to OpenAI `gpt-5.1-codex-max` | billed as `input / cached input / output` | Codex-oriented naming, but the public price structure still matches the regular GPT-5.1 token format |

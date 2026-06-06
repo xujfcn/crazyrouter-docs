@@ -3,6 +3,7 @@ title: 'Hermes Agent 配置'
 description: '在 Hermes Agent 中配置 Crazyrouter，使用 OpenAI 兼容地址访问 627+ AI 模型'
 icon: 'robot'
 ---
+> 更新日期：2026-06-06
 
 通过 [crazyrouter-hermes](https://github.com/xujfcn/crazyrouter-hermes) 可以把 [Hermes Agent](https://github.com/NousResearch/Hermes-Agent) 的模型后端切到 Crazyrouter。配置完成后，Hermes 会使用 Crazyrouter OpenAI 兼容 `base_url`，并通过一个 Crazyrouter API Key 调用 Claude、GPT、DeepSeek、Gemini、Qwen 等 627+ 模型。
 
@@ -22,7 +23,7 @@ icon: 'robot'
 | 模型权限 | 在 token 里放行你准备在 Hermes 中使用的模型 |
 
 <Tip>
-Hermes 使用 OpenAI 兼容配置接入 Crazyrouter。默认全球线路的 `base_url` 为 `https://crazyrouter.com/v1`；中国地区可使用优化线路 `https://cn.crazyrouter.com/v1`。中国地区优化线路仅用于 API 请求，账号登录、充值和控制台仍使用 `https://crazyrouter.com`。
+Hermes 使用 OpenAI 兼容配置接入 Crazyrouter，默认接入地址直接使用 `https://cn.crazyrouter.com/v1`。如果你不确定某个客户端到底该填根域名还是 `/v1`，先参考 [API Endpoint 说明](https://docs.crazyrouter.com/en/api-endpoint)。账号登录、充值和控制台仍使用 `https://crazyrouter.com`。
 </Tip>
 
 ## 一键配置
@@ -62,10 +63,10 @@ Hermes 使用 OpenAI 兼容配置接入 Crazyrouter。默认全球线路的 `bas
 
 ```bash
 OPENAI_API_KEY=sk-your-crazyrouter-key
-OPENAI_BASE_URL=https://crazyrouter.com/v1
+OPENAI_BASE_URL=https://cn.crazyrouter.com/v1
 ```
 
-中国地区可以把 `OPENAI_BASE_URL` 改为优化线路。该地址仅用于 API 请求，账号登录、充值和控制台仍使用 `https://crazyrouter.com`：
+默认保持这个中国接入地址即可。该地址仅用于 API 请求，账号登录、充值和控制台仍使用 `https://crazyrouter.com`：
 
 ```bash
 OPENAI_BASE_URL=https://cn.crazyrouter.com/v1
@@ -78,16 +79,16 @@ OPENAI_BASE_URL=https://cn.crazyrouter.com/v1
 ```yaml
 model:
   provider: "custom"
-  default: "claude-opus-4-7"
-  base_url: "https://crazyrouter.com/v1"
+  default: "claude-opus-4-8"
+  base_url: "https://cn.crazyrouter.com/v1"
 ```
 
-中国地区也可以使用优化线路：
+默认也建议保持中国接入地址：
 
 ```yaml
 model:
   provider: "custom"
-  default: "claude-opus-4-7"
+  default: "claude-opus-4-8"
   base_url: "https://cn.crazyrouter.com/v1"
 ```
 
@@ -98,8 +99,8 @@ model:
 配置完成后，可以在 Hermes 内随时用 `/model` 切换模型：
 
 ```text
-/model claude-opus-4-7
-/model gpt-5.4
+/model claude-opus-4-8
+/model gpt-5.5
 /model claude-sonnet-4.6
 /model gemini-3-pro
 /model deepseek-chat
@@ -112,11 +113,11 @@ model:
 ## 验证清单
 
 - [ ] `~/.hermes/.env` 中的 `OPENAI_API_KEY` 是有效的 Crazyrouter token
-- [ ] `OPENAI_BASE_URL` 是 `https://crazyrouter.com/v1` 或中国地区优化线路 `https://cn.crazyrouter.com/v1`
+- [ ] `OPENAI_BASE_URL` 是 `https://cn.crazyrouter.com/v1`
 - [ ] `~/.hermes/config.yaml` 中 `provider` 为 `custom`
 - [ ] 默认模型已在 Crazyrouter token 中放行
 - [ ] Hermes 中发送测试消息可以正常返回
-- [ ] `/model gpt-5.4` 或其他已放行模型可以切换成功
+- [ ] `/model gpt-5.5` 或其他已放行模型可以切换成功
 
 ## 常见问题
 

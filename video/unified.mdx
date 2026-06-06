@@ -2,6 +2,7 @@
 title: "统一视频 API"
 description: "Crazyrouter 统一视频生成接口，支持多种模型通过统一格式调用"
 ---
+> 更新日期：2026-06-06
 
 # 统一视频 API
 
@@ -45,7 +46,7 @@ POST /v1/video/create
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/v1/video/create \
+curl -X POST https://cn.crazyrouter.com/v1/video/create \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -59,7 +60,7 @@ curl -X POST https://crazyrouter.com/v1/video/create \
 import requests
 
 response = requests.post(
-    "https://crazyrouter.com/v1/video/create",
+    "https://cn.crazyrouter.com/v1/video/create",
     headers={
         "Content-Type": "application/json",
         "Authorization": "Bearer YOUR_API_KEY"
@@ -95,7 +96,7 @@ print(f"任务 ID: {task_id}")
 在 `images` 参数中传入参考图片：
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/v1/video/create \
+curl -X POST https://cn.crazyrouter.com/v1/video/create \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -117,7 +118,7 @@ GET /v1/video/query?id={task_id}
 ### 请求示例
 
 ```bash cURL
-curl "https://crazyrouter.com/v1/video/query?id=video_task_abc123" \
+curl "https://cn.crazyrouter.com/v1/video/query?id=video_task_abc123" \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 

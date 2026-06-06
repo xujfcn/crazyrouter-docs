@@ -2,6 +2,7 @@
 title: "Nano Banana Pro"
 description: "Use nano-banana-pro for reference-image generation and editing through the OpenAI Images API"
 ---
+> Дата обновления: 2026-06-06
 
 # Nano Banana Pro
 
@@ -99,7 +100,7 @@ Do not present the following as fully promised customer-facing capability yet:
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/v1/images/generations \
+curl -X POST https://cn.crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -118,7 +119,7 @@ curl -X POST https://crazyrouter.com/v1/images/generations \
 import requests
 
 response = requests.post(
-    "https://crazyrouter.com/v1/images/generations",
+    "https://cn.crazyrouter.com/v1/images/generations",
     headers={
         "Content-Type": "application/json",
         "Authorization": "Bearer YOUR_API_KEY"

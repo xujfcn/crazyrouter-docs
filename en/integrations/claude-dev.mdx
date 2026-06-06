@@ -2,13 +2,14 @@
 title: 'Claude Dev Setup Guide'
 description: 'Configure Crazyrouter API in the Claude Dev VS Code extension with the latest verified Claude models'
 ---
+> Last updated: 2026-06-06
 
 ## Overview
 
 Claude Dev is a VS Code AI coding extension suited for Claude-style code explanation, refactoring suggestions, and multi-turn collaboration through Crazyrouter. For public docs, prefer the OpenAI Compatible route first because it is more consistent with the rest of the Crazyrouter integration stack and easier to troubleshoot.
 
 <Warning>
-The `https://crazyrouter.com/v1` URL on this page applies only to Claude Dev's `OpenAI Compatible` provider. Do not copy it into Claude Code's `ANTHROPIC_BASE_URL`; Claude Code should use the root domain `https://crazyrouter.com` or `https://cn.crazyrouter.com`.
+The `https://cn.crazyrouter.com/v1` URL on this page applies only to Claude Dev's `OpenAI Compatible` provider. Do not copy it into Claude Code's `ANTHROPIC_BASE_URL`; Claude Code should use the root domain `https://crazyrouter.com` or `https://cn.crazyrouter.com`.
 </Warning>
 
 ## Recommended Configuration
@@ -24,7 +25,7 @@ The `https://crazyrouter.com/v1` URL on this page applies only to Claude Dev's `
     Prefer `OpenAI Compatible` as the API provider.
   </Step>
   <Step title="Enter Configuration">
-    - **Base URL**: `https://crazyrouter.com/v1`
+    - **Base URL**: `https://cn.crazyrouter.com/v1`
     - **API Key**: `sk-xxx`
     - **Model**: `claude-sonnet-4-6`
   </Step>

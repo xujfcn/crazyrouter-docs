@@ -2,6 +2,7 @@
 title: "Gemini-Compatible OpenAI Model List"
 description: "Production-revalidated GET /v1beta/openai/models usage for retrieving an OpenAI-style model list"
 ---
+> 更新日: 2026-06-06
 
 # Gemini-Compatible OpenAI Model List
 
@@ -45,11 +46,11 @@ GET /v1beta/openai/models?key=YOUR_API_KEY
 <CodeGroup>
 
 ```bash cURL
-curl "https://crazyrouter.com/v1beta/openai/models?key=YOUR_API_KEY"
+curl "https://cn.crazyrouter.com/v1beta/openai/models?key=YOUR_API_KEY"
 ```
 
 ```bash cURL with Header
-curl https://crazyrouter.com/v1beta/openai/models \
+curl https://cn.crazyrouter.com/v1beta/openai/models \
   -H "x-goog-api-key: YOUR_API_KEY"
 ```
 
@@ -83,7 +84,7 @@ In the `2026-03-23` production recheck:
   "success": true,
   "data": [
     {
-      "id": "gpt-5.4",
+      "id": "gpt-5.5",
       "object": "model",
       "created": 1700000000,
       "owned_by": "openai",

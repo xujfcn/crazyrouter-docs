@@ -2,6 +2,7 @@
 title: 'Python Function Calling'
 description: 'Complete Python Function Calling example'
 ---
+> 更新日: 2026-06-06
 
 ## Overview
 
@@ -13,7 +14,7 @@ Function Calling allows models to call functions you define, enabling interactio
 import json
 from openai import OpenAI
 
-client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+client = OpenAI(api_key="sk-xxx", base_url="https://cn.crazyrouter.com/v1")
 
 # 1. Define tools
 tools = [
@@ -67,7 +68,7 @@ def search_products(query, max_price=None):
 messages = [{"role": "user", "content": "What's the weather like in New York today? Also search for umbrellas"}]
 
 response = client.chat.completions.create(
-    model="gpt-5.4",
+    model="gpt-5.5",
     messages=messages,
     tools=tools,
     tool_choice="auto"
@@ -96,7 +97,7 @@ if message.tool_calls:
 
     # 5. Get final response
     final = client.chat.completions.create(
-        model="gpt-5.4",
+        model="gpt-5.5",
         messages=messages,
         tools=tools
     )
@@ -107,7 +108,7 @@ if message.tool_calls:
 
 ```python
 response = client.chat.completions.create(
-    model="gpt-5.4",
+    model="gpt-5.5",
     messages=messages,
     tools=tools,
     tool_choice={"type": "function", "function": {"name": "get_weather"}}
@@ -117,8 +118,8 @@ response = client.chat.completions.create(
 ## Supported Models
 
 For the OpenAI-compatible Function Calling examples in this page, use the following verified baseline first:
-- `gpt-5.4`
+- `gpt-5.5`
 
 <Note>
-  Tool calling with `gpt-5.4` was verified in Crazyrouter production on March 23, 2026. For other vendors, check their dedicated pages first because request formats and support details can differ.
+  Tool calling with `gpt-5.5` was verified in Crazyrouter production on March 23, 2026. For other vendors, check their dedicated pages first because request formats and support details can differ.
 </Note>

@@ -2,6 +2,7 @@
 title: 'Immersive Translate Setup Guide'
 description: 'Connect Crazyrouter to the Immersive Translate browser extension through the OpenAI service path, with custom API URL, model, rate, validation, and troubleshooting guidance'
 ---
+> Last updated: 2026-06-06
 
 Immersive Translate is a strong browser extension for webpage translation, bilingual reading, text-selection translation, and document translation. For Crazyrouter, the most reliable route is the extension's officially supported `OpenAI` service path, using the `More Settings` section to enter a custom API address.
 
@@ -12,8 +13,8 @@ With Immersive Translate's OpenAI service setup, you can send requests to Crazyr
 - recommended protocol: `OpenAI-compatible API`
 - service type: `OpenAI`
 - API key: your `sk-...`
-- custom API URL: `https://crazyrouter.com/v1/chat/completions`
-- recommended first validation model: `gpt-5.4`
+- custom API URL: `https://cn.crazyrouter.com/v1/chat/completions`
+- recommended first validation model: `gpt-5.5`
 
 <Tip>
 The most important difference between Immersive Translate and ChatBox is this: here you should usually start with the full endpoint path, not just the root domain.
@@ -24,7 +25,7 @@ The most important difference between Immersive Translate and ChatBox is this: h
 According to Immersive Translate's official OpenAI service docs, the extension supports customizing the OpenAI API address in `More Settings`. For Crazyrouter, the safer first-pass value is therefore:
 
 ```text
-https://crazyrouter.com/v1/chat/completions
+https://cn.crazyrouter.com/v1/chat/completions
 ```
 
 <Warning>
@@ -50,7 +51,7 @@ Do not start by entering only the root domain such as `https://crazyrouter.com`,
 
 Suggested starter allowlist:
 
-- `gpt-5.4`
+- `gpt-5.5`
 - `claude-sonnet-4-6`
 
 ## Install And Setup Path
@@ -83,7 +84,7 @@ Suggested starter allowlist:
   <Step title="Step 2: Create a dedicated Crazyrouter token">
     For the first pass, allow only:
 
-    - `gpt-5.4`
+    - `gpt-5.5`
     - `claude-sonnet-4-6`
 
     Do not start by allowing a wide model set in a translation scenario.
@@ -101,8 +102,8 @@ Suggested starter allowlist:
     Fill in:
 
     - `API Key`: your `sk-...`
-    - `Custom API URL`: `https://crazyrouter.com/v1/chat/completions`
-    - `Model`: start with `gpt-5.4`
+    - `Custom API URL`: `https://cn.crazyrouter.com/v1/chat/completions`
+    - `Model`: start with `gpt-5.5`
 
     If some fields are hidden by default, expand `More Settings` first.
   </Step>
@@ -132,7 +133,7 @@ Suggested starter allowlist:
 
 | Use case | Recommended model | Why |
 |----------|-------------------|-----|
-| first-pass minimal validation | `gpt-5.4` | verified successfully in production on March 23, 2026, and best for proving the OpenAI-compatible route works |
+| first-pass minimal validation | `gpt-5.5` | verified successfully in production on March 23, 2026, and best for proving the OpenAI-compatible route works |
 | higher-quality translation | `claude-sonnet-4-6` | better for long-form explanation, refinement, and more quality-sensitive content |
 | Gemini fallback path | `gemini-3-pro` | useful as a second compatibility-validation path after the baseline is already stable |
 
@@ -151,8 +152,8 @@ Suggested starter allowlist:
 - [ ] the extension is installed correctly
 - [ ] `OpenAI` is selected as the translation service
 - [ ] `API Key` is entered correctly
-- [ ] `Custom API URL` is `https://crazyrouter.com/v1/chat/completions`
-- [ ] the first model is `gpt-5.4` or another allowed model
+- [ ] `Custom API URL` is `https://cn.crazyrouter.com/v1/chat/completions`
+- [ ] the first model is `gpt-5.5` or another allowed model
 - [ ] a short selected paragraph translates successfully
 - [ ] a short webpage translates successfully
 - [ ] Crazyrouter logs show the matching request
@@ -161,16 +162,16 @@ Suggested starter allowlist:
 
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
-| `404` | the API URL is missing `/chat/completions`, or only the root domain was entered | switch to the full `https://crazyrouter.com/v1/chat/completions` URL |
+| `404` | the API URL is missing `/chat/completions`, or only the root domain was entered | switch to the full `https://cn.crazyrouter.com/v1/chat/completions` URL |
 | `401 unauthorized` | wrong, expired, or incomplete API key | generate a new token and paste it again |
 | `403` or `model not allowed` | the token does not allow the selected model | allow that model in Crazyrouter token settings |
 | `429` or unstable behavior | the request rate is too high | lower the request rate and validate on smaller text first |
 | long pages fail more often | concurrency or rate is too high | reduce scope first, then increase gradually |
-| cost rises too fast | you started with full-page or full-document translation immediately | begin with `gpt-5.4` on a smaller scope first |
+| cost rises too fast | you started with full-page or full-document translation immediately | begin with `gpt-5.5` on a smaller scope first |
 
 ## Cost Tips
 
-- default to `gpt-5.4`
+- default to `gpt-5.5`
 - translate selected text first instead of full pages immediately
 - sample long content first before translating all of it
 - if you install the extension on multiple browsers, separate the tokens for cleaner cost tracking
@@ -179,7 +180,7 @@ Suggested starter allowlist:
 
 ### What API URL should I enter in Immersive Translate?
 
-Use the full path: `https://crazyrouter.com/v1/chat/completions`.
+Use the full path: `https://cn.crazyrouter.com/v1/chat/completions`.
 
 ### Why is this different from ChatBox, where the guide starts from the root domain?
 
@@ -187,7 +188,7 @@ Because Immersive Translate's official OpenAI custom-address path is better alig
 
 ### Which model should I try first?
 
-Start with `gpt-5.4`.
+Start with `gpt-5.5`.
 
 ### Why not translate full pages or ebooks immediately?
 

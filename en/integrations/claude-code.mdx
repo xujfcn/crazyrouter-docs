@@ -2,6 +2,7 @@
 title: 'Claude Code Setup Guide'
 description: 'Connect Claude Code to Crazyrouter through the Anthropic Messages API, with full step-by-step instructions from Git and Node.js to installation commands, environment variables, and first-run validation'
 ---
+> Last updated: 2026-06-06
 
 Claude Code is one of the best terminal coding tools to connect to Crazyrouter. It speaks the Anthropic Messages API directly and works especially well for code reading, editing, refactoring, command execution, tool use, and long-context repository analysis.
 
@@ -48,9 +49,9 @@ ANTHROPIC_BASE_URL=https://cn.crazyrouter.com
 
 Do not use:
 
-- `https://crazyrouter.com/v1`
-- `https://crazyrouter.com/v1/messages`
-- `https://crazyrouter.com/v1/complete`
+- `https://cn.crazyrouter.com/v1`
+- `https://cn.crazyrouter.com/v1/messages`
+- `https://cn.crazyrouter.com/v1/complete`
 - `https://cn.crazyrouter.com/v1`
 - `https://cn.crazyrouter.com/v1/messages`
 
@@ -388,7 +389,7 @@ Beyond the native Claude family, Crazyrouter exposes several third-party models 
 | `kimi-k2-thinking` | Moonshot Kimi | ✅ | ✅ | reasoning | Complex reasoning |
 | `kimi-k2-0711-preview` / `kimi-k2-0905-preview` | Moonshot Kimi | ✅ | ✅ | — | Snapshot versions |
 
-> Tested against `https://crazyrouter.com/v1/messages` with `anthropic-version: 2023-06-01` using a standard Anthropic Messages payload.
+> Tested against `https://cn.crazyrouter.com/v1/messages` with `anthropic-version: 2023-06-01` using a standard Anthropic Messages payload.
 
 <Warning>
 The following models currently return `get_channel_failed` on the Anthropic protocol (an upstream channel availability issue, not a protocol incompatibility). Use them via `/v1/chat/completions` (OpenAI protocol) for now:
@@ -456,7 +457,7 @@ You can also switch inside a running Claude Code session:
 ### One-line check that a model works
 
 ```bash
-curl -sS https://crazyrouter.com/v1/messages \
+curl -sS https://cn.crazyrouter.com/v1/messages \
   -H "Authorization: Bearer $ANTHROPIC_API_KEY" \
   -H "anthropic-version: 2023-06-01" \
   -H "Content-Type: application/json" \

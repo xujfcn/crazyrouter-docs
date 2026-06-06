@@ -2,6 +2,7 @@
 title: "Grok Image Models"
 description: "Generate images with grok-4-image and grok-4-image, including supported parameters and differences"
 ---
+> Last updated: 2026-06-06
 
 # Grok Image Models
 
@@ -48,7 +49,7 @@ Do not pass these parameters:
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/v1/images/generations \
+curl -X POST https://cn.crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -66,7 +67,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="YOUR_API_KEY",
-    base_url="https://crazyrouter.com/v1",
+    base_url="https://cn.crazyrouter.com/v1",
 )
 
 response = client.images.generate(
@@ -92,7 +93,7 @@ import OpenAI from "openai";
 
 const client = new OpenAI({
   apiKey: "YOUR_API_KEY",
-  baseURL: "https://crazyrouter.com/v1",
+  baseURL: "https://cn.crazyrouter.com/v1",
 });
 
 const response = await client.images.generate({
@@ -151,7 +152,7 @@ Do not promise these for `grok-4-image`:
 ## grok-4-image Example
 
 ```bash
-curl -X POST https://crazyrouter.com/v1/images/generations \
+curl -X POST https://cn.crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{

@@ -2,6 +2,7 @@
 title: "Function Calling"
 description: "Chat Completions tool calling verified against Crazyrouter production on 2026-03-23"
 ---
+> Last updated: 2026-06-06
 
 # Function Calling
 
@@ -9,18 +10,18 @@ description: "Chat Completions tool calling verified against Crazyrouter product
 POST /v1/chat/completions
 ```
 
-As of March 23, 2026, Crazyrouter production has verified that `gpt-5.4` on the Chat Completions path returns `tool_calls`.
+As of March 23, 2026, Crazyrouter production has verified that `gpt-5.5` on the Chat Completions path returns `tool_calls`.
 
 ---
 
 ## Step 1: Define the Tool
 
 ```bash
-curl https://crazyrouter.com/v1/chat/completions \
+curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-5.5",
     "messages": [
       {"role": "user", "content": "What is the weather in Beijing? Use the tool."}
     ],
@@ -49,7 +50,7 @@ Observed production response shape:
 ```json
 {
   "object": "chat.completion",
-  "model": "gpt-5.4",
+  "model": "gpt-5.5",
   "choices": [
     {
       "message": {
@@ -79,7 +80,7 @@ Once you receive `tool_calls`, send your tool result back as a `role: "tool"` me
 
 ```json
 {
-  "model": "gpt-5.4",
+  "model": "gpt-5.5",
   "messages": [
     {"role": "user", "content": "What is the weather in Beijing? Use the tool."},
     {

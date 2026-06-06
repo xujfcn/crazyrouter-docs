@@ -2,6 +2,7 @@
 title: "Create Chat Completion"
 description: "Production-oriented usage of POST /v1/chat/completions based on current live behavior"
 ---
+> 更新日: 2026-06-06
 
 # Create Chat Completion
 
@@ -23,7 +24,7 @@ Authorization: Bearer YOUR_API_KEY
 
 | Parameter | Type | Required | Meaning |
 |-----------|------|----------|---------|
-| `model` | string | Yes | Model name such as `gpt-5.4`, `claude-sonnet-4-6`, or `gemini-3-pro` |
+| `model` | string | Yes | Model name such as `gpt-5.5`, `claude-sonnet-4-6`, or `gemini-3-pro` |
 | `messages` | array | Yes | Message list |
 | `stream` | boolean | No | Whether to stream output |
 | `max_tokens` | integer | No | Maximum output tokens |
@@ -42,11 +43,11 @@ Authorization: Bearer YOUR_API_KEY
 ## Non-streaming request
 
 ```bash cURL
-curl https://crazyrouter.com/v1/chat/completions \
+curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-5.5",
     "messages": [
       {
         "role": "system",
@@ -66,7 +67,7 @@ Typical production shape:
 ```json
 {
   "object": "chat.completion",
-  "model": "gpt-5.4",
+  "model": "gpt-5.5",
   "choices": [
     {
       "message": {
@@ -92,11 +93,11 @@ Typical production shape:
 ## Streaming request
 
 ```bash cURL
-curl https://crazyrouter.com/v1/chat/completions \
+curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-5.5",
     "messages": [
       {
         "role": "user",
@@ -120,7 +121,7 @@ This production recheck confirmed that:
 Observed SSE shape:
 
 ```text
-data: {"object":"chat.completion.chunk","model":"gpt-5.4","choices":[{"delta":{"role":"assistant","content":"AI","reasoning_content":null,"tool_calls":null}}]}
+data: {"object":"chat.completion.chunk","model":"gpt-5.5","choices":[{"delta":{"role":"assistant","content":"AI","reasoning_content":null,"tool_calls":null}}]}
 ```
 
 ```text
@@ -136,11 +137,11 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="YOUR_API_KEY",
-    base_url="https://crazyrouter.com/v1"
+    base_url="https://cn.crazyrouter.com/v1"
 )
 
 stream = client.chat.completions.create(
-    model="gpt-5.4",
+    model="gpt-5.5",
     messages=[
         {"role": "user", "content": "Explain AI in one short sentence."}
     ],

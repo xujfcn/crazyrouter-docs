@@ -2,13 +2,14 @@
 title: 'Python Audio'
 description: 'Python text-to-speech (TTS) and speech-to-text (STT)'
 ---
+> 更新日: 2026-06-06
 
 ## Text-to-Speech (TTS)
 
 ```python
 from openai import OpenAI
 
-client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+client = OpenAI(api_key="sk-xxx", base_url="https://cn.crazyrouter.com/v1")
 
 # Generate speech
 response = client.audio.speech.create(

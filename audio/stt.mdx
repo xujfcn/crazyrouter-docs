@@ -2,6 +2,7 @@
 title: "语音转文字 (STT)"
 description: "使用 POST /v1/audio/transcriptions 将语音转换为文字"
 ---
+> 更新日期：2026-06-06
 
 # 语音转文字 (STT)
 
@@ -31,7 +32,7 @@ POST /v1/audio/transcriptions
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/v1/audio/transcriptions \
+curl -X POST https://cn.crazyrouter.com/v1/audio/transcriptions \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -F file=@audio.mp3 \
   -F model=whisper-1 \
@@ -44,7 +45,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="YOUR_API_KEY",
-    base_url="https://crazyrouter.com/v1"
+    base_url="https://cn.crazyrouter.com/v1"
 )
 
 with open("audio.mp3", "rb") as audio_file:
@@ -64,7 +65,7 @@ import fs from "fs";
 
 const client = new OpenAI({
   apiKey: "YOUR_API_KEY",
-  baseURL: "https://crazyrouter.com/v1",
+  baseURL: "https://cn.crazyrouter.com/v1",
 });
 
 const transcript = await client.audio.transcriptions.create({

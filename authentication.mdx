@@ -2,6 +2,7 @@
 title: '认证方式'
 description: '如何获取和使用 API Key'
 ---
+> 更新日期：2026-06-06
 
 ## Bearer Token 认证
 
@@ -25,12 +26,16 @@ API Key 仅在创建时显示一次，请妥善保存。如果丢失，需要重
 
 ## 使用示例
 
+<Note>
+OpenAI 兼容接入默认使用 `https://cn.crazyrouter.com/v1`。如果你要给 Claude Code、Hermes、OpenClaw 或其他工具配置地址，先参考 [API Endpoint 说明](https://docs.crazyrouter.com/en/api-endpoint)。
+</Note>
+
 <CodeGroup>
 ```bash cURL
-curl https://crazyrouter.com/v1/chat/completions \
+curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Authorization: Bearer sk-xxxxxxxx" \
   -H "Content-Type: application/json" \
-  -d '{"model": "gpt-5.4", "messages": [{"role": "user", "content": "Hi"}]}'
+  -d '{"model": "gpt-5.5", "messages": [{"role": "user", "content": "Hi"}]}'
 ```
 
 ```python Python
@@ -38,7 +43,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="sk-xxxxxxxx",
-    base_url="https://crazyrouter.com/v1"
+    base_url="https://cn.crazyrouter.com/v1"
 )
 ```
 
@@ -47,7 +52,7 @@ import OpenAI from 'openai';
 
 const client = new OpenAI({
   apiKey: 'sk-xxxxxxxx',
-  baseURL: 'https://crazyrouter.com/v1'
+  baseURL: 'https://cn.crazyrouter.com/v1'
 });
 ```
 </CodeGroup>

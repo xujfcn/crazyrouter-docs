@@ -2,6 +2,7 @@
 title: 'Claude Code 配置教程'
 description: '在 Claude Code 中通过 Anthropic Messages API 接入 Crazyrouter，并提供从 Git、Node.js、安装命令、环境变量到首次验证的完整步骤'
 ---
+> 更新日期：2026-06-06
 
 Claude Code 是目前最值得优先接入 Crazyrouter 的终端编码工具之一。它直接使用 Anthropic Messages API，适合代码阅读、修改、重构、命令执行、工具调用和长上下文仓库分析。
 
@@ -48,9 +49,9 @@ ANTHROPIC_BASE_URL=https://cn.crazyrouter.com
 
 不要写成：
 
-- `https://crazyrouter.com/v1`
-- `https://crazyrouter.com/v1/messages`
-- `https://crazyrouter.com/v1/complete`
+- `https://cn.crazyrouter.com/v1`
+- `https://cn.crazyrouter.com/v1/messages`
+- `https://cn.crazyrouter.com/v1/complete`
 - `https://cn.crazyrouter.com/v1`
 - `https://cn.crazyrouter.com/v1/messages`
 
@@ -445,7 +446,7 @@ Claude Code 通过 `ANTHROPIC_MODEL` 环境变量或会话内 `/model` 命令选
 ### 一条命令快速验证某个模型是否可用
 
 ```bash
-curl -sS https://crazyrouter.com/v1/messages \
+curl -sS https://cn.crazyrouter.com/v1/messages \
   -H "Authorization: Bearer $ANTHROPIC_API_KEY" \
   -H "anthropic-version: 2023-06-01" \
   -H "Content-Type: application/json" \

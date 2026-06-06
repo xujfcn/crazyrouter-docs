@@ -2,6 +2,7 @@
 title: "チャット画像認識"
 description: "OpenAI 形式の画像入力。base64 とリモート URL の両方をカバー"
 ---
+> 更新日: 2026-06-06
 
 # チャット画像認識
 
@@ -11,7 +12,7 @@ POST /v1/chat/completions
 
 Crazyrouter 本番環境では、OpenAI 形式の `image_url` 入力をサポートする主要な視覚モデルを検証済みです：
 
-- `gpt-4o`、`gpt-4o-mini`、`gpt-4.1`、`gpt-5.4` などの OpenAI 視覚モデル
+- `gpt-4o`、`gpt-4o-mini`、`gpt-4.1`、`gpt-5.5` などの OpenAI 視覚モデル
 - `data:image/...;base64,...` data URL と公開 `https://` URL の両方が利用可能
 - `message.content` は現在プレーン文字列で返却されます
 
@@ -22,7 +23,7 @@ Crazyrouter 本番環境では、OpenAI 形式の `image_url` 入力をサポー
 ## base64 data URL を使う（最も確実）
 
 ```bash
-curl https://crazyrouter.com/v1/chat/completions \
+curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -66,7 +67,7 @@ curl https://crazyrouter.com/v1/chat/completions \
 ## リモート https URL を使う
 
 ```bash
-curl https://crazyrouter.com/v1/chat/completions \
+curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{

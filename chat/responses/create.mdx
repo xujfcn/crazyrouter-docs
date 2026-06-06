@@ -2,6 +2,7 @@
 title: "创建模型响应"
 description: "基于 2026-03-23 Crazyrouter 生产环境验证的 Responses API 基础调用方式"
 ---
+> 更新日期：2026-06-06
 
 # 创建模型响应
 
@@ -11,7 +12,7 @@ POST /v1/responses
 
 截至 2026 年 3 月 23 日，Crazyrouter 生产环境已验证：
 
-- `gpt-5.4` 可以正常返回 `object: "response"`
+- `gpt-5.5` 可以正常返回 `object: "response"`
 - 基础文本请求的 `output` 当前可稳定拿到 `message`
 - 流式请求可稳定观察到 `response.created`、`response.in_progress`、`response.output_item.added`、`response.content_part.added`、`response.output_text.delta`
 
@@ -24,11 +25,11 @@ POST /v1/responses
 ## 基本请求
 
 ```bash
-curl https://crazyrouter.com/v1/responses \
+curl https://cn.crazyrouter.com/v1/responses \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-5.5",
     "input": "用一句话解释什么是 API"
   }'
 ```
@@ -38,7 +39,7 @@ curl https://crazyrouter.com/v1/responses \
 ```json
 {
   "object": "response",
-  "model": "gpt-5.4",
+  "model": "gpt-5.5",
   "output": [
     {
       "type": "message"
@@ -52,11 +53,11 @@ curl https://crazyrouter.com/v1/responses \
 ## 流式请求
 
 ```bash
-curl https://crazyrouter.com/v1/responses \
+curl https://cn.crazyrouter.com/v1/responses \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-5.5",
     "input": "Say hello in one sentence.",
     "stream": true
   }'
@@ -81,7 +82,7 @@ event: response.output_text.delta
 
 ## 当前建议
 
-- 新的 GPT 文本调用，优先从 `gpt-5.4` + `/v1/responses` 起步
+- 新的 GPT 文本调用，优先从 `gpt-5.5` + `/v1/responses` 起步
 - 如果你需要工具调用，继续看 [Responses Function Calling](/chat/responses/function-calling)
 - 如果你需要联网搜索，继续看 [Responses Web 搜索](/chat/responses/web-search)
 - 如果你需要可见推理标记，继续看 [GPT-5 Thinking](/chat/responses/gpt5-thinking)

@@ -2,6 +2,7 @@
 title: 'Coze Setup Guide'
 description: 'Use Crazyrouter in Coze through API plugins or workflow HTTP nodes, and clearly separate the public setup path from enterprise custom-model capabilities'
 ---
+> 更新日: 2026-06-06
 
 Coze is ByteDance's bot and workflow platform. It is useful for building bots, chaining workflow steps, calling plugins, and publishing to different channels. When connecting Coze to Crazyrouter, the most stable and public-doc-friendly path is not to assume every Coze plan supports direct custom-model integration. The recommended public path is to use an HTTP / API plugin or a workflow HTTP request node first.
 
@@ -36,11 +37,11 @@ The most important accuracy rule for this page is: document Coze's public baseli
 Recommended parameters:
 
 - Request method: `POST`
-- URL: `https://crazyrouter.com/v1/chat/completions`
+- URL: `https://cn.crazyrouter.com/v1/chat/completions`
 - Headers:
   - `Authorization: Bearer sk-xxx`
   - `Content-Type: application/json`
-- First validation model: `gpt-5.4`
+- First validation model: `gpt-5.5`
 
 ### Why this route comes first
 
@@ -62,7 +63,7 @@ Because it:
 
 Suggested initial allowlist:
 
-- `gpt-5.4`
+- `gpt-5.5`
 - `claude-sonnet-4-6`
 - `gemini-3-pro`
 
@@ -72,7 +73,7 @@ Suggested initial allowlist:
   <Step title="Step 1: Create a dedicated Crazyrouter token for Coze">
     For the first pass, only allow:
 
-    - `gpt-5.4`
+    - `gpt-5.5`
     - `claude-sonnet-4-6`
 
     Do not enable too many models on day one. Troubleshooting is easier when the scope is small.
@@ -94,7 +95,7 @@ Suggested initial allowlist:
     Enter:
 
     - `Method`: `POST`
-    - `URL`: `https://crazyrouter.com/v1/chat/completions`
+    - `URL`: `https://cn.crazyrouter.com/v1/chat/completions`
   </Step>
 
   <Step title="Step 4: Configure headers">
@@ -111,7 +112,7 @@ Suggested initial allowlist:
 
     ```json
     {
-      "model": "gpt-5.4",
+      "model": "gpt-5.5",
       "messages": [
         {
           "role": "user",
@@ -151,7 +152,7 @@ If you do not want to maintain a separate plugin, you can call Crazyrouter direc
 ### Recommended configuration
 
 - Request method: `POST`
-- URL: `https://crazyrouter.com/v1/chat/completions`
+- URL: `https://cn.crazyrouter.com/v1/chat/completions`
 - Headers:
   - `Authorization: Bearer sk-xxx`
   - `Content-Type: application/json`
@@ -159,7 +160,7 @@ If you do not want to maintain a separate plugin, you can call Crazyrouter direc
 
 ```json
 {
-  "model": "gpt-5.4",
+  "model": "gpt-5.5",
   "messages": [
     {
       "role": "user",
@@ -189,7 +190,7 @@ Reasons:
 
 | Use case | Recommended model | Why |
 |----------|----------|------|
-| First connection test | `gpt-5.4` | Verified successfully in production on March 23, 2026, and best for validating the Coze-to-Crazyrouter path |
+| First connection test | `gpt-5.5` | Verified successfully in production on March 23, 2026, and best for validating the Coze-to-Crazyrouter path |
 | Higher-quality output | `claude-sonnet-4-6` | Better for stronger explanation and content generation |
 | Gemini fallback path | `gemini-3-pro` | Useful as a second compatibility-validation path |
 
@@ -207,10 +208,10 @@ Reasons:
 
 - [ ] Created a dedicated Crazyrouter token for Coze
 - [ ] Chosen the HTTP / API plugin route or workflow HTTP request route first
-- [ ] Set the request URL to `https://crazyrouter.com/v1/chat/completions`
+- [ ] Set the request URL to `https://cn.crazyrouter.com/v1/chat/completions`
 - [ ] Filled the `Authorization` header as `Bearer sk-xxx`
 - [ ] Set `Content-Type` to `application/json`
-- [ ] Validated the smallest request body with `gpt-5.4`
+- [ ] Validated the smallest request body with `gpt-5.5`
 - [ ] Confirmed the plugin or HTTP node works in standalone debugging
 - [ ] Confirmed it still works after attaching to the bot or workflow
 - [ ] Confirmed the request appears in Crazyrouter logs
@@ -222,7 +223,7 @@ Reasons:
 | 401 unauthorized | Token is wrong, expired, or copied incompletely | Generate a new token and re-enter the `Authorization` header |
 | 404 | URL is wrong or missing `/v1/chat/completions` | Change it to the full URL |
 | 403 / model not allowed | The token does not allow that model | Allow the model in Crazyrouter token settings |
-| `model not found` | Model name is wrong | Switch back to `gpt-5.4` and revalidate |
+| `model not found` | Model name is wrong | Switch back to `gpt-5.5` and revalidate |
 | Plugin can be created but fails inside the bot | Input / output mapping is inconsistent | Fall back to a fixed-string test first |
 | Workflow node fails intermittently | Input is too large, retries are too aggressive, or concurrency is too high | Shrink the input and return to a minimal test |
 | You cannot find a "model management" custom-upstream entry from another tutorial | Your version or plan is different | Go back to the HTTP / API plugin route instead of relying on enterprise-only capabilities |
@@ -239,11 +240,11 @@ Because Coze capabilities vary a lot by version and plan, and Coze's plan FAQ al
 
 ### What URL should I enter?
 
-Use `https://crazyrouter.com/v1/chat/completions`.
+Use `https://cn.crazyrouter.com/v1/chat/completions`.
 
 ### What should the first model be?
 
-Start with `gpt-5.4`.
+Start with `gpt-5.5`.
 
 ### When should I add Claude or more models?
 

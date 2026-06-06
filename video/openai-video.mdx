@@ -2,6 +2,7 @@
 title: "OpenAI 视频格式"
 description: "使用 OpenAI 兼容的视频 API 格式创建、查询和下载视频"
 ---
+> 更新日期：2026-06-06
 
 # OpenAI 视频格式
 
@@ -30,7 +31,7 @@ POST /v1/videos
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/v1/videos \
+curl -X POST https://cn.crazyrouter.com/v1/videos \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -45,7 +46,7 @@ curl -X POST https://crazyrouter.com/v1/videos \
 import requests
 
 response = requests.post(
-    "https://crazyrouter.com/v1/videos",
+    "https://cn.crazyrouter.com/v1/videos",
     headers={
         "Content-Type": "application/json",
         "Authorization": "Bearer YOUR_API_KEY"
@@ -83,7 +84,7 @@ GET /v1/videos/{id}
 ```
 
 ```bash cURL
-curl https://crazyrouter.com/v1/videos/video_abc123 \
+curl https://cn.crazyrouter.com/v1/videos/video_abc123 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
@@ -115,7 +116,7 @@ GET /v1/videos/{id}/content
 直接下载视频文件。
 
 ```bash cURL
-curl -o output.mp4 https://crazyrouter.com/v1/videos/video_abc123/content \
+curl -o output.mp4 https://cn.crazyrouter.com/v1/videos/video_abc123/content \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 

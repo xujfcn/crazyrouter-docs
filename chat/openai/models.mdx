@@ -2,6 +2,7 @@
 title: "列出模型"
 description: "基于生产环境复核，使用 GET /v1/models 获取当前 Token 可用模型列表"
 ---
+> 更新日期：2026-06-06
 
 # 列出模型
 
@@ -24,7 +25,7 @@ Authorization: Bearer YOUR_API_KEY
 <CodeGroup>
 
 ```bash cURL
-curl https://crazyrouter.com/v1/models \
+curl https://cn.crazyrouter.com/v1/models \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
@@ -33,7 +34,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="YOUR_API_KEY",
-    base_url="https://crazyrouter.com/v1"
+    base_url="https://cn.crazyrouter.com/v1"
 )
 
 models = client.models.list()
@@ -47,7 +48,7 @@ import OpenAI from "openai";
 
 const client = new OpenAI({
   apiKey: "YOUR_API_KEY",
-  baseURL: "https://crazyrouter.com/v1",
+  baseURL: "https://cn.crazyrouter.com/v1",
 });
 
 const models = await client.models.list();
@@ -70,7 +71,7 @@ for (const model of models.data) {
 - 顶层 `object` 为 `list`
 - 当前返回模型数量为 `605`
 - 以下模型已确认出现在返回列表中：
-  - `gpt-5.4`
+  - `gpt-5.5`
   - `claude-sonnet-4-6`
   - `claude-opus-4-7`
   - `gemini-3-pro`
@@ -89,7 +90,7 @@ for (const model of models.data) {
   "object": "list",
   "data": [
     {
-      "id": "gpt-5.4",
+      "id": "gpt-5.5",
       "object": "model",
       "created": 1700000000,
       "owned_by": "openai"

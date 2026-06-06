@@ -2,6 +2,7 @@
 title: "Grok 图片模型"
 description: "使用 grok-4-image 和 grok-4-image 生成图片，并了解参数差异"
 ---
+> 更新日期：2026-06-06
 
 # Grok 图片模型
 
@@ -50,7 +51,7 @@ Grok 图片模型使用 OpenAI Images 兼容路径调用。当前应区分两个
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/v1/images/generations \
+curl -X POST https://cn.crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -68,7 +69,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="YOUR_API_KEY",
-    base_url="https://crazyrouter.com/v1",
+    base_url="https://cn.crazyrouter.com/v1",
 )
 
 response = client.images.generate(
@@ -90,7 +91,7 @@ import OpenAI from "openai";
 
 const client = new OpenAI({
   apiKey: "YOUR_API_KEY",
-  baseURL: "https://crazyrouter.com/v1",
+  baseURL: "https://cn.crazyrouter.com/v1",
 });
 
 const response = await client.images.generate({
@@ -153,7 +154,7 @@ console.log(response.data[0].url);
 ## grok-4-image 示例
 
 ```bash
-curl -X POST https://crazyrouter.com/v1/images/generations \
+curl -X POST https://cn.crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{

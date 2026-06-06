@@ -2,6 +2,7 @@
 title: 'Dify Setup Guide'
 description: 'Connect Crazyrouter to Dify for chat models, embeddings, and workflows, then finish provider setup, first-run validation, and troubleshooting'
 ---
+> 更新日: 2026-06-06
 
 Dify is a strong fit for workflows, agents, knowledge bases, and internal AI application platforms. When connecting it to Crazyrouter, the recommended rollout is to start with the OpenAI-compatible provider path, get one chat model working first, and only then add embeddings or other model types.
 
@@ -11,16 +12,16 @@ Using Dify's model provider configuration, you can add Crazyrouter as an OpenAI-
 
 - Recommended protocol: `OpenAI-compatible API`
 - Recommended entry point: `Settings` → `Model Provider`
-- Base URL: `https://crazyrouter.com/v1`
+- Base URL: `https://cn.crazyrouter.com/v1`
 - Auth method: `sk-...` token
-- Recommended first validation model: `gpt-5.4`
+- Recommended first validation model: `gpt-5.5`
 
 <Tip>
 Depending on your Dify version or plugin-based distribution, the provider may appear as `OpenAI`, `OpenAI-API-compatible`, `OpenAI Compatible`, or something similar. Pick the OpenAI-compatible provider that lets you set a custom `API Base URL`.
 </Tip>
 
 <Note>
-Official Dify docs treat a custom `API Base URL` as an optional field for proxy or compatible-upstream scenarios. For Crazyrouter, that is exactly the intended pattern, so use `https://crazyrouter.com/v1` as the OpenAI-compatible upstream. Also, model-provider configuration is usually limited to workspace admins or owners; if you cannot see the entry, check your role first.
+Official Dify docs treat a custom `API Base URL` as an optional field for proxy or compatible-upstream scenarios. For Crazyrouter, that is exactly the intended pattern, so use `https://cn.crazyrouter.com/v1` as the OpenAI-compatible upstream. Also, model-provider configuration is usually limited to workspace admins or owners; if you cannot see the entry, check your role first.
 </Note>
 
 ## Best For
@@ -37,16 +38,16 @@ Recommended protocol: `OpenAI-compatible API`
 When connecting Crazyrouter in Dify, the usual OpenAI-compatible base URL is:
 
 ```text
-https://crazyrouter.com/v1
+https://cn.crazyrouter.com/v1
 ```
 
 Do not enter:
 
 - `https://crazyrouter.com`
-- `https://crazyrouter.com/v1/chat/completions`
+- `https://cn.crazyrouter.com/v1/chat/completions`
 
 <Tip>
-The exact UI label can move between `Model Provider`, `Providers`, localized labels, or plugin-related entry points across Dify versions. Keep the first-pass validation flow unchanged: save the provider first, add only one `LLM` model `gpt-5.4`, and validate with a minimal Chat app before adding anything else.
+The exact UI label can move between `Model Provider`, `Providers`, localized labels, or plugin-related entry points across Dify versions. Keep the first-pass validation flow unchanged: save the provider first, add only one `LLM` model `gpt-5.5`, and validate with a minimal Chat app before adding anything else.
 </Tip>
 
 ## Prerequisites
@@ -56,11 +57,11 @@ The exact UI label can move between `Model Provider`, `Providers`, localized lab
 | Crazyrouter account | Register first at [crazyrouter.com](https://crazyrouter.com) |
 | Crazyrouter token | Create a dedicated `sk-...` token for Dify |
 | Dify | Use a current stable version; provider labels may vary by release |
-| Available models | Allow at least one verified chat model such as `gpt-5.4` |
+| Available models | Allow at least one verified chat model such as `gpt-5.5` |
 
 Recommended starting whitelist:
 
-- `gpt-5.4`
+- `gpt-5.5`
 - `claude-sonnet-4-6`
 - `text-embedding-3-large`
 - `text-embedding-3-small`
@@ -71,7 +72,7 @@ If you plan to use a knowledge base, prepare at least one chat model and one emb
 
 <Steps>
   <Step title="Create a dedicated Dify token">
-    In the Crazyrouter dashboard, create a token named `dify`. For the first pass, allow `gpt-5.4` and one embedding model such as `text-embedding-3-large`.
+    In the Crazyrouter dashboard, create a token named `dify`. For the first pass, allow `gpt-5.5` and one embedding model such as `text-embedding-3-large`.
   </Step>
   <Step title="Open the model provider settings">
     Log in with a workspace admin-capable account and go to `Settings` → `Model Provider`.
@@ -79,11 +80,11 @@ If you plan to use a knowledge base, prepare at least one chat model and one emb
   <Step title="Add an OpenAI-compatible provider">
     Choose the `OpenAI` or `OpenAI-compatible` provider entry and fill in:
     - `API Key`: your `sk-...`
-    - `API Base URL`: `https://crazyrouter.com/v1`
+    - `API Base URL`: `https://cn.crazyrouter.com/v1`
   </Step>
   <Step title="Configure only one chat model first">
     For the first rollout, add a single LLM such as:
-    - `Model`: `gpt-5.4`
+    - `Model`: `gpt-5.5`
     - `Type`: `LLM`
 
     Then create a very simple Chat app or Workflow app for validation. Do not add chat, embeddings, rerank, and workflow tools all at once, or troubleshooting will get mixed together.
@@ -114,7 +115,7 @@ That keeps troubleshooting much cleaner.
 
 | Use case | Recommended model | Why |
 |----------|-------------------|-----|
-| Default workflow chat model | `gpt-5.4` | Verified successfully in production on March 23, 2026, and suited for the main Dify baseline |
+| Default workflow chat model | `gpt-5.5` | Verified successfully in production on March 23, 2026, and suited for the main Dify baseline |
 | Higher-quality complex workflows | `claude-sonnet-4-6` | Better for complex explanations, summaries, and long text |
 | Gemini fallback path | `gemini-3-pro` | Useful as a second vendor-compatible validation path |
 | Default embedding model | `text-embedding-3-large` | More reliable knowledge-base quality |
@@ -136,7 +137,7 @@ Recommended order: get the chat model working first, then add embeddings.
 ## Verification Checklist
 
 - [ ] Crazyrouter is saved in `Model Provider`
-- [ ] `API Base URL` is set to `https://crazyrouter.com/v1`
+- [ ] `API Base URL` is set to `https://cn.crazyrouter.com/v1`
 - [ ] at least one LLM is configured successfully
 - [ ] the first Dify app request succeeds
 - [ ] the request appears in the Crazyrouter logs
@@ -153,15 +154,15 @@ Recommended order: get the chat model working first, then add embeddings.
 | provider cannot be saved | wrong API key or wrong provider type without custom base URL support | switch to the OpenAI-compatible provider entry and re-enter the `sk-...` token |
 | 401 unauthorized | token expired, was removed, or was copied incorrectly | generate a new token and replace it |
 | 403 / model not allowed | Dify is trying to use a model that is not whitelisted | allow that model in Crazyrouter |
-| 404 | `API Base URL` was entered as the root domain or a full endpoint path | change it to `https://crazyrouter.com/v1` |
-| provider saves but the app still fails | wrong model name or bad app-level parameter choices | fall back to `gpt-5.4` for baseline validation |
+| 404 | `API Base URL` was entered as the root domain or a full endpoint path | change it to `https://cn.crazyrouter.com/v1` |
+| provider saves but the app still fails | wrong model name or bad app-level parameter choices | fall back to `gpt-5.5` for baseline validation |
 | knowledge-base import fails | the chat path works but embeddings were not configured correctly | validate the embedding model separately, then retry import |
 | workflow cost grows too quickly | batch runs, long context, or many apps share one token | split tokens, add quota caps, and narrow the whitelist |
-| some advanced models behave inconsistently in Dify | model-level parameter compatibility differs across nodes | validate on `gpt-5.4` first, then swap in stronger models gradually |
+| some advanced models behave inconsistently in Dify | model-level parameter compatibility differs across nodes | validate on `gpt-5.5` first, then swap in stronger models gradually |
 
 ## Performance and Cost Tips
 
-- Keep `gpt-5.4` as the workflow baseline during initial validation
+- Keep `gpt-5.5` as the workflow baseline during initial validation
 - For the first knowledge-base launch, import a small document set before indexing everything
 - Track chat and embedding traffic separately so cost sources stay visible
 - Set tighter quota caps for batch jobs, scheduled jobs, and internal test environments
@@ -171,7 +172,7 @@ Recommended order: get the chat model working first, then add embeddings.
 
 ### Which Base URL should I use in Dify?
 
-Use `https://crazyrouter.com/v1`.
+Use `https://cn.crazyrouter.com/v1`.
 
 ### Why should I not use only the root domain here?
 
@@ -187,7 +188,7 @@ That depends on your Dify version and installed provider plugins. Get chat and e
 
 ### Why does this guide insist on starting with one chat model only?
 
-Because Dify issues can come from the provider layer, model type, app configuration, or knowledge-base chain. Validating a single `gpt-5.4` chat app first makes isolation much easier.
+Because Dify issues can come from the provider layer, model type, app configuration, or knowledge-base chain. Validating a single `gpt-5.5` chat app first makes isolation much easier.
 
 ### Should Dify use multiple tokens?
 

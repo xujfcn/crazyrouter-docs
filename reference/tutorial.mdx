@@ -2,6 +2,7 @@
 title: '接入教程'
 description: '基于生产环境复核，从 OpenAI、Anthropic、Gemini 接入 Crazyrouter 的起步路径'
 ---
+> 更新日期：2026-06-06
 
 # 接入教程
 
@@ -9,15 +10,15 @@ description: '基于生产环境复核，从 OpenAI、Anthropic、Gemini 接入 
 
 如果你要最快开始，先区分三类接法：
 
-- OpenAI 兼容：`https://crazyrouter.com/v1`
+- OpenAI 兼容：`https://cn.crazyrouter.com/v1`
 - Anthropic 原生：`https://crazyrouter.com`
-- Gemini 原生：`https://crazyrouter.com/v1beta/models/...`
+- Gemini 原生：`https://cn.crazyrouter.com/v1beta/models/...`
 
 ## 最短迁移原则
 
 从 OpenAI 兼容客户端迁移到 Crazyrouter，通常只需要改两项：
 
-1. `base_url` 改成 `https://crazyrouter.com/v1`
+1. `base_url` 改成 `https://cn.crazyrouter.com/v1`
 2. `api_key` 改成 Crazyrouter 的 `sk-xxx`
 
 ---
@@ -29,11 +30,11 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="sk-xxx",
-    base_url="https://crazyrouter.com/v1"
+    base_url="https://cn.crazyrouter.com/v1"
 )
 
 response = client.chat.completions.create(
-    model="gpt-5.4",
+    model="gpt-5.5",
     messages=[{"role": "user", "content": "Hello"}],
     max_tokens=64
 )
@@ -41,7 +42,7 @@ response = client.chat.completions.create(
 
 本轮生产复核确认：
 
-- `gpt-5.4` 通过 `/v1/chat/completions` 可正常返回
+- `gpt-5.5` 通过 `/v1/chat/completions` 可正常返回
 - 如果你需要 reasoning 摘要或 OpenAI 风格 web search，优先切到 `/v1/responses`
 
 相关页面：
@@ -60,7 +61,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="sk-xxx",
-    base_url="https://crazyrouter.com/v1"
+    base_url="https://cn.crazyrouter.com/v1"
 )
 
 response = client.chat.completions.create(
@@ -107,7 +108,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="sk-xxx",
-    base_url="https://crazyrouter.com/v1"
+    base_url="https://cn.crazyrouter.com/v1"
 )
 
 response = client.chat.completions.create(
@@ -120,7 +121,7 @@ response = client.chat.completions.create(
 ### 方案 B：Gemini 原生
 
 ```bash
-curl "https://crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://cn.crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -154,13 +155,13 @@ curl "https://crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOU
   <Tab title="Linux / macOS">
     ```bash
     export OPENAI_API_KEY=sk-xxx
-    export OPENAI_BASE_URL=https://crazyrouter.com/v1
+    export OPENAI_BASE_URL=https://cn.crazyrouter.com/v1
     ```
   </Tab>
   <Tab title="Windows">
     ```powershell
     $env:OPENAI_API_KEY = "sk-xxx"
-    $env:OPENAI_BASE_URL = "https://crazyrouter.com/v1"
+    $env:OPENAI_BASE_URL = "https://cn.crazyrouter.com/v1"
     ```
   </Tab>
 </Tabs>
@@ -178,7 +179,7 @@ client = OpenAI()
 
 | 目标 | 推荐起步方式 |
 |------|--------------|
-| 最快接入 GPT | OpenAI 兼容 + `gpt-5.4` |
+| 最快接入 GPT | OpenAI 兼容 + `gpt-5.5` |
 | 最快接入 Claude | Anthropic 原生 + `claude-sonnet-4-6` |
 | 最快接入 Gemini | OpenAI 兼容或 Gemini 原生 + `gemini-3-pro` |
 | 要 reasoning 摘要 | Responses API |

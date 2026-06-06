@@ -2,6 +2,7 @@
 title: 'Cline Setup Guide'
 description: 'Connect Crazyrouter to the Cline VS Code extension through the OpenAI Compatible provider, with separate Windows and macOS install flows, setup, validation, and troubleshooting steps'
 ---
+> Last updated: 2026-06-06
 
 Cline is a strong agent-style coding extension for VS Code, especially for file edits, terminal execution, step-by-step planning, and multi-turn code changes. For Crazyrouter, the recommended path is Cline's official `OpenAI Compatible` provider.
 
@@ -10,9 +11,9 @@ Cline is a strong agent-style coding extension for VS Code, especially for file 
 With the OpenAI Compatible provider, Cline can send its agent traffic to Crazyrouter:
 
 - recommended protocol: `OpenAI-compatible API`
-- base URL: `https://crazyrouter.com/v1`
+- base URL: `https://cn.crazyrouter.com/v1`
 - auth format: `sk-...` token
-- recommended default models: `claude-sonnet-4-6` or `gpt-5.4`
+- recommended default models: `claude-sonnet-4-6` or `gpt-5.5`
 
 <Warning>
 Cline can read and write files and execute terminal commands. After the connection works, the real risk is not connectivity but over-granting execution scope. Start with a small repo you know well.
@@ -32,14 +33,14 @@ Recommended protocol: `OpenAI-compatible API`
 In Cline settings, use:
 
 - `API Provider`: `OpenAI Compatible`
-- `Base URL`: `https://crazyrouter.com/v1`
+- `Base URL`: `https://cn.crazyrouter.com/v1`
 - `API Key`: your `sk-...`
 - `Model ID`: the model you want to use
 
 Do not set the base URL to:
 
 - `https://crazyrouter.com`
-- `https://crazyrouter.com/v1/chat/completions`
+- `https://cn.crazyrouter.com/v1/chat/completions`
 
 <Note>
 Unlike Claude Code, Codex, or Aider, the normal Cline-in-VS-Code path usually does not require shell environment variables. In most cases, you only need to enter `Base URL`, `API Key`, and `Model ID` in the Cline settings UI.
@@ -60,7 +61,7 @@ Unlike Claude Code, Codex, or Aider, the normal Cline-in-VS-Code path usually do
 Suggested starter allowlist:
 
 - `claude-sonnet-4-6`
-- `gpt-5.4`
+- `gpt-5.5`
 - `gemini-3-pro`
 
 ## Full Install Path By Operating System
@@ -233,7 +234,7 @@ code --version
     In Crazyrouter, create a token named something like `cline`. For the first pass, allow only:
 
     - `claude-sonnet-4-6`
-    - `gpt-5.4`
+    - `gpt-5.5`
     - `gemini-3-pro`
 
     <Note>
@@ -263,7 +264,7 @@ code --version
     In the Cline settings panel, enter:
 
     - `API Provider`: `OpenAI Compatible`
-    - `Base URL`: `https://crazyrouter.com/v1`
+    - `Base URL`: `https://cn.crazyrouter.com/v1`
     - `API Key`: your `sk-...`
     - `Model ID`: start with `claude-sonnet-4-6`
 
@@ -298,10 +299,10 @@ code --version
 | Use case | Recommended model | Why |
 |----------|-------------------|-----|
 | default agent driver | `claude-sonnet-4-6` | stable for multi-turn planning, code explanation, and long context |
-| OpenAI-compatible baseline | `gpt-5.4` | verified successfully in production on March 23, 2026, and suited for the main OpenAI-compatible path |
+| OpenAI-compatible baseline | `gpt-5.5` | verified successfully in production on March 23, 2026, and suited for the main OpenAI-compatible path |
 | Gemini fallback path | `gemini-3-pro` | useful as a second compatibility-validation path |
 
-Recommended rollout: get the workflow stable on `claude-sonnet-4-6` first. If you also want an OpenAI-compatible baseline, add `gpt-5.4` second.
+Recommended rollout: get the workflow stable on `claude-sonnet-4-6` first. If you also want an OpenAI-compatible baseline, add `gpt-5.5` second.
 
 ## Token Setup Best Practices
 
@@ -321,7 +322,7 @@ Recommended rollout: get the workflow stable on `claude-sonnet-4-6` first. If yo
 - [ ] if you want terminal repo opening, `code --version` also works
 - [ ] Cline is installed and opens correctly
 - [ ] Cline is set to the `OpenAI Compatible` provider
-- [ ] `Base URL` is `https://crazyrouter.com/v1`
+- [ ] `Base URL` is `https://cn.crazyrouter.com/v1`
 - [ ] `API Key` is entered correctly
 - [ ] `Model ID` is a real allowed model
 - [ ] the first read-only task succeeds
@@ -336,7 +337,7 @@ Recommended rollout: get the workflow stable on `claude-sonnet-4-6` first. If yo
 | the `code` command does not exist | VS Code is installed but the shell command is not in PATH | on Windows, reopen the terminal; on macOS, run `Shell Command: Install 'code' command in PATH` |
 | `401 unauthorized` | wrong, expired, or badly pasted API key | create a new token and paste it again |
 | `403` or `model not allowed` | the token does not allow the selected model | allow that model in Crazyrouter token settings |
-| `404` | base URL was set to the root domain or a full endpoint path | use `https://crazyrouter.com/v1` |
+| `404` | base URL was set to the root domain or a full endpoint path | use `https://cn.crazyrouter.com/v1` |
 | `model not found` | incorrect `Model ID` or unavailable model | switch back to `claude-sonnet-4-6` or another confirmed model |
 | it cannot connect on a corporate network | proxy or firewall settings are blocking traffic | check VS Code's own proxy settings first; the Cline extension reuses VS Code's proxy configuration |
 | Cline edits the wrong files | permissions are too wide or the prompt scope is too loose | validate with read-only tasks first, then widen permissions gradually |
@@ -345,7 +346,7 @@ Recommended rollout: get the workflow stable on `claude-sonnet-4-6` first. If yo
 ## Performance And Cost Tips
 
 - start with read-only tasks and small edits on first setup
-- use `claude-sonnet-4-6` or `gpt-5.4` for complex refactors
+- use `claude-sonnet-4-6` or `gpt-5.5` for complex refactors
 - avoid widening the model list too early; keep the first-pass allowlist narrow
 - use different tokens for different workspaces or project types
 - after large tasks, inspect Crazyrouter logs to see the real cost pattern
@@ -358,7 +359,7 @@ Choose `OpenAI Compatible`.
 
 ### What base URL should I use?
 
-Use `https://crazyrouter.com/v1`.
+Use `https://cn.crazyrouter.com/v1`.
 
 ### Do I have to set environment variables for this Cline path?
 

@@ -2,6 +2,7 @@
 title: 'GPTs Conversations'
 description: 'Call OpenAI GPTs applications via API'
 ---
+> Last updated: 2026-06-06
 
 ## Overview
 
@@ -30,7 +31,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="sk-xxx",
-    base_url="https://crazyrouter.com/v1"
+    base_url="https://cn.crazyrouter.com/v1"
 )
 
 # Chat with a GPT
@@ -45,7 +46,7 @@ print(response.choices[0].message.content)
 ```
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/v1/chat/completions \
+curl -X POST https://cn.crazyrouter.com/v1/chat/completions \
   -H "Authorization: Bearer sk-xxx" \
   -H "Content-Type: application/json" \
   -d '{

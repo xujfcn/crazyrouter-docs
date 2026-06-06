@@ -2,6 +2,7 @@
 title: "Gemini Image Generation"
 description: "Current Gemini image-generation behavior updated from the 2026-04-14 Crazyrouter production retest"
 ---
+> Дата обновления: 2026-06-06
 
 # Gemini Image Generation
 
@@ -31,7 +32,7 @@ As of April 14, 2026, the latest production retest against Crazyrouter showed:
 For the specific goal of getting image bytes directly, the easiest current model to handle is `nano-banana-2`:
 
 ```bash
-curl "https://crazyrouter.com/v1beta/models/nano-banana-2:generateContent?key=YOUR_API_KEY" \
+curl "https://cn.crazyrouter.com/v1beta/models/nano-banana-2:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [

@@ -2,6 +2,7 @@
 title: 'LobeChat Setup Guide'
 description: 'Connect Crazyrouter to LobeChat through the OpenAI-compatible path, then finish chat validation, self-host setup, model management, and troubleshooting'
 ---
+> Дата обновления: 2026-06-06
 
 LobeChat works well as a self-hosted chat frontend, a personal multi-model workspace, or a shared team chat surface. When connecting it to Crazyrouter, the most reliable route is LobeChat's `OpenAI` path with the proxy URL pointed at Crazyrouter's OpenAI-compatible base.
 
@@ -11,9 +12,9 @@ Using LobeChat's OpenAI settings, you can route chat traffic through Crazyrouter
 
 - Recommended protocol: `OpenAI-compatible API`
 - Recommended route: the LobeChat `OpenAI` provider
-- Base URL: `https://crazyrouter.com/v1`
+- Base URL: `https://cn.crazyrouter.com/v1`
 - Auth method: `sk-...` token
-- Recommended first validation model: `gpt-5.4`
+- Recommended first validation model: `gpt-5.5`
 
 If you self-host LobeChat, you can also preconfigure Crazyrouter as the default OpenAI upstream through environment variables.
 
@@ -31,16 +32,16 @@ Recommended protocol: `OpenAI-compatible API`
 When connecting Crazyrouter in LobeChat, use this OpenAI-compatible base URL:
 
 ```text
-https://crazyrouter.com/v1
+https://cn.crazyrouter.com/v1
 ```
 
 Do not enter:
 
 - `https://crazyrouter.com`
-- `https://crazyrouter.com/v1/chat/completions`
+- `https://cn.crazyrouter.com/v1/chat/completions`
 
 <Note>
-LobeChat documents `OPENAI_PROXY_URL` as the OpenAI API request base URL, and its common defaults and examples are `/v1`-style. The local `http://127.0.0.1:4000/api/status` payload also exposes an official example using `{address}/v1`. So for Crazyrouter, `https://crazyrouter.com/v1` is the correct first-pass setup. If your own reverse proxy already adds `/v1`, adjust that layer to avoid a duplicated suffix.
+LobeChat documents `OPENAI_PROXY_URL` as the OpenAI API request base URL, and its common defaults and examples are `/v1`-style. The local `http://127.0.0.1:4000/api/status` payload also exposes an official example using `{address}/v1`. So for Crazyrouter, `https://cn.crazyrouter.com/v1` is the correct first-pass setup. If your own reverse proxy already adds `/v1`, adjust that layer to avoid a duplicated suffix.
 </Note>
 
 ## Prerequisites
@@ -50,11 +51,11 @@ LobeChat documents `OPENAI_PROXY_URL` as the OpenAI API request base URL, and it
 | Crazyrouter account | Register first at [crazyrouter.com](https://crazyrouter.com) |
 | Crazyrouter token | Create a dedicated `sk-...` token for LobeChat |
 | LobeChat | Hosted or self-hosted is fine; use a current stable build |
-| Available models | Allow at least one verified OpenAI-compatible chat model such as `gpt-5.4` |
+| Available models | Allow at least one verified OpenAI-compatible chat model such as `gpt-5.5` |
 
 Recommended starting whitelist:
 
-- `gpt-5.4`
+- `gpt-5.5`
 - `claude-sonnet-4-6`
 - `gemini-3-pro`
 
@@ -66,7 +67,7 @@ If you also plan to connect Crazyrouter to Cursor, Codex, or Claude Code, keep L
 
 <Steps>
   <Step title="Create a dedicated LobeChat token">
-    In the Crazyrouter dashboard, create a token named `lobechat`. For the first rollout, allow only the models you actually need, such as `gpt-5.4` and `claude-sonnet-4-6`.
+    In the Crazyrouter dashboard, create a token named `lobechat`. For the first rollout, allow only the models you actually need, such as `gpt-5.5` and `claude-sonnet-4-6`.
   </Step>
   <Step title="Open the language model settings">
     In LobeChat, open `Settings` → `Language Model` from the avatar menu or settings entry.
@@ -74,12 +75,12 @@ If you also plan to connect Crazyrouter to Cursor, Codex, or Claude Code, keep L
   <Step title="Configure the OpenAI path">
     In the `OpenAI` configuration, enter:
     - `API Key`: your `sk-...`
-    - `API Proxy URL`: `https://crazyrouter.com/v1`
+    - `API Proxy URL`: `https://cn.crazyrouter.com/v1`
 
     Also enable the custom proxy URL option if your version exposes it.
   </Step>
   <Step title="Pick one baseline model">
-    Save the settings and choose `gpt-5.4` as the default model first. Do not start with a large model list.
+    Save the settings and choose `gpt-5.5` as the default model first. Do not start with a large model list.
   </Step>
   <Step title="Run the first validation prompt">
     Start a new conversation and send `Reply only OK`. If it returns successfully and appears in the Crazyrouter logs, the integration is working.
@@ -98,8 +99,8 @@ services:
       - "3210:3210"
     environment:
       - OPENAI_API_KEY=sk-xxx
-      - OPENAI_PROXY_URL=https://crazyrouter.com/v1
-      - OPENAI_MODEL_LIST=gpt-5.4,claude-sonnet-4-6,gemini-3-pro
+      - OPENAI_PROXY_URL=https://cn.crazyrouter.com/v1
+      - OPENAI_MODEL_LIST=gpt-5.5,claude-sonnet-4-6,gemini-3-pro
 ```
 
 If you do not want end users to replace the key freely, combine this with the config controls your deployed LobeChat version supports for hosted defaults or restricted client-side customization.
@@ -108,11 +109,11 @@ If you do not want end users to replace the key freely, combine this with the co
 
 | Use case | Recommended model | Why |
 |----------|-------------------|-----|
-| Default main chat model | `gpt-5.4` | Verified successfully in production on March 23, 2026, and suited for the main LobeChat baseline |
+| Default main chat model | `gpt-5.5` | Verified successfully in production on March 23, 2026, and suited for the main LobeChat baseline |
 | Higher-quality writing / code help | `claude-sonnet-4-6` | Strong long-form writing and reasoning |
 | Gemini fallback path | `gemini-3-pro` | Useful as a second vendor-compatible validation path |
 
-Recommended order: get `gpt-5.4` working first, then expand to `claude-sonnet-4-6` and `gemini-3-pro`.
+Recommended order: get `gpt-5.5` working first, then expand to `claude-sonnet-4-6` and `gemini-3-pro`.
 
 ## Token Setup Best Practices
 
@@ -128,7 +129,7 @@ Recommended order: get `gpt-5.4` working first, then expand to `claude-sonnet-4-
 ## Verification Checklist
 
 - [ ] `API Key` is saved correctly
-- [ ] `API Proxy URL` is set to `https://crazyrouter.com/v1`
+- [ ] `API Proxy URL` is set to `https://cn.crazyrouter.com/v1`
 - [ ] the custom proxy URL option is enabled if required by your version
 - [ ] the first model is selected successfully
 - [ ] the first chat request succeeds
@@ -140,19 +141,19 @@ Recommended order: get `gpt-5.4` working first, then expand to `claude-sonnet-4-
 
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
-| settings cannot be saved or validation fails | wrong API key or wrong proxy URL | recheck the `sk-...` value and `https://crazyrouter.com/v1` |
+| settings cannot be saved or validation fails | wrong API key or wrong proxy URL | recheck the `sk-...` value and `https://cn.crazyrouter.com/v1` |
 | 401 unauthorized | token expired, was removed, or is invalid | generate a new token and replace it |
 | 403 / model not allowed | selected model is missing from the token whitelist | allow that model in Crazyrouter |
-| 404 | proxy URL was entered as the root domain or a full endpoint path | change it to `https://crazyrouter.com/v1` |
+| 404 | proxy URL was entered as the root domain or a full endpoint path | change it to `https://cn.crazyrouter.com/v1` |
 | settings look correct but you still get 404s | your own gateway, reverse proxy, or deployment layer already appends `/v1` once | inspect the upstream chain and remove the duplicated suffix from one layer |
-| model looks selectable but requests fail | LobeChat cached an old model list or the default model is not valid | switch back to `gpt-5.4`, refresh, and reselect |
-| chat works but streaming is unstable | client-version or model compatibility issue | use `gpt-5.4` as the baseline and upgrade LobeChat |
+| model looks selectable but requests fail | LobeChat cached an old model list or the default model is not valid | switch back to `gpt-5.5`, refresh, and reselect |
+| chat works but streaming is unstable | client-version or model compatibility issue | use `gpt-5.5` as the baseline and upgrade LobeChat |
 | usage spikes when multiple users share the app | one shared token has no quota cap | set a quota cap for the team frontend or split tokens |
 | users can still switch away from Crazyrouter after self-hosting | you only set defaults, not restrictions | add deployment-side controls or disable client customization where supported |
 
 ## Performance and Cost Tips
 
-- Keep only `gpt-5.4` in the first rollout
+- Keep only `gpt-5.5` in the first rollout
 - Use a cheaper default model for team chat only if you have separately validated that route in your own deployment
 - If you also enable knowledge features, plugins, or long-context sessions, give LobeChat its own quota cap
 - Separate staging and production tokens so internal testing does not affect real usage budgets
@@ -162,7 +163,7 @@ Recommended order: get `gpt-5.4` working first, then expand to `claude-sonnet-4-
 
 ### Which Base URL should I use in LobeChat?
 
-Use `https://crazyrouter.com/v1`.
+Use `https://cn.crazyrouter.com/v1`.
 
 ### Why should I not enter only the root domain here?
 
@@ -174,7 +175,7 @@ Then do not add another `/v1` in the final URL you expose to LobeChat. Check the
 
 ### Which model should I test first?
 
-Start with `gpt-5.4`.
+Start with `gpt-5.5`.
 
 ### Can LobeChat use multiple models with Crazyrouter?
 

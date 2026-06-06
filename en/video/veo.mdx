@@ -2,6 +2,7 @@
 title: "Veo 3.1"
 description: "Use Veo 3.1 Fast and Veo 3.1 Quality through the Crazyrouter unified video API"
 ---
+> Last updated: 2026-06-06
 
 # Veo 3.1
 
@@ -63,7 +64,7 @@ Provider-native `referenceImages`, style reference, and other Veo-specific modes
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/v1/video/create \
+curl -X POST https://cn.crazyrouter.com/v1/video/create \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -77,7 +78,7 @@ curl -X POST https://crazyrouter.com/v1/video/create \
 import requests
 
 response = requests.post(
-    "https://crazyrouter.com/v1/video/create",
+    "https://cn.crazyrouter.com/v1/video/create",
     headers={
         "Content-Type": "application/json",
         "Authorization": "Bearer YOUR_API_KEY"
@@ -110,7 +111,7 @@ print(f"Task ID: {task_id}")
 ## Single-Image Image-to-Video Example
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/v1/video/create \
+curl -X POST https://cn.crazyrouter.com/v1/video/create \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -131,7 +132,7 @@ GET /v1/video/query?id={task_id}
 ```
 
 ```bash cURL
-curl "https://crazyrouter.com/v1/video/query?id=veo_task_abc123" \
+curl "https://cn.crazyrouter.com/v1/video/query?id=veo_task_abc123" \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 

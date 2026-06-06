@@ -2,6 +2,7 @@
 title: "Tool Calling"
 description: "Production-verified tool calling with the latest GPT, Claude, and Gemini models"
 ---
+> Дата обновления: 2026-06-06
 
 # Tool Calling
 
@@ -13,7 +14,7 @@ Verification date:
 
 Verified models:
 
-- `gpt-5.4`
+- `gpt-5.5`
 - `claude-sonnet-4-6`
 - `gemini-3-pro`
 
@@ -21,18 +22,18 @@ Verified models:
 
 | Model | Protocol | Endpoint | Success marker |
 |------|------|------|----------|
-| `gpt-5.4` | OpenAI Chat Completions | `POST /v1/chat/completions` | Returns `tool_calls` |
+| `gpt-5.5` | OpenAI Chat Completions | `POST /v1/chat/completions` | Returns `tool_calls` |
 | `claude-sonnet-4-6` | Anthropic Messages | `POST /v1/messages` | Returns `tool_use` block |
 | `gemini-3-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | Returns `functionCall` |
 
 ## GPT-5.4
 
 ```bash
-curl https://crazyrouter.com/v1/chat/completions \
+curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-5.5",
     "messages": [
       {
         "role": "user",
@@ -78,7 +79,7 @@ Verified response shape:
 ## Claude Sonnet 4.6
 
 ```bash
-curl https://crazyrouter.com/v1/messages \
+curl https://cn.crazyrouter.com/v1/messages \
   -H "Content-Type: application/json" \
   -H "x-api-key: YOUR_API_KEY" \
   -H "anthropic-version: 2023-06-01" \
@@ -129,7 +130,7 @@ For first-pass validation, use an explicit `tool_choice` and clearly instruct Cl
 ## Gemini 3 Pro
 
 ```bash
-curl "https://crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://cn.crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [

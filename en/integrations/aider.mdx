@@ -2,6 +2,7 @@
 title: 'Aider Setup Guide'
 description: 'Connect Aider to Crazyrouter through the OpenAI-compatible path, with separate Windows and macOS install flows, config-file setup, env vars, and validation steps'
 ---
+> Last updated: 2026-06-06
 
 Aider is a practical terminal pair-programming tool that works especially well for small iterative code changes, diff review, explicit context-file control, and repeated fix cycles inside a git repo. For Crazyrouter, the safest path is Aider's officially supported OpenAI-compatible setup.
 
@@ -10,9 +11,9 @@ Aider is a practical terminal pair-programming tool that works especially well f
 With environment variables or `~/.aider.conf.yml`, Aider can send requests to Crazyrouter:
 
 - recommended protocol: `OpenAI-compatible API`
-- base URL: `https://crazyrouter.com/v1`
+- base URL: `https://cn.crazyrouter.com/v1`
 - auth variable: `OPENAI_API_KEY`
-- recommended default model string: `gpt-5.4`
+- recommended default model string: `gpt-5.5`
 
 <Tip>
 If your main workflow is `read code -> edit a few places -> inspect the diff -> refine once more`, Aider is often one of the lightest and easiest tools to operationalize.
@@ -39,17 +40,17 @@ Aider officially supports these settings:
 For Crazyrouter, use:
 
 ```text
-OPENAI_API_BASE=https://crazyrouter.com/v1
+OPENAI_API_BASE=https://cn.crazyrouter.com/v1
 ```
 
-One important accuracy detail: Crazyrouter model names are the raw model IDs shown in the model list and pricing page, such as `gpt-5.4` and `claude-sonnet-4-6`. Use that raw model ID directly in Aider:
+One important accuracy detail: Crazyrouter model names are the raw model IDs shown in the model list and pricing page, such as `gpt-5.5` and `claude-sonnet-4-6`. Use that raw model ID directly in Aider:
 
 ```text
-gpt-5.4
+gpt-5.5
 ```
 
 <Warning>
-Do not add an extra `openai/` prefix to Crazyrouter model names. `openai/gpt-5.4` is not a Crazyrouter model ID and can cause `model not found` or no-route failures.
+Do not add an extra `openai/` prefix to Crazyrouter model names. `openai/gpt-5.5` is not a Crazyrouter model ID and can cause `model not found` or no-route failures.
 </Warning>
 
 ## Prerequisites
@@ -66,7 +67,7 @@ Do not add an extra `openai/` prefix to Crazyrouter model names. `openai/gpt-5.4
 
 Suggested starter allowlist:
 
-- `gpt-5.4`
+- `gpt-5.5`
 - `claude-sonnet-4-6`
 - `gemini-3-pro`
 
@@ -258,7 +259,7 @@ Avoid starting with a plain system-wide `pip install aider-chat`. Aider's own in
 
 <Steps>
   <Step title="Create an Aider-specific token">
-    In Crazyrouter, create a token named something like `aider`. Start by allowing only models such as `gpt-5.4`, `claude-sonnet-4-6`, and `gemini-3-pro`.
+    In Crazyrouter, create a token named something like `aider`. Start by allowing only models such as `gpt-5.5`, `claude-sonnet-4-6`, and `gemini-3-pro`.
 
     <Note>
     The allowlist here uses Crazyrouter's raw model IDs. Use the same raw model IDs in Aider.
@@ -269,7 +270,7 @@ Avoid starting with a plain system-wide `pip install aider-chat`. Aider's own in
       <Tab title="Linux / macOS">
         ```bash
         export OPENAI_API_KEY=sk-xxx
-        export OPENAI_API_BASE=https://crazyrouter.com/v1
+        export OPENAI_API_BASE=https://cn.crazyrouter.com/v1
         echo $OPENAI_API_KEY
         echo $OPENAI_API_BASE
         ```
@@ -277,7 +278,7 @@ Avoid starting with a plain system-wide `pip install aider-chat`. Aider's own in
       <Tab title="Windows PowerShell">
         ```powershell
         $env:OPENAI_API_KEY = "sk-xxx"
-        $env:OPENAI_API_BASE = "https://crazyrouter.com/v1"
+        $env:OPENAI_API_BASE = "https://cn.crazyrouter.com/v1"
         echo $env:OPENAI_API_KEY
         echo $env:OPENAI_API_BASE
         ```
@@ -289,7 +290,7 @@ Avoid starting with a plain system-wide `pip install aider-chat`. Aider's own in
       <Tab title="Linux Bash">
         ```bash
         echo 'export OPENAI_API_KEY=sk-xxx' >> ~/.bashrc
-        echo 'export OPENAI_API_BASE=https://crazyrouter.com/v1' >> ~/.bashrc
+        echo 'export OPENAI_API_BASE=https://cn.crazyrouter.com/v1' >> ~/.bashrc
         source ~/.bashrc
         echo $OPENAI_API_BASE
         ```
@@ -297,7 +298,7 @@ Avoid starting with a plain system-wide `pip install aider-chat`. Aider's own in
       <Tab title="macOS / Zsh">
         ```bash
         echo 'export OPENAI_API_KEY=sk-xxx' >> ~/.zshrc
-        echo 'export OPENAI_API_BASE=https://crazyrouter.com/v1' >> ~/.zshrc
+        echo 'export OPENAI_API_BASE=https://cn.crazyrouter.com/v1' >> ~/.zshrc
         source ~/.zshrc
         echo $OPENAI_API_BASE
         ```
@@ -305,10 +306,10 @@ Avoid starting with a plain system-wide `pip install aider-chat`. Aider's own in
       <Tab title="Windows PowerShell">
         ```powershell
         [System.Environment]::SetEnvironmentVariable("OPENAI_API_KEY", "sk-xxx", "User")
-        [System.Environment]::SetEnvironmentVariable("OPENAI_API_BASE", "https://crazyrouter.com/v1", "User")
+        [System.Environment]::SetEnvironmentVariable("OPENAI_API_BASE", "https://cn.crazyrouter.com/v1", "User")
 
         $env:OPENAI_API_KEY = "sk-xxx"
-        $env:OPENAI_API_BASE = "https://crazyrouter.com/v1"
+        $env:OPENAI_API_BASE = "https://cn.crazyrouter.com/v1"
         ```
       </Tab>
     </Tabs>
@@ -316,8 +317,8 @@ Avoid starting with a plain system-wide `pip install aider-chat`. Aider's own in
   <Step title="Optionally add a config file">
     Add this to `~/.aider.conf.yml`:
     ```yaml
-    model: gpt-5.4
-    openai-api-base: https://crazyrouter.com/v1
+    model: gpt-5.5
+    openai-api-base: https://cn.crazyrouter.com/v1
     ```
 
     If you prefer a safer secret-handling pattern, keep the key only in environment variables and store only `model` plus `openai-api-base` in the config file.
@@ -336,7 +337,7 @@ Avoid starting with a plain system-wide `pip install aider-chat`. Aider's own in
   </Step>
   <Step title="Launch Aider inside your repo">
     ```bash
-    aider --model gpt-5.4
+    aider --model gpt-5.5
     ```
   </Step>
   <Step title="Run the first validation">
@@ -348,11 +349,11 @@ Avoid starting with a plain system-wide `pip install aider-chat`. Aider's own in
 
 | Use case | Recommended Aider model string | Why |
 |----------|--------------------------------|-----|
-| default coding driver | `gpt-5.4` | uses Crazyrouter's raw model ID and works as the OpenAI-compatible Aider baseline |
+| default coding driver | `gpt-5.5` | uses Crazyrouter's raw model ID and works as the OpenAI-compatible Aider baseline |
 | Claude-style alternative | `claude-sonnet-4-6` | good for long-context explanation and steady multi-turn collaboration |
 | Gemini fallback path | `gemini-3-pro` | useful as a second compatibility-validation path |
 
-Recommended rollout: start with `gpt-5.4`. Then add `claude-sonnet-4-6` or `gemini-3-pro` only after the baseline path is stable.
+Recommended rollout: start with `gpt-5.5`. Then add `claude-sonnet-4-6` or `gemini-3-pro` only after the baseline path is stable.
 
 ## Token Setup Best Practices
 
@@ -371,9 +372,9 @@ Recommended rollout: start with `gpt-5.4`. Then add `claude-sonnet-4-6` or `gemi
 - [ ] `python --version` or `python3 --version` works
 - [ ] `aider --version` works
 - [ ] `OPENAI_API_KEY` is set correctly
-- [ ] `OPENAI_API_BASE` is `https://crazyrouter.com/v1`
-- [ ] if `~/.aider.conf.yml` is used, the model string is a Crazyrouter raw model ID such as `gpt-5.4`
-- [ ] `aider --model gpt-5.4` launches correctly
+- [ ] `OPENAI_API_BASE` is `https://cn.crazyrouter.com/v1`
+- [ ] if `~/.aider.conf.yml` is used, the model string is a Crazyrouter raw model ID such as `gpt-5.5`
+- [ ] `aider --model gpt-5.5` launches correctly
 - [ ] the first read-only or small-change task succeeds
 - [ ] Crazyrouter logs show the matching request
 - [ ] token quota and model allowlist match your intended setup
@@ -384,16 +385,16 @@ Recommended rollout: start with `gpt-5.4`. Then add `claude-sonnet-4-6` or `gemi
 |---------|--------------|-----|
 | `401 unauthorized` | wrong, expired, or incomplete API key | generate a new token and set it again |
 | `403` or `model not allowed` | the token does not allow the selected model | allow that model in Crazyrouter token settings |
-| `404` | wrong base URL or missing `/v1` | use `https://crazyrouter.com/v1` |
-| `model not found` | wrong model string, an unsupported `openai/` prefix, or a model that is not currently available on Crazyrouter | switch back to a raw model ID that exists on the pricing page or model list, such as `gpt-5.4` or `claude-sonnet-4-6` |
-| Aider launches but performs poorly | the model is too weak or the context is too noisy | return to `gpt-5.4` and reduce the context files |
+| `404` | wrong base URL or missing `/v1` | use `https://cn.crazyrouter.com/v1` |
+| `model not found` | wrong model string, an unsupported `openai/` prefix, or a model that is not currently available on Crazyrouter | switch back to a raw model ID that exists on the pricing page or model list, such as `gpt-5.5` or `claude-sonnet-4-6` |
+| Aider launches but performs poorly | the model is too weak or the context is too noisy | return to `gpt-5.5` and reduce the context files |
 | config file and env vars behave inconsistently | the two configuration sources conflict | pick one primary source and restart Aider |
 | cost rises too quickly | long sessions and too many context files | clear or restart the session and shrink the context |
 
 ## Performance And Cost Tips
 
 - validate on a small repo first
-- keep `gpt-5.4` as the main model and add `claude-sonnet-4-6` only when you need cross-vendor validation
+- keep `gpt-5.5` as the main model and add `claude-sonnet-4-6` only when you need cross-vendor validation
 - split tokens by project type so cost tracking stays clear
 - clear context when the session becomes too long or drifts away from the task
 - after larger edits, review both the Aider diff and Crazyrouter logs
@@ -402,11 +403,11 @@ Recommended rollout: start with `gpt-5.4`. Then add `claude-sonnet-4-6` or `gemi
 
 ### What base URL should I use for Aider?
 
-Use `https://crazyrouter.com/v1`.
+Use `https://cn.crazyrouter.com/v1`.
 
-### Why should the model name not be `openai/gpt-5.4`?
+### Why should the model name not be `openai/gpt-5.5`?
 
-Because Crazyrouter model names do not include provider prefixes. Crazyrouter recognizes raw model IDs such as `gpt-5.4`; `openai/gpt-5.4` is treated as a different model name and is not available.
+Because Crazyrouter model names do not include provider prefixes. Crazyrouter recognizes raw model IDs such as `gpt-5.5`; `openai/gpt-5.5` is treated as a different model name and is not available.
 
 ### Should I prefer env vars or a config file?
 
@@ -414,7 +415,7 @@ Both work. Environment variables are faster for a first setup; `~/.aider.conf.ym
 
 ### Which model should I try first?
 
-Start with `gpt-5.4`.
+Start with `gpt-5.5`.
 
 ### Does Aider have to run inside a git repo?
 

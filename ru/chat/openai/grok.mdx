@@ -2,6 +2,7 @@
 title: "Grok Models"
 description: "Call Grok text models through the OpenAI Chat Completions format"
 ---
+> Дата обновления: 2026-06-06
 
 # Grok Models
 
@@ -38,7 +39,7 @@ Grok text models use the OpenAI-compatible Chat Completions format. Point `base_
 <CodeGroup>
 
 ```bash cURL
-curl https://crazyrouter.com/v1/chat/completions \
+curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -59,7 +60,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="YOUR_API_KEY",
-    base_url="https://crazyrouter.com/v1",
+    base_url="https://cn.crazyrouter.com/v1",
 )
 
 response = client.chat.completions.create(
@@ -79,7 +80,7 @@ import OpenAI from "openai";
 
 const client = new OpenAI({
   apiKey: "YOUR_API_KEY",
-  baseURL: "https://crazyrouter.com/v1",
+  baseURL: "https://cn.crazyrouter.com/v1",
 });
 
 const response = await client.chat.completions.create({
@@ -101,7 +102,7 @@ console.log(response.choices[0].message.content);
 Set `stream: true` to use SSE streaming.
 
 ```bash
-curl https://crazyrouter.com/v1/chat/completions \
+curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{

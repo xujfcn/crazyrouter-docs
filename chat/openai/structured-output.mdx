@@ -2,6 +2,7 @@
 title: "结构化输出"
 description: "基于 2026-03-23 Crazyrouter 生产环境验证的 OpenAI 风格结构化输出"
 ---
+> 更新日期：2026-06-06
 
 # 结构化输出
 
@@ -9,18 +10,18 @@ description: "基于 2026-03-23 Crazyrouter 生产环境验证的 OpenAI 风格�
 POST /v1/chat/completions
 ```
 
-截至 2026 年 3 月 23 日，Crazyrouter 生产环境已验证 `gpt-5.4` + `response_format.type = "json_schema"` 可以返回可直接解析的 JSON。
+截至 2026 年 3 月 23 日，Crazyrouter 生产环境已验证 `gpt-5.5` + `response_format.type = "json_schema"` 可以返回可直接解析的 JSON。
 
 ---
 
 ## 推荐路径：`json_schema`
 
 ```bash
-curl https://crazyrouter.com/v1/chat/completions \
+curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-5.5",
     "messages": [
       {
         "role": "user",

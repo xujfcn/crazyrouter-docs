@@ -2,6 +2,7 @@
 title: 'ChatGPT on WeChat Setup Guide'
 description: 'Configure Crazyrouter API in the ChatGPT on WeChat project with production-verified model recommendations'
 ---
+> 更新日: 2026-06-06
 
 ## Overview
 
@@ -9,8 +10,8 @@ ChatGPT on WeChat is a widely used WeChat bot project that can route private and
 
 ## Recommended First-Pass Setup
 
-- `open_ai_api_base`: `https://crazyrouter.com/v1`
-- first validation model: `gpt-5.4`
+- `open_ai_api_base`: `https://cn.crazyrouter.com/v1`
+- first validation model: `gpt-5.5`
 - keep the initial allowlist small so troubleshooting stays simple
 
 ## Configuration
@@ -22,8 +23,8 @@ Edit `config.json`:
 ```json
 {
   "open_ai_api_key": "sk-xxx",
-  "open_ai_api_base": "https://crazyrouter.com/v1",
-  "model": "gpt-5.4",
+  "open_ai_api_base": "https://cn.crazyrouter.com/v1",
+  "model": "gpt-5.5",
   "proxy": "",
   "single_chat_prefix": [""],
   "single_chat_reply_prefix": "",
@@ -36,8 +37,8 @@ Edit `config.json`:
 
 ```bash
 export OPEN_AI_API_KEY=sk-xxx
-export OPEN_AI_API_BASE=https://crazyrouter.com/v1
-export MODEL=gpt-5.4
+export OPEN_AI_API_BASE=https://cn.crazyrouter.com/v1
+export MODEL=gpt-5.5
 ```
 
 ### Docker Deployment
@@ -48,8 +49,8 @@ services:
     image: zhayujie/chatgpt-on-wechat
     environment:
       - OPEN_AI_API_KEY=sk-xxx
-      - OPEN_AI_API_BASE=https://crazyrouter.com/v1
-      - MODEL=gpt-5.4
+      - OPEN_AI_API_BASE=https://cn.crazyrouter.com/v1
+      - MODEL=gpt-5.5
     volumes:
       - ./config.json:/app/config.json
 ```
@@ -58,14 +59,14 @@ services:
 
 | Scenario | Model | Description |
 |----------|-------|-------------|
-| First-pass route validation | `gpt-5.4` | Verified successfully in Crazyrouter production on March 23, 2026, and best for the OpenAI-compatible baseline |
+| First-pass route validation | `gpt-5.5` | Verified successfully in Crazyrouter production on March 23, 2026, and best for the OpenAI-compatible baseline |
 | Higher-quality long replies | `claude-sonnet-4-6` | Better for complex explanations, summaries, and longer text |
 | Gemini fallback path | `gemini-3-pro` | Useful as a second vendor-compatible validation path |
 
 ## Suggested Validation Order
 
 1. Create one dedicated token
-2. Start with one model: `gpt-5.4`
+2. Start with one model: `gpt-5.5`
 3. Send `Reply only OK` in a private chat first
 4. Confirm the request appears in Crazyrouter logs
 5. Only then expand group triggers, prefixes, and additional models

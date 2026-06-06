@@ -2,6 +2,7 @@
 title: "Vision via Chat"
 description: "OpenAI-style image input, covering both base64 and remote URL usage"
 ---
+> Last updated: 2026-06-06
 
 # Vision via Chat
 
@@ -11,7 +12,7 @@ POST /v1/chat/completions
 
 Crazyrouter production has verified OpenAI-style `image_url` input on the usual vision models:
 
-- `gpt-4o`, `gpt-4o-mini`, `gpt-4.1`, `gpt-5.4`, and other OpenAI vision models
+- `gpt-4o`, `gpt-4o-mini`, `gpt-4.1`, `gpt-5.5`, and other OpenAI vision models
 - Both `data:image/...;base64,...` data URLs and public `https://` URLs work
 - The returned `message.content` is currently a plain string
 
@@ -22,7 +23,7 @@ Crazyrouter production has verified OpenAI-style `image_url` input on the usual 
 ## Using a base64 data URL (most reliable)
 
 ```bash
-curl https://crazyrouter.com/v1/chat/completions \
+curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -66,7 +67,7 @@ Sample response:
 ## Using a remote https URL
 
 ```bash
-curl https://crazyrouter.com/v1/chat/completions \
+curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{

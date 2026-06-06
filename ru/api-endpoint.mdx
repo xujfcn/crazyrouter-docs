@@ -2,6 +2,7 @@
 title: 'API endpoints'
 description: 'Адреса API endpoints и справочник'
 ---
+> Дата обновления: 2026-06-06
 
 ## Базовый URL API
 
@@ -25,9 +26,9 @@ https://crazyrouter.com
 
 | Сценарий | Глобальный маршрут | Маршрут для Китая | Примечание |
 |----------|--------------------|-------------------|------------|
-| OpenAI-совместимые SDK / клиенты | `https://crazyrouter.com/v1` | `https://cn.crazyrouter.com/v1` | Клиент сам добавляет пути вроде `/chat/completions` и `/models` |
+| OpenAI-совместимые SDK / клиенты | `https://cn.crazyrouter.com/v1` | `https://cn.crazyrouter.com/v1` | Клиент сам добавляет пути вроде `/chat/completions` и `/models` |
 | Claude Code / Anthropic-native клиенты | `https://crazyrouter.com` | `https://cn.crazyrouter.com` | Клиент сам добавляет `/v1/messages`, поэтому не добавляйте `/v1` вручную |
-| curl / raw HTTP requests | Полный endpoint, например `https://crazyrouter.com/v1/chat/completions` | Полный endpoint, например `https://cn.crazyrouter.com/v1/chat/completions` | В ручных HTTP-запросах нужно указывать полный API path |
+| curl / raw HTTP requests | Полный endpoint, например `https://cn.crazyrouter.com/v1/chat/completions` | Полный endpoint, например `https://cn.crazyrouter.com/v1/chat/completions` | В ручных HTTP-запросах нужно указывать полный API path |
 
 <Warning>
 Если в логах видны `/v1/v1/models`, `/v1/v1/messages` или `/v1/messages/v1/messages`, клиент дублирует API path. Для Claude Code / Anthropic-native клиентов верните root domain. Для OpenAI-совместимых клиентов оставьте Base URL только до `/v1`.
@@ -94,5 +95,5 @@ https://crazyrouter.com
 | `/v1/models` | GET | Список моделей |
 
 <Note>
-Все endpoints поддерживают HTTPS. OpenAI-совместимые клиенты используют `https://crazyrouter.com/v1` или `https://cn.crazyrouter.com/v1`; Claude Code и другие Anthropic-native клиенты используют root domain без `/v1`.
+Все endpoints поддерживают HTTPS. OpenAI-совместимые клиенты используют `https://cn.crazyrouter.com/v1` или `https://cn.crazyrouter.com/v1`; Claude Code и другие Anthropic-native клиенты используют root domain без `/v1`.
 </Note>

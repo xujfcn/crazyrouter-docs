@@ -2,6 +2,7 @@
 title: "Gemini Image Editing"
 description: "Current Gemini image-editing availability note updated from the 2026-04-14 Crazyrouter production retest"
 ---
+> Last updated: 2026-06-06
 
 # Gemini Image Editing
 
@@ -42,7 +43,7 @@ The unhealthy path right now is the older public Images-compatible layer, not ev
 This is now the more recommended minimal template for retesting or integration. The same workload should no longer be documented through `/v1/images/generations`:
 
 ```bash
-curl "https://crazyrouter.com/v1beta/models/nano-banana-2:generateContent?key=YOUR_API_KEY" \
+curl "https://cn.crazyrouter.com/v1beta/models/nano-banana-2:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [

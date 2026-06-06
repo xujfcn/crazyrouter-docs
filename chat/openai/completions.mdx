@@ -2,6 +2,7 @@
 title: "创建聊天补全"
 description: "基于当前生产行为，使用 POST /v1/chat/completions 创建聊天补全"
 ---
+> 更新日期：2026-06-06
 
 # 创建聊天补全
 
@@ -23,7 +24,7 @@ Authorization: Bearer YOUR_API_KEY
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| `model` | string | 是 | 模型名称，如 `gpt-5.4`、`claude-sonnet-4-6`、`gemini-3-pro` |
+| `model` | string | 是 | 模型名称，如 `gpt-5.5`、`claude-sonnet-4-6`、`gemini-3-pro` |
 | `messages` | array | 是 | 消息列表 |
 | `stream` | boolean | 否 | 是否启用流式输出 |
 | `max_tokens` | integer | 否 | 最大输出 Token 数 |
@@ -42,11 +43,11 @@ Authorization: Bearer YOUR_API_KEY
 ## 非流式请求
 
 ```bash cURL
-curl https://crazyrouter.com/v1/chat/completions \
+curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-5.5",
     "messages": [
       {
         "role": "system",
@@ -66,7 +67,7 @@ curl https://crazyrouter.com/v1/chat/completions \
 ```json
 {
   "object": "chat.completion",
-  "model": "gpt-5.4",
+  "model": "gpt-5.5",
   "choices": [
     {
       "message": {
@@ -92,11 +93,11 @@ curl https://crazyrouter.com/v1/chat/completions \
 ## 流式请求
 
 ```bash cURL
-curl https://crazyrouter.com/v1/chat/completions \
+curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-5.5",
     "messages": [
       {
         "role": "user",
@@ -120,7 +121,7 @@ curl https://crazyrouter.com/v1/chat/completions \
 当前收到的 SSE 片段形态类似：
 
 ```text
-data: {"object":"chat.completion.chunk","model":"gpt-5.4","choices":[{"delta":{"role":"assistant","content":"AI","reasoning_content":null,"tool_calls":null}}]}
+data: {"object":"chat.completion.chunk","model":"gpt-5.5","choices":[{"delta":{"role":"assistant","content":"AI","reasoning_content":null,"tool_calls":null}}]}
 ```
 
 ```text
@@ -136,11 +137,11 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="YOUR_API_KEY",
-    base_url="https://crazyrouter.com/v1"
+    base_url="https://cn.crazyrouter.com/v1"
 )
 
 stream = client.chat.completions.create(
-    model="gpt-5.4",
+    model="gpt-5.5",
     messages=[
         {"role": "user", "content": "Explain AI in one short sentence."}
     ],

@@ -2,6 +2,7 @@
 title: 'Node.js 基础对话'
 description: 'Node.js 使用 openai 包接入 Crazyrouter'
 ---
+> 更新日期：2026-06-06
 
 ## 安装
 
@@ -16,12 +17,12 @@ import OpenAI from 'openai';
 
 const client = new OpenAI({
   apiKey: 'sk-xxx',
-  baseURL: 'https://crazyrouter.com/v1',
+  baseURL: 'https://cn.crazyrouter.com/v1',
 });
 
 async function main() {
   const response = await client.chat.completions.create({
-    model: 'gpt-5.4',
+    model: 'gpt-5.5',
     messages: [
       { role: 'system', content: '你是一个有帮助的助手。' },
       { role: 'user', content: '用一句话解释什么是 Node.js' },
@@ -39,7 +40,7 @@ main();
 ```javascript
 async function streamChat() {
   const stream = await client.chat.completions.create({
-    model: 'gpt-5.4',
+    model: 'gpt-5.5',
     messages: [{ role: 'user', content: '写一首关于编程的诗' }],
     stream: true,
   });
@@ -65,7 +66,7 @@ async function chat(userInput) {
   messages.push({ role: 'user', content: userInput });
 
   const response = await client.chat.completions.create({
-    model: 'gpt-5.4',
+    model: 'gpt-5.5',
     messages,
   });
 
@@ -89,17 +90,17 @@ const OpenAI = require('openai');
 
 const client = new OpenAI({
   apiKey: 'sk-xxx',
-  baseURL: 'https://crazyrouter.com/v1',
+  baseURL: 'https://cn.crazyrouter.com/v1',
 });
 
 client.chat.completions
   .create({
-    model: 'gpt-5.4',
+    model: 'gpt-5.5',
     messages: [{ role: 'user', content: '你好' }],
   })
   .then((res) => console.log(res.choices[0].message.content));
 ```
 
 <Note>
-  以上示例默认使用 2026 年 3 月 23 日已在生产环境实测成功的 `gpt-5.4`。如果你需要切换模型，优先改成同样已验证的 `claude-sonnet-4-6` 或 `gemini-3-pro`，再根据场景继续扩展。
+  以上示例默认使用 2026 年 3 月 23 日已在生产环境实测成功的 `gpt-5.5`。如果你需要切换模型，优先改成同样已验证的 `claude-sonnet-4-6` 或 `gemini-3-pro`，再根据场景继续扩展。
 </Note>

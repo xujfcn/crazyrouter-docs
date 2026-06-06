@@ -2,6 +2,7 @@
 title: 'PHP Examples'
 description: 'PHP Crazyrouter API examples'
 ---
+> Last updated: 2026-06-06
 
 ## Basic Chat
 
@@ -9,10 +10,10 @@ description: 'PHP Crazyrouter API examples'
 <?php
 
 $apiKey = 'sk-xxx';
-$baseUrl = 'https://crazyrouter.com/v1';
+$baseUrl = 'https://cn.crazyrouter.com/v1';
 
 $data = [
-    'model' => 'gpt-5.4',
+    'model' => 'gpt-5.5',
     'messages' => [
         ['role' => 'user', 'content' => 'Hello, write a bubble sort in PHP']
     ]
@@ -42,7 +43,7 @@ echo $result['choices'][0]['message']['content'];
 <?php
 
 $apiKey = 'sk-xxx';
-$baseUrl = 'https://crazyrouter.com/v1';
+$baseUrl = 'https://cn.crazyrouter.com/v1';
 
 // Edit image with GPT-Image-2
 $ch = curl_init($baseUrl . '/images/edits');
@@ -78,10 +79,10 @@ echo "Image URL: " . $imageUrl . "\n";
 <?php
 
 $apiKey = 'sk-xxx';
-$baseUrl = 'https://crazyrouter.com/v1';
+$baseUrl = 'https://cn.crazyrouter.com/v1';
 
 $data = [
-    'model' => 'gpt-5.4',
+    'model' => 'gpt-5.5',
     'messages' => [['role' => 'user', 'content' => 'Tell me a joke']],
     'stream' => true,
 ];
@@ -113,5 +114,5 @@ echo "\n";
 ```
 
 <Note>
-  The chat examples above default to `gpt-5.4`, which was verified successfully in Crazyrouter production on March 23, 2026. If you switch models, prefer other verified options such as `claude-sonnet-4-6` or `gemini-3-pro`.
+  The chat examples above default to `gpt-5.5`, which was verified successfully in Crazyrouter production on March 23, 2026. If you switch models, prefer other verified options such as `claude-sonnet-4-6` or `gemini-3-pro`.
 </Note>

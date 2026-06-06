@@ -2,6 +2,7 @@
 title: 'ChatGPT on WeChat 配置教程'
 description: '在 ChatGPT on WeChat 项目中配置 Crazyrouter API，并使用已在生产环境验证过的最新模型'
 ---
+> 更新日期：2026-06-06
 
 ## 概述
 
@@ -9,8 +10,8 @@ ChatGPT on WeChat 是一个常见的微信机器人项目，可以把 Crazyroute
 
 ## 推荐首轮配置
 
-- `open_ai_api_base`: `https://crazyrouter.com/v1`
-- 首个验证模型：`gpt-5.4`
+- `open_ai_api_base`: `https://cn.crazyrouter.com/v1`
+- 首个验证模型：`gpt-5.5`
 - 首轮只开放少量模型，避免排障范围过大
 
 ## 配置方法
@@ -22,8 +23,8 @@ ChatGPT on WeChat 是一个常见的微信机器人项目，可以把 Crazyroute
 ```json
 {
   "open_ai_api_key": "sk-xxx",
-  "open_ai_api_base": "https://crazyrouter.com/v1",
-  "model": "gpt-5.4",
+  "open_ai_api_base": "https://cn.crazyrouter.com/v1",
+  "model": "gpt-5.5",
   "proxy": "",
   "single_chat_prefix": [""],
   "single_chat_reply_prefix": "",
@@ -36,8 +37,8 @@ ChatGPT on WeChat 是一个常见的微信机器人项目，可以把 Crazyroute
 
 ```bash
 export OPEN_AI_API_KEY=sk-xxx
-export OPEN_AI_API_BASE=https://crazyrouter.com/v1
-export MODEL=gpt-5.4
+export OPEN_AI_API_BASE=https://cn.crazyrouter.com/v1
+export MODEL=gpt-5.5
 ```
 
 ### Docker 部署
@@ -48,8 +49,8 @@ services:
     image: zhayujie/chatgpt-on-wechat
     environment:
       - OPEN_AI_API_KEY=sk-xxx
-      - OPEN_AI_API_BASE=https://crazyrouter.com/v1
-      - MODEL=gpt-5.4
+      - OPEN_AI_API_BASE=https://cn.crazyrouter.com/v1
+      - MODEL=gpt-5.5
     volumes:
       - ./config.json:/app/config.json
 ```
@@ -58,14 +59,14 @@ services:
 
 | 场景 | 模型 | 说明 |
 |------|------|------|
-| 首轮链路验证 | `gpt-5.4` | 2026 年 3 月 23 日已在生产环境实测成功，最适合先确认 OpenAI 兼容链路 |
+| 首轮链路验证 | `gpt-5.5` | 2026 年 3 月 23 日已在生产环境实测成功，最适合先确认 OpenAI 兼容链路 |
 | 高质量长回复 | `claude-sonnet-4-6` | 更适合复杂解释、总结和长文本 |
 | Gemini 备用档 | `gemini-3-pro` | 适合补充第二条供应商兼容性验证路径 |
 
 ## 建议验证顺序
 
 1. 先只配置一个 token
-2. 先只配置一个模型 `gpt-5.4`
+2. 先只配置一个模型 `gpt-5.5`
 3. 先在私聊里发送 `Reply only OK`
 4. 确认 Crazyrouter 后台日志已有对应请求
 5. 再逐步放开群聊、更多前缀规则和其他模型

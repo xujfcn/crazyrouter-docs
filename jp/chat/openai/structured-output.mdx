@@ -2,6 +2,7 @@
 title: "Structured Outputs"
 description: "OpenAI-style structured output verified against Crazyrouter production on 2026-03-23"
 ---
+> 更新日: 2026-06-06
 
 # Structured Outputs
 
@@ -9,18 +10,18 @@ description: "OpenAI-style structured output verified against Crazyrouter produc
 POST /v1/chat/completions
 ```
 
-As of March 23, 2026, Crazyrouter production has verified that `gpt-5.4` with `response_format.type = "json_schema"` returns directly parseable JSON.
+As of March 23, 2026, Crazyrouter production has verified that `gpt-5.5` with `response_format.type = "json_schema"` returns directly parseable JSON.
 
 ---
 
 ## Recommended Path: `json_schema`
 
 ```bash
-curl https://crazyrouter.com/v1/chat/completions \
+curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-5.5",
     "messages": [
       {
         "role": "user",

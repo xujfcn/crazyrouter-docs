@@ -2,6 +2,7 @@
 title: "Web Search"
 description: "Production-revalidated OpenAI-style web search on Crazyrouter"
 ---
+> 更新日: 2026-06-06
 
 # Web Search
 
@@ -9,7 +10,7 @@ This page only documents OpenAI-style web search behavior that was revalidated a
 
 The current primary path is:
 
-- `gpt-5.4`
+- `gpt-5.5`
 - `POST /v1/responses`
 - `tools: [{ "type": "web_search_preview" }]`
 
@@ -17,7 +18,7 @@ The current primary path is:
 
 In today's production recheck:
 
-- `gpt-5.4` via the Responses API reliably returned `web_search_call`
+- `gpt-5.5` via the Responses API reliably returned `web_search_call`
 - the older Chat Completions probe using `tools: [{ "type": "web_search" }]` returned `200`, but did not provide a stable, verifiable search trigger signal, so it is not used as the primary documented pattern
 
 ---
@@ -25,11 +26,11 @@ In today's production recheck:
 ## Verified request
 
 ```bash cURL
-curl https://crazyrouter.com/v1/responses \
+curl https://cn.crazyrouter.com/v1/responses \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-5.5",
     "input": "Use web search to find one current technology headline published recently.",
     "tools": [
       {
@@ -56,11 +57,11 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="YOUR_API_KEY",
-    base_url="https://crazyrouter.com/v1"
+    base_url="https://cn.crazyrouter.com/v1"
 )
 
 response = client.responses.create(
-    model="gpt-5.4",
+    model="gpt-5.5",
     input="Use web search to find one current technology headline published recently.",
     tools=[
         {"type": "web_search_preview"}

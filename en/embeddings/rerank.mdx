@@ -3,6 +3,7 @@ title: 'Rerank'
 description: 'Semantically rerank search results'
 api: 'POST /v1/rerank'
 ---
+> Last updated: 2026-06-06
 
 ## Overview
 
@@ -77,7 +78,7 @@ Reorder a set of documents by semantic relevance to a query. Commonly used as th
 import requests
 
 response = requests.post(
-    "https://crazyrouter.com/v1/rerank",
+    "https://cn.crazyrouter.com/v1/rerank",
     headers={
         "Authorization": "Bearer sk-xxx",
         "Content-Type": "application/json"
@@ -102,7 +103,7 @@ for result in data["results"]:
 ```
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/v1/rerank \
+curl -X POST https://cn.crazyrouter.com/v1/rerank \
   -H "Authorization: Bearer sk-xxx" \
   -H "Content-Type: application/json" \
   -d '{

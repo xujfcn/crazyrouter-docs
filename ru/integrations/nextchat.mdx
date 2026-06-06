@@ -2,6 +2,7 @@
 title: 'NextChat Setup Guide'
 description: 'Connect Crazyrouter to NextChat through the OpenAI-compatible path, then finish hosted or self-hosted setup, model list control, and troubleshooting'
 ---
+> Дата обновления: 2026-06-06
 
 NextChat (formerly ChatGPT Next Web) is a good fit when you want a lightweight, fast, easy-to-deploy chat frontend. When connecting it to Crazyrouter, the recommended approach is to stay on NextChat's default OpenAI-compatible route and point the service URL at the Crazyrouter root domain.
 
@@ -13,7 +14,7 @@ Using NextChat's OpenAI settings, you can route requests through Crazyrouter:
 - Recommended route: the default NextChat OpenAI flow
 - Base URL: `https://crazyrouter.com`
 - Auth method: `sk-...` token
-- Recommended first validation model: `gpt-5.4`
+- Recommended first validation model: `gpt-5.5`
 
 <Note>
 NextChat's official README documents `BASE_URL` as the OpenAI API request base URL and uses root-domain style examples. The local `http://127.0.0.1:4000/api/status` response also exposes a root-style `server_address`. So for Crazyrouter, the safest first-pass setup is `https://crazyrouter.com`; only switch to a more specific path if your customized build explicitly requires it.
@@ -38,13 +39,13 @@ https://crazyrouter.com
 
 Do not start with:
 
-- `https://crazyrouter.com/v1/chat/completions`
-- `https://crazyrouter.com/v1/models`
+- `https://cn.crazyrouter.com/v1/chat/completions`
+- `https://cn.crazyrouter.com/v1/models`
 
 If an older or customized NextChat build requires a more specific API host setting, adjust to that version after you validate the baseline setup with the root domain.
 
 <Tip>
-The exact entry point varies by deployment style: hosted usage often exposes a settings panel, while self-hosted usage often pushes the values through environment variables only. Regardless of the UI, keep first-pass validation minimal: `API Key` + root-domain `BASE_URL` + one model `gpt-5.4`.
+The exact entry point varies by deployment style: hosted usage often exposes a settings panel, while self-hosted usage often pushes the values through environment variables only. Regardless of the UI, keep first-pass validation minimal: `API Key` + root-domain `BASE_URL` + one model `gpt-5.5`.
 </Tip>
 
 ## Prerequisites
@@ -54,11 +55,11 @@ The exact entry point varies by deployment style: hosted usage often exposes a s
 | Crazyrouter account | Register first at [crazyrouter.com](https://crazyrouter.com) |
 | Crazyrouter token | Create a dedicated `sk-...` token for NextChat |
 | NextChat | Hosted or self-hosted is fine; use a current stable version |
-| Available models | Allow at least one verified OpenAI-compatible chat model such as `gpt-5.4` |
+| Available models | Allow at least one verified OpenAI-compatible chat model such as `gpt-5.5` |
 
 Recommended starting whitelist:
 
-- `gpt-5.4`
+- `gpt-5.5`
 - `claude-sonnet-4-6`
 - `gemini-3-pro`
 
@@ -66,7 +67,7 @@ Recommended starting whitelist:
 
 <Steps>
   <Step title="Create a dedicated NextChat token">
-    In the Crazyrouter dashboard, create a token named `nextchat`. For the first rollout, allow only baseline models such as `gpt-5.4` and `claude-sonnet-4-6`.
+    In the Crazyrouter dashboard, create a token named `nextchat`. For the first rollout, allow only baseline models such as `gpt-5.5` and `claude-sonnet-4-6`.
   </Step>
   <Step title="Open NextChat settings">
     In NextChat, open the `Settings` panel from the bottom-left icon or settings entry.
@@ -77,7 +78,7 @@ Recommended starting whitelist:
     - `Base URL`: `https://crazyrouter.com`
   </Step>
   <Step title="Set the first model">
-    In the `Model` field, manually enter or select `gpt-5.4`. If your version supports a custom model list, add more models later.
+    In the `Model` field, manually enter or select `gpt-5.5`. If your version supports a custom model list, add more models later.
   </Step>
   <Step title="Run the first validation prompt">
     Start a new chat and send `Reply only OK`. Once it works, add more models gradually.
@@ -97,7 +98,7 @@ services:
     environment:
       - OPENAI_API_KEY=sk-xxx
       - BASE_URL=https://crazyrouter.com
-      - CUSTOM_MODELS=+gpt-5.4,+claude-sonnet-4-6,+gemini-3-pro
+      - CUSTOM_MODELS=+gpt-5.5,+claude-sonnet-4-6,+gemini-3-pro
       - HIDE_USER_API_KEY=1
 ```
 
@@ -107,18 +108,18 @@ Common environment variables:
 |----------|-------------------|-------|
 | `OPENAI_API_KEY` | `sk-xxx` | default Crazyrouter token |
 | `BASE_URL` | `https://crazyrouter.com` | use the root domain first, matching the official `BASE_URL` pattern for baseline validation |
-| `CUSTOM_MODELS` | `+gpt-5.4,+claude-sonnet-4-6,+gemini-3-pro` | adds selectable models in the UI |
+| `CUSTOM_MODELS` | `+gpt-5.5,+claude-sonnet-4-6,+gemini-3-pro` | adds selectable models in the UI |
 | `HIDE_USER_API_KEY` | `1` | prevents end users from entering their own key |
 
 ## Recommended Model Setup
 
 | Use case | Recommended model | Why |
 |----------|-------------------|-----|
-| Default main chat model | `gpt-5.4` | Verified successfully in production on March 23, 2026, and suited for the main NextChat baseline |
+| Default main chat model | `gpt-5.5` | Verified successfully in production on March 23, 2026, and suited for the main NextChat baseline |
 | Higher-quality long-form and explanation | `claude-sonnet-4-6` | Better for longer text and more complex explanations |
 | Gemini fallback path | `gemini-3-pro` | Useful as a second vendor-compatible validation path |
 
-Recommended order: validate `gpt-5.4` first, then expand the list with `CUSTOM_MODELS`.
+Recommended order: validate `gpt-5.5` first, then expand the list with `CUSTOM_MODELS`.
 
 ## Token Setup Best Practices
 
@@ -135,7 +136,7 @@ Recommended order: validate `gpt-5.4` first, then expand the list with `CUSTOM_M
 
 - [ ] `API Key` is saved correctly
 - [ ] `Base URL` is set to `https://crazyrouter.com`
-- [ ] the first model is set to `gpt-5.4`
+- [ ] the first model is set to `gpt-5.5`
 - [ ] the first chat request succeeds
 - [ ] `CUSTOM_MODELS` works if you use self-hosted deployment
 - [ ] streaming output works normally
@@ -150,14 +151,14 @@ Recommended order: validate `gpt-5.4` first, then expand the list with `CUSTOM_M
 | 403 / model not allowed | the model is not in the token whitelist | allow that model in Crazyrouter |
 | 404 | you entered a full endpoint path, or your version expects a different env var name | switch back to `https://crazyrouter.com` and check whether your build uses `BASE_URL` or another setting name |
 | the self-hosted UI does not show these settings | your deployment style fixes them in environment variables instead of the frontend settings panel | inspect `OPENAI_API_KEY`, `BASE_URL`, and `CUSTOM_MODELS` in the deployment config directly |
-| no models appear in the UI | `CUSTOM_MODELS` is missing or old config is cached | validate with a manual `gpt-5.4` entry first, then refresh and recheck env vars |
-| request goes out but the model fails | default model name is wrong or unavailable | fall back to `gpt-5.4` for baseline testing |
+| no models appear in the UI | `CUSTOM_MODELS` is missing or old config is cached | validate with a manual `gpt-5.5` entry first, then refresh and recheck env vars |
+| request goes out but the model fails | default model name is wrong or unavailable | fall back to `gpt-5.5` for baseline testing |
 | users can still switch to their own key | `HIDE_USER_API_KEY=1` was not set | add that variable in deployment config |
 | usage grows too quickly | many users share one broad token | split tokens, reduce whitelist scope, and add quota caps |
 
 ## Performance and Cost Tips
 
-- Default to exposing only `gpt-5.4` in the first rollout
+- Default to exposing only `gpt-5.5` in the first rollout
 - Keep premium models out of the default list until you actually need them
 - On public or semi-public deployments, hide user-supplied key entry whenever possible
 - Separate demo traffic from production traffic with different tokens
@@ -175,11 +176,11 @@ Because the official NextChat docs show `BASE_URL` in a root-domain style, and t
 
 ### Which model should I test first?
 
-Start with `gpt-5.4`.
+Start with `gpt-5.5`.
 
 ### Do I have to configure `CUSTOM_MODELS`?
 
-No. You can manually enter `gpt-5.4` first, validate the connection, and add a model list later.
+No. You can manually enter `gpt-5.5` first, validate the connection, and add a model list later.
 
 ### Why do some self-hosted deployments only let me change env vars, not UI settings?
 

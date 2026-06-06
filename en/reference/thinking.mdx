@@ -2,6 +2,7 @@
 title: 'AI Thinking Fields'
 description: 'Production-revalidated guide to the thinking and reasoning fields exposed by different Crazyrouter protocols'
 ---
+> Last updated: 2026-06-06
 
 # AI Thinking Fields
 
@@ -17,12 +18,12 @@ The key point is that different protocols expose "thinking" differently:
 
 | Model | Protocol | Verified field or marker | Notes |
 |-------|----------|--------------------------|-------|
-| `gpt-5.4` | Responses | `output[].type = "reasoning"` | Can return displayable summaries when `summary` is requested |
+| `gpt-5.5` | Responses | `output[].type = "reasoning"` | Can return displayable summaries when `summary` is requested |
 | `claude-opus-4-7` | Anthropic Messages | `content[].type = "thinking"` | Returned alongside a `text` block |
 | `gemini-3-pro` | Gemini Native | `usageMetadata.thoughtsTokenCount` | Confirms thinking tokens were actually used |
 
 <Note>
-  In the current recheck, `gpt-5.4` Chat Completions did not reliably return usable `message.reasoning_content`, so it is not treated as the primary observable field here.
+  In the current recheck, `gpt-5.5` Chat Completions did not reliably return usable `message.reasoning_content`, so it is not treated as the primary observable field here.
 </Note>
 
 ---
@@ -60,7 +61,7 @@ Extraction example:
 
 ```python
 response = client.responses.create(
-    model="gpt-5.4",
+    model="gpt-5.5",
     input="Which is larger, 9.11 or 9.9?",
     reasoning={"effort": "high", "summary": "detailed"}
 )

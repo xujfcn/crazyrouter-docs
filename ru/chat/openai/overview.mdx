@@ -2,6 +2,7 @@
 title: "Chat Completion Object"
 description: "Core production-oriented structure of Chat Completion and Chat Completion Chunk objects"
 ---
+> Дата обновления: 2026-06-06
 
 # Chat Completion Object
 
@@ -14,11 +15,11 @@ This page focuses on the most stable, broadly useful OpenAI-compatible response 
 Minimal production request:
 
 ```bash cURL
-curl https://crazyrouter.com/v1/chat/completions \
+curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-5.5",
     "messages": [
       {
         "role": "user",
@@ -36,7 +37,7 @@ Typical production response skeleton:
   "id": "chatcmpl-xxx",
   "object": "chat.completion",
   "created": 1774177466,
-  "model": "gpt-5.4",
+  "model": "gpt-5.5",
   "choices": [
     {
       "index": 0,
@@ -69,7 +70,7 @@ For streaming requests, the server returns `chat.completion.chunk` SSE events:
   "id": "chatcmpl-xxx",
   "object": "chat.completion.chunk",
   "created": 1774177466,
-  "model": "gpt-5.4",
+  "model": "gpt-5.5",
   "choices": [
     {
       "index": 0,

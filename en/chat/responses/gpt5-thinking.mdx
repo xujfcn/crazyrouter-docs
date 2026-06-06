@@ -2,6 +2,7 @@
 title: "GPT-5 Thinking Mode"
 description: "Production-revalidated GPT-5.4 reasoning via the Responses API"
 ---
+> Last updated: 2026-06-06
 
 # GPT-5 Thinking Mode
 
@@ -9,7 +10,7 @@ This page only documents GPT reasoning behavior that was revalidated against Cra
 
 The current primary example uses:
 
-- `gpt-5.4`
+- `gpt-5.5`
 - `POST /v1/responses`
 
 <Note>
@@ -27,11 +28,11 @@ POST /v1/responses
 <CodeGroup>
 
 ```bash cURL
-curl https://crazyrouter.com/v1/responses \
+curl https://cn.crazyrouter.com/v1/responses \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-5.5",
     "input": "Which is larger, 9.11 or 9.9? Explain briefly.",
     "reasoning": {
       "effort": "high",
@@ -45,11 +46,11 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="YOUR_API_KEY",
-    base_url="https://crazyrouter.com/v1"
+    base_url="https://cn.crazyrouter.com/v1"
 )
 
 response = client.responses.create(
-    model="gpt-5.4",
+    model="gpt-5.5",
     input="Which is larger, 9.11 or 9.9? Explain briefly.",
     reasoning={
         "effort": "high",
@@ -65,11 +66,11 @@ import OpenAI from "openai";
 
 const client = new OpenAI({
   apiKey: "YOUR_API_KEY",
-  baseURL: "https://crazyrouter.com/v1",
+  baseURL: "https://cn.crazyrouter.com/v1",
 });
 
 const response = await client.responses.create({
-  model: "gpt-5.4",
+  model: "gpt-5.5",
   input: "Which is larger, 9.11 or 9.9? Explain briefly.",
   reasoning: {
     effort: "high",
@@ -147,7 +148,7 @@ In the current recheck:
 
 ```python Python
 response = client.responses.create(
-    model="gpt-5.4",
+    model="gpt-5.5",
     input="Design a high-concurrency message queue architecture.",
     reasoning={
         "effort": "high",
@@ -183,7 +184,7 @@ Example:
 
 ```python Python
 stream = client.responses.create(
-    model="gpt-5.4",
+    model="gpt-5.5",
     input="Explain briefly why 9.9 is larger than 9.11.",
     reasoning={
         "effort": "high",
@@ -203,8 +204,8 @@ for event in stream:
 
 ## Current recommendation
 
-- If you need a visible reasoning field, prefer `gpt-5.4` with the Responses API
-- Do not treat `gpt-5.4` Chat Completions `reasoning_content` as the current primary contract
+- If you need a visible reasoning field, prefer `gpt-5.5` with the Responses API
+- Do not treat `gpt-5.5` Chat Completions `reasoning_content` as the current primary contract
 - If you only care about the final answer, Chat Completions with `reasoning_effort` is still fine
 
 <Warning>

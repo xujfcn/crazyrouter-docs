@@ -2,6 +2,7 @@
 title: "Doubao Seedream"
 description: "Use the Doubao Seedream family through the OpenAI Images-compatible public contract"
 ---
+> Last updated: 2026-06-06
 
 # Doubao Seedream
 
@@ -52,7 +53,7 @@ Crazyrouter exposes the `Seedream` image family through the OpenAI Images-compat
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/v1/images/generations \
+curl -X POST https://cn.crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -69,7 +70,7 @@ curl -X POST https://crazyrouter.com/v1/images/generations \
 ```
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/v1/images/generations \
+curl -X POST https://cn.crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -93,7 +94,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="YOUR_API_KEY",
-    base_url="https://crazyrouter.com/v1"
+    base_url="https://cn.crazyrouter.com/v1"
 )
 
 response = client.images.generate(

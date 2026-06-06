@@ -2,6 +2,7 @@
 title: 'Getting Started'
 description: 'Production-revalidated starter paths for connecting to Crazyrouter from OpenAI, Anthropic, and Gemini'
 ---
+> Дата обновления: 2026-06-06
 
 # Getting Started
 
@@ -9,15 +10,15 @@ This page only documents starter paths that were revalidated against Crazyrouter
 
 For the fastest start, separate the integration styles first:
 
-- OpenAI-compatible: `https://crazyrouter.com/v1`
+- OpenAI-compatible: `https://cn.crazyrouter.com/v1`
 - Anthropic native: `https://crazyrouter.com`
-- Gemini native: `https://crazyrouter.com/v1beta/models/...`
+- Gemini native: `https://cn.crazyrouter.com/v1beta/models/...`
 
 ## Shortest migration rule
 
 When migrating from an OpenAI-compatible client, you usually only change two things:
 
-1. set `base_url` to `https://crazyrouter.com/v1`
+1. set `base_url` to `https://cn.crazyrouter.com/v1`
 2. replace the key with your Crazyrouter `sk-xxx`
 
 ---
@@ -29,11 +30,11 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="sk-xxx",
-    base_url="https://crazyrouter.com/v1"
+    base_url="https://cn.crazyrouter.com/v1"
 )
 
 response = client.chat.completions.create(
-    model="gpt-5.4",
+    model="gpt-5.5",
     messages=[{"role": "user", "content": "Hello"}],
     max_tokens=64
 )
@@ -41,7 +42,7 @@ response = client.chat.completions.create(
 
 This production recheck confirmed that:
 
-- `gpt-5.4` works through `/v1/chat/completions`
+- `gpt-5.5` works through `/v1/chat/completions`
 - if you need reasoning summaries or OpenAI-style web search, you should prefer `/v1/responses`
 
 Related pages:
@@ -60,7 +61,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="sk-xxx",
-    base_url="https://crazyrouter.com/v1"
+    base_url="https://cn.crazyrouter.com/v1"
 )
 
 response = client.chat.completions.create(
@@ -107,7 +108,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="sk-xxx",
-    base_url="https://crazyrouter.com/v1"
+    base_url="https://cn.crazyrouter.com/v1"
 )
 
 response = client.chat.completions.create(
@@ -120,7 +121,7 @@ response = client.chat.completions.create(
 ### Option B: Gemini native
 
 ```bash
-curl "https://crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://cn.crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -154,13 +155,13 @@ If you use the OpenAI-compatible route, a good default is:
   <Tab title="Linux / macOS">
     ```bash
     export OPENAI_API_KEY=sk-xxx
-    export OPENAI_BASE_URL=https://crazyrouter.com/v1
+    export OPENAI_BASE_URL=https://cn.crazyrouter.com/v1
     ```
   </Tab>
   <Tab title="Windows">
     ```powershell
     $env:OPENAI_API_KEY = "sk-xxx"
-    $env:OPENAI_BASE_URL = "https://crazyrouter.com/v1"
+    $env:OPENAI_BASE_URL = "https://cn.crazyrouter.com/v1"
     ```
   </Tab>
 </Tabs>
@@ -178,7 +179,7 @@ client = OpenAI()
 
 | Goal | Recommended starting path |
 |------|---------------------------|
-| Fastest GPT integration | OpenAI-compatible + `gpt-5.4` |
+| Fastest GPT integration | OpenAI-compatible + `gpt-5.5` |
 | Fastest Claude integration | Anthropic native + `claude-sonnet-4-6` |
 | Fastest Gemini integration | OpenAI-compatible or Gemini native + `gemini-3-pro` |
 | Need reasoning summaries | Responses API |

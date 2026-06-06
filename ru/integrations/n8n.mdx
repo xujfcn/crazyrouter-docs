@@ -2,6 +2,7 @@
 title: 'n8n Setup Guide'
 description: 'Configure Crazyrouter in n8n with OpenAI credentials, AI Agent workflows, and an HTTP Request fallback, then finish validation and troubleshooting'
 ---
+> Дата обновления: 2026-06-06
 
 n8n is a strong fit when you want to place LLM calls inside automation flows, agents, approval chains, and business-system integrations. When connecting it to Crazyrouter, the recommended rollout is to get one minimal workflow working with n8n's OpenAI credential path first, then decide whether you need the more flexible HTTP Request fallback.
 
@@ -11,9 +12,9 @@ Using n8n's OpenAI credentials or AI nodes, you can route workflow model traffic
 
 - Recommended protocol: `OpenAI-compatible API`
 - Recommended route: n8n `OpenAI API` credential + node-level `Base URL`
-- Base URL: `https://crazyrouter.com/v1`
+- Base URL: `https://cn.crazyrouter.com/v1`
 - Auth method: `sk-...` token
-- Recommended first validation model: `gpt-5.4`
+- Recommended first validation model: `gpt-5.5`
 
 If a specific node does not expose the parameters or newer model features you need, fall back to the `HTTP Request` node and call Crazyrouter directly.
 
@@ -31,13 +32,13 @@ Recommended protocol: `OpenAI-compatible API`
 When connecting Crazyrouter in n8n, use:
 
 ```text
-https://crazyrouter.com/v1
+https://cn.crazyrouter.com/v1
 ```
 
 Do not enter:
 
 - `https://crazyrouter.com`
-- `https://crazyrouter.com/v1/chat/completions`
+- `https://cn.crazyrouter.com/v1/chat/completions`
 
 ## Prerequisites
 
@@ -46,11 +47,11 @@ Do not enter:
 | Crazyrouter account | Register first at [crazyrouter.com](https://crazyrouter.com) |
 | Crazyrouter token | Create a dedicated `sk-...` token for n8n |
 | n8n | Use a current stable version with AI nodes available |
-| Available models | Allow at least one verified chat model such as `gpt-5.4` |
+| Available models | Allow at least one verified chat model such as `gpt-5.5` |
 
 Recommended starting whitelist:
 
-- `gpt-5.4`
+- `gpt-5.5`
 - `claude-sonnet-4-6`
 - `gemini-3-pro`
 - `text-embedding-3-large` if you will use vector or retrieval-related flows
@@ -59,7 +60,7 @@ Recommended starting whitelist:
 
 <Steps>
   <Step title="Create a dedicated n8n token">
-    In the Crazyrouter dashboard, create a token named `n8n`. For the first rollout, allow only `gpt-5.4` and `claude-sonnet-4-6`.
+    In the Crazyrouter dashboard, create a token named `n8n`. For the first rollout, allow only `gpt-5.5` and `claude-sonnet-4-6`.
   </Step>
   <Step title="Add an OpenAI credential">
     In n8n, go to `Settings` → `Credentials` → `Add Credential`, then choose `OpenAI API` or the equivalent OpenAI credential type in your version.
@@ -69,10 +70,10 @@ Recommended starting whitelist:
     - `API Key`: your `sk-...`
 
     Then in the `OpenAI`, `OpenAI Chat Model`, or related AI node `Options`, set:
-    - `Base URL`: `https://crazyrouter.com/v1`
+    - `Base URL`: `https://cn.crazyrouter.com/v1`
   </Step>
   <Step title="Build a minimal workflow">
-    Create a workflow such as `Manual Trigger` → `OpenAI Chat Model` → `Output`, and set the model to `gpt-5.4`.
+    Create a workflow such as `Manual Trigger` → `OpenAI Chat Model` → `Output`, and set the model to `gpt-5.5`.
   </Step>
   <Step title="Run the first validation">
     Send a simple input such as `Reply only OK` through the `OpenAI Chat Model` node and execute the workflow manually. Once it succeeds, add AI Agent or more complex logic later.
@@ -87,7 +88,7 @@ Recommended starting whitelist:
 {
   "node": "OpenAI Chat Model",
   "parameters": {
-    "model": "gpt-5.4",
+    "model": "gpt-5.5",
     "messages": [
       { "role": "user", "content": "{{ $json.input }}" }
     ]
@@ -117,13 +118,13 @@ Example:
 
 ```http
 Method: POST
-URL: https://crazyrouter.com/v1/chat/completions
+URL: https://cn.crazyrouter.com/v1/chat/completions
 Headers:
   Authorization: Bearer sk-xxx
   Content-Type: application/json
 Body:
   {
-    "model": "gpt-5.4",
+    "model": "gpt-5.5",
     "messages": [
       {"role": "user", "content": "{{ $json.input }}"}
     ]
@@ -142,12 +143,12 @@ Depending on the n8n version, `Base URL` may appear on the credential page or in
 
 | Use case | Recommended model | Why |
 |----------|-------------------|-----|
-| Default workflow model | `gpt-5.4` | Verified successfully in production on March 23, 2026, and suited for the main n8n baseline |
+| Default workflow model | `gpt-5.5` | Verified successfully in production on March 23, 2026, and suited for the main n8n baseline |
 | Higher-quality complex agent flows | `claude-sonnet-4-6` | Better for more complex explanation and long-form tasks |
 | Gemini fallback path | `gemini-3-pro` | Useful as a second vendor-compatible validation path |
 | Retrieval / vector-related flows | `text-embedding-3-large` | Good for later vector or search-enhanced pipelines |
 
-Recommended order: get `gpt-5.4` working in a minimal flow, then expand to agents, tools, and batch jobs.
+Recommended order: get `gpt-5.5` working in a minimal flow, then expand to agents, tools, and batch jobs.
 
 ## Token Setup Best Practices
 
@@ -163,7 +164,7 @@ Recommended order: get `gpt-5.4` working in a minimal flow, then expand to agent
 ## Verification Checklist
 
 - [ ] the `OpenAI API` credential is saved successfully
-- [ ] node-level `Base URL` is set to `https://crazyrouter.com/v1`
+- [ ] node-level `Base URL` is set to `https://cn.crazyrouter.com/v1`
 - [ ] the `OpenAI Chat Model` node executes successfully
 - [ ] the first minimal workflow returns a valid response
 - [ ] the `AI Agent` node works too if you need agent flows
@@ -178,7 +179,7 @@ Recommended order: get `gpt-5.4` working in a minimal flow, then expand to agent
 | credential test fails | wrong API key, or `Base URL` was entered in the wrong place for your n8n version | recheck the `sk-...` value and confirm `Base URL` is set where your version actually supports it |
 | 401 unauthorized | token expired, was deleted, or pasted with extra spaces | create a new token and replace it |
 | 403 / model not allowed | the workflow uses a model that is not whitelisted | allow that model in Crazyrouter |
-| 404 | `Base URL` was entered as the root domain or a full endpoint path | change it to `https://crazyrouter.com/v1` |
+| 404 | `Base URL` was entered as the root domain or a full endpoint path | change it to `https://cn.crazyrouter.com/v1` |
 | workflow keeps retrying and cost grows fast | node retries, loops, or batch logic is misconfigured | limit retries, split flows, and add quota caps |
 | AI Agent starts but tool use is unstable | the tool chain is too complex for first-pass validation | keep only one simple tool until the baseline works |
 | native AI node is missing parameters you need | n8n's node wrapper does not expose that feature yet | switch that step to an `HTTP Request` node |
@@ -186,7 +187,7 @@ Recommended order: get `gpt-5.4` working in a minimal flow, then expand to agent
 
 ## Performance and Cost Tips
 
-- Keep `gpt-5.4` as the default automation baseline during initial rollout
+- Keep `gpt-5.5` as the default automation baseline during initial rollout
 - Add stricter caps and alerts for looped, scheduled, or batch workflows
 - Keep production and debugging flows on separate tokens
 - Validate AI Agent flows with fewer tools and shorter chains before scaling up
@@ -196,7 +197,7 @@ Recommended order: get `gpt-5.4` working in a minimal flow, then expand to agent
 
 ### Which Base URL should I use in n8n?
 
-Use `https://crazyrouter.com/v1`.
+Use `https://cn.crazyrouter.com/v1`.
 
 ### Should I put `Base URL` in the credential or in the node?
 
@@ -208,7 +209,7 @@ Start with native OpenAI credentials and AI nodes. Use `HTTP Request` only when 
 
 ### Which model should I test first?
 
-Start with `gpt-5.4`.
+Start with `gpt-5.5`.
 
 ### Why did workflow costs suddenly increase?
 

@@ -3,6 +3,7 @@ title: 'OpenClaw Deployment Guide'
 description: 'Deploy OpenClaw with Crazyrouter on Linux or macOS, then finish WebUI, Telegram, and day-two operations setup'
 icon: 'rocket'
 ---
+> Дата обновления: 2026-06-06
 
 Use the one-click installer to deploy [OpenClaw](https://github.com/open-claw/open-claw) on Linux or macOS with Crazyrouter as the default backend. The installer writes a ready-to-run `~/.openclaw/openclaw.json`, registers the system service, and preloads a practical model set for chat, coding, and long-context work.
 
@@ -26,7 +27,7 @@ OpenClaw is a good fit when you want a self-controlled local AI entrypoint backe
 
 Recommended protocol: `OpenAI-compatible API`
 
-- the installer points the default `crazyrouter` provider at `https://crazyrouter.com/v1`
+- the installer points the default `crazyrouter` provider at `https://cn.crazyrouter.com/v1`
 - it also writes `crazyrouter-claude` and `crazyrouter-minimax` providers for native-compatible switching
 - OpenClaw itself exposes a local gateway and WebUI, authenticated with the generated `gateway.auth.token`
 
@@ -49,7 +50,7 @@ The installer binds the gateway to LAN scope by default (`bind: lan`). If the ma
 
 <Steps>
   <Step title="Create a dedicated Crazyrouter token">
-    In Crazyrouter, create a dedicated `sk-...` token for OpenClaw. Start with a small model allowlist such as `claude-sonnet-4-6`, `gpt-5.4`, and `gemini-3-pro`.
+    In Crazyrouter, create a dedicated `sk-...` token for OpenClaw. Start with a small model allowlist such as `claude-opus-4-8`, `gpt-5.5`, and `gemini-3-pro`.
   </Step>
   <Step title="Run the installer">
     ```bash
@@ -67,7 +68,7 @@ The installer binds the gateway to LAN scope by default (`bind: lan`). If the ma
     - config path: `~/.openclaw/openclaw.json`
   </Step>
   <Step title="Validate the first successful response">
-    Open the auto-login URL in a browser, confirm you can enter the OpenClaw control UI, and send a simple test prompt with the default model `claude-sonnet-4-6`, such as `Reply with ok`.
+    Open the auto-login URL in a browser, confirm you can enter the OpenClaw control UI, and send a simple test prompt with the default model `claude-opus-4-8`, such as `Reply with ok`.
   </Step>
   <Step title="Optionally finish Telegram pairing">
     The installer can set up Telegram immediately. If you choose that path, paste your Bot Token and then send any message to the bot so the first owner pairing can complete.
@@ -76,24 +77,24 @@ The installer binds the gateway to LAN scope by default (`bind: lan`). If the ma
 
 ## Recommended Model Setup
 
-The installer sets `claude-sonnet-4-6` as the default primary model. To change the day-to-day default, edit `agents.defaults.model.primary` in `~/.openclaw/openclaw.json`.
+The installer sets `claude-opus-4-8` as the default primary model. To change the day-to-day default, edit `agents.defaults.model.primary` in `~/.openclaw/openclaw.json`.
 
 | Use case | Recommended model | Why |
 |----------|-------------------|-----|
-| Default daily assistant | `claude-sonnet-4-6` | Strong balance of quality, stability, and cost |
-| Coding / agent work | `gpt-5.4` | Verified successfully in production on March 23, 2026, and suited for the main OpenAI-compatible coding and agent baseline |
-| Highest answer quality | `claude-opus-4-6` | Stronger complex reasoning and writing quality |
+| Default daily assistant | `claude-opus-4-8` | Current default primary model for high-quality daily chat and controller workloads |
+| Coding / agent work | `gpt-5.5` | Latest OpenAI-compatible baseline for coding and agent-heavy workflows |
+| Cost-balanced fallback | `claude-sonnet-4-6` | Strong balance of quality, stability, and cost |
 | Gemini fallback path | `gemini-3-pro` | Useful as a second compatibility-validation path |
 | Heavy reasoning | `deepseek-r1` | Useful when you want stronger reasoning behavior |
 
-Example: switch the default model to `gpt-5.4`
+Example: switch the default model to `gpt-5.5`
 
 ```json
 {
   "agents": {
     "defaults": {
       "model": {
-        "primary": "crazyrouter/gpt-5.4"
+        "primary": "crazyrouter/gpt-5.5"
       }
     }
   }
@@ -107,7 +108,7 @@ If you want to explicitly use the Claude-compatible provider instead:
   "agents": {
     "defaults": {
       "model": {
-        "primary": "crazyrouter-claude/claude-sonnet-4-6"
+        "primary": "crazyrouter-claude/claude-opus-4-8"
       }
     }
   }
@@ -159,8 +160,8 @@ OpenClaw uses at least two credential types: the Crazyrouter `sk-...` API key fo
 | JSON path | Purpose | Typical change |
 |-----------|---------|----------------|
 | `models.providers.crazyrouter.apiKey` | Crazyrouter OpenAI-compatible key | rotate API key |
-| `models.providers.crazyrouter.baseUrl` | OpenAI-compatible base URL | usually keep `https://crazyrouter.com/v1` |
-| `agents.defaults.model.primary` | default primary model | switch to `gpt-5.4`, `claude-opus-4-7`, and so on |
+| `models.providers.crazyrouter.baseUrl` | OpenAI-compatible base URL | usually keep `https://cn.crazyrouter.com/v1` |
+| `agents.defaults.model.primary` | default primary model | switch to `gpt-5.5`, `claude-opus-4-8`, and so on |
 | `gateway.port` | WebUI / gateway port | move to a different port |
 | `gateway.auth.token` | WebUI login token | rotate immediately if exposed |
 | `gateway.bind` | listener scope | default is `lan` |
@@ -269,9 +270,9 @@ If OpenClaw will be connected to a team IM workspace, create a separate Crazyrou
 
 ## Performance And Cost Tips
 
-- start with `claude-sonnet-4-6` until the whole flow is stable
-- keep routine bot traffic on `claude-sonnet-4-6` or move selected tasks to `gemini-3-pro`
-- use `gpt-5.4` for coding-heavy agent workflows
+- start with `claude-opus-4-8` until the whole flow is stable
+- keep routine bot traffic on `claude-sonnet-4-6` or move selected tasks to `gemini-3-pro` when cost matters more
+- use `gpt-5.5` for coding-heavy agent workflows
 - split WebUI, Telegram, and team IM usage across different tokens for better cost tracking
 - keep only the models and plugins you actually need
 
@@ -343,11 +344,11 @@ If Node.js was installed only for OpenClaw, you can remove Node.js afterward onc
 
 ### Which Crazyrouter base URL should I keep?
 
-Leave the installer defaults unless you are intentionally changing provider modes: `https://crazyrouter.com/v1` for the OpenAI-compatible provider, and `https://crazyrouter.com` for Claude / MiniMax native-compatible providers.
+Leave the installer defaults unless you are intentionally changing provider modes: `https://cn.crazyrouter.com/v1` for the OpenAI-compatible provider, and `https://crazyrouter.com` for Claude / MiniMax native-compatible providers.
 
 ### Which default model should I keep first?
 
-For most users, keep `claude-sonnet-4-6` first. If OpenClaw is mainly a coding assistant, switch to `gpt-5.4`.
+For most users, keep `claude-opus-4-8` first. If OpenClaw is mainly a coding assistant, switch to `gpt-5.5`.
 
 ### Why is my expected model missing?
 

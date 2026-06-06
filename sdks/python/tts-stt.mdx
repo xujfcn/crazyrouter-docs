@@ -2,13 +2,14 @@
 title: 'Python 语音'
 description: 'Python 实现文本转语音（TTS）和语音转文本（STT）'
 ---
+> 更新日期：2026-06-06
 
 ## 文本转语音（TTS）
 
 ```python
 from openai import OpenAI
 
-client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+client = OpenAI(api_key="sk-xxx", base_url="https://cn.crazyrouter.com/v1")
 
 # 生成语音
 response = client.audio.speech.create(

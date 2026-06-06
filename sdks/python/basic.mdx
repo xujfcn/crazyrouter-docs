@@ -2,6 +2,7 @@
 title: 'Python 基础对话'
 description: 'Python 实现基础聊天、连续对话和流式输出'
 ---
+> 更新日期：2026-06-06
 
 ## 安装依赖
 
@@ -18,11 +19,11 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="sk-xxx",
-    base_url="https://crazyrouter.com/v1"
+    base_url="https://cn.crazyrouter.com/v1"
 )
 
 response = client.chat.completions.create(
-    model="gpt-5.4",
+    model="gpt-5.5",
     messages=[
         {"role": "system", "content": "你是一个有帮助的助手。"},
         {"role": "user", "content": "用一句话解释什么是人工智能"}
@@ -36,13 +37,13 @@ print(response.choices[0].message.content)
 import requests
 
 response = requests.post(
-    "https://crazyrouter.com/v1/chat/completions",
+    "https://cn.crazyrouter.com/v1/chat/completions",
     headers={
         "Authorization": "Bearer sk-xxx",
         "Content-Type": "application/json"
     },
     json={
-        "model": "gpt-5.4",
+        "model": "gpt-5.5",
         "messages": [
             {"role": "user", "content": "用一句话解释什么是人工智能"}
         ]
@@ -62,7 +63,7 @@ print(data["choices"][0]["message"]["content"])
 ```python
 from openai import OpenAI
 
-client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+client = OpenAI(api_key="sk-xxx", base_url="https://cn.crazyrouter.com/v1")
 
 messages = [
     {"role": "system", "content": "你是一个 Python 编程助手。"}
@@ -72,7 +73,7 @@ def chat(user_input):
     messages.append({"role": "user", "content": user_input})
 
     response = client.chat.completions.create(
-        model="gpt-5.4",
+        model="gpt-5.5",
         messages=messages
     )
 
@@ -91,10 +92,10 @@ print(chat("能用 pandas 实现吗？"))
 ```python
 from openai import OpenAI
 
-client = OpenAI(api_key="sk-xxx", base_url="https://crazyrouter.com/v1")
+client = OpenAI(api_key="sk-xxx", base_url="https://cn.crazyrouter.com/v1")
 
 stream = client.chat.completions.create(
-    model="gpt-5.4",
+    model="gpt-5.5",
     messages=[{"role": "user", "content": "写一首关于编程的诗"}],
     stream=True
 )
@@ -112,13 +113,13 @@ import requests
 import json
 
 response = requests.post(
-    "https://crazyrouter.com/v1/chat/completions",
+    "https://cn.crazyrouter.com/v1/chat/completions",
     headers={
         "Authorization": "Bearer sk-xxx",
         "Content-Type": "application/json"
     },
     json={
-        "model": "gpt-5.4",
+        "model": "gpt-5.5",
         "messages": [{"role": "user", "content": "你好"}],
         "stream": True
     },
@@ -136,5 +137,5 @@ print()
 ```
 
 <Note>
-  所有示例默认使用 2026 年 3 月 23 日已在生产环境实测成功的 `gpt-5.4`。如果你要切换模型，优先改成同样已验证的 `claude-sonnet-4-6` 或 `gemini-3-pro`。
+  所有示例默认使用 2026 年 3 月 23 日已在生产环境实测成功的 `gpt-5.5`。如果你要切换模型，优先改成同样已验证的 `claude-sonnet-4-6` 或 `gemini-3-pro`。
 </Note>

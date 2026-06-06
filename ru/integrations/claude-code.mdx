@@ -2,6 +2,7 @@
 title: 'Claude Code Setup Guide'
 description: 'Connect Claude Code to Crazyrouter through the Anthropic Messages API, with full step-by-step instructions from Git and Node.js to installation commands, environment variables, and first-run validation'
 ---
+> Дата обновления: 2026-06-06
 
 Claude Code is one of the best terminal coding tools to connect to Crazyrouter. It speaks the Anthropic Messages API directly and works especially well for code reading, editing, refactoring, command execution, tool use, and long-context repository analysis.
 
@@ -48,9 +49,9 @@ ANTHROPIC_BASE_URL=https://cn.crazyrouter.com
 
 Do not use:
 
-- `https://crazyrouter.com/v1`
-- `https://crazyrouter.com/v1/messages`
-- `https://crazyrouter.com/v1/complete`
+- `https://cn.crazyrouter.com/v1`
+- `https://cn.crazyrouter.com/v1/messages`
+- `https://cn.crazyrouter.com/v1/complete`
 - `https://cn.crazyrouter.com/v1`
 - `https://cn.crazyrouter.com/v1/messages`
 
@@ -388,7 +389,7 @@ Recommended rollout: stabilize normal work on `claude-sonnet-4-6`, then switch t
 | `kimi-k2-thinking` | Moonshot Kimi | ✅ | ✅ | reasoning | Сложные рассуждения |
 | `kimi-k2-0711-preview` / `kimi-k2-0905-preview` | Moonshot Kimi | ✅ | ✅ | — | Snapshot-версии |
 
-> Тестирование выполнялось на `https://crazyrouter.com/v1/messages` с заголовком `anthropic-version: 2023-06-01` и стандартным телом запроса Anthropic Messages.
+> Тестирование выполнялось на `https://cn.crazyrouter.com/v1/messages` с заголовком `anthropic-version: 2023-06-01` и стандартным телом запроса Anthropic Messages.
 
 <Warning>
 Следующие модели сейчас возвращают `get_channel_failed` на протоколе Anthropic (это вопрос доступности upstream-канала, а не несовместимости протокола). Используйте их пока через `/v1/chat/completions` (протокол OpenAI):
@@ -456,7 +457,7 @@ Claude Code берёт модель из переменной окружения
 ### Однострочная проверка работоспособности модели
 
 ```bash
-curl -sS https://crazyrouter.com/v1/messages \
+curl -sS https://cn.crazyrouter.com/v1/messages \
   -H "Authorization: Bearer $ANTHROPIC_API_KEY" \
   -H "anthropic-version: 2023-06-01" \
   -H "Content-Type: application/json" \

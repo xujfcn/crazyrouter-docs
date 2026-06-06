@@ -2,6 +2,7 @@
 title: 'GPT Academic Setup Guide'
 description: 'Configure Crazyrouter API in GPT Academic and switch to currently verified latest models'
 ---
+> Дата обновления: 2026-06-06
 
 ## Overview
 
@@ -16,13 +17,13 @@ Edit `config.py` or `config_private.py`:
 ```python
 API_KEY = "sk-xxx"
 API_URL_REDIRECT = {
-    "https://api.openai.com/v1/chat/completions": "https://crazyrouter.com/v1/chat/completions"
+    "https://api.openai.com/v1/chat/completions": "https://cn.crazyrouter.com/v1/chat/completions"
 }
 
 # Or set directly
-LLM_MODEL = "gpt-5.4"
+LLM_MODEL = "gpt-5.5"
 AVAIL_LLM_MODELS = [
-    "gpt-5.4",
+    "gpt-5.5",
     "claude-sonnet-4-6",
     "gemini-3-pro"
 ]
@@ -32,8 +33,8 @@ AVAIL_LLM_MODELS = [
 
 ```bash
 export API_KEY=sk-xxx
-export API_URL_REDIRECT='{"https://api.openai.com/v1/chat/completions": "https://crazyrouter.com/v1/chat/completions"}'
-export LLM_MODEL=gpt-5.4
+export API_URL_REDIRECT='{"https://api.openai.com/v1/chat/completions": "https://cn.crazyrouter.com/v1/chat/completions"}'
+export LLM_MODEL=gpt-5.5
 ```
 
 ### Docker Deployment
@@ -46,18 +47,18 @@ services:
       - "22303:22303"
     environment:
       - API_KEY=sk-xxx
-      - LLM_MODEL=gpt-5.4
-      - API_URL_REDIRECT={"https://api.openai.com/v1/chat/completions": "https://crazyrouter.com/v1/chat/completions"}
+      - LLM_MODEL=gpt-5.5
+      - API_URL_REDIRECT={"https://api.openai.com/v1/chat/completions": "https://cn.crazyrouter.com/v1/chat/completions"}
 ```
 
 ## Recommended Models
 
 | Scenario | Model | Description |
 |----------|-------|-------------|
-| First-pass academic workflow validation | `gpt-5.4` | Verified successfully in Crazyrouter production on March 23, 2026, and best for the OpenAI-compatible baseline |
+| First-pass academic workflow validation | `gpt-5.5` | Verified successfully in Crazyrouter production on March 23, 2026, and best for the OpenAI-compatible baseline |
 | Higher-quality long-form summarization | `claude-sonnet-4-6` | Better for complex explanation, rewriting, and summaries |
 | Gemini fallback path | `gemini-3-pro` | Useful as a second vendor-compatible validation path |
 
 <Note>
-  GPT Academic's URL redirect feature forwards OpenAI requests directly to Crazyrouter. Start by validating one minimal session with `gpt-5.4`, then expand the model list and plugin usage gradually.
+  GPT Academic's URL redirect feature forwards OpenAI requests directly to Crazyrouter. Start by validating one minimal session with `gpt-5.5`, then expand the model list and plugin usage gradually.
 </Note>
