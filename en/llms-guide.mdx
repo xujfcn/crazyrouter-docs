@@ -1,0 +1,92 @@
+---
+title: 'How to use llms.txt'
+description: 'Use https://docs.crazyrouter.com/llms.txt so AI tools read Crazyrouter docs, models, and API patterns correctly'
+---
+> Last updated: 2026-06-06
+
+# How to use llms.txt
+
+`https://docs.crazyrouter.com/llms.txt` is the AI-readable Crazyrouter documentation entry point for Codex, Claude Code, ChatGPT, Cursor, Cline, Aider, and similar tools. Users can give this URL directly to an AI tool so it reads the compact index first, then follows the relevant documentation pages.
+
+## Recommended prompt for AI tools
+
+```text
+First read https://docs.crazyrouter.com/llms.txt and answer my question using the Crazyrouter documentation index there.
+
+Requirements:
+1. Model names, pricing, billing modes, and endpoint support must align with the data exposed by https://crazyrouter.com/pricing and https://crazyrouter.com/api/pricing?lang=en.
+2. If you need to confirm which models my API key can actually use, call GET https://cn.crazyrouter.com/v1/models with Authorization: Bearer YOUR_API_KEY.
+3. Do not guess model names, prices, or endpoints from stale knowledge. If a model is absent from pricing or /v1/models, say that availability must be confirmed first.
+4. API usage must match the Crazyrouter docs and backend routes. OpenAI-compatible clients use base_url https://cn.crazyrouter.com/v1. Claude / Anthropic-native clients use the root domain https://cn.crazyrouter.com.
+5. Before generating code, choose the correct API from public_endpoint_types or supported_endpoint_types returned by /api/pricing.
+```
+
+## Runtime sources of truth
+
+| Need to confirm | Source |
+| --- | --- |
+| Public models, prices, billing modes, endpoint types | [Pricing page](https://crazyrouter.com/pricing) and `GET https://crazyrouter.com/api/pricing?lang=en` |
+| Models available to the current API key | `GET https://cn.crazyrouter.com/v1/models` |
+| Documentation index | `https://docs.crazyrouter.com/llms.txt` |
+| Full documentation context | `https://docs.crazyrouter.com/llms-full.txt` |
+| Single-page Markdown | Add `.md` to a docs URL, for example `https://docs.crazyrouter.com/en/quickstart.md` |
+
+<Warning>
+Do not treat `llms.txt` as the complete model catalog. Models can change by channel, group, token permission, and pricing configuration. The full model and pricing source of truth is the Pricing page and `/api/pricing`.
+</Warning>
+
+## Endpoint selection rules
+
+Each model item from `GET https://crazyrouter.com/api/pricing?lang=en` can include:
+
+- `model_name`: the public model name to pass in API requests
+- `public_endpoint_types`: user-facing recommended endpoint types; prefer this field when present
+- `supported_endpoint_types`: backend-supported endpoint types
+- `video_pricing` / `image_pricing`: billing details for video or image models
+- `billing_mode` / `display_unit`: billing basis and display unit
+
+Common endpoint types and request paths:
+
+| endpoint type | Request path |
+| --- | --- |
+| `openai` | `POST /v1/chat/completions` |
+| `openai-response` | `POST /v1/responses` |
+| `anthropic` | `POST /v1/messages` |
+| `gemini` | `POST /v1beta/models/{model}:generateContent` |
+| `image-generation` | `POST /v1/images/generations` or `POST /v1/images/edits` |
+| `openai-video` | `POST /v1/video/generations` or `POST /v1/videos` |
+| `unified-video` | `POST /v1/video/create`; query with `GET /v1/video/query` |
+| `kling` | `/kling/v1/videos/*` or `/kling/v1/images/*` |
+| `minimax-video` | `/minimax/v1/video_generation` |
+| `luma` | `/luma/generations` |
+| `runway` | `/runwayml/v1/image_to_video` |
+| `volc-video` | `/volc/v1/contents/generations/tasks` |
+| `ali-video` | `/alibailian/api/v1/services/aigc/video-generation/video-synthesis` |
+
+<Note>
+Endpoint mapping is aligned with the local repository files `router/relay-router.go`, `router/video-router.go`, `controller/pricing.go`, `controller/model.go`, and `common/endpoint_type.go`. Documentation updates should verify those files before changing examples.
+</Note>
+
+## What users should paste
+
+Paste this into an AI tool:
+
+```text
+Read https://docs.crazyrouter.com/llms.txt, then tell me how to use Crazyrouter for [your task]. Confirm that the model and endpoint match the pricing page first.
+```
+
+If the task needs more context, add:
+
+```text
+If llms.txt is not enough, continue reading https://docs.crazyrouter.com/llms-full.txt and the relevant single-page Markdown docs.
+```
+
+## Maintenance requirements
+
+When updating `crazyrouter-docs/llms.txt`:
+
+1. Do not hardcode the full model catalog in `llms.txt`.
+2. Example models must exist in the Pricing page or `/api/pricing`.
+3. Example request paths must exist in both the docs and the local Go routes.
+4. Model availability notes must point users to token-level `/v1/models` results.
+5. After Mintlify deploys the docs, users continue to reference the same URL: `https://docs.crazyrouter.com/llms.txt`.
