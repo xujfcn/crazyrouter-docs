@@ -2,7 +2,7 @@
 title: "视频生成别名"
 description: "POST /v1/video/generations 兼容别名接口，供依赖该路径的客户端提交视频生成任务"
 ---
-> 更新日期：2026-06-06
+> 更新日期：2026-06-07
 
 # 视频生成别名
 
@@ -23,13 +23,31 @@ Authorization: Bearer YOUR_API_KEY
 - 你的客户端已经写死了 `/v1/video/generations`
 - 你在迁移历史视频工作流，不想改调用路径
 - 你需要兼容第三方已经发布的请求格式
+- 你要提交 Wan 文生视频，例如 `wan2.5-t2v-preview` 或 `wan2.2-t2v-plus`
 
 如果你在开发新接入，优先考虑：
 
-- `POST /v1/videos`：更接近 OpenAI 官方视频格式
-- `POST /v1/video/create`：Crazyrouter 自己的统一视频格式
+- Wan 文生视频：使用本页的 `POST /v1/video/generations`
+- Veo / 统一视频工作流：使用 `POST /v1/video/create`
+- OpenAI 官方兼容视频工作流：使用 `POST /v1/videos`
 
 ## 最小请求示例
+
+### Wan 2.2 T2V Plus
+
+```bash cURL
+curl -X POST https://cn.crazyrouter.com/v1/video/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "wan2.2-t2v-plus",
+    "prompt": "一段平静的电影感山间云海镜头",
+    "seconds": "5",
+    "size": "480P"
+  }'
+```
+
+### 通用最小示例
 
 ```bash cURL
 curl -X POST https://cn.crazyrouter.com/v1/video/generations   -H "Content-Type: application/json"   -H "Authorization: Bearer YOUR_API_KEY"   -d '{
@@ -64,8 +82,10 @@ curl -X POST https://cn.crazyrouter.com/v1/video/generations   -H "Content-Type:
 
 - 请求体字段会随具体视频模型和上游能力而变化
 - `model` 是否可用取决于当前 Token 白名单和上游渠道状态
+- Wan 文生视频使用 `model`、`prompt`、`seconds`、`size`；`wan2.2-t2v-plus` 的已验证组合是 `seconds: "5"`，`size: "480P"` 或 `"1080P"`。
+- `wan2.2-t2v-plus` 不应提交到 `/alibailian/api/v1/services/aigc/video-generation/video-synthesis`。
 - 任务创建成功后，可继续调用 `GET /v1/video/generations/{task_id}` 查询状态
 
 <Note>
-这个路由是兼容别名，不代表所有视频模型都共享完全一致的请求字段。新项目如果不受历史路径约束，建议优先使用主文档中的 `/v1/videos` 或 `/v1/video/create`。
+这个路由是兼容别名，不代表所有视频模型都共享完全一致的请求字段。Wan 文生视频当前推荐使用本页路由；Veo 或统一视频工作流仍优先看 `/v1/video/create`。
 </Note>

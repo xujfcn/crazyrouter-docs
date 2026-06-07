@@ -2,7 +2,7 @@
 title: "Ali Bailian Video API"
 description: "Ali Bailian-compatible video routes. Clients use /alibailian/api/v1/* while Crazyrouter now proxies upstream to official DashScope /api/v1/* endpoints"
 ---
-> Last updated: 2026-06-06
+> Last updated: 2026-06-07
 
 # Ali Bailian Video API
 
@@ -10,9 +10,10 @@ Crazyrouter exposes Ali Bailian-compatible video routes so applications already 
 
 ## What This Page Covers
 
-- This page documents the Ali-compatible public alias exposed by Crazyrouter, so client requests should continue using `/alibailian/api/v1/*`
+- This page documents Crazyrouter's Ali-compatible public alias for workflows already integrated against the DashScope / Ali Bailian video body shape; those workflows can continue using `/alibailian/api/v1/*`
 - Internally, Crazyrouter now talks to the official DashScope upstream through `/api/v1/*`
 - If you want Crazyrouter's unified video API rather than the Ali-compatible migration path, use `/v1/video/generations`
+- Wan text-to-video currently uses `/v1/video/generations`. In particular, `wan2.2-t2v-plus` is not supported on this page's `/alibailian/...video-synthesis` submit path.
 - Actual model availability still depends on your token allowlist, pricing configuration, and current production channel bindings; do not assume every upstream Ali model is enabled by default
 
 ## Supported Endpoints
@@ -57,6 +58,10 @@ POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis
 | `parameters.watermark` | boolean | No | Whether to add an AI watermark |
 | `parameters.audio` | boolean | No | Whether to auto-add audio |
 | `parameters.seed` | integer | No | Random seed |
+
+<Warning>
+  Submitting `wan2.2-t2v-plus` to this page's path returns `invalid_request` in production, with guidance to use `/v1/video/generations`. For Wan text-to-video, see [Wan Video](/en/video/wan) or [Video Generation Alias](/en/video/openai-video-alias-create).
+</Warning>
 
 ### Request Example
 

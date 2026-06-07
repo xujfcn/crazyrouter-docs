@@ -1,17 +1,21 @@
 ---
 title: "Wan 视频"
-description: "Wan 视频模型总览。对外优先使用阿里百炼兼容协议，Crazyrouter 内部承载可来自官方或第三方 provider"
+description: "Wan 视频模型总览。Wan 文生视频使用 /v1/video/generations；图生、首尾帧和主体参考等阿里格式工作流使用 /alibailian/api/v1/* 兼容路径"
 ---
-> 更新日期：2026-06-06
+> 更新日期：2026-06-07
 
 # Wan 视频
 
-Wan 系列当前对外优先使用阿里百炼兼容协议：
+Wan 系列当前按能力使用不同对客协议：
 
-- `POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis`
-- `GET /alibailian/api/v1/tasks/{task_id}`
+- 文生视频（`wan2.5-t2v-preview`、`wan2.2-t2v-plus`）：使用 `POST /v1/video/generations`，并通过 `GET /v1/video/generations/{task_id}` 查询。
+- 图生视频、首尾帧生视频、主体参考生视频：使用阿里百炼兼容路径 `POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis`，并通过 `GET /alibailian/api/v1/tasks/{task_id}` 查询。
 
-完整请求体和任务查询格式请查看 [阿里百炼视频接口](/video/alibailian)。本页只收口当前首批对外开放的 `Wan` 模型、能力和计费口径。
+<Warning>
+  不要把 `wan2.2-t2v-plus` 提交到 `/alibailian/api/v1/services/aigc/video-generation/video-synthesis`。生产环境会返回 `invalid_request`，并提示改用 `/v1/video/generations`。
+</Warning>
+
+阿里格式工作流的完整请求体和任务查询格式请查看 [阿里百炼视频接口](/video/alibailian)。本页收口当前首批对外开放的 `Wan` 模型、能力、计费口径和推荐协议。
 
 ## 首批模型
 
@@ -45,7 +49,9 @@ Wan 系列当前对外优先使用阿里百炼兼容协议：
 
 ### 1. 文生视频
 
-- 重点字段：`model`、`input.prompt`、`parameters.resolution`、`parameters.duration`
+- 推荐提交路径：`POST /v1/video/generations`
+- 推荐查询路径：`GET /v1/video/generations/{task_id}`
+- 重点字段：`model`、`prompt`、`seconds`、`size`
 - 典型模型：`wan2.5-t2v-preview`、`wan2.2-t2v-plus`
 
 ### 2. 图生视频
@@ -64,6 +70,34 @@ Wan 系列当前对外优先使用阿里百炼兼容协议：
 - 典型模型：`wan2.2-s2v`
 
 ## 请求示例
+
+### 文生视频：Wan 2.5
+
+```bash cURL
+curl -X POST https://cn.crazyrouter.com/v1/video/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "wan2.5-t2v-preview",
+    "prompt": "电影感海边日落，镜头缓慢推进",
+    "seconds": "5",
+    "size": "1280*720"
+  }'
+```
+
+### 文生视频：Wan 2.2 T2V Plus
+
+```bash cURL
+curl -X POST https://cn.crazyrouter.com/v1/video/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "wan2.2-t2v-plus",
+    "prompt": "一段平静的电影感山间云海镜头",
+    "seconds": "5",
+    "size": "480P"
+  }'
+```
 
 ### 图生视频
 
@@ -122,7 +156,15 @@ curl -X POST https://crazyrouter.com/alibailian/api/v1/services/aigc/video-gener
 
 ## 任务取回
 
-Wan 当前仍是异步任务模型。客户创建任务后，需要使用：
+Wan 当前仍是异步任务模型。客户创建任务后，按提交协议查询：
+
+文生视频：
+
+```http
+GET /v1/video/generations/{task_id}
+```
+
+阿里兼容图生、首尾帧和主体参考工作流：
 
 ```http
 GET /alibailian/api/v1/tasks/{task_id}
@@ -132,6 +174,7 @@ GET /alibailian/api/v1/tasks/{task_id}
 
 ## 边界说明
 
-- 本页对客协议以阿里百炼兼容路径为主，不再延续旧的 Fal 专属路径说明。
+- Wan 文生视频的当前推荐对客协议是 `/v1/video/generations`，不是阿里百炼兼容提交路径。
+- 阿里百炼兼容路径主要用于图生视频、首尾帧生视频、主体参考生视频等阿里格式迁移场景。
 - Crazyrouter 内部可以把官方、ApiPass、Kie 或其他第三方作为 provider，但这些 provider 不单独定义客户协议。
 - 当前 Beta 行可以先对客展示；上线后应结合生产任务日志继续补 live evidence，成功闭环后再去掉 Beta 标记。

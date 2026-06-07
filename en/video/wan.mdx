@@ -1,17 +1,21 @@
 ---
 title: "Wan Video"
-description: "Wan video family overview. Customers use the Ali Bailian-compatible contract while Crazyrouter can route to official or third-party providers internally"
+description: "Wan video family overview. Wan text-to-video uses /v1/video/generations; image-to-video, first-last-frame, and subject-reference workflows use the /alibailian/api/v1/* compatibility contract"
 ---
-> Last updated: 2026-06-06
+> Last updated: 2026-06-07
 
 # Wan Video
 
-The Wan family is currently exposed through the Ali Bailian-compatible public contract:
+The Wan family currently uses different public contracts by capability:
 
-- `POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis`
-- `GET /alibailian/api/v1/tasks/{task_id}`
+- Text-to-video (`wan2.5-t2v-preview`, `wan2.2-t2v-plus`): submit with `POST /v1/video/generations` and query with `GET /v1/video/generations/{task_id}`.
+- Image-to-video, first-last-frame, and subject-reference video: submit with the Ali Bailian-compatible `POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis` path and query with `GET /alibailian/api/v1/tasks/{task_id}`.
 
-For the full request and task-query schema, see [Ali Bailian Video API](/en/video/alibailian). This page closes only the first batch of public `Wan` models, capabilities, and billing truth.
+<Warning>
+  Do not submit `wan2.2-t2v-plus` to `/alibailian/api/v1/services/aigc/video-generation/video-synthesis`. Production rejects that model on the Ali-compatible path with `invalid_request` and tells clients to use `/v1/video/generations`.
+</Warning>
+
+For Ali-shaped workflows, see the full request and task-query schema in [Ali Bailian Video API](/en/video/alibailian). This page closes the first batch of public `Wan` models, capabilities, billing truth, and recommended protocol.
 
 ## First-Batch Models
 
@@ -45,7 +49,9 @@ For the full request and task-query schema, see [Ali Bailian Video API](/en/vide
 
 ### 1. Text-to-video
 
-- Key fields: `model`, `input.prompt`, `parameters.resolution`, `parameters.duration`
+- Recommended submit path: `POST /v1/video/generations`
+- Recommended query path: `GET /v1/video/generations/{task_id}`
+- Key fields: `model`, `prompt`, `seconds`, `size`
 - Typical models: `wan2.5-t2v-preview`, `wan2.2-t2v-plus`
 
 ### 2. Image-to-video
@@ -64,6 +70,34 @@ For the full request and task-query schema, see [Ali Bailian Video API](/en/vide
 - Typical model: `wan2.2-s2v`
 
 ## Request Examples
+
+### Text-to-video: Wan 2.5
+
+```bash cURL
+curl -X POST https://cn.crazyrouter.com/v1/video/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "wan2.5-t2v-preview",
+    "prompt": "A cinematic seaside sunset with a slow camera push-in",
+    "seconds": "5",
+    "size": "1280*720"
+  }'
+```
+
+### Text-to-video: Wan 2.2 T2V Plus
+
+```bash cURL
+curl -X POST https://cn.crazyrouter.com/v1/video/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "wan2.2-t2v-plus",
+    "prompt": "A calm cinematic shot of clouds over mountains",
+    "seconds": "5",
+    "size": "480P"
+  }'
+```
 
 ### Image-to-video
 
@@ -122,7 +156,15 @@ curl -X POST https://crazyrouter.com/alibailian/api/v1/services/aigc/video-gener
 
 ## Task Retrieval
 
-Wan remains an async task family. After creation, query:
+Wan remains an async task family. Query with the matching route for the submit contract.
+
+Text-to-video:
+
+```http
+GET /v1/video/generations/{task_id}
+```
+
+Ali-compatible image-to-video, first-last-frame, and subject-reference workflows:
 
 ```http
 GET /alibailian/api/v1/tasks/{task_id}
@@ -132,6 +174,7 @@ When `output.task_status` reaches success, use `output.video_url` as the final v
 
 ## Scope Notes
 
-- The customer-facing contract is the Ali Bailian-compatible path. The old Fal-only route description is no longer the source of truth.
+- The current recommended customer-facing contract for Wan text-to-video is `/v1/video/generations`, not the Ali Bailian-compatible submit path.
+- The Ali Bailian-compatible path is primarily for image-to-video, first-last-frame, subject-reference, and other Ali-shaped migration workflows.
 - Crazyrouter can internally route to official, ApiPass, Kie, or other third-party providers, but those providers do not define customer protocols.
 - Beta rows can still be shown publicly now; after launch, use production task logs to close live evidence and then remove the Beta label.

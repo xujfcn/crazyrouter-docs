@@ -2,7 +2,7 @@
 title: "Video Generation Alias"
 description: "POST /v1/video/generations compatibility alias for clients that already depend on this video-generation path"
 ---
-> 更新日: 2026-06-06
+> 更新日: 2026-06-07
 
 # Video Generation Alias
 
@@ -23,13 +23,31 @@ Authorization: Bearer YOUR_API_KEY
 - your client is hardcoded to `/v1/video/generations`
 - you are migrating an older video workflow and do not want to change the path
 - you need to preserve compatibility with an existing third-party request shape
+- you want to submit Wan text-to-video models such as `wan2.5-t2v-preview` or `wan2.2-t2v-plus`
 
 For new integrations, prefer:
 
-- `POST /v1/videos`: closer to the official OpenAI video format
-- `POST /v1/video/create`: Crazyrouter's unified video format
+- Wan text-to-video: use this page's `POST /v1/video/generations`
+- Veo / unified-video workflows: use `POST /v1/video/create`
+- OpenAI-compatible video workflows: use `POST /v1/videos`
 
 ## Minimal Request Example
+
+### Wan 2.2 T2V Plus
+
+```bash cURL
+curl -X POST https://cn.crazyrouter.com/v1/video/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "wan2.2-t2v-plus",
+    "prompt": "A calm cinematic shot of clouds over mountains",
+    "seconds": "5",
+    "size": "480P"
+  }'
+```
+
+### Generic Minimal Example
 
 ```bash cURL
 curl -X POST https://cn.crazyrouter.com/v1/video/generations   -H "Content-Type: application/json"   -H "Authorization: Bearer YOUR_API_KEY"   -d '{
@@ -64,8 +82,10 @@ On the local `http://127.0.0.1:4000` environment, this route was verified to exi
 
 - request fields vary by video model and upstream capability
 - model availability depends on the token whitelist and current upstream state
+- Wan text-to-video uses `model`, `prompt`, `seconds`, and `size`; the verified `wan2.2-t2v-plus` combinations are `seconds: "5"` with `size: "480P"` or `"1080P"`.
+- Do not submit `wan2.2-t2v-plus` to `/alibailian/api/v1/services/aigc/video-generation/video-synthesis`.
 - after task creation, query status with `GET /v1/video/generations/{task_id}`
 
 <Note>
-This route is a compatibility alias. It does not guarantee that every video model shares the exact same body schema. If you are starting fresh and do not need legacy path compatibility, prefer `/v1/videos` or `/v1/video/create`.
+This route is a compatibility alias. It does not guarantee that every video model shares the exact same body schema. Wan text-to-video currently uses this route; Veo and unified-video workflows should still start from `/v1/video/create`.
 </Note>
