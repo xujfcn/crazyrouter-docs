@@ -56,8 +56,8 @@ LobeChat documents `OPENAI_PROXY_URL` as the OpenAI API request base URL, and it
 Recommended starting whitelist:
 
 - `gpt-5.5`
-- `claude-sonnet-4-6`
-- `gemini-3-pro`
+- `claude-opus-4-8`
+- `gemini-3.1-pro`
 
 <Tip>
 If you also plan to connect Crazyrouter to Cursor, Codex, or Claude Code, keep LobeChat on its own token. It makes cost tracking much easier.
@@ -67,7 +67,7 @@ If you also plan to connect Crazyrouter to Cursor, Codex, or Claude Code, keep L
 
 <Steps>
   <Step title="Create a dedicated LobeChat token">
-    In the Crazyrouter dashboard, create a token named `lobechat`. For the first rollout, allow only the models you actually need, such as `gpt-5.5` and `claude-sonnet-4-6`.
+    In the Crazyrouter dashboard, create a token named `lobechat`. For the first rollout, allow only the models you actually need, such as `gpt-5.5` and `claude-opus-4-8`.
   </Step>
   <Step title="Open the language model settings">
     In LobeChat, open `Settings` → `Language Model` from the avatar menu or settings entry.
@@ -100,7 +100,7 @@ services:
     environment:
       - OPENAI_API_KEY=sk-xxx
       - OPENAI_PROXY_URL=https://cn.crazyrouter.com/v1
-      - OPENAI_MODEL_LIST=gpt-5.5,claude-sonnet-4-6,gemini-3-pro
+      - OPENAI_MODEL_LIST=gpt-5.5,claude-opus-4-8,gemini-3.1-pro
 ```
 
 If you do not want end users to replace the key freely, combine this with the config controls your deployed LobeChat version supports for hosted defaults or restricted client-side customization.
@@ -110,10 +110,10 @@ If you do not want end users to replace the key freely, combine this with the co
 | Use case | Recommended model | Why |
 |----------|-------------------|-----|
 | Default main chat model | `gpt-5.5` | Verified successfully in production on March 23, 2026, and suited for the main LobeChat baseline |
-| Higher-quality writing / code help | `claude-sonnet-4-6` | Strong long-form writing and reasoning |
-| Gemini fallback path | `gemini-3-pro` | Useful as a second vendor-compatible validation path |
+| Higher-quality writing / code help | `claude-opus-4-8` | Strong long-form writing and reasoning |
+| Gemini fallback path | `gemini-3.1-pro` | Useful as a second vendor-compatible validation path |
 
-Recommended order: get `gpt-5.5` working first, then expand to `claude-sonnet-4-6` and `gemini-3-pro`.
+Recommended order: get `gpt-5.5` working first, then expand to `claude-opus-4-8` and `gemini-3.1-pro`.
 
 ## Token Setup Best Practices
 
@@ -188,3 +188,4 @@ If you want tighter control over upstream routing and cost, yes. If you want eac
 <Note>
 If your goal is a stable chat frontend and a shared workspace, LobeChat is a strong choice. If your goal is agentic coding and automated edits, Cursor, Claude Code, Codex, and Cline should still take priority.
 </Note>
+

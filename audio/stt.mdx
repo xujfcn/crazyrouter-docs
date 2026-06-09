@@ -17,7 +17,7 @@ POST /v1/audio/transcriptions
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
 | `file` | file | 是 | 音频文件（multipart/form-data） |
-| `model` | string | 是 | 模型名称：`whisper-1`、`gpt-4o-transcribe` |
+| `model` | string | 是 | 模型名称：`whisper-1`、`whisper-1` |
 | `language` | string | 否 | 音频语言（ISO-639-1 格式），如 `zh`、`en`、`ja` |
 | `response_format` | string | 否 | 输出格式：`json`（默认）、`text`、`srt`、`verbose_json`、`vtt` |
 | `temperature` | number | 否 | 采样温度，0-1 |

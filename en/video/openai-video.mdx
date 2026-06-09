@@ -18,7 +18,7 @@ POST /v1/videos
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `model` | string | Yes | Model name, e.g. `sora-2`, `sora-2-pro` |
+| `model` | string | Yes | Model name, e.g. `veo-3.1-fast`, `veo-3.1-quality` |
 | `prompt` | string | Yes | Video description prompt |
 | `size` | string | No | Video size: `1920x1080`, `1080x1920`, `1080x1080` |
 | `duration` | integer | No | Video duration (seconds) |
@@ -35,7 +35,7 @@ curl -X POST https://cn.crazyrouter.com/v1/videos \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "sora-2",
+    "model": "veo-3.1-fast",
     "prompt": "A timelapse of a city skyline from day to night, clouds moving quickly",
     "size": "1920x1080",
     "duration": 10
@@ -52,7 +52,7 @@ response = requests.post(
         "Authorization": "Bearer YOUR_API_KEY"
     },
     json={
-        "model": "sora-2",
+        "model": "veo-3.1-fast",
         "prompt": "A timelapse of a city skyline from day to night",
         "size": "1920x1080",
         "duration": 10
@@ -128,7 +128,7 @@ Pass `image_url` in the create request for image-to-video:
 
 ```json
 {
-  "model": "sora-2",
+  "model": "veo-3.1-fast",
   "prompt": "The scene comes to life with gentle movement",
   "image_url": "https://example.com/scene.jpg",
   "size": "1920x1080",
@@ -142,7 +142,7 @@ Pass `image_url` in the create request for image-to-video:
 
 ```json
 {
-  "model": "sora-2",
+  "model": "veo-3.1-fast",
   "storyboard": [
     {"prompt": "Wide shot of a forest at dawn", "duration": 3},
     {"prompt": "A deer walks into frame", "duration": 4},
@@ -160,7 +160,7 @@ Set `private: true` so the generated video won't appear in the public gallery:
 
 ```json
 {
-  "model": "sora-2",
+  "model": "veo-3.1-fast",
   "prompt": "A confidential product demo video",
   "size": "1920x1080",
   "private": true

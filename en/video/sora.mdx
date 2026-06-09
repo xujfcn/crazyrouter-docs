@@ -1,154 +1,20 @@
 ---
-title: "Sora"
-description: "Generate videos with OpenAI Sora models through the verified public unified video API, Video Generations API, and OpenAI-compatible video format"
+title: "Sora (Temporarily Hidden)"
+description: "Public Sora examples are temporarily hidden; use the current public video models and video APIs for new integrations"
+noindex: true
 ---
-> Last updated: 2026-06-06
+> Last updated: 2026-06-07
 
-# Sora
+# Sora (Temporarily Hidden)
 
-For public Crazyrouter docs, the recommended verified Sora routes are:
+Sora public examples are no longer shown as a recommended Crazyrouter integration path. To prevent users from copying examples for delisted or non-public models, this page has been removed from navigation and no longer includes request samples.
 
-- `POST /v1/video/create` with `GET /v1/video/query`
-- `POST /v1/video/generations` with `GET /v1/video/generations/{task_id}`
-- `POST /v1/videos` with `GET /v1/videos/{task_id}`
+For new video integrations, use:
 
-If this is your first Sora integration, start with `POST /v1/video/generations`. It has clearer task-state fields and is now documented in dedicated route pages as part of this update round.
-
-## Model Selection
-
-| Model | Description | Speed | Quality | Recommended Use |
-|-------|-------------|-------|---------|-----------------|
-| `sora-2` | Second-generation standard model | Medium | High | Production and day-to-day usage |
-| `sora-2-pro` | Second-generation professional model | Slower | Highest | Professional work and finer control |
-
-## Recommended Main Path: Video Generations API
-
-```
-POST /v1/video/generations
-```
-
-```bash cURL
-curl -X POST https://cn.crazyrouter.com/v1/video/generations \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "model": "sora-2",
-    "prompt": "A serene Japanese garden in spring, with cherry blossoms gently falling",
-    "size": "1280x720",
-    "duration": 5
-  }'
-```
-
-Query the task:
-
-```
-GET /v1/video/generations/{task_id}
-```
-
-```bash cURL
-curl https://cn.crazyrouter.com/v1/video/generations/video_123 \
-  -H "Authorization: Bearer YOUR_API_KEY"
-```
-
-### When to use this route
-
-- first-pass Sora integration
-- clearer task status and metadata
-- teams that want to follow the new dedicated Crazyrouter video compatibility pages
-
-## Unified Video API
-
-```
-POST /v1/video/create
-```
-
-```bash cURL
-curl -X POST https://cn.crazyrouter.com/v1/video/create \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "model": "sora-2",
-    "prompt": "A cat playing piano in a jazz club, cinematic lighting",
-    "aspect_ratio": "16:9"
-  }'
-```
-
-Query the task:
-
-```
-GET /v1/video/query?task_id=your_task_id
-```
-
-```bash cURL
-curl "https://cn.crazyrouter.com/v1/video/query?task_id=your_task_id" \
-  -H "Authorization: Bearer YOUR_API_KEY"
-```
-
-## OpenAI-Compatible Video Format
-
-```
-POST /v1/videos
-```
-
-```bash cURL
-curl -X POST https://cn.crazyrouter.com/v1/videos \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "model": "sora-2",
-    "prompt": "A cat playing piano in a jazz club, cinematic lighting",
-    "size": "1920x1080",
-    "duration": 10
-  }'
-```
-
-Query the task:
-
-```
-GET /v1/videos/{task_id}
-```
-
-```bash cURL
-curl https://cn.crazyrouter.com/v1/videos/sora_task_abc123 \
-  -H "Authorization: Bearer YOUR_API_KEY"
-```
-
-## Status And Result Fields
-
-Common task states:
-
-| Status | Meaning |
-|--------|---------|
-| `queued` | Submitted and waiting |
-| `in_progress` | Generating |
-| `completed` | Finished |
-| `failed` | Failed |
-
-Common result fields:
-
-- `url` or `video_url`: video download URL
-- `thumbnail_url`: preview thumbnail
-- `progress`: generation progress
-- `expires_at`: expiration time for the temporary result URL
+- [Veo 3.1](/en/video/veo): `veo-3.1-fast` or `veo-3.1-quality`
+- [Unified Video API](/en/video/unified): `POST /v1/video/create`
+- [OpenAI-compatible Video API](/en/video/openai-video): `POST /v1/videos`
 
 <Note>
-  Result URLs are usually not permanent. Download the video promptly instead of treating the returned URL as long-term storage.
-</Note>
-
-## Recommended Rollout Order
-
-1. Start with `sora-2`
-2. Start with a short 5-10 second video
-3. Validate one simple text-to-video request first
-4. Add higher resolution, longer duration, or more advanced parameters later
-5. Switch to `sora-2-pro` only after the basic path is stable
-
-## Practical Notes
-
-- Do not assume every more complex native field is part of the stable public baseline
-- If you need route-specific `Video Generations` examples, prefer the new dedicated pages added in this docs round
-- If you are only checking connectivity, validate with a short prompt and short duration first
-
-<Note>
-  This page keeps the public Sora overview concise. More specific compatibility-route details have been split into dedicated video docs so each route can be maintained more accurately.
+  If Sora returns to the public model list later, this page should be updated with the current model IDs, request examples, and validation notes.
 </Note>

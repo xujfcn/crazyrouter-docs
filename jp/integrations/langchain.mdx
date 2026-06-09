@@ -57,8 +57,8 @@ In LangChain, that usually maps to:
 Suggested starter allowlist:
 
 - `gpt-5.5`
-- `claude-sonnet-4-6`
-- `gemini-3-pro`
+- `claude-opus-4-8`
+- `gemini-3.1-pro`
 - `text-embedding-3-large`
 
 ## Full Python Path
@@ -124,7 +124,7 @@ npm -v
     For the first pass, allow only:
 
     - `gpt-5.5`
-    - `claude-sonnet-4-6`
+    - `claude-opus-4-8`
     - `text-embedding-3-large`
 
     Add more models only after the basic route is already stable.
@@ -362,8 +362,8 @@ console.log(response.content);
 | Use case | Recommended model | Why |
 |----------|-------------------|-----|
 | first-pass validation | `gpt-5.5` | verified successfully in production on March 23, 2026, and best for proving that LangChain and Crazyrouter are connected |
-| higher-quality long-form and complex chains | `claude-sonnet-4-6` | better for complex explanation, summaries, and heavier reasoning |
-| Gemini fallback path | `gemini-3-pro` | useful as a second compatibility-validation path |
+| higher-quality long-form and complex chains | `claude-opus-4-8` | better for complex explanation, summaries, and heavier reasoning |
+| Gemini fallback path | `gemini-3.1-pro` | useful as a second compatibility-validation path |
 | vector retrieval | `text-embedding-3-large` | strong first embedding baseline |
 
 ## Token Setup Best Practices

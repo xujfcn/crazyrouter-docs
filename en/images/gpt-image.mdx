@@ -27,7 +27,7 @@ POST /v1/images/edits
 | `prompt` | string | Yes | Image description prompt |
 | `n` | integer | No | Number of images, default `1`, range `1-10` |
 | `size` | string | No | `auto` or `WxH`. Dimensions must be multiples of 16, each side must be at most 3840, total pixels must be 655360 to 8294400, and the long:short side ratio must not exceed 3:1. Common values: `1024x1024`, `1536x1024`, `1024x1536` |
-| `quality` | string | No | `auto`, `low`, `medium`, `high`. `hd` is accepted for compatibility and normalized to `high`; `standard` is rejected |
+| `quality` | string | No | `auto`, `low`, `medium`, `high`. `hd` is accepted for compatibility and normalized to `high`; `standard` is accepted for compatibility and normalized to `auto` |
 | `background` | string | No | `auto` or `opaque`. `transparent` is not supported for `gpt-image-2` |
 | `output_format` | string | No | `png`, `jpeg`, `webp` |
 | `output_compression` | integer | No | `0-100`, only with `output_format=jpeg` or `output_format=webp` |
@@ -36,11 +36,13 @@ POST /v1/images/edits
 | `partial_images` | integer | No | `0-3`, only when `stream=true` |
 | `user` | string | No | End-user identifier |
 
-These parameters are rejected for `gpt-image-2`: `response_format`, `style`, `input_fidelity`, `background=transparent`, `quality=standard`, and `output_format=png` with `output_compression`.
+For compatibility with older DALL-E / OpenAI Images clients, `gpt-image-2` accepts `response_format=url`, `response_format=b64_json`, `quality=standard`, and `style=vivid/natural`. `response_format` and `style` are not forwarded upstream; `quality=standard` is normalized to `auto`.
 
 <Warning>
-  `response_format` is not a `gpt-image-2` parameter. Do not send `response_format="url"` or `response_format="b64_json"`; use `output_format="png"`, `"jpeg"`, or `"webp"` to choose the image file format, and read `data[0].url` from the response by default. `response_format` notes on DALL-E, Doubao, Qwen, or other image-model pages do not apply to `gpt-image-2`.
+  `response_format` is only a Crazyrouter compatibility field for legacy clients, not a `gpt-image-2` upstream parameter. For new integrations, use `output_format="png"`, `"jpeg"`, or `"webp"` to choose the image file format, and read `data[0].url` by default. If a legacy client sends `response_format="b64_json"`, the service tries to preserve base64 response semantics.
 </Warning>
+
+These combinations are still rejected: `input_fidelity`, `background=transparent`, and `output_format=png` with `output_compression`.
 
 ### Request Examples
 

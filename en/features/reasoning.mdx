@@ -15,16 +15,16 @@ Verification date:
 Verified models:
 
 - `gpt-5.5`
-- `claude-opus-4-7`
-- `gemini-3-pro`
+- `claude-opus-4-8`
+- `gemini-3.1-pro`
 
 ## Verified matrix
 
 | Model | Protocol | Endpoint | Success marker |
 |------|------|------|----------|
 | `gpt-5.5` | OpenAI Responses | `POST /v1/responses` | `output` includes a `reasoning` item |
-| `claude-opus-4-7` | Anthropic Messages | `POST /v1/messages` | Returns `thinking` block |
-| `gemini-3-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | `usageMetadata` includes `thoughtsTokenCount` |
+| `claude-opus-4-8` | Anthropic Messages | `POST /v1/messages` | Returns `thinking` block |
+| `gemini-3.1-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | `usageMetadata` includes `thoughtsTokenCount` |
 
 ## GPT-5.4
 
@@ -70,7 +70,7 @@ curl https://cn.crazyrouter.com/v1/messages \
   -H "x-api-key: YOUR_API_KEY" \
   -H "anthropic-version: 2023-06-01" \
   -d '{
-    "model": "claude-opus-4-7",
+    "model": "claude-opus-4-8",
     "max_tokens": 320,
     "thinking": {
       "type": "enabled",
@@ -103,7 +103,7 @@ Verified response shape:
 ## Gemini 3 Pro
 
 ```bash
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -132,7 +132,7 @@ Verified production field:
 ## Current exclusions
 
 - In the current recheck, `gpt-5.5` via Chat Completions did not reliably surface `reasoning_content`, so this page uses the Responses API as the primary GPT example
-- Base `claude-opus-4-6` did not return a thinking block in this verification round
+- Base `claude-opus-4-8` did not return a thinking block in this verification round
 
 ## See Also
 
@@ -141,3 +141,4 @@ Verified production field:
 - [Thinking Fields](/en/reference/thinking)
 - [Claude Native Messages](/en/chat/anthropic/messages)
 - [Gemini Native API](/en/chat/gemini/native)
+

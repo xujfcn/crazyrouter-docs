@@ -14,8 +14,8 @@ This page only documents Claude Messages behavior that was revalidated against C
 
 Current primary example models:
 
-- `claude-sonnet-4-6`
-- `claude-opus-4-7`
+- `claude-opus-4-8`
+- `claude-opus-4-8`
 
 ## Authentication
 
@@ -45,7 +45,7 @@ curl https://cn.crazyrouter.com/v1/messages \
   -H "x-api-key: YOUR_API_KEY" \
   -H "anthropic-version: 2023-06-01" \
   -d '{
-    "model": "claude-sonnet-4-6",
+    "model": "claude-opus-4-8",
     "max_tokens": 128,
     "messages": [
       {
@@ -87,7 +87,7 @@ curl https://cn.crazyrouter.com/v1/messages \
   -H "x-api-key: YOUR_API_KEY" \
   -H "anthropic-version: 2023-06-01" \
   -d '{
-    "model": "claude-sonnet-4-6",
+    "model": "claude-opus-4-8",
     "max_tokens": 256,
     "tools": [
       {
@@ -139,9 +139,9 @@ Verified response shape:
 
 In this production recheck, the combination that clearly returned a `thinking` block was:
 
-- `claude-opus-4-7`
+- `claude-opus-4-8`
 
-Base `claude-opus-4-6` did not produce an equally explicit thinking block in this round, so the docs prioritize the thinking variant here.
+Base `claude-opus-4-8` did not produce an equally explicit thinking block in this round, so the docs prioritize the thinking variant here.
 
 ```bash cURL
 curl https://cn.crazyrouter.com/v1/messages \
@@ -149,7 +149,7 @@ curl https://cn.crazyrouter.com/v1/messages \
   -H "x-api-key: YOUR_API_KEY" \
   -H "anthropic-version: 2023-06-01" \
   -d '{
-    "model": "claude-opus-4-7",
+    "model": "claude-opus-4-8",
     "max_tokens": 320,
     "thinking": {
       "type": "enabled",
@@ -189,12 +189,13 @@ Verified response shape:
 
 ## Current recommendation
 
-- Standard text chat: use `claude-sonnet-4-6`
-- Tool calling: use `claude-sonnet-4-6`, and include `tool_choice` in first-pass validation
-- Explicit thinking blocks: use `claude-opus-4-7`
+- Standard text chat: use `claude-opus-4-8`
+- Tool calling: use `claude-opus-4-8`, and include `tool_choice` in first-pass validation
+- Explicit thinking blocks: use `claude-opus-4-8`
 
 Related pages:
 
 - [Feature Hub: Tool Calling](/en/features/tool-calling)
 - [Feature Hub: Reasoning](/en/features/reasoning)
 - [Official Model Pricing Methods](/en/reference/official-pricing-methods)
+

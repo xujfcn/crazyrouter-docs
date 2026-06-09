@@ -34,29 +34,29 @@ The examples below intentionally use the most common pricing tier that is easies
 
 | Crazyrouter Name | Official Model | Base Input | Cache 5m / 1h / Hit | Output | Notes |
 | --- | --- | --- | --- | --- | --- |
-| `claude-sonnet-4-6` | `claude-sonnet-4-6` | `$3` | `$3.75 / $6 / $0.30` | `$15` | `1M context` uses the standard rate; Batch is roughly `50% off` |
-| `claude-opus-4-6` | `claude-opus-4-6` | `$5` | `$6.25 / $10 / $0.50` | `$25` | `Fast mode` is billed at `6x` the standard price |
-| `claude-opus-4-7` | `claude-opus-4-7` | `$5` | `$6.25 / $10 / $0.50` | `$25` | `US-only inference` has an extra regional multiplier in the official docs |
-| `claude-sonnet-4-5-20250929` | `claude-sonnet-4-5` snapshot | `$3` | `$3.75 / $6 / $0.30` | `$15` | Snapshot IDs keep the `Sonnet 4.5` price; they do not define a separate pricing table |
+| `claude-opus-4-8` | `claude-opus-4-8` | `$3` | `$3.75 / $6 / $0.30` | `$15` | `1M context` uses the standard rate; Batch is roughly `50% off` |
+| `claude-opus-4-8` | `claude-opus-4-8` | `$5` | `$6.25 / $10 / $0.50` | `$25` | `Fast mode` is billed at `6x` the standard price |
+| `claude-opus-4-8` | `claude-opus-4-8` | `$5` | `$6.25 / $10 / $0.50` | `$25` | `US-only inference` has an extra regional multiplier in the official docs |
+| `claude-opus-4-8` | `claude-sonnet-4-5` snapshot | `$3` | `$3.75 / $6 / $0.30` | `$15` | Snapshot IDs keep the `Sonnet 4.5` price; they do not define a separate pricing table |
 
 ### OpenAI Example Prices
 
 | Crazyrouter Name | Official Model | Input | Cached input | Output | Notes |
 | --- | --- | --- | --- | --- | --- |
-| `gpt-54` | `gpt-5.5` | `$2.50` | `$0.25` | `$15.00` | Standard price applies below `270K` context; long-context multipliers apply above that |
+| `gpt-5.5` | `gpt-5.5` | `$2.50` | `$0.25` | `$15.00` | Standard price applies below `270K` context; long-context multipliers apply above that |
 | `gpt-4o` | `gpt-4o` | `$2.50` | `$1.25` | `$10.00` | Classic three-part token pricing |
 | `gpt-5` | `gpt-5` | `$1.25` | `$0.125` | `$10.00` | Tool charges are separate |
-| `gpt-51-codex-max` | `gpt-5.1-codex-max` | `$1.25` | `$0.125` | `$10.00` | Commonly used in Codex and agentic coding workflows, but still billed with the standard three-part structure |
+| `gpt-5.5` | `gpt-5.1-codex-max` | `$1.25` | `$0.125` | `$10.00` | Commonly used in Codex and agentic coding workflows, but still billed with the standard three-part structure |
 | `gpt-5-mini` | `gpt-5-mini` | `$0.25` | `$0.025` | `$2.00` | Lower-cost GPT-5 variant |
 | `gpt-5-nano` | `gpt-5-nano` | `$0.05` | `$0.005` | `$0.40` | Lowest-cost GPT-5 route |
-| `gpt-5.2` | `gpt-5.2` | `$1.75` | `$0.175` | `$14.00` | Earlier flagship tier, still standard three-part token pricing |
+| `gpt-5.5` | `gpt-5.5` | `$1.75` | `$0.175` | `$14.00` | Earlier flagship tier, still standard three-part token pricing |
 | `gpt-5.5` | `gpt-5.5` | `$5.00` | `$0.50` | `$30.00` | Current flagship tier; the official standard-price note applies below `270K` context |
 
 ### Gemini Example Prices
 
 | Crazyrouter Name | Official Model | Standard Input | Standard Cache | Standard Output | Notes |
 | --- | --- | --- | --- | --- | --- |
-| `gemini-3-pro` | `gemini-3-pro` | `$2.00` | `$0.20` + `$4.50 / 1M tok / hr` storage | `$12.00` | `<= 200K` prompt tier; `> 200K` becomes `$4 / $0.40 / $18`; Google also lists Search and Maps free quotas plus `$14 / 1,000 search queries` |
+| `gemini-3.1-pro` | `gemini-3.1-pro` | `$2.00` | `$0.20` + `$4.50 / 1M tok / hr` storage | `$12.00` | `<= 200K` prompt tier; `> 200K` becomes `$4 / $0.40 / $18`; Google also lists Search and Maps free quotas plus `$14 / 1,000 search queries` |
 | `gemini-2.5-flash-lite` | `gemini-2.5-flash-lite` | `$0.10` for text / image / video | `$0.01` for text / image / video + `$1.00 / 1M tok / hr` storage | `$0.40` | Audio input is `$0.30`, audio cache is `$0.03`; Search is `1,500 RPD` free then `$35 / 1,000 grounded prompts` |
 
 ### xAI Example Prices
@@ -82,7 +82,7 @@ The examples below intentionally use the most common pricing tier that is easies
 
 | Crazyrouter Name | Official Model | Input | Prompt caching read | Prompt caching write | Output | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| `MiniMax-M27` | `MiniMax-M2.7` | `$0.3` | `$0.06` | `$0.375` | `$1.2` | This is the clearest tier to use for direct API budgeting |
+| `MiniMax-M2.7` | `MiniMax-M2.7` | `$0.3` | `$0.06` | `$0.375` | `$1.2` | This is the clearest tier to use for direct API budgeting |
 
 #### Token Plan
 
@@ -109,10 +109,10 @@ Two common rules also matter:
 
 | Crazyrouter Name | Official Mapping | Official Billing Method | Notes |
 | --- | --- | --- | --- |
-| `claude-sonnet-4-6` | Anthropic `claude-sonnet-4-6` | billed as `base input / 5m cache write / 1h cache write / cache hit / output` | Anthropic explicitly documents `Sonnet 4.6` with `1M context`, still using standard pricing |
-| `claude-opus-4-6` | Anthropic `claude-opus-4-6` | billed as `base input / 5m cache write / 1h cache write / cache hit / output` | `Opus 4.6` also supports `1M context`; `Fast mode` uses a separate multiplier |
-| `claude-opus-4-7` | Anthropic `claude-opus-4-7` | billed as `base input / 5m cache write / 1h cache write / cache hit / output` | `Opus 4.7` is a distinct model on the official Anthropic pricing surface |
-| `claude-sonnet-4-5-20250929` | Anthropic snapshot ID `claude-sonnet-4-5-20250929`, usually displayed publicly as `claude-sonnet-4-5` | still billed under the `Sonnet 4.5` `base input / cache write / cache hit / output` structure | Snapshot IDs are dated API names, not separate product prices |
+| `claude-opus-4-8` | Anthropic `claude-opus-4-8` | billed as `base input / 5m cache write / 1h cache write / cache hit / output` | Anthropic explicitly documents `Sonnet 4.6` with `1M context`, still using standard pricing |
+| `claude-opus-4-8` | Anthropic `claude-opus-4-8` | billed as `base input / 5m cache write / 1h cache write / cache hit / output` | `Opus 4.6` also supports `1M context`; `Fast mode` uses a separate multiplier |
+| `claude-opus-4-8` | Anthropic `claude-opus-4-8` | billed as `base input / 5m cache write / 1h cache write / cache hit / output` | `Opus 4.7` is a distinct model on the official Anthropic pricing surface |
+| `claude-opus-4-8` | Anthropic snapshot ID `claude-opus-4-8`, usually displayed publicly as `claude-sonnet-4-5` | still billed under the `Sonnet 4.5` `base input / cache write / cache hit / output` structure | Snapshot IDs are dated API names, not separate product prices |
 
 Official links:
 
@@ -135,13 +135,13 @@ Common extra rules:
 
 | Crazyrouter Name | Official Mapping | Official Billing Method | Notes |
 | --- | --- | --- | --- |
-| `gpt-54` | internal alias, usually meaning OpenAI `gpt-5.5` | billed as `input / cached input / output` | the public standard price applies below `270K` context; regional processing endpoints add another surcharge |
+| `gpt-5.5` | internal alias, usually meaning OpenAI `gpt-5.5` | billed as `input / cached input / output` | the public standard price applies below `270K` context; regional processing endpoints add another surcharge |
 | `gpt-4o` | OpenAI `gpt-4o` | billed as `input / cached input / output` | classic unified OpenAI pricing structure |
 | `gpt-5` | OpenAI `gpt-5` | billed as `input / cached input / output` | tool usage is billed separately; there is no separate public "thinking token price" line item |
-| `gpt-51-codex-max` | should map to OpenAI `gpt-5.1-codex-max` | billed as `input / cached input / output` | Codex-oriented naming, but the public price structure still matches the regular GPT-5.1 token format |
+| `gpt-5.5` | should map to OpenAI `gpt-5.1-codex-max` | billed as `input / cached input / output` | Codex-oriented naming, but the public price structure still matches the regular GPT-5.1 token format |
 | `gpt-5-mini` | OpenAI `gpt-5-mini` | billed as `input / cached input / output` | smaller lower-cost tier |
 | `gpt-5-nano` | OpenAI `gpt-5-nano` | billed as `input / cached input / output` | nano tier, same billing structure |
-| `gpt-5.2` | OpenAI `gpt-5.2` | billed as `input / cached input / output` | still part of the GPT-5 pricing pattern |
+| `gpt-5.5` | OpenAI `gpt-5.5` | billed as `input / cached input / output` | still part of the GPT-5 pricing pattern |
 | `gpt-5.5` | OpenAI `gpt-5.5` | billed as `input / cached input / output` | current flagship tier; use the latest long-context notes from OpenAI before production rollout |
 
 Official links:
@@ -170,7 +170,7 @@ And it often breaks out:
 
 | Crazyrouter Name | Official Mapping | Official Billing Method | Notes |
 | --- | --- | --- | --- |
-| `gemini-3-pro` | Google `gemini-3-pro`, often displayed internally as `gemini-3-pro` | officially split by `Standard / Batch / Flex / Priority`, and then by `input / output / caching / search grounding / maps grounding` | preview model, with separate `<= 200K` and `> 200K` prompt pricing tiers |
+| `gemini-3.1-pro` | Google `gemini-3.1-pro`, often displayed internally as `gemini-3.1-pro` | officially split by `Standard / Batch / Flex / Priority`, and then by `input / output / caching / search grounding / maps grounding` | preview model, with separate `<= 200K` and `> 200K` prompt pricing tiers |
 | `gemini-2.5-flash-lite` | Google `gemini-2.5-flash-lite` | priced by `Standard / Batch / Flex / Priority`, with separate `input / output / context caching / storage / Google Search / Google Maps` | stable model rather than preview; official output pricing explicitly includes thinking tokens |
 
 Official links:
@@ -238,7 +238,7 @@ That means:
 
 | Crazyrouter Name | Official Mapping | Official Billing Method | Notes |
 | --- | --- | --- | --- |
-| `MiniMax-M27` | should map to `MiniMax-M2.7` | under `Pay as You Go`, billed as `input / output / prompt caching read / prompt caching write`; under `Token Plan`, billed as `requests / 5hrs` capacity | for production API budgeting, start with `Pay as You Go`; evaluate `Token Plan` separately for heavy coding or interactive usage |
+| `MiniMax-M2.7` | should map to `MiniMax-M2.7` | under `Pay as You Go`, billed as `input / output / prompt caching read / prompt caching write`; under `Token Plan`, billed as `requests / 5hrs` capacity | for production API budgeting, start with `Pay as You Go`; evaluate `Token Plan` separately for heavy coding or interactive usage |
 
 Official links:
 

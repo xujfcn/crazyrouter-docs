@@ -38,14 +38,14 @@ https://cn.crazyrouter.com/v1
 
 不要填成：
 
-- `https://crazyrouter.com`
+- `https://cn.crazyrouter.com`
 - `https://cn.crazyrouter.com/v1/chat/completions`
 
 ## 前置条件
 
 | 项目 | 说明 |
 |------|------|
-| Crazyrouter 账号 | 先在 [crazyrouter.com](https://crazyrouter.com) 注册 |
+| Crazyrouter 账号 | 先在 [crazyrouter.com](https://cn.crazyrouter.com) 注册 |
 | Crazyrouter token | 建议单独创建一个给 Cursor 使用的 `sk-...` token |
 | Cursor 桌面端 | 建议升级到当前稳定版后再配置 |
 | 可用模型 | 至少保证 token 放行了 1 到 2 个 OpenAI 兼容聊天模型 |
@@ -53,8 +53,8 @@ https://cn.crazyrouter.com/v1
 推荐先放行这些模型之一：
 
 - `gpt-5.5`
-- `claude-sonnet-4-6`
-- `gemini-3-pro`
+- `claude-opus-4-8`
+- `gemini-3.1-pro`
 
 <Tip>
 如果你后续还要配置 Claude Code、Codex、Cline，不要和 Cursor 共用同一个 token。单独拆 token 更方便排查和控费。
@@ -64,7 +64,7 @@ https://cn.crazyrouter.com/v1
 
 <Steps>
   <Step title="创建 Cursor 专用 token">
-    在 Crazyrouter 后台创建一个新 token，名称建议直接写 `cursor`。先开启少量模型白名单，例如 `gpt-5.5` 与 `claude-sonnet-4-6`。
+    在 Crazyrouter 后台创建一个新 token，名称建议直接写 `cursor`。先开启少量模型白名单，例如 `gpt-5.5` 与 `claude-opus-4-8`。
   </Step>
   <Step title="打开 Cursor 设置">
     打开 Cursor，进入 `Cursor Settings` → `Models`。
@@ -89,10 +89,10 @@ https://cn.crazyrouter.com/v1
 | 使用场景 | 推荐模型 | 原因 |
 |----------|----------|------|
 | 默认主力 | `gpt-5.5` | 2026 年 3 月 23 日已在生产环境实测成功，适合作为 Cursor OpenAI 兼容主基线 |
-| 高质量代码与长文 | `claude-sonnet-4-6` | 更适合复杂解释、总结和代码辅助 |
-| Gemini 备用档 | `gemini-3-pro` | 适合作为第二条兼容性验证路径 |
+| 高质量代码与长文 | `claude-opus-4-8` | 更适合复杂解释、总结和代码辅助 |
+| Gemini 备用档 | `gemini-3.1-pro` | 适合作为第二条兼容性验证路径 |
 
-推荐顺序：先用 `gpt-5.5` 跑通，再逐步尝试 `claude-sonnet-4-6` 和 `gemini-3-pro`。
+推荐顺序：先用 `gpt-5.5` 跑通，再逐步尝试 `claude-opus-4-8` 和 `gemini-3.1-pro`。
 
 ## Token 设置最佳实践
 
@@ -132,7 +132,7 @@ https://cn.crazyrouter.com/v1
 
 - 第一阶段先只开 `gpt-5.5`
 - 复杂代码解释、总结和重构优先走 `gpt-5.5`
-- 如果你要做多供应商验证，再补 `claude-sonnet-4-6` 与 `gemini-3-pro`
+- 如果你要做多供应商验证，再补 `claude-opus-4-8` 与 `gemini-3.1-pro`
 - 如果你同时在用 Claude Code / Codex，务必拆分 token 统计成本
 - 遇到可疑高消耗时，先回看 Crazyrouter 日志确认是不是 Cursor 的多轮上下文导致
 
@@ -161,3 +161,5 @@ https://cn.crazyrouter.com/v1
 <Note>
 如果你主要想把 Crazyrouter 用在稳定的编码工作流里，Claude Code、Codex、Cline 往往比 Cursor 的自定义端点路径更直接可控。Cursor 更适合先接入聊天和常规编辑辅助。
 </Note>
+
+

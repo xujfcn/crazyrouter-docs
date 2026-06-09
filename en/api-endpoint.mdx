@@ -80,7 +80,8 @@ If logs show `/v1/v1/models`, `/v1/v1/messages`, or `/v1/messages/v1/messages`, 
 | `/jimeng/submit/videos` | POST | Jimeng video submit |
 | `/jimeng/fetch/{task_id}` | GET | Jimeng task query |
 | `/luma/generations` | POST | Luma video generation |
-| `/runwayml/v1/tasks` | POST | Runway video generation |
+| `/runwayml/v1/image_to_video` | POST | Runway image-to-video |
+| `/runwayml/v1/tasks/{task_id}` | GET | Runway task query |
 
 ### Audio API
 
@@ -97,6 +98,9 @@ If logs show `/v1/v1/models`, `/v1/v1/messages`, or `/v1/messages/v1/messages`, 
 | `/v1/embeddings` | POST | Embeddings |
 | `/v1/rerank` | POST | Reranking |
 | `/v1/models` | GET | Model list |
+| `/v1/files/uploads` | POST | Temporary local image upload |
+| `/v1/files/uploads/base64` | POST | Temporary Base64 image upload |
+| `/v1/files/uploads/url` | POST | Rehost a remote image as a temporary URL |
 
 <Note>
 All endpoints support HTTPS. Prefer the `https://cn.crazyrouter.com` route family for API access by default; account login, billing, and the dashboard still use `https://crazyrouter.com`.

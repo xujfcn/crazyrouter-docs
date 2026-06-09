@@ -81,7 +81,7 @@ The current `gpt-image-2` stable path uses the primary image route `https://cn.c
 
 - `data[0].url`
 
-`gpt-image-2` does not support `response_format`; do not send `response_format="url"` or `response_format="b64_json"`. To choose the image file format, use `output_format="png"`, `"jpeg"`, or `"webp"`.
+`gpt-image-2` accepts `response_format="url"` and `response_format="b64_json"` as legacy compatibility fields, but new integrations should use `output_format="png"`, `"jpeg"`, or `"webp"` to choose the image file format.
 
 So the stable automation path is still the Images API, not the chat-image compatibility path.
 

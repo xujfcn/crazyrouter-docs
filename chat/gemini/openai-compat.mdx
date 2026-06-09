@@ -16,13 +16,13 @@ POST /v1/chat/completions
 
 当前主示例模型：
 
-- `gemini-3-pro`
+- `gemini-3.1-pro`
 
 ## 当前主结论
 
 本轮生产复核确认：
 
-- `gemini-3-pro` 可以通过 `/v1/chat/completions` 正常对话
+- `gemini-3.1-pro` 可以通过 `/v1/chat/completions` 正常对话
 - 流式返回兼容 `chat.completion.chunk` SSE 结构
 - 如果你需要 Gemini 的结构化输出、Google Search、thinking 等能力，当前仍应优先看 [Gemini 原生格式](/chat/gemini/native)
 
@@ -35,7 +35,7 @@ curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gemini-3-pro",
+    "model": "gemini-3.1-pro",
     "messages": [
       {
         "role": "system",
@@ -55,7 +55,7 @@ curl https://cn.crazyrouter.com/v1/chat/completions \
 ```json
 {
   "object": "chat.completion",
-  "model": "gemini-3-pro",
+  "model": "gemini-3.1-pro",
   "choices": [
     {
       "message": {
@@ -80,7 +80,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gemini-3-pro",
+    model="gemini-3.1-pro",
     messages=[
         {"role": "system", "content": "You are a concise assistant."},
         {"role": "user", "content": "Explain quantum entanglement in one sentence."}
@@ -99,7 +99,7 @@ print(response.choices[0].message.content)
 
 ```python Python
 stream = client.chat.completions.create(
-    model="gemini-3-pro",
+    model="gemini-3.1-pro",
     messages=[
         {"role": "user", "content": "Write one short sentence about AI."}
     ],
@@ -116,7 +116,7 @@ for chunk in stream:
 当前生产收到的 SSE 片段形态类似：
 
 ```text
-data: {"object":"chat.completion.chunk","model":"gemini-3-pro",...}
+data: {"object":"chat.completion.chunk","model":"gemini-3.1-pro",...}
 data: {"choices":[{"delta":{"content":"..."}}],...}
 data: [DONE]
 ```

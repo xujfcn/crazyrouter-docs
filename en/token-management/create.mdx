@@ -45,7 +45,7 @@ New-Api-User: 1
 </ParamField>
 
 <ParamField body="model_limits" type="string">
-  Model restriction config as a string, usually a JSON string such as `["gpt-5.5","claude-sonnet-4-6"]`
+  Model restriction config as a string, usually a JSON string such as `["gpt-5.5","claude-opus-4-8"]`
 </ParamField>
 
 <ParamField body="allow_ips" type="string">
@@ -83,7 +83,7 @@ headers = {
 }
 
 response = requests.post(
-    "https://crazyrouter.com/api/token/",
+    "https://cn.crazyrouter.com/api/token/",
     headers=headers,
     json={
         "name": "Production",
@@ -91,7 +91,7 @@ response = requests.post(
         "unlimited_quota": False,
         "expired_time": -1,
         "model_limits_enabled": True,
-        "model_limits": json.dumps(["gpt-5.5", "claude-sonnet-4-6"]),
+        "model_limits": json.dumps(["gpt-5.5", "claude-opus-4-8"]),
         "allow_ips": "203.0.113.10"
     }
 )
@@ -100,7 +100,7 @@ print(response.json())
 ```
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/api/token/ \
+curl -X POST https://cn.crazyrouter.com/api/token/ \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 1" \
   -H "Content-Type: application/json" \
@@ -118,3 +118,4 @@ curl -X POST https://crazyrouter.com/api/token/ \
 <Warning>
   The current create endpoint does not return the full generated `key` in the response. If your workflow requires copying the full token immediately, prefer creating it from the console UI and saving it there.
 </Warning>
+

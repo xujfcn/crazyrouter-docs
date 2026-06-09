@@ -16,13 +16,13 @@ This page only documents compatibility-layer behavior that was revalidated again
 
 Current primary example model:
 
-- `gemini-3-pro`
+- `gemini-3.1-pro`
 
 ## Current conclusion
 
 This production recheck confirmed that:
 
-- `gemini-3-pro` works through `/v1/chat/completions` for normal text chat
+- `gemini-3.1-pro` works through `/v1/chat/completions` for normal text chat
 - streaming returns standard `chat.completion.chunk` SSE objects
 - for Gemini-specific capabilities such as structured outputs, Google Search, and thinking, you should still prefer [Gemini Native Format](/jp/chat/gemini/native)
 
@@ -35,7 +35,7 @@ curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gemini-3-pro",
+    "model": "gemini-3.1-pro",
     "messages": [
       {
         "role": "system",
@@ -55,7 +55,7 @@ Verified response shape:
 ```json
 {
   "object": "chat.completion",
-  "model": "gemini-3-pro",
+  "model": "gemini-3.1-pro",
   "choices": [
     {
       "message": {
@@ -80,7 +80,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gemini-3-pro",
+    model="gemini-3.1-pro",
     messages=[
         {"role": "system", "content": "You are a concise assistant."},
         {"role": "user", "content": "Explain quantum entanglement in one sentence."}
@@ -99,7 +99,7 @@ This production recheck also confirmed streaming compatibility:
 
 ```python Python
 stream = client.chat.completions.create(
-    model="gemini-3-pro",
+    model="gemini-3.1-pro",
     messages=[
         {"role": "user", "content": "Write one short sentence about AI."}
     ],
@@ -116,7 +116,7 @@ for chunk in stream:
 Observed SSE shape:
 
 ```text
-data: {"object":"chat.completion.chunk","model":"gemini-3-pro",...}
+data: {"object":"chat.completion.chunk","model":"gemini-3.1-pro",...}
 data: {"choices":[{"delta":{"content":"..."}}],...}
 data: [DONE]
 ```

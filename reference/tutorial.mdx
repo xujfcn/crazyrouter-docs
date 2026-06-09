@@ -11,7 +11,7 @@ description: '基于生产环境复核，从 OpenAI、Anthropic、Gemini 接入 
 如果你要最快开始，先区分三类接法：
 
 - OpenAI 兼容：`https://cn.crazyrouter.com/v1`
-- Anthropic 原生：`https://crazyrouter.com`
+- Anthropic 原生：`https://cn.crazyrouter.com`
 - Gemini 原生：`https://cn.crazyrouter.com/v1beta/models/...`
 
 ## 最短迁移原则
@@ -65,7 +65,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="claude-sonnet-4-6",
+    model="claude-opus-4-8",
     messages=[{"role": "user", "content": "Hello"}],
     max_tokens=64
 )
@@ -78,11 +78,11 @@ import anthropic
 
 client = anthropic.Anthropic(
     api_key="sk-xxx",
-    base_url="https://crazyrouter.com"
+    base_url="https://cn.crazyrouter.com"
 )
 
 response = client.messages.create(
-    model="claude-sonnet-4-6",
+    model="claude-opus-4-8",
     max_tokens=128,
     messages=[{"role": "user", "content": "Hello"}]
 )
@@ -90,8 +90,8 @@ response = client.messages.create(
 
 如果你要：
 
-- 普通 Claude 对话：优先 `claude-sonnet-4-6`
-- 明确需要 thinking block：优先 `claude-opus-4-7`
+- 普通 Claude 对话：优先 `claude-opus-4-8`
+- 明确需要 thinking block：优先 `claude-opus-4-8`
 
 相关页面：
 
@@ -112,7 +112,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gemini-3-pro",
+    model="gemini-3.1-pro",
     messages=[{"role": "user", "content": "Hello"}],
     max_tokens=64
 )
@@ -121,7 +121,7 @@ response = client.chat.completions.create(
 ### 方案 B：Gemini 原生
 
 ```bash
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -180,12 +180,14 @@ client = OpenAI()
 | 目标 | 推荐起步方式 |
 |------|--------------|
 | 最快接入 GPT | OpenAI 兼容 + `gpt-5.5` |
-| 最快接入 Claude | Anthropic 原生 + `claude-sonnet-4-6` |
-| 最快接入 Gemini | OpenAI 兼容或 Gemini 原生 + `gemini-3-pro` |
+| 最快接入 Claude | Anthropic 原生 + `claude-opus-4-8` |
+| 最快接入 Gemini | OpenAI 兼容或 Gemini 原生 + `gemini-3.1-pro` |
 | 要 reasoning 摘要 | Responses API |
-| 要 Claude thinking block | `claude-opus-4-7` |
+| 要 Claude thinking block | `claude-opus-4-8` |
 | 要 Gemini Google Search / thinking / responseSchema | Gemini 原生 |
 
 <Note>
   Crazyrouter 同时支持 OpenAI、Anthropic、Gemini 三种协议。更稳的做法通常不是“所有模型都强行走同一协议”，而是按能力选最合适的入口。
 </Note>
+
+

@@ -12,7 +12,7 @@ POST /v1/chat/completions
 
 As of March 23, 2026, Crazyrouter production has verified:
 
-- non-stream `claude-sonnet-4-6` requests return `object: "chat.completion"`
+- non-stream `claude-opus-4-8` requests return `object: "chat.completion"`
 - the current `message` reliably includes `role` and `content`
 - streaming requests return `chat.completion.chunk`
 - the SSE stream still ends with `data: [DONE]`
@@ -26,7 +26,7 @@ curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "claude-sonnet-4-6",
+    "model": "claude-opus-4-8",
     "messages": [
       {"role": "system", "content": "You are a concise assistant."},
       {"role": "user", "content": "Compare PostgreSQL and MySQL in one paragraph."}
@@ -41,7 +41,7 @@ Observed response shape:
 ```json
 {
   "object": "chat.completion",
-  "model": "claude-sonnet-4-6",
+  "model": "claude-opus-4-8",
   "choices": [
     {
       "message": {
@@ -62,7 +62,7 @@ curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "claude-sonnet-4-6",
+    "model": "claude-opus-4-8",
     "messages": [
       {"role": "user", "content": "Say hello in one sentence."}
     ],
@@ -74,11 +74,12 @@ curl https://cn.crazyrouter.com/v1/chat/completions \
 The 2026-03-23 production streaming probe began like this:
 
 ```text
-data: {"object":"chat.completion.chunk","model":"claude-sonnet-4-6","choices":[{"delta":{"role":"assistant"}}]}
-data: {"object":"chat.completion.chunk","model":"claude-sonnet-4-6","choices":[{"delta":{"content":"Hello! ..."}}]}
+data: {"object":"chat.completion.chunk","model":"claude-opus-4-8","choices":[{"delta":{"role":"assistant"}}]}
+data: {"object":"chat.completion.chunk","model":"claude-opus-4-8","choices":[{"delta":{"content":"Hello! ..."}}]}
 data: [DONE]
 ```
 
 <Note>
   If you need Claude-native `thinking`, native tool blocks, or document inputs, prefer [Claude Messages](/chat/anthropic/messages).
 </Note>
+

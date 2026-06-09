@@ -12,7 +12,7 @@ POST /v1beta/models/{model}:generateContent
 
 As of `2026-04-08`, successful Crazyrouter and local `:4000` retests show:
 
-- `gemini-2.5-pro` can reliably read images through `inlineData`
+- `gemini-3.1-pro` can reliably read images through `inlineData`
 - remote image URLs through `fileData.fileUri` have shown repeated fetch and upstream-body failures
 - the primary recommended request shape for image understanding is therefore `inlineData`
 
@@ -21,7 +21,7 @@ As of `2026-04-08`, successful Crazyrouter and local `:4000` retests show:
 ## Verified Minimal Request
 
 ```bash
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-2.5-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -71,3 +71,4 @@ Observed production response shape:
 <Note>
   For video understanding, see [Gemini Video Understanding](/en/chat/gemini/video). For audio understanding, see [Gemini Audio Understanding](/en/chat/gemini/audio).
 </Note>
+

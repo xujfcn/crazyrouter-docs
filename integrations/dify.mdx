@@ -43,7 +43,7 @@ https://cn.crazyrouter.com/v1
 
 不要填成：
 
-- `https://crazyrouter.com`
+- `https://cn.crazyrouter.com`
 - `https://cn.crazyrouter.com/v1/chat/completions`
 
 <Tip>
@@ -54,7 +54,7 @@ https://cn.crazyrouter.com/v1
 
 | 项目 | 说明 |
 |------|------|
-| Crazyrouter 账号 | 先在 [crazyrouter.com](https://crazyrouter.com) 注册 |
+| Crazyrouter 账号 | 先在 [crazyrouter.com](https://cn.crazyrouter.com) 注册 |
 | Crazyrouter token | 建议为 Dify 单独创建一个 `sk-...` token |
 | Dify | 建议使用当前稳定版；不同版本的入口名称可能略有差异 |
 | 可用模型 | 至少放行一个当天已实测成功的聊天模型，如 `gpt-5.5` |
@@ -62,7 +62,7 @@ https://cn.crazyrouter.com/v1
 推荐首批白名单：
 
 - `gpt-5.5`
-- `claude-sonnet-4-6`
+- `claude-opus-4-8`
 - `text-embedding-3-large`
 - `text-embedding-3-small`
 
@@ -116,8 +116,8 @@ https://cn.crazyrouter.com/v1
 | 使用场景 | 推荐模型 | 原因 |
 |----------|----------|------|
 | 默认工作流聊天模型 | `gpt-5.5` | 当天已实测成功，适合作为 Dify 聊天主基线 |
-| 高质量复杂场景 | `claude-sonnet-4-6` | 更适合复杂解释、总结与长文本 |
-| Gemini 备用档 | `gemini-3-pro` | 适合做第二条上游兼容性验证路径 |
+| 高质量复杂场景 | `claude-opus-4-8` | 更适合复杂解释、总结与长文本 |
+| Gemini 备用档 | `gemini-3.1-pro` | 适合做第二条上游兼容性验证路径 |
 | 默认 Embedding | `text-embedding-3-large` | 知识库质量更稳 |
 | 低成本 Embedding | `text-embedding-3-small` | 适合预算敏感的索引场景 |
 
@@ -197,3 +197,5 @@ https://cn.crazyrouter.com/v1
 <Note>
 Dify 最适合放在“应用平台”和“工作流平台”的位置。和聊天前端相比，它更强调流程编排、知识库和多环境管理，因此更需要专用 token、模型白名单和配额策略。
 </Note>
+
+

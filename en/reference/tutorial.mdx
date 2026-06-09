@@ -65,7 +65,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="claude-sonnet-4-6",
+    model="claude-opus-4-8",
     messages=[{"role": "user", "content": "Hello"}],
     max_tokens=64
 )
@@ -78,11 +78,11 @@ import anthropic
 
 client = anthropic.Anthropic(
     api_key="sk-xxx",
-    base_url="https://crazyrouter.com"
+    base_url="https://cn.crazyrouter.com"
 )
 
 response = client.messages.create(
-    model="claude-sonnet-4-6",
+    model="claude-opus-4-8",
     max_tokens=128,
     messages=[{"role": "user", "content": "Hello"}]
 )
@@ -90,8 +90,8 @@ response = client.messages.create(
 
 If you need:
 
-- standard Claude chat: prefer `claude-sonnet-4-6`
-- an explicit thinking block: prefer `claude-opus-4-7`
+- standard Claude chat: prefer `claude-opus-4-8`
+- an explicit thinking block: prefer `claude-opus-4-8`
 
 Related page:
 
@@ -112,7 +112,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gemini-3-pro",
+    model="gemini-3.1-pro",
     messages=[{"role": "user", "content": "Hello"}],
     max_tokens=64
 )
@@ -121,7 +121,7 @@ response = client.chat.completions.create(
 ### Option B: Gemini native
 
 ```bash
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -180,12 +180,13 @@ client = OpenAI()
 | Goal | Recommended starting path |
 |------|---------------------------|
 | Fastest GPT integration | OpenAI-compatible + `gpt-5.5` |
-| Fastest Claude integration | Anthropic native + `claude-sonnet-4-6` |
-| Fastest Gemini integration | OpenAI-compatible or Gemini native + `gemini-3-pro` |
+| Fastest Claude integration | Anthropic native + `claude-opus-4-8` |
+| Fastest Gemini integration | OpenAI-compatible or Gemini native + `gemini-3.1-pro` |
 | Need reasoning summaries | Responses API |
-| Need a Claude thinking block | `claude-opus-4-7` |
+| Need a Claude thinking block | `claude-opus-4-8` |
 | Need Gemini Google Search / thinking / responseSchema | Gemini native |
 
 <Note>
   Crazyrouter supports OpenAI, Anthropic, and Gemini protocols at the same time. In practice, the more reliable approach is usually not forcing every model through one protocol, but choosing the route that best matches the capability you need.
 </Note>
+

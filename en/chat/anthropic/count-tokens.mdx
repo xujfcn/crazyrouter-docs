@@ -38,7 +38,7 @@ If your request also includes `system`, `tools`, tool results, or text content, 
 
 ```bash cURL
 curl https://cn.crazyrouter.com/v1/messages/count_tokens   -H "Content-Type: application/json"   -H "x-api-key: YOUR_API_KEY"   -H "anthropic-version: 2023-06-01"   -d '{
-    "model": "claude-sonnet-4-6",
+    "model": "claude-opus-4-8",
     "messages": [
       {"role": "user", "content": "hello"}
     ]
@@ -56,7 +56,7 @@ resp = requests.post(
         "Content-Type": "application/json",
     },
     json={
-        "model": "claude-sonnet-4-6",
+        "model": "claude-opus-4-8",
         "messages": [
             {"role": "user", "content": "hello"}
         ],
@@ -98,3 +98,4 @@ If the request contains images or files, those image/file tokens are not include
 <Note>
 This endpoint returns an estimate, not a final billing record. Actual usage is determined by the real model call.
 </Note>
+

@@ -12,7 +12,7 @@ POST /v1beta/models/{model}:generateContent
 
 截至 `2026-04-08`，Crazyrouter 本站与本地 `4000` 端口复测表明：
 
-- `gemini-2.5-pro` 可以稳定通过 `inlineData` 读取图片并返回文本描述
+- `gemini-3.1-pro` 可以稳定通过 `inlineData` 读取图片并返回文本描述
 - 远程图片 URL 形态的 `fileData.fileUri` 在多条渠道上出现过抓取失败、上游返回体异常等问题
 - 因此图片理解在当前文档中以 `inlineData` 作为主推荐写法
 
@@ -21,7 +21,7 @@ POST /v1beta/models/{model}:generateContent
 ## 已验证的最小请求
 
 ```bash
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-2.5-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [

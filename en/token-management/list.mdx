@@ -55,7 +55,7 @@ New-Api-User: {user_id}
         "remain_quota": 500000,
         "unlimited_quota": false,
         "model_limits_enabled": true,
-        "model_limits": "[\"gpt-5.5\",\"claude-sonnet-4-6\"]",
+        "model_limits": "[\"gpt-5.5\",\"claude-opus-4-8\"]",
         "allow_ips": "203.0.113.10",
         "used_quota": 12345,
         "group": "default"
@@ -96,7 +96,7 @@ headers = {
 }
 
 response = requests.get(
-    "https://crazyrouter.com/api/token/?p=1&size=100",
+    "https://cn.crazyrouter.com/api/token/?p=1&size=100",
     headers=headers
 )
 
@@ -106,9 +106,10 @@ for token in page["items"]:
 ```
 
 ```bash cURL
-curl "https://crazyrouter.com/api/token/?p=1&size=100" \
+curl "https://cn.crazyrouter.com/api/token/?p=1&size=100" \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 1"
 ```
 
 </CodeGroup>
+

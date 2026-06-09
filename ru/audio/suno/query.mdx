@@ -17,7 +17,7 @@ GET /suno/fetch/{id}
 <CodeGroup>
 
 ```bash cURL
-curl https://crazyrouter.com/suno/fetch/suno_task_abc123 \
+curl https://cn.crazyrouter.com/suno/fetch/suno_task_abc123 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
@@ -25,7 +25,7 @@ curl https://crazyrouter.com/suno/fetch/suno_task_abc123 \
 import requests
 
 response = requests.get(
-    "https://crazyrouter.com/suno/fetch/suno_task_abc123",
+    "https://cn.crazyrouter.com/suno/fetch/suno_task_abc123",
     headers={"Authorization": "Bearer YOUR_API_KEY"}
 )
 
@@ -100,7 +100,7 @@ Query multiple tasks at once.
 ### Request Example
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/suno/fetch \
+curl -X POST https://cn.crazyrouter.com/suno/fetch \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{

@@ -39,7 +39,7 @@ OpenClaw 适合把 Crazyrouter 变成一个你自己可控的本地 AI 入口：
 
 | 项目 | 说明 |
 |------|------|
-| Crazyrouter 账号 | 先在 [crazyrouter.com](https://crazyrouter.com) 注册 |
+| Crazyrouter 账号 | 先在 [crazyrouter.com](https://cn.crazyrouter.com) 注册 |
 | Crazyrouter API Key | 建议为 OpenClaw 单独创建一个 token，不要与 Cursor、Claude Code 共用 |
 | 操作系统 | Linux 或 macOS，x64 / arm64 均可 |
 | 网络 | 服务器需要能访问公网；如果你要从其他设备访问 WebUI，还要放行 `18789` 端口 |
@@ -54,7 +54,7 @@ OpenClaw 安装器默认把网关绑定到局域网地址（`bind: lan`）。如
 
 <Steps>
   <Step title="创建专用 Crazyrouter token">
-    在 Crazyrouter 后台创建一个专门给 OpenClaw 使用的 `sk-...` token。建议先只放行你打算在网关里使用的模型，例如 `claude-opus-4-8`、`gpt-5.5`、`gemini-3-pro`。
+    在 Crazyrouter 后台创建一个专门给 OpenClaw 使用的 `sk-...` token。建议先只放行你打算在网关里使用的模型，例如 `claude-opus-4-8`、`gpt-5.5`、`gemini-3.1-pro`。
   </Step>
   <Step title="运行安装脚本">
     ```bash
@@ -87,9 +87,9 @@ OpenClaw 安装器默认把网关绑定到局域网地址（`bind: lan`）。如
 |------|----------|------|
 | 默认日常聊天 | `claude-opus-4-8` | 当前默认主模型，适合作为高质量日常聊天与主控模型 |
 | 编码 / Agent | `gpt-5.5` | 最新 OpenAI 兼容主力模型，适合作为编码与 Agent 主基线 |
-| 高性价比备用 | `claude-sonnet-4-6` | 质量、稳定性和成本比较均衡 |
-| Gemini 备用档 | `gemini-3-pro` | 适合作为第二条兼容性验证路径 |
-| 深度推理 | `deepseek-r1` | 适合需要更强推理链的场景 |
+| 高性价比备用 | `claude-opus-4-8` | 质量、稳定性和成本比较均衡 |
+| Gemini 备用档 | `gemini-3.1-pro` | 适合作为第二条兼容性验证路径 |
+| 深度推理 | `claude-opus-4-8` | 适合需要更强推理链的场景 |
 
 示例：把默认模型改成 `gpt-5.5`
 
@@ -275,7 +275,7 @@ openclaw pairing approve <code>
 ## 性能与成本建议
 
 - 默认先用 `claude-opus-4-8`，确认整体流程跑通后再做模型分工
-- 高频日常问答或机器人通知场景，可按成本回退到 `claude-sonnet-4-6` 或 `gemini-3-pro`
+- 高频日常问答或机器人通知场景，可按成本回退到 `claude-opus-4-8` 或 `gemini-3.1-pro`
 - 编码类工作流单独切到 `gpt-5.5`
 - 团队场景把 Telegram / 企业 IM / WebUI 分成不同 token，便于成本核算和风险隔离
 - 只保留必要插件和必要模型，减少误调用成本
@@ -369,3 +369,5 @@ openclaw pairing approve <code>
 <Card title="查看安装脚本仓库" icon="github" href="https://github.com/xujfcn/crazyrouter-openclaw">
   查看安装脚本、提交 Issue，或手动审查一键安装逻辑。
 </Card>
+
+

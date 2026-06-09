@@ -12,7 +12,7 @@ POST /v1/chat/completions
 
 Crazyrouter production has verified OpenAI-style `image_url` input on the usual vision models:
 
-- `gpt-4o`, `gpt-4o-mini`, `gpt-4.1`, `gpt-5.5`, and other OpenAI vision models
+- `gpt-4o`, `gpt-4o-mini`, `gpt-5.5`, `gpt-5.5`, and other OpenAI vision models
 - Both `data:image/...;base64,...` data URLs and public `https://` URLs work
 - The returned `message.content` is currently a plain string
 
@@ -110,3 +110,4 @@ If you see `Unable to process the image you provided. Please verify the image UR
 - For internal assets, private images, or anything whose reachability is uncertain: call [`POST /v1/files/uploads`](/en/upload) first for a 72-hour `media.crazyrouter.com/...` URL, then pass it to `image_url`
 - For small (< 1MB) or one-off images: send a base64 data URL directly, avoiding an extra upload round-trip
 - Multi-image inputs and `detail` parameter: the OpenAI upstream supports them; pass them through following OpenAI's official spec
+

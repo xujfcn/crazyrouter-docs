@@ -12,7 +12,7 @@ POST /v1/chat/completions
 
 截至 2026 年 3 月 23 日，Crazyrouter 生产环境已验证：
 
-- `claude-sonnet-4-6` 非流式请求返回 `object: "chat.completion"`
+- `claude-opus-4-8` 非流式请求返回 `object: "chat.completion"`
 - `message` 当前稳定包含 `role`、`content`
 - 流式请求返回 `chat.completion.chunk`
 - SSE 仍以 `data: [DONE]` 结束
@@ -26,7 +26,7 @@ curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "claude-sonnet-4-6",
+    "model": "claude-opus-4-8",
     "messages": [
       {"role": "system", "content": "You are a concise assistant."},
       {"role": "user", "content": "Compare PostgreSQL and MySQL in one paragraph."}
@@ -41,7 +41,7 @@ curl https://cn.crazyrouter.com/v1/chat/completions \
 ```json
 {
   "object": "chat.completion",
-  "model": "claude-sonnet-4-6",
+  "model": "claude-opus-4-8",
   "choices": [
     {
       "message": {
@@ -62,7 +62,7 @@ curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "claude-sonnet-4-6",
+    "model": "claude-opus-4-8",
     "messages": [
       {"role": "user", "content": "Say hello in one sentence."}
     ],
@@ -74,8 +74,8 @@ curl https://cn.crazyrouter.com/v1/chat/completions \
 2026-03-23 的生产环境流式探针里，开头片段如下：
 
 ```text
-data: {"object":"chat.completion.chunk","model":"claude-sonnet-4-6","choices":[{"delta":{"role":"assistant"}}]}
-data: {"object":"chat.completion.chunk","model":"claude-sonnet-4-6","choices":[{"delta":{"content":"Hello! ..."}}]}
+data: {"object":"chat.completion.chunk","model":"claude-opus-4-8","choices":[{"delta":{"role":"assistant"}}]}
+data: {"object":"chat.completion.chunk","model":"claude-opus-4-8","choices":[{"delta":{"content":"Hello! ..."}}]}
 data: [DONE]
 ```
 

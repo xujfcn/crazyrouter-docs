@@ -47,7 +47,7 @@ BASE_URL=https://cn.crazyrouter.com/v1
 
 | 项目 | 说明 |
 |------|------|
-| Crazyrouter 账号 | 先在 [crazyrouter.com](https://crazyrouter.com) 注册 |
+| Crazyrouter 账号 | 先在 [crazyrouter.com](https://cn.crazyrouter.com) 注册 |
 | Crazyrouter token | 建议为 LangChain 项目单独创建一个 token |
 | Python | 建议 `Python 3.10+` |
 | Node.js | 建议 `Node.js 18+` |
@@ -57,8 +57,8 @@ BASE_URL=https://cn.crazyrouter.com/v1
 建议初始白名单：
 
 - `gpt-5.5`
-- `claude-sonnet-4-6`
-- `gemini-3-pro`
+- `claude-opus-4-8`
+- `gemini-3.1-pro`
 - `text-embedding-3-large`
 
 ## Python 项目完整接入路径
@@ -124,7 +124,7 @@ npm -v
     第一次只建议放行：
 
     - `gpt-5.5`
-    - `claude-sonnet-4-6`
+    - `claude-opus-4-8`
     - `text-embedding-3-large`
 
     如果你后续要补更多模型，再按需求扩展，但第一次先坚持最小白名单。
@@ -362,8 +362,8 @@ console.log(response.content);
 | 使用场景 | 推荐模型 | 原因 |
 |----------|----------|------|
 | 首轮链路验证 | `gpt-5.5` | 2026 年 3 月 23 日已在生产环境实测成功，最适合先确认 LangChain 与 Crazyrouter 已连通 |
-| 高质量长文与复杂链路 | `claude-sonnet-4-6` | 适合复杂解释、总结与较重推理任务 |
-| Gemini 备用档 | `gemini-3-pro` | 适合作为第二条兼容性验证路径 |
+| 高质量长文与复杂链路 | `claude-opus-4-8` | 适合复杂解释、总结与较重推理任务 |
+| Gemini 备用档 | `gemini-3.1-pro` | 适合作为第二条兼容性验证路径 |
 | 向量检索 | `text-embedding-3-large` | 适合先做 embedding 基线验证 |
 
 ## Token 设置最佳实践
@@ -423,3 +423,5 @@ console.log(response.content);
 <Note>
 如果你准备把 Crazyrouter 正式接入自己的应用工程，LangChain 仍然是最值得优先补齐的开发框架文档之一。
 </Note>
+
+

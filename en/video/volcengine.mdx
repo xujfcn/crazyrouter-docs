@@ -29,7 +29,7 @@ POST /volc/v1/contents/generations/tasks
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/volc/v1/contents/generations/tasks \
+curl -X POST https://cn.crazyrouter.com/volc/v1/contents/generations/tasks \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -45,7 +45,7 @@ curl -X POST https://crazyrouter.com/volc/v1/contents/generations/tasks \
 import requests
 
 response = requests.post(
-    "https://crazyrouter.com/volc/v1/contents/generations/tasks",
+    "https://cn.crazyrouter.com/volc/v1/contents/generations/tasks",
     headers={
         "Content-Type": "application/json",
         "Authorization": "Bearer YOUR_API_KEY"
@@ -85,7 +85,7 @@ GET /volc/v1/contents/generations/tasks/{task_id}
 ```
 
 ```bash cURL
-curl https://crazyrouter.com/volc/v1/contents/generations/tasks/volc_task_abc123 \
+curl https://cn.crazyrouter.com/volc/v1/contents/generations/tasks/volc_task_abc123 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 

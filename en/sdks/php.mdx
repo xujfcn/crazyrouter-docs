@@ -68,7 +68,7 @@ curl_close($ch);
 
 $result = json_decode($response, true);
 
-// gpt-image-2 usually returns data[0].url; do not send response_format=b64_json
+// gpt-image-2 usually returns data[0].url; response_format=b64_json is accepted for legacy clients
 $imageUrl = $result['data'][0]['url'] ?? null;
 echo "Image URL: " . $imageUrl . "\n";
 ```
@@ -114,5 +114,6 @@ echo "\n";
 ```
 
 <Note>
-  The chat examples above default to `gpt-5.5`, which was verified successfully in Crazyrouter production on March 23, 2026. If you switch models, prefer other verified options such as `claude-sonnet-4-6` or `gemini-3-pro`.
+  The chat examples above default to `gpt-5.5`, which was verified successfully in Crazyrouter production on March 23, 2026. If you switch models, prefer other verified options such as `claude-opus-4-8` or `gemini-3.1-pro`.
 </Note>
+

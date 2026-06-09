@@ -49,7 +49,7 @@ New-Api-User: 1
 </ParamField>
 
 <ParamField body="model_limits" type="string">
-  模型限制配置字符串，例如 `["gpt-5.5","claude-sonnet-4-6"]`
+  模型限制配置字符串，例如 `["gpt-5.5","claude-opus-4-8"]`
 </ParamField>
 
 <ParamField body="status" type="integer">
@@ -79,7 +79,7 @@ New-Api-User: 1
     "remain_quota": 200000,
     "unlimited_quota": false,
     "model_limits_enabled": true,
-    "model_limits": "[\"gpt-5.5\",\"claude-sonnet-4-6\"]",
+    "model_limits": "[\"gpt-5.5\",\"claude-opus-4-8\"]",
     "allow_ips": "203.0.113.10",
     "group": "default"
   }
@@ -102,14 +102,14 @@ headers = {
 }
 
 response = requests.put(
-    "https://crazyrouter.com/api/token/",
+    "https://cn.crazyrouter.com/api/token/",
     headers=headers,
     json={
         "id": 10,
         "name": "生产环境-已更新",
         "remain_quota": 200000,
         "model_limits_enabled": True,
-        "model_limits": json.dumps(["gpt-5.5", "claude-sonnet-4-6"])
+        "model_limits": json.dumps(["gpt-5.5", "claude-opus-4-8"])
     }
 )
 
@@ -117,7 +117,7 @@ print(response.json())
 ```
 
 ```bash cURL
-curl -X PUT https://crazyrouter.com/api/token/ \
+curl -X PUT https://cn.crazyrouter.com/api/token/ \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 1" \
   -H "Content-Type: application/json" \

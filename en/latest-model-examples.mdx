@@ -1,0 +1,116 @@
+---
+title: "Latest Model Examples"
+description: "Examples for the latest public models based on the local model index"
+---
+> Last updated: 2026-06-07
+
+# Latest Model Examples
+
+This page follows the public model index in `web/src/data/models/index.json`. New examples should use these models first; delisted or non-public models are not shown as copyable examples.
+
+## Recommended Models
+
+| Use case | Recommended model |
+|----------|-------------------|
+| Default chat and general reasoning | `gpt-5.5` |
+| Cost-sensitive chat | `gpt-5-mini` |
+| Claude coding and long context | `claude-opus-4-8` |
+| Hard Claude tasks | `claude-opus-4-8` |
+| Lightweight Claude tasks | `claude-opus-4-8` |
+| Gemini native multimodal | `gemini-3.1-pro` |
+| Low-latency Gemini | `gemini-3.1-flash-lite` |
+| DeepSeek reasoning | `deepseek-v4-pro` |
+| Fast xAI chat | `grok-4.1-fast` |
+| MiniMax long context | `MiniMax-M2.7` |
+| Qwen vision | `qwen3-vl-235b-a22b-instruct` or `qwen2.5-vl-72b-instruct` |
+| Suno lyrics / music | `suno_lyrics` / `suno_music` |
+
+## Chat Completions
+
+```bash cURL
+curl -X POST https://cn.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "messages": [
+      {"role": "user", "content": "Explain when this endpoint is useful in three sentences."}
+    ]
+  }'
+```
+
+## Responses API
+
+```bash cURL
+curl -X POST https://cn.crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "input": "Create a pre-release checklist for API docs."
+  }'
+```
+
+## Claude Messages
+
+```bash cURL
+curl -X POST https://cn.crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-opus-4-8",
+    "max_tokens": 256,
+    "messages": [
+      {"role": "user", "content": "Review whether this API changelog is clear."}
+    ]
+  }'
+```
+
+## Gemini Native
+
+```bash cURL
+curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [{"text": "Summarize the API docs checks I should run today."}]
+      }
+    ]
+  }'
+```
+
+## Vision
+
+```bash cURL
+curl -X POST https://cn.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "qwen3-vl-235b-a22b-instruct",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {"type": "text", "text": "Describe the key information in this image."},
+          {"type": "image_url", "image_url": {"url": "https://example.com/image.png"}}
+        ]
+      }
+    ]
+  }'
+```
+
+## Music And Lyrics
+
+`suno_lyrics` and `suno_music` are the public model-index entries for audio generation. For submit, query, and continuation flows, see:
+
+- [Suno Lyrics](/en/audio/suno/lyrics)
+- [Suno Generate Song](/en/audio/suno/generate)
+- [Suno Task Query](/en/audio/suno/query)
+
+<Note>
+  Actual availability also depends on token allowlists, channel state, and platform updates. Before production rollout, call [`GET /v1/models`](/en/chat/openai/models) to confirm the model IDs visible to your token.
+</Note>
+

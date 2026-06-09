@@ -14,7 +14,7 @@ With a few environment variables, Claude Code can send Anthropic requests direct
 - base URL: `https://crazyrouter.com`
 - China-optimized base URL: `https://cn.crazyrouter.com`
 - auth variable: `ANTHROPIC_API_KEY`
-- recommended default model: `claude-sonnet-4-6`
+- recommended default model: `claude-opus-4-8`
 
 <Tip>
 Claude Code appends the Anthropic request path itself, so the base URL must stay at the site root: `https://crazyrouter.com` or `https://cn.crazyrouter.com`. Do not append `/v1` or `/v1/messages`.
@@ -64,12 +64,12 @@ Do not use:
 | Git | `git 2.23+` is recommended for reviewing and rolling back AI edits |
 | Node.js | `Node.js 18+` is recommended |
 | Claude Code | Use a current stable release |
-| Claude model access | Allow at least `claude-sonnet-4-6` on the token |
+| Claude model access | Allow at least `claude-opus-4-8` on the token |
 
 Suggested starter allowlist:
 
-- `claude-sonnet-4-6`
-- `claude-opus-4-6`
+- `claude-opus-4-8`
+- `claude-opus-4-8`
 
 ## Full Install Paths By OS
 
@@ -243,8 +243,8 @@ If you prefer a script that installs Claude Code and writes the Crazyrouter-rela
 
     For the first pass, allow only:
 
-    - `claude-sonnet-4-6`
-    - `claude-opus-4-6`
+    - `claude-opus-4-8`
+    - `claude-opus-4-8`
 
     Give it its own budget so it does not share spend with Cursor, Codex, or OpenClaw.
   </Step>
@@ -263,7 +263,7 @@ If you prefer a script that installs Claude Code and writes the Crazyrouter-rela
       </Tab>
       <Tab title="Windows PowerShell">
         ```powershell
-        $env:ANTHROPIC_BASE_URL = "https://crazyrouter.com"
+        $env:ANTHROPIC_BASE_URL = "https://cn.crazyrouter.com"
         $env:ANTHROPIC_API_KEY = "sk-xxx"
         echo $env:ANTHROPIC_BASE_URL
         echo $env:ANTHROPIC_API_KEY
@@ -297,7 +297,7 @@ If you prefer a script that installs Claude Code and writes the Crazyrouter-rela
         [System.Environment]::SetEnvironmentVariable("ANTHROPIC_BASE_URL", "https://crazyrouter.com", "User")
         [System.Environment]::SetEnvironmentVariable("ANTHROPIC_API_KEY", "sk-xxx", "User")
 
-        $env:ANTHROPIC_BASE_URL = "https://crazyrouter.com"
+        $env:ANTHROPIC_BASE_URL = "https://cn.crazyrouter.com"
         $env:ANTHROPIC_API_KEY = "sk-xxx"
         ```
       </Tab>
@@ -363,12 +363,12 @@ If you prefer a script that installs Claude Code and writes the Crazyrouter-rela
 
 | Use case | Recommended model | Why |
 |----------|-------------------|-----|
-| default daily driver | `claude-sonnet-4-6` | best balance of quality, speed, and cost for most coding tasks |
-| difficult refactors | `claude-opus-4-6` | stronger complex reasoning, planning, and code understanding |
-| long-context repo analysis | `claude-sonnet-4-6` | stable and strong for long sessions |
-| cost-sensitive first validation | `claude-sonnet-4-6` | first get the main path working reliably |
+| default daily driver | `claude-opus-4-8` | best balance of quality, speed, and cost for most coding tasks |
+| difficult refactors | `claude-opus-4-8` | stronger complex reasoning, planning, and code understanding |
+| long-context repo analysis | `claude-opus-4-8` | stable and strong for long sessions |
+| cost-sensitive first validation | `claude-opus-4-8` | first get the main path working reliably |
 
-Recommended rollout: stabilize normal work on `claude-sonnet-4-6`, then switch to `claude-opus-4-6` only for genuinely heavier tasks.
+Recommended rollout: stabilize normal work on `claude-opus-4-8`, then switch to `claude-opus-4-8` only for genuinely heavier tasks.
 
 ## Using Non-Claude Models in Claude Code
 
@@ -380,12 +380,9 @@ Beyond the native Claude family, Crazyrouter exposes several third-party models 
 |----------|----------|----------|-----------|----------|----------|
 | `deepseek-v4-pro` | DeepSeek | ✅ | ✅ | — | General coding & refactors, best price/perf |
 | `deepseek-v4-flash` | DeepSeek | ✅ | ✅ | ✅ native | Reasoning with visible thinking blocks |
-| `deepseek-reasoner` | DeepSeek | ✅ | ✅ | reasoning | Math / complex logic |
-| `deepseek-chat` / `deepseek-v3` / `deepseek-v3.2` / `deepseek-r1` | DeepSeek | ✅ | ✅ | — | General text tasks |
-| `MiniMax-M2.7` | MiniMax | ✅ | ✅ | ⚠️ inside text block as `<think>` tags | Long-context CN tasks |
-| `MiniMax-M2.5` | MiniMax | ✅ | ✅ | ⚠️ inside text block | General chat |
-| `MiniMax-M2.1` | MiniMax | ✅ | ✅ | — | No thinking, cleanest output |
-| `kimi-k2.5` / `kimi-k2` / `kimi-k2-instruct` | Moonshot Kimi | ✅ | ✅ | — | Long-context, CN-heavy work |
+| `deepseek-v4-pro` | DeepSeek | Yes | Yes | reasoning | General text and reasoning tasks |
+| `MiniMax-M2.7` | MiniMax | Yes | Yes | plain text | Long-context and Chinese-heavy tasks |
+| `kimi-k2.5` / `kimi-k2.6` | Moonshot Kimi | Yes | Yes | plain text | Long-context and Chinese-heavy work |
 | `kimi-k2-thinking` | Moonshot Kimi | ✅ | ✅ | reasoning | Complex reasoning |
 | `kimi-k2-0711-preview` / `kimi-k2-0905-preview` | Moonshot Kimi | ✅ | ✅ | — | Snapshot versions |
 
@@ -418,12 +415,12 @@ Claude Code picks the model from the `ANTHROPIC_MODEL` environment variable, or 
     ANTHROPIC_MODEL=kimi-k2-thinking claude
 
     # Or one-off switch to MiniMax
-    ANTHROPIC_MODEL=MiniMax-M2.1 claude
+    ANTHROPIC_MODEL=MiniMax-M2.7 claude
     ```
   </Tab>
   <Tab title="Windows PowerShell">
     ```powershell
-    $env:ANTHROPIC_BASE_URL = "https://crazyrouter.com"
+    $env:ANTHROPIC_BASE_URL = "https://cn.crazyrouter.com"
     $env:ANTHROPIC_API_KEY  = "sk-xxx"
 
     $env:ANTHROPIC_MODEL = "deepseek-v4-pro"
@@ -431,7 +428,7 @@ Claude Code picks the model from the `ANTHROPIC_MODEL` environment variable, or 
 
     # Or one-off switches
     $env:ANTHROPIC_MODEL = "kimi-k2-thinking"; claude
-    $env:ANTHROPIC_MODEL = "MiniMax-M2.1"; claude
+    $env:ANTHROPIC_MODEL = "MiniMax-M2.7"; claude
     ```
   </Tab>
 </Tabs>
@@ -441,18 +438,16 @@ You can also switch inside a running Claude Code session:
 ```text
 /model deepseek-v4-pro
 /model kimi-k2-thinking
-/model MiniMax-M2.1
+/model MiniMax-M2.7
 ```
 
 ### Usage notes and known differences
 
 - **DeepSeek family**: highest protocol fidelity. Tool calls, streaming, and `stop_reason=tool_use` all match Anthropic's spec; `deepseek-v4-flash` returns native `thinking` blocks that Claude Code renders as a thinking pane. **Recommended default: `deepseek-v4-pro`**.
 - **Kimi family**: strong long-context behavior, tool calls work normally. `kimi-k2-thinking` includes a reasoning trace, useful for hard tasks.
-- **MiniMax family**: the only models whose pricing entry explicitly advertises `anthropic` in `supported_endpoint_types`, so the protocol layer is the most direct fit. However, `M2.5` / `M2.7` emit their reasoning as a regular text block **wrapped in `<think>...</think>` tags** — Claude Code will display them verbatim. Two ways to avoid this:
-  1. Use `MiniMax-M2.1` (no thinking trace).
-  2. Add a system prompt: "Do not output `<think>` tags or your reasoning, only return the final answer."
+- **MiniMax family**: use the current public `MiniMax-M2.7` ID for new examples. If an older MiniMax snapshot is still allowed on your token, verify it through `/v1/models` before putting it in a Claude Code profile.
 - **Token allowlist**: if your Claude Code-dedicated token has model allowlisting enabled, add the models above to it in the Crazyrouter dashboard, otherwise you will get `403 model not allowed`.
-- **Thinking and billing**: thinking-enabled models (`-thinking`, `-flash`, `reasoner`, `MiniMax-M2.5/2.7`) consume extra output tokens. Set a separate budget cap on the Claude Code token.
+- **Thinking and billing**: thinking-enabled models (`-thinking`, `-flash`, `reasoner`, `MiniMax-M2.7`) consume extra output tokens. Set a separate budget cap on the Claude Code token.
 
 ### One-line check that a model works
 
@@ -510,8 +505,8 @@ A `200` response with non-empty `content[].text` means Claude Code can use this 
 
 ## Performance And Cost Tips
 
-- start with `claude-sonnet-4-6`
-- switch to `claude-opus-4-6` only for hard architecture analysis or heavy refactors
+- start with `claude-opus-4-8`
+- switch to `claude-opus-4-8` only for hard architecture analysis or heavy refactors
 - validate first in a small repo, not a large production repo
 - check `git status` before each new task
 - watch Crazyrouter logs and quota more closely when tool use becomes frequent
@@ -542,7 +537,7 @@ Because Claude Code can edit files and run commands. A clean snapshot makes revi
 
 ### Which model should I try first?
 
-Start with `claude-sonnet-4-6`. It is usually the safest baseline.
+Start with `claude-opus-4-8`. It is usually the safest baseline.
 
 <Note>
 If your first priority is Claude-family models plus a terminal-first coding workflow, Claude Code should be near the front of your Crazyrouter integration order.
@@ -551,3 +546,4 @@ If your first priority is Claude-family models plus a terminal-first coding work
 <Card title="View the crazyrouter-claude-code repository" icon="github" href="https://github.com/xujfcn/crazyrouter-claude-code">
   Review the one-click setup scripts, README, and latest usage notes.
 </Card>
+

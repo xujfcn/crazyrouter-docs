@@ -62,7 +62,7 @@ The exact UI label can move between `Model Provider`, `Providers`, localized lab
 Recommended starting whitelist:
 
 - `gpt-5.5`
-- `claude-sonnet-4-6`
+- `claude-opus-4-8`
 - `text-embedding-3-large`
 - `text-embedding-3-small`
 
@@ -116,8 +116,8 @@ That keeps troubleshooting much cleaner.
 | Use case | Recommended model | Why |
 |----------|-------------------|-----|
 | Default workflow chat model | `gpt-5.5` | Verified successfully in production on March 23, 2026, and suited for the main Dify baseline |
-| Higher-quality complex workflows | `claude-sonnet-4-6` | Better for complex explanations, summaries, and long text |
-| Gemini fallback path | `gemini-3-pro` | Useful as a second vendor-compatible validation path |
+| Higher-quality complex workflows | `claude-opus-4-8` | Better for complex explanations, summaries, and long text |
+| Gemini fallback path | `gemini-3.1-pro` | Useful as a second vendor-compatible validation path |
 | Default embedding model | `text-embedding-3-large` | More reliable knowledge-base quality |
 | Lower-cost embedding model | `text-embedding-3-small` | Good for budget-sensitive indexing |
 

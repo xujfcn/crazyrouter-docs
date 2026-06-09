@@ -29,7 +29,7 @@ POST /mj/submit/imagine
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/mj/submit/imagine \
+curl -X POST https://cn.crazyrouter.com/mj/submit/imagine \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -44,7 +44,7 @@ curl -X POST https://crazyrouter.com/mj/submit/imagine \
 import requests
 
 response = requests.post(
-    "https://crazyrouter.com/mj/submit/imagine",
+    "https://cn.crazyrouter.com/mj/submit/imagine",
     headers={
         "Content-Type": "application/json",
         "Authorization": "Bearer YOUR_API_KEY"
@@ -84,7 +84,7 @@ print(response.json())
 使用 `base64Array` 传入参考图片：
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/mj/submit/imagine \
+curl -X POST https://cn.crazyrouter.com/mj/submit/imagine \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{

@@ -13,7 +13,7 @@ With the OpenAI Compatible provider, Cline can send its agent traffic to Crazyro
 - recommended protocol: `OpenAI-compatible API`
 - base URL: `https://cn.crazyrouter.com/v1`
 - auth format: `sk-...` token
-- recommended default models: `claude-sonnet-4-6` or `gpt-5.5`
+- recommended default models: `claude-opus-4-8` or `gpt-5.5`
 
 <Warning>
 Cline can read and write files and execute terminal commands. After the connection works, the real risk is not connectivity but over-granting execution scope. Start with a small repo you know well.
@@ -60,9 +60,9 @@ Unlike Claude Code, Codex, or Aider, the normal Cline-in-VS-Code path usually do
 
 Suggested starter allowlist:
 
-- `claude-sonnet-4-6`
+- `claude-opus-4-8`
 - `gpt-5.5`
-- `gemini-3-pro`
+- `gemini-3.1-pro`
 
 ## Full Install Path By Operating System
 
@@ -233,9 +233,9 @@ code --version
   <Step title="Step 4: Create a Cline-specific token">
     In Crazyrouter, create a token named something like `cline`. For the first pass, allow only:
 
-    - `claude-sonnet-4-6`
+    - `claude-opus-4-8`
     - `gpt-5.5`
-    - `gemini-3-pro`
+    - `gemini-3.1-pro`
 
     <Note>
     The standard Cline-in-VS-Code path usually stores the API key in the UI rather than through shell env vars. The most important setup decisions here are a dedicated token and a narrow allowlist.
@@ -266,7 +266,7 @@ code --version
     - `API Provider`: `OpenAI Compatible`
     - `Base URL`: `https://cn.crazyrouter.com/v1`
     - `API Key`: your `sk-...`
-    - `Model ID`: start with `claude-sonnet-4-6`
+    - `Model ID`: start with `claude-opus-4-8`
 
     If your current Cline version shows a `Verify` button, click it first to confirm the connection. If not, you can validate with a small read-only prompt instead.
 
@@ -298,11 +298,11 @@ code --version
 
 | Use case | Recommended model | Why |
 |----------|-------------------|-----|
-| default agent driver | `claude-sonnet-4-6` | stable for multi-turn planning, code explanation, and long context |
+| default agent driver | `claude-opus-4-8` | stable for multi-turn planning, code explanation, and long context |
 | OpenAI-compatible baseline | `gpt-5.5` | verified successfully in production on March 23, 2026, and suited for the main OpenAI-compatible path |
-| Gemini fallback path | `gemini-3-pro` | useful as a second compatibility-validation path |
+| Gemini fallback path | `gemini-3.1-pro` | useful as a second compatibility-validation path |
 
-Recommended rollout: get the workflow stable on `claude-sonnet-4-6` first. If you also want an OpenAI-compatible baseline, add `gpt-5.5` second.
+Recommended rollout: get the workflow stable on `claude-opus-4-8` first. If you also want an OpenAI-compatible baseline, add `gpt-5.5` second.
 
 ## Token Setup Best Practices
 
@@ -338,7 +338,7 @@ Recommended rollout: get the workflow stable on `claude-sonnet-4-6` first. If yo
 | `401 unauthorized` | wrong, expired, or badly pasted API key | create a new token and paste it again |
 | `403` or `model not allowed` | the token does not allow the selected model | allow that model in Crazyrouter token settings |
 | `404` | base URL was set to the root domain or a full endpoint path | use `https://cn.crazyrouter.com/v1` |
-| `model not found` | incorrect `Model ID` or unavailable model | switch back to `claude-sonnet-4-6` or another confirmed model |
+| `model not found` | incorrect `Model ID` or unavailable model | switch back to `claude-opus-4-8` or another confirmed model |
 | it cannot connect on a corporate network | proxy or firewall settings are blocking traffic | check VS Code's own proxy settings first; the Cline extension reuses VS Code's proxy configuration |
 | Cline edits the wrong files | permissions are too wide or the prompt scope is too loose | validate with read-only tasks first, then widen permissions gradually |
 | cost rises too fast | multi-step planning, large context, and auto execution | narrow the task scope and give Cline its own budget |
@@ -346,7 +346,7 @@ Recommended rollout: get the workflow stable on `claude-sonnet-4-6` first. If yo
 ## Performance And Cost Tips
 
 - start with read-only tasks and small edits on first setup
-- use `claude-sonnet-4-6` or `gpt-5.5` for complex refactors
+- use `claude-opus-4-8` or `gpt-5.5` for complex refactors
 - avoid widening the model list too early; keep the first-pass allowlist narrow
 - use different tokens for different workspaces or project types
 - after large tasks, inspect Crazyrouter logs to see the real cost pattern
@@ -367,7 +367,7 @@ Usually no. The normal VS Code path generally works by entering `Base URL`, `API
 
 ### Which model should I try first?
 
-Start with `claude-sonnet-4-6`.
+Start with `claude-opus-4-8`.
 
 ### Why should I take a Git snapshot before the first real task?
 
@@ -380,3 +380,4 @@ Because the safest rollout pattern is read-only first, then tiny edits, then wid
 <Note>
 If you want a true agent workflow inside VS Code, Cline is usually a better fit than Cursor's BYOK path.
 </Note>
+

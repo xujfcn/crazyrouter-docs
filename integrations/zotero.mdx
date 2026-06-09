@@ -45,7 +45,7 @@ Crazyrouter 在 Zotero 里的公开推荐接法是：
 
 | 项目 | 说明 |
 |------|------|
-| Crazyrouter 账号 | 先在 [crazyrouter.com](https://crazyrouter.com) 注册 |
+| Crazyrouter 账号 | 先在 [crazyrouter.com](https://cn.crazyrouter.com) 注册 |
 | Crazyrouter token | 建议单独为 Zotero 创建一个 token |
 | Zotero 桌面版 | 插件主要运行在桌面端 |
 | AI 插件 | 需要支持自定义 OpenAI 兼容地址 |
@@ -54,8 +54,8 @@ Crazyrouter 在 Zotero 里的公开推荐接法是：
 建议首轮只放行：
 
 - `gpt-5.5`
-- `claude-sonnet-4-6`
-- `gemini-3-pro`
+- `claude-opus-4-8`
+- `gemini-3.1-pro`
 
 ## 安装 Zotero
 
@@ -126,7 +126,7 @@ Crazyrouter 在 Zotero 里的公开推荐接法是：
     第一次建议只放行：
 
     - `gpt-5.5`
-    - `claude-sonnet-4-6`
+    - `claude-opus-4-8`
 
     先不要把大量模型一次性全部开放，这样更容易排障。
   </Step>
@@ -201,8 +201,8 @@ Crazyrouter 在 Zotero 里的公开推荐接法是：
 | 场景 | 推荐模型 | 原因 |
 |------|----------|------|
 | 首轮链路验证 | `gpt-5.5` | 2026 年 3 月 23 日已在生产环境实测成功，最适合先验证插件到 Crazyrouter 的基础链路 |
-| 深度分析与解释 | `claude-sonnet-4-6` | 更适合复杂总结、方法比较、长文解释 |
-| Gemini 备用档 | `gemini-3-pro` | 适合作为第二条兼容性验证路径 |
+| 深度分析与解释 | `claude-opus-4-8` | 更适合复杂总结、方法比较、长文解释 |
+| Gemini 备用档 | `gemini-3.1-pro` | 适合作为第二条兼容性验证路径 |
 
 ## 适合 Zotero 的使用方式
 
@@ -286,3 +286,5 @@ Crazyrouter 在 Zotero 里的公开推荐接法是：
 <Note>
 如果你的目标是“先让 Zotero 跑通 Crazyrouter”，最关键的不是一开始就追求最强插件，而是先确认你选的插件真的支持自定义 OpenAI 兼容地址，然后用 `gpt-5.5` 跑通单篇摘要。
 </Note>
+
+

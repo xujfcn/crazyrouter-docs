@@ -45,8 +45,8 @@ According to ChatBox's current official provider documentation, the `API Path` u
 Suggested first-pass allowlist:
 
 - `gpt-5.5`
-- `claude-sonnet-4-6`
-- `gemini-3-pro`
+- `claude-opus-4-8`
+- `gemini-3.1-pro`
 
 ## Install ChatBox
 
@@ -92,7 +92,7 @@ If your current version already includes `OpenAI API`, select it directly. If no
     On the first pass, only allow one or two models such as:
 
     - `gpt-5.5`
-    - `claude-sonnet-4-6`
+    - `claude-opus-4-8`
 
     A small model scope makes troubleshooting much easier.
   </Step>
@@ -128,8 +128,8 @@ If your current version already includes `OpenAI API`, select it directly. If no
 
     After the minimal path works, you can add:
 
-    - `claude-sonnet-4-6`
-    - `gemini-3-pro`
+    - `claude-opus-4-8`
+    - `gemini-3.1-pro`
   </Step>
 
   <Step title="Step 6: Use Check or Save for the first connectivity test">
@@ -164,8 +164,8 @@ Follow this order instead of enabling everything at once:
 | Scenario | Recommended model | Why |
 |------|----------|------|
 | First connectivity test | `gpt-5.5` | Verified successfully in production on March 23, 2026, and best suited for the OpenAI-compatible baseline |
-| Higher-quality writing and explanation | `claude-sonnet-4-6` | Better for detailed explanation, rewriting, and summaries |
-| Gemini fallback path | `gemini-3-pro` | Useful as a second vendor-compatible validation path inside the same client |
+| Higher-quality writing and explanation | `claude-opus-4-8` | Better for detailed explanation, rewriting, and summaries |
+| Gemini fallback path | `gemini-3.1-pro` | Useful as a second vendor-compatible validation path inside the same client |
 
 ## How To Use ChatBox Features With Crazyrouter
 
@@ -188,8 +188,8 @@ Do not start with a large knowledge-base import before confirming the API config
 Useful when you want different models for different tasks, for example:
 
 - default baseline chat: `gpt-5.5`
-- important summaries and writing: `claude-sonnet-4-6`
-- secondary vendor validation: `gemini-3-pro`
+- important summaries and writing: `claude-opus-4-8`
+- secondary vendor validation: `gemini-3.1-pro`
 
 ## Parameter Suggestions
 
@@ -260,3 +260,4 @@ Only after the minimal chat path is already working.
 <Note>
 If your goal is "make ChatBox work first", the best approach is not to configure many models and features at once. Start with `gpt-5.5` and validate the smallest possible chat path.
 </Note>
+

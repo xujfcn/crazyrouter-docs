@@ -6,7 +6,7 @@ description: "Use the native Seedance API for video generation"
 
 # Seedance
 
-Seedance is ByteDance / Doubao's video generation family. On Crazyrouter, the public contract stays on the native `/volc/v1/*` surface. The old unified-video `seedance-lite` alias is no longer the primary customer-facing protocol.
+Seedance is ByteDance / Doubao's video generation family. On Crazyrouter, the public contract stays on the native `/volc/v1/*` surface. The old unified-video `doubao-seedance-2-0-fast` alias is no longer the primary customer-facing protocol.
 
 ## Current Public Models
 
@@ -76,7 +76,7 @@ POST /volc/v1/contents/generations/tasks
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/volc/v1/contents/generations/tasks \
+curl -X POST https://cn.crazyrouter.com/volc/v1/contents/generations/tasks \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -94,7 +94,7 @@ curl -X POST https://crazyrouter.com/volc/v1/contents/generations/tasks \
 import requests
 
 response = requests.post(
-    "https://crazyrouter.com/volc/v1/contents/generations/tasks",
+    "https://cn.crazyrouter.com/volc/v1/contents/generations/tasks",
     headers={
         "Content-Type": "application/json",
         "Authorization": "Bearer YOUR_API_KEY"
@@ -118,7 +118,7 @@ print(response.json())
 ### Single-Image Image-to-Video Example
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/volc/v1/contents/generations/tasks \
+curl -X POST https://cn.crazyrouter.com/volc/v1/contents/generations/tasks \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -141,7 +141,7 @@ curl -X POST https://crazyrouter.com/volc/v1/contents/generations/tasks \
 ### Seedance 2.0 Multimodal Example
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/volc/v1/contents/generations/tasks \
+curl -X POST https://cn.crazyrouter.com/volc/v1/contents/generations/tasks \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -198,7 +198,7 @@ GET /volc/v1/contents/generations/tasks/{task_id}
 ```
 
 ```bash cURL
-curl https://crazyrouter.com/volc/v1/contents/generations/tasks/cgt_task_abc123 \
+curl https://cn.crazyrouter.com/volc/v1/contents/generations/tasks/cgt_task_abc123 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
@@ -234,7 +234,7 @@ curl https://crazyrouter.com/volc/v1/contents/generations/tasks/cgt_task_abc123 
 | `failed` | terminal failure |
 
 <Note>
-  The public docs now only commit to the native `/volc/v1/*` route family and canonical model names. The old `seedance-lite` label is retained only as historical context, not as the primary contract for new integrations.
+  The public docs now only commit to the native `/volc/v1/*` route family and canonical model names. The old `doubao-seedance-2-0-fast` label is retained only as historical context, not as the primary contract for new integrations.
 </Note>
 
 <Note>

@@ -31,7 +31,7 @@ POST /luma/generations
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/luma/generations \
+curl -X POST https://cn.crazyrouter.com/luma/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -47,7 +47,7 @@ curl -X POST https://crazyrouter.com/luma/generations \
 import requests
 
 response = requests.post(
-    "https://crazyrouter.com/luma/generations",
+    "https://cn.crazyrouter.com/luma/generations",
     headers={
         "Content-Type": "application/json",
         "Authorization": "Bearer YOUR_API_KEY"
@@ -109,7 +109,7 @@ GET /luma/generations/{task_id}
 ```
 
 ```bash cURL
-curl https://crazyrouter.com/luma/generations/luma_gen_abc123 \
+curl https://cn.crazyrouter.com/luma/generations/luma_gen_abc123 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
@@ -138,7 +138,7 @@ POST /luma/generations/{task_id}/extend
 延长已完成的视频。
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/luma/generations/luma_gen_abc123/extend \
+curl -X POST https://cn.crazyrouter.com/luma/generations/luma_gen_abc123/extend \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{

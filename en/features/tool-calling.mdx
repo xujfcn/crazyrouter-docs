@@ -15,16 +15,16 @@ Verification date:
 Verified models:
 
 - `gpt-5.5`
-- `claude-sonnet-4-6`
-- `gemini-3-pro`
+- `claude-opus-4-8`
+- `gemini-3.1-pro`
 
 ## Verified matrix
 
 | Model | Protocol | Endpoint | Success marker |
 |------|------|------|----------|
 | `gpt-5.5` | OpenAI Chat Completions | `POST /v1/chat/completions` | Returns `tool_calls` |
-| `claude-sonnet-4-6` | Anthropic Messages | `POST /v1/messages` | Returns `tool_use` block |
-| `gemini-3-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | Returns `functionCall` |
+| `claude-opus-4-8` | Anthropic Messages | `POST /v1/messages` | Returns `tool_use` block |
+| `gemini-3.1-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | Returns `functionCall` |
 
 ## GPT-5.4
 
@@ -84,7 +84,7 @@ curl https://cn.crazyrouter.com/v1/messages \
   -H "x-api-key: YOUR_API_KEY" \
   -H "anthropic-version: 2023-06-01" \
   -d '{
-    "model": "claude-sonnet-4-6",
+    "model": "claude-opus-4-8",
     "max_tokens": 256,
     "tools": [
       {
@@ -130,7 +130,7 @@ For first-pass validation, use an explicit `tool_choice` and clearly instruct Cl
 ## Gemini 3 Pro
 
 ```bash
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -189,3 +189,4 @@ Verified response shape:
 - [Responses Function Calling](/en/chat/responses/function-calling)
 - [Gemini Tools](/en/chat/gemini/tools)
 - [Claude Native Messages](/en/chat/anthropic/messages)
+

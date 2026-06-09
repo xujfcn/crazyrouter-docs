@@ -14,7 +14,7 @@ This page only documents Message-object and streaming-event behavior that was re
 
 The current minimal production request uses:
 
-- `model: "claude-sonnet-4-6"`
+- `model: "claude-opus-4-8"`
 - `POST /v1/messages`
 
 Typical production response skeleton:
@@ -30,7 +30,7 @@ Typical production response skeleton:
       "text": "..."
     }
   ],
-  "model": "claude-sonnet-4-6",
+  "model": "claude-opus-4-8",
   "stop_reason": "end_turn",
   "stop_sequence": null,
   "usage": {
@@ -89,7 +89,7 @@ Thinking block:
 
 ## Streaming event types
 
-In the `2026-03-23` production recheck, native streaming for `claude-sonnet-4-6` returned these SSE events:
+In the `2026-03-23` production recheck, native streaming for `claude-opus-4-8` returned these SSE events:
 
 - `message_start`
 - `content_block_start`
@@ -151,7 +151,7 @@ data: {"type":"message_stop"}
 - If `content` contains `thinking`, the current model and request shape triggered extended thinking
 
 <Note>
-  A `thinking` block is not returned by every Claude model by default. The currently revalidated explicit thinking path is `claude-opus-4-7`.
+  A `thinking` block is not returned by every Claude model by default. The currently revalidated explicit thinking path is `claude-opus-4-8`.
 </Note>
 
 Related pages:

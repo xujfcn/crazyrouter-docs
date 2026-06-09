@@ -49,7 +49,7 @@ New-Api-User: 1
 </ParamField>
 
 <ParamField body="model_limits" type="string">
-  Model restriction config string, for example `["gpt-5.5","claude-sonnet-4-6"]`
+  Model restriction config string, for example `["gpt-5.5","claude-opus-4-8"]`
 </ParamField>
 
 <ParamField body="status" type="integer">
@@ -79,7 +79,7 @@ The current endpoint returns the updated token object:
     "remain_quota": 200000,
     "unlimited_quota": false,
     "model_limits_enabled": true,
-    "model_limits": "[\"gpt-5.5\",\"claude-sonnet-4-6\"]",
+    "model_limits": "[\"gpt-5.5\",\"claude-opus-4-8\"]",
     "allow_ips": "203.0.113.10",
     "group": "default"
   }
@@ -102,14 +102,14 @@ headers = {
 }
 
 response = requests.put(
-    "https://crazyrouter.com/api/token/",
+    "https://cn.crazyrouter.com/api/token/",
     headers=headers,
     json={
         "id": 10,
         "name": "Production-Updated",
         "remain_quota": 200000,
         "model_limits_enabled": True,
-        "model_limits": json.dumps(["gpt-5.5", "claude-sonnet-4-6"])
+        "model_limits": json.dumps(["gpt-5.5", "claude-opus-4-8"])
     }
 )
 
@@ -117,7 +117,7 @@ print(response.json())
 ```
 
 ```bash cURL
-curl -X PUT https://crazyrouter.com/api/token/ \
+curl -X PUT https://cn.crazyrouter.com/api/token/ \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 1" \
   -H "Content-Type: application/json" \
@@ -135,3 +135,4 @@ curl -X PUT https://crazyrouter.com/api/token/ \
 <Warning>
   Updating a token does not regenerate the API key. If you need a new key, delete the token and create a new one.
 </Warning>
+

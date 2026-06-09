@@ -27,7 +27,7 @@ POST /v1/images/edits
 | `prompt` | string | 是 | 图像描述提示词 |
 | `n` | integer | 否 | 生成数量，默认 `1`，范围 `1-10` |
 | `size` | string | 否 | `auto` 或 `宽x高`。宽高必须为 16 的倍数，单边不超过 3840，总像素在 655360 到 8294400 之间，长短边比例不超过 3:1。常用值：`1024x1024`、`1536x1024`、`1024x1536` |
-| `quality` | string | 否 | `auto`、`low`、`medium`、`high`。兼容 `hd`，服务端会归一为 `high`；不接受 `standard` |
+| `quality` | string | 否 | `auto`、`low`、`medium`、`high`。兼容 `hd`，服务端会归一为 `high`；兼容 `standard`，服务端会归一为 `auto` |
 | `background` | string | 否 | `auto` 或 `opaque`。`gpt-image-2` 不支持 `transparent` |
 | `output_format` | string | 否 | `png`、`jpeg`、`webp` |
 | `output_compression` | integer | 否 | `0-100`，仅当 `output_format` 为 `jpeg` 或 `webp` 时可用 |
@@ -36,11 +36,13 @@ POST /v1/images/edits
 | `partial_images` | integer | 否 | `0-3`，仅当 `stream=true` 时可用 |
 | `user` | string | 否 | 终端用户标识 |
 
-以下参数不会被 `gpt-image-2` 接受：`response_format`、`style`、`input_fidelity`、`background=transparent`、`quality=standard`、`output_format=png` 搭配 `output_compression`。
+为兼容旧 DALL-E / OpenAI Images 客户端，`gpt-image-2` 会接收 `response_format=url`、`response_format=b64_json`、`quality=standard` 和 `style=vivid/natural`。其中 `response_format` 和 `style` 不会透传给上游，`quality=standard` 会归一为 `auto`。
 
 <Warning>
-  `response_format` 不是 `gpt-image-2` 参数。不要传 `response_format="url"` 或 `response_format="b64_json"`；请用 `output_format="png"`、`"jpeg"` 或 `"webp"` 控制图片文件格式，并默认读取响应里的 `data[0].url`。DALL-E、Doubao、Qwen 等其他图片模型页面中的 `response_format` 说明不适用于 `gpt-image-2`。
+  `response_format` 只是 Crazyrouter 为旧客户端保留的兼容字段，不是 `gpt-image-2` 上游参数。新接入请优先使用 `output_format="png"`、`"jpeg"` 或 `"webp"` 控制图片文件格式，并默认读取响应里的 `data[0].url`。如果旧客户端传 `response_format="b64_json"`，服务端会尽量保留 base64 响应语义。
 </Warning>
+
+仍会被拒绝的参数组合包括：`input_fidelity`、`background=transparent`、`output_format=png` 搭配 `output_compression`。
 
 ### 请求示例
 

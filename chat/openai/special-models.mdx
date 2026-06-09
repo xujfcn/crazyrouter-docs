@@ -1,76 +1,18 @@
 ---
-title: "特殊模型"
-description: "基于 2026-03-23 生产复核，记录特殊用途模型的当前可见性与接入注意事项"
+title: "特殊模型（暂时隐藏）"
+description: "历史特殊模型页面已从公开导航隐藏"
+noindex: true
 ---
-> 更新日期：2026-06-06
+> 更新日期：2026-06-07
 
-# 特殊模型
+# 特殊模型（暂时隐藏）
 
-本文页只写入 `2026-03-23` 已在 Crazyrouter 生产环境复核过的事实。
+历史特殊模型页面当前不再作为公开 API 示例展示。新接入请使用：
 
-和前面几类通用能力不同，特殊模型更容易受渠道库存、临时下线或权限配置影响，因此这里不再把旧示例直接写成“稳定可调用”。
+- [最新模型用例](/latest-model-examples)
+- [列出模型](/chat/openai/models)
+- [Chat Completions](/chat/openai/completions)
 
-## 本轮复核结果
-
-### `qwen3.5-plus`
-
-`2026-03-23` 当天复核结果：
-
-- 未出现在 `GET /v1/models` 返回列表中
-- 直接请求返回：
-  - `503`
-  - `model_not_found`
-  - `Model qwen3.5-plus is temporarily unavailable`
-
-因此当前文档不再把 `qwen3.5-plus` 写成已稳定可用模型。
-
-### `deepseek-ocr`
-
-`2026-03-23` 当天复核结果：
-
-- 出现在 `GET /v1/models` 列表中
-- 但实际调用返回：
-  - `500`
-  - `get_channel_failed`
-  - `model deepseek-ocr is temporarily unavailable, please try again later`
-
-这说明它当前至少是“模型可见，但调用通道暂不可用”。
-
----
-
-## 当前建议
-
-- 如果你要判断某个特殊模型今天能不能用，先查 [GET /v1/models](/chat/openai/models)
-- 模型出现在列表里，也不代表当天就一定能成功调用
-- 对于这类模型，首次联调建议先做一次最小探针请求，再写入正式流程
-
-## 最小探针模板
-
-```bash cURL
-curl https://cn.crazyrouter.com/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "model": "YOUR_SPECIAL_MODEL",
-    "messages": [
-      {
-        "role": "user",
-        "content": "Hello"
-      }
-    ],
-    "max_tokens": 64
-  }'
-```
-
-如果返回：
-
-- 正常 `choices`
-  说明当前通道可用
-- `model_not_found`
-  说明当前模型不在可用范围内
-- `temporarily unavailable` / `get_channel_failed`
-  说明模型名可见，但当前通道不可用
-
-<Warning>
-  特殊模型页最容易过时。对于翻译、OCR、实验性专用模型，建议始终以当天的 `/v1/models` 结果和一次真实请求为准。
-</Warning>
+<Note>
+  生产接入前请先调用 `GET /v1/models` 确认当前 Token 可见的模型 ID。未进入公开模型索引或当前 Token 不可见的模型，不应写入默认配置或用例。
+</Note>

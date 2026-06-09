@@ -53,8 +53,8 @@ Do not use:
 Recommended starter allowlist:
 
 - `gpt-5.5`
-- `claude-sonnet-4-6`
-- `gemini-3-pro`
+- `claude-opus-4-8`
+- `gemini-3.1-pro`
 
 <Tip>
 If you also plan to configure Claude Code, Codex, or Cline, do not share the same token with Cursor. Separate tokens make quota control and debugging much easier.
@@ -64,7 +64,7 @@ If you also plan to configure Claude Code, Codex, or Cline, do not share the sam
 
 <Steps>
   <Step title="Create a Cursor-specific token">
-    In Crazyrouter, create a new token and name it something obvious like `cursor`. Start with a small allowlist such as `gpt-5.5` and `claude-sonnet-4-6`.
+    In Crazyrouter, create a new token and name it something obvious like `cursor`. Start with a small allowlist such as `gpt-5.5` and `claude-opus-4-8`.
   </Step>
   <Step title="Open Cursor settings">
     Open Cursor and go to `Cursor Settings` → `Models`.
@@ -89,10 +89,10 @@ If you also plan to configure Claude Code, Codex, or Cline, do not share the sam
 | Use case | Recommended model | Why |
 |----------|-------------------|-----|
 | default baseline | `gpt-5.5` | verified successfully in production on March 23, 2026, and stable for the main Cursor OpenAI-compatible path |
-| high-quality code and long-form work | `claude-sonnet-4-6` | stronger for complex explanation, summaries, and code assistance |
-| Gemini fallback path | `gemini-3-pro` | useful as a second compatibility-validation path |
+| high-quality code and long-form work | `claude-opus-4-8` | stronger for complex explanation, summaries, and code assistance |
+| Gemini fallback path | `gemini-3.1-pro` | useful as a second compatibility-validation path |
 
-Recommended rollout order: get `gpt-5.5` working first, then test `claude-sonnet-4-6` and `gemini-3-pro`.
+Recommended rollout order: get `gpt-5.5` working first, then test `claude-opus-4-8` and `gemini-3.1-pro`.
 
 ## Token Setup Best Practices
 
@@ -132,7 +132,7 @@ Recommended rollout order: get `gpt-5.5` working first, then test `claude-sonnet
 
 - start with only `gpt-5.5`
 - use `gpt-5.5` for the baseline coding and chat workflow
-- add `claude-sonnet-4-6` or `gemini-3-pro` only after the baseline path is stable
+- add `claude-opus-4-8` or `gemini-3.1-pro` only after the baseline path is stable
 - split Cursor, Claude Code, and Codex traffic across different tokens
 - if usage looks suspiciously high, inspect Crazyrouter logs and check whether long multi-turn context is driving costs
 

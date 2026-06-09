@@ -15,15 +15,15 @@ Verification date:
 Strictly verified models:
 
 - `gpt-5.5`
-- `gemini-3-pro`
+- `gemini-3.1-pro`
 
 Not included as a strict-success example:
 
-- `claude-sonnet-4-6`
+- `claude-opus-4-8`
 
 Reason:
 
-- Under the current OpenAI-compatible `response_format=json_schema` request shape, `claude-sonnet-4-6` did not show stable strict-JSON behavior across production checks
+- Under the current OpenAI-compatible `response_format=json_schema` request shape, `claude-opus-4-8` did not show stable strict-JSON behavior across production checks
 - Earlier testing produced JSON wrapped in Markdown code fences
 - The `2026-03-22` recheck returned empty `content`
 - Because the result is not stable or strictly parseable, it is not treated as a verified strict structured-output success example
@@ -33,7 +33,7 @@ Reason:
 | Model | Protocol | Endpoint | Success marker |
 |------|------|------|----------|
 | `gpt-5.5` | OpenAI Chat Completions | `POST /v1/chat/completions` | Response can be parsed directly as JSON |
-| `gemini-3-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | Returns JSON text matching schema |
+| `gemini-3.1-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | Returns JSON text matching schema |
 
 ## GPT-5.4
 
@@ -77,7 +77,7 @@ Verified production output:
 ## Gemini 3 Pro
 
 ```bash
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [

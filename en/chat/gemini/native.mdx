@@ -10,7 +10,7 @@ This page only documents Gemini Native behavior that was revalidated against Cra
 
 Current primary example model:
 
-- `gemini-3-pro`
+- `gemini-3.1-pro`
 
 Dedicated multimodal pages based on successful request patterns:
 
@@ -38,7 +38,7 @@ Pass the API key through the URL parameter:
 ## Basic text generation
 
 ```bash cURL
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -83,7 +83,7 @@ Verified response shape:
 This recheck confirmed that `streamGenerateContent` returns incremental SSE output.
 
 ```bash cURL
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-3-pro:streamGenerateContent?key=YOUR_API_KEY&alt=sse" \
+curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:streamGenerateContent?key=YOUR_API_KEY&alt=sse" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -112,7 +112,7 @@ data: {"candidates":[{"content":{"parts":[{"text":"...","thoughtSignature":"..."
 This production recheck confirmed that `responseMimeType + responseSchema` works:
 
 ```bash cURL
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -152,7 +152,7 @@ Verified production output:
 This production recheck confirmed that the `googleSearch` tool works:
 
 ```bash cURL
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -186,7 +186,7 @@ Verified fields include:
 This production recheck confirmed that `thinkingConfig` works:
 
 ```bash cURL
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-3-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -237,3 +237,4 @@ Verified marker:
 Related pages:
 
 - [Official Model Pricing Methods](/en/reference/official-pricing-methods)
+

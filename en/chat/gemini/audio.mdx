@@ -12,7 +12,7 @@ POST /v1beta/models/{model}:generateContent
 
 As of `2026-04-08`, successful Crazyrouter and local `:4000` retests show:
 
-- `gemini-2.5-pro` can read `audio/wav`
+- `gemini-3.1-pro` can read `audio/wav`
 - the currently verified primary path is `inlineData`
 - short audio classification, transcription, language hints, and summaries can be requested directly in text
 
@@ -21,7 +21,7 @@ As of `2026-04-08`, successful Crazyrouter and local `:4000` retests show:
 ## Verified Minimal Request
 
 ```bash
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-2.5-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -72,5 +72,6 @@ Observed successful response shape:
 - If you need strict JSON instead of JSON-looking text, combine this route with [Structured Outputs](/en/features/structured-outputs)
 
 <Note>
-  This page only covers the short-audio understanding path that was actually rechecked successfully. For longer STT workflows, realtime audio, or TTS, see the existing [STT](/en/audio/stt), [Realtime](/en/audio/realtime), and [TTS](/en/audio/tts) pages.
+  This page only covers the short-audio understanding path that was actually rechecked successfully. For longer STT workflows or TTS, see the existing [STT](/en/audio/stt) and [TTS](/en/audio/tts) pages; Realtime is not currently shown as a public recommended example.
 </Note>
+

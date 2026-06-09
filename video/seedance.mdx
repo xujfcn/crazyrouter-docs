@@ -6,7 +6,7 @@ description: "使用 Seedance 原生 API 生成视频"
 
 # Seedance
 
-Seedance 是字节跳动 / 豆包的视频生成模型族。Crazyrouter 当前对客保留火山原生 `/volc/v1/*` 协议，不再把旧统一视频接口里的 `seedance-lite` 作为公开主协议。
+Seedance 是字节跳动 / 豆包的视频生成模型族。Crazyrouter 当前对客保留火山原生 `/volc/v1/*` 协议，不再把旧统一视频接口里的 `doubao-seedance-2-0-fast` 作为公开主协议。
 
 如果你想看 **Seedance 2.0 / 2.0 Fast 在 Crazyrouter 里的真实结算逻辑**，包括“为什么是任务完成后按 token 补扣”和“token 与秒数能不能固定换算”，直接看专题页：[Seedance 2.0 计费说明](/video/seedance-2-billing)。
 
@@ -78,7 +78,7 @@ POST /volc/v1/contents/generations/tasks
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/volc/v1/contents/generations/tasks \
+curl -X POST https://cn.crazyrouter.com/volc/v1/contents/generations/tasks \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -96,7 +96,7 @@ curl -X POST https://crazyrouter.com/volc/v1/contents/generations/tasks \
 import requests
 
 response = requests.post(
-    "https://crazyrouter.com/volc/v1/contents/generations/tasks",
+    "https://cn.crazyrouter.com/volc/v1/contents/generations/tasks",
     headers={
         "Content-Type": "application/json",
         "Authorization": "Bearer YOUR_API_KEY"
@@ -120,7 +120,7 @@ print(response.json())
 ### 单图生视频示例
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/volc/v1/contents/generations/tasks \
+curl -X POST https://cn.crazyrouter.com/volc/v1/contents/generations/tasks \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -143,7 +143,7 @@ curl -X POST https://crazyrouter.com/volc/v1/contents/generations/tasks \
 ### Seedance 2.0 多模态示例
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/volc/v1/contents/generations/tasks \
+curl -X POST https://cn.crazyrouter.com/volc/v1/contents/generations/tasks \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -200,7 +200,7 @@ GET /volc/v1/contents/generations/tasks/{task_id}
 ```
 
 ```bash cURL
-curl https://crazyrouter.com/volc/v1/contents/generations/tasks/cgt_task_abc123 \
+curl https://cn.crazyrouter.com/volc/v1/contents/generations/tasks/cgt_task_abc123 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
@@ -236,7 +236,7 @@ curl https://crazyrouter.com/volc/v1/contents/generations/tasks/cgt_task_abc123 
 | `failed` | 终态失败 |
 
 <Note>
-  当前公开文档只承诺 native `/volc/v1/*` 路径与 canonical 模型名。旧 `seedance-lite` 仅保留为历史口径，不再作为新的对客主协议。
+  当前公开文档只承诺 native `/volc/v1/*` 路径与 canonical 模型名。旧 `doubao-seedance-2-0-fast` 仅保留为历史口径，不再作为新的对客主协议。
 </Note>
 
 <Note>

@@ -9,7 +9,7 @@ description: "通过 Crazyrouter 统一视频 API 调用 Veo 3.1 Fast 与 Veo 3.
 当前 Crazyrouter 对客公开的 Veo 3.1 模型为：
 
 - `veo-3.1-fast`
-- `veo-3.1`
+- `veo-3.1-quality`
 
 这两个名称是对客 public alias。内部 canonical provider 名称不会直接暴露给客户。
 
@@ -31,7 +31,7 @@ Google 官方文档中的 `referenceImages`、style reference、以及更细的 
 | 模型 | 说明 |
 |------|------|
 | `veo-3.1-fast` | 更偏低延迟，适合更快拿到首个可用结果 |
-| `veo-3.1` | 更偏质量优先，适合默认主展示 |
+| `veo-3.1-quality` | 更偏质量优先，适合默认主展示 |
 
 ### 能力状态
 
@@ -52,7 +52,7 @@ Google 官方文档中的 `referenceImages`、style reference、以及更细的 
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| `model` | string | 是 | `veo-3.1-fast` 或 `veo-3.1` |
+| `model` | string | 是 | `veo-3.1-fast` 或 `veo-3.1-quality` |
 | `prompt` | string | 是 | 视频描述提示词 |
 | `aspect_ratio` | string | 否 | 当前公开建议使用 `16:9` 或 `9:16` |
 | `size` | string | 否 | 当前公开建议使用 `720P` 或 `1080P` |
@@ -68,7 +68,7 @@ curl -X POST https://cn.crazyrouter.com/v1/video/create \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "veo-3.1",
+    "model": "veo-3.1-quality",
     "prompt": "A cinematic shot of a spaceship landing on Mars, dust clouds rising, golden hour lighting",
     "aspect_ratio": "16:9"
   }'
@@ -84,7 +84,7 @@ response = requests.post(
         "Authorization": "Bearer YOUR_API_KEY"
     },
     json={
-        "model": "veo-3.1",
+        "model": "veo-3.1-quality",
         "prompt": "A cinematic shot of a spaceship landing on Mars",
         "aspect_ratio": "16:9"
     }
@@ -148,5 +148,5 @@ curl "https://cn.crazyrouter.com/v1/video/query?id=veo_task_abc123" \
 ```
 
 <Note>
-  Google 官方文档还描述了 Veo 3.1 的 `reference asset images`、以及更细的 provider-native 能力边界。当前 Crazyrouter 对客公开页先只承诺 `veo-3.1-fast` / `veo-3.1` 下的文生视频与单图生视频；如果后续开放更多 Veo 一级能力，会单独补文档与验证记录。
+  Google 官方文档还描述了 Veo 3.1 的 `reference asset images`、以及更细的 provider-native 能力边界。当前 Crazyrouter 对客公开页先只承诺 `veo-3.1-fast` / `veo-3.1-quality` 下的文生视频与单图生视频；如果后续开放更多 Veo 一级能力，会单独补文档与验证记录。
 </Note>

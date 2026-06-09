@@ -14,8 +14,8 @@ POST /v1/messages
 
 当前主示例模型：
 
-- `claude-sonnet-4-6`
-- `claude-opus-4-7`
+- `claude-opus-4-8`
+- `claude-opus-4-8`
 
 ## 认证
 
@@ -45,7 +45,7 @@ curl https://cn.crazyrouter.com/v1/messages \
   -H "x-api-key: YOUR_API_KEY" \
   -H "anthropic-version: 2023-06-01" \
   -d '{
-    "model": "claude-sonnet-4-6",
+    "model": "claude-opus-4-8",
     "max_tokens": 128,
     "messages": [
       {
@@ -87,7 +87,7 @@ curl https://cn.crazyrouter.com/v1/messages \
   -H "x-api-key: YOUR_API_KEY" \
   -H "anthropic-version: 2023-06-01" \
   -d '{
-    "model": "claude-sonnet-4-6",
+    "model": "claude-opus-4-8",
     "max_tokens": 256,
     "tools": [
       {
@@ -139,9 +139,9 @@ curl https://cn.crazyrouter.com/v1/messages \
 
 本轮生产复核中，明确返回 `thinking` block 的组合是：
 
-- `claude-opus-4-7`
+- `claude-opus-4-8`
 
-基础版 `claude-opus-4-6` 本轮没有拿到同等明确的 thinking block，因此这里优先写 thinking 能力。
+基础版 `claude-opus-4-8` 本轮没有拿到同等明确的 thinking block，因此这里优先写 thinking 能力。
 
 ```bash cURL
 curl https://cn.crazyrouter.com/v1/messages \
@@ -149,7 +149,7 @@ curl https://cn.crazyrouter.com/v1/messages \
   -H "x-api-key: YOUR_API_KEY" \
   -H "anthropic-version: 2023-06-01" \
   -d '{
-    "model": "claude-opus-4-7",
+    "model": "claude-opus-4-8",
     "max_tokens": 320,
     "thinking": {
       "type": "enabled",
@@ -189,9 +189,9 @@ curl https://cn.crazyrouter.com/v1/messages \
 
 ## 当前建议
 
-- 普通文本对话：优先用 `claude-sonnet-4-6`
-- 工具调用：优先用 `claude-sonnet-4-6`，并在首轮验证里加 `tool_choice`
-- 明确需要 thinking block：优先用 `claude-opus-4-7`
+- 普通文本对话：优先用 `claude-opus-4-8`
+- 工具调用：优先用 `claude-opus-4-8`，并在首轮验证里加 `tool_choice`
+- 明确需要 thinking block：优先用 `claude-opus-4-8`
 
 相关页面：
 

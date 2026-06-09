@@ -9,7 +9,7 @@ description: "Use Veo 3.1 Fast and Veo 3.1 Quality through the Crazyrouter unifi
 The currently public Crazyrouter Veo 3.1 model names are:
 
 - `veo-3.1-fast`
-- `veo-3.1`
+- `veo-3.1-quality`
 
 These are customer-facing public aliases. Internal canonical provider names are not exposed to customers.
 
@@ -31,7 +31,7 @@ Provider-native `referenceImages`, style reference, and other Veo-specific modes
 | Model | Description |
 |-------|-------------|
 | `veo-3.1-fast` | Lower-latency option for getting the first usable result faster |
-| `veo-3.1` | Quality-first option for the default public path |
+| `veo-3.1-quality` | Quality-first option for the default public path |
 
 ### Capability Status
 
@@ -52,7 +52,7 @@ Provider-native `referenceImages`, style reference, and other Veo-specific modes
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `model` | string | Yes | `veo-3.1-fast` or `veo-3.1` |
+| `model` | string | Yes | `veo-3.1-fast` or `veo-3.1-quality` |
 | `prompt` | string | Yes | Video prompt |
 | `aspect_ratio` | string | No | Publicly recommended: `16:9` or `9:16` |
 | `size` | string | No | Publicly recommended: `720P` or `1080P` |
@@ -68,7 +68,7 @@ curl -X POST https://cn.crazyrouter.com/v1/video/create \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "veo-3.1",
+    "model": "veo-3.1-quality",
     "prompt": "A cinematic shot of a spaceship landing on Mars, dust clouds rising, golden hour lighting",
     "aspect_ratio": "16:9"
   }'
@@ -84,7 +84,7 @@ response = requests.post(
         "Authorization": "Bearer YOUR_API_KEY"
     },
     json={
-        "model": "veo-3.1",
+        "model": "veo-3.1-quality",
         "prompt": "A cinematic shot of a spaceship landing on Mars",
         "aspect_ratio": "16:9"
     }
@@ -148,5 +148,5 @@ curl "https://cn.crazyrouter.com/v1/video/query?id=veo_task_abc123" \
 ```
 
 <Note>
-  Google's official Veo 3.1 docs also describe `reference asset images` and other provider-native capability details. The current Crazyrouter public page intentionally stays narrower: it only commits to text-to-video and single-image image-to-video under `veo-3.1-fast` and `veo-3.1`. Additional Veo capability pages should be published only after the public route and validation artifacts are ready.
+  Google's official Veo 3.1 docs also describe `reference asset images` and other provider-native capability details. The current Crazyrouter public page intentionally stays narrower: it only commits to text-to-video and single-image image-to-video under `veo-3.1-fast` and `veo-3.1-quality`. Additional Veo capability pages should be published only after the public route and validation artifacts are ready.
 </Note>

@@ -55,7 +55,7 @@ Coze（扣子）是字节跳动推出的智能体与工作流平台，适合做 
 
 | 项目 | 说明 |
 |------|------|
-| Crazyrouter 账号 | 先在 [crazyrouter.com](https://crazyrouter.com) 注册 |
+| Crazyrouter 账号 | 先在 [crazyrouter.com](https://cn.crazyrouter.com) 注册 |
 | Crazyrouter token | 建议为 Coze 单独创建一个 token |
 | Coze 账号 | 需要可创建 Bot / 工作流 / 插件 |
 | 发布能力 | 至少能调试 Bot 或工作流 |
@@ -64,8 +64,8 @@ Coze（扣子）是字节跳动推出的智能体与工作流平台，适合做 
 建议初始白名单：
 
 - `gpt-5.5`
-- `claude-sonnet-4-6`
-- `gemini-3-pro`
+- `claude-opus-4-8`
+- `gemini-3.1-pro`
 
 ## 方案 1：通过 API 插件接入 Crazyrouter
 
@@ -74,7 +74,7 @@ Coze（扣子）是字节跳动推出的智能体与工作流平台，适合做 
     第一次只建议放行：
 
     - `gpt-5.5`
-    - `claude-sonnet-4-6`
+    - `claude-opus-4-8`
 
     先不要一开始就开放太多模型，排障会更简单。
   </Step>
@@ -191,8 +191,8 @@ Coze 的一些版本或套餐确实可能支持自定义模型接入，但这不
 | 使用场景 | 推荐模型 | 原因 |
 |----------|----------|------|
 | 首轮链路验证 | `gpt-5.5` | 2026 年 3 月 23 日已在生产环境实测成功，最适合先确认 Coze 到 Crazyrouter 的调用链路 |
-| 高质量输出 | `claude-sonnet-4-6` | 适合更强解释和内容生成 |
-| Gemini 备用档 | `gemini-3-pro` | 适合作为第二条兼容性验证路径 |
+| 高质量输出 | `claude-opus-4-8` | 适合更强解释和内容生成 |
+| Gemini 备用档 | `gemini-3.1-pro` | 适合作为第二条兼容性验证路径 |
 
 ## Token 设置最佳实践
 
@@ -253,3 +253,5 @@ Coze 的一些版本或套餐确实可能支持自定义模型接入，但这不
 <Note>
 如果你的目标是“让 Coze 先稳定调用 Crazyrouter”，最重要的不是追求最复杂的接法，而是先用 HTTP / API 插件把最小链路跑通。
 </Note>
+
+

@@ -72,7 +72,7 @@ POST /kling/v1/videos/multi-image2video
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/kling/v1/videos/text2video \
+curl -X POST https://cn.crazyrouter.com/kling/v1/videos/text2video \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -89,7 +89,7 @@ curl -X POST https://crazyrouter.com/kling/v1/videos/text2video \
 import requests
 
 response = requests.post(
-    "https://crazyrouter.com/kling/v1/videos/text2video",
+    "https://cn.crazyrouter.com/kling/v1/videos/text2video",
     headers={
         "Content-Type": "application/json",
         "Authorization": "Bearer YOUR_API_KEY"
@@ -149,7 +149,7 @@ print(response.json())
 ### 图生视频示例
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/kling/v1/videos/image2video \
+curl -X POST https://cn.crazyrouter.com/kling/v1/videos/image2video \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -175,7 +175,7 @@ UPLOAD_RESPONSE=$(curl -sS -X POST https://cn.crazyrouter.com/v1/files/uploads \
 
 IMAGE_URL=$(python -c "import json,sys; print(json.load(sys.stdin)['url'])" <<< "$UPLOAD_RESPONSE")
 
-curl -X POST https://crazyrouter.com/kling/v1/videos/image2video \
+curl -X POST https://cn.crazyrouter.com/kling/v1/videos/image2video \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d "{
@@ -217,7 +217,7 @@ POST /kling/v1/videos/multi-image2video
 ### 参考图生视频示例
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/kling/v1/videos/multi-image2video \
+curl -X POST https://cn.crazyrouter.com/kling/v1/videos/multi-image2video \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -278,7 +278,7 @@ POST /kling/v1/videos/omni-video
 ### Omni 请求示例
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/kling/v1/videos/omni-video \
+curl -X POST https://cn.crazyrouter.com/kling/v1/videos/omni-video \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{

@@ -50,7 +50,7 @@ The installer binds the gateway to LAN scope by default (`bind: lan`). If the ma
 
 <Steps>
   <Step title="Create a dedicated Crazyrouter token">
-    In Crazyrouter, create a dedicated `sk-...` token for OpenClaw. Start with a small model allowlist such as `claude-opus-4-8`, `gpt-5.5`, and `gemini-3-pro`.
+    In Crazyrouter, create a dedicated `sk-...` token for OpenClaw. Start with a small model allowlist such as `claude-opus-4-8`, `gpt-5.5`, and `gemini-3.1-pro`.
   </Step>
   <Step title="Run the installer">
     ```bash
@@ -83,9 +83,9 @@ The installer sets `claude-opus-4-8` as the default primary model. To change the
 |----------|-------------------|-----|
 | Default daily assistant | `claude-opus-4-8` | Current default primary model for high-quality daily chat and controller workloads |
 | Coding / agent work | `gpt-5.5` | Latest OpenAI-compatible baseline for coding and agent-heavy workflows |
-| Cost-balanced fallback | `claude-sonnet-4-6` | Strong balance of quality, stability, and cost |
-| Gemini fallback path | `gemini-3-pro` | Useful as a second compatibility-validation path |
-| Heavy reasoning | `deepseek-r1` | Useful when you want stronger reasoning behavior |
+| Cost-balanced fallback | `claude-opus-4-8` | Strong balance of quality, stability, and cost |
+| Gemini fallback path | `gemini-3.1-pro` | Useful as a second compatibility-validation path |
+| Heavy reasoning | `deepseek-v4-pro` | Useful when you want stronger reasoning behavior |
 
 Example: switch the default model to `gpt-5.5`
 
@@ -271,7 +271,7 @@ If OpenClaw will be connected to a team IM workspace, create a separate Crazyrou
 ## Performance And Cost Tips
 
 - start with `claude-opus-4-8` until the whole flow is stable
-- keep routine bot traffic on `claude-sonnet-4-6` or move selected tasks to `gemini-3-pro` when cost matters more
+- keep routine bot traffic on `claude-opus-4-8` or move selected tasks to `gemini-3.1-pro` when cost matters more
 - use `gpt-5.5` for coding-heavy agent workflows
 - split WebUI, Telegram, and team IM usage across different tokens for better cost tracking
 - keep only the models and plugins you actually need

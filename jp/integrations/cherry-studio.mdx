@@ -60,8 +60,8 @@ Cherry Studio only needs a full custom path with a trailing `#` in special non-s
 Recommended starting whitelist:
 
 - `gpt-5.5`
-- `claude-sonnet-4-6`
-- `gemini-3-pro`
+- `claude-opus-4-8`
+- `gemini-3.1-pro`
 
 ## 5-Minute Quick Start
 
@@ -92,10 +92,10 @@ Recommended starting whitelist:
 | Use case | Recommended model | Why |
 |----------|-------------------|-----|
 | Default chat model | `gpt-5.5` | Verified successfully in production on March 23, 2026, and suited for the OpenAI-compatible baseline |
-| Higher-quality code / long-form help | `claude-sonnet-4-6` | Strong reasoning, writing, and code explanation |
-| Gemini fallback path | `gemini-3-pro` | Useful as a second vendor-compatible validation path |
+| Higher-quality code / long-form help | `claude-opus-4-8` | Strong reasoning, writing, and code explanation |
+| Gemini fallback path | `gemini-3.1-pro` | Useful as a second vendor-compatible validation path |
 
-Recommended order: get `gpt-5.5` working first, then add `claude-sonnet-4-6` and `gemini-3-pro`.
+Recommended order: get `gpt-5.5` working first, then add `claude-opus-4-8` and `gemini-3.1-pro`.
 
 ## Token Setup Best Practices
 
@@ -151,7 +151,7 @@ If you enable MCP:
 ## Performance and Cost Tips
 
 - Start with only 1 to 2 models so the first rollout stays easy to debug
-- Default to `gpt-5.5`, then switch to `claude-sonnet-4-6` for harder long-form and code tasks
+- Default to `gpt-5.5`, then switch to `claude-opus-4-8` for harder long-form and code tasks
 - If you keep long conversations open, give Cherry Studio its own quota cap
 - Since Cherry Studio makes model switching easy, reserve expensive models for heavier work only
 - If usage looks abnormal, check the Crazyrouter logs first for retries or long multi-turn sessions

@@ -1,90 +1,114 @@
 ---
 title: 'Image Upload Guidance'
-description: 'How to provide image URLs and use model-native upload flows'
+description: 'Upload local images and get 48-hour temporary public URLs for image-to-image, image-to-video, and vision APIs'
 ---
 > Last updated: 2026-06-06
 
-## Current status
+Crazyrouter provides temporary public image upload endpoints for converting local reference images into model-readable public URLs. They are suitable for Kling, Veo, Seedance, Runway, Luma, MiniMax, Nano Banana Pro, Doubao Seedream, and other APIs that accept `image_url`, `image_urls`, `image_list`, `images`, or `image_input`.
 
-Crazyrouter does not currently expose a public generic image-hosting endpoint.
+<Note>
+  Temporary images are kept for 48 hours by default and then cleaned up automatically. Storage during that period is not billed separately; current anti-abuse controls use per-user upload quota and rate limits.
+</Note>
 
-Do not depend on the following endpoint:
+## Endpoint Overview
 
-```text
-POST /api/upload
-```
+| Scenario | Endpoint |
+|----------|----------|
+| Local file upload | `POST /v1/files/uploads` |
+| Base64 image upload | `POST /v1/files/uploads/base64` |
+| Remote image rehosting | `POST /v1/files/uploads/url` |
 
-## Recommended approaches
+Common limits:
 
-### 1. Use your own object storage or CDN
+| Item | Current rule |
+|------|--------------|
+| Auth | `Authorization: Bearer YOUR_API_KEY` |
+| Supported formats | `image/png`, `image/jpeg`, `image/webp`, `image/gif` |
+| Single file size | 20MB |
+| User upload quota | 200MB / rolling 24-hour window |
+| Default expiration | 48 hours |
+| Returned URL | `https://media.crazyrouter.com/task-artifacts/tmp-inputs/...` |
 
-The best option is to upload files to your own S3 / R2 / OSS / COS / CDN bucket first, then pass the resulting public URL to Crazyrouter endpoints that support image input.
-
-Typical use cases:
-
-- GPT / Claude / Gemini vision
-- image editing
-- image-to-video
-- workflow tool integrations
-
-### 2. Use model-native upload flows
-
-Some models and upstream APIs already support multipart uploads or dedicated upload routes. Use the model-specific endpoint when available.
-
-Examples:
-
-- Midjourney image upload: `POST /mj/submit/upload-discord-images`
-- OpenAI-compatible image edits: `POST /v1/images/edits`
-- audio transcription: `POST /v1/audio/transcriptions`
-
-### 3. Save files in your own backend first, then send URLs
-
-If users upload local files to your app, your backend should store the file, generate a public URL, and then call Crazyrouter with that URL.
-
-## Example: use a public image URL for vision
-
-<CodeGroup>
-
-```python Python
-from openai import OpenAI
-
-client = OpenAI(api_key="sk-xxx", base_url="https://cn.crazyrouter.com/v1")
-
-response = client.chat.completions.create(
-    model="gpt-5.5",
-    messages=[{
-        "role": "user",
-        "content": [
-            {"type": "text", "text": "Describe this image"},
-            {"type": "image_url", "image_url": {"url": "https://example.com/photo.jpg"}}
-        ]
-    }]
-)
-print(response.choices[0].message.content)
-```
+## Local File Upload
 
 ```bash cURL
-curl https://cn.crazyrouter.com/v1/chat/completions \
+curl -X POST https://cn.crazyrouter.com/v1/files/uploads \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "file=@./reference.png" \
+  -F "purpose=model_input"
+```
+
+Example response:
+
+```json
+{
+  "id": "file_e5bbce820b5941409682a9c5e9ba79f1",
+  "url": "https://media.crazyrouter.com/task-artifacts/tmp-inputs/2026/06/07/user-1/file_e5bbce820b5941409682a9c5e9ba79f1.png",
+  "mime_type": "image/png",
+  "size": 2025,
+  "expires_at": "2026-06-09T04:41:35Z"
+}
+```
+
+## Base64 Upload
+
+```bash cURL
+curl -X POST https://cn.crazyrouter.com/v1/files/uploads/base64 \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer sk-xxx" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-5.5",
-    "messages": [{
-      "role": "user",
-      "content": [
-        {"type": "text", "text": "Describe this image"},
-        {"type": "image_url", "image_url": {"url": "https://example.com/photo.jpg"}}
-      ]
-    }]
+    "data": "data:image/png;base64,iVBORw0KGgoAAA...",
+    "filename": "reference.png",
+    "purpose": "model_input"
   }'
 ```
 
-</CodeGroup>
+## Remote URL Rehosting
+
+```bash cURL
+curl -X POST https://cn.crazyrouter.com/v1/files/uploads/url \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "url": "https://example.com/reference.png",
+    "filename": "reference.png",
+    "purpose": "model_input"
+  }'
+```
+
+The remote URL must be an `http` or `https` image URL reachable by Crazyrouter servers. The system checks file size, MIME type, and SSRF protection rules.
+
+## Example: Use a Local Reference Image for Kling Image-to-Video
+
+First, upload the local reference image:
+
+```bash cURL
+UPLOAD_RESPONSE=$(curl -sS -X POST https://cn.crazyrouter.com/v1/files/uploads \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "file=@./portrait.png" \
+  -F "purpose=model_input")
+
+IMAGE_URL=$(python -c "import json,sys; print(json.load(sys.stdin)['url'])" <<< "$UPLOAD_RESPONSE")
+echo "$IMAGE_URL"
+```
+
+Then pass the returned `IMAGE_URL` to Kling image-to-video:
+
+```bash cURL
+curl -X POST https://cn.crazyrouter.com/kling/v1/videos/image2video \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model_name": "kling-v3",
+    "prompt": "The person in the image slowly turns their head and smiles, cinematic lighting",
+    "image_urls": ["'"$IMAGE_URL"'"],
+    "duration": "5",
+    "mode": "std"
+  }'
+```
+
+The submit request returns a task ID. Use the [Kling task query](/en/video/kling/query) endpoint to get the final video result.
 
 <Warning>
-  If the image URL is not publicly reachable, the upstream model usually cannot read it.
+  Temporary URLs are not a permanent asset library. Make sure the URL has not expired before submitting a generation task, and do not store it as a long-term business image URL.
 </Warning>
-
-<Note>
-  If Crazyrouter exposes a public generic upload API again in the future, this page will be updated into a formal endpoint reference.
-</Note>

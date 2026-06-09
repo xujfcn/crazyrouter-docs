@@ -1,0 +1,115 @@
+---
+title: "最新模型用例"
+description: "基于本地公开模型索引整理的最新模型调用示例"
+---
+> 更新日期：2026-06-07
+
+# 最新模型用例
+
+本页按 `web/src/data/models/index.json` 的公开模型索引整理。新用例优先使用这些模型；已经下架或未进入公开索引的模型不再作为示例展示。
+
+## 推荐模型速览
+
+| 场景 | 推荐模型 |
+|------|----------|
+| 默认聊天、通用推理 | `gpt-5.5` |
+| 成本敏感聊天 | `gpt-5-mini` |
+| Claude 编码与长上下文 | `claude-opus-4-8` |
+| Claude 高难度任务 | `claude-opus-4-8` |
+| Claude 低成本轻任务 | `claude-opus-4-8` |
+| Gemini 原生多模态 | `gemini-3.1-pro` |
+| Gemini 低延迟 | `gemini-3.1-flash-lite` |
+| DeepSeek 推理 | `deepseek-v4-pro` |
+| xAI 快速聊天 | `grok-4.1-fast` |
+| MiniMax 长上下文 | `MiniMax-M2.7` |
+| Qwen 视觉理解 | `qwen3-vl-235b-a22b-instruct` 或 `qwen2.5-vl-72b-instruct` |
+| Suno 歌词 / 音乐 | `suno_lyrics` / `suno_music` |
+
+## Chat Completions
+
+```bash cURL
+curl -X POST https://cn.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "messages": [
+      {"role": "user", "content": "用三句话解释这个接口适合什么场景"}
+    ]
+  }'
+```
+
+## Responses API
+
+```bash cURL
+curl -X POST https://cn.crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "input": "给出一个安全上线前的 API 文档检查清单"
+  }'
+```
+
+## Claude Messages
+
+```bash cURL
+curl -X POST https://cn.crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-opus-4-8",
+    "max_tokens": 256,
+    "messages": [
+      {"role": "user", "content": "请审查这段 API 变更说明是否清楚"}
+    ]
+  }'
+```
+
+## Gemini 原生
+
+```bash cURL
+curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [{"text": "总结一下今天要验证的 API 文档重点"}]
+      }
+    ]
+  }'
+```
+
+## 视觉理解
+
+```bash cURL
+curl -X POST https://cn.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "qwen3-vl-235b-a22b-instruct",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {"type": "text", "text": "描述这张图片中的关键信息"},
+          {"type": "image_url", "image_url": {"url": "https://example.com/image.png"}}
+        ]
+      }
+    ]
+  }'
+```
+
+## 音乐与歌词
+
+`suno_lyrics` 和 `suno_music` 是公开模型索引中的音频能力入口。具体提交、查询和续写流程请看：
+
+- [Suno 生成歌词](/audio/suno/lyrics)
+- [Suno 生成歌曲](/audio/suno/generate)
+- [Suno 任务查询](/audio/suno/query)
+
+<Note>
+  实际可用模型还会受到 Token 白名单、渠道状态和平台更新影响。生产接入前请先调用 [`GET /v1/models`](/chat/openai/models) 确认当前 Token 可见的模型 ID。
+</Note>

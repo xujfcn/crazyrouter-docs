@@ -12,7 +12,7 @@ POST /v1beta/models/{model}:generateContent
 
 截至 `2026-04-08`，Crazyrouter 本站与本地 `4000` 端口复测表明：
 
-- `gemini-2.5-pro` 可以读取 `audio/wav`
+- `gemini-3.1-pro` 可以读取 `audio/wav`
 - 当前已稳定跑通的主链路是 `inlineData`
 - 对短音频做转写、语言判断、摘要说明都可以直接通过文本提示完成
 
@@ -21,7 +21,7 @@ POST /v1beta/models/{model}:generateContent
 ## 已验证的最小请求
 
 ```bash
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-2.5-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -72,5 +72,5 @@ curl "https://cn.crazyrouter.com/v1beta/models/gemini-2.5-pro:generateContent?ke
 - 如果你需要严格 JSON，可再叠加 [结构化输出](/features/structured-outputs) 约束
 
 <Note>
-  当前页面写的是已经跑通的短音频理解主路径。更长音频、实时流和语音生成请分别看现有 [STT](/audio/stt)、[Realtime](/audio/realtime)、[TTS](/audio/tts) 页面。
+  当前页面写的是已经跑通的短音频理解主路径。更长音频转写和语音生成请分别看现有 [STT](/audio/stt)、[TTS](/audio/tts) 页面；Realtime 当前不作为公开推荐用例展示。
 </Note>

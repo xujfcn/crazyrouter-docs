@@ -10,7 +10,7 @@ description: "基于 2026-03-23 Crazyrouter 生产环境验证的 Claude PDF 输
 POST /v1/messages
 ```
 
-截至 2026 年 3 月 23 日，Crazyrouter 生产环境已验证 `claude-sonnet-4-6` 可以通过原生 Messages API 读取 Base64 PDF，并返回文本摘要。
+截至 2026 年 3 月 23 日，Crazyrouter 生产环境已验证 `claude-opus-4-8` 可以通过原生 Messages API 读取 Base64 PDF，并返回文本摘要。
 
 ---
 
@@ -22,7 +22,7 @@ curl https://cn.crazyrouter.com/v1/messages \
   -H "x-api-key: YOUR_API_KEY" \
   -H "anthropic-version: 2023-06-01" \
   -d '{
-    "model": "claude-sonnet-4-6",
+    "model": "claude-opus-4-8",
     "max_tokens": 512,
     "messages": [
       {
@@ -50,7 +50,7 @@ curl https://cn.crazyrouter.com/v1/messages \
 
 ```json
 {
-  "model": "claude-sonnet-4-6",
+  "model": "claude-opus-4-8",
   "content": [
     {
       "type": "text",

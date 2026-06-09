@@ -29,7 +29,7 @@ Automatically generate songs from a simple description.
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/suno/submit/music \
+curl -X POST https://cn.crazyrouter.com/suno/submit/music \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -43,7 +43,7 @@ curl -X POST https://crazyrouter.com/suno/submit/music \
 import requests
 
 response = requests.post(
-    "https://crazyrouter.com/suno/submit/music",
+    "https://cn.crazyrouter.com/suno/submit/music",
     headers={
         "Content-Type": "application/json",
         "Authorization": "Bearer YOUR_API_KEY"
@@ -87,7 +87,7 @@ Write your own lyrics and set style tags.
 | `make_instrumental` | boolean | No | Whether instrumental only |
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/suno/submit/music \
+curl -X POST https://cn.crazyrouter.com/suno/submit/music \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{

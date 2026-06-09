@@ -14,7 +14,7 @@ Crazyrouter 支持 Anthropic 原生 Messages API。
 
 当前生产最小请求使用：
 
-- `model: "claude-sonnet-4-6"`
+- `model: "claude-opus-4-8"`
 - `POST /v1/messages`
 
 当前生产返回的典型骨架：
@@ -30,7 +30,7 @@ Crazyrouter 支持 Anthropic 原生 Messages API。
       "text": "..."
     }
   ],
-  "model": "claude-sonnet-4-6",
+  "model": "claude-opus-4-8",
   "stop_reason": "end_turn",
   "stop_sequence": null,
   "usage": {
@@ -89,7 +89,7 @@ Crazyrouter 支持 Anthropic 原生 Messages API。
 
 ## 流式事件类型
 
-`2026-03-23` 的生产复核中，`claude-sonnet-4-6` 原生流式返回了以下 SSE 事件：
+`2026-03-23` 的生产复核中，`claude-opus-4-8` 原生流式返回了以下 SSE 事件：
 
 - `message_start`
 - `content_block_start`
@@ -151,7 +151,7 @@ data: {"type":"message_stop"}
 - 如果 `content` 里出现 `thinking`，说明当前模型和请求形态触发了扩展思考
 
 <Note>
-  `thinking` block 不是所有 Claude 模型默认都会返回。当前明确复核成功的是 `claude-opus-4-7`。
+  `thinking` block 不是所有 Claude 模型默认都会返回。当前明确复核成功的是 `claude-opus-4-8`。
 </Note>
 
 相关页面：

@@ -21,7 +21,7 @@ curl https://cn.crazyrouter.com/v1/messages \
   -H "x-api-key: YOUR_API_KEY" \
   -H "anthropic-version: 2023-06-01" \
   -d '{
-    "model": "claude-sonnet-4-6",
+    "model": "claude-opus-4-8",
     "max_tokens": 128,
     "messages": [
       {
@@ -47,7 +47,7 @@ curl https://cn.crazyrouter.com/v1/messages \
 
 本次生产环境检查返回了：
 
-- `model: "claude-sonnet-4-6"`
+- `model: "claude-opus-4-8"`
 - `content[0].type = "text"`
 
 ---
@@ -59,7 +59,7 @@ curl https://cn.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "claude-sonnet-4-6",
+    "model": "claude-opus-4-8",
     "messages": [
       {
         "role": "user",

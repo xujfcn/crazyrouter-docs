@@ -14,7 +14,7 @@ With a few environment variables, Claude Code can send Anthropic requests direct
 - base URL: `https://crazyrouter.com`
 - China-optimized base URL: `https://cn.crazyrouter.com`
 - auth variable: `ANTHROPIC_API_KEY`
-- recommended default model: `claude-sonnet-4-6`
+- recommended default model: `claude-opus-4-8`
 
 <Tip>
 Claude Code appends the Anthropic request path itself, so the base URL must stay at the site root: `https://crazyrouter.com` or `https://cn.crazyrouter.com`. Do not append `/v1` or `/v1/messages`.
@@ -64,12 +64,12 @@ Do not use:
 | Git | `git 2.23+` is recommended for reviewing and rolling back AI edits |
 | Node.js | `Node.js 18+` is recommended |
 | Claude Code | Use a current stable release |
-| Claude model access | Allow at least `claude-sonnet-4-6` on the token |
+| Claude model access | Allow at least `claude-opus-4-8` on the token |
 
 Suggested starter allowlist:
 
-- `claude-sonnet-4-6`
-- `claude-opus-4-6`
+- `claude-opus-4-8`
+- `claude-opus-4-8`
 
 ## Full Install Paths By OS
 
@@ -243,8 +243,8 @@ If you prefer a script that installs Claude Code and writes the Crazyrouter-rela
 
     For the first pass, allow only:
 
-    - `claude-sonnet-4-6`
-    - `claude-opus-4-6`
+    - `claude-opus-4-8`
+    - `claude-opus-4-8`
 
     Give it its own budget so it does not share spend with Cursor, Codex, or OpenClaw.
   </Step>
@@ -363,12 +363,12 @@ If you prefer a script that installs Claude Code and writes the Crazyrouter-rela
 
 | Use case | Recommended model | Why |
 |----------|-------------------|-----|
-| default daily driver | `claude-sonnet-4-6` | best balance of quality, speed, and cost for most coding tasks |
-| difficult refactors | `claude-opus-4-6` | stronger complex reasoning, planning, and code understanding |
-| long-context repo analysis | `claude-sonnet-4-6` | stable and strong for long sessions |
-| cost-sensitive first validation | `claude-sonnet-4-6` | first get the main path working reliably |
+| default daily driver | `claude-opus-4-8` | best balance of quality, speed, and cost for most coding tasks |
+| difficult refactors | `claude-opus-4-8` | stronger complex reasoning, planning, and code understanding |
+| long-context repo analysis | `claude-opus-4-8` | stable and strong for long sessions |
+| cost-sensitive first validation | `claude-opus-4-8` | first get the main path working reliably |
 
-Recommended rollout: stabilize normal work on `claude-sonnet-4-6`, then switch to `claude-opus-4-6` only for genuinely heavier tasks.
+Recommended rollout: stabilize normal work on `claude-opus-4-8`, then switch to `claude-opus-4-8` only for genuinely heavier tasks.
 
 ## Использование не-Claude моделей в Claude Code
 
@@ -380,11 +380,11 @@ Recommended rollout: stabilize normal work on `claude-sonnet-4-6`, then switch t
 |----------|-----------|----------|-----------|----------|------------|
 | `deepseek-v4-pro` | DeepSeek | ✅ | ✅ | — | Универсальный кодинг и рефакторинг, лучшее соотношение цена/качество |
 | `deepseek-v4-flash` | DeepSeek | ✅ | ✅ | ✅ нативно | Рассуждения с видимыми блоками thinking |
-| `deepseek-reasoner` | DeepSeek | ✅ | ✅ | reasoning | Математика, сложная логика |
-| `deepseek-chat` / `deepseek-v3` / `deepseek-v3.2` / `deepseek-r1` | DeepSeek | ✅ | ✅ | — | Общие текстовые задачи |
+| `deepseek-v4-pro` | DeepSeek | ✅ | ✅ | reasoning | Математика, сложная логика |
+| `deepseek-v4-pro` / `deepseek-v4-pro` / `deepseek-v4-pro` / `deepseek-v4-pro` | DeepSeek | ✅ | ✅ | — | Общие текстовые задачи |
 | `MiniMax-M2.7` | MiniMax | ✅ | ✅ | ⚠️ внутри text-блока как теги `<think>` | Длинный контекст, китайские задачи |
-| `MiniMax-M2.5` | MiniMax | ✅ | ✅ | ⚠️ внутри text-блока | Общий чат |
-| `MiniMax-M2.1` | MiniMax | ✅ | ✅ | — | Без thinking, чистейший вывод |
+| `MiniMax-M2.7` | MiniMax | ✅ | ✅ | ⚠️ внутри text-блока | Общий чат |
+| `MiniMax-M2.7` | MiniMax | ✅ | ✅ | — | Без thinking, чистейший вывод |
 | `kimi-k2.5` / `kimi-k2` / `kimi-k2-instruct` | Moonshot Kimi | ✅ | ✅ | — | Длинный контекст, работа на китайском |
 | `kimi-k2-thinking` | Moonshot Kimi | ✅ | ✅ | reasoning | Сложные рассуждения |
 | `kimi-k2-0711-preview` / `kimi-k2-0905-preview` | Moonshot Kimi | ✅ | ✅ | — | Snapshot-версии |
@@ -418,7 +418,7 @@ Claude Code берёт модель из переменной окружения
     ANTHROPIC_MODEL=kimi-k2-thinking claude
 
     # Разовый запуск с MiniMax
-    ANTHROPIC_MODEL=MiniMax-M2.1 claude
+    ANTHROPIC_MODEL=MiniMax-M2.7 claude
     ```
   </Tab>
   <Tab title="Windows PowerShell">
@@ -431,7 +431,7 @@ Claude Code берёт модель из переменной окружения
 
     # Разовые переключения
     $env:ANTHROPIC_MODEL = "kimi-k2-thinking"; claude
-    $env:ANTHROPIC_MODEL = "MiniMax-M2.1"; claude
+    $env:ANTHROPIC_MODEL = "MiniMax-M2.7"; claude
     ```
   </Tab>
 </Tabs>
@@ -441,7 +441,7 @@ Claude Code берёт модель из переменной окружения
 ```text
 /model deepseek-v4-pro
 /model kimi-k2-thinking
-/model MiniMax-M2.1
+/model MiniMax-M2.7
 ```
 
 ### Замечания по использованию и известные различия
@@ -449,10 +449,10 @@ Claude Code берёт модель из переменной окружения
 - **Семейство DeepSeek**: максимальная совместимость с протоколом. Tool calls, streaming и `stop_reason=tool_use` соответствуют спецификации Anthropic; `deepseek-v4-flash` отдаёт нативные блоки `thinking`, которые Claude Code показывает в виде панели рассуждений. **Рекомендуемое значение по умолчанию: `deepseek-v4-pro`**.
 - **Семейство Kimi**: стабильная работа с длинным контекстом, tool calls работают штатно. `kimi-k2-thinking` содержит трассу рассуждений — полезно для сложных задач.
 - **Семейство MiniMax**: единственные модели, у которых в записи прайс-листа поле `supported_endpoint_types` явно содержит `anthropic`, поэтому уровень протокола подходит лучше всего. Однако `M2.5` / `M2.7` отдают рассуждения в обычном text-блоке **обёрнутыми тегами `<think>...</think>`** — Claude Code показывает их как есть. Способы избежать:
-  1. Использовать `MiniMax-M2.1` (без рассуждений).
+  1. Использовать `MiniMax-M2.7` (без рассуждений).
   2. Добавить system-подсказку: «Не выводите теги `<think>` и сами рассуждения, только итоговый ответ».
 - **Allowlist токена**: если на вашем выделенном для Claude Code токене включён whitelist моделей, добавьте туда нужные модели в панели Crazyrouter, иначе будет `403 model not allowed`.
-- **Thinking и тарификация**: модели с thinking (`-thinking`, `-flash`, `reasoner`, `MiniMax-M2.5/2.7`) расходуют дополнительные output-токены. Установите отдельный лимит бюджета на токен для Claude Code.
+- **Thinking и тарификация**: модели с thinking (`-thinking`, `-flash`, `reasoner`, `MiniMax-M2.7`) расходуют дополнительные output-токены. Установите отдельный лимит бюджета на токен для Claude Code.
 
 ### Однострочная проверка работоспособности модели
 
@@ -510,8 +510,8 @@ curl -sS https://cn.crazyrouter.com/v1/messages \
 
 ## Performance And Cost Tips
 
-- start with `claude-sonnet-4-6`
-- switch to `claude-opus-4-6` only for hard architecture analysis or heavy refactors
+- start with `claude-opus-4-8`
+- switch to `claude-opus-4-8` only for hard architecture analysis or heavy refactors
 - validate first in a small repo, not a large production repo
 - check `git status` before each new task
 - watch Crazyrouter logs and quota more closely when tool use becomes frequent
@@ -542,7 +542,7 @@ Because Claude Code can edit files and run commands. A clean snapshot makes revi
 
 ### Which model should I try first?
 
-Start with `claude-sonnet-4-6`. It is usually the safest baseline.
+Start with `claude-opus-4-8`. It is usually the safest baseline.
 
 <Note>
 If your first priority is Claude-family models plus a terminal-first coding workflow, Claude Code should be near the front of your Crazyrouter integration order.

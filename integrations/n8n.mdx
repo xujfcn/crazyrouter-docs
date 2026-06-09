@@ -37,14 +37,14 @@ https://cn.crazyrouter.com/v1
 
 不要填成：
 
-- `https://crazyrouter.com`
+- `https://cn.crazyrouter.com`
 - `https://cn.crazyrouter.com/v1/chat/completions`
 
 ## 前置条件
 
 | 项目 | 说明 |
 |------|------|
-| Crazyrouter 账号 | 先在 [crazyrouter.com](https://crazyrouter.com) 注册 |
+| Crazyrouter 账号 | 先在 [crazyrouter.com](https://cn.crazyrouter.com) 注册 |
 | Crazyrouter token | 建议为 n8n 单独创建一个 `sk-...` token |
 | n8n | 建议使用当前稳定版，并确认 AI 节点可用 |
 | 可用模型 | 至少放行一个当天已实测成功的聊天模型，如 `gpt-5.5` |
@@ -52,15 +52,15 @@ https://cn.crazyrouter.com/v1
 推荐首批白名单：
 
 - `gpt-5.5`
-- `claude-sonnet-4-6`
-- `gemini-3-pro`
+- `claude-opus-4-8`
+- `gemini-3.1-pro`
 - `text-embedding-3-large`（如果你会用向量或检索相关节点）
 
 ## 5 分钟快速开始
 
 <Steps>
   <Step title="创建 n8n 专用 token">
-    在 Crazyrouter 后台创建一个名为 `n8n` 的 token。首次建议只开放 `gpt-5.5` 和 `claude-sonnet-4-6`。
+    在 Crazyrouter 后台创建一个名为 `n8n` 的 token。首次建议只开放 `gpt-5.5` 和 `claude-opus-4-8`。
   </Step>
   <Step title="添加 OpenAI 凭证">
     在 n8n 中进入 `Settings` → `Credentials` → `Add Credential`，选择 `OpenAI API` 或你当前版本对应的 OpenAI 凭证类型。
@@ -144,8 +144,8 @@ Body:
 | 使用场景 | 推荐模型 | 原因 |
 |----------|----------|------|
 | 默认工作流模型 | `gpt-5.5` | 当天已实测成功，适合作为 n8n 主基线 |
-| 高质量复杂 Agent 场景 | `claude-sonnet-4-6` | 适合更复杂解释和长文本任务 |
-| Gemini 备用档 | `gemini-3-pro` | 适合补充第二条兼容性验证路径 |
+| 高质量复杂 Agent 场景 | `claude-opus-4-8` | 适合更复杂解释和长文本任务 |
+| Gemini 备用档 | `gemini-3.1-pro` | 适合补充第二条兼容性验证路径 |
 | 检索 / 向量相关 | `text-embedding-3-large` | 适合后续做向量处理或检索增强 |
 
 推荐顺序：先用 `gpt-5.5` 跑通最小工作流，再扩展到 Agent、工具和批量任务。
@@ -222,3 +222,5 @@ Body:
 <Note>
 n8n 接入 Crazyrouter 后，价值不只是“能调模型”，而是能把模型放进自动化链路里。因此最关键的不是单次对话能否成功，而是要同时控制重试、循环、批量执行和 token 配额。
 </Note>
+
+

@@ -10,7 +10,7 @@ description: "Claude PDF input verified against Crazyrouter production on 2026-0
 POST /v1/messages
 ```
 
-As of March 23, 2026, Crazyrouter production has verified that `claude-sonnet-4-6` can read a Base64 PDF through the native Messages API and return a text summary.
+As of March 23, 2026, Crazyrouter production has verified that `claude-opus-4-8` can read a Base64 PDF through the native Messages API and return a text summary.
 
 ---
 
@@ -22,7 +22,7 @@ curl https://cn.crazyrouter.com/v1/messages \
   -H "x-api-key: YOUR_API_KEY" \
   -H "anthropic-version: 2023-06-01" \
   -d '{
-    "model": "claude-sonnet-4-6",
+    "model": "claude-opus-4-8",
     "max_tokens": 512,
     "messages": [
       {
@@ -50,7 +50,7 @@ Observed production response shape:
 
 ```json
 {
-  "model": "claude-sonnet-4-6",
+  "model": "claude-opus-4-8",
   "content": [
     {
       "type": "text",
@@ -63,3 +63,4 @@ Observed production response shape:
 <Note>
   This page keeps only the Base64 PDF path that was revalidated successfully. Remote URLs, multi-PDF comparison, and streamed PDF output were not rechecked item by item in this pass.
 </Note>
+

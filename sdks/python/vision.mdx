@@ -85,7 +85,7 @@ Claude 模型同样支持通过 OpenAI 兼容格式进行识图：
 
 ```python
 response = client.chat.completions.create(
-    model="claude-sonnet-4-6",
+    model="claude-opus-4-8",
     messages=[{
         "role": "user",
         "content": [
@@ -109,8 +109,8 @@ print(response.choices[0].message.content)
 | 模型 | 说明 |
 |------|------|
 | `gpt-5.5` | 2026 年 3 月 23 日已在生产环境实测成功的 OpenAI 兼容视觉模型 |
-| `claude-sonnet-4-6` | 已实测成功的 Claude OpenAI 兼容视觉模型 |
+| `claude-opus-4-8` | 已实测成功的 Claude OpenAI 兼容视觉模型 |
 
 <Note>
-  `gpt-5.5` 与 `claude-sonnet-4-6` 的视觉输入已于 2026 年 3 月 23 日在 Crazyrouter 生产环境完成实测。图片大小建议不超过 20MB；Base64 编码会增加约 33% 的数据量，大图建议优先使用 URL。
+  `gpt-5.5` 与 `claude-opus-4-8` 的视觉输入已于 2026 年 3 月 23 日在 Crazyrouter 生产环境完成实测。图片大小建议不超过 20MB；Base64 编码会增加约 33% 的数据量，大图建议优先使用 URL。
 </Note>

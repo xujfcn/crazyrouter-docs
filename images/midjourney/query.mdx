@@ -19,7 +19,7 @@ GET /mj/task/{id}/fetch
 <CodeGroup>
 
 ```bash cURL
-curl https://crazyrouter.com/mj/task/task_1234567890/fetch \
+curl https://cn.crazyrouter.com/mj/task/task_1234567890/fetch \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
@@ -27,7 +27,7 @@ curl https://crazyrouter.com/mj/task/task_1234567890/fetch \
 import requests
 
 response = requests.get(
-    "https://crazyrouter.com/mj/task/task_1234567890/fetch",
+    "https://cn.crazyrouter.com/mj/task/task_1234567890/fetch",
     headers={"Authorization": "Bearer YOUR_API_KEY"}
 )
 
@@ -102,7 +102,7 @@ POST /mj/task/list-by-condition
 ### 请求示例
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/mj/task/list-by-condition \
+curl -X POST https://cn.crazyrouter.com/mj/task/list-by-condition \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{

@@ -1,154 +1,20 @@
 ---
-title: "Sora"
-description: "使用 OpenAI Sora 模型生成视频，公开文档优先覆盖已验证的统一视频 API、Video Generations API 和 OpenAI 视频兼容格式"
+title: "Sora（暂时隐藏）"
+description: "Sora 公开用例暂时隐藏；新接入请使用当前公开视频模型与视频 API"
+noindex: true
 ---
-> 更新日期：2026-06-06
+> 更新日期：2026-06-07
 
-# Sora
+# Sora（暂时隐藏）
 
-Crazyrouter 当前公开文档建议优先使用下面几类已验证的视频调用方式：
+Sora 相关公开用例当前不再作为 Crazyrouter 新接入推荐路径展示。为了避免用户复制到已下架或未公开模型，本页已从导航中移除，并且不再保留请求示例。
 
-- `POST /v1/video/create` 与 `GET /v1/video/query`
-- `POST /v1/video/generations` 与 `GET /v1/video/generations/{task_id}`
-- `POST /v1/videos` 与 `GET /v1/videos/{task_id}`
+新接入视频生成请优先查看：
 
-如果你只是第一次接入，优先从 `POST /v1/video/generations` 开始，因为它的任务状态和返回字段更直观，也已经在本轮文档中单独补充了专门页面。
-
-## 模型选择
-
-| 模型 | 说明 | 生成速度 | 质量 | 推荐场景 |
-|------|------|----------|------|----------|
-| `sora-2` | 第二代标准版 | 中等 | 高 | 生产环境、日常使用 |
-| `sora-2-pro` | 第二代专业版 | 较慢 | 最高 | 专业作品、精细控制 |
-
-## 推荐主线：Video Generations API
-
-```
-POST /v1/video/generations
-```
-
-```bash cURL
-curl -X POST https://cn.crazyrouter.com/v1/video/generations \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "model": "sora-2",
-    "prompt": "A serene Japanese garden in spring, with cherry blossoms gently falling",
-    "size": "1280x720",
-    "duration": 5
-  }'
-```
-
-查询任务：
-
-```
-GET /v1/video/generations/{task_id}
-```
-
-```bash cURL
-curl https://cn.crazyrouter.com/v1/video/generations/video_123 \
-  -H "Authorization: Bearer YOUR_API_KEY"
-```
-
-### 适合什么时候用
-
-- 第一次接入 Sora
-- 想要更清晰的任务状态与元数据
-- 想使用 Crazyrouter 文档里单独维护的视频兼容页
-
-## 统一视频 API
-
-```
-POST /v1/video/create
-```
-
-```bash cURL
-curl -X POST https://cn.crazyrouter.com/v1/video/create \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "model": "sora-2",
-    "prompt": "A cat playing piano in a jazz club, cinematic lighting",
-    "aspect_ratio": "16:9"
-  }'
-```
-
-查询任务：
-
-```
-GET /v1/video/query?task_id=your_task_id
-```
-
-```bash cURL
-curl "https://cn.crazyrouter.com/v1/video/query?task_id=your_task_id" \
-  -H "Authorization: Bearer YOUR_API_KEY"
-```
-
-## OpenAI 视频兼容格式
-
-```
-POST /v1/videos
-```
-
-```bash cURL
-curl -X POST https://cn.crazyrouter.com/v1/videos \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "model": "sora-2",
-    "prompt": "A cat playing piano in a jazz club, cinematic lighting",
-    "size": "1920x1080",
-    "duration": 10
-  }'
-```
-
-查询任务：
-
-```
-GET /v1/videos/{task_id}
-```
-
-```bash cURL
-curl https://cn.crazyrouter.com/v1/videos/sora_task_abc123 \
-  -H "Authorization: Bearer YOUR_API_KEY"
-```
-
-## 状态与结果说明
-
-常见任务状态：
-
-| 状态 | 说明 |
-|------|------|
-| `queued` | 已提交，等待处理 |
-| `in_progress` | 生成中 |
-| `completed` | 已完成 |
-| `failed` | 失败 |
-
-常见结果字段：
-
-- `url` 或 `video_url`：视频下载地址
-- `thumbnail_url`：缩略图
-- `progress`：生成进度
-- `expires_at`：结果链接过期时间
+- [Veo 3.1](/video/veo)：使用 `veo-3.1-fast` 或 `veo-3.1-quality`
+- [统一视频 API](/video/unified)：使用 `POST /v1/video/create`
+- [OpenAI 视频兼容格式](/video/openai-video)：使用 `POST /v1/videos`
 
 <Note>
-  视频结果链接通常不是永久有效。拿到结果后，建议及时下载保存，不要把临时 URL 当成长期存储地址。
-</Note>
-
-## 推荐使用顺序
-
-1. 先用 `sora-2`
-2. 先做 5 到 10 秒短视频
-3. 先跑通单次文本生成视频
-4. 再增加分辨率、时长或更复杂参数
-5. 需要更高质量时再切换到 `sora-2-pro`
-
-## 常见注意事项
-
-- 不要在这页默认假设所有更复杂的原生字段都已作为公开主线稳定支持
-- 如果你需要更具体的 `Video Generations` 请求与查询示例，优先查看本轮新增的专门页面
-- 如果只是排查连通性，先用最小 prompt 和较短时长验证
-
-<Note>
-  本页保留 Sora 的公开主线接入说明；更细的兼容接口说明已经拆分到单独的视频文档页，便于按路由分别维护准确性。
+  如果后续 Sora 重新进入公开模型列表，会重新补充模型 ID、请求示例和验证记录。
 </Note>

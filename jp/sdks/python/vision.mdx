@@ -85,7 +85,7 @@ Claude models also support vision through the OpenAI-compatible format:
 
 ```python
 response = client.chat.completions.create(
-    model="claude-sonnet-4-6",
+    model="claude-opus-4-8",
     messages=[{
         "role": "user",
         "content": [
@@ -109,8 +109,8 @@ print(response.choices[0].message.content)
 | Model | Description |
 |-------|-------------|
 | `gpt-5.5` | OpenAI-compatible vision model verified successfully in production on March 23, 2026 |
-| `claude-sonnet-4-6` | Claude OpenAI-compatible vision model verified successfully in production |
+| `claude-opus-4-8` | Claude OpenAI-compatible vision model verified successfully in production |
 
 <Note>
-  Vision input with `gpt-5.5` and `claude-sonnet-4-6` was verified in Crazyrouter production on March 23, 2026. Image size should not exceed 20MB; base64 encoding adds approximately 33% to the payload size, so URL method is recommended for larger files.
+  Vision input with `gpt-5.5` and `claude-opus-4-8` was verified in Crazyrouter production on March 23, 2026. Image size should not exceed 20MB; base64 encoding adds approximately 33% to the payload size, so URL method is recommended for larger files.
 </Note>

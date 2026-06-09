@@ -9,7 +9,7 @@ description: '在 Claude Dev VS Code 扩展中配置 Crazyrouter API，并使用
 Claude Dev 是 VS Code 里的 AI 编程扩展，适合把 Claude 风格的代码解释、重构建议和多轮协作接到 Crazyrouter。公开文档里建议优先使用 OpenAI Compatible 路线，因为这条链路在本站文档体系里更统一，也更容易排障。
 
 <Warning>
-本页的 `https://cn.crazyrouter.com/v1` 只适用于 Claude Dev 中的 `OpenAI Compatible` provider。不要把这个地址复制到 Claude Code 的 `ANTHROPIC_BASE_URL`；Claude Code 应填写根域名 `https://crazyrouter.com` 或 `https://cn.crazyrouter.com`。
+本页的 `https://cn.crazyrouter.com/v1` 只适用于 Claude Dev 中的 `OpenAI Compatible` provider。不要把这个地址复制到 Claude Code 的 `ANTHROPIC_BASE_URL`；Claude Code 应填写根域名 `https://cn.crazyrouter.com` 或 `https://cn.crazyrouter.com`。
 </Warning>
 
 ## 推荐配置
@@ -27,7 +27,7 @@ Claude Dev 是 VS Code 里的 AI 编程扩展，适合把 Claude 风格的代码
   <Step title="填写配置">
     - **Base URL**: `https://cn.crazyrouter.com/v1`
     - **API Key**: `sk-xxx`
-    - **Model**: `claude-sonnet-4-6`
+    - **Model**: `claude-opus-4-8`
   </Step>
 </Steps>
 
@@ -37,9 +37,11 @@ Claude Dev 是 VS Code 里的 AI 编程扩展，适合把 Claude 风格的代码
 
 | 场景 | 模型 |
 |------|------|
-| 日常编程 | `claude-sonnet-4-6` |
-| 更重推理与规划 | `claude-opus-4-7` |
+| 日常编程 | `claude-opus-4-8` |
+| 更重推理与规划 | `claude-opus-4-8` |
 
 <Note>
-  `claude-sonnet-4-6` 与 `claude-opus-4-7` 都属于当前已验证过的 Claude 最新口径。若只是先做 VS Code 内的最小验证，先用 `claude-sonnet-4-6`。
+  `claude-opus-4-8` 与 `claude-opus-4-8` 都属于当前已验证过的 Claude 最新口径。若只是先做 VS Code 内的最小验证，先用 `claude-opus-4-8`。
 </Note>
+
+

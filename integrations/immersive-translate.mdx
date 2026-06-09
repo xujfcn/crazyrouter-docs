@@ -29,7 +29,7 @@ https://cn.crazyrouter.com/v1/chat/completions
 ```
 
 <Warning>
-不要把这里写成根域名 `https://crazyrouter.com`，也不要只写到 `/v1`。对沉浸式翻译这类接法，首轮验证优先用完整 `/v1/chat/completions` 路径。
+不要把这里写成根域名 `https://cn.crazyrouter.com`，也不要只写到 `/v1`。对沉浸式翻译这类接法，首轮验证优先用完整 `/v1/chat/completions` 路径。
 </Warning>
 
 ## 适合谁用
@@ -43,7 +43,7 @@ https://cn.crazyrouter.com/v1/chat/completions
 
 | 项目 | 说明 |
 |------|------|
-| Crazyrouter 账号 | 先在 [crazyrouter.com](https://crazyrouter.com) 注册 |
+| Crazyrouter 账号 | 先在 [crazyrouter.com](https://cn.crazyrouter.com) 注册 |
 | Crazyrouter token | 建议为沉浸式翻译单独创建一个 token |
 | 浏览器 | Chrome、Edge、Firefox 等支持该扩展的浏览器 |
 | 沉浸式翻译扩展 | 建议当前稳定版 |
@@ -52,7 +52,7 @@ https://cn.crazyrouter.com/v1/chat/completions
 建议初始白名单：
 
 - `gpt-5.5`
-- `claude-sonnet-4-6`
+- `claude-opus-4-8`
 
 ## 安装与配置路径
 
@@ -85,7 +85,7 @@ https://cn.crazyrouter.com/v1/chat/completions
     第一次只建议放行：
 
     - `gpt-5.5`
-    - `claude-sonnet-4-6`
+    - `claude-opus-4-8`
 
     先不要一开始就把很多模型都加入翻译场景里。
   </Step>
@@ -134,8 +134,8 @@ https://cn.crazyrouter.com/v1/chat/completions
 | 使用场景 | 推荐模型 | 原因 |
 |----------|----------|------|
 | 首轮最小验证 | `gpt-5.5` | 2026 年 3 月 23 日已在生产环境实测成功，适合先测通 OpenAI 兼容翻译链路 |
-| 更高质量翻译 | `claude-sonnet-4-6` | 更适合长文解释、润色和较重质量场景 |
-| Gemini 备用档 | `gemini-3-pro` | 适合作为第二条兼容性验证路径，但建议先跑通主链路再尝试 |
+| 更高质量翻译 | `claude-opus-4-8` | 更适合长文解释、润色和较重质量场景 |
+| Gemini 备用档 | `gemini-3.1-pro` | 适合作为第二条兼容性验证路径，但建议先跑通主链路再尝试 |
 
 ## Token 设置最佳实践
 
@@ -197,3 +197,5 @@ https://cn.crazyrouter.com/v1/chat/completions
 <Note>
 如果你的目标是“用 Crazyrouter 管理网页 AI 翻译成本”，沉浸式翻译是非常值得补齐细节说明的一类浏览器扩展。
 </Note>
+
+
