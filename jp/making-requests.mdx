@@ -2,7 +2,7 @@
 title: 'リクエストの作成'
 description: 'Crazyrouter API へ正しくリクエストする方法'
 ---
-> 更新日: 2026-06-06
+> 更新日: 2026-06-14
 
 ## リクエスト形式
 
@@ -20,6 +20,7 @@ API リクエストは HTTPS と JSON リクエストボディを使用します
 | Header | Value | 説明 |
 |--------|-------|------|
 | `Accept` | `application/json` | レスポンス形式 |
+| `Content-Encoding` | `gzip` | 任意。リクエストボディを gzip 圧縮して送信する場合に設定 |
 
 ## リクエスト例
 
@@ -33,6 +34,115 @@ curl https://cn.crazyrouter.com/v1/chat/completions \
     "stream": false
   }'
 ```
+
+## gzip でリクエストボディを送信する
+
+長いコンテキスト、長文ドキュメント、大量のメッセージ履歴など、リクエストボディが大きい場合は、元の JSON ボディを gzip 圧縮して送信できます。
+
+gzip は転送形式だけを変更します。リクエストの意味は変わりません。Crazyrouter は JSON を解析する前にリクエストボディを自動で解凍します。
+
+次のヘッダーを追加してください。
+
+```http
+Content-Type: application/json
+Content-Encoding: gzip
+```
+
+<Note>
+  `Content-Encoding: gzip` は「リクエストボディ自体が gzip 圧縮されている」ことを示します。通常レスポンス圧縮に使われる `Accept-Encoding: gzip` とは異なります。
+</Note>
+
+### Python
+
+```python
+import gzip
+import json
+import requests
+
+payload = {
+    "model": "gpt-5.5",
+    "messages": [
+        {"role": "user", "content": "長いコンテキストやドキュメント内容をここに入れます..."}
+    ],
+    "stream": False
+}
+
+raw = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+compressed = gzip.compress(raw)
+
+resp = requests.post(
+    "https://cn.crazyrouter.com/v1/chat/completions",
+    headers={
+        "Authorization": "Bearer sk-xxxxxxxx",
+        "Content-Type": "application/json",
+        "Content-Encoding": "gzip",
+    },
+    data=compressed,
+    timeout=120,
+)
+
+print(resp.status_code, resp.text)
+```
+
+### Node.js
+
+```js
+import zlib from "node:zlib";
+
+const payload = {
+  model: "gpt-5.5",
+  messages: [
+    { role: "user", content: "長いコンテキストやドキュメント内容をここに入れます..." },
+  ],
+  stream: false,
+};
+
+const raw = Buffer.from(JSON.stringify(payload));
+const compressed = zlib.gzipSync(raw);
+
+const resp = await fetch("https://cn.crazyrouter.com/v1/chat/completions", {
+  method: "POST",
+  headers: {
+    Authorization: "Bearer sk-xxxxxxxx",
+    "Content-Type": "application/json",
+    "Content-Encoding": "gzip",
+  },
+  body: compressed,
+});
+
+console.log(resp.status, await resp.text());
+```
+
+### cURL
+
+```bash
+cat > body.json <<'JSON'
+{
+  "model": "gpt-5.5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "長いコンテキストやドキュメント内容をここに入れます..."
+    }
+  ],
+  "stream": false
+}
+JSON
+
+gzip -c body.json > body.json.gz
+
+curl https://cn.crazyrouter.com/v1/chat/completions \
+  -H "Authorization: Bearer sk-xxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -H "Content-Encoding: gzip" \
+  --data-binary @body.json.gz
+```
+
+次のような場合に適しています。
+
+- 1 回のリクエストボディが 1 MB を超えることが多い
+- 長いコンテキストや長文ドキュメントを繰り返しアップロードする
+- クライアント側で HTTP body とヘッダーを直接制御できる
 
 ## ストリーミング
 

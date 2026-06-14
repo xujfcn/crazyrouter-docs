@@ -2,7 +2,7 @@
 title: 'Making Requests'
 description: 'Learn how to make API requests correctly'
 ---
-> Last updated: 2026-06-06
+> Last updated: 2026-06-14
 
 ## Request Format
 
@@ -24,6 +24,7 @@ Prefer `https://cn.crazyrouter.com/v1` by default. If you are unsure whether a c
 | Header | Value | Description |
 |--------|-------|-------------|
 | `Accept` | `application/json` | Response format |
+| `Content-Encoding` | `gzip` | Optional. Set this when the request body is gzip-compressed |
 
 ## Request Example
 
@@ -37,6 +38,115 @@ curl https://cn.crazyrouter.com/v1/chat/completions \
     "stream": false
   }'
 ```
+
+## Sending a gzip request body
+
+If your request body is large, for example long context, long documents, or a large message history, you can gzip-compress the original JSON body before sending it.
+
+gzip only changes the transport format. It does not change the request semantics. Crazyrouter decompresses the body before parsing the JSON.
+
+Add these headers:
+
+```http
+Content-Type: application/json
+Content-Encoding: gzip
+```
+
+<Note>
+  `Content-Encoding: gzip` means the request body itself is gzip-compressed. It is different from `Accept-Encoding: gzip`, which is usually used for response compression.
+</Note>
+
+### Python
+
+```python
+import gzip
+import json
+import requests
+
+payload = {
+    "model": "gpt-5.5",
+    "messages": [
+        {"role": "user", "content": "Put your long context or document here..."}
+    ],
+    "stream": False
+}
+
+raw = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+compressed = gzip.compress(raw)
+
+resp = requests.post(
+    "https://cn.crazyrouter.com/v1/chat/completions",
+    headers={
+        "Authorization": "Bearer sk-xxxxxxxx",
+        "Content-Type": "application/json",
+        "Content-Encoding": "gzip",
+    },
+    data=compressed,
+    timeout=120,
+)
+
+print(resp.status_code, resp.text)
+```
+
+### Node.js
+
+```js
+import zlib from "node:zlib";
+
+const payload = {
+  model: "gpt-5.5",
+  messages: [
+    { role: "user", content: "Put your long context or document here..." },
+  ],
+  stream: false,
+};
+
+const raw = Buffer.from(JSON.stringify(payload));
+const compressed = zlib.gzipSync(raw);
+
+const resp = await fetch("https://cn.crazyrouter.com/v1/chat/completions", {
+  method: "POST",
+  headers: {
+    Authorization: "Bearer sk-xxxxxxxx",
+    "Content-Type": "application/json",
+    "Content-Encoding": "gzip",
+  },
+  body: compressed,
+});
+
+console.log(resp.status, await resp.text());
+```
+
+### cURL
+
+```bash
+cat > body.json <<'JSON'
+{
+  "model": "gpt-5.5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Put your long context or document here..."
+    }
+  ],
+  "stream": false
+}
+JSON
+
+gzip -c body.json > body.json.gz
+
+curl https://cn.crazyrouter.com/v1/chat/completions \
+  -H "Authorization: Bearer sk-xxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -H "Content-Encoding: gzip" \
+  --data-binary @body.json.gz
+```
+
+Use this when:
+
+- a single request body is often larger than 1 MB
+- you repeatedly upload long context or long documents
+- your client can directly control the HTTP body and headers
 
 ## Streaming Requests
 

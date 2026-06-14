@@ -2,7 +2,7 @@
 title: '发出请求'
 description: '了解如何正确发出 API 请求'
 ---
-> 更新日期：2026-06-06
+> 更新日期：2026-06-14
 
 ## 请求格式
 
@@ -24,6 +24,7 @@ description: '了解如何正确发出 API 请求'
 | Header | 值 | 说明 |
 |--------|-----|------|
 | `Accept` | `application/json` | 响应格式 |
+| `Content-Encoding` | `gzip` | 可选。请求体使用 gzip 压缩时设置 |
 
 ## 请求示例
 
@@ -37,6 +38,115 @@ curl https://cn.crazyrouter.com/v1/chat/completions \
     "stream": false
   }'
 ```
+
+## 使用 gzip 发送请求体
+
+如果你的请求体很大，例如每次都上传长上下文、长文档或大量消息历史，可以把原始 JSON 请求体 gzip 压缩后发送。
+
+开启 gzip 只改变传输方式，不改变请求语义。服务端会在解析 JSON 前自动解压。
+
+需要增加请求头：
+
+```http
+Content-Type: application/json
+Content-Encoding: gzip
+```
+
+<Note>
+  `Content-Encoding: gzip` 表示“请求体已经 gzip 压缩”。它和 `Accept-Encoding: gzip` 不同，后者通常用于响应压缩。
+</Note>
+
+### Python
+
+```python
+import gzip
+import json
+import requests
+
+payload = {
+    "model": "gpt-5.5",
+    "messages": [
+        {"role": "user", "content": "这里放很长的上下文或文档内容..."}
+    ],
+    "stream": False
+}
+
+raw = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+compressed = gzip.compress(raw)
+
+resp = requests.post(
+    "https://cn.crazyrouter.com/v1/chat/completions",
+    headers={
+        "Authorization": "Bearer sk-xxxxxxxx",
+        "Content-Type": "application/json",
+        "Content-Encoding": "gzip",
+    },
+    data=compressed,
+    timeout=120,
+)
+
+print(resp.status_code, resp.text)
+```
+
+### Node.js
+
+```js
+import zlib from "node:zlib";
+
+const payload = {
+  model: "gpt-5.5",
+  messages: [
+    { role: "user", content: "这里放很长的上下文或文档内容..." },
+  ],
+  stream: false,
+};
+
+const raw = Buffer.from(JSON.stringify(payload));
+const compressed = zlib.gzipSync(raw);
+
+const resp = await fetch("https://cn.crazyrouter.com/v1/chat/completions", {
+  method: "POST",
+  headers: {
+    Authorization: "Bearer sk-xxxxxxxx",
+    "Content-Type": "application/json",
+    "Content-Encoding": "gzip",
+  },
+  body: compressed,
+});
+
+console.log(resp.status, await resp.text());
+```
+
+### cURL
+
+```bash
+cat > body.json <<'JSON'
+{
+  "model": "gpt-5.5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "这里放很长的上下文或文档内容..."
+    }
+  ],
+  "stream": false
+}
+JSON
+
+gzip -c body.json > body.json.gz
+
+curl https://cn.crazyrouter.com/v1/chat/completions \
+  -H "Authorization: Bearer sk-xxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -H "Content-Encoding: gzip" \
+  --data-binary @body.json.gz
+```
+
+适用场景：
+
+- 单次请求体通常超过 1MB
+- 重复上传长上下文或长文档
+- 客户端可以直接控制 HTTP body 和请求头
 
 ## 流式请求
 
