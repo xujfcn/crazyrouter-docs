@@ -31,7 +31,7 @@ POST /v1/chat/completions
 ## 基本对话
 
 ```bash cURL
-curl https://cn.crazyrouter.com/v1/chat/completions \
+curl https://api.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -76,7 +76,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="YOUR_API_KEY",
-    base_url="https://cn.crazyrouter.com/v1"
+    base_url="https://api.crazyrouter.com/v1"
 )
 
 response = client.chat.completions.create(
@@ -129,5 +129,5 @@ data: [DONE]
 - 需要 Gemini 的结构化输出、Google Search、thinking、原生字段：优先用 [Gemini 原生格式](/chat/gemini/native)
 
 <Note>
-  这页只覆盖 `/v1/chat/completions` 兼容层。对于 Gemini 图片工作负载，请使用统一 Images API：`POST https://cn.crazyrouter.com/v1/images/generations`，并参考 [Nano Banana](/images/nano-banana)、[Nano Banana Pro](/images/nano-banana-pro)、[Nano Banana 2](/images/nano-banana-2)。
+  这页只覆盖 `/v1/chat/completions` 兼容层。对于 Gemini 图片工作负载，请使用统一 Images API：`POST https://api.crazyrouter.com/v1/images/generations`，并参考 [Nano Banana](/images/nano-banana)、[Nano Banana Pro](/images/nano-banana-pro)、[Nano Banana 2](/images/nano-banana-2)。
 </Note>

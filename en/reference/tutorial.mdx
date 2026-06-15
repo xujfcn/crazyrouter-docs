@@ -10,15 +10,15 @@ This page only documents starter paths that were revalidated against Crazyrouter
 
 For the fastest start, separate the integration styles first:
 
-- OpenAI-compatible: `https://cn.crazyrouter.com/v1`
+- OpenAI-compatible: `https://api.crazyrouter.com/v1`
 - Anthropic native: `https://crazyrouter.com`
-- Gemini native: `https://cn.crazyrouter.com/v1beta/models/...`
+- Gemini native: `https://api.crazyrouter.com/v1beta/models/...`
 
 ## Shortest migration rule
 
 When migrating from an OpenAI-compatible client, you usually only change two things:
 
-1. set `base_url` to `https://cn.crazyrouter.com/v1`
+1. set `base_url` to `https://api.crazyrouter.com/v1`
 2. replace the key with your Crazyrouter `sk-xxx`
 
 ---
@@ -30,7 +30,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="sk-xxx",
-    base_url="https://cn.crazyrouter.com/v1"
+    base_url="https://api.crazyrouter.com/v1"
 )
 
 response = client.chat.completions.create(
@@ -61,7 +61,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="sk-xxx",
-    base_url="https://cn.crazyrouter.com/v1"
+    base_url="https://api.crazyrouter.com/v1"
 )
 
 response = client.chat.completions.create(
@@ -78,7 +78,7 @@ import anthropic
 
 client = anthropic.Anthropic(
     api_key="sk-xxx",
-    base_url="https://cn.crazyrouter.com"
+    base_url="https://api.crazyrouter.com"
 )
 
 response = client.messages.create(
@@ -108,7 +108,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="sk-xxx",
-    base_url="https://cn.crazyrouter.com/v1"
+    base_url="https://api.crazyrouter.com/v1"
 )
 
 response = client.chat.completions.create(
@@ -121,7 +121,7 @@ response = client.chat.completions.create(
 ### Option B: Gemini native
 
 ```bash
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -155,13 +155,13 @@ If you use the OpenAI-compatible route, a good default is:
   <Tab title="Linux / macOS">
     ```bash
     export OPENAI_API_KEY=sk-xxx
-    export OPENAI_BASE_URL=https://cn.crazyrouter.com/v1
+    export OPENAI_BASE_URL=https://api.crazyrouter.com/v1
     ```
   </Tab>
   <Tab title="Windows">
     ```powershell
     $env:OPENAI_API_KEY = "sk-xxx"
-    $env:OPENAI_BASE_URL = "https://cn.crazyrouter.com/v1"
+    $env:OPENAI_BASE_URL = "https://api.crazyrouter.com/v1"
     ```
   </Tab>
 </Tabs>

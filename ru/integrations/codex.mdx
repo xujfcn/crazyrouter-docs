@@ -12,7 +12,7 @@ With a custom provider in `~/.codex/config.toml`, Codex CLI can send its request
 
 - recommended protocol: `OpenAI-compatible API`
 - API style used by Codex: `Responses API`
-- base URL: `https://cn.crazyrouter.com/v1`
+- base URL: `https://api.crazyrouter.com/v1`
 - auth variable: `OPENAI_API_KEY`
 - recommended default model: `gpt-5.5`
 
@@ -37,7 +37,7 @@ Recommended protocol: `OpenAI-compatible API`
 
 Codex CLI currently works best with a custom `model_provider` configured like this:
 
-- `base_url = "https://cn.crazyrouter.com/v1"`
+- `base_url = "https://api.crazyrouter.com/v1"`
 - `wire_api = "responses"`
 
 <Note>
@@ -287,7 +287,7 @@ If you prefer a script that writes the Crazyrouter-related settings automaticall
 
         [model_providers.crazyrouter]
         name = "Crazyrouter"
-        base_url = "https://cn.crazyrouter.com/v1"
+        base_url = "https://api.crazyrouter.com/v1"
         env_key = "OPENAI_API_KEY"
         wire_api = "responses"
 
@@ -308,7 +308,7 @@ If you prefer a script that writes the Crazyrouter-related settings automaticall
 
         [model_providers.crazyrouter]
         name = "Crazyrouter"
-        base_url = "https://cn.crazyrouter.com/v1"
+        base_url = "https://api.crazyrouter.com/v1"
         env_key = "OPENAI_API_KEY"
         wire_api = "responses"
 
@@ -402,7 +402,7 @@ If you need Claude, use the native Claude `POST /v1/messages` path or OpenAI-com
 - [ ] `codex --version` works
 - [ ] `OPENAI_API_KEY` is set correctly
 - [ ] `~/.codex/config.toml` contains `model_provider = "crazyrouter"`
-- [ ] `base_url` is `https://cn.crazyrouter.com/v1`
+- [ ] `base_url` is `https://api.crazyrouter.com/v1`
 - [ ] `wire_api` is `responses`
 - [ ] the first request succeeds
 - [ ] Crazyrouter logs show the matching request
@@ -415,7 +415,7 @@ If you need Claude, use the native Claude `POST /v1/messages` path or OpenAI-com
 | `codex: command not found` | CLI did not install cleanly, or the global npm bin directory is not on PATH | reinstall Codex and ensure the global npm bin path is on PATH |
 | `401 unauthorized` | wrong, expired, or badly pasted `OPENAI_API_KEY` | create a new token and reset the variable |
 | `403` or `model not allowed` | the token does not allow the selected model | allow the required model in Crazyrouter |
-| `404` | `base_url` is wrong or missing `/v1` | change it to `https://cn.crazyrouter.com/v1` |
+| `404` | `base_url` is wrong or missing `/v1` | change it to `https://api.crazyrouter.com/v1` |
 | request-shape errors | `wire_api` is not `responses` | set `wire_api = "responses"` |
 | Codex launches but does not use Crazyrouter | `model_provider` is not switched to `crazyrouter` | re-check `config.toml` |
 | Git changes are hard to review | no clean repo snapshot before AI edits | commit a first snapshot before real edits |
@@ -433,7 +433,7 @@ If you need Claude, use the native Claude `POST /v1/messages` path or OpenAI-com
 
 ### Which base URL should I use in Codex CLI?
 
-Use `https://cn.crazyrouter.com/v1`.
+Use `https://api.crazyrouter.com/v1`.
 
 ### On Windows, should I use PowerShell or Git Bash?
 

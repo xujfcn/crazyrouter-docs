@@ -9,7 +9,7 @@ description: 'Python 使用 DALL-E 和 GPT-Image-2 生成和编辑图像'
 ```python
 from openai import OpenAI
 
-client = OpenAI(api_key="sk-xxx", base_url="https://cn.crazyrouter.com/v1")
+client = OpenAI(api_key="sk-xxx", base_url="https://api.crazyrouter.com/v1")
 
 response = client.images.generate(
     model="dall-e-3",
@@ -81,7 +81,7 @@ print("图片已保存")
 ```
 
 <Note>
-  `gpt-image-2` 通常返回 `data[0].url`。不要给 `gpt-image-2` 传 `response_format`；如需控制图片文件格式，请使用 `output_format="png"`、`"jpeg"` 或 `"webp"`。生产图片请求建议使用主承接线路 `https://cn.crazyrouter.com/v1`。
+  `gpt-image-2` 通常返回 `data[0].url`。不要给 `gpt-image-2` 传 `response_format`；如需控制图片文件格式，请使用 `output_format="png"`、`"jpeg"` 或 `"webp"`。生产图片请求建议使用主承接线路 `https://api.crazyrouter.com/v1`。
 </Note>
 
 <Warning>

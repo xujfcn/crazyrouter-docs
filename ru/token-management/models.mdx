@@ -55,7 +55,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="sk-xxx",
-    base_url="https://cn.crazyrouter.com/v1"
+    base_url="https://api.crazyrouter.com/v1"
 )
 
 # Get model list via OpenAI SDK
@@ -68,7 +68,7 @@ for model in models.data:
 import requests
 
 response = requests.get(
-    "https://cn.crazyrouter.com/v1/models",
+    "https://api.crazyrouter.com/v1/models",
     headers={"Authorization": "Bearer sk-xxx"}
 )
 
@@ -78,7 +78,7 @@ for model in models:
 ```
 
 ```bash cURL
-curl https://cn.crazyrouter.com/v1/models \
+curl https://api.crazyrouter.com/v1/models \
   -H "Authorization: Bearer sk-xxx"
 ```
 

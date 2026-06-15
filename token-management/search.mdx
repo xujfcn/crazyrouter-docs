@@ -70,7 +70,7 @@ headers = {
 }
 
 response = requests.get(
-    "https://cn.crazyrouter.com/api/token/search?keyword=生产&token=sk-",
+    "https://api.crazyrouter.com/api/token/search?keyword=生产&token=sk-",
     headers=headers
 )
 
@@ -80,7 +80,7 @@ for token in tokens:
 ```
 
 ```bash cURL
-curl "https://cn.crazyrouter.com/api/token/search?keyword=生产&token=sk-" \
+curl "https://api.crazyrouter.com/api/token/search?keyword=生产&token=sk-" \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 1"
 ```

@@ -23,7 +23,7 @@ Automatically generate lyrics based on a description, which can be used for subs
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://cn.crazyrouter.com/suno/submit/lyrics \
+curl -X POST https://api.crazyrouter.com/suno/submit/lyrics \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -35,7 +35,7 @@ curl -X POST https://cn.crazyrouter.com/suno/submit/lyrics \
 import requests
 
 response = requests.post(
-    "https://cn.crazyrouter.com/suno/submit/lyrics",
+    "https://api.crazyrouter.com/suno/submit/lyrics",
     headers={
         "Content-Type": "application/json",
         "Authorization": "Bearer YOUR_API_KEY"
@@ -67,7 +67,7 @@ print(response.json())
 Use the [Task Query](/en/audio/suno/query) endpoint to get the generated lyrics:
 
 ```bash cURL
-curl https://cn.crazyrouter.com/suno/fetch/lyrics_task_abc123 \
+curl https://api.crazyrouter.com/suno/fetch/lyrics_task_abc123 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 

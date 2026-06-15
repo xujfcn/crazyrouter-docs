@@ -10,7 +10,7 @@ ChatGPT on WeChat is a widely used WeChat bot project that can route private and
 
 ## Recommended First-Pass Setup
 
-- `open_ai_api_base`: `https://cn.crazyrouter.com/v1`
+- `open_ai_api_base`: `https://api.crazyrouter.com/v1`
 - first validation model: `gpt-5.5`
 - keep the initial allowlist small so troubleshooting stays simple
 
@@ -23,7 +23,7 @@ Edit `config.json`:
 ```json
 {
   "open_ai_api_key": "sk-xxx",
-  "open_ai_api_base": "https://cn.crazyrouter.com/v1",
+  "open_ai_api_base": "https://api.crazyrouter.com/v1",
   "model": "gpt-5.5",
   "proxy": "",
   "single_chat_prefix": [""],
@@ -37,7 +37,7 @@ Edit `config.json`:
 
 ```bash
 export OPEN_AI_API_KEY=sk-xxx
-export OPEN_AI_API_BASE=https://cn.crazyrouter.com/v1
+export OPEN_AI_API_BASE=https://api.crazyrouter.com/v1
 export MODEL=gpt-5.5
 ```
 
@@ -49,7 +49,7 @@ services:
     image: zhayujie/chatgpt-on-wechat
     environment:
       - OPEN_AI_API_KEY=sk-xxx
-      - OPEN_AI_API_BASE=https://cn.crazyrouter.com/v1
+      - OPEN_AI_API_BASE=https://api.crazyrouter.com/v1
       - MODEL=gpt-5.5
     volumes:
       - ./config.json:/app/config.json

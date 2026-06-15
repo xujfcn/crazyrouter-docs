@@ -13,7 +13,7 @@ description: '在沉浸式翻译浏览器扩展中通过 OpenAI 服务接入 Cra
 - 推荐协议：`OpenAI-compatible API`
 - 服务类型：`OpenAI`
 - API Key：你的 `sk-...`
-- 自定义 API 地址：`https://cn.crazyrouter.com/v1/chat/completions`
+- 自定义 API 地址：`https://api.crazyrouter.com/v1/chat/completions`
 - 推荐首个验证模型：`gpt-5.5`
 
 <Tip>
@@ -25,11 +25,11 @@ description: '在沉浸式翻译浏览器扩展中通过 OpenAI 服务接入 Cra
 根据沉浸式翻译官方 OpenAI 服务文档，它支持在 `更多设置` 里自定义 OpenAI API 地址。因此 Crazyrouter 这里更稳妥的写法通常是完整地址：
 
 ```text
-https://cn.crazyrouter.com/v1/chat/completions
+https://api.crazyrouter.com/v1/chat/completions
 ```
 
 <Warning>
-不要把这里写成根域名 `https://cn.crazyrouter.com`，也不要只写到 `/v1`。对沉浸式翻译这类接法，首轮验证优先用完整 `/v1/chat/completions` 路径。
+不要把这里写成根域名 `https://api.crazyrouter.com`，也不要只写到 `/v1`。对沉浸式翻译这类接法，首轮验证优先用完整 `/v1/chat/completions` 路径。
 </Warning>
 
 ## 适合谁用
@@ -43,7 +43,7 @@ https://cn.crazyrouter.com/v1/chat/completions
 
 | 项目 | 说明 |
 |------|------|
-| Crazyrouter 账号 | 先在 [crazyrouter.com](https://cn.crazyrouter.com) 注册 |
+| Crazyrouter 账号 | 先在 [crazyrouter.com](https://crazyrouter.com) 注册 |
 | Crazyrouter token | 建议为沉浸式翻译单独创建一个 token |
 | 浏览器 | Chrome、Edge、Firefox 等支持该扩展的浏览器 |
 | 沉浸式翻译扩展 | 建议当前稳定版 |
@@ -102,7 +102,7 @@ https://cn.crazyrouter.com/v1/chat/completions
     填写：
 
     - `API Key`：你的 `sk-...`
-    - `自定义 API 接口地址`：`https://cn.crazyrouter.com/v1/chat/completions`
+    - `自定义 API 接口地址`：`https://api.crazyrouter.com/v1/chat/completions`
     - `模型`：先填 `gpt-5.5`
 
     如果界面里默认把一些参数折叠起来，记得展开 `更多设置` 再看完整字段。
@@ -152,7 +152,7 @@ https://cn.crazyrouter.com/v1/chat/completions
 - [ ] 扩展已正确安装
 - [ ] 已选择 `OpenAI` 翻译服务
 - [ ] `API Key` 已填写正确
-- [ ] `自定义 API 接口地址` 已设置为 `https://cn.crazyrouter.com/v1/chat/completions`
+- [ ] `自定义 API 接口地址` 已设置为 `https://api.crazyrouter.com/v1/chat/completions`
 - [ ] 首个模型已设置为 `gpt-5.5` 或其他已放行模型
 - [ ] 小段选中文本翻译成功
 - [ ] 短网页翻译成功
@@ -162,7 +162,7 @@ https://cn.crazyrouter.com/v1/chat/completions
 
 | 现象 | 常见原因 | 修复方式 |
 |------|----------|----------|
-| 404 | API 地址少写了 `/chat/completions`，或写成了根域名 | 改成完整地址 `https://cn.crazyrouter.com/v1/chat/completions` |
+| 404 | API 地址少写了 `/chat/completions`，或写成了根域名 | 改成完整地址 `https://api.crazyrouter.com/v1/chat/completions` |
 | 401 unauthorized | API Key 错误、过期或复制不完整 | 重新生成 token 并重新填写 |
 | 403 / model not allowed | token 未放行当前模型 | 在 Crazyrouter token 设置中放行模型 |
 | 429 / 不稳定 | 请求频率过高 | 把请求频率调低，先从小文本开始 |
@@ -180,7 +180,7 @@ https://cn.crazyrouter.com/v1/chat/completions
 
 ### 沉浸式翻译里应该填什么 API 地址？
 
-填完整路径：`https://cn.crazyrouter.com/v1/chat/completions`。
+填完整路径：`https://api.crazyrouter.com/v1/chat/completions`。
 
 ### 为什么这里和 ChatBox 不一样，不推荐只填根域名？
 

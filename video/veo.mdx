@@ -64,7 +64,7 @@ Google 官方文档中的 `referenceImages`、style reference、以及更细的 
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://cn.crazyrouter.com/v1/video/create \
+curl -X POST https://api.crazyrouter.com/v1/video/create \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -78,7 +78,7 @@ curl -X POST https://cn.crazyrouter.com/v1/video/create \
 import requests
 
 response = requests.post(
-    "https://cn.crazyrouter.com/v1/video/create",
+    "https://api.crazyrouter.com/v1/video/create",
     headers={
         "Content-Type": "application/json",
         "Authorization": "Bearer YOUR_API_KEY"
@@ -111,7 +111,7 @@ print(f"任务 ID: {task_id}")
 ## 单图生视频示例
 
 ```bash cURL
-curl -X POST https://cn.crazyrouter.com/v1/video/create \
+curl -X POST https://api.crazyrouter.com/v1/video/create \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -132,7 +132,7 @@ GET /v1/video/query?id={task_id}
 ```
 
 ```bash cURL
-curl "https://cn.crazyrouter.com/v1/video/query?id=veo_task_abc123" \
+curl "https://api.crazyrouter.com/v1/video/query?id=veo_task_abc123" \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 

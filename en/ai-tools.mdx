@@ -2,7 +2,7 @@
 title: 'AI Tool Docs Entry'
 description: 'Crazyrouter documentation entry points for Codex, Claude Code, ChatGPT, Cursor, and other AI tools'
 ---
-> Last updated: 2026-06-06
+> Last updated: 2026-06-16
 
 Use this page when you want an AI tool to read Crazyrouter documentation. Prefer these stable entry points.
 
@@ -29,9 +29,10 @@ Use this page when you want an AI tool to read Crazyrouter documentation. Prefer
 First read https://docs.crazyrouter.com/llms.txt to identify the relevant pages.
 If full context is needed, read https://docs.crazyrouter.com/llms-full.txt.
 Model names, prices, billing modes, and endpoint support must align with https://crazyrouter.com/pricing and https://crazyrouter.com/api/pricing?lang=en.
-If you need to confirm which models the current API key can call, use GET https://cn.crazyrouter.com/v1/models.
-For OpenAI-compatible clients, use base_url https://cn.crazyrouter.com/v1.
-For Claude Code / Anthropic-native clients, use root domain https://cn.crazyrouter.com and do not append /v1.
+If you need to confirm which models the current API key can call, use GET https://api.crazyrouter.com/v1/models.
+For OpenAI-compatible clients, use base_url https://api.crazyrouter.com/v1.
+For Claude Code / Anthropic-native clients, use root domain https://api.crazyrouter.com and do not append /v1.
+For East Asia, prefer https://cn.crazyrouter.com; OpenAI-compatible clients should use https://cn.crazyrouter.com/v1.
 ```
 
 ## Common Pages
@@ -53,5 +54,6 @@ For Claude Code / Anthropic-native clients, use root domain https://cn.crazyrout
 
 - `llms.txt` is not the complete model catalog.
 - Model names, prices, billing modes, and endpoint types come from the [Pricing page](https://crazyrouter.com/pricing) and `GET https://crazyrouter.com/api/pricing?lang=en`.
-- Models callable by the current token come from `GET https://cn.crazyrouter.com/v1/models`.
+- Models callable by the current token come from `GET https://api.crazyrouter.com/v1/models`.
+- For East Asia, prefer `https://cn.crazyrouter.com`; OpenAI-compatible clients should use `https://cn.crazyrouter.com/v1`.
 - When generating API code, prefer `public_endpoint_types` from `/api/pricing`; fall back to `supported_endpoint_types` when needed.

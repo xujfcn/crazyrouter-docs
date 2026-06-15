@@ -12,7 +12,7 @@ Using LobeChat's OpenAI settings, you can route chat traffic through Crazyrouter
 
 - Recommended protocol: `OpenAI-compatible API`
 - Recommended route: the LobeChat `OpenAI` provider
-- Base URL: `https://cn.crazyrouter.com/v1`
+- Base URL: `https://api.crazyrouter.com/v1`
 - Auth method: `sk-...` token
 - Recommended first validation model: `gpt-5.5`
 
@@ -32,16 +32,16 @@ Recommended protocol: `OpenAI-compatible API`
 When connecting Crazyrouter in LobeChat, use this OpenAI-compatible base URL:
 
 ```text
-https://cn.crazyrouter.com/v1
+https://api.crazyrouter.com/v1
 ```
 
 Do not enter:
 
 - `https://crazyrouter.com`
-- `https://cn.crazyrouter.com/v1/chat/completions`
+- `https://api.crazyrouter.com/v1/chat/completions`
 
 <Note>
-LobeChat documents `OPENAI_PROXY_URL` as the OpenAI API request base URL, and its common defaults and examples are `/v1`-style. The local `http://127.0.0.1:4000/api/status` payload also exposes an official example using `{address}/v1`. So for Crazyrouter, `https://cn.crazyrouter.com/v1` is the correct first-pass setup. If your own reverse proxy already adds `/v1`, adjust that layer to avoid a duplicated suffix.
+LobeChat documents `OPENAI_PROXY_URL` as the OpenAI API request base URL, and its common defaults and examples are `/v1`-style. The local `http://127.0.0.1:4000/api/status` payload also exposes an official example using `{address}/v1`. So for Crazyrouter, `https://api.crazyrouter.com/v1` is the correct first-pass setup. If your own reverse proxy already adds `/v1`, adjust that layer to avoid a duplicated suffix.
 </Note>
 
 ## Prerequisites
@@ -75,7 +75,7 @@ If you also plan to connect Crazyrouter to Cursor, Codex, or Claude Code, keep L
   <Step title="Configure the OpenAI path">
     In the `OpenAI` configuration, enter:
     - `API Key`: your `sk-...`
-    - `API Proxy URL`: `https://cn.crazyrouter.com/v1`
+    - `API Proxy URL`: `https://api.crazyrouter.com/v1`
 
     Also enable the custom proxy URL option if your version exposes it.
   </Step>
@@ -99,7 +99,7 @@ services:
       - "3210:3210"
     environment:
       - OPENAI_API_KEY=sk-xxx
-      - OPENAI_PROXY_URL=https://cn.crazyrouter.com/v1
+      - OPENAI_PROXY_URL=https://api.crazyrouter.com/v1
       - OPENAI_MODEL_LIST=gpt-5.5,claude-opus-4-8,gemini-3.1-pro
 ```
 
@@ -129,7 +129,7 @@ Recommended order: get `gpt-5.5` working first, then expand to `claude-opus-4-8`
 ## Verification Checklist
 
 - [ ] `API Key` is saved correctly
-- [ ] `API Proxy URL` is set to `https://cn.crazyrouter.com/v1`
+- [ ] `API Proxy URL` is set to `https://api.crazyrouter.com/v1`
 - [ ] the custom proxy URL option is enabled if required by your version
 - [ ] the first model is selected successfully
 - [ ] the first chat request succeeds
@@ -141,10 +141,10 @@ Recommended order: get `gpt-5.5` working first, then expand to `claude-opus-4-8`
 
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
-| settings cannot be saved or validation fails | wrong API key or wrong proxy URL | recheck the `sk-...` value and `https://cn.crazyrouter.com/v1` |
+| settings cannot be saved or validation fails | wrong API key or wrong proxy URL | recheck the `sk-...` value and `https://api.crazyrouter.com/v1` |
 | 401 unauthorized | token expired, was removed, or is invalid | generate a new token and replace it |
 | 403 / model not allowed | selected model is missing from the token whitelist | allow that model in Crazyrouter |
-| 404 | proxy URL was entered as the root domain or a full endpoint path | change it to `https://cn.crazyrouter.com/v1` |
+| 404 | proxy URL was entered as the root domain or a full endpoint path | change it to `https://api.crazyrouter.com/v1` |
 | settings look correct but you still get 404s | your own gateway, reverse proxy, or deployment layer already appends `/v1` once | inspect the upstream chain and remove the duplicated suffix from one layer |
 | model looks selectable but requests fail | LobeChat cached an old model list or the default model is not valid | switch back to `gpt-5.5`, refresh, and reselect |
 | chat works but streaming is unstable | client-version or model compatibility issue | use `gpt-5.5` as the baseline and upgrade LobeChat |
@@ -163,7 +163,7 @@ Recommended order: get `gpt-5.5` working first, then expand to `claude-opus-4-8`
 
 ### Which Base URL should I use in LobeChat?
 
-Use `https://cn.crazyrouter.com/v1`.
+Use `https://api.crazyrouter.com/v1`.
 
 ### Why should I not enter only the root domain here?
 

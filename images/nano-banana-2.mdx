@@ -13,7 +13,7 @@ POST /v1/images/generations
 `nano-banana-2` 是 `nano-banana-2` 的公开别名。用户侧统一使用 OpenAI Images 兼容协议；服务端会把 `output_format`、`output_compression`、`resolution`、`aspect_ratio` 等统一参数转换成 Gemini / Vertex 原生请求。
 
 <Warning>
-  `nano-banana-2` 属于长耗时图片模型。生产接入请优先使用主承接线路 `https://cn.crazyrouter.com/v1`，完整生成端点为 `https://cn.crazyrouter.com/v1/images/generations`。账号登录、充值和控制台仍使用 `https://crazyrouter.com`。
+  `nano-banana-2` 属于长耗时图片模型。生产接入请优先使用主承接线路 `https://api.crazyrouter.com/v1`，完整生成端点为 `https://api.crazyrouter.com/v1/images/generations`。账号登录、充值和控制台仍使用 `https://crazyrouter.com`。
 </Warning>
 
 ## 模型名
@@ -46,7 +46,7 @@ POST /v1/images/generations
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://cn.crazyrouter.com/v1/images/generations \
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -64,7 +64,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="YOUR_API_KEY",
-    base_url="https://cn.crazyrouter.com/v1",
+    base_url="https://api.crazyrouter.com/v1",
 )
 
 response = client.images.generate(
@@ -87,7 +87,7 @@ print(response.data[0].url or response.data[0].b64_json)
 ## 参考图编辑示例
 
 ```bash cURL
-curl -X POST https://cn.crazyrouter.com/v1/images/generations \
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -128,7 +128,7 @@ POST /v1beta/models/nano-banana-2:generateContent
 建议迁移到：
 
 ```text
-POST https://cn.crazyrouter.com/v1/images/generations
+POST https://api.crazyrouter.com/v1/images/generations
 ```
 
 并把 Gemini 原生参数改成统一参数：

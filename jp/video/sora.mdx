@@ -28,7 +28,7 @@ POST /v1/video/generations
 ```
 
 ```bash cURL
-curl -X POST https://cn.crazyrouter.com/v1/video/generations \
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -46,7 +46,7 @@ GET /v1/video/generations/{task_id}
 ```
 
 ```bash cURL
-curl https://cn.crazyrouter.com/v1/video/generations/video_123 \
+curl https://api.crazyrouter.com/v1/video/generations/video_123 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
@@ -63,7 +63,7 @@ POST /v1/video/create
 ```
 
 ```bash cURL
-curl -X POST https://cn.crazyrouter.com/v1/video/create \
+curl -X POST https://api.crazyrouter.com/v1/video/create \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -80,7 +80,7 @@ GET /v1/video/query?task_id=your_task_id
 ```
 
 ```bash cURL
-curl "https://cn.crazyrouter.com/v1/video/query?task_id=your_task_id" \
+curl "https://api.crazyrouter.com/v1/video/query?task_id=your_task_id" \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
@@ -91,7 +91,7 @@ POST /v1/videos
 ```
 
 ```bash cURL
-curl -X POST https://cn.crazyrouter.com/v1/videos \
+curl -X POST https://api.crazyrouter.com/v1/videos \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -109,7 +109,7 @@ GET /v1/videos/{task_id}
 ```
 
 ```bash cURL
-curl https://cn.crazyrouter.com/v1/videos/sora_task_abc123 \
+curl https://api.crazyrouter.com/v1/videos/sora_task_abc123 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 

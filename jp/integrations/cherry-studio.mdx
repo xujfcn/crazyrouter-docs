@@ -12,12 +12,12 @@ Using Cherry Studio's custom provider support, you can add Crazyrouter as an Ope
 
 - Recommended protocol: `OpenAI-compatible API`
 - Recommended provider type: `OpenAI`
-- API URL: `https://crazyrouter.com`
+- API URL: `https://api.crazyrouter.com`
 - Auth method: `sk-...` token
 - Recommended first validation model: `gpt-5.5`
 
 <Note>
-Cherry Studio's official docs explain that if the upstream endpoint is something like `https://xxx.com/v1/chat/completions`, you usually enter only the root URL in `API URL`. For Crazyrouter, start with `https://crazyrouter.com`, not `https://cn.crazyrouter.com/v1`.
+Cherry Studio's official docs explain that if the upstream endpoint is something like `https://xxx.com/v1/chat/completions`, you usually enter only the root URL in `API URL`. For Crazyrouter, start with `https://api.crazyrouter.com`, not `https://api.crazyrouter.com/v1`.
 </Note>
 
 <Tip>
@@ -43,8 +43,8 @@ https://crazyrouter.com
 
 Do not start with:
 
-- `https://cn.crazyrouter.com/v1/chat/completions`
-- `https://cn.crazyrouter.com/v1/models`
+- `https://api.crazyrouter.com/v1/chat/completions`
+- `https://api.crazyrouter.com/v1/models`
 
 Cherry Studio only needs a full custom path with a trailing `#` in special non-standard routing scenarios. Normal Crazyrouter chat setup does not need that.
 
@@ -75,7 +75,7 @@ Recommended starting whitelist:
   <Step title="Enter the connection settings">
     In the provider settings, enter:
     - `API Key`: your `sk-...`
-    - `API URL`: `https://crazyrouter.com`
+    - `API URL`: `https://api.crazyrouter.com`
 
     Then click `Check` to validate the token and URL.
   </Step>
@@ -111,7 +111,7 @@ Recommended order: get `gpt-5.5` working first, then add `claude-opus-4-8` and `
 ## Verification Checklist
 
 - [ ] `Check` succeeds in the provider settings
-- [ ] `API URL` is set to `https://crazyrouter.com`
+- [ ] `API URL` is set to `https://api.crazyrouter.com`
 - [ ] the provider toggle is enabled
 - [ ] at least one model was added from `Manage`
 - [ ] the first chat request succeeds
@@ -141,7 +141,7 @@ If you enable MCP:
 | `Check` fails | wrong API key or pasted value contains spaces | regenerate the token and paste a clean `sk-...` value |
 | 401 unauthorized | token expired, was deleted, or is invalid | create a new token in Crazyrouter and replace it |
 | 403 / model not allowed | the selected model is not in the token whitelist | allow that model in the token settings |
-| 404 | `API URL` was entered as a full endpoint path, or the provider type is wrong | switch back to the `OpenAI` provider type and set the URL to `https://crazyrouter.com` |
+| 404 | `API URL` was entered as a full endpoint path, or the provider type is wrong | switch back to the `OpenAI` provider type and set the URL to `https://api.crazyrouter.com` |
 | `Check` still fails even though the URL and key look right | Cherry Studio often validates against the last conversational model currently present in the provider list, and that model may be invalid | keep only `gpt-5.5`, remove suspicious models, and run `Check` again |
 | model list does not load | wrong URL, network problem, or provider not enabled | run `Check`, then confirm the provider toggle and network connectivity |
 | connection works but chat still fails | the added model is incompatible or unavailable | keep only `gpt-5.5` for baseline testing |
@@ -160,7 +160,7 @@ If you enable MCP:
 
 ### Which URL should I enter in Cherry Studio?
 
-Start with `https://crazyrouter.com`.
+Start with `https://api.crazyrouter.com`.
 
 ### Why is `/v1` not the recommended first setting here?
 

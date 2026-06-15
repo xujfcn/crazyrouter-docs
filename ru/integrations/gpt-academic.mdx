@@ -17,7 +17,7 @@ Edit `config.py` or `config_private.py`:
 ```python
 API_KEY = "sk-xxx"
 API_URL_REDIRECT = {
-    "https://api.openai.com/v1/chat/completions": "https://cn.crazyrouter.com/v1/chat/completions"
+    "https://api.openai.com/v1/chat/completions": "https://api.crazyrouter.com/v1/chat/completions"
 }
 
 # Or set directly
@@ -33,7 +33,7 @@ AVAIL_LLM_MODELS = [
 
 ```bash
 export API_KEY=sk-xxx
-export API_URL_REDIRECT='{"https://api.openai.com/v1/chat/completions": "https://cn.crazyrouter.com/v1/chat/completions"}'
+export API_URL_REDIRECT='{"https://api.openai.com/v1/chat/completions": "https://api.crazyrouter.com/v1/chat/completions"}'
 export LLM_MODEL=gpt-5.5
 ```
 
@@ -48,7 +48,7 @@ services:
     environment:
       - API_KEY=sk-xxx
       - LLM_MODEL=gpt-5.5
-      - API_URL_REDIRECT={"https://api.openai.com/v1/chat/completions": "https://cn.crazyrouter.com/v1/chat/completions"}
+      - API_URL_REDIRECT={"https://api.openai.com/v1/chat/completions": "https://api.crazyrouter.com/v1/chat/completions"}
 ```
 
 ## Recommended Models

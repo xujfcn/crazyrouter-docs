@@ -64,7 +64,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="sk-xxx",
-    base_url="https://cn.crazyrouter.com/v1"
+    base_url="https://api.crazyrouter.com/v1"
 )
 
 response = client.embeddings.create(
@@ -92,7 +92,7 @@ for item in response.data:
 ```
 
 ```bash cURL
-curl -X POST https://cn.crazyrouter.com/v1/embeddings \
+curl -X POST https://api.crazyrouter.com/v1/embeddings \
   -H "Authorization: Bearer sk-xxx" \
   -H "Content-Type: application/json" \
   -d '{

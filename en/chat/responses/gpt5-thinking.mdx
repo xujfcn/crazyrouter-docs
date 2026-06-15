@@ -28,7 +28,7 @@ POST /v1/responses
 <CodeGroup>
 
 ```bash cURL
-curl https://cn.crazyrouter.com/v1/responses \
+curl https://api.crazyrouter.com/v1/responses \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -46,7 +46,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="YOUR_API_KEY",
-    base_url="https://cn.crazyrouter.com/v1"
+    base_url="https://api.crazyrouter.com/v1"
 )
 
 response = client.responses.create(
@@ -66,7 +66,7 @@ import OpenAI from "openai";
 
 const client = new OpenAI({
   apiKey: "YOUR_API_KEY",
-  baseURL: "https://cn.crazyrouter.com/v1",
+  baseURL: "https://api.crazyrouter.com/v1",
 });
 
 const response = await client.responses.create({

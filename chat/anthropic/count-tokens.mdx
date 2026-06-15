@@ -37,7 +37,7 @@ anthropic-version: 2023-06-01
 <CodeGroup>
 
 ```bash cURL
-curl https://cn.crazyrouter.com/v1/messages/count_tokens   -H "Content-Type: application/json"   -H "x-api-key: YOUR_API_KEY"   -H "anthropic-version: 2023-06-01"   -d '{
+curl https://api.crazyrouter.com/v1/messages/count_tokens   -H "Content-Type: application/json"   -H "x-api-key: YOUR_API_KEY"   -H "anthropic-version: 2023-06-01"   -d '{
     "model": "claude-opus-4-8",
     "messages": [
       {"role": "user", "content": "hello"}
@@ -49,7 +49,7 @@ curl https://cn.crazyrouter.com/v1/messages/count_tokens   -H "Content-Type: app
 import requests
 
 resp = requests.post(
-    "https://cn.crazyrouter.com/v1/messages/count_tokens",
+    "https://api.crazyrouter.com/v1/messages/count_tokens",
     headers={
         "x-api-key": "YOUR_API_KEY",
         "anthropic-version": "2023-06-01",

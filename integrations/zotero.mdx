@@ -16,7 +16,7 @@ Zotero 本身是文献管理工具，不直接内置 Crazyrouter 配置入口。
 Crazyrouter 在 Zotero 里的公开推荐接法是：
 
 - 选择一个支持自定义 OpenAI 兼容地址的 Zotero AI 插件
-- 把基础地址填为 `https://cn.crazyrouter.com/v1`
+- 把基础地址填为 `https://api.crazyrouter.com/v1`
 - 把 API Key 填为 `sk-xxx`
 - 第一个验证模型先用 `gpt-5.5`
 
@@ -45,7 +45,7 @@ Crazyrouter 在 Zotero 里的公开推荐接法是：
 
 | 项目 | 说明 |
 |------|------|
-| Crazyrouter 账号 | 先在 [crazyrouter.com](https://cn.crazyrouter.com) 注册 |
+| Crazyrouter 账号 | 先在 [crazyrouter.com](https://crazyrouter.com) 注册 |
 | Crazyrouter token | 建议单独为 Zotero 创建一个 token |
 | Zotero 桌面版 | 插件主要运行在桌面端 |
 | AI 插件 | 需要支持自定义 OpenAI 兼容地址 |
@@ -110,13 +110,13 @@ Crazyrouter 在 Zotero 里的公开推荐接法是：
 
 | 插件字段 | 推荐值 |
 |----------|--------|
-| Base API URL / API URL | `https://cn.crazyrouter.com/v1` |
-| Full Endpoint | `https://cn.crazyrouter.com/v1/chat/completions` |
+| Base API URL / API URL | `https://api.crazyrouter.com/v1` |
+| Full Endpoint | `https://api.crazyrouter.com/v1/chat/completions` |
 | API Key | `sk-xxx` |
 | Model | `gpt-5.5` |
 
 <Tip>
-如果插件让你填写的是“基础地址”，优先填 `https://cn.crazyrouter.com/v1`。只有在插件明确要求“完整聊天接口地址”时，再填 `https://cn.crazyrouter.com/v1/chat/completions`。
+如果插件让你填写的是“基础地址”，优先填 `https://api.crazyrouter.com/v1`。只有在插件明确要求“完整聊天接口地址”时，再填 `https://api.crazyrouter.com/v1/chat/completions`。
 </Tip>
 
 ## 配置步骤
@@ -158,13 +158,13 @@ Crazyrouter 在 Zotero 里的公开推荐接法是：
   <Step title="第 5 步：填写 Crazyrouter 地址、Key 和模型">
     如果插件支持基础地址模式，推荐填写：
 
-    - `Base API URL`: `https://cn.crazyrouter.com/v1`
+    - `Base API URL`: `https://api.crazyrouter.com/v1`
     - `API Key`: `sk-xxx`
     - `Model`: `gpt-5.5`
 
     如果插件只支持完整接口地址，改填：
 
-    - `Endpoint`: `https://cn.crazyrouter.com/v1/chat/completions`
+    - `Endpoint`: `https://api.crazyrouter.com/v1/chat/completions`
   </Step>
 
   <Step title="第 6 步：如插件要求，重启 Zotero">
@@ -237,7 +237,7 @@ Crazyrouter 在 Zotero 里的公开推荐接法是：
 - [ ] 已安装 Zotero 桌面版
 - [ ] 已安装支持自定义 OpenAI 兼容地址的 AI 插件
 - [ ] 已创建 Zotero 专用 Crazyrouter token
-- [ ] 已把基础地址填写为 `https://cn.crazyrouter.com/v1` 或完整接口地址
+- [ ] 已把基础地址填写为 `https://api.crazyrouter.com/v1` 或完整接口地址
 - [ ] 已正确填写 `sk-xxx`
 - [ ] 已先只配置 `gpt-5.5`
 - [ ] 修改设置后已按需重启 Zotero
@@ -250,7 +250,7 @@ Crazyrouter 在 Zotero 里的公开推荐接法是：
 |------|----------|----------|
 | 插件里只有 OpenAI Key，没有 Base URL | 插件不支持自定义上游 | 换成支持自定义 `Base API URL` 或 `Endpoint` 的插件 |
 | 401 unauthorized | token 错误、复制不完整或失效 | 重新生成 token 并重新填写 |
-| 404 | 基础地址或完整接口地址填错 | 基础地址改回 `https://cn.crazyrouter.com/v1`，或完整地址改回 `https://cn.crazyrouter.com/v1/chat/completions` |
+| 404 | 基础地址或完整接口地址填错 | 基础地址改回 `https://api.crazyrouter.com/v1`，或完整地址改回 `https://api.crazyrouter.com/v1/chat/completions` |
 | 403 / model not allowed | token 没放行当前模型 | 在 Crazyrouter token 设置中放行该模型 |
 | `model not found` | 模型名写错 | 先改回 `gpt-5.5` 做最小验证 |
 | 插件没反应或设置改了不生效 | 插件需要重启 Zotero | 重启 Zotero 后重试 |
@@ -273,7 +273,7 @@ Crazyrouter 在 Zotero 里的公开推荐接法是：
 
 ### 基础地址应该填什么？
 
-优先填 `https://cn.crazyrouter.com/v1`。
+优先填 `https://api.crazyrouter.com/v1`。
 
 ### 第一个模型填什么？
 

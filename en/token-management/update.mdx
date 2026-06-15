@@ -102,7 +102,7 @@ headers = {
 }
 
 response = requests.put(
-    "https://cn.crazyrouter.com/api/token/",
+    "https://api.crazyrouter.com/api/token/",
     headers=headers,
     json={
         "id": 10,
@@ -117,7 +117,7 @@ print(response.json())
 ```
 
 ```bash cURL
-curl -X PUT https://cn.crazyrouter.com/api/token/ \
+curl -X PUT https://api.crazyrouter.com/api/token/ \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 1" \
   -H "Content-Type: application/json" \

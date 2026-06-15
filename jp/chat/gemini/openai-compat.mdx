@@ -31,7 +31,7 @@ This production recheck confirmed that:
 ## Basic conversation
 
 ```bash cURL
-curl https://cn.crazyrouter.com/v1/chat/completions \
+curl https://api.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -76,7 +76,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="YOUR_API_KEY",
-    base_url="https://cn.crazyrouter.com/v1"
+    base_url="https://api.crazyrouter.com/v1"
 )
 
 response = client.chat.completions.create(

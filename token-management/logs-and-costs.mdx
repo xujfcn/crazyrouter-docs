@@ -43,7 +43,7 @@ New-Api-User: {user_id}
 ## 1. 获取 API Key 列表
 
 ```bash cURL
-curl "https://cn.crazyrouter.com/api/token/?p=1&page_size=100" \
+curl "https://api.crazyrouter.com/api/token/?p=1&page_size=100" \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 485"
 ```
@@ -96,7 +96,7 @@ curl "https://cn.crazyrouter.com/api/token/?p=1&page_size=100" \
 示例：
 
 ```bash cURL
-curl "https://cn.crazyrouter.com/api/log/self?type=2&token_name=gptai&start_timestamp=1771334901&end_timestamp=1772309095&p=1&page_size=5" \
+curl "https://api.crazyrouter.com/api/log/self?type=2&token_name=gptai&start_timestamp=1771334901&end_timestamp=1772309095&p=1&page_size=5" \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 485"
 ```
@@ -162,7 +162,7 @@ curl "https://cn.crazyrouter.com/api/log/self?type=2&token_name=gptai&start_time
 如果不需要逐条日志，只想做监控面板或日报，推荐调用汇总接口：
 
 ```bash cURL
-curl "https://cn.crazyrouter.com/api/log/self/stat?type=2&token_name=gptai&start_timestamp=1771334901&end_timestamp=1772309095" \
+curl "https://api.crazyrouter.com/api/log/self/stat?type=2&token_name=gptai&start_timestamp=1771334901&end_timestamp=1772309095" \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 485"
 ```
@@ -193,7 +193,7 @@ curl "https://cn.crazyrouter.com/api/log/self/stat?type=2&token_name=gptai&start
 请求头与其他管理接口一致：
 
 ```bash cURL
-curl "https://cn.crazyrouter.com/api/user/self" \
+curl "https://api.crazyrouter.com/api/user/self" \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 4004"
 ```
@@ -255,7 +255,7 @@ $22.00
 系统换算参数可通过公开接口 `/api/status` 获取：
 
 ```bash cURL
-curl "https://cn.crazyrouter.com/api/status"
+curl "https://api.crazyrouter.com/api/status"
 ```
 
 响应中关注：
@@ -289,7 +289,7 @@ cost_usd = quota / quota_per_unit
 ```python
 import requests
 
-BASE_URL = "https://cn.crazyrouter.com"
+BASE_URL = "https://api.crazyrouter.com"
 ACCESS_TOKEN = "your_access_token"
 USER_ID = "485"
 TOKEN_NAME = "gptai"

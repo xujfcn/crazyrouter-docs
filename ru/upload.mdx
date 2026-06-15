@@ -48,7 +48,7 @@ If users upload local files to your app, your backend should store the file, gen
 ```python Python
 from openai import OpenAI
 
-client = OpenAI(api_key="sk-xxx", base_url="https://cn.crazyrouter.com/v1")
+client = OpenAI(api_key="sk-xxx", base_url="https://api.crazyrouter.com/v1")
 
 response = client.chat.completions.create(
     model="gpt-5.5",
@@ -64,7 +64,7 @@ print(response.choices[0].message.content)
 ```
 
 ```bash cURL
-curl https://cn.crazyrouter.com/v1/chat/completions \
+curl https://api.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer sk-xxx" \
   -d '{

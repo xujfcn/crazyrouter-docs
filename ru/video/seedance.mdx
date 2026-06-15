@@ -76,7 +76,7 @@ POST /volc/v1/contents/generations/tasks
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://cn.crazyrouter.com/volc/v1/contents/generations/tasks \
+curl -X POST https://api.crazyrouter.com/volc/v1/contents/generations/tasks \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -94,7 +94,7 @@ curl -X POST https://cn.crazyrouter.com/volc/v1/contents/generations/tasks \
 import requests
 
 response = requests.post(
-    "https://cn.crazyrouter.com/volc/v1/contents/generations/tasks",
+    "https://api.crazyrouter.com/volc/v1/contents/generations/tasks",
     headers={
         "Content-Type": "application/json",
         "Authorization": "Bearer YOUR_API_KEY"
@@ -118,7 +118,7 @@ print(response.json())
 ### Single-Image Image-to-Video Example
 
 ```bash cURL
-curl -X POST https://cn.crazyrouter.com/volc/v1/contents/generations/tasks \
+curl -X POST https://api.crazyrouter.com/volc/v1/contents/generations/tasks \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -141,7 +141,7 @@ curl -X POST https://cn.crazyrouter.com/volc/v1/contents/generations/tasks \
 ### Seedance 2.0 Multimodal Example
 
 ```bash cURL
-curl -X POST https://cn.crazyrouter.com/volc/v1/contents/generations/tasks \
+curl -X POST https://api.crazyrouter.com/volc/v1/contents/generations/tasks \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -198,7 +198,7 @@ GET /volc/v1/contents/generations/tasks/{task_id}
 ```
 
 ```bash cURL
-curl https://cn.crazyrouter.com/volc/v1/contents/generations/tasks/cgt_task_abc123 \
+curl https://api.crazyrouter.com/volc/v1/contents/generations/tasks/cgt_task_abc123 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 

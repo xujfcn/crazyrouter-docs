@@ -25,7 +25,7 @@ All API requests use the HTTPS protocol with JSON request bodies.
 ## Request Example
 
 ```bash
-curl https://cn.crazyrouter.com/v1/chat/completions \
+curl https://api.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer sk-xxxxxxxx" \
   -d '{
@@ -71,7 +71,7 @@ raw = json.dumps(payload, ensure_ascii=False).encode("utf-8")
 compressed = gzip.compress(raw)
 
 resp = requests.post(
-    "https://cn.crazyrouter.com/v1/chat/completions",
+    "https://api.crazyrouter.com/v1/chat/completions",
     headers={
         "Authorization": "Bearer sk-xxxxxxxx",
         "Content-Type": "application/json",
@@ -100,7 +100,7 @@ const payload = {
 const raw = Buffer.from(JSON.stringify(payload));
 const compressed = zlib.gzipSync(raw);
 
-const resp = await fetch("https://cn.crazyrouter.com/v1/chat/completions", {
+const resp = await fetch("https://api.crazyrouter.com/v1/chat/completions", {
   method: "POST",
   headers: {
     Authorization: "Bearer sk-xxxxxxxx",
@@ -131,11 +131,76 @@ JSON
 
 gzip -c body.json > body.json.gz
 
-curl https://cn.crazyrouter.com/v1/chat/completions \
+curl https://api.crazyrouter.com/v1/chat/completions \
   -H "Authorization: Bearer sk-xxxxxxxx" \
   -H "Content-Type: application/json" \
   -H "Content-Encoding: gzip" \
   --data-binary @body.json.gz
+```
+
+### Automatically enable gzip by body size
+
+If your system is a workflow, you usually do not need to manually decide which business steps should use gzip. Put the decision in your shared HTTP client wrapper: serialize the JSON body first, check its byte size, and gzip only when it is above a threshold.
+
+Recommended threshold:
+
+```text
+body >= 128KB: enable gzip
+body < 128KB: send as normal JSON
+```
+
+If your requests are often MB-sized, `256KB` is also a reasonable threshold. Do not force gzip for very small requests, because compression overhead and gzip headers can make them larger.
+
+Python wrapper example:
+
+```python
+import gzip
+import json
+import requests
+
+def post_json(url, payload, api_key, gzip_threshold=128 * 1024):
+    raw = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+
+    if len(raw) >= gzip_threshold:
+        body = gzip.compress(raw)
+        headers["Content-Encoding"] = "gzip"
+    else:
+        body = raw
+
+    return requests.post(url, headers=headers, data=body, timeout=120)
+```
+
+Node.js wrapper example:
+
+```js
+import zlib from "node:zlib";
+
+async function postJson(url, payload, apiKey, gzipThreshold = 128 * 1024) {
+  const raw = Buffer.from(JSON.stringify(payload));
+  const headers = {
+    Authorization: `Bearer ${apiKey}`,
+    "Content-Type": "application/json",
+  };
+
+  const body =
+    raw.length >= gzipThreshold
+      ? (() => {
+          headers["Content-Encoding"] = "gzip";
+          return zlib.gzipSync(raw);
+        })()
+      : raw;
+
+  return fetch(url, {
+    method: "POST",
+    headers,
+    body,
+  });
+}
 ```
 
 Use this when:
@@ -149,7 +214,7 @@ Use this when:
 Set `stream: true` to enable SSE streaming output:
 
 ```bash
-curl https://cn.crazyrouter.com/v1/chat/completions \
+curl https://api.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer sk-xxxxxxxx" \
   -d '{

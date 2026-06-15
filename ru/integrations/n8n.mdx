@@ -12,7 +12,7 @@ Using n8n's OpenAI credentials or AI nodes, you can route workflow model traffic
 
 - Recommended protocol: `OpenAI-compatible API`
 - Recommended route: n8n `OpenAI API` credential + node-level `Base URL`
-- Base URL: `https://cn.crazyrouter.com/v1`
+- Base URL: `https://api.crazyrouter.com/v1`
 - Auth method: `sk-...` token
 - Recommended first validation model: `gpt-5.5`
 
@@ -32,13 +32,13 @@ Recommended protocol: `OpenAI-compatible API`
 When connecting Crazyrouter in n8n, use:
 
 ```text
-https://cn.crazyrouter.com/v1
+https://api.crazyrouter.com/v1
 ```
 
 Do not enter:
 
 - `https://crazyrouter.com`
-- `https://cn.crazyrouter.com/v1/chat/completions`
+- `https://api.crazyrouter.com/v1/chat/completions`
 
 ## Prerequisites
 
@@ -70,7 +70,7 @@ Recommended starting whitelist:
     - `API Key`: your `sk-...`
 
     Then in the `OpenAI`, `OpenAI Chat Model`, or related AI node `Options`, set:
-    - `Base URL`: `https://cn.crazyrouter.com/v1`
+    - `Base URL`: `https://api.crazyrouter.com/v1`
   </Step>
   <Step title="Build a minimal workflow">
     Create a workflow such as `Manual Trigger` → `OpenAI Chat Model` → `Output`, and set the model to `gpt-5.5`.
@@ -118,7 +118,7 @@ Example:
 
 ```http
 Method: POST
-URL: https://cn.crazyrouter.com/v1/chat/completions
+URL: https://api.crazyrouter.com/v1/chat/completions
 Headers:
   Authorization: Bearer sk-xxx
   Content-Type: application/json
@@ -164,7 +164,7 @@ Recommended order: get `gpt-5.5` working in a minimal flow, then expand to agent
 ## Verification Checklist
 
 - [ ] the `OpenAI API` credential is saved successfully
-- [ ] node-level `Base URL` is set to `https://cn.crazyrouter.com/v1`
+- [ ] node-level `Base URL` is set to `https://api.crazyrouter.com/v1`
 - [ ] the `OpenAI Chat Model` node executes successfully
 - [ ] the first minimal workflow returns a valid response
 - [ ] the `AI Agent` node works too if you need agent flows
@@ -179,7 +179,7 @@ Recommended order: get `gpt-5.5` working in a minimal flow, then expand to agent
 | credential test fails | wrong API key, or `Base URL` was entered in the wrong place for your n8n version | recheck the `sk-...` value and confirm `Base URL` is set where your version actually supports it |
 | 401 unauthorized | token expired, was deleted, or pasted with extra spaces | create a new token and replace it |
 | 403 / model not allowed | the workflow uses a model that is not whitelisted | allow that model in Crazyrouter |
-| 404 | `Base URL` was entered as the root domain or a full endpoint path | change it to `https://cn.crazyrouter.com/v1` |
+| 404 | `Base URL` was entered as the root domain or a full endpoint path | change it to `https://api.crazyrouter.com/v1` |
 | workflow keeps retrying and cost grows fast | node retries, loops, or batch logic is misconfigured | limit retries, split flows, and add quota caps |
 | AI Agent starts but tool use is unstable | the tool chain is too complex for first-pass validation | keep only one simple tool until the baseline works |
 | native AI node is missing parameters you need | n8n's node wrapper does not expose that feature yet | switch that step to an `HTTP Request` node |
@@ -197,7 +197,7 @@ Recommended order: get `gpt-5.5` working in a minimal flow, then expand to agent
 
 ### Which Base URL should I use in n8n?
 
-Use `https://cn.crazyrouter.com/v1`.
+Use `https://api.crazyrouter.com/v1`.
 
 ### Should I put `Base URL` in the credential or in the node?
 

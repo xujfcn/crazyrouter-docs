@@ -96,7 +96,7 @@ headers = {
 }
 
 response = requests.get(
-    "https://cn.crazyrouter.com/api/token/?p=1&size=100",
+    "https://api.crazyrouter.com/api/token/?p=1&size=100",
     headers=headers
 )
 
@@ -106,7 +106,7 @@ for token in page["items"]:
 ```
 
 ```bash cURL
-curl "https://cn.crazyrouter.com/api/token/?p=1&size=100" \
+curl "https://api.crazyrouter.com/api/token/?p=1&size=100" \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 1"
 ```

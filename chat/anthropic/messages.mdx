@@ -40,7 +40,7 @@ anthropic-version: 2023-06-01
 ## 基本对话
 
 ```bash cURL
-curl https://cn.crazyrouter.com/v1/messages \
+curl https://api.crazyrouter.com/v1/messages \
   -H "Content-Type: application/json" \
   -H "x-api-key: YOUR_API_KEY" \
   -H "anthropic-version: 2023-06-01" \
@@ -82,7 +82,7 @@ curl https://cn.crazyrouter.com/v1/messages \
 - 提示词里写清楚“必须调用工具，不要直接回答”
 
 ```bash cURL
-curl https://cn.crazyrouter.com/v1/messages \
+curl https://api.crazyrouter.com/v1/messages \
   -H "Content-Type: application/json" \
   -H "x-api-key: YOUR_API_KEY" \
   -H "anthropic-version: 2023-06-01" \
@@ -144,7 +144,7 @@ curl https://cn.crazyrouter.com/v1/messages \
 基础版 `claude-opus-4-8` 本轮没有拿到同等明确的 thinking block，因此这里优先写 thinking 能力。
 
 ```bash cURL
-curl https://cn.crazyrouter.com/v1/messages \
+curl https://api.crazyrouter.com/v1/messages \
   -H "Content-Type: application/json" \
   -H "x-api-key: YOUR_API_KEY" \
   -H "anthropic-version: 2023-06-01" \

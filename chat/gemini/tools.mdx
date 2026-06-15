@@ -28,7 +28,7 @@ POST /v1beta/models/{model}:generateContent
 下面的请求在生产环境返回了 `executableCode` 和 `codeExecutionResult` 两个关键响应块：
 
 ```bash
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -84,7 +84,7 @@ curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?ke
 下面的请求在生产环境返回了 `groundingMetadata`，说明模型确实触发了 Google Search：
 
 ```bash
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -115,7 +115,7 @@ curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?ke
 下面的请求在生产环境返回了 `urlContextMetadata`，同时也带有 `groundingMetadata`：
 
 ```bash
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -146,7 +146,7 @@ curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?ke
 下面的请求在生产环境返回了 `functionCall`：
 
 ```bash
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [

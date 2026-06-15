@@ -38,7 +38,7 @@ POST /v1beta/models/{model}:streamGenerateContent
 ## 基本文本生成
 
 ```bash cURL
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -83,7 +83,7 @@ curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?ke
 本轮已复核 `streamGenerateContent` 可以通过 SSE 返回增量内容。
 
 ```bash cURL
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:streamGenerateContent?key=YOUR_API_KEY&alt=sse" \
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:streamGenerateContent?key=YOUR_API_KEY&alt=sse" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -112,7 +112,7 @@ data: {"candidates":[{"content":{"parts":[{"text":"...","thoughtSignature":"..."
 当前生产已复核 `responseMimeType + responseSchema` 可用：
 
 ```bash cURL
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -152,7 +152,7 @@ curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?ke
 当前生产已复核 `googleSearch` 工具可用：
 
 ```bash cURL
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -186,7 +186,7 @@ curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?ke
 当前生产已复核 `thinkingConfig` 可用：
 
 ```bash cURL
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [

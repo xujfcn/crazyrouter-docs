@@ -27,7 +27,7 @@ For OpenAI-compatible integrations, the current guidance is:
 The following request shape currently works in production:
 
 ```bash cURL
-curl https://cn.crazyrouter.com/v1/chat/completions \
+curl https://api.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -68,7 +68,7 @@ So if you only want stronger reasoning, Chat Completions with `reasoning_effort`
 The more reliable production path is the Responses API:
 
 ```bash cURL
-curl https://cn.crazyrouter.com/v1/responses \
+curl https://api.crazyrouter.com/v1/responses \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{

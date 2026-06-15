@@ -27,7 +27,7 @@ OpenClaw is a good fit when you want a self-controlled local AI entrypoint backe
 
 Recommended protocol: `OpenAI-compatible API`
 
-- the installer points the default `crazyrouter` provider at `https://cn.crazyrouter.com/v1`
+- the installer points the default `crazyrouter` provider at `https://api.crazyrouter.com/v1`
 - it also writes `crazyrouter-claude` and `crazyrouter-minimax` providers for native-compatible switching
 - OpenClaw itself exposes a local gateway and WebUI, authenticated with the generated `gateway.auth.token`
 
@@ -164,7 +164,7 @@ OpenClaw uses at least two credential types: the Crazyrouter `sk-...` API key fo
 | JSON path | Purpose | Typical change |
 |-----------|---------|----------------|
 | `models.providers.crazyrouter.apiKey` | Crazyrouter OpenAI-compatible key | rotate API key |
-| `models.providers.crazyrouter.baseUrl` | OpenAI-compatible base URL | usually keep `https://cn.crazyrouter.com/v1` |
+| `models.providers.crazyrouter.baseUrl` | OpenAI-compatible base URL | usually keep `https://api.crazyrouter.com/v1` |
 | `agents.defaults.model.primary` | default primary model | switch to `gpt-5.5`, `claude-opus-4-8`, and so on |
 | `gateway.port` | WebUI / gateway port | move to a different port |
 | `gateway.auth.token` | WebUI login token | rotate immediately if exposed |
@@ -348,7 +348,7 @@ If Node.js was installed only for OpenClaw, you can remove Node.js afterward onc
 
 ### Which Crazyrouter base URL should I keep?
 
-Leave the installer defaults unless you are intentionally changing provider modes: `https://cn.crazyrouter.com/v1` for the OpenAI-compatible provider, and `https://cn.crazyrouter.com` for Claude / MiniMax native-compatible providers.
+Leave the installer defaults unless you are intentionally changing provider modes: `https://api.crazyrouter.com/v1` for the OpenAI-compatible provider, and `https://api.crazyrouter.com` for Claude / MiniMax native-compatible providers.
 
 ### Which default model should I keep first?
 

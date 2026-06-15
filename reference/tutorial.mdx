@@ -10,15 +10,15 @@ description: '基于生产环境复核，从 OpenAI、Anthropic、Gemini 接入 
 
 如果你要最快开始，先区分三类接法：
 
-- OpenAI 兼容：`https://cn.crazyrouter.com/v1`
-- Anthropic 原生：`https://cn.crazyrouter.com`
-- Gemini 原生：`https://cn.crazyrouter.com/v1beta/models/...`
+- OpenAI 兼容：`https://api.crazyrouter.com/v1`
+- Anthropic 原生：`https://api.crazyrouter.com`
+- Gemini 原生：`https://api.crazyrouter.com/v1beta/models/...`
 
 ## 最短迁移原则
 
 从 OpenAI 兼容客户端迁移到 Crazyrouter，通常只需要改两项：
 
-1. `base_url` 改成 `https://cn.crazyrouter.com/v1`
+1. `base_url` 改成 `https://api.crazyrouter.com/v1`
 2. `api_key` 改成 Crazyrouter 的 `sk-xxx`
 
 ---
@@ -30,7 +30,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="sk-xxx",
-    base_url="https://cn.crazyrouter.com/v1"
+    base_url="https://api.crazyrouter.com/v1"
 )
 
 response = client.chat.completions.create(
@@ -61,7 +61,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="sk-xxx",
-    base_url="https://cn.crazyrouter.com/v1"
+    base_url="https://api.crazyrouter.com/v1"
 )
 
 response = client.chat.completions.create(
@@ -78,7 +78,7 @@ import anthropic
 
 client = anthropic.Anthropic(
     api_key="sk-xxx",
-    base_url="https://cn.crazyrouter.com"
+    base_url="https://api.crazyrouter.com"
 )
 
 response = client.messages.create(
@@ -108,7 +108,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="sk-xxx",
-    base_url="https://cn.crazyrouter.com/v1"
+    base_url="https://api.crazyrouter.com/v1"
 )
 
 response = client.chat.completions.create(
@@ -121,7 +121,7 @@ response = client.chat.completions.create(
 ### 方案 B：Gemini 原生
 
 ```bash
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -155,13 +155,13 @@ curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?ke
   <Tab title="Linux / macOS">
     ```bash
     export OPENAI_API_KEY=sk-xxx
-    export OPENAI_BASE_URL=https://cn.crazyrouter.com/v1
+    export OPENAI_BASE_URL=https://api.crazyrouter.com/v1
     ```
   </Tab>
   <Tab title="Windows">
     ```powershell
     $env:OPENAI_API_KEY = "sk-xxx"
-    $env:OPENAI_BASE_URL = "https://cn.crazyrouter.com/v1"
+    $env:OPENAI_BASE_URL = "https://api.crazyrouter.com/v1"
     ```
   </Tab>
 </Tabs>

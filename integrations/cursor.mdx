@@ -11,7 +11,7 @@ Cursor 适合把 Crazyrouter 接到日常编码工作流里，用来做聊天、
 通过 Cursor 的 BYOK（Bring Your Own Key）能力，你可以把部分聊天模型请求切到 Crazyrouter，并按自己的 token 计费。
 
 - 推荐接法：OpenAI 兼容模式
-- Crazyrouter Base URL：`https://cn.crazyrouter.com/v1`
+- Crazyrouter Base URL：`https://api.crazyrouter.com/v1`
 - 认证方式：`sk-...` token
 - 最适合先接入的功能：Chat、Ask、常规编辑对话
 
@@ -33,19 +33,19 @@ Cursor 适合把 Crazyrouter 接到日常编码工作流里，用来做聊天、
 Cursor 里对接 Crazyrouter 时，使用 OpenAI 兼容基址：
 
 ```text
-https://cn.crazyrouter.com/v1
+https://api.crazyrouter.com/v1
 ```
 
 不要填成：
 
-- `https://cn.crazyrouter.com`
-- `https://cn.crazyrouter.com/v1/chat/completions`
+- `https://api.crazyrouter.com`
+- `https://api.crazyrouter.com/v1/chat/completions`
 
 ## 前置条件
 
 | 项目 | 说明 |
 |------|------|
-| Crazyrouter 账号 | 先在 [crazyrouter.com](https://cn.crazyrouter.com) 注册 |
+| Crazyrouter 账号 | 先在 [crazyrouter.com](https://crazyrouter.com) 注册 |
 | Crazyrouter token | 建议单独创建一个给 Cursor 使用的 `sk-...` token |
 | Cursor 桌面端 | 建议升级到当前稳定版后再配置 |
 | 可用模型 | 至少保证 token 放行了 1 到 2 个 OpenAI 兼容聊天模型 |
@@ -72,7 +72,7 @@ https://cn.crazyrouter.com/v1
   <Step title="填写 OpenAI 接入信息">
     在 OpenAI 相关配置区域填写：
     - `OpenAI API Key`: 你的 `sk-...`
-    - `Override OpenAI Base URL`: `https://cn.crazyrouter.com/v1`
+    - `Override OpenAI Base URL`: `https://api.crazyrouter.com/v1`
 
     如果你的 Cursor 版本没有看到 `Override OpenAI Base URL`，说明当前版本的自定义 OpenAI 兼容端点支持不完整，需要先升级 Cursor，或等待 Cursor 侧进一步完善该能力。
   </Step>
@@ -108,7 +108,7 @@ https://cn.crazyrouter.com/v1
 ## 验证清单
 
 - [ ] `Cursor Settings` → `Models` 中的 key 能通过 `Verify`
-- [ ] `Override OpenAI Base URL` 已正确设置为 `https://cn.crazyrouter.com/v1`
+- [ ] `Override OpenAI Base URL` 已正确设置为 `https://api.crazyrouter.com/v1`
 - [ ] 已成功选择至少一个 Crazyrouter 模型
 - [ ] 聊天面板的第一条请求成功返回
 - [ ] Crazyrouter 后台日志能看到对应请求
@@ -119,10 +119,10 @@ https://cn.crazyrouter.com/v1
 
 | 现象 | 常见原因 | 修复方式 |
 |------|----------|----------|
-| `Verify` 失败 | API Key 错误，或 Base URL 写错 | 重新检查 `sk-...` 和 `https://cn.crazyrouter.com/v1` |
+| `Verify` 失败 | API Key 错误，或 Base URL 写错 | 重新检查 `sk-...` 和 `https://api.crazyrouter.com/v1` |
 | 401 unauthorized | token 无效、过期或复制时带了空格 | 重新生成 token 并粘贴纯净值 |
 | 403 / model not allowed | 当前模型不在 token 白名单内 | 在 Crazyrouter token 设置里放行对应模型 |
-| 404 | Base URL 填成了根域名或具体接口路径 | 统一改成 `https://cn.crazyrouter.com/v1` |
+| 404 | Base URL 填成了根域名或具体接口路径 | 统一改成 `https://api.crazyrouter.com/v1` |
 | 模型列表不对或没有模型 | Cursor BYOK 刷新失败，或版本兼容性问题 | 重启 Cursor，重新 Verify，必要时升级到最新稳定版 |
 | 聊天能用但 Tab 补全不走 Crazyrouter | Cursor 官方限制：专用能力仍会走内置模型 | 这是预期行为，不是 Crazyrouter 故障 |
 | 自定义模型无法使用 | Cursor 对自定义 OpenAI 兼容端点支持不稳定 | 先用 `gpt-5.5` 跑通，再逐步尝试其他模型 |
@@ -140,7 +140,7 @@ https://cn.crazyrouter.com/v1
 
 ### Cursor 里应该填哪个 Base URL？
 
-填：`https://cn.crazyrouter.com/v1`
+填：`https://api.crazyrouter.com/v1`
 
 ### 为什么我填了 Key，但某些功能还是没走 Crazyrouter？
 

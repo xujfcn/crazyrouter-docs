@@ -28,7 +28,7 @@ POST /v1/chat/completions
 下面的请求在生产环境命中了 `gpt-image-2`，返回 `200`：
 
 ```bash
-curl https://cn.crazyrouter.com/v1/chat/completions \
+curl https://api.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -65,7 +65,7 @@ Data Preview: https://...
 如果你的目标是程序化取图，当前更稳定的方式是：
 
 ```bash
-curl -X POST https://cn.crazyrouter.com/v1/images/generations \
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -77,7 +77,7 @@ curl -X POST https://cn.crazyrouter.com/v1/images/generations \
   }'
 ```
 
-当前 `gpt-image-2` 稳定路径使用主承接线路 `https://cn.crazyrouter.com/v1`。响应通常返回：
+当前 `gpt-image-2` 稳定路径使用主承接线路 `https://api.crazyrouter.com/v1`。响应通常返回：
 
 - `data[0].url`
 
@@ -86,5 +86,5 @@ curl -X POST https://cn.crazyrouter.com/v1/images/generations \
 也就是说，当前稳定的自动化消费方式仍然是 Images API，而不是 Chat Completions 的图片兼容路径。
 
 <Note>
-  如果你只是手工试用，`gpt-image-2` 的 Chat 路径仍然可以观察结果；如果你要做前后端自动化、结果存储或图片后处理，请直接用 [`GPT Image 文档`](/images/gpt-image)、[`Grok 图片模型`](/images/grok) 或 [`Nano Banana 2`](/images/nano-banana-2)。图片类长耗时请求优先使用 `https://cn.crazyrouter.com/v1`。
+  如果你只是手工试用，`gpt-image-2` 的 Chat 路径仍然可以观察结果；如果你要做前后端自动化、结果存储或图片后处理，请直接用 [`GPT Image 文档`](/images/gpt-image)、[`Grok 图片模型`](/images/grok) 或 [`Nano Banana 2`](/images/nano-banana-2)。图片类长耗时请求优先使用 `https://api.crazyrouter.com/v1`。
 </Note>

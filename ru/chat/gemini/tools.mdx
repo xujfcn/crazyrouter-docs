@@ -28,7 +28,7 @@ As of March 23, 2026, Crazyrouter production has verified that `gemini-3.1-pro` 
 The following request returned both `executableCode` and `codeExecutionResult` in production:
 
 ```bash
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -84,7 +84,7 @@ Observed response shape:
 The following request returned `groundingMetadata` in production, confirming that Google Search was actually used:
 
 ```bash
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -115,7 +115,7 @@ Current markers to check:
 The following request returned `urlContextMetadata` in production, along with `groundingMetadata`:
 
 ```bash
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -146,7 +146,7 @@ Current markers to check:
 The following request returned `functionCall` in production:
 
 ```bash
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [

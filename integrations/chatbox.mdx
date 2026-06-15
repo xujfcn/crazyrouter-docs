@@ -17,13 +17,13 @@ ChatBox 是一款常见的跨平台 AI 客户端，支持 Windows、macOS、Linu
 推荐优先使用下面这组配置：
 
 - Provider / API Mode：`OpenAI API Compatible` 或 `OpenAI API`
-- API Host：`https://cn.crazyrouter.com`
+- API Host：`https://api.crazyrouter.com`
 - API Path：保持默认或留空
 - API Key：`sk-xxx`
 - 首个验证模型：`gpt-5.5`
 
 <Note>
-根据 ChatBox 官方文档，`API Path` 一般不需要手动填写，默认就是 OpenAI 兼容聊天路径。因此在 Crazyrouter 文档里，推荐把 `API Host` 写成根域名 `https://cn.crazyrouter.com`，不要先手动补 `/v1/chat/completions`。
+根据 ChatBox 官方文档，`API Path` 一般不需要手动填写，默认就是 OpenAI 兼容聊天路径。因此在 Crazyrouter 文档里，推荐把 `API Host` 写成根域名 `https://api.crazyrouter.com`，不要先手动补 `/v1/chat/completions`。
 </Note>
 
 ## 适合谁用
@@ -37,7 +37,7 @@ ChatBox 是一款常见的跨平台 AI 客户端，支持 Windows、macOS、Linu
 
 | 项目 | 说明 |
 |------|------|
-| Crazyrouter 账号 | 先在 [crazyrouter.com](https://cn.crazyrouter.com) 注册 |
+| Crazyrouter 账号 | 先在 [crazyrouter.com](https://crazyrouter.com) 注册 |
 | Crazyrouter token | 建议单独给 ChatBox 创建一个 token |
 | ChatBox 客户端 | 推荐安装桌面版，知识库等能力更完整 |
 | 可用模型 | 至少先放行 1 个聊天模型 |
@@ -114,7 +114,7 @@ ChatBox 不同版本界面名称可能略有不同，常见入口包括：
   <Step title="第 4 步：填写 Crazyrouter 连接信息">
     推荐填写：
 
-    - `API Host`: `https://cn.crazyrouter.com`
+    - `API Host`: `https://api.crazyrouter.com`
     - `API Path`: 保持默认或留空
     - `API Key`: `sk-xxx`
 
@@ -216,7 +216,7 @@ ChatBox 不同版本界面名称可能略有不同，常见入口包括：
 - [ ] 已安装 ChatBox 并能正常启动
 - [ ] 已创建 ChatBox 专用 Crazyrouter token
 - [ ] 已选择 `OpenAI API` 或 `OpenAI API Compatible`
-- [ ] `API Host` 已填写为 `https://cn.crazyrouter.com`
+- [ ] `API Host` 已填写为 `https://api.crazyrouter.com`
 - [ ] `API Path` 已保持默认或留空
 - [ ] 已成功填写 `sk-xxx`
 - [ ] 已先只添加 `gpt-5.5`
@@ -228,7 +228,7 @@ ChatBox 不同版本界面名称可能略有不同，常见入口包括：
 | 现象 | 常见原因 | 修复方式 |
 |------|----------|----------|
 | 401 unauthorized | token 错误、复制不完整或已失效 | 重新生成 token 并重新粘贴 |
-| 404 | Host 或 Path 填错 | Host 改回 `https://cn.crazyrouter.com`，Path 保持默认 |
+| 404 | Host 或 Path 填错 | Host 改回 `https://api.crazyrouter.com`，Path 保持默认 |
 | 403 / model not allowed | token 没放行当前模型 | 在 Crazyrouter token 设置中放行该模型 |
 | `model not found` | 模型名拼写错误 | 先改回 `gpt-5.5` 做最小验证 |
 | 保存成功但聊天失败 | Provider 选错，或模型未真正添加 | 重新检查 provider 类型和模型列表 |
@@ -243,7 +243,7 @@ ChatBox 不同版本界面名称可能略有不同，常见入口包括：
 
 ### API Host 该填什么？
 
-填 `https://cn.crazyrouter.com`。
+填 `https://api.crazyrouter.com`。
 
 ### 要不要手动填写 `/v1/chat/completions`？
 

@@ -29,7 +29,7 @@ POST /suno/submit/music
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://cn.crazyrouter.com/suno/submit/music \
+curl -X POST https://api.crazyrouter.com/suno/submit/music \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -43,7 +43,7 @@ curl -X POST https://cn.crazyrouter.com/suno/submit/music \
 import requests
 
 response = requests.post(
-    "https://cn.crazyrouter.com/suno/submit/music",
+    "https://api.crazyrouter.com/suno/submit/music",
     headers={
         "Content-Type": "application/json",
         "Authorization": "Bearer YOUR_API_KEY"
@@ -87,7 +87,7 @@ print(response.json())
 | `make_instrumental` | boolean | 否 | 是否纯音乐 |
 
 ```bash cURL
-curl -X POST https://cn.crazyrouter.com/suno/submit/music \
+curl -X POST https://api.crazyrouter.com/suno/submit/music \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{

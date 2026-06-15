@@ -40,7 +40,7 @@ POST /v1/completions
 如果你必须验证某个旧模型是否还能走这个端点，建议先用 [`/v1/models`](/chat/openai/models) 确认模型 ID，再做最小请求：
 
 ```bash
-curl https://cn.crazyrouter.com/v1/completions \
+curl https://api.crazyrouter.com/v1/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{

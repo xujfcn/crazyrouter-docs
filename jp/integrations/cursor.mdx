@@ -11,7 +11,7 @@ Cursor is a practical way to bring Crazyrouter into your day-to-day coding workf
 With Cursor's BYOK (Bring Your Own Key) flow, you can route part of your chat-model traffic through Crazyrouter and pay against your own token instead of bundling everything into Cursor usage.
 
 - recommended path: OpenAI-compatible mode
-- Crazyrouter base URL: `https://cn.crazyrouter.com/v1`
+- Crazyrouter base URL: `https://api.crazyrouter.com/v1`
 - auth format: `sk-...` token
 - best first-use features: Chat, Ask, and normal editing conversations
 
@@ -33,13 +33,13 @@ Recommended protocol: `OpenAI-compatible API`
 When connecting Cursor to Crazyrouter, use this OpenAI-compatible base URL:
 
 ```text
-https://cn.crazyrouter.com/v1
+https://api.crazyrouter.com/v1
 ```
 
 Do not use:
 
 - `https://crazyrouter.com`
-- `https://cn.crazyrouter.com/v1/chat/completions`
+- `https://api.crazyrouter.com/v1/chat/completions`
 
 ## Prerequisites
 
@@ -72,7 +72,7 @@ If you also plan to configure Claude Code, Codex, or Cline, do not share the sam
   <Step title="Fill the OpenAI connection fields">
     In the OpenAI-related section, enter:
     - `OpenAI API Key`: your `sk-...`
-    - `Override OpenAI Base URL`: `https://cn.crazyrouter.com/v1`
+    - `Override OpenAI Base URL`: `https://api.crazyrouter.com/v1`
 
     If your Cursor build does not show `Override OpenAI Base URL`, your current version does not fully expose the custom OpenAI-compatible endpoint path yet. In that case, upgrade Cursor first or wait for improved support on the Cursor side.
   </Step>
@@ -108,7 +108,7 @@ Recommended rollout order: get `gpt-5.5` working first, then test `claude-opus-4
 ## Verification Checklist
 
 - [ ] `Verify` succeeds in `Cursor Settings` → `Models`
-- [ ] `Override OpenAI Base URL` is set to `https://cn.crazyrouter.com/v1`
+- [ ] `Override OpenAI Base URL` is set to `https://api.crazyrouter.com/v1`
 - [ ] at least one Crazyrouter-backed model is selected
 - [ ] the first chat request succeeds
 - [ ] the matching request appears in Crazyrouter logs
@@ -119,10 +119,10 @@ Recommended rollout order: get `gpt-5.5` working first, then test `claude-opus-4
 
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
-| `Verify` fails | wrong API key or wrong base URL | re-check the `sk-...` key and `https://cn.crazyrouter.com/v1` |
+| `Verify` fails | wrong API key or wrong base URL | re-check the `sk-...` key and `https://api.crazyrouter.com/v1` |
 | `401 unauthorized` | invalid, expired, or badly pasted token | generate a new token and paste the raw value again |
 | `403` or `model not allowed` | the model is not in the token allowlist | allow that model in Crazyrouter token settings |
-| `404` | base URL was set to the root domain or a full endpoint path | use exactly `https://cn.crazyrouter.com/v1` |
+| `404` | base URL was set to the root domain or a full endpoint path | use exactly `https://api.crazyrouter.com/v1` |
 | no models show up or the list looks wrong | Cursor BYOK refresh failed or the current version has compatibility issues | restart Cursor, verify again, and update to the latest stable build if needed |
 | chat works but Tab Completion does not use Crazyrouter | Cursor officially keeps specialized features on built-in models | expected behavior, not a Crazyrouter outage |
 | custom models do not behave correctly | Cursor's custom OpenAI-compatible endpoint support is still inconsistent | get `gpt-5.5` working first, then test other models gradually |
@@ -140,7 +140,7 @@ Recommended rollout order: get `gpt-5.5` working first, then test `claude-opus-4
 
 ### Which base URL should I enter in Cursor?
 
-Use `https://cn.crazyrouter.com/v1`.
+Use `https://api.crazyrouter.com/v1`.
 
 ### Why do some Cursor features still not go through Crazyrouter?
 

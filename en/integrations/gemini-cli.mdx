@@ -17,7 +17,7 @@ In the current Gemini CLI release, API-key mode still requires `GEMINI_API_KEY` 
 ```bash
 export GEMINI_API_KEY=sk-xxx
 export GEMINI_MODEL=gemini-3.1-pro
-export GOOGLE_GEMINI_BASE_URL=https://crazyrouter.com
+export GOOGLE_GEMINI_BASE_URL=https://api.crazyrouter.com
 ```
 
 PowerShell:
@@ -25,7 +25,7 @@ PowerShell:
 ```powershell
 $env:GEMINI_API_KEY="sk-xxx"
 $env:GEMINI_MODEL="gemini-3.1-pro"
-$env:GOOGLE_GEMINI_BASE_URL="https://crazyrouter.com"
+$env:GOOGLE_GEMINI_BASE_URL="https://api.crazyrouter.com"
 ```
 
 If you want this to persist across sessions, put the same values into `~/.gemini/.env` or your PowerShell profile.
@@ -42,7 +42,7 @@ Edit `~/.gemini/settings.json`:
     }
   },
   "apiKey": "sk-xxx",
-  "baseUrl": "https://crazyrouter.com",
+  "baseUrl": "https://api.crazyrouter.com",
   "model": {
     "name": "gemini-3.1-pro"
   }
@@ -60,7 +60,7 @@ Notes:
 ```bash
 GEMINI_API_KEY=sk-xxx
 GEMINI_MODEL=gemini-3.1-pro
-GOOGLE_GEMINI_BASE_URL=https://crazyrouter.com
+GOOGLE_GEMINI_BASE_URL=https://api.crazyrouter.com
 ```
 
 ### Launch
@@ -76,6 +76,6 @@ gemini
 | `gemini-3.1-pro` | Verified successfully with a real Gemini CLI request in Crazyrouter production on April 8, 2026, and recommended as the current baseline |
 
 <Note>
-  Crazyrouter supports both the Gemini native API format and the OpenAI-compatible format. Gemini CLI uses the Gemini-native format. The `gemini-3.1-pro` example above, the `gemini-api-key` auth mode, and `GOOGLE_GEMINI_BASE_URL=https://crazyrouter.com` have been validated with a real CLI request.
+  Crazyrouter supports both the Gemini native API format and the OpenAI-compatible format. Gemini CLI uses the Gemini-native format. The `gemini-3.1-pro` example above, the `gemini-api-key` auth mode, and `GOOGLE_GEMINI_BASE_URL=https://api.crazyrouter.com` have been validated with a real CLI request.
 </Note>
 

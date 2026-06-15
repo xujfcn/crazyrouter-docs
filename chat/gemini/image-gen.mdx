@@ -19,7 +19,7 @@ Crazyrouter 对 Gemini 图片模型统一提供 OpenAI Images 兼容入口。用
 | `nano-banana-2` | `nano-banana-2` |
 
 <Warning>
-  Gemini 图片生成属于长耗时请求。生产接入请优先使用主承接线路 `https://cn.crazyrouter.com/v1`，完整生成端点为 `https://cn.crazyrouter.com/v1/images/generations`。
+  Gemini 图片生成属于长耗时请求。生产接入请优先使用主承接线路 `https://api.crazyrouter.com/v1`，完整生成端点为 `https://api.crazyrouter.com/v1/images/generations`。
 </Warning>
 
 <Note>
@@ -46,7 +46,7 @@ Crazyrouter 对 Gemini 图片模型统一提供 OpenAI Images 兼容入口。用
 ## 请求示例
 
 ```bash
-curl -X POST https://cn.crazyrouter.com/v1/images/generations \
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -76,7 +76,7 @@ curl -X POST https://cn.crazyrouter.com/v1/images/generations \
 ## 参考图编辑
 
 ```bash
-curl -X POST https://cn.crazyrouter.com/v1/images/generations \
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{

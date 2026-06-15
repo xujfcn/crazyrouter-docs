@@ -12,12 +12,12 @@ Using NextChat's OpenAI settings, you can route requests through Crazyrouter:
 
 - Recommended protocol: `OpenAI-compatible API`
 - Recommended route: the default NextChat OpenAI flow
-- Base URL: `https://crazyrouter.com`
+- Base URL: `https://api.crazyrouter.com`
 - Auth method: `sk-...` token
 - Recommended first validation model: `gpt-5.5`
 
 <Note>
-NextChat's official README documents `BASE_URL` as the OpenAI API request base URL and uses root-domain style examples. The local `http://127.0.0.1:4000/api/status` response also exposes a root-style `server_address`. So for Crazyrouter, the safest first-pass setup is `https://crazyrouter.com`; only switch to a more specific path if your customized build explicitly requires it.
+NextChat's official README documents `BASE_URL` as the OpenAI API request base URL and uses root-domain style examples. The local `http://127.0.0.1:4000/api/status` response also exposes a root-style `server_address`. So for Crazyrouter, the safest first-pass setup is `https://api.crazyrouter.com`; only switch to a more specific path if your customized build explicitly requires it.
 </Note>
 
 ## Best For
@@ -39,8 +39,8 @@ https://crazyrouter.com
 
 Do not start with:
 
-- `https://cn.crazyrouter.com/v1/chat/completions`
-- `https://cn.crazyrouter.com/v1/models`
+- `https://api.crazyrouter.com/v1/chat/completions`
+- `https://api.crazyrouter.com/v1/models`
 
 If an older or customized NextChat build requires a more specific API host setting, adjust to that version after you validate the baseline setup with the root domain.
 
@@ -75,7 +75,7 @@ Recommended starting whitelist:
   <Step title="Enter the endpoint and key">
     In the OpenAI-related settings, enter:
     - `API Key`: your `sk-...`
-    - `Base URL`: `https://crazyrouter.com`
+    - `Base URL`: `https://api.crazyrouter.com`
   </Step>
   <Step title="Set the first model">
     In the `Model` field, manually enter or select `gpt-5.5`. If your version supports a custom model list, add more models later.
@@ -97,7 +97,7 @@ services:
       - "3000:3000"
     environment:
       - OPENAI_API_KEY=sk-xxx
-      - BASE_URL=https://crazyrouter.com
+      - BASE_URL=https://api.crazyrouter.com
       - CUSTOM_MODELS=+gpt-5.5,+claude-opus-4-8,+gemini-3.1-pro
       - HIDE_USER_API_KEY=1
 ```
@@ -107,7 +107,7 @@ Common environment variables:
 | Variable | Recommended value | Notes |
 |----------|-------------------|-------|
 | `OPENAI_API_KEY` | `sk-xxx` | default Crazyrouter token |
-| `BASE_URL` | `https://crazyrouter.com` | use the root domain first, matching the official `BASE_URL` pattern for baseline validation |
+| `BASE_URL` | `https://api.crazyrouter.com` | use the root domain first, matching the official `BASE_URL` pattern for baseline validation |
 | `CUSTOM_MODELS` | `+gpt-5.5,+claude-opus-4-8,+gemini-3.1-pro` | adds selectable models in the UI |
 | `HIDE_USER_API_KEY` | `1` | prevents end users from entering their own key |
 
@@ -135,7 +135,7 @@ Recommended order: validate `gpt-5.5` first, then expand the list with `CUSTOM_M
 ## Verification Checklist
 
 - [ ] `API Key` is saved correctly
-- [ ] `Base URL` is set to `https://crazyrouter.com`
+- [ ] `Base URL` is set to `https://api.crazyrouter.com`
 - [ ] the first model is set to `gpt-5.5`
 - [ ] the first chat request succeeds
 - [ ] `CUSTOM_MODELS` works if you use self-hosted deployment
@@ -149,7 +149,7 @@ Recommended order: validate `gpt-5.5` first, then expand the list with `CUSTOM_M
 |---------|--------------|-----|
 | 401 unauthorized | token is wrong, expired, or pasted with extra spaces | create a new token and replace it |
 | 403 / model not allowed | the model is not in the token whitelist | allow that model in Crazyrouter |
-| 404 | you entered a full endpoint path, or your version expects a different env var name | switch back to `https://crazyrouter.com` and check whether your build uses `BASE_URL` or another setting name |
+| 404 | you entered a full endpoint path, or your version expects a different env var name | switch back to `https://api.crazyrouter.com` and check whether your build uses `BASE_URL` or another setting name |
 | the self-hosted UI does not show these settings | your deployment style fixes them in environment variables instead of the frontend settings panel | inspect `OPENAI_API_KEY`, `BASE_URL`, and `CUSTOM_MODELS` in the deployment config directly |
 | no models appear in the UI | `CUSTOM_MODELS` is missing or old config is cached | validate with a manual `gpt-5.5` entry first, then refresh and recheck env vars |
 | request goes out but the model fails | default model name is wrong or unavailable | fall back to `gpt-5.5` for baseline testing |
@@ -168,7 +168,7 @@ Recommended order: validate `gpt-5.5` first, then expand the list with `CUSTOM_M
 
 ### Which URL should I use in NextChat?
 
-Start with `https://crazyrouter.com`.
+Start with `https://api.crazyrouter.com`.
 
 ### Why does this guide not recommend `/v1` first?
 

@@ -22,7 +22,7 @@ POST /v1beta/models/{model}:generateContent
 下面的请求在生产环境成功读取 PDF，并返回摘要文本：
 
 ```bash
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -51,7 +51,7 @@ curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?ke
 下面的请求在生产环境成功返回了可直接 `json.loads()` 的 JSON 文本：
 
 ```bash
-curl "https://cn.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [

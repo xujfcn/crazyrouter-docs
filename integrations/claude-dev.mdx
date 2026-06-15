@@ -9,7 +9,7 @@ description: '在 Claude Dev VS Code 扩展中配置 Crazyrouter API，并使用
 Claude Dev 是 VS Code 里的 AI 编程扩展，适合把 Claude 风格的代码解释、重构建议和多轮协作接到 Crazyrouter。公开文档里建议优先使用 OpenAI Compatible 路线，因为这条链路在本站文档体系里更统一，也更容易排障。
 
 <Warning>
-本页的 `https://cn.crazyrouter.com/v1` 只适用于 Claude Dev 中的 `OpenAI Compatible` provider。不要把这个地址复制到 Claude Code 的 `ANTHROPIC_BASE_URL`；Claude Code 应填写根域名 `https://cn.crazyrouter.com` 或 `https://cn.crazyrouter.com`。
+本页的 `https://api.crazyrouter.com/v1` 只适用于 Claude Dev 中的 `OpenAI Compatible` provider。不要把这个地址复制到 Claude Code 的 `ANTHROPIC_BASE_URL`；Claude Code 应填写根域名 `https://api.crazyrouter.com` 或 `https://api.crazyrouter.com`。
 </Warning>
 
 ## 推荐配置
@@ -25,13 +25,13 @@ Claude Dev 是 VS Code 里的 AI 编程扩展，适合把 Claude 风格的代码
     优先选择 `OpenAI Compatible` 作为 API Provider。
   </Step>
   <Step title="填写配置">
-    - **Base URL**: `https://cn.crazyrouter.com/v1`
+    - **Base URL**: `https://api.crazyrouter.com/v1`
     - **API Key**: `sk-xxx`
     - **Model**: `claude-opus-4-8`
   </Step>
 </Steps>
 
-如果你在中国地区使用 API 加速线路，并且 Claude Dev 当前选择的是 `OpenAI Compatible` provider，可以把 Base URL 改为 `https://cn.crazyrouter.com/v1`。
+如果你在中国地区使用 API 加速线路，并且 Claude Dev 当前选择的是 `OpenAI Compatible` provider，可以把 Base URL 改为 `https://api.crazyrouter.com/v1`。
 
 ## 推荐模型
 

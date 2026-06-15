@@ -11,7 +11,7 @@ LangChain is one of the most common LLM application frameworks for chat flows, p
 With LangChain's OpenAI components, you can send requests to Crazyrouter with:
 
 - recommended protocol: `OpenAI-compatible API`
-- base URL: `https://cn.crazyrouter.com/v1`
+- base URL: `https://api.crazyrouter.com/v1`
 - auth variable: `OPENAI_API_KEY`
 - main Python package: `langchain-openai`
 - main JavaScript / TypeScript package: `@langchain/openai`
@@ -35,7 +35,7 @@ Core Crazyrouter settings:
 
 ```text
 OPENAI_API_KEY=sk-xxx
-BASE_URL=https://cn.crazyrouter.com/v1
+BASE_URL=https://api.crazyrouter.com/v1
 ```
 
 In LangChain, that usually maps to:
@@ -179,7 +179,7 @@ npm -v
     llm = ChatOpenAI(
         model="gpt-5.5",
         api_key="sk-xxx",
-        base_url="https://cn.crazyrouter.com/v1",
+        base_url="https://api.crazyrouter.com/v1",
         temperature=0,
     )
 
@@ -204,7 +204,7 @@ npm -v
     llm = ChatOpenAI(
         model="gpt-5.5",
         api_key=os.environ["OPENAI_API_KEY"],
-        base_url="https://cn.crazyrouter.com/v1",
+        base_url="https://api.crazyrouter.com/v1",
         temperature=0,
     )
     ```
@@ -220,7 +220,7 @@ npm -v
       model: "gpt-5.5",
       apiKey: process.env.OPENAI_API_KEY,
       configuration: {
-        baseURL: "https://cn.crazyrouter.com/v1",
+        baseURL: "https://api.crazyrouter.com/v1",
       },
       temperature: 0,
     });
@@ -256,7 +256,7 @@ from langchain_openai import ChatOpenAI
 llm = ChatOpenAI(
     model="gpt-5.5",
     api_key="sk-xxx",
-    base_url="https://cn.crazyrouter.com/v1",
+    base_url="https://api.crazyrouter.com/v1",
     temperature=0.7,
 )
 
@@ -272,7 +272,7 @@ from langchain_openai import OpenAIEmbeddings
 embeddings = OpenAIEmbeddings(
     model="text-embedding-3-large",
     api_key="sk-xxx",
-    base_url="https://cn.crazyrouter.com/v1",
+    base_url="https://api.crazyrouter.com/v1",
 )
 
 vectors = embeddings.embed_documents(["Text one", "Text two"])
@@ -289,7 +289,7 @@ from langchain_core.output_parsers import StrOutputParser
 llm = ChatOpenAI(
     model="gpt-5.5",
     api_key="sk-xxx",
-    base_url="https://cn.crazyrouter.com/v1",
+    base_url="https://api.crazyrouter.com/v1",
 )
 
 prompt = ChatPromptTemplate.from_template("Explain {topic} in simple terms")
@@ -310,13 +310,13 @@ from langchain_core.runnables import RunnablePassthrough
 llm = ChatOpenAI(
     model="gpt-5.5",
     api_key="sk-xxx",
-    base_url="https://cn.crazyrouter.com/v1",
+    base_url="https://api.crazyrouter.com/v1",
 )
 
 embeddings = OpenAIEmbeddings(
     model="text-embedding-3-large",
     api_key="sk-xxx",
-    base_url="https://cn.crazyrouter.com/v1",
+    base_url="https://api.crazyrouter.com/v1",
 )
 
 texts = [
@@ -348,7 +348,7 @@ const llm = new ChatOpenAI({
   model: "gpt-5.5",
   apiKey: process.env.OPENAI_API_KEY,
   configuration: {
-    baseURL: "https://cn.crazyrouter.com/v1",
+    baseURL: "https://api.crazyrouter.com/v1",
   },
   temperature: 0,
 });
@@ -381,7 +381,7 @@ console.log(response.content);
 - [ ] Python or Node.js runtime is ready
 - [ ] `OPENAI_API_KEY` is set correctly
 - [ ] `langchain-openai` or `@langchain/openai` is installed
-- [ ] the chat model is set to `https://cn.crazyrouter.com/v1` through `base_url` or `baseURL`
+- [ ] the chat model is set to `https://api.crazyrouter.com/v1` through `base_url` or `baseURL`
 - [ ] the first `Reply only OK` request succeeds
 - [ ] Crazyrouter logs show the matching request
 - [ ] if embeddings are used, the embedding model is also allowed
@@ -392,7 +392,7 @@ console.log(response.content);
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
 | `401 unauthorized` | wrong, expired, or badly pasted `OPENAI_API_KEY` | generate a new token and set it again |
-| `404` | wrong `base_url` or missing `/v1` | use `https://cn.crazyrouter.com/v1` |
+| `404` | wrong `base_url` or missing `/v1` | use `https://api.crazyrouter.com/v1` |
 | `model not found` | wrong model name or the token does not allow it | switch back to `gpt-5.5` and check the allowlist |
 | embeddings fail | the embedding model was not allowed | add `text-embedding-3-large` to the token allowlist |
 | RAG fails in many places | too many components were added at once | go back to single-turn chat, then rebuild step by step |
@@ -406,7 +406,7 @@ Use the OpenAI-compatible route.
 
 ### What base URL should I set?
 
-Use `https://cn.crazyrouter.com/v1`.
+Use `https://api.crazyrouter.com/v1`.
 
 ### Which Python package should I use?
 

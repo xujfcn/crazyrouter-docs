@@ -9,7 +9,7 @@ description: 'Python image recognition with gpt-5.5 and Claude'
 ```python
 from openai import OpenAI
 
-client = OpenAI(api_key="sk-xxx", base_url="https://cn.crazyrouter.com/v1")
+client = OpenAI(api_key="sk-xxx", base_url="https://api.crazyrouter.com/v1")
 
 response = client.chat.completions.create(
     model="gpt-5.5",
@@ -36,7 +36,7 @@ print(response.choices[0].message.content)
 import base64
 from openai import OpenAI
 
-client = OpenAI(api_key="sk-xxx", base_url="https://cn.crazyrouter.com/v1")
+client = OpenAI(api_key="sk-xxx", base_url="https://api.crazyrouter.com/v1")
 
 # Read local image and convert to base64
 with open("photo.jpg", "rb") as f:

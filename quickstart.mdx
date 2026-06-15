@@ -2,7 +2,7 @@
 title: 'API 快速开始指南'
 description: '5 分钟完成第一次 API 调用'
 ---
-> 更新日期：2026-06-06
+> 更新日期：2026-06-16
 
 ## 第一步：获取 API Key
 
@@ -13,12 +13,12 @@ description: '5 分钟完成第一次 API 调用'
 ## 第二步：发起请求
 
 <Note>
-默认接入地址请优先填写 `https://cn.crazyrouter.com/v1`。如果你不确定某个客户端应该填写根域名还是 `/v1`，先参考 [API Endpoint 说明](https://docs.crazyrouter.com/en/api-endpoint)。
+默认国际接入地址请优先填写 `https://api.crazyrouter.com/v1`。东亚地区优先使用 `https://cn.crazyrouter.com/v1`。如果你不确定某个客户端应该填写根域名还是 `/v1`，先参考 [API Endpoint 说明](https://docs.crazyrouter.com/en/api-endpoint)。
 </Note>
 
 <CodeGroup>
 ```bash cURL
-curl https://cn.crazyrouter.com/v1/chat/completions \
+curl https://api.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -34,7 +34,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="YOUR_API_KEY",
-    base_url="https://cn.crazyrouter.com/v1"
+    base_url="https://api.crazyrouter.com/v1"
 )
 
 response = client.chat.completions.create(
@@ -49,7 +49,7 @@ import OpenAI from 'openai';
 
 const client = new OpenAI({
   apiKey: 'YOUR_API_KEY',
-  baseURL: 'https://cn.crazyrouter.com/v1'
+  baseURL: 'https://api.crazyrouter.com/v1'
 });
 
 const response = await client.chat.completions.create({

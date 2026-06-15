@@ -9,7 +9,7 @@ description: 'Python 实现 gpt-5.5 和 Claude 视觉识图'
 ```python
 from openai import OpenAI
 
-client = OpenAI(api_key="sk-xxx", base_url="https://cn.crazyrouter.com/v1")
+client = OpenAI(api_key="sk-xxx", base_url="https://api.crazyrouter.com/v1")
 
 response = client.chat.completions.create(
     model="gpt-5.5",
@@ -36,7 +36,7 @@ print(response.choices[0].message.content)
 import base64
 from openai import OpenAI
 
-client = OpenAI(api_key="sk-xxx", base_url="https://cn.crazyrouter.com/v1")
+client = OpenAI(api_key="sk-xxx", base_url="https://api.crazyrouter.com/v1")
 
 # 读取本地图片并转为 base64
 with open("photo.jpg", "rb") as f:

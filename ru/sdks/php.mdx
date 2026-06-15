@@ -10,7 +10,7 @@ description: 'PHP Crazyrouter API examples'
 <?php
 
 $apiKey = 'sk-xxx';
-$baseUrl = 'https://cn.crazyrouter.com/v1';
+$baseUrl = 'https://api.crazyrouter.com/v1';
 
 $data = [
     'model' => 'gpt-5.5',
@@ -43,7 +43,7 @@ echo $result['choices'][0]['message']['content'];
 <?php
 
 $apiKey = 'sk-xxx';
-$baseUrl = 'https://cn.crazyrouter.com/v1';
+$baseUrl = 'https://api.crazyrouter.com/v1';
 
 // Edit image with GPT-Image-2
 $ch = curl_init($baseUrl . '/images/edits');
@@ -79,7 +79,7 @@ echo "Image URL: " . $imageUrl . "\n";
 <?php
 
 $apiKey = 'sk-xxx';
-$baseUrl = 'https://cn.crazyrouter.com/v1';
+$baseUrl = 'https://api.crazyrouter.com/v1';
 
 $data = [
     'model' => 'gpt-5.5',

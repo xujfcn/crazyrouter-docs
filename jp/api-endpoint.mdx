@@ -2,33 +2,35 @@
 title: 'API エンドポイント'
 description: 'Crazyrouter の主要 API エンドポイント一覧'
 ---
-> 更新日: 2026-06-06
+> 更新日: 2026-06-16
 
 ## API Base URL
+
+```text
+https://api.crazyrouter.com
+```
+
+`https://api.crazyrouter.com` はデフォルトの国際 API 接続入口として有効です。アカウントログイン、課金、ダッシュボードは引き続き次のドメインを使用します。
 
 ```text
 https://crazyrouter.com
 ```
 
-中国向け最適化 API ルート:
+東アジア地域では、次の API 接続先を優先してください。
 
 ```text
 https://cn.crazyrouter.com
 ```
 
-この最適化ルートは API リクエスト専用です。アカウントログイン、課金、ダッシュボードは引き続き次のドメインを使用します。
-
-```text
-https://crazyrouter.com
-```
+SDK、IDE、エージェント、サードパーティクライアントを設定する前に、そのツールがルートドメインを要求するのか `/v1` 付きの Base URL を要求するのかを確認してください。
 
 ## クライアント別の Base URL
 
-| 用途 | グローバル標準ルート | 中国向け最適化ルート | 補足 |
+| 用途 | デフォルト国際入口 | 東アジア地域の優先入口 | 補足 |
 |------|----------------------|----------------------|------|
-| OpenAI 互換 SDK / クライアント | `https://cn.crazyrouter.com/v1` | `https://cn.crazyrouter.com/v1` | クライアントが `/chat/completions` や `/models` などを追加します |
-| Claude Code / Anthropic ネイティブクライアント | `https://crazyrouter.com` | `https://cn.crazyrouter.com` | クライアントが `/v1/messages` を自動で追加するため、`/v1` を手動で追加しないでください |
-| curl / 手書き HTTP リクエスト | 完全なエンドポイント、例: `https://cn.crazyrouter.com/v1/chat/completions` | 完全なエンドポイント、例: `https://cn.crazyrouter.com/v1/chat/completions` | 手書きリクエストでは API パス全体が必要です |
+| OpenAI 互換 SDK / クライアント | `https://api.crazyrouter.com/v1` | `https://cn.crazyrouter.com/v1` | クライアントが `/chat/completions` や `/models` などを追加します |
+| Claude Code / Anthropic ネイティブクライアント | `https://api.crazyrouter.com` | `https://cn.crazyrouter.com` | クライアントが `/v1/messages` を自動で追加するため、`/v1` を手動で追加しないでください |
+| curl / 手書き HTTP リクエスト | 完全なエンドポイント、例: `https://api.crazyrouter.com/v1/chat/completions` | 完全なエンドポイント、例: `https://cn.crazyrouter.com/v1/chat/completions` | 手書きリクエストでは API パス全体が必要です |
 
 <Warning>
 ログに `/v1/v1/models`、`/v1/v1/messages`、`/v1/messages/v1/messages` が出る場合、API パスが重複しています。Claude Code / Anthropic ネイティブクライアントはルートドメインに戻し、OpenAI 互換クライアントは `/v1` までの Base URL にしてください。
@@ -91,5 +93,5 @@ https://crazyrouter.com
 | `/v1/models` | GET | モデル一覧 |
 
 <Note>
-  すべてのエンドポイントは HTTPS に対応しています。OpenAI 互換クライアントでは `https://cn.crazyrouter.com/v1` または `https://cn.crazyrouter.com/v1` を使います。Claude Code など Anthropic ネイティブクライアントでは `/v1` なしのルートドメインを使ってください。
+  すべてのエンドポイントは HTTPS に対応しています。デフォルトの国際 API 入口は `https://api.crazyrouter.com` です。東アジア地域では `https://cn.crazyrouter.com` を優先してください。アカウントログイン、課金、ダッシュボードは引き続き `https://crazyrouter.com` を使用します。
 </Note>

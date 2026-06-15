@@ -32,7 +32,7 @@ Common limits:
 ## Local File Upload
 
 ```bash cURL
-curl -X POST https://cn.crazyrouter.com/v1/files/uploads \
+curl -X POST https://api.crazyrouter.com/v1/files/uploads \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -F "file=@./reference.png" \
   -F "purpose=model_input"
@@ -53,7 +53,7 @@ Example response:
 ## Base64 Upload
 
 ```bash cURL
-curl -X POST https://cn.crazyrouter.com/v1/files/uploads/base64 \
+curl -X POST https://api.crazyrouter.com/v1/files/uploads/base64 \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -66,7 +66,7 @@ curl -X POST https://cn.crazyrouter.com/v1/files/uploads/base64 \
 ## Remote URL Rehosting
 
 ```bash cURL
-curl -X POST https://cn.crazyrouter.com/v1/files/uploads/url \
+curl -X POST https://api.crazyrouter.com/v1/files/uploads/url \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -83,7 +83,7 @@ The remote URL must be an `http` or `https` image URL reachable by Crazyrouter s
 First, upload the local reference image:
 
 ```bash cURL
-UPLOAD_RESPONSE=$(curl -sS -X POST https://cn.crazyrouter.com/v1/files/uploads \
+UPLOAD_RESPONSE=$(curl -sS -X POST https://api.crazyrouter.com/v1/files/uploads \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -F "file=@./portrait.png" \
   -F "purpose=model_input")
@@ -95,7 +95,7 @@ echo "$IMAGE_URL"
 Then pass the returned `IMAGE_URL` to Kling image-to-video:
 
 ```bash cURL
-curl -X POST https://cn.crazyrouter.com/kling/v1/videos/image2video \
+curl -X POST https://api.crazyrouter.com/kling/v1/videos/image2video \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{

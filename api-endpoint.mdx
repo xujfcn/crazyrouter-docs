@@ -2,41 +2,43 @@
 title: '代理接口调用地址'
 description: 'API 端点地址说明'
 ---
-> 更新日期：2026-06-06
+> 更新日期：2026-06-16
 
 ## API Base URL
+
+```
+https://api.crazyrouter.com
+```
+
+`https://api.crazyrouter.com` 已作为默认国际 API 接入入口启用。账号登录、充值和控制台仍使用：
 
 ```
 https://crazyrouter.com
 ```
 
-中国地区优化线路：
+东亚地区优先使用以下 API 接入地址：
 
 ```
 https://cn.crazyrouter.com
 ```
 
-该优化线路仅用于 API 请求。账号登录、充值和控制台仍使用：
-
-```
-https://crazyrouter.com
-```
-
-## 推荐接入地址
-
-默认优先使用中国地区优化线路 `https://cn.crazyrouter.com`。如果你在配置第三方客户端、SDK、IDE 或 Agent，请先参考英文统一说明章节：
+如果你在配置第三方客户端、SDK、IDE 或 Agent，请先确认该工具应该填写根域名还是 `/v1`：
 
 <Card title="查看接入地址说明" icon="book" href="https://docs.crazyrouter.com/en/api-endpoint">
   先按这个章节确认应该填写根域名还是 `/v1`，再回到具体工具文档配置。
 </Card>
 
+## 推荐接入地址
+
+默认优先使用国际 API 入口 `https://api.crazyrouter.com`。东亚地区用户优先使用 `https://cn.crazyrouter.com`。这两个地址只用于 API 请求；网页端账号、充值、控制台和定价页面继续使用 `https://crazyrouter.com`。
+
 ## 不同客户端应该填写的地址
 
-| 使用方式 | 推荐填写地址 | 说明 |
-|----------|----------------|------|
-| OpenAI 兼容 SDK / 客户端 | `https://cn.crazyrouter.com/v1` | 客户端会在该地址后继续拼接 `/chat/completions`、`/models` 等路径 |
-| Claude Code / Anthropic 原生客户端 | `https://cn.crazyrouter.com` | 客户端会自己拼接 `/v1/messages`，不要手动加 `/v1` |
-| curl / 手写 HTTP 请求 | 使用完整端点，例如 `https://cn.crazyrouter.com/v1/chat/completions` | 手写请求时需要把完整 API 路径写出来 |
+| 使用方式 | 默认国际入口 | 东亚地区优先入口 | 说明 |
+|----------|----------------|----------------|------|
+| OpenAI 兼容 SDK / 客户端 | `https://api.crazyrouter.com/v1` | `https://cn.crazyrouter.com/v1` | 客户端会在该地址后继续拼接 `/chat/completions`、`/models` 等路径 |
+| Claude Code / Anthropic 原生客户端 | `https://api.crazyrouter.com` | `https://cn.crazyrouter.com` | 客户端会自己拼接 `/v1/messages`，不要手动加 `/v1` |
+| curl / 手写 HTTP 请求 | 使用完整端点，例如 `https://api.crazyrouter.com/v1/chat/completions` | 使用完整端点，例如 `https://cn.crazyrouter.com/v1/chat/completions` | 手写请求时需要把完整 API 路径写出来 |
 
 <Warning>
 如果日志中出现 `/v1/v1/models`、`/v1/v1/messages` 或 `/v1/messages/v1/messages`，说明客户端配置里重复拼接了 API 路径。Claude Code / Anthropic 原生客户端请改回根域名；OpenAI 兼容客户端请只保留到 `/v1`。
@@ -107,5 +109,5 @@ https://crazyrouter.com
 | `/v1/files/uploads/url` | POST | 远程图片转存为临时 URL |
 
 <Note>
-所有端点均支持 HTTPS。默认优先使用 `https://cn.crazyrouter.com` 系列地址进行 API 接入；账号登录、充值和控制台仍使用 `https://crazyrouter.com`。
+所有端点均支持 HTTPS。默认国际 API 入口为 `https://api.crazyrouter.com`；东亚地区优先使用 `https://cn.crazyrouter.com`；账号登录、充值和控制台仍使用 `https://crazyrouter.com`。
 </Note>

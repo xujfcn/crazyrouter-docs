@@ -24,7 +24,7 @@ First read https://docs.crazyrouter.com/llms.txt, then answer my question using 
 My goal is: [write your task here, for example: use Python to generate a 5-second Sora 2 video]
 
 Please note:
-- OpenAI-compatible SDKs should usually use base_url: https://cn.crazyrouter.com/v1
+- OpenAI-compatible SDKs should usually use base_url: https://api.crazyrouter.com/v1
 - If model names, prices, or billing are involved, use https://crazyrouter.com/pricing as the reference
 - If you are unsure whether a model is available, tell me to confirm it on the Pricing page or with /v1/models
 - Give me runnable code examples
@@ -63,7 +63,7 @@ https://crazyrouter.com/pricing
 If you already have an API key and want to check which models your token can call, request:
 
 ```bash cURL
-curl https://cn.crazyrouter.com/v1/models \
+curl https://api.crazyrouter.com/v1/models \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 

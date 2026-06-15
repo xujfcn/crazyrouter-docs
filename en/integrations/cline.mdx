@@ -11,7 +11,7 @@ Cline is a strong agent-style coding extension for VS Code, especially for file 
 With the OpenAI Compatible provider, Cline can send its agent traffic to Crazyrouter:
 
 - recommended protocol: `OpenAI-compatible API`
-- base URL: `https://cn.crazyrouter.com/v1`
+- base URL: `https://api.crazyrouter.com/v1`
 - auth format: `sk-...` token
 - recommended default models: `claude-opus-4-8` or `gpt-5.5`
 
@@ -33,14 +33,14 @@ Recommended protocol: `OpenAI-compatible API`
 In Cline settings, use:
 
 - `API Provider`: `OpenAI Compatible`
-- `Base URL`: `https://cn.crazyrouter.com/v1`
+- `Base URL`: `https://api.crazyrouter.com/v1`
 - `API Key`: your `sk-...`
 - `Model ID`: the model you want to use
 
 Do not set the base URL to:
 
 - `https://crazyrouter.com`
-- `https://cn.crazyrouter.com/v1/chat/completions`
+- `https://api.crazyrouter.com/v1/chat/completions`
 
 <Note>
 Unlike Claude Code, Codex, or Aider, the normal Cline-in-VS-Code path usually does not require shell environment variables. In most cases, you only need to enter `Base URL`, `API Key`, and `Model ID` in the Cline settings UI.
@@ -264,7 +264,7 @@ code --version
     In the Cline settings panel, enter:
 
     - `API Provider`: `OpenAI Compatible`
-    - `Base URL`: `https://cn.crazyrouter.com/v1`
+    - `Base URL`: `https://api.crazyrouter.com/v1`
     - `API Key`: your `sk-...`
     - `Model ID`: start with `claude-opus-4-8`
 
@@ -322,7 +322,7 @@ Recommended rollout: get the workflow stable on `claude-opus-4-8` first. If you 
 - [ ] if you want terminal repo opening, `code --version` also works
 - [ ] Cline is installed and opens correctly
 - [ ] Cline is set to the `OpenAI Compatible` provider
-- [ ] `Base URL` is `https://cn.crazyrouter.com/v1`
+- [ ] `Base URL` is `https://api.crazyrouter.com/v1`
 - [ ] `API Key` is entered correctly
 - [ ] `Model ID` is a real allowed model
 - [ ] the first read-only task succeeds
@@ -337,7 +337,7 @@ Recommended rollout: get the workflow stable on `claude-opus-4-8` first. If you 
 | the `code` command does not exist | VS Code is installed but the shell command is not in PATH | on Windows, reopen the terminal; on macOS, run `Shell Command: Install 'code' command in PATH` |
 | `401 unauthorized` | wrong, expired, or badly pasted API key | create a new token and paste it again |
 | `403` or `model not allowed` | the token does not allow the selected model | allow that model in Crazyrouter token settings |
-| `404` | base URL was set to the root domain or a full endpoint path | use `https://cn.crazyrouter.com/v1` |
+| `404` | base URL was set to the root domain or a full endpoint path | use `https://api.crazyrouter.com/v1` |
 | `model not found` | incorrect `Model ID` or unavailable model | switch back to `claude-opus-4-8` or another confirmed model |
 | it cannot connect on a corporate network | proxy or firewall settings are blocking traffic | check VS Code's own proxy settings first; the Cline extension reuses VS Code's proxy configuration |
 | Cline edits the wrong files | permissions are too wide or the prompt scope is too loose | validate with read-only tasks first, then widen permissions gradually |
@@ -359,7 +359,7 @@ Choose `OpenAI Compatible`.
 
 ### What base URL should I use?
 
-Use `https://cn.crazyrouter.com/v1`.
+Use `https://api.crazyrouter.com/v1`.
 
 ### Do I have to set environment variables for this Cline path?
 

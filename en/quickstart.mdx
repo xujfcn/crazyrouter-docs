@@ -2,7 +2,7 @@
 title: 'Quick Start Guide'
 description: 'Make your first API call in 5 minutes'
 ---
-> Last updated: 2026-06-06
+> Last updated: 2026-06-16
 
 ## Step 1: Get Your API Key
 
@@ -13,12 +13,12 @@ description: 'Make your first API call in 5 minutes'
 ## Step 2: Make a Request
 
 <Note>
-Use `https://cn.crazyrouter.com/v1` as the default access address. If you are unsure whether a tool should use the root domain or `/v1`, check [API Endpoints](https://docs.crazyrouter.com/en/api-endpoint) first.
+Use `https://api.crazyrouter.com/v1` as the default international access address. For East Asia, prefer `https://cn.crazyrouter.com/v1`. If you are unsure whether a tool should use the root domain or `/v1`, check [API Endpoints](https://docs.crazyrouter.com/en/api-endpoint) first.
 </Note>
 
 <CodeGroup>
 ```bash cURL
-curl https://cn.crazyrouter.com/v1/chat/completions \
+curl https://api.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -34,7 +34,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="YOUR_API_KEY",
-    base_url="https://cn.crazyrouter.com/v1"
+    base_url="https://api.crazyrouter.com/v1"
 )
 
 response = client.chat.completions.create(
@@ -49,7 +49,7 @@ import OpenAI from 'openai';
 
 const client = new OpenAI({
   apiKey: 'YOUR_API_KEY',
-  baseURL: 'https://cn.crazyrouter.com/v1'
+  baseURL: 'https://api.crazyrouter.com/v1'
 });
 
 const response = await client.chat.completions.create({

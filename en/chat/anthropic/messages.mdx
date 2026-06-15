@@ -40,7 +40,7 @@ anthropic-version: 2023-06-01
 ## Basic conversation
 
 ```bash cURL
-curl https://cn.crazyrouter.com/v1/messages \
+curl https://api.crazyrouter.com/v1/messages \
   -H "Content-Type: application/json" \
   -H "x-api-key: YOUR_API_KEY" \
   -H "anthropic-version: 2023-06-01" \
@@ -82,7 +82,7 @@ For first-pass validation, use:
 - a prompt that clearly says Claude must call the tool and not answer directly
 
 ```bash cURL
-curl https://cn.crazyrouter.com/v1/messages \
+curl https://api.crazyrouter.com/v1/messages \
   -H "Content-Type: application/json" \
   -H "x-api-key: YOUR_API_KEY" \
   -H "anthropic-version: 2023-06-01" \
@@ -144,7 +144,7 @@ In this production recheck, the combination that clearly returned a `thinking` b
 Base `claude-opus-4-8` did not produce an equally explicit thinking block in this round, so the docs prioritize the thinking variant here.
 
 ```bash cURL
-curl https://cn.crazyrouter.com/v1/messages \
+curl https://api.crazyrouter.com/v1/messages \
   -H "Content-Type: application/json" \
   -H "x-api-key: YOUR_API_KEY" \
   -H "anthropic-version: 2023-06-01" \

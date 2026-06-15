@@ -23,7 +23,7 @@ POST /v1beta/models/imagen-4:generateContent
 <CodeGroup>
 
 ```bash cURL
-curl "https://cn.crazyrouter.com/v1beta/models/imagen-4:generateContent?key=YOUR_API_KEY" \
+curl "https://api.crazyrouter.com/v1beta/models/imagen-4:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -51,7 +51,7 @@ import base64
 genai.configure(
     api_key="YOUR_API_KEY",
     transport="rest",
-    client_options={"api_endpoint": "https://crazyrouter.com"}
+    client_options={"api_endpoint": "https://api.crazyrouter.com"}
 )
 
 model = genai.GenerativeModel("imagen-4")

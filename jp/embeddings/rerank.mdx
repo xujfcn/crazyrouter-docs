@@ -78,7 +78,7 @@ Reorder a set of documents by semantic relevance to a query. Commonly used as th
 import requests
 
 response = requests.post(
-    "https://cn.crazyrouter.com/v1/rerank",
+    "https://api.crazyrouter.com/v1/rerank",
     headers={
         "Authorization": "Bearer sk-xxx",
         "Content-Type": "application/json"
@@ -103,7 +103,7 @@ for result in data["results"]:
 ```
 
 ```bash cURL
-curl -X POST https://cn.crazyrouter.com/v1/rerank \
+curl -X POST https://api.crazyrouter.com/v1/rerank \
   -H "Authorization: Bearer sk-xxx" \
   -H "Content-Type: application/json" \
   -d '{

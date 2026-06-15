@@ -14,7 +14,7 @@ description: 'Сделайте первый API-вызов за 5 минут'
 
 <CodeGroup>
 ```bash cURL
-curl https://cn.crazyrouter.com/v1/chat/completions \
+curl https://api.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -30,7 +30,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="YOUR_API_KEY",
-    base_url="https://cn.crazyrouter.com/v1"
+    base_url="https://api.crazyrouter.com/v1"
 )
 
 response = client.chat.completions.create(
@@ -45,7 +45,7 @@ import OpenAI from 'openai';
 
 const client = new OpenAI({
   apiKey: 'YOUR_API_KEY',
-  baseURL: 'https://cn.crazyrouter.com/v1'
+  baseURL: 'https://api.crazyrouter.com/v1'
 });
 
 const response = await client.chat.completions.create({

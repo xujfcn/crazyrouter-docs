@@ -5,7 +5,7 @@ icon: 'robot'
 ---
 > Last updated: 2026-06-06
 
-Use [crazyrouter-hermes](https://github.com/xujfcn/crazyrouter-hermes) to point [Hermes Agent](https://github.com/NousResearch/Hermes-Agent) at Crazyrouter. After setup, Hermes uses `https://cn.crazyrouter.com/v1` as its OpenAI-compatible endpoint and calls Claude, GPT, DeepSeek, Gemini, Qwen, and 627+ other models through a single Crazyrouter API key.
+Use [crazyrouter-hermes](https://github.com/xujfcn/crazyrouter-hermes) to point [Hermes Agent](https://github.com/NousResearch/Hermes-Agent) at Crazyrouter. After setup, Hermes uses `https://api.crazyrouter.com/v1` as its OpenAI-compatible endpoint and calls Claude, GPT, DeepSeek, Gemini, Qwen, and 627+ other models through a single Crazyrouter API key.
 
 ## Best For
 
@@ -23,7 +23,7 @@ Use [crazyrouter-hermes](https://github.com/xujfcn/crazyrouter-hermes) to point 
 | Model access | Allow the models you plan to use in that token |
 
 <Tip>
-Hermes connects to Crazyrouter through OpenAI-compatible settings. Use `https://cn.crazyrouter.com/v1` as the default access address. If you need to confirm whether a client should use the root domain or `/v1`, check [API Endpoints](https://docs.crazyrouter.com/en/api-endpoint) first.
+Hermes connects to Crazyrouter through OpenAI-compatible settings. Use `https://api.crazyrouter.com/v1` as the default access address. If you need to confirm whether a client should use the root domain or `/v1`, check [API Endpoints](https://docs.crazyrouter.com/en/api-endpoint) first.
 </Tip>
 
 ## One-Click Setup
@@ -63,7 +63,7 @@ Edit `~/.hermes/.env`:
 
 ```bash
 OPENAI_API_KEY=sk-your-crazyrouter-key
-OPENAI_BASE_URL=https://cn.crazyrouter.com/v1
+OPENAI_BASE_URL=https://api.crazyrouter.com/v1
 ```
 
 ### Default Model
@@ -74,7 +74,7 @@ Edit `~/.hermes/config.yaml`:
 model:
   provider: "custom"
   default: "claude-opus-4-8"
-  base_url: "https://cn.crazyrouter.com/v1"
+  base_url: "https://api.crazyrouter.com/v1"
 ```
 
 Change `default` to any model allowed by your Crazyrouter token.
@@ -98,7 +98,7 @@ If switching returns `model not allowed` or `403`, the current Crazyrouter token
 ## Verification Checklist
 
 - [ ] `OPENAI_API_KEY` in `~/.hermes/.env` is a valid Crazyrouter token
-- [ ] `OPENAI_BASE_URL` is `https://cn.crazyrouter.com/v1`
+- [ ] `OPENAI_BASE_URL` is `https://api.crazyrouter.com/v1`
 - [ ] `provider` in `~/.hermes/config.yaml` is `custom`
 - [ ] the default model is allowed by the Crazyrouter token
 - [ ] Hermes can return a test response

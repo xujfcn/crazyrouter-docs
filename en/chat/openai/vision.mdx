@@ -23,7 +23,7 @@ Crazyrouter production has verified OpenAI-style `image_url` input on the usual 
 ## Using a base64 data URL (most reliable)
 
 ```bash
-curl https://cn.crazyrouter.com/v1/chat/completions \
+curl https://api.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -67,7 +67,7 @@ Sample response:
 ## Using a remote https URL
 
 ```bash
-curl https://cn.crazyrouter.com/v1/chat/completions \
+curl https://api.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{

@@ -63,7 +63,7 @@ So this path should currently be documented as "controlled testing only", not as
 The request below is for same-day controlled testing only. It does not imply stable production readiness:
 
 ```bash
-curl "https://cn.crazyrouter.com/v1beta/models/nano-banana:generateContent?key=YOUR_API_KEY" \
+curl "https://api.crazyrouter.com/v1beta/models/nano-banana:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -87,7 +87,7 @@ curl "https://cn.crazyrouter.com/v1beta/models/nano-banana:generateContent?key=Y
 The following legacy pattern is no longer recommended:
 
 ```bash
-curl -X POST https://cn.crazyrouter.com/v1/images/generations \
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{

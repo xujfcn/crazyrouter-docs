@@ -34,7 +34,7 @@ The current public docs only commit to the main Kling image-generation path. Do 
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://cn.crazyrouter.com/kling/v1/images/generations \
+curl -X POST https://api.crazyrouter.com/kling/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -50,7 +50,7 @@ curl -X POST https://cn.crazyrouter.com/kling/v1/images/generations \
 import requests
 
 response = requests.post(
-    "https://cn.crazyrouter.com/kling/v1/images/generations",
+    "https://api.crazyrouter.com/kling/v1/images/generations",
     headers={
         "Content-Type": "application/json",
         "Authorization": "Bearer YOUR_API_KEY"
@@ -92,7 +92,7 @@ GET /kling/v1/images/generations/{task_id}
 ```
 
 ```bash cURL
-curl https://cn.crazyrouter.com/kling/v1/images/generations/2037177945839673344 \
+curl https://api.crazyrouter.com/kling/v1/images/generations/2037177945839673344 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 

@@ -23,7 +23,7 @@ Crazyrouter 本番環境では、OpenAI 形式の `image_url` 入力をサポー
 ## base64 data URL を使う（最も確実）
 
 ```bash
-curl https://cn.crazyrouter.com/v1/chat/completions \
+curl https://api.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -67,7 +67,7 @@ curl https://cn.crazyrouter.com/v1/chat/completions \
 ## リモート https URL を使う
 
 ```bash
-curl https://cn.crazyrouter.com/v1/chat/completions \
+curl https://api.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{

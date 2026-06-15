@@ -14,7 +14,7 @@ POST /v1/images/edits
 ```
 
 <Warning>
-  Use the primary image route `https://cn.crazyrouter.com/v1` for `gpt-image-2`. The full generation endpoint is `https://cn.crazyrouter.com/v1/images/generations`. Account login, billing, and the console remain on `https://crazyrouter.com`.
+  Use the primary image route `https://api.crazyrouter.com/v1` for `gpt-image-2`. The full generation endpoint is `https://api.crazyrouter.com/v1/images/generations`. Account login, billing, and the console remain on `https://crazyrouter.com`.
 </Warning>
 
 ## Generate Image
@@ -47,7 +47,7 @@ These parameters are rejected for `gpt-image-2`: `response_format`, `style`, `in
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://cn.crazyrouter.com/v1/images/generations \
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -65,7 +65,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="YOUR_API_KEY",
-    base_url="https://cn.crazyrouter.com/v1",
+    base_url="https://api.crazyrouter.com/v1",
 )
 
 response = client.images.generate(
@@ -87,7 +87,7 @@ print(response.data[0].url)
 `gpt-image-2` supports `stream=true`. If you send `partial_images`, you must also set `stream=true`, and the value must be `0-3`.
 
 ```bash cURL
-curl -N -X POST https://cn.crazyrouter.com/v1/images/generations \
+curl -N -X POST https://api.crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -101,7 +101,7 @@ curl -N -X POST https://cn.crazyrouter.com/v1/images/generations \
 ```
 
 <Note>
-  Synchronous `quality=high` requests, including the compatibility value `quality=hd`, can take a long time. For image workloads, use `https://cn.crazyrouter.com/v1`; for high-quality jobs, prefer `stream=true` or set your client timeout above 180 seconds.
+  Synchronous `quality=high` requests, including the compatibility value `quality=hd`, can take a long time. For image workloads, use `https://api.crazyrouter.com/v1`; for high-quality jobs, prefer `stream=true` or set your client timeout above 180 seconds.
 </Note>
 
 ### Response Example
@@ -154,7 +154,7 @@ from openai import OpenAI
 
 client = OpenAI(
     api_key="YOUR_API_KEY",
-    base_url="https://cn.crazyrouter.com/v1",
+    base_url="https://api.crazyrouter.com/v1",
 )
 
 response = client.images.edit(
@@ -177,7 +177,7 @@ Multi-image editing requests must use `multipart/form-data`. Prefer multiple `im
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://cn.crazyrouter.com/v1/images/edits \
+curl -X POST https://api.crazyrouter.com/v1/images/edits \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -F "model=gpt-image-2" \
   -F "prompt=Blend the person from the first image with the background from the second image into one natural campaign visual" \
@@ -192,7 +192,7 @@ curl -X POST https://cn.crazyrouter.com/v1/images/edits \
 import requests
 
 response = requests.post(
-    "https://cn.crazyrouter.com/v1/images/edits",
+    "https://api.crazyrouter.com/v1/images/edits",
     headers={"Authorization": "Bearer YOUR_API_KEY"},
     data={
         "model": "gpt-image-2",

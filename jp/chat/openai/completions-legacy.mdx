@@ -40,7 +40,7 @@ In practice, this means the endpoint should be treated as legacy-client compatib
 If you must verify whether a legacy model still works on this endpoint, first confirm the model ID through [`/v1/models`](/chat/openai/models), then send a minimal request:
 
 ```bash
-curl https://cn.crazyrouter.com/v1/completions \
+curl https://api.crazyrouter.com/v1/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{

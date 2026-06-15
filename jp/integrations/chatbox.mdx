@@ -17,13 +17,13 @@ This setup is useful because it:
 Use this configuration first:
 
 - Provider / API Mode: `OpenAI API Compatible` or `OpenAI API`
-- API Host: `https://crazyrouter.com`
+- API Host: `https://api.crazyrouter.com`
 - API Path: leave it blank or keep the default
 - API Key: `sk-xxx`
 - First validation model: `gpt-5.5`
 
 <Note>
-According to ChatBox's current official provider documentation, the `API Path` usually does not need to be filled manually because ChatBox already has a default OpenAI-compatible chat path. For Crazyrouter docs, the safest starting point is to enter the root host `https://crazyrouter.com` and avoid manually forcing `/v1/chat/completions` at the beginning.
+According to ChatBox's current official provider documentation, the `API Path` usually does not need to be filled manually because ChatBox already has a default OpenAI-compatible chat path. For Crazyrouter docs, the safest starting point is to enter the root host `https://api.crazyrouter.com` and avoid manually forcing `/v1/chat/completions` at the beginning.
 </Note>
 
 ## Who This Guide Is For
@@ -114,7 +114,7 @@ If your current version already includes `OpenAI API`, select it directly. If no
   <Step title="Step 4: Enter the Crazyrouter connection values">
     Recommended values:
 
-    - `API Host`: `https://crazyrouter.com`
+    - `API Host`: `https://api.crazyrouter.com`
     - `API Path`: leave blank or keep the default
     - `API Key`: `sk-xxx`
 
@@ -216,7 +216,7 @@ If your ChatBox version exposes common generation settings, keep the first run c
 - [ ] ChatBox is installed and launches normally
 - [ ] A dedicated Crazyrouter token was created for ChatBox
 - [ ] `OpenAI API` or `OpenAI API Compatible` is selected
-- [ ] `API Host` is set to `https://crazyrouter.com`
+- [ ] `API Host` is set to `https://api.crazyrouter.com`
 - [ ] `API Path` is left blank or kept at the default
 - [ ] `sk-xxx` was entered successfully
 - [ ] Only `gpt-5.5` was added for the first pass
@@ -228,7 +228,7 @@ If your ChatBox version exposes common generation settings, keep the first run c
 | Symptom | Common cause | Fix |
 |------|----------|----------|
 | 401 unauthorized | Token is wrong, incomplete, or expired | Generate a new token and paste it again |
-| 404 | Host or path is wrong | Reset Host to `https://crazyrouter.com` and keep the path default |
+| 404 | Host or path is wrong | Reset Host to `https://api.crazyrouter.com` and keep the path default |
 | 403 / model not allowed | The token does not allow the selected model | Allow that model in Crazyrouter token settings |
 | `model not found` | The model name is wrong | Switch back to `gpt-5.5` and revalidate |
 | Save succeeds but chat fails | Wrong provider type or the model was not actually added | Recheck the provider mode and model list |
@@ -243,7 +243,7 @@ Prefer `OpenAI API` or `OpenAI API Compatible`.
 
 ### What should I enter as the API Host?
 
-Use `https://crazyrouter.com`.
+Use `https://api.crazyrouter.com`.
 
 ### Do I need to manually enter `/v1/chat/completions`?
 

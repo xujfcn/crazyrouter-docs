@@ -27,7 +27,7 @@ POST /minimax/v1/video_generation
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://cn.crazyrouter.com/minimax/v1/video_generation \
+curl -X POST https://api.crazyrouter.com/minimax/v1/video_generation \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -40,7 +40,7 @@ curl -X POST https://cn.crazyrouter.com/minimax/v1/video_generation \
 import requests
 
 response = requests.post(
-    "https://cn.crazyrouter.com/minimax/v1/video_generation",
+    "https://api.crazyrouter.com/minimax/v1/video_generation",
     headers={
         "Content-Type": "application/json",
         "Authorization": "Bearer YOUR_API_KEY"
@@ -89,7 +89,7 @@ GET /minimax/v1/query/video_generation?task_id={task_id}
 ```
 
 ```bash cURL
-curl "https://cn.crazyrouter.com/minimax/v1/query/video_generation?task_id=minimax_video_abc123" \
+curl "https://api.crazyrouter.com/minimax/v1/query/video_generation?task_id=minimax_video_abc123" \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 

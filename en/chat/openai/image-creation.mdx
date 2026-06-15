@@ -28,7 +28,7 @@ As of March 23, 2026, production checks against Crazyrouter showed:
 The following request hit `gpt-image-2` in production and returned `200`:
 
 ```bash
-curl https://cn.crazyrouter.com/v1/chat/completions \
+curl https://api.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -65,7 +65,7 @@ That means the current chat path behaves more like text-wrapped image-task outpu
 If you need programmatic image retrieval, use:
 
 ```bash
-curl -X POST https://cn.crazyrouter.com/v1/images/generations \
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -77,7 +77,7 @@ curl -X POST https://cn.crazyrouter.com/v1/images/generations \
   }'
 ```
 
-The current `gpt-image-2` stable path uses the primary image route `https://cn.crazyrouter.com/v1`. Responses usually include:
+The current `gpt-image-2` stable path uses the primary image route `https://api.crazyrouter.com/v1`. Responses usually include:
 
 - `data[0].url`
 

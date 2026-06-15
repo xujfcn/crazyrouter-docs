@@ -9,7 +9,7 @@ description: 'Python text-to-speech (TTS) and speech-to-text (STT)'
 ```python
 from openai import OpenAI
 
-client = OpenAI(api_key="sk-xxx", base_url="https://cn.crazyrouter.com/v1")
+client = OpenAI(api_key="sk-xxx", base_url="https://api.crazyrouter.com/v1")
 
 # Generate speech
 response = client.audio.speech.create(
