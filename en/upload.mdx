@@ -17,6 +17,7 @@ Crazyrouter provides temporary public image upload endpoints for converting loca
 | Local file upload | `POST /v1/files/uploads` |
 | Base64 image upload | `POST /v1/files/uploads/base64` |
 | Remote image rehosting | `POST /v1/files/uploads/url` |
+| Presigned direct R2 upload | `POST /v1/files/uploads/presign` |
 
 Common limits:
 
@@ -77,6 +78,58 @@ curl -X POST https://api.crazyrouter.com/v1/files/uploads/url \
 ```
 
 The remote URL must be an `http` or `https` image URL reachable by Crazyrouter servers. The system checks file size, MIME type, and SSRF protection rules.
+
+## Presigned Direct R2 Upload
+
+For high-upload-volume workflows, request a presigned upload URL first, then upload the image directly from your client to the storage endpoint with `PUT`. The image bytes do not pass through the Crazyrouter application server.
+
+First, request a direct upload URL:
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/files/uploads/presign \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "filename": "reference.jpg",
+    "content_type": "image/jpeg",
+    "size": 12345,
+    "purpose": "model_input"
+  }'
+```
+
+Example response:
+
+```json
+{
+  "id": "file_e5bbce820b5941409682a9c5e9ba79f1",
+  "upload_url": "https://...r2.cloudflarestorage.com/...?...",
+  "url": "https://media.crazyrouter.com/task-artifacts/tmp-inputs/2026/06/21/user-1/file_e5bbce820b5941409682a9c5e9ba79f1.jpg",
+  "method": "PUT",
+  "headers": {
+    "Content-Type": "image/jpeg",
+    "Content-Length": "12345"
+  },
+  "mime_type": "image/jpeg",
+  "size": 12345,
+  "expires_at": "2026-06-22T04:41:35Z",
+  "upload_expires_at": "2026-06-21T04:56:35Z"
+}
+```
+
+Then upload the file directly to `upload_url`:
+
+```bash cURL
+curl -X PUT "$UPLOAD_URL" \
+  -H "Content-Type: image/jpeg" \
+  -H "Content-Length: 12345" \
+  --data-binary @./reference.jpg
+```
+
+After the upload succeeds, use the returned `url` as the image URL in the model request.
+
+<Warning>
+  The `upload_url` is a short-lived write URL, valid for about 15 minutes by default. `Content-Type` and `Content-Length` must match the presign request. Do not pass `upload_url` to the model; use the returned `url` instead.
+</Warning>
 
 ## Example: Use a Local Reference Image for Kling Image-to-Video
 

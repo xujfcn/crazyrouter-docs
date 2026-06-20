@@ -1,90 +1,81 @@
 ---
-title: 'Image Upload Guidance'
-description: 'How to provide image URLs and use model-native upload flows'
+title: '画像アップロードガイド'
+description: '画像をアップロードして一時的な公開 URL を取得し、画像入力対応 API で使用する方法'
 ---
-> 更新日: 2026-06-06
+> 更新日: 2026-06-21
 
-## Current status
+Crazyrouter は、モデルが読み取れる一時的な公開画像 URL を作成するためのアップロード API を提供しています。Vision、画像編集、画像から動画、ワークフロー連携などで利用できます。
 
-Crazyrouter does not currently expose a public generic image-hosting endpoint.
+<Note>
+  一時画像はデフォルトで 48 時間保存され、その後自動的に削除されます。保存期間中のストレージは個別課金されませんが、ユーザー単位のアップロード容量とレート制限があります。
+</Note>
 
-Do not depend on the following endpoint:
+## Endpoint Overview
 
-```text
-POST /api/upload
-```
+| Scenario | Endpoint |
+|----------|----------|
+| Local file upload | `POST /v1/files/uploads` |
+| Base64 image upload | `POST /v1/files/uploads/base64` |
+| Remote image rehosting | `POST /v1/files/uploads/url` |
+| Presigned direct R2 upload | `POST /v1/files/uploads/presign` |
 
-## Recommended approaches
+Common limits:
 
-### 1. Use your own object storage or CDN
+| Item | Current rule |
+|------|--------------|
+| Auth | `Authorization: Bearer YOUR_API_KEY` |
+| Supported formats | `image/png`, `image/jpeg`, `image/webp`, `image/gif` |
+| Single file size | 20MB |
+| User upload quota | 200MB / rolling 24-hour window |
+| Default expiration | 48 hours |
+| Returned URL | `https://media.crazyrouter.com/task-artifacts/tmp-inputs/...` |
 
-The best option is to upload files to your own S3 / R2 / OSS / COS / CDN bucket first, then pass the resulting public URL to Crazyrouter endpoints that support image input.
+## Presigned Direct R2 Upload
 
-Typical use cases:
-
-- GPT / Claude / Gemini vision
-- image editing
-- image-to-video
-- workflow tool integrations
-
-### 2. Use model-native upload flows
-
-Some models and upstream APIs already support multipart uploads or dedicated upload routes. Use the model-specific endpoint when available.
-
-Examples:
-
-- Midjourney image upload: `POST /mj/submit/upload-discord-images`
-- OpenAI-compatible image edits: `POST /v1/images/edits`
-- audio transcription: `POST /v1/audio/transcriptions`
-
-### 3. Save files in your own backend first, then send URLs
-
-If users upload local files to your app, your backend should store the file, generate a public URL, and then call Crazyrouter with that URL.
-
-## Example: use a public image URL for vision
-
-<CodeGroup>
-
-```python Python
-from openai import OpenAI
-
-client = OpenAI(api_key="sk-xxx", base_url="https://api.crazyrouter.com/v1")
-
-response = client.chat.completions.create(
-    model="gpt-5.5",
-    messages=[{
-        "role": "user",
-        "content": [
-            {"type": "text", "text": "Describe this image"},
-            {"type": "image_url", "image_url": {"url": "https://example.com/photo.jpg"}}
-        ]
-    }]
-)
-print(response.choices[0].message.content)
-```
+大量アップロードのワークフローでは、まず presigned upload URL を取得し、クライアントからストレージへ直接 `PUT` できます。画像バイナリは Crazyrouter のアプリケーションサーバーを経由しません。
 
 ```bash cURL
-curl https://api.crazyrouter.com/v1/chat/completions \
+curl -X POST https://api.crazyrouter.com/v1/files/uploads/presign \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer sk-xxx" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "gpt-5.5",
-    "messages": [{
-      "role": "user",
-      "content": [
-        {"type": "text", "text": "Describe this image"},
-        {"type": "image_url", "image_url": {"url": "https://example.com/photo.jpg"}}
-      ]
-    }]
+    "filename": "reference.jpg",
+    "content_type": "image/jpeg",
+    "size": 12345,
+    "purpose": "model_input"
   }'
 ```
 
-</CodeGroup>
+Example response:
+
+```json
+{
+  "id": "file_e5bbce820b5941409682a9c5e9ba79f1",
+  "upload_url": "https://...r2.cloudflarestorage.com/...?...",
+  "url": "https://media.crazyrouter.com/task-artifacts/tmp-inputs/2026/06/21/user-1/file_e5bbce820b5941409682a9c5e9ba79f1.jpg",
+  "method": "PUT",
+  "headers": {
+    "Content-Type": "image/jpeg",
+    "Content-Length": "12345"
+  },
+  "mime_type": "image/jpeg",
+  "size": 12345,
+  "expires_at": "2026-06-22T04:41:35Z",
+  "upload_expires_at": "2026-06-21T04:56:35Z"
+}
+```
+
+Then upload directly:
+
+```bash cURL
+curl -X PUT "$UPLOAD_URL" \
+  -H "Content-Type: image/jpeg" \
+  -H "Content-Length: 12345" \
+  --data-binary @./reference.jpg
+```
+
+アップロード完了後、モデルリクエストでは `upload_url` ではなく、返却された `url` を使用してください。
 
 <Warning>
-  If the image URL is not publicly reachable, the upstream model usually cannot read it.
+  `upload_url` は短時間だけ有効な書き込み用 URL です。`Content-Type` と `Content-Length` は presign リクエストと一致している必要があります。
 </Warning>
-
-<Note>
-  If Crazyrouter exposes a public generic upload API again in the future, this page will be updated into a formal endpoint reference.
-</Note>
