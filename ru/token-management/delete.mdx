@@ -3,7 +3,7 @@ title: 'Delete Token'
 description: 'Delete a specified API token'
 api: 'DELETE /api/token/{id}'
 ---
-> Дата обновления: 2026-06-06
+> Дата обновления: 2026-06-23
 
 ## Overview
 
@@ -52,7 +52,7 @@ headers = {
 
 token_id = 10
 response = requests.delete(
-    f"https://crazyrouter.com/api/token/{token_id}",
+    f"https://api.crazyrouter.com/api/token/{token_id}",
     headers=headers
 )
 
@@ -60,7 +60,7 @@ print(response.json())
 ```
 
 ```bash cURL
-curl -X DELETE https://crazyrouter.com/api/token/10 \
+curl -X DELETE https://api.crazyrouter.com/api/token/10 \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 1"
 ```

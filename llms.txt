@@ -8,7 +8,7 @@ Use this file as the first AI-readable entry point for Crazyrouter docs:
 
 ```text
 Read https://docs.crazyrouter.com/llms.txt first.
-Use https://crazyrouter.com/pricing and https://crazyrouter.com/api/pricing?lang=en as the source of truth for public models, prices, billing modes, and endpoint support.
+Use https://crazyrouter.com/pricing and https://api.crazyrouter.com/api/pricing?lang=en as the source of truth for public models, prices, billing modes, and endpoint support.
 Use GET https://api.crazyrouter.com/v1/models with Authorization: Bearer YOUR_API_KEY to confirm which models a token can actually call.
 For East Asia, prefer https://cn.crazyrouter.com; OpenAI-compatible SDKs use https://cn.crazyrouter.com/v1.
 Do not invent model names, prices, billing modes, or routes from memory.
@@ -18,7 +18,7 @@ Generate code only after matching the model's public_endpoint_types or supported
 Authoritative runtime sources:
 
 - [Pricing page](https://crazyrouter.com/pricing): current public model catalog and user-facing prices.
-- [Pricing API](https://crazyrouter.com/api/pricing?lang=en): machine-readable pricing data used by the pricing page. Prefer `public_endpoint_types`; fall back to `supported_endpoint_types`.
+- [Pricing API](https://api.crazyrouter.com/api/pricing?lang=en): machine-readable pricing data used by the pricing page. Prefer `public_endpoint_types`; fall back to `supported_endpoint_types`.
 - `GET https://api.crazyrouter.com/v1/models`: token-level available models. Requires `Authorization: Bearer YOUR_API_KEY`.
 - [How to use llms.txt](https://docs.crazyrouter.com/en/llms-guide.md): instructions for users and AI tools.
 
@@ -80,7 +80,7 @@ Maintainers: keep examples aligned with `router/relay-router.go`, `router/video-
 ## Model And Pricing Alignment
 
 - Never treat this file as the complete model catalog.
-- For public model names and pricing, use `https://crazyrouter.com/pricing` or `https://crazyrouter.com/api/pricing?lang=en`.
+- For public model names and pricing, use `https://crazyrouter.com/pricing` or `https://api.crazyrouter.com/api/pricing?lang=en`.
 - For the current user's callable models, use `GET https://api.crazyrouter.com/v1/models` with that user's API key.
 - Use `model_name` from pricing data as the API `model` value.
 - Prefer `public_endpoint_types` from pricing data when selecting a route. If absent, use `supported_endpoint_types`.

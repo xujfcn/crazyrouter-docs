@@ -2,7 +2,7 @@
 title: "Ideogram V3"
 description: "Use the Ideogram V3 API for image generation, editing, blending, reframing, and background replacement"
 ---
-> 更新日: 2026-06-06
+> 更新日: 2026-06-23
 
 # Ideogram V3
 
@@ -31,7 +31,7 @@ POST /ideogram/v1/ideogram-v3/generate
 <CodeGroup>
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/ideogram/v1/ideogram-v3/generate \
+curl -X POST https://api.crazyrouter.com/ideogram/v1/ideogram-v3/generate \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -46,7 +46,7 @@ curl -X POST https://crazyrouter.com/ideogram/v1/ideogram-v3/generate \
 import requests
 
 response = requests.post(
-    "https://crazyrouter.com/ideogram/v1/ideogram-v3/generate",
+    "https://api.crazyrouter.com/ideogram/v1/ideogram-v3/generate",
     headers={
         "Content-Type": "application/json",
         "Authorization": "Bearer YOUR_API_KEY"
@@ -100,7 +100,7 @@ Edit and modify an existing image.
 | `style_type` | string | No | Style type |
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/ideogram/v1/ideogram-v3/edit \
+curl -X POST https://api.crazyrouter.com/ideogram/v1/ideogram-v3/edit \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -127,7 +127,7 @@ Generate variations based on a reference image and new prompt.
 | `image_weight` | number | No | Reference image weight, 0-100 |
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/ideogram/v1/ideogram-v3/remix \
+curl -X POST https://api.crazyrouter.com/ideogram/v1/ideogram-v3/remix \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
@@ -168,7 +168,7 @@ Automatically detect the subject and replace the background.
 | `image` | string | Yes | Original image |
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/ideogram/v1/ideogram-v3/replace-background \
+curl -X POST https://api.crazyrouter.com/ideogram/v1/ideogram-v3/replace-background \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{

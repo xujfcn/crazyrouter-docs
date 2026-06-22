@@ -3,7 +3,7 @@ title: 'Create Token'
 description: 'Create a new API token'
 api: 'POST /api/token/'
 ---
-> 更新日: 2026-06-06
+> 更新日: 2026-06-23
 
 ## Overview
 
@@ -83,7 +83,7 @@ headers = {
 }
 
 response = requests.post(
-    "https://crazyrouter.com/api/token/",
+    "https://api.crazyrouter.com/api/token/",
     headers=headers,
     json={
         "name": "Production",
@@ -100,7 +100,7 @@ print(response.json())
 ```
 
 ```bash cURL
-curl -X POST https://crazyrouter.com/api/token/ \
+curl -X POST https://api.crazyrouter.com/api/token/ \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 1" \
   -H "Content-Type: application/json" \

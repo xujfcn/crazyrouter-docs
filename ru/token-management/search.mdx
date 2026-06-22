@@ -3,7 +3,7 @@ title: 'Search Tokens'
 description: 'Search tokens by keyword'
 api: 'GET /api/token/search'
 ---
-> Дата обновления: 2026-06-06
+> Дата обновления: 2026-06-23
 
 ## Overview
 
@@ -70,7 +70,7 @@ headers = {
 }
 
 response = requests.get(
-    "https://crazyrouter.com/api/token/search?keyword=production&token=sk-",
+    "https://api.crazyrouter.com/api/token/search?keyword=production&token=sk-",
     headers=headers
 )
 
@@ -80,7 +80,7 @@ for token in tokens:
 ```
 
 ```bash cURL
-curl "https://crazyrouter.com/api/token/search?keyword=production&token=sk-" \
+curl "https://api.crazyrouter.com/api/token/search?keyword=production&token=sk-" \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 1"
 ```

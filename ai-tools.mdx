@@ -2,7 +2,7 @@
 title: 'AI 工具读取文档'
 description: '给 Codex、Claude Code、ChatGPT、Cursor 等 AI 工具使用的 Crazyrouter 文档入口'
 ---
-> 更新日期：2026-06-16
+> 更新日期：2026-06-23
 
 这个页面用于把 Crazyrouter 文档交给 AI 工具读取。优先使用下面这些稳定入口。
 
@@ -28,7 +28,7 @@ description: '给 Codex、Claude Code、ChatGPT、Cursor 等 AI 工具使用的 
 ```text
 请先读取 https://docs.crazyrouter.com/llms.txt 判断相关页面。
 如果需要完整上下文，再读取 https://docs.crazyrouter.com/llms-full.txt。
-模型名称、价格、计费方式和端点支持必须以 https://crazyrouter.com/pricing 以及 https://crazyrouter.com/api/pricing?lang=zh 为准。
+模型名称、价格、计费方式和端点支持必须以 https://crazyrouter.com/pricing 以及 https://api.crazyrouter.com/api/pricing?lang=zh 为准。
 如需确认当前 API Key 实际可用模型，请调用 GET https://api.crazyrouter.com/v1/models。
 接入 OpenAI 兼容客户端时 base_url 使用 https://api.crazyrouter.com/v1。
 接入 Claude Code / Anthropic 原生客户端时使用根域名 https://api.crazyrouter.com，不要追加 /v1。
@@ -53,7 +53,7 @@ description: '给 Codex、Claude Code、ChatGPT、Cursor 等 AI 工具使用的 
 ## 口径要求
 
 - `llms.txt` 不是全量模型清单。
-- 模型、价格、计费方式和端点类型以 [Pricing 页面](https://crazyrouter.com/pricing) 与 `GET https://crazyrouter.com/api/pricing?lang=zh` 为准。
+- 模型、价格、计费方式和端点类型以 [Pricing 页面](https://crazyrouter.com/pricing) 与 `GET https://api.crazyrouter.com/api/pricing?lang=zh` 为准。
 - 当前 Token 能调用哪些模型，以 `GET https://api.crazyrouter.com/v1/models` 的返回结果为准。
 - 东亚地区优先使用 `https://cn.crazyrouter.com`，OpenAI 兼容客户端使用 `https://cn.crazyrouter.com/v1`。
 - 生成调用代码时，优先使用 `/api/pricing` 返回的 `public_endpoint_types`，没有该字段时再使用 `supported_endpoint_types`。

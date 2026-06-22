@@ -24,7 +24,7 @@ if sys.platform == "win32":
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 # ============ 配置 ============
-API_BASE = os.getenv("API_BASE_URL", "https://crazyrouter.com")
+API_BASE = os.getenv("API_BASE_URL", "https://api.crazyrouter.com")
 API_KEY = os.getenv("API_KEY", "")           # sk-xxx
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN", "") # 控制台 API 用
 USER_ID = os.getenv("USER_ID", "1")

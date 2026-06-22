@@ -2,7 +2,7 @@
 title: 'Usage Logs and Cost Monitoring'
 description: 'Use management APIs to list API keys, query usage logs, summarize quota, and calculate USD cost'
 ---
-> 更新日: 2026-06-06
+> 更新日: 2026-06-23
 
 ## Use Cases
 
@@ -43,7 +43,7 @@ Recommended sequence:
 ## 1. List API Keys
 
 ```bash cURL
-curl "https://crazyrouter.com/api/token/?p=1&page_size=100" \
+curl "https://api.crazyrouter.com/api/token/?p=1&page_size=100" \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 485"
 ```
@@ -96,7 +96,7 @@ Use `/api/log/self` to query the current user's own consumption logs. At minimum
 Example:
 
 ```bash cURL
-curl "https://crazyrouter.com/api/log/self?type=2&token_name=gptai&start_timestamp=1771334901&end_timestamp=1772309095&p=1&page_size=5" \
+curl "https://api.crazyrouter.com/api/log/self?type=2&token_name=gptai&start_timestamp=1771334901&end_timestamp=1772309095&p=1&page_size=5" \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 485"
 ```
@@ -162,7 +162,7 @@ Example response:
 If you only need a dashboard, report, or alerting input, use the summary endpoint:
 
 ```bash cURL
-curl "https://crazyrouter.com/api/log/self/stat?type=2&token_name=gptai&start_timestamp=1771334901&end_timestamp=1772309095" \
+curl "https://api.crazyrouter.com/api/log/self/stat?type=2&token_name=gptai&start_timestamp=1771334901&end_timestamp=1772309095" \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 485"
 ```
@@ -193,7 +193,7 @@ If the customer does not only want per-key monitoring, but also wants to display
 Use the same management-auth headers:
 
 ```bash cURL
-curl "https://crazyrouter.com/api/user/self" \
+curl "https://api.crazyrouter.com/api/user/self" \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 4004"
 ```
@@ -255,7 +255,7 @@ $22.00
 System conversion metadata is available from the public `/api/status` endpoint:
 
 ```bash cURL
-curl "https://crazyrouter.com/api/status"
+curl "https://api.crazyrouter.com/api/status"
 ```
 
 Relevant fields:
