@@ -2,7 +2,7 @@
 title: "Claude OpenAI 兼容格式"
 description: "基于 2026-03-23 Crazyrouter 生产环境验证的 Claude Chat Completions 兼容路径"
 ---
-> 更新日期：2026-06-06
+> 更新日期：2026-06-23
 
 # Claude OpenAI 兼容格式
 
@@ -16,6 +16,10 @@ POST /v1/chat/completions
 - `message` 当前稳定包含 `role`、`content`
 - 流式请求返回 `chat.completion.chunk`
 - SSE 仍以 `data: [DONE]` 结束
+
+<Warning>
+本页是 Claude 走 OpenAI Chat Completions 兼容格式的普通对话路径。Claude 原生 `tool_use`、Claude Code、以及依赖工具调用的 Agent 编程场景，请优先使用 [Claude 原生格式](/chat/anthropic/messages) 的 `POST /v1/messages`。OpenAI 兼容格式不保证等价支持 Claude 原生工具块。
+</Warning>
 
 ---
 
