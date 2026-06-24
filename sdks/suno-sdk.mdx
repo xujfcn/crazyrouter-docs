@@ -1,0 +1,468 @@
+---
+title: 'Suno SDK 中文指南'
+description: '使用同一个 Crazyrouter API Key 调用 Suno 统一任务模型族，覆盖生成、续写、翻唱、上传续写、时间轴歌词和人声分离'
+---
+> 更新日期：2026-06-24
+
+## 适用范围
+
+这页文档讲的是 Crazyrouter 当前这套 Suno 统一任务模型族：
+
+- `suno/generate`
+- `suno/extend`
+- `suno/upload-extend`
+- `suno/cover`
+- `suno/timestamped-lyrics`
+- `suno/vocal-separation`
+
+它们不是 OpenAI SDK 的内置方法，应该使用同一个 API Key，通过 Crazyrouter 原生异步任务路径调用：
+
+```text
+POST /v1/video/generations
+GET  /v1/video/generations/{task_id}
+GET  /v1/videos/{task_id}/content
+```
+
+<Warning>
+不要把这套 `suno/*` 模型当成 `client.audio.*` 或 `client.responses.*` 来调。它们当前属于 Crazyrouter 原生任务接口，不是 OpenAI 官方 SDK 的标准音频方法。
+</Warning>
+
+## 基础地址
+
+国际默认入口：
+
+```text
+https://api.crazyrouter.com
+```
+
+如果你已经在业务里统一使用主站域名，也可以使用：
+
+```text
+https://crazyrouter.com
+```
+
+## 鉴权
+
+所有请求都使用同一个 Crazyrouter API Key：
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+如果你要固定打某个已验证渠道，例如 `258`，当前最稳妥的方式是把渠道后缀拼到 Key 后面：
+
+```text
+Bearer YOUR_API_KEY-258
+```
+
+默认情况下可不指定，走自动路由。
+
+## 版本参数
+
+Suno 统一任务模型族使用 `input.model_version`，不是老 `/suno/submit/music` 路由里的 `mv`。
+
+当前可用版本值：
+
+| UI 文案 | `model_version` 值 |
+|---|---|
+| `V5.5 (Latest)` | `V5_5` |
+| `V5` | `V5` |
+| `V4.5 Plus` | `V4_5PLUS` |
+| `V4.5 All` | `V4_5ALL` |
+| `V4.5` | `V4_5` |
+| `V4` | `V4` |
+
+`2026-06-24 +08:00` 本地对 `258` 渠道逐个实测，以上 6 个版本在 `suno/generate` 主链全部成功。
+
+## 通用提交格式
+
+所有模型都走同一个提交入口：
+
+```json
+{
+  "model": "suno/generate",
+  "callBackUrl": "https://your-domain.com/callback",
+  "channel": "auto",
+  "input": {
+    "model_version": "V5_5"
+  }
+}
+```
+
+其中：
+
+- `model` 是具体的 Suno 子模型名
+- `callBackUrl` 可选
+- `channel` 可选，建议默认 `auto`
+- 具体参数放在 `input` 里
+
+## 查询任务
+
+提交后拿到 `task_id`，再轮询：
+
+```bash
+curl https://api.crazyrouter.com/v1/video/generations/TASK_ID \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+典型响应：
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "status": "succeeded",
+    "task_id": "task_xxx",
+    "format": "mp4",
+    "url": "https://api.crazyrouter.com/v1/videos/task_xxx/content",
+    "metadata": null,
+    "error": null
+  }
+}
+```
+
+下载最终内容：
+
+```bash
+curl -L https://api.crazyrouter.com/v1/videos/TASK_ID/content -o result.mp4
+```
+
+<Note>
+当前部分 Suno 路由查询结果只稳定返回 `task_id`、`status`、`url`，不一定总能回出 `audioId`。如果你的链路依赖派生模型，请先确认上游结果里拿得到所需字段。
+</Note>
+
+## 模型清单与请求示例
+
+### 1. `suno/generate`
+
+文本生成歌曲。
+
+最常用参数：
+
+- `model_version`
+- `prompt`
+- `customMode`
+- `instrumental`
+- `style`
+- `title`
+
+```bash
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "suno/generate",
+    "channel": "auto",
+    "input": {
+      "model_version": "V5_5",
+      "customMode": true,
+      "instrumental": false,
+      "prompt": "[Verse]\nMorning lights across the wire\nTiny sparks climb higher\n[Chorus]\nTest the route and let it sing\nClear and bright on everything",
+      "style": "bright synth pop, short, clean vocals",
+      "title": "CR Suno Route Test"
+    }
+  }'
+```
+
+### 2. `suno/extend`
+
+基于已有 Suno 音频继续续写。
+
+最常用参数：
+
+- `model_version`
+- `audioId`
+- `continueAt`
+- `prompt`
+- `style`
+- `title`
+- `instrumental`
+
+```json
+{
+  "model": "suno/extend",
+  "channel": "auto",
+  "input": {
+    "model_version": "V5",
+    "audioId": "abc123-def456",
+    "continueAt": 20,
+    "instrumental": false,
+    "prompt": "[Bridge]\nCarry the melody forward with a brighter chorus and soft harmonies",
+    "style": "bright synth pop, clean vocals",
+    "title": "CR Suno Route Test Extended"
+  }
+}
+```
+
+### 3. `suno/upload-extend`
+
+基于外部音频 URL 继续续写。
+
+最常用参数：
+
+- `model_version`
+- `audioUrl`
+- `continueAt`
+- `prompt`
+- `style`
+- `title`
+
+```json
+{
+  "model": "suno/upload-extend",
+  "channel": "auto",
+  "input": {
+    "model_version": "V4_5PLUS",
+    "audioUrl": "https://your-storage.example.com/source.mp3",
+    "continueAt": 20,
+    "instrumental": false,
+    "prompt": "Extend with a simple upbeat outro",
+    "style": "bright synth pop",
+    "title": "Upload Extend Demo"
+  }
+}
+```
+
+### 4. `suno/cover`
+
+基于已有音频做翻唱或风格改写。
+
+最常用参数：
+
+- `model_version`
+- `audioUrl`
+- `customMode`
+- `instrumental`
+- `prompt`
+- `style`
+- `title`
+- `vocalGender`
+
+```json
+{
+  "model": "suno/cover",
+  "channel": "auto",
+  "input": {
+    "model_version": "V4_5ALL",
+    "audioUrl": "https://your-storage.example.com/original.mp3",
+    "customMode": false,
+    "instrumental": false,
+    "prompt": "Transform into an acoustic pop cover with gentle guitar",
+    "style": "acoustic pop",
+    "title": "Acoustic Cover Demo",
+    "vocalGender": "f"
+  }
+}
+```
+
+### 5. `suno/timestamped-lyrics`
+
+获取时间轴歌词。
+
+最常用参数：
+
+- `taskId`
+- `audioId`
+
+```json
+{
+  "model": "suno/timestamped-lyrics",
+  "channel": "auto",
+  "input": {
+    "taskId": "task_xxx",
+    "audioId": "audio_xxx"
+  }
+}
+```
+
+<Warning>
+当前 `258` 渠道在 `2026-06-24 +08:00` 的复测里，`timestamped-lyrics` 仍不稳定：`metadata` 写法会返回 `400 invalid_request`，`input` 写法也出现过上游 `502`。如果你要上线这条能力，先单独做渠道级验证，不要默认它和 `generate` 一样稳定。
+</Warning>
+
+### 6. `suno/vocal-separation`
+
+做人声与伴奏分离。
+
+当前最稳妥的参数集合：
+
+- `taskId`
+- `audioId`
+- `audioUrl`
+
+```json
+{
+  "model": "suno/vocal-separation",
+  "channel": "auto",
+  "input": {
+    "taskId": "task_xxx",
+    "audioId": "audio_xxx",
+    "audioUrl": "https://your-storage.example.com/source.mp3",
+    "prompt": "Separate vocals and instrumental stems"
+  }
+}
+```
+
+<Note>
+我们在 `2026-06-24 +08:00` 的最小修复验证里确认：只传 `audioUrl` 不够稳，补上 `taskId + audioId + audioUrl` 后 `258` 渠道成功。
+</Note>
+
+## JavaScript / TypeScript 完整示例
+
+```ts
+const apiKey = process.env.CRAZYROUTER_API_KEY;
+const baseURL = process.env.CRAZYROUTER_BASE_URL ?? 'https://api.crazyrouter.com';
+
+if (!apiKey) {
+  throw new Error('Missing CRAZYROUTER_API_KEY');
+}
+
+async function crazyrouterFetch(path: string, init: RequestInit = {}) {
+  const response = await fetch(`${baseURL}${path}`, {
+    ...init,
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      Accept: 'application/json',
+      ...(init.body ? { 'Content-Type': 'application/json' } : {}),
+      ...init.headers,
+    },
+  });
+
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}: ${JSON.stringify(body)}`);
+  }
+  return body;
+}
+
+async function submitSunoGenerate() {
+  const task = await crazyrouterFetch('/v1/video/generations', {
+    method: 'POST',
+    body: JSON.stringify({
+      model: 'suno/generate',
+      channel: 'auto',
+      input: {
+        model_version: 'V5_5',
+        customMode: true,
+        instrumental: false,
+        prompt:
+          '[Verse]\\nMorning lights across the wire\\nTiny sparks climb higher\\n[Chorus]\\nTest the route and let it sing\\nClear and bright on everything',
+        style: 'bright synth pop, short, clean vocals',
+        title: 'CR Suno SDK Demo',
+      },
+    }),
+  });
+
+  const taskId = task.data?.task_id ?? task.task_id ?? task.id;
+  if (!taskId) {
+    throw new Error(`Missing task_id: ${JSON.stringify(task)}`);
+  }
+  return taskId;
+}
+
+async function waitForTask(taskId: string, timeoutMs = 10 * 60 * 1000) {
+  const deadline = Date.now() + timeoutMs;
+
+  while (Date.now() < deadline) {
+    const result = await crazyrouterFetch(`/v1/video/generations/${encodeURIComponent(taskId)}`);
+    const status = String(result.data?.status ?? result.status ?? '').toLowerCase();
+
+    if (['succeeded', 'success', 'completed', 'done'].includes(status)) {
+      return result;
+    }
+    if (['failed', 'failure', 'error', 'cancelled', 'canceled'].includes(status)) {
+      throw new Error(`Task failed: ${JSON.stringify(result)}`);
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 8000));
+  }
+
+  throw new Error(`Task timeout: ${taskId}`);
+}
+
+const taskId = await submitSunoGenerate();
+console.log('taskId:', taskId);
+
+const result = await waitForTask(taskId);
+console.log('status:', result.data?.status);
+console.log('content url:', result.data?.url);
+```
+
+## Python 完整示例
+
+```python
+import os
+import time
+import requests
+
+BASE_URL = os.getenv("CRAZYROUTER_BASE_URL", "https://api.crazyrouter.com")
+API_KEY = os.getenv("CRAZYROUTER_API_KEY")
+
+if not API_KEY:
+    raise RuntimeError("Missing CRAZYROUTER_API_KEY")
+
+HEADERS = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+}
+
+submit = requests.post(
+    f"{BASE_URL}/v1/video/generations",
+    headers=HEADERS,
+    json={
+        "model": "suno/generate",
+        "channel": "auto",
+        "input": {
+            "model_version": "V5_5",
+            "customMode": True,
+            "instrumental": False,
+            "prompt": "[Verse]\\nMorning lights across the wire\\nTiny sparks climb higher\\n[Chorus]\\nTest the route and let it sing\\nClear and bright on everything",
+            "style": "bright synth pop, short, clean vocals",
+            "title": "CR Suno Python Demo",
+        },
+    },
+    timeout=120,
+)
+submit.raise_for_status()
+task = submit.json()
+task_id = task.get("data", {}).get("task_id") or task.get("task_id") or task.get("id")
+
+if not task_id:
+    raise RuntimeError(f"Missing task_id: {task}")
+
+print("task_id:", task_id)
+
+while True:
+    resp = requests.get(
+        f"{BASE_URL}/v1/video/generations/{task_id}",
+        headers={"Authorization": f"Bearer {API_KEY}", "Accept": "application/json"},
+        timeout=120,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    status = str(data.get("data", {}).get("status", "")).lower()
+    print("status:", status)
+
+    if status in {"succeeded", "success", "completed", "done"}:
+        print("content url:", data.get("data", {}).get("url"))
+        break
+    if status in {"failed", "failure", "error", "cancelled", "canceled"}:
+        raise RuntimeError(data)
+
+    time.sleep(8)
+```
+
+## 常见问题
+
+### 为什么我能生成，但拿不到 `audioId`？
+
+这通常不是你请求体的问题，而是当前渠道或上游在查询结果里没有把 Suno 原始音频项完整透出。主链 `generate` 成功，不代表所有派生能力都一定可用。
+
+### 老 `/suno/submit/music` 和这里是什么关系？
+
+老路由是 Crazyrouter 早期保留的 Suno 原生接口；这页写的是当前统一任务模型族，也就是 `model: "suno/*"` 配合 `/v1/video/generations` 的接法。新项目优先按这页方式接。
+
+### 我应该传 `mv` 还是 `model_version`？
+
+这套统一任务模型族传 `input.model_version`。只有老 `/suno/submit/music` 才传 `mv`。
