@@ -1,0 +1,87 @@
+---
+title: "AIGC GV VOD 呼び出しガイド"
+description: "Crazyrouter の Tencent VOD ルートで GV / Google Veo 動画モデルを呼び出す方法"
+---
+> 更新日: 2026-06-24
+
+# AIGC GV VOD 呼び出しガイド
+
+`aigc-video-gv-*` は Crazyrouter が Tencent VOD ルートで公開している GV / Google Veo 動画モデルです。AIGC Kling VOD と同じ OpenAI 風の非同期動画 API を使います。
+
+```http
+POST /v1/video/generations
+GET /v1/video/generations/{task_id}
+```
+
+## 利用可能なモデル
+
+| モデル | 上流バージョン | 説明 |
+|------|------|------|
+| `aigc-video-gv-3.1` | GV 3.1 | 高品質版、音声生成対応 |
+| `aigc-video-gv-3.1-fast` | GV 3.1 Fast | 高速版、音声生成対応 |
+| `aigc-video-gv-3.1-lite` | GV 3.1 Lite | 軽量版、音声生成対応 |
+
+<Note>
+  Tencent VOD の GV 3.1 は Google Veo ルートであり、Kling ではありません。`aigc-video-kling-3.1` のようなモデル名は使わないでください。
+</Note>
+
+## タスク作成
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-gv-3.1-fast",
+    "prompt": "a cinematic product shot with natural camera movement",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "1080P",
+      "sound": true
+    }
+  }'
+```
+
+## 画像入力と複数画像参照
+
+単一画像では `image` を使えます。複数画像参照では `metadata.image_list` を使ってください。
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-gv-3.1",
+    "prompt": "combine the visual style of the references into one smooth shot",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "1080P",
+      "image_list": [
+        {
+          "url": "https://example.com/ref-1.png",
+          "reference_type": "asset"
+        },
+        {
+          "url": "https://example.com/ref-2.png",
+          "reference_type": "style"
+        }
+      ]
+    }
+  }'
+```
+
+<Warning>
+  GV の複数画像入力は `FileInfos` で送る必要があります。Crazyrouter は `image_list` を `FileInfos` に変換し、GV の複数画像リクエストでは `LastFrameUrl` を使いません。
+</Warning>
+
+## よく使う `metadata` フィールド
+
+| フィールド | 説明 |
+|------|------|
+| `resolution` | `720P`、`1080P`、`2K`、`4K`。利用可能な仕様は Pricing ページを参照 |
+| `sound` | 音声生成の有無。`true` / `false`、`on` / `off` |
+| `audio_generation` | `Enabled` / `Disabled` を直接指定 |
+| `image_list` | 複数画像参照リスト |
+| `reference_type` / `ReferenceType` | GV 参照タイプ。一般的には `asset` または `style` |
+
+価格、割引、有効な仕様はリアルタイムの [Pricing ページ](/pricing) を基準にしてください。

@@ -1,0 +1,87 @@
+---
+title: "AIGC GV VOD: руководство"
+description: "Как вызывать видео-модели GV / Google Veo через маршрут Tencent VOD в Crazyrouter"
+---
+> Дата обновления: 2026-06-24
+
+# AIGC GV VOD: руководство
+
+Модели `aigc-video-gv-*` — это видео-модели GV / Google Veo, опубликованные в Crazyrouter через маршрут Tencent VOD. Они используют тот же OpenAI-совместимый асинхронный видео-маршрут, что и AIGC Kling VOD:
+
+```http
+POST /v1/video/generations
+GET /v1/video/generations/{task_id}
+```
+
+## Доступные модели
+
+| Модель | Версия upstream | Описание |
+|------|------|------|
+| `aigc-video-gv-3.1` | GV 3.1 | Качественная версия с поддержкой звука |
+| `aigc-video-gv-3.1-fast` | GV 3.1 Fast | Более быстрая версия с поддержкой звука |
+| `aigc-video-gv-3.1-lite` | GV 3.1 Lite | Облегченная версия с поддержкой звука |
+
+<Note>
+  GV 3.1 в Tencent VOD — это маршрут Google Veo, а не Kling. Не используйте имена моделей вроде `aigc-video-kling-3.1`.
+</Note>
+
+## Создание задачи
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-gv-3.1-fast",
+    "prompt": "a cinematic product shot with natural camera movement",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "1080P",
+      "sound": true
+    }
+  }'
+```
+
+## Изображение и несколько референсов
+
+Для одного изображения можно использовать `image`. Для нескольких референс-изображений используйте `metadata.image_list`:
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-gv-3.1",
+    "prompt": "combine the visual style of the references into one smooth shot",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "1080P",
+      "image_list": [
+        {
+          "url": "https://example.com/ref-1.png",
+          "reference_type": "asset"
+        },
+        {
+          "url": "https://example.com/ref-2.png",
+          "reference_type": "style"
+        }
+      ]
+    }
+  }'
+```
+
+<Warning>
+  Для GV несколько изображений должны передаваться через `FileInfos`. Crazyrouter преобразует `image_list` в `FileInfos` и не использует `LastFrameUrl` для multi-image запросов GV.
+</Warning>
+
+## Часто используемые поля `metadata`
+
+| Поле | Описание |
+|------|------|
+| `resolution` | `720P`, `1080P`, `2K` или `4K`. Доступные спецификации смотрите на странице Pricing |
+| `sound` | Генерация звука: `true` / `false`, `on` / `off` |
+| `audio_generation` | Прямое значение `Enabled` / `Disabled` |
+| `image_list` | Список референс-изображений |
+| `reference_type` / `ReferenceType` | Тип референса GV, обычно `asset` или `style` |
+
+Цены, скидки и доступные спецификации смотрите на актуальной странице [Pricing](/pricing).

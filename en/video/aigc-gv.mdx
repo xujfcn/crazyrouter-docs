@@ -1,0 +1,87 @@
+---
+title: "AIGC GV VOD Guide"
+description: "Call GV / Google Veo video models through Crazyrouter's Tencent VOD route"
+---
+> Last updated: 2026-06-24
+
+# AIGC GV VOD Guide
+
+`aigc-video-gv-*` models are GV / Google Veo video models exposed through Crazyrouter's Tencent VOD route. They use the same OpenAI-style async video route as AIGC Kling VOD:
+
+```http
+POST /v1/video/generations
+GET /v1/video/generations/{task_id}
+```
+
+## Available Models
+
+| Model | Upstream version | Notes |
+|------|------|------|
+| `aigc-video-gv-3.1` | GV 3.1 | Quality version with audio support |
+| `aigc-video-gv-3.1-fast` | GV 3.1 Fast | Faster version with audio support |
+| `aigc-video-gv-3.1-lite` | GV 3.1 Lite | Lightweight version with audio support |
+
+<Note>
+  Tencent VOD GV 3.1 is a Google Veo route, not Kling. Do not use model names such as `aigc-video-kling-3.1`.
+</Note>
+
+## Create a Task
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-gv-3.1-fast",
+    "prompt": "a cinematic product shot with natural camera movement",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "1080P",
+      "sound": true
+    }
+  }'
+```
+
+## Image and Multi-Image Reference
+
+Use `image` for a single input image. For multi-image references, use `metadata.image_list`:
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-gv-3.1",
+    "prompt": "combine the visual style of the references into one smooth shot",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "1080P",
+      "image_list": [
+        {
+          "url": "https://example.com/ref-1.png",
+          "reference_type": "asset"
+        },
+        {
+          "url": "https://example.com/ref-2.png",
+          "reference_type": "style"
+        }
+      ]
+    }
+  }'
+```
+
+<Warning>
+  GV multi-image input must be sent through `FileInfos`. Crazyrouter converts `image_list` into `FileInfos` and does not use `LastFrameUrl` for GV multi-image requests.
+</Warning>
+
+## Common `metadata` Fields
+
+| Field | Description |
+|------|------|
+| `resolution` | `720P`, `1080P`, `2K`, or `4K`. Available specs are shown on the Pricing page |
+| `sound` | Audio generation toggle: `true` / `false`, `on` / `off` |
+| `audio_generation` | Direct `Enabled` / `Disabled` value |
+| `image_list` | Multi-image reference list |
+| `reference_type` / `ReferenceType` | GV reference type, commonly `asset` or `style` |
+
+Use the live [Pricing page](/pricing) as the source of truth for prices, discounts, and enabled specs.

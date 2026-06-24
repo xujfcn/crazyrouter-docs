@@ -1,0 +1,87 @@
+---
+title: "AIGC GV VOD 调用方法"
+description: "通过 Crazyrouter 的 Tencent VOD 线路调用 GV / Google Veo 视频模型"
+---
+> 更新日期：2026-06-24
+
+# AIGC GV VOD 调用方法
+
+`aigc-video-gv-*` 是 Crazyrouter 通过 Tencent VOD 线路接入的 GV / Google Veo 视频模型。调用方式与 AIGC Kling VOD 一致，使用 OpenAI 风格的视频异步接口：
+
+```http
+POST /v1/video/generations
+GET /v1/video/generations/{task_id}
+```
+
+## 可用模型
+
+| 模型 | 上游版本 | 说明 |
+|------|------|------|
+| `aigc-video-gv-3.1` | GV 3.1 | 高质量版本，支持有声视频 |
+| `aigc-video-gv-3.1-fast` | GV 3.1 Fast | 更快版本，支持有声视频 |
+| `aigc-video-gv-3.1-lite` | GV 3.1 Lite | 轻量版本，支持有声视频 |
+
+<Note>
+  Tencent VOD 的 GV 3.1 是 Google Veo 线路，不是 Kling。不要使用 `aigc-video-kling-3.1` 这类模型名。
+</Note>
+
+## 创建任务
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-gv-3.1-fast",
+    "prompt": "a cinematic product shot with natural camera movement",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "1080P",
+      "sound": true
+    }
+  }'
+```
+
+## 图生与多图参考
+
+单图可使用 `image`；多图参考建议使用 `metadata.image_list`：
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-gv-3.1",
+    "prompt": "combine the visual style of the references into one smooth shot",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "1080P",
+      "image_list": [
+        {
+          "url": "https://example.com/ref-1.png",
+          "reference_type": "asset"
+        },
+        {
+          "url": "https://example.com/ref-2.png",
+          "reference_type": "style"
+        }
+      ]
+    }
+  }'
+```
+
+<Warning>
+  GV 多图输入必须通过 `FileInfos` 传递。本站会把 `image_list` 转成 `FileInfos`，并且不会为 GV 多图请求使用 `LastFrameUrl`。
+</Warning>
+
+## 常用 metadata 字段
+
+| 字段 | 说明 |
+|------|------|
+| `resolution` | `720P`、`1080P`、`2K`、`4K`。实际可用规格以 Pricing 页面为准 |
+| `sound` | 是否生成声音，支持 `true` / `false`、`on` / `off` |
+| `audio_generation` | 直接传 `Enabled` / `Disabled` |
+| `image_list` | 多图参考数组 |
+| `reference_type` / `ReferenceType` | GV 参考类型，常用 `asset` 或 `style` |
+
+价格、折扣和可用规格以 [Pricing 页面](/pricing) 为准。
