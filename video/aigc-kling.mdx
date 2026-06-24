@@ -1,0 +1,280 @@
+---
+title: "AIGC Kling VOD 调用方法"
+description: "通过 Crazyrouter 的 AIGC Kling VOD 线路调用 Kling 视频模型"
+---
+> 更新日期：2026-06-24
+
+# AIGC Kling VOD 调用方法
+
+`aigc-video-kling-*` 是 Crazyrouter 通过 Tencent VOD 线路接入的 Kling 视频模型。它和原生 Kling 文档里的 `/kling/v1/videos/*` 路径不同，对客调用使用 OpenAI 风格的视频异步接口：
+
+```http
+POST /v1/video/generations
+GET /v1/video/generations/{task_id}
+```
+
+<Note>
+  调用 VOD 线路时必须使用 `aigc-video-kling-*` 模型名。不要把 `kling-v2-5-turbo`、`kling-v2-6`、`kling-v3` 直接提交到本页接口，否则可能会命中原生 Kling 线路。
+</Note>
+
+## 可用模型
+
+| 模型 | 上游版本 | 适合能力 |
+|------|------|------|
+| `aigc-video-kling-1.6` | Kling 1.6 | 文生、图生、首尾帧、参考图 |
+| `aigc-video-kling-2.0` | Kling 2.0 | 文生、图生、首尾帧、参考图 |
+| `aigc-video-kling-2.1` | Kling 2.1 | 文生、图生、首尾帧、参考图 |
+| `aigc-video-kling-2.5-turbo` | Kling 2.5 Turbo | 文生、图生、首尾帧、参考图 |
+| `aigc-video-kling-2.6` | Kling 2.6 | 文生、图生、首尾帧、参考图、视频输入 |
+| `aigc-video-kling-2.6-motion-control` | Kling 2.6 Motion Control | 动作控制 |
+| `aigc-video-kling-3.0` | Kling 3.0 | 文生、图生、首尾帧、参考图 |
+| `aigc-video-kling-3.0-motion-control` | Kling 3.0 Motion Control | 动作控制 |
+| `aigc-video-kling-o1` | Kling O1 | 文生、图生、参考图、视频输入 |
+| `aigc-video-kling-avatar` | Kling Avatar | 数字人 / Avatar |
+| `aigc-video-kling-identifyface` | Kling Identifyface | 对口型 |
+
+## 创建任务
+
+```http
+POST https://api.crazyrouter.com/v1/video/generations
+Authorization: Bearer YOUR_API_KEY
+Content-Type: application/json
+```
+
+### 通用参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `model` | string | 是 | 使用本页的 `aigc-video-kling-*` 模型名 |
+| `prompt` | string | 条件必填 | 文生视频必填；多镜头或部分图生场景可放在扩展参数中 |
+| `seconds` / `duration` | string / number | 否 | 视频时长，常用 `5` 或 `10`，默认按 `5` 秒处理 |
+| `size` | string | 否 | 如 `1280x720`、`720x1280`，会推导输出比例 |
+| `image` | string | 否 | 单图生视频首帧 URL |
+| `images` | array[string] | 否 | 第一张作为首帧；第二张可作为尾帧或参考图 |
+| `metadata` | object | 否 | VOD Kling 扩展参数，见下方字段表 |
+
+### 常用 metadata 字段
+
+| 字段 | 说明 |
+|------|------|
+| `resolution` | 输出规格，如 `720P`、`1080P`、`2K`、`4K` |
+| `aspect_ratio` | 输出比例，如 `16:9`、`9:16`、`1:1` |
+| `sound` | 是否生成声音，支持 `true` / `false`、`on` / `off` |
+| `image_urls` | 首帧 / 尾帧数组，最多 2 张 |
+| `image_tail` / `last_frame_url` | 尾帧 URL，优先级高于 `image_urls[1]` |
+| `image_list` | 多参考图列表，最多 9 张 |
+| `multi_shots` / `multi_shot` | 多镜头开关 |
+| `shot_type` | 分镜类型 |
+| `multi_prompt` | 多镜头提示词数组 |
+| `kling_elements` / `element_list` | Kling 元素控制 |
+| `camera_control` | 运镜控制 |
+| `motion_brush` / `dynamic_masks` | 动作控制参数 |
+| `video_list` | 视频参考输入，常用于 O1 或视频输入类能力 |
+| `voice_list` | 声音参考输入 |
+| `session_id` / `face_choose` | 对口型相关参数 |
+
+## 文生视频
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-kling-2.6",
+    "prompt": "a red square logo slowly rotating on a clean white background",
+    "size": "1280x720",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "720P",
+      "sound": false
+    }
+  }'
+```
+
+## 图生视频
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-kling-2.5-turbo",
+    "prompt": "make the picture gently move with a slow camera push in",
+    "image": "https://example.com/input.png",
+    "size": "1280x720",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "720P"
+    }
+  }'
+```
+
+## 首尾帧视频
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-kling-2.6",
+    "prompt": "transition naturally from the first frame to the last frame",
+    "images": [
+      "https://example.com/first.png",
+      "https://example.com/last.png"
+    ],
+    "seconds": "5",
+    "metadata": {
+      "resolution": "720P",
+      "sound": false
+    }
+  }'
+```
+
+<Note>
+  Kling 2.6 首尾帧建议显式传 `metadata.sound=false`。
+</Note>
+
+## 多参考图
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-kling-3.0",
+    "prompt": "keep the same character identity and create a cinematic walking shot",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "720P",
+      "image_list": [
+        "https://example.com/ref-1.png",
+        "https://example.com/ref-2.png"
+      ]
+    }
+  }'
+```
+
+## 动作控制
+
+动作控制能力使用专门模型名，例如 `aigc-video-kling-2.6-motion-control` 或 `aigc-video-kling-3.0-motion-control`。
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-kling-3.0-motion-control",
+    "prompt": "animate the selected subject moving from left to right",
+    "image": "https://example.com/input.png",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "720P",
+      "dynamic_masks": [
+        {
+          "mask_url": "https://example.com/mask.png",
+          "trajectories": [
+            { "x": 220, "y": 380 },
+            { "x": 620, "y": 380 }
+          ]
+        }
+      ]
+    }
+  }'
+```
+
+## O1 视频输入
+
+`aigc-video-kling-o1` 可通过 `metadata.video_list` 传入视频参考。是否带视频输入会影响计费规格。
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-kling-o1",
+    "prompt": "use the reference video motion style and generate a new cinematic shot",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "720P",
+      "video_list": [
+        { "url": "https://example.com/reference.mp4" }
+      ]
+    }
+  }'
+```
+
+## Avatar 与对口型
+
+Avatar 使用 `aigc-video-kling-avatar`：
+
+```json
+{
+  "model": "aigc-video-kling-avatar",
+  "prompt": "a presenter speaks naturally to the camera",
+  "image": "https://example.com/avatar.png",
+  "seconds": "5",
+  "metadata": {
+    "resolution": "720P",
+    "voice_list": [
+      { "url": "https://example.com/voice.wav" }
+    ]
+  }
+}
+```
+
+对口型使用 `aigc-video-kling-identifyface`。如果业务侧已经有上游识别得到的 `session_id` 和 `face_choose`，可放到 `metadata` 中：
+
+```json
+{
+  "model": "aigc-video-kling-identifyface",
+  "prompt": "lip sync the face with the provided voice",
+  "image": "https://example.com/face.png",
+  "seconds": "5",
+  "metadata": {
+    "resolution": "720P",
+    "session_id": "SESSION_ID",
+    "face_choose": "FACE_ID",
+    "voice_list": [
+      { "url": "https://example.com/voice.wav" }
+    ]
+  }
+}
+```
+
+<Note>
+  对口型完整流程通常需要先做面部识别，再提交视频生成任务。没有 `session_id` / `face_choose` 时，上游可能返回参数错误。
+</Note>
+
+## 查询任务
+
+创建任务返回 `id` 或 `task_id` 后，用同一套兼容路径查询：
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/video/generations/TASK_ID \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+完成后通常会返回归档后的视频 URL：
+
+```json
+{
+  "code": "success",
+  "data": {
+    "status": "succeeded",
+    "task_id": "vod_task_abc123",
+    "url": "https://media.crazyrouter.com/task-artifacts/example.mp4"
+  }
+}
+```
+
+## 与原生 Kling 的区别
+
+| 项目 | AIGC Kling VOD | 原生 Kling |
+|------|------|------|
+| 模型名 | `aigc-video-kling-*` | `kling-v2-5-turbo`、`kling-v2-6`、`kling-v3` |
+| 创建路径 | `POST /v1/video/generations` | `POST /kling/v1/videos/text2video` 等 |
+| 查询路径 | `GET /v1/video/generations/{task_id}` | `GET /kling/v1/videos/{type}/{task_id}` |
+| 主要字段 | `model`、`prompt`、`seconds`、`image`、`images`、`metadata` | `model_name`、`prompt`、`image_urls`、`duration` 等 |
+| 适合场景 | 走 Tencent VOD 线路、使用 VOD 价格和能力 | 走原生 Kling 协议 |
+
+价格、折扣和可用规格以 [Pricing 页面](/pricing) 为准。
