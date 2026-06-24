@@ -1,0 +1,280 @@
+---
+title: "AIGC Kling VOD 呼び出しガイド"
+description: "Crazyrouter の AIGC Kling VOD ルートで Kling 動画モデルを呼び出す方法"
+---
+> 更新日: 2026-06-24
+
+# AIGC Kling VOD 呼び出しガイド
+
+`aigc-video-kling-*` は Crazyrouter が Tencent VOD ルートで公開している Kling 動画モデルです。ネイティブ Kling の `/kling/v1/videos/*` とは呼び出し方式が異なり、OpenAI 風の非同期動画 API を使います。
+
+```http
+POST /v1/video/generations
+GET /v1/video/generations/{task_id}
+```
+
+<Note>
+  VOD ルートを使う場合は、必ず `aigc-video-kling-*` のモデル名を指定してください。`kling-v2-5-turbo`、`kling-v2-6`、`kling-v3` をこのページの用途で直接指定すると、ネイティブ Kling ルートに流れる可能性があります。
+</Note>
+
+## 利用可能なモデル
+
+| モデル | 上流バージョン | 主な用途 |
+|------|------|------|
+| `aigc-video-kling-1.6` | Kling 1.6 | テキストから動画、画像から動画、始終フレーム、参照画像 |
+| `aigc-video-kling-2.0` | Kling 2.0 | テキストから動画、画像から動画、始終フレーム、参照画像 |
+| `aigc-video-kling-2.1` | Kling 2.1 | テキストから動画、画像から動画、始終フレーム、参照画像 |
+| `aigc-video-kling-2.5-turbo` | Kling 2.5 Turbo | テキストから動画、画像から動画、始終フレーム、参照画像 |
+| `aigc-video-kling-2.6` | Kling 2.6 | テキストから動画、画像から動画、始終フレーム、参照画像、動画入力 |
+| `aigc-video-kling-2.6-motion-control` | Kling 2.6 Motion Control | モーション制御 |
+| `aigc-video-kling-3.0` | Kling 3.0 | テキストから動画、画像から動画、始終フレーム、参照画像 |
+| `aigc-video-kling-3.0-motion-control` | Kling 3.0 Motion Control | モーション制御 |
+| `aigc-video-kling-o1` | Kling O1 | テキストから動画、画像から動画、参照画像、動画入力 |
+| `aigc-video-kling-avatar` | Kling Avatar | アバター / デジタルヒューマン |
+| `aigc-video-kling-identifyface` | Kling Identifyface | リップシンク |
+
+## タスク作成
+
+```http
+POST https://api.crazyrouter.com/v1/video/generations
+Authorization: Bearer YOUR_API_KEY
+Content-Type: application/json
+```
+
+### 共通パラメータ
+
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `model` | string | 必須 | このページの `aigc-video-kling-*` モデル名 |
+| `prompt` | string | 条件付き | テキストから動画では必須。マルチショットなどでは metadata に詳細を置けます |
+| `seconds` / `duration` | string / number | 任意 | 動画秒数。通常は `5` または `10`。未指定時は 5 秒扱い |
+| `size` | string | 任意 | `1280x720`、`720x1280` など。アスペクト比の推定に使われます |
+| `image` | string | 任意 | 単一画像から動画を作るときの先頭フレーム URL |
+| `images` | array[string] | 任意 | 1 枚目は先頭フレーム、2 枚目は終端フレームまたは参照画像として扱われます |
+| `metadata` | object | 任意 | VOD Kling 拡張パラメータ |
+
+### よく使う `metadata` フィールド
+
+| フィールド | 説明 |
+|------|------|
+| `resolution` | 出力品質。例: `720P`、`1080P`、`2K`、`4K` |
+| `aspect_ratio` | 出力比率。例: `16:9`、`9:16`、`1:1` |
+| `sound` | 音声生成の有無。`true` / `false`、`on` / `off` |
+| `image_urls` | 先頭 / 終端フレーム URL。最大 2 枚 |
+| `image_tail` / `last_frame_url` | 終端フレーム URL。`image_urls[1]` より優先されます |
+| `image_list` | 複数参照画像。最大 9 枚 |
+| `multi_shots` / `multi_shot` | マルチショットの有効化 |
+| `shot_type` | ショット種別 |
+| `multi_prompt` | マルチショット用プロンプト配列 |
+| `kling_elements` / `element_list` | Kling 要素制御 |
+| `camera_control` | カメラ制御 |
+| `motion_brush` / `dynamic_masks` | モーション制御入力 |
+| `video_list` | O1 や動画入力ワークフロー用の動画参照 |
+| `voice_list` | 音声参照 |
+| `session_id` / `face_choose` | リップシンク用の顔選択パラメータ |
+
+## テキストから動画
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-kling-2.6",
+    "prompt": "a red square logo slowly rotating on a clean white background",
+    "size": "1280x720",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "720P",
+      "sound": false
+    }
+  }'
+```
+
+## 画像から動画
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-kling-2.5-turbo",
+    "prompt": "make the picture gently move with a slow camera push in",
+    "image": "https://example.com/input.png",
+    "size": "1280x720",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "720P"
+    }
+  }'
+```
+
+## 始終フレーム動画
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-kling-2.6",
+    "prompt": "transition naturally from the first frame to the last frame",
+    "images": [
+      "https://example.com/first.png",
+      "https://example.com/last.png"
+    ],
+    "seconds": "5",
+    "metadata": {
+      "resolution": "720P",
+      "sound": false
+    }
+  }'
+```
+
+<Note>
+  Kling 2.6 の始終フレーム動画では、`metadata.sound=false` を明示することを推奨します。
+</Note>
+
+## 複数参照画像
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-kling-3.0",
+    "prompt": "keep the same character identity and create a cinematic walking shot",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "720P",
+      "image_list": [
+        "https://example.com/ref-1.png",
+        "https://example.com/ref-2.png"
+      ]
+    }
+  }'
+```
+
+## モーション制御
+
+モーション制御には `aigc-video-kling-2.6-motion-control` または `aigc-video-kling-3.0-motion-control` を使います。
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-kling-3.0-motion-control",
+    "prompt": "animate the selected subject moving from left to right",
+    "image": "https://example.com/input.png",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "720P",
+      "dynamic_masks": [
+        {
+          "mask_url": "https://example.com/mask.png",
+          "trajectories": [
+            { "x": 220, "y": 380 },
+            { "x": 620, "y": 380 }
+          ]
+        }
+      ]
+    }
+  }'
+```
+
+## O1 動画入力
+
+`aigc-video-kling-o1` は `metadata.video_list` で動画参照を渡せます。動画入力の有無により課金仕様が変わる場合があります。
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-kling-o1",
+    "prompt": "use the reference video motion style and generate a new cinematic shot",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "720P",
+      "video_list": [
+        { "url": "https://example.com/reference.mp4" }
+      ]
+    }
+  }'
+```
+
+## Avatar とリップシンク
+
+Avatar は `aigc-video-kling-avatar` を使います。
+
+```json
+{
+  "model": "aigc-video-kling-avatar",
+  "prompt": "a presenter speaks naturally to the camera",
+  "image": "https://example.com/avatar.png",
+  "seconds": "5",
+  "metadata": {
+    "resolution": "720P",
+    "voice_list": [
+      { "url": "https://example.com/voice.wav" }
+    ]
+  }
+}
+```
+
+リップシンクは `aigc-video-kling-identifyface` を使います。上流の顔識別で得た `session_id` と `face_choose` がある場合は `metadata` に渡します。
+
+```json
+{
+  "model": "aigc-video-kling-identifyface",
+  "prompt": "lip sync the face with the provided voice",
+  "image": "https://example.com/face.png",
+  "seconds": "5",
+  "metadata": {
+    "resolution": "720P",
+    "session_id": "SESSION_ID",
+    "face_choose": "FACE_ID",
+    "voice_list": [
+      { "url": "https://example.com/voice.wav" }
+    ]
+  }
+}
+```
+
+<Note>
+  リップシンクの完全なフローでは、通常、動画生成の前に顔識別が必要です。`session_id` / `face_choose` がない場合、上流でパラメータエラーになることがあります。
+</Note>
+
+## タスク照会
+
+作成レスポンスの `id` または `task_id` を使い、同じ互換パスで照会します。
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/video/generations/TASK_ID \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+完了後は通常、アーカイブ済み動画 URL が返ります。
+
+```json
+{
+  "code": "success",
+  "data": {
+    "status": "succeeded",
+    "task_id": "vod_task_abc123",
+    "url": "https://media.crazyrouter.com/task-artifacts/example.mp4"
+  }
+}
+```
+
+## ネイティブ Kling との違い
+
+| 項目 | AIGC Kling VOD | ネイティブ Kling |
+|------|------|------|
+| モデル名 | `aigc-video-kling-*` | `kling-v2-5-turbo`、`kling-v2-6`、`kling-v3` |
+| 作成パス | `POST /v1/video/generations` | `POST /kling/v1/videos/text2video` など |
+| 照会パス | `GET /v1/video/generations/{task_id}` | `GET /kling/v1/videos/{type}/{task_id}` |
+| 主なフィールド | `model`、`prompt`、`seconds`、`image`、`images`、`metadata` | `model_name`、`prompt`、`image_urls`、`duration` など |
+| 適した用途 | Tencent VOD ルート、VOD の価格と機能 | ネイティブ Kling プロトコル |
+
+価格、割引、有効な仕様はリアルタイムの [Pricing ページ](/pricing) を基準にしてください。
