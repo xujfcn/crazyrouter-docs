@@ -28,7 +28,7 @@ Authorization: Bearer YOUR_API_KEY
 For new integrations, prefer:
 
 - Wan text-to-video: use this page's `POST /v1/video/generations`
-- Veo / unified-video workflows: use `POST /v1/video/create`
+- Veo / unified-video workflows: use `POST /v1/video/create` with `veo-3.1-fast` or `veo-3.1-quality`
 - OpenAI-compatible video workflows: use `POST /v1/videos`
 
 ## Minimal Request Example
@@ -51,7 +51,7 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/video/generations   -H "Content-Type: application/json"   -H "Authorization: Bearer YOUR_API_KEY"   -d '{
-    "model": "veo-3.1-quality",
+    "model": "wan2.5-t2v-preview",
     "prompt": "A cinematic shot of waves hitting a cliff at sunset"
   }'
 ```
@@ -73,7 +73,7 @@ On the local `http://127.0.0.1:4000` environment, this route was verified to exi
 ```json
 {
   "code": "get_channel_failed",
-  "message": "model veo-3.1 is temporarily unavailable, please try again later",
+  "message": "model wan2.2-t2v-plus is temporarily unavailable, please try again later",
   "data": null
 }
 ```
@@ -87,5 +87,5 @@ On the local `http://127.0.0.1:4000` environment, this route was verified to exi
 - after task creation, query status with `GET /v1/video/generations/{task_id}`
 
 <Note>
-This route is a compatibility alias. It does not guarantee that every video model shares the exact same body schema. Wan text-to-video currently uses this route; Veo and unified-video workflows should still start from `/v1/video/create`.
+This route is a compatibility alias. It does not guarantee that every video model shares the exact same body schema. Wan text-to-video currently uses this route; Veo and unified-video workflows should use `/v1/video/create` with `veo-3.1-fast` or `veo-3.1-quality`.
 </Note>

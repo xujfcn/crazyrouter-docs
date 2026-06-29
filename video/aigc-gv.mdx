@@ -13,6 +13,10 @@ POST /v1/video/generations
 GET /v1/video/generations/{task_id}
 ```
 
+<Note>
+  `aigc-video-gv-*` only uses `/v1/video/generations` and the matching query route. Do not send these models to `/v1/video/create`; a route mismatch will surface as `model_not_found` or a similar upstream error.
+</Note>
+
 ## 可用模型
 
 | 模型 | 上游版本 | 说明 |

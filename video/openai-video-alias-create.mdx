@@ -28,7 +28,7 @@ Authorization: Bearer YOUR_API_KEY
 如果你在开发新接入，优先考虑：
 
 - Wan 文生视频：使用本页的 `POST /v1/video/generations`
-- Veo / 统一视频工作流：使用 `POST /v1/video/create`
+- Veo / 统一视频工作流：使用 `POST /v1/video/create`，并提交 `veo-3.1-fast` 或 `veo-3.1-quality`
 - OpenAI 官方兼容视频工作流：使用 `POST /v1/videos`
 
 ## 最小请求示例
@@ -51,7 +51,7 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/video/generations   -H "Content-Type: application/json"   -H "Authorization: Bearer YOUR_API_KEY"   -d '{
-    "model": "veo-3.1-quality",
+    "model": "wan2.5-t2v-preview",
     "prompt": "A cinematic shot of waves hitting a cliff at sunset"
   }'
 ```
@@ -73,7 +73,7 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations   -H "Content-Type
 ```json
 {
   "code": "get_channel_failed",
-  "message": "model veo-3.1-quality is temporarily unavailable, please try again later",
+  "message": "model wan2.2-t2v-plus is temporarily unavailable, please try again later",
   "data": null
 }
 ```
@@ -87,5 +87,5 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations   -H "Content-Type
 - 任务创建成功后，可继续调用 `GET /v1/video/generations/{task_id}` 查询状态
 
 <Note>
-这个路由是兼容别名，不代表所有视频模型都共享完全一致的请求字段。Wan 文生视频当前推荐使用本页路由；Veo 或统一视频工作流仍优先看 `/v1/video/create`。
+这个路由是兼容别名，不代表所有视频模型都共享完全一致的请求字段。Wan 文生视频当前推荐使用本页路由；Veo 或统一视频工作流应使用 `/v1/video/create`，并提交 `veo-3.1-fast` 或 `veo-3.1-quality`。
 </Note>
