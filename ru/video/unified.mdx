@@ -136,7 +136,7 @@ curl "https://api.crazyrouter.com/v1/video/query?id=video_task_abc123" \
 ```json
 {
   "id": "video_task_abc123",
-  "status": "completed",
+  "status": "SUCCESS",
   "status_update_time": 1709123520,
   "video_url": "https://api.crazyrouter.com/files/video_abc123.mp4"
 }
@@ -147,7 +147,7 @@ curl "https://api.crazyrouter.com/v1/video/query?id=video_task_abc123" \
 | Status | Description |
 |--------|-------------|
 | `processing` | Processing |
-| `completed` | Completed |
+| `SUCCESS` | Completed |
 | `failed` | Failed |
 
 ---

@@ -206,20 +206,18 @@ curl https://api.crazyrouter.com/volc/v1/contents/generations/tasks/cgt_task_abc
 
 ```json
 {
-  "id": "cgt_task_abc123",
-  "object": "video",
-  "model": "doubao-seedance-1-0-lite-t2v",
-  "status": "completed",
-  "progress": 100,
-  "created_at": 1774580000,
-  "completed_at": 1774580030,
-  "seconds": "5",
-  "metadata": {
-    "url": "https://media.crazyrouter.com/task-artifacts/2026/03/28/seedance/cgt_task_abc123.mp4",
-    "artifact_url": "https://media.crazyrouter.com/task-artifacts/2026/03/28/seedance/cgt_task_abc123.mp4",
-    "resolution": "720p",
-    "ratio": "16:9",
-    "frames_per_second": 24
+  "code": "success",
+  "message": "",
+  "data": {
+    "id": "cgt_task_abc123",
+    "task_id": "cgt_task_abc123",
+    "model": "doubao-seedance-2-0-fast",
+    "status": "SUCCESS",
+    "result_url": "https://media.crazyrouter.com/task-artifacts/2026/06/30/seedance/cgt_task_abc123.mp4",
+    "artifact_url": "https://media.crazyrouter.com/task-artifacts/2026/06/30/seedance/cgt_task_abc123.mp4",
+    "content": {
+      "video_url": "https://media.crazyrouter.com/task-artifacts/2026/06/30/seedance/cgt_task_abc123.mp4"
+    }
   }
 }
 ```
@@ -228,10 +226,10 @@ curl https://api.crazyrouter.com/volc/v1/contents/generations/tasks/cgt_task_abc
 
 | Status | Description |
 |--------|-------------|
-| `queued` | submitted or waiting in queue |
-| `in_progress` | generation in progress |
-| `completed` | completed and ready from `metadata.url` |
-| `failed` | terminal failure |
+| `NOT_START` | submitted and waiting for upstream handling |
+| `IN_PROGRESS` | generation in progress |
+| `SUCCESS` | completed and ready from `result_url`, `artifact_url`, or `content.video_url` |
+| `FAILURE` | terminal failure |
 
 <Note>
   The public docs now only commit to the native `/volc/v1/*` route family and canonical model names. The old `doubao-seedance-2-0-fast` label is retained only as historical context, not as the primary contract for new integrations.

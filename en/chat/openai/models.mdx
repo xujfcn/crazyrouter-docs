@@ -131,21 +131,10 @@ In the `2026-04-14` production recheck:
 
 ## Pricing information
 
-If you also need public pricing data, see:
-
-```text
-GET /api/pricing
-```
-
-This production recheck confirmed that the endpoint returns a JSON object with common top-level keys such as:
-
-- `data`
-- `popular_models`
-- `supported_endpoint`
-- `vendors`
+If you also need public pricing data, use the [Pricing page](/en/pricing). For programmatic confirmation of currently visible models, keep using `GET /v1/models`.
 
 <Note>
-  Use `supported_endpoint_types` / `public_endpoint_types` from `GET /api/pricing` for endpoint support. `openai` maps to `POST /v1/chat/completions`, `anthropic` maps to `POST /v1/messages`, and only `openai-response` maps to `POST /v1/responses`. Claude currently exposes `openai` + `anthropic`, not `openai-response`.
+  `supported_endpoint_types` on `GET /v1/models` only describes the interface styles the current model supports. `openai` maps to `POST /v1/chat/completions`, `anthropic` maps to `POST /v1/messages`, and only `openai-response` maps to `POST /v1/responses`. Claude currently exposes `openai` + `anthropic`, not `openai-response`.
 </Note>
 
 Related page:

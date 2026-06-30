@@ -38,7 +38,6 @@ Wan 系列当前按能力使用不同对客协议：
 | 模型 | 能力桶 | 分辨率 | 官方单价 |
 |------|--------|--------|----------|
 | `wan2.5-t2v-preview` | 文生视频 | `480P / 720P / 1080P` | `¥0.30 / ¥0.60 / ¥1.00 / 秒` |
-| `wan2.5-i2v-preview` | 图生视频 | `480P / 720P / 1080P` | `¥0.30 / ¥0.60 / ¥1.00 / 秒` |
 | `wan2.2-t2v-plus` | 文生视频 | `480P / 1080P` | `¥0.14 / ¥0.70 / 秒` |
 | `wan2.2-i2v-plus` | 图生视频 | `480P / 1080P` | `¥0.14 / ¥0.70 / 秒` |
 | `wan2.2-i2v-flash` | 图生视频 | `480P / 720P / 1080P` | `¥0.10 / ¥0.20 / ¥0.48 / 秒` |
@@ -70,20 +69,6 @@ Wan 系列当前按能力使用不同对客协议：
 - 典型模型：`wan2.2-s2v`
 
 ## 请求示例
-
-### 文生视频：Wan 2.5
-
-```bash cURL
-curl -X POST https://api.crazyrouter.com/v1/video/generations \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "model": "wan2.5-t2v-preview",
-    "prompt": "电影感海边日落，镜头缓慢推进",
-    "seconds": "5",
-    "size": "1280*720"
-  }'
-```
 
 ### 文生视频：Wan 2.2 T2V Plus
 
@@ -170,7 +155,7 @@ GET /v1/video/generations/{task_id}
 GET /alibailian/api/v1/tasks/{task_id}
 ```
 
-当 `output.task_status` 进入成功态后，从 `output.video_url` 获取最终视频结果。
+当查询返回 `status = SUCCESS` 时，从 `result_url` 或 `artifact_url` 获取最终视频结果。
 
 ## 边界说明
 

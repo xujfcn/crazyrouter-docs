@@ -131,21 +131,10 @@ for (const model of models.data) {
 
 ## 定价信息
 
-如果你还需要公共定价信息，可查看：
-
-```text
-GET /api/pricing
-```
-
-本轮生产复核确认该端点返回 JSON 对象，常见顶层字段包括：
-
-- `data`
-- `popular_models`
-- `supported_endpoint`
-- `vendors`
+如果你还需要公共定价信息，请以 [Pricing 页面](/pricing) 为准。程序侧确认当前 Token 可见模型时，继续使用本页的 `GET /v1/models`。
 
 <Note>
-  端点支持口径请看 `GET /api/pricing` 里的 `supported_endpoint_types` / `public_endpoint_types`。其中 `openai` 对应 `POST /v1/chat/completions`，`anthropic` 对应 `POST /v1/messages`，只有 `openai-response` 才对应 `POST /v1/responses`。Claude 当前公开支持的是 `openai` + `anthropic`，不支持 `openai-response`。
+  `GET /v1/models` 返回的 `supported_endpoint_types` 只表示当前模型支持的接口风格。其中 `openai` 对应 `POST /v1/chat/completions`，`anthropic` 对应 `POST /v1/messages`，只有 `openai-response` 才对应 `POST /v1/responses`。Claude 当前公开支持的是 `openai` + `anthropic`，不支持 `openai-response`。
 </Note>
 
 相关页面：

@@ -208,20 +208,18 @@ curl https://api.crazyrouter.com/volc/v1/contents/generations/tasks/cgt_task_abc
 
 ```json
 {
-  "id": "cgt_task_abc123",
-  "object": "video",
-  "model": "doubao-seedance-1-0-lite-t2v",
-  "status": "completed",
-  "progress": 100,
-  "created_at": 1774580000,
-  "completed_at": 1774580030,
-  "seconds": "5",
-  "metadata": {
-    "url": "https://media.crazyrouter.com/task-artifacts/2026/03/28/seedance/cgt_task_abc123.mp4",
-    "artifact_url": "https://media.crazyrouter.com/task-artifacts/2026/03/28/seedance/cgt_task_abc123.mp4",
-    "resolution": "720p",
-    "ratio": "16:9",
-    "frames_per_second": 24
+  "code": "success",
+  "message": "",
+  "data": {
+    "id": "cgt_task_abc123",
+    "task_id": "cgt_task_abc123",
+    "model": "doubao-seedance-2-0-fast",
+    "status": "SUCCESS",
+    "result_url": "https://media.crazyrouter.com/task-artifacts/2026/06/30/seedance/cgt_task_abc123.mp4",
+    "artifact_url": "https://media.crazyrouter.com/task-artifacts/2026/06/30/seedance/cgt_task_abc123.mp4",
+    "content": {
+      "video_url": "https://media.crazyrouter.com/task-artifacts/2026/06/30/seedance/cgt_task_abc123.mp4"
+    }
   }
 }
 ```
@@ -230,10 +228,10 @@ curl https://api.crazyrouter.com/volc/v1/contents/generations/tasks/cgt_task_abc
 
 | 状态 | 说明 |
 |------|------|
-| `queued` | 已提交或排队中 |
-| `in_progress` | 正在生成 |
-| `completed` | 已完成，可从 `metadata.url` 取回结果 |
-| `failed` | 终态失败 |
+| `NOT_START` | 已提交，等待上游处理 |
+| `IN_PROGRESS` | 正在生成 |
+| `SUCCESS` | 已完成，可从 `result_url`、`artifact_url` 或 `content.video_url` 取回结果 |
+| `FAILURE` | 终态失败 |
 
 <Note>
   当前公开文档只承诺 native `/volc/v1/*` 路径与 canonical 模型名。旧 `doubao-seedance-2-0-fast` 仅保留为历史口径，不再作为新的对客主协议。

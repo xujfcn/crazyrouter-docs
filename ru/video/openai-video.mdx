@@ -68,10 +68,13 @@ print(response.json())
 
 ```json
 {
-  "id": "video_abc123",
-  "object": "video",
-  "status": "processing",
-  "created_at": 1709123456
+  "code": "success",
+  "message": "",
+  "data": {
+    "id": "video_abc123",
+    "task_id": "video_abc123",
+    "status": "processing"
+  }
 }
 ```
 
@@ -94,7 +97,7 @@ curl https://api.crazyrouter.com/v1/videos/video_abc123 \
 {
   "id": "video_abc123",
   "object": "video",
-  "status": "completed",
+  "status": "SUCCESS",
   "created_at": 1709123456,
   "video": {
     "url": "https://crazyrouter.com/files/video_abc123.mp4",
@@ -172,5 +175,5 @@ Set `private: true` so the generated video won't appear in the public gallery:
 | Status | Description |
 |--------|-------------|
 | `processing` | Processing |
-| `completed` | Completed |
+| `SUCCESS` | Completed |
 | `failed` | Failed |

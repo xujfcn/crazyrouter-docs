@@ -29,9 +29,9 @@ All Kling query endpoints return the same task envelope:
     "error": null,
     "format": "mp4",
     "metadata": null,
-    "status": "succeeded",
+    "status": "SUCCESS",
     "task_id": "866168216002236456",
-    "url": "https://media.crazyrouter.com/task-artifacts/2026/03/26/50/textGenerate/866168216002236456.m4v"
+    "result_url": "https://media.crazyrouter.com/task-artifacts/2026/06/30/kling/866168216002236456.mp4",`r`n    "artifact_url": "https://media.crazyrouter.com/task-artifacts/2026/06/30/kling/866168216002236456.mp4"
   }
 }
 ```
@@ -48,7 +48,7 @@ All Kling query endpoints return the same task envelope:
     "metadata": null,
     "status": "queued",
     "task_id": "task_abc123",
-    "url": ""
+    "result_url": "",`r`n    "artifact_url": ""
   }
 }
 ```
@@ -65,7 +65,7 @@ All Kling query endpoints return the same task envelope:
     "metadata": null,
     "status": "processing",
     "task_id": "task_abc123",
-    "url": ""
+    "result_url": "",`r`n    "artifact_url": ""
   }
 }
 ```
@@ -80,9 +80,9 @@ All Kling query endpoints return the same task envelope:
     "error": null,
     "format": "mp4",
     "metadata": null,
-    "status": "succeeded",
+    "status": "SUCCESS",
     "task_id": "866168216002236456",
-    "url": "https://media.crazyrouter.com/task-artifacts/2026/03/26/50/textGenerate/866168216002236456.m4v"
+    "result_url": "https://media.crazyrouter.com/task-artifacts/2026/06/30/kling/866168216002236456.mp4",`r`n    "artifact_url": "https://media.crazyrouter.com/task-artifacts/2026/06/30/kling/866168216002236456.mp4"
   }
 }
 ```
@@ -102,7 +102,7 @@ All Kling query endpoints return the same task envelope:
     "metadata": null,
     "status": "failed",
     "task_id": "task_abc123",
-    "url": ""
+    "result_url": "",`r`n    "artifact_url": ""
   }
 }
 ```
@@ -113,7 +113,7 @@ All Kling query endpoints return the same task envelope:
 |--------|-------------|
 | `queued` | submitted or waiting in queue |
 | `processing` | generation in progress |
-| `succeeded` | completed and directly fetchable via `url` |
+| `SUCCESS` | completed and directly fetchable via `url` |
 | `failed` | terminal failure |
 
 ---

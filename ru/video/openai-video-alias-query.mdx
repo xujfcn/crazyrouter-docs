@@ -29,7 +29,7 @@ curl https://api.crazyrouter.com/v1/video/generations/video_task_abc123   -H "Au
 ```json
 {
   "id": "video_task_abc123",
-  "status": "completed",
+  "status": "SUCCESS",
   "video_url": "https://example.com/video.mp4"
 }
 ```
@@ -51,7 +51,7 @@ On the local `http://127.0.0.1:4000` environment, querying a nonexistent task re
 | Status | Description |
 |--------|-------------|
 | `processing` | Task is running |
-| `completed` | Task finished successfully |
+| `SUCCESS` | Task finished successfully |
 | `failed` | Task failed |
 
 <Note>

@@ -23,7 +23,6 @@ All tasks are asynchronous. Successful fetches prefer Crazyrouter archived URLs 
 | `kling-v2-6` | Standard Kling video | text-to-video, image-to-video, start-end, reference-video, sound, voice control, motion control | `Beta` | `mode + duration + sound + voice control` |
 | `kling-v3` | Standard Kling video | text-to-video, image-to-video, start-end, reference-video, motion control, standard-route element references | `Beta` | `mode + duration + sound`; motion uses a separate billing bucket |
 | `kling-v3` | Kling omni-video | omni-video with image / element / video / voice references | `Beta` | `mode + duration + sound + video input` |
-| `kling-v3` | Kling omni-video | single-shot omni-video | `Beta` | `mode + duration + video input` |
 
 <Note>
   The customer-facing contract follows the official Kling capability and field definitions. Third-party channels remain internal providers only. Use the live Pricing page as the source of truth for sell-side prices.
@@ -112,13 +111,14 @@ print(response.json())
 
 ```json
 {
-  "created_at": 1774539107,
-  "id": "866168216002236456",
-  "model": "kling-v2-5-turbo",
-  "object": "video",
-  "progress": 0,
-  "status": "",
-  "task_id": "866168216002236456"
+  "code": "success",
+  "message": "",
+  "data": {
+    "id": "866168216002236456",
+    "task_id": "866168216002236456",
+    "model": "kling-v2-5-turbo",
+    "status": "queued"
+  }
 }
 ```
 

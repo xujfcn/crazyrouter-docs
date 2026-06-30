@@ -92,15 +92,14 @@ curl https://api.crazyrouter.com/v1/videos/video_abc123 \
 
 ```json
 {
-  "id": "video_abc123",
-  "object": "video",
-  "status": "completed",
-  "created_at": 1709123456,
-  "video": {
-    "url": "https://crazyrouter.com/files/video_abc123.mp4",
-    "duration": 10,
-    "width": 1920,
-    "height": 1080
+  "code": "success",
+  "message": "",
+  "data": {
+    "id": "video_abc123",
+    "task_id": "video_abc123",
+    "status": "SUCCESS",
+    "artifact_url": "https://media.crazyrouter.com/task-artifacts/example.mp4",
+    "result_url": "https://media.crazyrouter.com/task-artifacts/example.mp4"
   }
 }
 ```
@@ -172,5 +171,5 @@ curl -o output.mp4 https://api.crazyrouter.com/v1/videos/video_abc123/content \
 | 状态 | 说明 |
 |------|------|
 | `processing` | 处理中 |
-| `completed` | 已完成 |
+| `SUCCESS` | 已完成 |
 | `failed` | 失败 |

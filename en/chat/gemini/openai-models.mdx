@@ -120,7 +120,7 @@ In the `2026-03-23` production recheck:
 | `success` | boolean | Whether the request succeeded |
 
 <Note>
-  Read the path meaning of `supported_endpoint_types` from `supported_endpoint` in `GET /api/pricing`. At the moment, `openai` maps to `POST /v1/chat/completions`, `anthropic` maps to `POST /v1/messages`, and only `openai-response` maps to `POST /v1/responses`. Claude currently exposes `openai` + `anthropic`, not `openai-response`.
+  `supported_endpoint_types` only describes the interface styles the current model supports. At the moment, `openai` maps to `POST /v1/chat/completions`, `anthropic` maps to `POST /v1/messages`, and only `openai-response` maps to `POST /v1/responses`. Claude currently exposes `openai` + `anthropic`, not `openai-response`.
 </Note>
 
 <Note>

@@ -209,7 +209,7 @@ curl https://api.crazyrouter.com/volc/v1/contents/generations/tasks/cgt_task_abc
   "id": "cgt_task_abc123",
   "object": "video",
   "model": "doubao-seedance-1-0-lite-t2v",
-  "status": "completed",
+  "status": "SUCCESS",
   "progress": 100,
   "created_at": 1774580000,
   "completed_at": 1774580030,
@@ -230,7 +230,7 @@ curl https://api.crazyrouter.com/volc/v1/contents/generations/tasks/cgt_task_abc
 |--------|-------------|
 | `queued` | submitted or waiting in queue |
 | `in_progress` | generation in progress |
-| `completed` | completed and ready from `metadata.url` |
+| `SUCCESS` | completed and ready from `metadata.url` |
 | `failed` | terminal failure |
 
 <Note>

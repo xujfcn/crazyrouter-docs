@@ -28,9 +28,15 @@ curl https://api.crazyrouter.com/v1/video/generations/video_task_abc123   -H "Au
 
 ```json
 {
-  "id": "video_task_abc123",
-  "status": "completed",
-  "video_url": "https://example.com/video.mp4"
+  "code": "success",
+  "message": "",
+  "data": {
+    "id": "video_task_abc123",
+    "task_id": "video_task_abc123",
+    "status": "SUCCESS",
+    "result_url": "https://media.crazyrouter.com/task-artifacts/example.mp4",
+    "artifact_url": "https://media.crazyrouter.com/task-artifacts/example.mp4"
+  }
 }
 ```
 
@@ -50,10 +56,11 @@ curl https://api.crazyrouter.com/v1/video/generations/video_task_abc123   -H "Au
 
 | 状态 | 说明 |
 |------|------|
+| `queued` | 任务已提交或排队中 |
 | `processing` | 任务处理中 |
-| `completed` | 任务已完成 |
+| `SUCCESS` | 任务已完成 |
 | `failed` | 任务失败 |
 
 <Note>
-不同视频模型和不同上游的完成结果字段可能略有差异。最稳定的做法是：创建和查询尽量保持在同一套兼容路径里。
+不同视频模型和不同上游的完成结果字段可能略有差异。最稳定的做法是：创建和查询尽量保持在同一套兼容路径里，并优先读取 `data.artifact_url` 或 `data.result_url`。
 </Note>
