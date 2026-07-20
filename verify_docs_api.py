@@ -6,10 +6,11 @@ Crazyrouter 文档 API 一致性验证脚本
   python verify_docs_api.py
 
 需要环境变量或直接修改下方配置:
-  API_BASE_URL - API 基础地址
-  API_KEY      - sk- 开头的 API Key
-  ACCESS_TOKEN - 用户 Access Token (控制台接口用)
-  USER_ID      - 用户 ID (控制台接口用)
+  API_BASE_URL        - 模型 API 基础地址
+  MANAGEMENT_BASE_URL - 账户与管理 API 基础地址
+  API_KEY             - sk- 开头的 API Key
+  ACCESS_TOKEN        - 用户 Access Token (控制台接口用)
+  USER_ID             - 用户 ID (控制台接口用)
 """
 
 import requests
@@ -25,6 +26,7 @@ if sys.platform == "win32":
 
 # ============ 配置 ============
 API_BASE = os.getenv("API_BASE_URL", "https://api.crazyrouter.com")
+MANAGEMENT_BASE = os.getenv("MANAGEMENT_BASE_URL", "https://crazyrouter.com")
 API_KEY = os.getenv("API_KEY", "")           # sk-xxx
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN", "") # 控制台 API 用
 USER_ID = os.getenv("USER_ID", "1")
@@ -72,7 +74,7 @@ def test_public_endpoints():
 
     # GET /api/status — 文档: introduction.mdx 提到的系统状态
     try:
-        r = requests.get(f"{API_BASE}/api/status", headers=public_headers, timeout=10)
+        r = requests.get(f"{MANAGEMENT_BASE}/api/status", headers=public_headers, timeout=10)
         ok = r.status_code == 200
         log_result("公开", "/api/status", "GET", r.status_code,
                    "系统状态正常" if ok else f"异常: {r.text[:100]}", ok)
@@ -81,7 +83,7 @@ def test_public_endpoints():
 
     # GET /api/pricing — 文档: quickstart.mdx 提到的定价接口
     try:
-        r = requests.get(f"{API_BASE}/api/pricing", headers=public_headers, timeout=10)
+        r = requests.get(f"{MANAGEMENT_BASE}/api/pricing", headers=public_headers, timeout=10)
         ok = r.status_code == 200
         data = r.json() if ok else {}
         count = len(data.get("data", [])) if isinstance(data.get("data"), list) else "N/A"
@@ -242,7 +244,7 @@ def test_token_management():
 
     # GET /api/token/ — 获取令牌列表
     try:
-        r = requests.get(f"{API_BASE}/api/token/?p=0&size=5",
+        r = requests.get(f"{MANAGEMENT_BASE}/api/token/?p=0&size=5",
                          headers=HEADERS_MGMT, timeout=10)
         ok = r.status_code == 200
         data = r.json() if ok else {}
@@ -258,7 +260,7 @@ def test_token_management():
 
     # GET /api/token/search — 搜索令牌
     try:
-        r = requests.get(f"{API_BASE}/api/token/search?keyword=test",
+        r = requests.get(f"{MANAGEMENT_BASE}/api/token/search?keyword=test",
                          headers=HEADERS_MGMT, timeout=10)
         ok = r.status_code == 200
         log_result("Token管理", "/api/token/search", "GET", r.status_code,
@@ -369,6 +371,7 @@ def print_summary():
     report = {
         "timestamp": datetime.now().isoformat(),
         "api_base": API_BASE,
+        "management_base": MANAGEMENT_BASE,
         "total": total,
         "passed": passed,
         "failed": failed,
@@ -383,7 +386,8 @@ def print_summary():
 if __name__ == "__main__":
     print(f"Crazyrouter 文档 API 一致性验证")
     print(f"时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print(f"目标: {API_BASE}")
+    print(f"模型 API 目标: {API_BASE}")
+    print(f"账户/管理 API 目标: {MANAGEMENT_BASE}")
     print(f"API Key: {'已设置' if API_KEY else '未设置 (跳过需认证的测试)'}")
     print(f"Access Token: {'已设置' if ACCESS_TOKEN else '未设置 (跳过管理API测试)'}")
 

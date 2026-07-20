@@ -2,7 +2,7 @@
 title: 'Вход для AI tools'
 description: 'Точки входа в документацию Crazyrouter для Codex, Claude Code, ChatGPT, Cursor и других AI tools'
 ---
-> Дата обновления: 2026-06-06
+> Дата обновления: 2026-07-20
 
 Используйте эту страницу, когда нужно дать AI tool доступ к документации Crazyrouter.
 
@@ -30,4 +30,5 @@ First read https://docs.crazyrouter.com/llms.txt to identify the relevant pages.
 If full context is needed, read https://docs.crazyrouter.com/llms-full.txt.
 For OpenAI-compatible clients, use base_url https://api.crazyrouter.com/v1.
 For Claude Code / Anthropic-native clients, use root domain https://api.crazyrouter.com and do not append /v1.
+Для endpoints аккаунта и управления, например `/api/user/self`, `/api/token/*` и `/api/log/*`, используйте https://crazyrouter.com; API-only домены возвращают для этих маршрутов 404 api_only_endpoint.
 ```

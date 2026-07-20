@@ -3,14 +3,14 @@ title: 'Delete Token'
 description: 'Delete a specified API token'
 api: 'DELETE /api/token/{id}'
 ---
-> Дата обновления: 2026-06-23
+> Дата обновления: 2026-07-20
 
 ## Overview
 
 Permanently delete a specified API token. The token's API Key will be invalidated immediately after deletion.
 
 <Note>
-  The `/api/token/*` endpoints are mainly for Crazyrouter dashboard automation around API key management. They require a user `access token` plus the `New-Api-User` header, and are not the normal interface for `sk-xxx` model calls.
+  The `/api/token/*` endpoints are mainly for Crazyrouter dashboard automation around API key management. They require a user `access token` plus the `New-Api-User` header, and are not the normal interface for `sk-xxx` model calls. Use `https://crazyrouter.com` as the base URL; `https://api.crazyrouter.com` is reserved for model APIs and returns `404 api_only_endpoint` for management paths.
 </Note>
 
 ## Authentication
@@ -52,7 +52,7 @@ headers = {
 
 token_id = 10
 response = requests.delete(
-    f"https://api.crazyrouter.com/api/token/{token_id}",
+    f"https://crazyrouter.com/api/token/{token_id}",
     headers=headers
 )
 
@@ -60,7 +60,7 @@ print(response.json())
 ```
 
 ```bash cURL
-curl -X DELETE https://api.crazyrouter.com/api/token/10 \
+curl -X DELETE https://crazyrouter.com/api/token/10 \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 1"
 ```

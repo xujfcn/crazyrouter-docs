@@ -2,7 +2,7 @@
 title: '调用日志与花费监控'
 description: '通过管理接口查询 API Key 列表、调用日志、汇总额度与美元花费'
 ---
-> 更新日期：2026-06-23
+> 更新日期：2026-07-20
 
 ## 适用场景
 
@@ -16,6 +16,10 @@ description: '通过管理接口查询 API Key 列表、调用日志、汇总额
 <Note>
   管理接口使用的是用户身份认证，不是模型调用时使用的业务 Token。
 </Note>
+
+<Warning>
+  本页所有账户与管理接口（包括 `/api/token/*`、`/api/log/*` 和 `/api/user/self`）都必须请求 `https://crazyrouter.com`。`https://api.crazyrouter.com` 仅承载模型/媒体 API，误用会返回 `404 api_only_endpoint`。
+</Warning>
 
 ## 认证方式
 
@@ -43,7 +47,7 @@ New-Api-User: {user_id}
 ## 1. 获取 API Key 列表
 
 ```bash cURL
-curl "https://api.crazyrouter.com/api/token/?p=1&page_size=100" \
+curl "https://crazyrouter.com/api/token/?p=1&page_size=100" \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 485"
 ```
@@ -96,7 +100,7 @@ curl "https://api.crazyrouter.com/api/token/?p=1&page_size=100" \
 示例：
 
 ```bash cURL
-curl "https://api.crazyrouter.com/api/log/self?type=2&token_name=gptai&start_timestamp=1771334901&end_timestamp=1772309095&p=1&page_size=5" \
+curl "https://crazyrouter.com/api/log/self?type=2&token_name=gptai&start_timestamp=1771334901&end_timestamp=1772309095&p=1&page_size=5" \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 485"
 ```
@@ -166,7 +170,7 @@ curl "https://api.crazyrouter.com/api/log/self?type=2&token_name=gptai&start_tim
 如果不需要逐条日志，只想做监控面板或日报，推荐调用汇总接口：
 
 ```bash cURL
-curl "https://api.crazyrouter.com/api/log/self/stat?type=2&token_name=gptai&start_timestamp=1771334901&end_timestamp=1772309095" \
+curl "https://crazyrouter.com/api/log/self/stat?type=2&token_name=gptai&start_timestamp=1771334901&end_timestamp=1772309095" \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 485"
 ```
@@ -197,7 +201,7 @@ curl "https://api.crazyrouter.com/api/log/self/stat?type=2&token_name=gptai&star
 请求头与其他管理接口一致：
 
 ```bash cURL
-curl "https://api.crazyrouter.com/api/user/self" \
+curl "https://crazyrouter.com/api/user/self" \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 4004"
 ```
@@ -293,7 +297,7 @@ cost_usd = quota / quota_per_unit
 ```python
 import requests
 
-BASE_URL = "https://api.crazyrouter.com"
+BASE_URL = "https://crazyrouter.com"
 ACCESS_TOKEN = "your_access_token"
 USER_ID = "485"
 TOKEN_NAME = "gptai"

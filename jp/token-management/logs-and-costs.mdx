@@ -2,7 +2,7 @@
 title: 'Usage Logs and Cost Monitoring'
 description: 'Use management APIs to list API keys, query usage logs, summarize quota, and calculate USD cost'
 ---
-> 更新日: 2026-06-23
+> 更新日: 2026-07-20
 
 ## Use Cases
 
@@ -16,6 +16,10 @@ If a customer needs monitoring per API key, use the Crazyrouter management APIs 
 <Note>
   Management APIs use user-level authentication, not the business token used for model inference calls.
 </Note>
+
+<Warning>
+  All account and management endpoints on this page, including `/api/token/*`, `/api/log/*`, and `/api/user/self`, must use `https://crazyrouter.com`. `https://api.crazyrouter.com` is reserved for model and media APIs and returns `404 api_only_endpoint` for management routes.
+</Warning>
 
 ## Authentication
 
@@ -43,7 +47,7 @@ Recommended sequence:
 ## 1. List API Keys
 
 ```bash cURL
-curl "https://api.crazyrouter.com/api/token/?p=1&page_size=100" \
+curl "https://crazyrouter.com/api/token/?p=1&page_size=100" \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 485"
 ```
@@ -96,7 +100,7 @@ Use `/api/log/self` to query the current user's own consumption logs. At minimum
 Example:
 
 ```bash cURL
-curl "https://api.crazyrouter.com/api/log/self?type=2&token_name=gptai&start_timestamp=1771334901&end_timestamp=1772309095&p=1&page_size=5" \
+curl "https://crazyrouter.com/api/log/self?type=2&token_name=gptai&start_timestamp=1771334901&end_timestamp=1772309095&p=1&page_size=5" \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 485"
 ```
@@ -162,7 +166,7 @@ Example response:
 If you only need a dashboard, report, or alerting input, use the summary endpoint:
 
 ```bash cURL
-curl "https://api.crazyrouter.com/api/log/self/stat?type=2&token_name=gptai&start_timestamp=1771334901&end_timestamp=1772309095" \
+curl "https://crazyrouter.com/api/log/self/stat?type=2&token_name=gptai&start_timestamp=1771334901&end_timestamp=1772309095" \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 485"
 ```
@@ -193,7 +197,7 @@ If the customer does not only want per-key monitoring, but also wants to display
 Use the same management-auth headers:
 
 ```bash cURL
-curl "https://api.crazyrouter.com/api/user/self" \
+curl "https://crazyrouter.com/api/user/self" \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 4004"
 ```
@@ -289,7 +293,7 @@ Example:
 ```python
 import requests
 
-BASE_URL = "https://api.crazyrouter.com"
+BASE_URL = "https://crazyrouter.com"
 ACCESS_TOKEN = "your_access_token"
 USER_ID = "485"
 TOKEN_NAME = "gptai"

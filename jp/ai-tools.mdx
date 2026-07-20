@@ -2,7 +2,7 @@
 title: 'AI ツール向けドキュメント入口'
 description: 'Codex、Claude Code、ChatGPT、Cursor などが Crazyrouter ドキュメントを読むための入口'
 ---
-> 更新日: 2026-06-06
+> 更新日: 2026-07-20
 
 AI ツールに Crazyrouter ドキュメントを読ませる場合は、次の安定した入口を使ってください。
 
@@ -30,4 +30,5 @@ AI ツールに Crazyrouter ドキュメントを読ませる場合は、次の�
 完全な文脈が必要な場合は https://docs.crazyrouter.com/llms-full.txt を読んでください。
 OpenAI 互換クライアントでは base_url に https://api.crazyrouter.com/v1 または https://api.crazyrouter.com/v1 を使います。
 Claude Code / Anthropic native クライアントではルートドメインを使い、/v1 を追加しません。
+`/api/user/self`、`/api/token/*`、`/api/log/*` などのアカウント・管理 API は https://crazyrouter.com を使用してください。API 専用ドメインでは 404 api_only_endpoint が返されます。
 ```

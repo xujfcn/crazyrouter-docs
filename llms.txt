@@ -23,6 +23,7 @@ Authoritative runtime sources:
 
 Endpoint alignment:
 
+- Account and management endpoints such as `/api/user/self`, `/api/token/*`, and `/api/log/*` must use `https://crazyrouter.com`; sending them to an API-only domain returns `404 api_only_endpoint`.
 - OpenAI-compatible SDKs use `base_url="https://api.crazyrouter.com/v1"`.
 - Raw HTTP calls use the full endpoint, for example `https://api.crazyrouter.com/v1/chat/completions`.
 - Anthropic-native clients use root domain `https://api.crazyrouter.com`; do not append `/v1` manually.

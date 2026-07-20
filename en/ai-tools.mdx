@@ -2,7 +2,7 @@
 title: 'AI Tool Docs Entry'
 description: 'Crazyrouter documentation entry points for Codex, Claude Code, ChatGPT, Cursor, and other AI tools'
 ---
-> Last updated: 2026-06-23
+> Last updated: 2026-07-20
 
 Use this page when you want an AI tool to read Crazyrouter documentation. Prefer these stable entry points.
 
@@ -33,6 +33,7 @@ If you need to confirm which models the current API key can call, use GET https:
 For OpenAI-compatible clients, use base_url https://api.crazyrouter.com/v1.
 For Claude Code / Anthropic-native clients, use root domain https://api.crazyrouter.com and do not append /v1.
 For East Asia, prefer https://cn.crazyrouter.com; OpenAI-compatible clients should use https://cn.crazyrouter.com/v1.
+For account and management endpoints such as `/api/user/self`, `/api/token/*`, and `/api/log/*`, use https://crazyrouter.com; API-only domains return 404 api_only_endpoint for these routes.
 ```
 
 ## Common Pages

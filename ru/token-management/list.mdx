@@ -3,14 +3,14 @@ title: 'List Tokens'
 description: 'Get a paginated list of API tokens for the current user'
 api: 'GET /api/token/'
 ---
-> Дата обновления: 2026-06-23
+> Дата обновления: 2026-07-20
 
 ## Overview
 
 Retrieve all API tokens created by the current user, with pagination support.
 
 <Note>
-  The `/api/token/*` endpoints are mainly for Crazyrouter dashboard automation around API key management. They require a user `access token` plus the `New-Api-User` header, and are not the normal interface for `sk-xxx` model calls.
+  The `/api/token/*` endpoints are mainly for Crazyrouter dashboard automation around API key management. They require a user `access token` plus the `New-Api-User` header, and are not the normal interface for `sk-xxx` model calls. Use `https://crazyrouter.com` as the base URL; `https://api.crazyrouter.com` is reserved for model APIs and returns `404 api_only_endpoint` for management paths.
 </Note>
 
 ## Authentication
@@ -96,7 +96,7 @@ headers = {
 }
 
 response = requests.get(
-    "https://api.crazyrouter.com/api/token/?p=1&size=100",
+    "https://crazyrouter.com/api/token/?p=1&size=100",
     headers=headers
 )
 
@@ -106,7 +106,7 @@ for token in page["items"]:
 ```
 
 ```bash cURL
-curl "https://api.crazyrouter.com/api/token/?p=1&size=100" \
+curl "https://crazyrouter.com/api/token/?p=1&size=100" \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 1"
 ```

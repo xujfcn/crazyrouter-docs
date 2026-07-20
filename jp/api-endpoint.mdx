@@ -2,7 +2,7 @@
 title: 'API エンドポイント'
 description: 'Crazyrouter の主要 API エンドポイント一覧'
 ---
-> 更新日: 2026-06-16
+> 更新日: 2026-07-20
 
 ## API Base URL
 
@@ -15,6 +15,10 @@ https://api.crazyrouter.com
 ```text
 https://crazyrouter.com
 ```
+
+<Warning>
+アカウントおよび管理 API は、`/api/user/self`、`/api/token/*`、`/api/log/*` を含め、必ずメインドメイン `https://crazyrouter.com` を使用してください。これらのパスを `https://api.crazyrouter.com` または `https://cn.crazyrouter.com` に送ると、管理ルートは対象外のため `404 api_only_endpoint` が返されます。`/v1/chat/completions`、`/v1/messages`、`/v1/models` などのモデル API は引き続き API 専用ドメインを使用します。
+</Warning>
 
 東アジア地域では、次の API 接続先を優先してください。
 
@@ -31,6 +35,7 @@ SDK、IDE、エージェント、サードパーティクライアントを設�
 | OpenAI 互換 SDK / クライアント | `https://api.crazyrouter.com/v1` | `https://cn.crazyrouter.com/v1` | クライアントが `/chat/completions` や `/models` などを追加します |
 | Claude Code / Anthropic ネイティブクライアント | `https://api.crazyrouter.com` | `https://cn.crazyrouter.com` | クライアントが `/v1/messages` を自動で追加するため、`/v1` を手動で追加しないでください |
 | curl / 手書き HTTP リクエスト | 完全なエンドポイント、例: `https://api.crazyrouter.com/v1/chat/completions` | 完全なエンドポイント、例: `https://cn.crazyrouter.com/v1/chat/completions` | 手書きリクエストでは API パス全体が必要です |
+| アカウント、残高、Token、ログ管理 | `https://crazyrouter.com` | `https://crazyrouter.com` | `/api/user/self`、`/api/token/*`、`/api/log/*` 用。API 専用ドメインは使用しないでください |
 
 <Warning>
 ログに `/v1/v1/models`、`/v1/v1/messages`、`/v1/messages/v1/messages` が出る場合、API パスが重複しています。Claude Code / Anthropic ネイティブクライアントはルートドメインに戻し、OpenAI 互換クライアントは `/v1` までの Base URL にしてください。

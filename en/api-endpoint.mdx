@@ -2,7 +2,7 @@
 title: 'API Endpoints'
 description: 'API endpoint addresses and reference'
 ---
-> Last updated: 2026-06-16
+> Last updated: 2026-07-20
 
 ## API Base URL
 
@@ -15,6 +15,10 @@ https://api.crazyrouter.com
 ```text
 https://crazyrouter.com
 ```
+
+<Warning>
+Account and management endpoints must use the primary domain `https://crazyrouter.com`, including `/api/user/self`, `/api/token/*`, and `/api/log/*`. Do not send these paths to `https://api.crazyrouter.com` or `https://cn.crazyrouter.com`; those domains are reserved for model and media APIs and return `404 api_only_endpoint` for management routes. Model inference endpoints such as `/v1/chat/completions`, `/v1/messages`, and `/v1/models` should continue to use the API-specific domains.
+</Warning>
 
 For East Asia, prefer this API access address:
 
@@ -36,6 +40,7 @@ Use the international API entry `https://api.crazyrouter.com` by default for API
 | OpenAI-compatible SDKs / clients | `https://api.crazyrouter.com/v1` | `https://cn.crazyrouter.com/v1` | The client appends paths such as `/chat/completions` and `/models` |
 | Claude Code / Anthropic-native clients | `https://api.crazyrouter.com` | `https://cn.crazyrouter.com` | The client appends `/v1/messages` itself, so do not add `/v1` manually |
 | curl / raw HTTP requests | Full endpoint, for example `https://api.crazyrouter.com/v1/chat/completions` | Full endpoint, for example `https://cn.crazyrouter.com/v1/chat/completions` | Raw requests must include the full API path |
+| Account, wallet, token, and log management | `https://crazyrouter.com` | `https://crazyrouter.com` | Use for `/api/user/self`, `/api/token/*`, and `/api/log/*`; do not use an API-only domain |
 
 <Warning>
 If logs show `/v1/v1/models`, `/v1/v1/messages`, or `/v1/messages/v1/messages`, the client is duplicating API paths. For Claude Code / Anthropic-native clients, reset the base URL to the root domain. For OpenAI-compatible clients, keep only the `/v1` base URL.

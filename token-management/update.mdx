@@ -3,14 +3,14 @@ title: '修改令牌'
 description: '更新已有令牌的配置'
 api: 'PUT /api/token/'
 ---
-> 更新日期：2026-06-06
+> 更新日期：2026-07-20
 
 ## 接口说明
 
 修改已有令牌的名称、额度、过期时间、模型权限等配置。
 
 <Note>
-  这组 `/api/token/*` 接口主要用于 Crazyrouter 控制台中的 API Key 管理自动化。它们需要用户 `access token` 与 `New-Api-User` 请求头，不是给普通 `sk-xxx` 模型调用流程直接使用的接口。
+  这组 `/api/token/*` 接口主要用于 Crazyrouter 控制台中的 API Key 管理自动化。它们需要用户 `access token` 与 `New-Api-User` 请求头，不是给普通 `sk-xxx` 模型调用流程直接使用的接口。请求基地址必须使用 `https://crazyrouter.com`；`https://api.crazyrouter.com` 是模型 API 专用入口，调用管理路径会返回 `404 api_only_endpoint`。
 </Note>
 
 ## 认证方式
@@ -102,7 +102,7 @@ headers = {
 }
 
 response = requests.put(
-    "https://api.crazyrouter.com/api/token/",
+    "https://crazyrouter.com/api/token/",
     headers=headers,
     json={
         "id": 10,
@@ -117,7 +117,7 @@ print(response.json())
 ```
 
 ```bash cURL
-curl -X PUT https://api.crazyrouter.com/api/token/ \
+curl -X PUT https://crazyrouter.com/api/token/ \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 1" \
   -H "Content-Type: application/json" \

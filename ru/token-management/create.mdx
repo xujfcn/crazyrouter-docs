@@ -3,14 +3,14 @@ title: 'Create Token'
 description: 'Create a new API token'
 api: 'POST /api/token/'
 ---
-> Дата обновления: 2026-06-23
+> Дата обновления: 2026-07-20
 
 ## Overview
 
 Create a new API token for calling AI model APIs.
 
 <Note>
-  The `/api/token/*` endpoints are mainly for Crazyrouter dashboard automation around API key management. They require a user `access token` plus the `New-Api-User` header, and are not the normal interface for `sk-xxx` model calls.
+  The `/api/token/*` endpoints are mainly for Crazyrouter dashboard automation around API key management. They require a user `access token` plus the `New-Api-User` header, and are not the normal interface for `sk-xxx` model calls. Use `https://crazyrouter.com` as the base URL; `https://api.crazyrouter.com` is reserved for model APIs and returns `404 api_only_endpoint` for management paths.
 </Note>
 
 ## Authentication
@@ -83,7 +83,7 @@ headers = {
 }
 
 response = requests.post(
-    "https://api.crazyrouter.com/api/token/",
+    "https://crazyrouter.com/api/token/",
     headers=headers,
     json={
         "name": "Production",
@@ -100,7 +100,7 @@ print(response.json())
 ```
 
 ```bash cURL
-curl -X POST https://api.crazyrouter.com/api/token/ \
+curl -X POST https://crazyrouter.com/api/token/ \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 1" \
   -H "Content-Type: application/json" \
