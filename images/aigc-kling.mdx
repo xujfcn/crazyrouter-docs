@@ -1,0 +1,123 @@
+---
+title: "AIGC Kling 3.0 图像生成"
+description: "通过 Crazyrouter 的 Tencent VOD 线路调用 aigc-image-kling-3.0 生成图像"
+---
+> 更新日期：2026-08-07
+
+# AIGC Kling 3.0 图像生成
+
+`aigc-image-kling-3.0` 是 Crazyrouter 通过 Tencent VOD 线路开放的 Kling 3.0 文生图模型。客户端使用 OpenAI Images 兼容接口：
+
+```http
+POST /v1/images/generations
+```
+
+<Warning>
+  完整端点是 `https://api.crazyrouter.com/v1/images/generations`。不要把该模型提交到 `/kling/v1/images/generations`，也不要把模型名写成视频模型 `aigc-video-kling-3.0`。
+</Warning>
+
+## 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `model` | string | 是 | 固定为 `aigc-image-kling-3.0` |
+| `prompt` | string | 是 | 图片生成提示词 |
+| `aspect_ratio` | string | 否 | 输出比例。常用值为 `1:1`、`16:9`、`9:16`、`4:3`、`3:4`；默认 `1:1` |
+| `size` | string | 否 | 兼容尺寸写法，服务端会将其换算为输出比例，见下表 |
+
+当前公开能力为文生图。请不要在该模型的请求中传参考图，也不要使用 `/v1/images/edits`。
+
+### 尺寸与比例
+
+推荐直接传 `aspect_ratio`。如使用 `size`，当前换算规则如下：
+
+| `size` | 实际输出比例 |
+|------|------|
+| `1024x1024` | `1:1` |
+| `1792x1024`、`1536x1024` | `16:9` |
+| `1024x1792`、`1024x1536` | `9:16` |
+| `1024x768` | `4:3` |
+| `768x1024` | `3:4` |
+
+<Note>
+  同时传 `aspect_ratio` 和 `size` 时，以 `aspect_ratio` 为准。其他未列出的 `size` 当前会按 `1:1` 处理。
+</Note>
+
+## 请求示例
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-image-kling-3.0",
+    "prompt": "一张电影感的未来城市夜景，雨后的街道反射霓虹灯光，画面细节丰富",
+    "aspect_ratio": "16:9"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/v1/images/generations",
+    headers={
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Content-Type": "application/json",
+    },
+    json={
+        "model": "aigc-image-kling-3.0",
+        "prompt": "一张电影感的未来城市夜景，雨后的街道反射霓虹灯光，画面细节丰富",
+        "aspect_ratio": "16:9",
+    },
+    timeout=240,
+)
+
+response.raise_for_status()
+result = response.json()
+print(result["data"][0]["url"])
+```
+
+</CodeGroup>
+
+## 响应示例
+
+```json
+{
+  "created": 1786000000,
+  "data": [
+    {
+      "url": "https://media.crazyrouter.com/task-artifacts/example.png",
+      "b64_json": "",
+      "revised_prompt": ""
+    }
+  ],
+  "extra": {
+    "provider": "tencent-vod",
+    "task_id": "AigcImageTask-example",
+    "request_id": "request-example"
+  }
+}
+```
+
+直接读取 `data[0].url` 即可获取生成结果。
+
+## 请求耗时
+
+Tencent VOD 上游以异步任务执行，但 Crazyrouter 会在服务端等待任务完成，再通过当前 HTTP 请求返回 OpenAI Images 格式的最终结果。客户端不需要另行查询任务。
+
+<Note>
+  图片生成可能持续数十秒。建议把客户端超时设置为至少 `240` 秒，并等待当前请求完成；不要因为暂时没有响应而立即重复提交，否则可能产生重复任务和重复计费。
+</Note>
+
+## 与其他 Kling 模型的区别
+
+| 模型 | 用途 | 请求路径 |
+|------|------|------|
+| `aigc-image-kling-3.0` | Tencent VOD Kling 3.0 文生图 | `POST /v1/images/generations` |
+| `aigc-video-kling-3.0` | Tencent VOD Kling 3.0 视频生成 | `POST /v1/video/generations` |
+| 原生 Kling 图片模型 | 原生 Kling 图片协议 | `POST /kling/v1/images/generations` |
+
+该模型按成功生成图片计费。实时价格、折扣和可用状态以 [Pricing 页面](/pricing) 与当前 API Key 的 `GET /v1/models` 返回为准。
