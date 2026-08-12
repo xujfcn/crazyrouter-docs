@@ -1,0 +1,74 @@
+---
+title: "Suno SDK: единый API"
+description: "Русское руководство по вызову Suno через единый асинхронный API Crazyrouter"
+---
+> Дата обновления: 2026-08-13
+
+<Note>
+Проверка в production 2026-08-13 (UTC+8): `suno/generate`, `suno/cover`, `suno/upload-extend` и `suno/vocal-separation` с обязательными ресурсными полями успешно прошли реальный маршрут Crazyrouter. `suno_lyrics` сейчас отсутствует в production `/v1/models`; `suno/timestamped-lyrics` возвращает нестабильный ответ upstream `Invalid request` и не гарантируется.
+</Note>
+
+## Поддерживаемые модели
+
+- `suno/generate` — создание песни по тексту
+- `suno/extend` — продолжение существующего аудио по `audioId`
+- `suno/upload-extend` — продолжение аудио по внешнему `audioUrl`
+- `suno/cover` — кавер или изменение стиля по `audioUrl`
+- `suno/vocal-separation` — разделение вокала и инструментала по существующей задаче
+- `suno/timestamped-lyrics` — временные метки текста; доступность нестабильна
+
+## Отправка задачи
+
+Используйте один API Key и единый асинхронный маршрут. Важно: верхнеуровневое поле `prompt` обязательно, а параметры Suno передаются в `metadata`.
+
+```bash
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "suno/generate",
+    "channel": "auto",
+    "prompt": "A short bright instrumental synth pop melody",
+    "metadata": {
+      "model_version": "V5_5",
+      "customMode": true,
+      "instrumental": true,
+      "style": "bright synth pop",
+      "title": "SDK verification"
+    }
+  }'
+```
+
+Ответ содержит `task_id`. Получите результат запросом:
+
+```bash
+curl https://api.crazyrouter.com/v1/video/generations/TASK_ID \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+Состояние `succeeded` означает готовый результат. URL результата находится в `data.url`; формат для Suno обычно `mp3`.
+
+## Параметры производных операций
+
+`extend` требует `audioId`; `upload-extend` и `cover` требуют `audioUrl`; `vocal-separation` требует `taskId`, `audioId` и рекомендуется также `audioUrl`. Эти операции нельзя тестировать без реального исходного ресурса.
+
+Пример продолжения:
+
+```json
+{
+  "model": "suno/extend",
+  "channel": "auto",
+  "prompt": "Continue with a brighter chorus",
+  "metadata": {
+    "audioId": "audio_xxx",
+    "continueAt": 20,
+    "model_version": "V5_5"
+  }
+}
+```
+
+Для фиксированного канала можно использовать суффикс ключа, например `YOUR_API_KEY-258`; по умолчанию оставляйте `channel: "auto"`.
+
+## Ограничения
+
+Старые маршруты `/suno/submit/*` и `/suno/fetch/*` сохранены только для совместимости и не являются основным production-протоколом. Перед запуском проверяйте доступные модели через `GET /v1/models`. Не рассчитывайте, что результат запроса всегда содержит `audioId`: для производных операций сохраните исходные идентификаторы, полученные от upstream.

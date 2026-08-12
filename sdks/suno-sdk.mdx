@@ -63,7 +63,7 @@ Bearer YOUR_API_KEY-258
 
 ## 版本参数
 
-Suno 统一任务模型族使用 `input.model_version`，不是老 `/suno/submit/music` 路由里的 `mv`。
+Suno 统一任务模型族使用 `metadata.model_version`，不是老 `/suno/submit/music` 路由里的 `mv`。
 
 当前可用版本值：
 
@@ -85,9 +85,9 @@ Suno 统一任务模型族使用 `input.model_version`，不是老 `/suno/submit
 ```json
 {
   "model": "suno/generate",
-  "callBackUrl": "https://your-domain.com/callback",
   "channel": "auto",
-  "input": {
+  "prompt": "A short bright synth pop song",
+  "metadata": {
     "model_version": "V5_5"
   }
 }
@@ -98,7 +98,8 @@ Suno 统一任务模型族使用 `input.model_version`，不是老 `/suno/submit
 - `model` 是具体的 Suno 子模型名
 - `callBackUrl` 可选
 - `channel` 可选，建议默认 `auto`
-- 具体参数放在 `input` 里
+- `prompt` 是统一任务接口的必填顶层字段
+- Suno 专用参数放在 `metadata` 中，本站会转换为上游 `input`
 
 ## 查询任务
 
@@ -158,7 +159,7 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
   -d '{
     "model": "suno/generate",
     "channel": "auto",
-    "input": {
+    "metadata": {
       "model_version": "V5_5",
       "customMode": true,
       "instrumental": false,
@@ -187,7 +188,8 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
 {
   "model": "suno/extend",
   "channel": "auto",
-  "input": {
+  "prompt": "Suno task prompt",
+  "metadata": {
     "model_version": "V5",
     "audioId": "abc123-def456",
     "continueAt": 20,
@@ -216,7 +218,8 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
 {
   "model": "suno/upload-extend",
   "channel": "auto",
-  "input": {
+  "prompt": "Suno task prompt",
+  "metadata": {
     "model_version": "V4_5PLUS",
     "audioUrl": "https://your-storage.example.com/source.mp3",
     "continueAt": 20,
@@ -247,7 +250,8 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
 {
   "model": "suno/cover",
   "channel": "auto",
-  "input": {
+  "prompt": "Suno task prompt",
+  "metadata": {
     "model_version": "V4_5ALL",
     "audioUrl": "https://your-storage.example.com/original.mp3",
     "customMode": false,
@@ -273,7 +277,8 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
 {
   "model": "suno/timestamped-lyrics",
   "channel": "auto",
-  "input": {
+  "prompt": "Suno task prompt",
+  "metadata": {
     "taskId": "task_xxx",
     "audioId": "audio_xxx"
   }
@@ -298,7 +303,8 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
 {
   "model": "suno/vocal-separation",
   "channel": "auto",
-  "input": {
+  "prompt": "Suno task prompt",
+  "metadata": {
     "taskId": "task_xxx",
     "audioId": "audio_xxx",
     "audioUrl": "https://your-storage.example.com/source.mp3",
@@ -345,7 +351,8 @@ async function submitSunoGenerate() {
     body: JSON.stringify({
       model: 'suno/generate',
       channel: 'auto',
-      input: {
+      prompt: '[Verse]\\nMorning lights across the wire\\nTiny sparks climb higher',
+      metadata: {
         model_version: 'V5_5',
         customMode: true,
         instrumental: false,
@@ -417,7 +424,7 @@ submit = requests.post(
     json={
         "model": "suno/generate",
         "channel": "auto",
-        "input": {
+        "metadata": {
             "model_version": "V5_5",
             "customMode": True,
             "instrumental": False,
@@ -469,4 +476,4 @@ while True:
 
 ### 我应该传 `mv` 还是 `model_version`？
 
-这套统一任务模型族传 `input.model_version`。只有老 `/suno/submit/music` 才传 `mv`。
+这套统一任务模型族传 `metadata.model_version`。只有老 `/suno/submit/music` 才传 `mv`。

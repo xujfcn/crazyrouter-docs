@@ -106,8 +106,7 @@ curl -X POST https://api.crazyrouter.com/v1/chat/completions \
 
 生产公开模型索引当前只有 `suno_music`。歌词能力暂未提供稳定生产路由。歌曲提交、查询和续写流程请看：
 
-- [Suno 生成歌曲](/audio/suno/generate)
-- [Suno 任务查询](/audio/suno/query)
+- [Suno SDK 统一任务指南](/sdks/suno-sdk)
 
 <Note>
   实际可用模型还会受到 Token 白名单、渠道状态和平台更新影响。生产接入前请先调用 [`GET /v1/models`](/chat/openai/models) 确认当前 Token 可见的模型 ID。

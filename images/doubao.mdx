@@ -2,7 +2,7 @@
 title: "豆包 Seedream"
 description: "使用豆包 Seedream 系列模型进行图像生成，客户端继续使用 OpenAI Images 兼容协议"
 ---
-> 更新日期：2026-06-06
+> 更新日期：2026-07-25
 
 # 豆包 Seedream
 
@@ -19,7 +19,7 @@ Crazyrouter 当前对外以 OpenAI Images 兼容协议开放 `Seedream` 系列�
 | `doubao-seedream-4-0` | Seedream 4.0 | 文生图、图生图、多参考图、组图输出 | Beta |
 | `doubao-seedream-4-5` | Seedream 4.5 | 文生图、图生图、多参考图、组图输出 | Beta |
 | `doubao-seedream-5-0` | Seedream 5.0 lite | 文生图、图生图、多参考图、组图输出 | Beta |
-| `doubao-seedream-5-0` | Seedream 3.0 | 兼容保留 | Legacy |
+| `doubao-seedream-3-0` | Seedream 3.0 | 兼容保留 | Legacy |
 
 <Note>
   这里的“Beta”含义是：客户协议与官方能力定义已经对齐，但当前生产承载与实测 artifact 仍在继续补齐。官方能力先按完整形态写出，未闭环部分保留 Beta 标记。
@@ -34,12 +34,29 @@ Crazyrouter 当前对外以 OpenAI Images 兼容协议开放 `Seedream` 系列�
 | `model` | string | 是 | `doubao-seedream-4-0`、`doubao-seedream-4-5`、`doubao-seedream-5-0` |
 | `prompt` | string | 是 | 生成提示词 |
 | `image_input` | string 或 string[] | 否 | 参考图 URL，官方 4.0 / 4.5 / 5.0 lite 当前能力上限为 `14` 张 |
-| `size` | string | 否 | 输出尺寸。`Seedream 4.5` 官方支持 `2K`、`4K`，以及范围内的显式宽高 |
+| `size` | string | 否 | 输出尺寸。`Seedream 4.5` 官方支持 `2K`、`4K`，以及范围内的显式宽高；`Seedream 5.0 lite` 当前要求宽×高至少为 `3,686,400` 总像素 |
 | `n` | integer | 否 | 输出张数，默认 `1` |
 | `response_format` | string | 否 | `url` 或 `b64_json` |
 | `watermark` | boolean | 否 | 是否加水印 |
 | `sequential_image_generation` | string | 否 | `auto` 或 `disabled`；用于组图输出与串联生成语义 |
 | `optimize_prompt_options` | object | 否 | 官方提示词优化选项；当前 `Seedream 4.5` 与 `5.0 lite` 仅确认 `mode: "standard"` |
+
+### Seedream 5.0 尺寸要求
+
+`doubao-seedream-5-0` 的显式 `宽x高` 尺寸必须满足：
+
+```text
+宽 × 高 >= 3,686,400
+```
+
+| 尺寸 | 总像素 | 是否满足最低门槛 |
+|------|--------|------------------|
+| `2688x1152` | `3,096,576` | 否；上游返回 `InvalidParameter` |
+| `2048x2048` | `4,194,304` | 是；同时仍需符合模型支持的宽高和比例范围 |
+
+<Warning>
+  不要对相同的无效尺寸反复重试或据此判断模型不可用。如果错误日志显示“Service temporarily unavailable”或“The requested model is temporarily unavailable”，请先检查 `size`；当前普通错误日志可能隐藏上游更具体的尺寸错误。
+</Warning>
 
 ### 参考图边界
 
