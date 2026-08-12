@@ -23,7 +23,7 @@ description: "基于本地公开模型索引整理的最新模型调用示例"
 | xAI 快速聊天 | `grok-4.1-fast` |
 | MiniMax 长上下文 | `MiniMax-M2.7` |
 | Qwen 视觉理解 | `qwen3-vl-235b-a22b-instruct` 或 `qwen2.5-vl-72b-instruct` |
-| Suno 歌词 / 音乐 | `suno_lyrics` / `suno_music` |
+| Suno 音乐 | `suno_music` |
 
 ## Chat Completions
 
@@ -104,9 +104,8 @@ curl -X POST https://api.crazyrouter.com/v1/chat/completions \
 
 ## 音乐与歌词
 
-`suno_lyrics` 和 `suno_music` 是公开模型索引中的音频能力入口。具体提交、查询和续写流程请看：
+生产公开模型索引当前只有 `suno_music`。歌词能力暂未提供稳定生产路由。歌曲提交、查询和续写流程请看：
 
-- [Suno 生成歌词](/audio/suno/lyrics)
 - [Suno 生成歌曲](/audio/suno/generate)
 - [Suno 任务查询](/audio/suno/query)
 

@@ -4,6 +4,10 @@ description: "查询 Suno 歌曲生成任务的状态和结果"
 ---
 > 更新日期：2026-06-06
 
+<Warning>
+  The /suno/fetch/* endpoint is a legacy compatibility interface. New integrations should poll GET /v1/video/generations/{task_id} and use data.url from the response.
+</Warning>
+
 # Suno 任务查询
 
 ## 查询单个任务

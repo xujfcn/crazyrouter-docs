@@ -2,7 +2,11 @@
 title: 'Suno SDK 中文指南'
 description: '使用同一个 Crazyrouter API Key 调用 Suno 统一任务模型族，覆盖生成、续写、翻唱、上传续写、时间轴歌词和人声分离'
 ---
-> 更新日期：2026-06-24
+> 更新日期：2026-08-13
+
+<Note>
+生产验证（2026-08-13 +08:00）：`suno/generate`、`suno/cover`、`suno/upload-extend` 和补齐资源字段后的 `suno/vocal-separation` 已通过本站真实任务链路。`suno_lyrics` 当前不在生产 `/v1/models` 中；`suno/timestamped-lyrics` 仍返回上游 `Invalid request`，暂不承诺稳定可用。
+</Note>
 
 ## 适用范围
 
