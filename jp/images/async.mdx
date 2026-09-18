@@ -1,0 +1,246 @@
+---
+title: "非同期画像生成"
+description: "送信後すぐにタスク ID を返し、ポーリングで画像 URL を取得。gpt-image-2、nano-banana-2、nano-banana-pro などの時間のかかる画像モデル向け"
+---
+> 更新日：2026-09-18
+
+# 非同期画像生成
+
+画像生成は 1 回あたり通常 20〜120 秒かかります。同期 API では HTTP 接続を開いたまま待つ必要があり、ゲートウェイやプロキシの読み取りタイムアウトにかかりやすく、base64 のレスポンスも大きくなります。非同期モードでは呼び出しを 2 回に分けます。
+
+1. **送信**：リクエストは 1 秒以内に `202` とタスク ID を返します。
+2. **ポーリング**：`GET /v1/tasks/{id}` で完了を待ちます。完了後、`result` には各画像の **https URL**（`media.crazyrouter.com` に永続保存）が入ります。デフォルトで base64 は返しません。
+
+```
+送信（3 通り、下記参照）
+  POST /v1beta/models/{model}:asyncGenerateContent      # Gemini 系、パスエイリアス
+  POST /v1/images/generations  + Prefer: respond-async   # OpenAI 系
+  POST /v1/images/edits        + Prefer: respond-async   # OpenAI 系（参照画像あり）
+
+照会
+  GET  /v1/tasks/{task_id}
+```
+
+<Note>
+  **モデル名・リクエストボディ・課金は同期呼び出しと完全に同じです。** 非同期は「いつ結果を受け取るか」だけを変えます。同じ API キーで同期と非同期を混在させて構いません。失敗したタスクは課金されません。
+</Note>
+
+## 対応モデル
+
+| モデル | 送信方法 | 目安時間 |
+|------|------|------|
+| `nano-banana-2`（Gemini 3.1 Flash Image） | `:asyncGenerateContent` | 15〜30 秒 |
+| `nano-banana-pro`（Gemini 3 Pro Image） | `:asyncGenerateContent` | 30〜60 秒 |
+| `gpt-image-2`、`gpt-image-1.5`、`gpt-image-2.5-*` | `Prefer: respond-async` ヘッダー、または `async: true` フィールド | 60〜120 秒 |
+| その他の画像出力モデル | 同上、既存のエンドポイントで | — |
+
+## 方法 1：Gemini パスエイリアス（Gemini クライアント推奨）
+
+**ボディ・ヘッダー・クエリ文字列を 1 バイトも変更する必要はありません。** アクション接尾辞 `:generateContent` を `:asyncGenerateContent` に置き換えるだけです。
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1beta/models/nano-banana-2:asyncGenerateContent \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [{"role": "user", "parts": [{"text": "draw a cat"}]}],
+    "generationConfig": {
+      "responseModalities": ["IMAGE"],
+      "imageConfig": {"aspectRatio": "16:9"}
+    }
+  }'
+```
+
+`202` が返ります：
+
+```json
+{
+  "id": "task_17754fd677574c3fbfb178ace1ee7551",
+  "object": "task",
+  "kind": "image",
+  "model": "gemini-3.1-flash-image-preview",
+  "status": "queued",
+  "created_at": 1789716402
+}
+```
+
+<Note>
+  レスポンスの `model` は解決後の実モデル名（例：`gemini-3.1-flash-image-preview`）で、利用ログと一致します。送信時は引き続き `nano-banana-2` を使えます。参照画像による編集は同期と同じで、`contents` の `parts` に `inlineData`（base64）または `fileData`（URL）を入れてください。
+</Note>
+
+`:asyncGenerateContent` は画像出力モデル専用です。テキストモデルで呼ぶと `400 async mode is only available for image models` になります。ストリーミングの `:streamGenerateContent` に非同期版はありません。
+
+## 方法 2：OpenAI 画像エンドポイント + `Prefer` ヘッダー
+
+既存の `/v1/images/generations` または `/v1/images/edits` リクエストに HTTP ヘッダー `Prefer: respond-async` を付けるだけです。ボディの `"async": true`（JSON）やフォームフィールド `async=true`（multipart）でも同じ効果です。
+
+<CodeGroup>
+
+```bash テキストから画像
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Prefer: respond-async" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-image-2",
+    "prompt": "a tiny cartoon cat sticker",
+    "size": "1024x1024",
+    "quality": "low",
+    "n": 1
+  }'
+```
+
+```bash 参照画像で編集（multipart）
+curl -X POST https://api.crazyrouter.com/v1/images/edits \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Prefer: respond-async" \
+  -F model=gpt-image-2 \
+  -F prompt="turn this into a cartoon cat sticker" \
+  -F size=1024x1024 \
+  -F quality=low \
+  -F image=@reference.png
+```
+
+```python Python (requests)
+import requests, time
+
+BASE = "https://api.crazyrouter.com"
+H = {"Authorization": "Bearer YOUR_API_KEY"}
+
+r = requests.post(f"{BASE}/v1/images/edits",
+                  headers={**H, "Prefer": "respond-async"},
+                  data={"model": "gpt-image-2", "prompt": "turn this into a cartoon cat sticker",
+                        "size": "1024x1024", "quality": "low"},
+                  files={"image": open("reference.png", "rb")})
+task_id = r.json()["id"]
+
+while True:
+    env = requests.get(f"{BASE}/v1/tasks/{task_id}", headers=H).json()
+    if env["status"] in ("completed", "failed"):
+        break
+    time.sleep(3)
+
+if env["status"] == "completed":
+    print(env["result"]["data"][0]["url"])
+else:
+    print(env["error"])
+```
+
+</CodeGroup>
+
+レスポンスヘッダーに `Preference-Applied: respond-async` が付き、ボディは方法 1 と同じ `202` + タスク ID です。
+
+## タスクの照会
+
+```
+GET https://api.crazyrouter.com/v1/tasks/{task_id}
+Authorization: Bearer YOUR_API_KEY
+```
+
+照会できるのは自分のアカウントで送信したタスクのみで、それ以外の ID は `404` です。2〜3 秒間隔でポーリングし、10 分経っても完了しない場合は失敗とみなしてください。
+
+### ステータス
+
+| `status` | 意味 |
+|------|------|
+| `queued` | 受付済み、実行待ち |
+| `running` | 生成中 |
+| `completed` | 成功、`result` に結果あり |
+| `failed` | 失敗、`error` に理由あり、**課金なし** |
+
+### 完了時のレスポンス（Gemini 系）
+
+`result` はネイティブの Gemini `GenerateContentResponse` そのもので、`inlineData` が画像 URL を指す `fileData` に置き換わっている点だけが異なります。
+
+```json
+{
+  "id": "task_17754fd677574c3fbfb178ace1ee7551",
+  "object": "task",
+  "kind": "image",
+  "model": "gemini-3.1-flash-image-preview",
+  "status": "completed",
+  "progress": "100%",
+  "created_at": 1789716402,
+  "started_at": 1789716403,
+  "completed_at": 1789716419,
+  "result": {
+    "candidates": [{
+      "content": {
+        "role": "model",
+        "parts": [
+          {"fileData": {"mimeType": "image/png", "fileUri": "https://media.crazyrouter.com/task-artifacts/2026/09/18/sync-image/task_17754fd677574c3fbfb178ace1ee7551-0.png"}}
+        ]
+      },
+      "finishReason": "STOP"
+    }],
+    "usageMetadata": {"promptTokenCount": 15, "candidatesTokenCount": 1022, "totalTokenCount": 1037}
+  },
+  "error": null
+}
+```
+
+### 完了時のレスポンス（OpenAI 系）
+
+`result` は同期の `/v1/images/*` レスポンスと同じ形で、画像は `data[].url` にあります。
+
+```json
+{
+  "id": "task_b210db17cea14754818e9b965bd8a61c",
+  "object": "task",
+  "kind": "image",
+  "model": "gpt-image-2",
+  "status": "completed",
+  "result": {
+    "created": 1789716295,
+    "data": [
+      {"url": "https://media.crazyrouter.com/task-artifacts/2026/09/18/sync-image/task_b210db17cea14754818e9b965bd8a61c-0.png"}
+    ],
+    "usage": {"input_tokens": 77, "output_tokens": 196, "total_tokens": 273}
+  },
+  "error": null
+}
+```
+
+どうしても base64 が必要な場合は照会時に `?inline=true` を付けてください。保存済み画像を読み戻して `inlineData` / `b64_json` に戻します（大きな画像では遅いため非推奨）。
+
+### 失敗時のレスポンス
+
+```json
+{
+  "id": "task_…",
+  "status": "failed",
+  "result": null,
+  "error": {
+    "code": "provider_failed",
+    "message": "upstream returned 502",
+    "retryable": true
+  }
+}
+```
+
+| `error.code` | 意味 | 再試行可 |
+|------|------|------|
+| `validation_failed` | リクエストパラメータが拒否された（4xx） | いいえ |
+| `token_invalid` | API キーが無効、またはこのモデルが許可されていない | いいえ |
+| `insufficient_quota` | 残高不足 | いいえ |
+| `rate_limited` | 上流／チャネルのレート制限 | はい |
+| `provider_failed` | 上流での生成失敗 | はい |
+| `timeout` | 1 回の生成が 10 分を超過 | はい |
+| `no_image` | モデルが画像なしで応答（安全フィルタ等）。同期と同様に**課金対象** | いいえ |
+
+`retryable: true` は新しいタスクを再送信してよいという意味で、自動再試行は行われません。
+
+## 冪等な送信
+
+ネットワークの再試行で同じタスクが二重送信されることがあります。送信リクエストに `Idempotency-Key: <任意の文字列>` ヘッダーを付けると、同一アカウント・同一キーでは同じタスク ID が返り（2 回目は `202` ではなく `200`）、重複生成も重複課金も起きません。
+
+## 同期と非同期の比較
+
+| | 同期 | 非同期 |
+|------|------|------|
+| 送信の戻り | 生成完了後に画像（20〜120 秒） | 1 秒以内にタスク ID |
+| 画像の形式 | URL または base64（チャネル依存） | 常に URL |
+| 接続タイムアウトのリスク | あり | なし |
+| 課金 | モデル／サイズ別 | 完全に同じ。失敗は無料 |
+| ルーティング | 能力ベースのルーティング | 同じ（再実行も同じルーティングとフェイルオーバー） |
+| 制限 | — | アカウントあたり未完了タスク最大 50 件、超過時は `429` |

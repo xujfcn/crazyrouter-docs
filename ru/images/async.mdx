@@ -1,0 +1,246 @@
+---
+title: "Асинхронная генерация изображений"
+description: "Отправьте запрос, сразу получите ID задачи, опрашивайте до получения URL изображения — для gpt-image-2, nano-banana-2, nano-banana-pro и других медленных моделей"
+---
+> Обновлено: 2026-09-18
+
+# Асинхронная генерация изображений
+
+Одна генерация изображения обычно занимает 20–120 секунд. Синхронные эндпоинты держат HTTP-соединение открытым всё это время, что упирается в таймауты чтения шлюзов и прокси, а base64-ответы получаются большими. Асинхронный режим разбивает вызов на два шага:
+
+1. **Отправка**: запрос возвращает `202` и ID задачи менее чем за секунду.
+2. **Опрос**: `GET /v1/tasks/{id}` до завершения; в `result` будет **https-URL** каждого изображения (постоянно хранится на `media.crazyrouter.com`). Base64 по умолчанию не возвращается.
+
+```
+Отправка (три способа, см. ниже)
+  POST /v1beta/models/{model}:asyncGenerateContent      # семейство Gemini, алиас пути
+  POST /v1/images/generations  + Prefer: respond-async   # семейство OpenAI
+  POST /v1/images/edits        + Prefer: respond-async   # семейство OpenAI (с референсом)
+
+Опрос
+  GET  /v1/tasks/{task_id}
+```
+
+<Note>
+  **Имена моделей, тела запросов и тарификация полностью совпадают с синхронными вызовами.** Асинхронность меняет только *когда* вы получаете результат; один и тот же API-ключ может свободно смешивать синхронные и асинхронные запросы. Неудавшиеся задачи не тарифицируются.
+</Note>
+
+## Поддерживаемые модели
+
+| Модель | Как отправлять | Типичное время |
+|------|------|------|
+| `nano-banana-2` (Gemini 3.1 Flash Image) | `:asyncGenerateContent` | 15–30 с |
+| `nano-banana-pro` (Gemini 3 Pro Image) | `:asyncGenerateContent` | 30–60 с |
+| `gpt-image-2`, `gpt-image-1.5`, `gpt-image-2.5-*` | заголовок `Prefer: respond-async` или поле `async: true` | 60–120 с |
+| Любая другая модель с выводом изображений | так же, на её обычном эндпоинте | — |
+
+## Способ 1: алиас пути Gemini (рекомендуется для Gemini-клиентов)
+
+**Не меняйте ни одного байта тела, заголовков или строки запроса.** Замените только суффикс действия `:generateContent` на `:asyncGenerateContent`.
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1beta/models/nano-banana-2:asyncGenerateContent \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [{"role": "user", "parts": [{"text": "draw a cat"}]}],
+    "generationConfig": {
+      "responseModalities": ["IMAGE"],
+      "imageConfig": {"aspectRatio": "16:9"}
+    }
+  }'
+```
+
+Ответ `202`:
+
+```json
+{
+  "id": "task_17754fd677574c3fbfb178ace1ee7551",
+  "object": "task",
+  "kind": "image",
+  "model": "gemini-3.1-flash-image-preview",
+  "status": "queued",
+  "created_at": 1789716402
+}
+```
+
+<Note>
+  Поле `model` в ответе — это разрешённая базовая модель (например `gemini-3.1-flash-image-preview`), как в журнале расходов; отправлять по-прежнему можно с `nano-banana-2`. Редактирование по референсу работает как в синхронном вызове: положите части `inlineData` (base64) или `fileData` (URL) в `contents`.
+</Note>
+
+`:asyncGenerateContent` принимает только модели с выводом изображений; текстовая модель вернёт `400 async mode is only available for image models`. У потокового действия `:streamGenerateContent` асинхронной формы нет.
+
+## Способ 2: эндпоинты изображений OpenAI с заголовком `Prefer`
+
+Добавьте HTTP-заголовок `Prefer: respond-async` к неизменённому запросу `/v1/images/generations` или `/v1/images/edits`. Эквивалентно — поле тела `"async": true` (JSON) или поле формы `async=true` (multipart).
+
+<CodeGroup>
+
+```bash Текст в изображение
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Prefer: respond-async" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-image-2",
+    "prompt": "a tiny cartoon cat sticker",
+    "size": "1024x1024",
+    "quality": "low",
+    "n": 1
+  }'
+```
+
+```bash Редактирование с референсом (multipart)
+curl -X POST https://api.crazyrouter.com/v1/images/edits \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Prefer: respond-async" \
+  -F model=gpt-image-2 \
+  -F prompt="turn this into a cartoon cat sticker" \
+  -F size=1024x1024 \
+  -F quality=low \
+  -F image=@reference.png
+```
+
+```python Python (requests)
+import requests, time
+
+BASE = "https://api.crazyrouter.com"
+H = {"Authorization": "Bearer YOUR_API_KEY"}
+
+r = requests.post(f"{BASE}/v1/images/edits",
+                  headers={**H, "Prefer": "respond-async"},
+                  data={"model": "gpt-image-2", "prompt": "turn this into a cartoon cat sticker",
+                        "size": "1024x1024", "quality": "low"},
+                  files={"image": open("reference.png", "rb")})
+task_id = r.json()["id"]
+
+while True:
+    env = requests.get(f"{BASE}/v1/tasks/{task_id}", headers=H).json()
+    if env["status"] in ("completed", "failed"):
+        break
+    time.sleep(3)
+
+if env["status"] == "completed":
+    print(env["result"]["data"][0]["url"])
+else:
+    print(env["error"])
+```
+
+</CodeGroup>
+
+В ответе будет заголовок `Preference-Applied: respond-async` и то же тело `202` + ID задачи, что и в способе 1.
+
+## Опрос задачи
+
+```
+GET https://api.crazyrouter.com/v1/tasks/{task_id}
+Authorization: Bearer YOUR_API_KEY
+```
+
+Читать можно только задачи своего аккаунта; любой чужой ID даёт `404`. Опрашивайте каждые 2–3 секунды; отсутствие завершения в течение 10 минут считайте ошибкой.
+
+### Значения статуса
+
+| `status` | Значение |
+|------|------|
+| `queued` | Принято, ожидает воркера |
+| `running` | Генерируется |
+| `completed` | Готово, заполнен `result` |
+| `failed` | Ошибка, заполнен `error`, **не тарифицируется** |
+
+### Ответ при завершении (семейство Gemini)
+
+`result` — это нативный Gemini `GenerateContentResponse`; единственное отличие: каждая часть `inlineData` заменена на `fileData` с URL изображения:
+
+```json
+{
+  "id": "task_17754fd677574c3fbfb178ace1ee7551",
+  "object": "task",
+  "kind": "image",
+  "model": "gemini-3.1-flash-image-preview",
+  "status": "completed",
+  "progress": "100%",
+  "created_at": 1789716402,
+  "started_at": 1789716403,
+  "completed_at": 1789716419,
+  "result": {
+    "candidates": [{
+      "content": {
+        "role": "model",
+        "parts": [
+          {"fileData": {"mimeType": "image/png", "fileUri": "https://media.crazyrouter.com/task-artifacts/2026/09/18/sync-image/task_17754fd677574c3fbfb178ace1ee7551-0.png"}}
+        ]
+      },
+      "finishReason": "STOP"
+    }],
+    "usageMetadata": {"promptTokenCount": 15, "candidatesTokenCount": 1022, "totalTokenCount": 1037}
+  },
+  "error": null
+}
+```
+
+### Ответ при завершении (семейство OpenAI)
+
+`result` имеет ту же форму, что синхронный ответ `/v1/images/*`; изображения в `data[].url`:
+
+```json
+{
+  "id": "task_b210db17cea14754818e9b965bd8a61c",
+  "object": "task",
+  "kind": "image",
+  "model": "gpt-image-2",
+  "status": "completed",
+  "result": {
+    "created": 1789716295,
+    "data": [
+      {"url": "https://media.crazyrouter.com/task-artifacts/2026/09/18/sync-image/task_b210db17cea14754818e9b965bd8a61c-0.png"}
+    ],
+    "usage": {"input_tokens": 77, "output_tokens": 196, "total_tokens": 273}
+  },
+  "error": null
+}
+```
+
+Если base64 действительно нужен, добавьте `?inline=true` к запросу опроса — сохранённое изображение будет прочитано обратно в `inlineData` / `b64_json` (не рекомендуется: медленно для больших картинок).
+
+### Ответ при ошибке
+
+```json
+{
+  "id": "task_…",
+  "status": "failed",
+  "result": null,
+  "error": {
+    "code": "provider_failed",
+    "message": "upstream returned 502",
+    "retryable": true
+  }
+}
+```
+
+| `error.code` | Значение | Повтор |
+|------|------|------|
+| `validation_failed` | Параметры запроса отклонены (4xx) | нет |
+| `token_invalid` | API-ключ отключён или не допущен к этой модели | нет |
+| `insufficient_quota` | Недостаточно баланса | нет |
+| `rate_limited` | Лимит частоты на стороне провайдера/канала | да |
+| `provider_failed` | Ошибка генерации у провайдера | да |
+| `timeout` | Одна генерация превысила 10 минут | да |
+| `no_image` | Модель ответила без изображения (например, отказ по безопасности); **тарифицируется** как синхронный вызов | нет |
+
+`retryable: true` означает, что можно отправить новую задачу; автоматических повторов нет.
+
+## Идемпотентная отправка
+
+Сетевые повторы могут отправить одну задачу дважды. Передайте заголовок `Idempotency-Key: <любая строка>` при отправке: для одного аккаунта и ключа вернётся тот же ID задачи (второй вызов ответит `200` вместо `202`) без повторной генерации и повторного списания.
+
+## Синхронно и асинхронно: сравнение
+
+| | Синхронно | Асинхронно |
+|------|------|------|
+| Ответ на отправку | Изображение через 20–120 с | ID задачи менее чем за 1 с |
+| Форма изображения | URL или base64 (зависит от канала) | Всегда URL |
+| Риск таймаута соединения | Есть | Нет |
+| Тарификация | По модели/размеру | Идентична; ошибки бесплатны |
+| Маршрутизация | По возможностям модели | Та же (повтор идёт через ту же маршрутизацию и failover) |
+| Ограничения | — | Не более 50 незавершённых задач на аккаунт, далее `429` |

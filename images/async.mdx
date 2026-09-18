@@ -1,0 +1,246 @@
+---
+title: "异步生图"
+description: "提交后立即返回任务 ID，轮询取回图片 URL；适用于 gpt-image-2、nano-banana-2、nano-banana-pro 等长耗时图片模型"
+---
+> 更新日期：2026-09-18
+
+# 异步生图
+
+图片模型一次生成通常要 20~120 秒。同步接口需要客户端一直挂着 HTTP 连接等结果，容易撞上网关/代理的读超时，返回的 base64 也很大。异步模式把这一步拆成两次调用：
+
+1. **提交**：请求立即返回 `202` 和一个任务 ID（不到 1 秒）。
+2. **轮询**：用任务 ID 查 `GET /v1/tasks/{id}`，完成后 `result` 里是图片的 **https URL**（永久归档在 `media.crazyrouter.com`），不返回 base64。
+
+```
+提交（三种触发方式，见下文）
+  POST /v1beta/models/{model}:asyncGenerateContent      # Gemini 系，路径别名
+  POST /v1/images/generations  + Prefer: respond-async   # OpenAI 系
+  POST /v1/images/edits        + Prefer: respond-async   # OpenAI 系（带参考图）
+
+查询
+  GET  /v1/tasks/{task_id}
+```
+
+<Note>
+  **模型名、请求体、计费都和同步完全一样。** 异步只是改变"什么时候拿到结果"，同一个 API Key 可以一部分请求同步、一部分请求异步。任务失败不计费。
+</Note>
+
+## 支持的模型
+
+| 模型 | 提交方式 | 典型耗时 |
+|------|------|------|
+| `nano-banana-2`（Gemini 3.1 Flash Image） | `:asyncGenerateContent` | 15~30 秒 |
+| `nano-banana-pro`（Gemini 3 Pro Image） | `:asyncGenerateContent` | 30~60 秒 |
+| `gpt-image-2`、`gpt-image-1.5`、`gpt-image-2.5-*` | `Prefer: respond-async` 头，或 `async: true` 字段 | 60~120 秒 |
+| 其他图片输出模型 | 同上，按其原有端点 | — |
+
+## 方式一：Gemini 路径别名（推荐给 Gemini 客户端）
+
+**不需要改动请求体、请求头或查询参数中的任何一个字节**，只把动作后缀从 `:generateContent` 换成 `:asyncGenerateContent`。
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1beta/models/nano-banana-2:asyncGenerateContent \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [{"role": "user", "parts": [{"text": "draw a cat"}]}],
+    "generationConfig": {
+      "responseModalities": ["IMAGE"],
+      "imageConfig": {"aspectRatio": "16:9"}
+    }
+  }'
+```
+
+返回 `202`：
+
+```json
+{
+  "id": "task_17754fd677574c3fbfb178ace1ee7551",
+  "object": "task",
+  "kind": "image",
+  "model": "gemini-3.1-flash-image-preview",
+  "status": "queued",
+  "created_at": 1789716402
+}
+```
+
+<Note>
+  返回的 `model` 是解析后的底层模型名（如 `gemini-3.1-flash-image-preview`），与消费日志一致；这不影响你按 `nano-banana-2` 提交。参考图编辑与同步写法相同：在 `parts` 里放 `inlineData`（base64）或 `fileData`（URL）即可。
+</Note>
+
+`:asyncGenerateContent` 只接受图片输出模型；用文本模型调用会返回 `400 async mode is only available for image models`。流式动作 `:streamGenerateContent` 不支持异步。
+
+## 方式二：OpenAI 图片端点加 `Prefer` 头
+
+在原有 `/v1/images/generations` 或 `/v1/images/edits` 请求上加一个 HTTP 头 `Prefer: respond-async`，其余不变。也可以改用请求体字段 `"async": true`（JSON）或表单字段 `async=true`（multipart），效果相同。
+
+<CodeGroup>
+
+```bash 文生图
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Prefer: respond-async" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-image-2",
+    "prompt": "a tiny cartoon cat sticker",
+    "size": "1024x1024",
+    "quality": "low",
+    "n": 1
+  }'
+```
+
+```bash 参考图编辑（multipart）
+curl -X POST https://api.crazyrouter.com/v1/images/edits \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Prefer: respond-async" \
+  -F model=gpt-image-2 \
+  -F prompt="turn this into a cartoon cat sticker" \
+  -F size=1024x1024 \
+  -F quality=low \
+  -F image=@reference.png
+```
+
+```python Python (requests)
+import requests, time
+
+BASE = "https://api.crazyrouter.com"
+H = {"Authorization": "Bearer YOUR_API_KEY"}
+
+r = requests.post(f"{BASE}/v1/images/edits",
+                  headers={**H, "Prefer": "respond-async"},
+                  data={"model": "gpt-image-2", "prompt": "turn this into a cartoon cat sticker",
+                        "size": "1024x1024", "quality": "low"},
+                  files={"image": open("reference.png", "rb")})
+task_id = r.json()["id"]
+
+while True:
+    env = requests.get(f"{BASE}/v1/tasks/{task_id}", headers=H).json()
+    if env["status"] in ("completed", "failed"):
+        break
+    time.sleep(3)
+
+if env["status"] == "completed":
+    print(env["result"]["data"][0]["url"])
+else:
+    print(env["error"])
+```
+
+</CodeGroup>
+
+响应头会带 `Preference-Applied: respond-async`，正文与方式一相同（`202` + 任务 ID）。
+
+## 查询任务
+
+```
+GET https://api.crazyrouter.com/v1/tasks/{task_id}
+Authorization: Bearer YOUR_API_KEY
+```
+
+只能查询本账号提交的任务，其他账号的 ID 一律 `404`。建议 2~3 秒轮询一次，10 分钟仍未完成可视为失败。
+
+### 状态
+
+| `status` | 含义 |
+|------|------|
+| `queued` | 已接收，等待执行 |
+| `running` | 正在生成 |
+| `completed` | 成功，`result` 已填充 |
+| `failed` | 失败，`error` 已填充，**不计费** |
+
+### 完成时的响应（Gemini 系）
+
+`result` 就是原生 Gemini `GenerateContentResponse`，只把 `inlineData` 换成了指向图片 URL 的 `fileData`：
+
+```json
+{
+  "id": "task_17754fd677574c3fbfb178ace1ee7551",
+  "object": "task",
+  "kind": "image",
+  "model": "gemini-3.1-flash-image-preview",
+  "status": "completed",
+  "progress": "100%",
+  "created_at": 1789716402,
+  "started_at": 1789716403,
+  "completed_at": 1789716419,
+  "result": {
+    "candidates": [{
+      "content": {
+        "role": "model",
+        "parts": [
+          {"fileData": {"mimeType": "image/png", "fileUri": "https://media.crazyrouter.com/task-artifacts/2026/09/18/sync-image/task_17754fd677574c3fbfb178ace1ee7551-0.png"}}
+        ]
+      },
+      "finishReason": "STOP"
+    }],
+    "usageMetadata": {"promptTokenCount": 15, "candidatesTokenCount": 1022, "totalTokenCount": 1037}
+  },
+  "error": null
+}
+```
+
+### 完成时的响应（OpenAI 系）
+
+`result` 与同步 `/v1/images/*` 的返回体同形，图片在 `data[].url`：
+
+```json
+{
+  "id": "task_b210db17cea14754818e9b965bd8a61c",
+  "object": "task",
+  "kind": "image",
+  "model": "gpt-image-2",
+  "status": "completed",
+  "result": {
+    "created": 1789716295,
+    "data": [
+      {"url": "https://media.crazyrouter.com/task-artifacts/2026/09/18/sync-image/task_b210db17cea14754818e9b965bd8a61c-0.png"}
+    ],
+    "usage": {"input_tokens": 77, "output_tokens": 196, "total_tokens": 273}
+  },
+  "error": null
+}
+```
+
+如果你确实需要 base64，查询时加 `?inline=true`，服务端会把归档图片读回并还原为 `inlineData` / `b64_json`（不推荐，大图很慢）。
+
+### 失败时的响应
+
+```json
+{
+  "id": "task_…",
+  "status": "failed",
+  "result": null,
+  "error": {
+    "code": "provider_failed",
+    "message": "upstream returned 502",
+    "retryable": true
+  }
+}
+```
+
+| `error.code` | 含义 | 可重试 |
+|------|------|------|
+| `validation_failed` | 请求参数被拒绝（4xx） | 否 |
+| `token_invalid` | API Key 已失效或不允许该模型 | 否 |
+| `insufficient_quota` | 余额不足 | 否 |
+| `rate_limited` | 上游/渠道限流 | 是 |
+| `provider_failed` | 上游生成失败 | 是 |
+| `timeout` | 单次生成超过 10 分钟 | 是 |
+| `no_image` | 模型返回了内容但没有图片（例如安全拦截），这种情况按同步规则**正常计费** | 否 |
+
+`retryable: true` 表示可以重新提交一个新任务；系统不会自动重试。
+
+## 幂等提交
+
+网络重试可能重复提交同一个任务。在提交请求上带 `Idempotency-Key: <任意字符串>` 头，同一账号同一 Key 会返回同一个任务 ID（第二次返回 `200` 而不是 `202`），不会重复生成也不会重复计费。
+
+## 与同步的差异一览
+
+| | 同步 | 异步 |
+|------|------|------|
+| 提交返回 | 生成完成后返回图片（20~120 秒） | 不到 1 秒返回任务 ID |
+| 图片形式 | URL 或 base64（视渠道） | 永远是 URL |
+| 连接超时风险 | 有 | 无 |
+| 计费 | 按模型/尺寸计费 | 完全相同；失败不计费 |
+| 路由 | 能力路由 | 相同（重放走同一套路由与故障转移） |
+| 限制 | — | 每账号最多 50 个未完成任务，超出返回 `429` |

@@ -1,0 +1,246 @@
+---
+title: "Async Image Generation"
+description: "Submit, get a task ID back immediately, poll for an image URL — for gpt-image-2, nano-banana-2, nano-banana-pro and other slow image models"
+---
+> Last updated: 2026-09-18
+
+# Async Image Generation
+
+One image generation usually takes 20–120 seconds. The synchronous endpoints keep the HTTP connection open the whole time, which runs into gateway/proxy read timeouts, and the base64 payloads are large. Async mode splits the call in two:
+
+1. **Submit**: the request returns `202` with a task ID in under a second.
+2. **Poll**: `GET /v1/tasks/{id}` until it completes; `result` then carries an **https URL** for each image (permanently archived on `media.crazyrouter.com`). Base64 is never returned by default.
+
+```
+Submit (three triggers, see below)
+  POST /v1beta/models/{model}:asyncGenerateContent      # Gemini family, path alias
+  POST /v1/images/generations  + Prefer: respond-async   # OpenAI family
+  POST /v1/images/edits        + Prefer: respond-async   # OpenAI family (with reference image)
+
+Poll
+  GET  /v1/tasks/{task_id}
+```
+
+<Note>
+  **Model names, request bodies and billing are identical to the synchronous calls.** Async only changes *when* you get the result; the same API key can mix sync and async requests freely. Failed tasks are not billed.
+</Note>
+
+## Supported models
+
+| Model | How to submit | Typical duration |
+|------|------|------|
+| `nano-banana-2` (Gemini 3.1 Flash Image) | `:asyncGenerateContent` | 15–30 s |
+| `nano-banana-pro` (Gemini 3 Pro Image) | `:asyncGenerateContent` | 30–60 s |
+| `gpt-image-2`, `gpt-image-1.5`, `gpt-image-2.5-*` | `Prefer: respond-async` header or `async: true` field | 60–120 s |
+| Any other image-output model | Same, on its existing endpoint | — |
+
+## Option 1: Gemini path alias (recommended for Gemini clients)
+
+**Do not change a single byte of the body, headers or query string.** Only swap the action suffix `:generateContent` for `:asyncGenerateContent`.
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1beta/models/nano-banana-2:asyncGenerateContent \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [{"role": "user", "parts": [{"text": "draw a cat"}]}],
+    "generationConfig": {
+      "responseModalities": ["IMAGE"],
+      "imageConfig": {"aspectRatio": "16:9"}
+    }
+  }'
+```
+
+Returns `202`:
+
+```json
+{
+  "id": "task_17754fd677574c3fbfb178ace1ee7551",
+  "object": "task",
+  "kind": "image",
+  "model": "gemini-3.1-flash-image-preview",
+  "status": "queued",
+  "created_at": 1789716402
+}
+```
+
+<Note>
+  `model` in the response is the resolved underlying model (e.g. `gemini-3.1-flash-image-preview`), matching your usage logs; you still submit with `nano-banana-2`. Reference-image editing works exactly like the sync call: put `inlineData` (base64) or `fileData` (URL) parts in `contents`.
+</Note>
+
+`:asyncGenerateContent` accepts image-output models only; a text model returns `400 async mode is only available for image models`. The streaming action `:streamGenerateContent` has no async form.
+
+## Option 2: OpenAI image endpoints with a `Prefer` header
+
+Add the HTTP header `Prefer: respond-async` to an otherwise unchanged `/v1/images/generations` or `/v1/images/edits` request. Equivalently, send the body field `"async": true` (JSON) or the form field `async=true` (multipart).
+
+<CodeGroup>
+
+```bash Text to image
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Prefer: respond-async" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-image-2",
+    "prompt": "a tiny cartoon cat sticker",
+    "size": "1024x1024",
+    "quality": "low",
+    "n": 1
+  }'
+```
+
+```bash Edit with reference image (multipart)
+curl -X POST https://api.crazyrouter.com/v1/images/edits \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Prefer: respond-async" \
+  -F model=gpt-image-2 \
+  -F prompt="turn this into a cartoon cat sticker" \
+  -F size=1024x1024 \
+  -F quality=low \
+  -F image=@reference.png
+```
+
+```python Python (requests)
+import requests, time
+
+BASE = "https://api.crazyrouter.com"
+H = {"Authorization": "Bearer YOUR_API_KEY"}
+
+r = requests.post(f"{BASE}/v1/images/edits",
+                  headers={**H, "Prefer": "respond-async"},
+                  data={"model": "gpt-image-2", "prompt": "turn this into a cartoon cat sticker",
+                        "size": "1024x1024", "quality": "low"},
+                  files={"image": open("reference.png", "rb")})
+task_id = r.json()["id"]
+
+while True:
+    env = requests.get(f"{BASE}/v1/tasks/{task_id}", headers=H).json()
+    if env["status"] in ("completed", "failed"):
+        break
+    time.sleep(3)
+
+if env["status"] == "completed":
+    print(env["result"]["data"][0]["url"])
+else:
+    print(env["error"])
+```
+
+</CodeGroup>
+
+The response carries `Preference-Applied: respond-async` and the same `202` body as Option 1.
+
+## Polling a task
+
+```
+GET https://api.crazyrouter.com/v1/tasks/{task_id}
+Authorization: Bearer YOUR_API_KEY
+```
+
+You can only read tasks submitted by your own account; any other ID returns `404`. Poll every 2–3 seconds and treat 10 minutes without completion as a failure.
+
+### Status values
+
+| `status` | Meaning |
+|------|------|
+| `queued` | Accepted, waiting for a worker |
+| `running` | Generating |
+| `completed` | Done, `result` is populated |
+| `failed` | Failed, `error` is populated, **not billed** |
+
+### Completed response (Gemini family)
+
+`result` is the native Gemini `GenerateContentResponse`; the only change is that each `inlineData` part becomes a `fileData` part pointing at the image URL:
+
+```json
+{
+  "id": "task_17754fd677574c3fbfb178ace1ee7551",
+  "object": "task",
+  "kind": "image",
+  "model": "gemini-3.1-flash-image-preview",
+  "status": "completed",
+  "progress": "100%",
+  "created_at": 1789716402,
+  "started_at": 1789716403,
+  "completed_at": 1789716419,
+  "result": {
+    "candidates": [{
+      "content": {
+        "role": "model",
+        "parts": [
+          {"fileData": {"mimeType": "image/png", "fileUri": "https://media.crazyrouter.com/task-artifacts/2026/09/18/sync-image/task_17754fd677574c3fbfb178ace1ee7551-0.png"}}
+        ]
+      },
+      "finishReason": "STOP"
+    }],
+    "usageMetadata": {"promptTokenCount": 15, "candidatesTokenCount": 1022, "totalTokenCount": 1037}
+  },
+  "error": null
+}
+```
+
+### Completed response (OpenAI family)
+
+`result` has the same shape as the synchronous `/v1/images/*` response; images are in `data[].url`:
+
+```json
+{
+  "id": "task_b210db17cea14754818e9b965bd8a61c",
+  "object": "task",
+  "kind": "image",
+  "model": "gpt-image-2",
+  "status": "completed",
+  "result": {
+    "created": 1789716295,
+    "data": [
+      {"url": "https://media.crazyrouter.com/task-artifacts/2026/09/18/sync-image/task_b210db17cea14754818e9b965bd8a61c-0.png"}
+    ],
+    "usage": {"input_tokens": 77, "output_tokens": 196, "total_tokens": 273}
+  },
+  "error": null
+}
+```
+
+If you really need base64, add `?inline=true` to the poll request and the archived image is read back into `inlineData` / `b64_json` (not recommended — slow for large images).
+
+### Failed response
+
+```json
+{
+  "id": "task_…",
+  "status": "failed",
+  "result": null,
+  "error": {
+    "code": "provider_failed",
+    "message": "upstream returned 502",
+    "retryable": true
+  }
+}
+```
+
+| `error.code` | Meaning | Retryable |
+|------|------|------|
+| `validation_failed` | Request rejected (4xx) | no |
+| `token_invalid` | API key disabled or not allowed for this model | no |
+| `insufficient_quota` | Balance too low | no |
+| `rate_limited` | Upstream/channel rate limit | yes |
+| `provider_failed` | Upstream generation failed | yes |
+| `timeout` | A single generation exceeded 10 minutes | yes |
+| `no_image` | The model answered without an image (e.g. safety refusal); **billed** like the sync call | no |
+
+`retryable: true` means you may submit a new task; nothing is retried automatically.
+
+## Idempotent submission
+
+Network retries can submit the same task twice. Send an `Idempotency-Key: <any string>` header with the submit request; the same account + key returns the same task ID (the second call answers `200` instead of `202`) with no duplicate generation or charge.
+
+## Sync vs. async at a glance
+
+| | Sync | Async |
+|------|------|------|
+| Submit returns | The image, after 20–120 s | A task ID in under 1 s |
+| Image form | URL or base64 (channel dependent) | Always a URL |
+| Connection-timeout risk | Yes | No |
+| Billing | Per model/size | Identical; failures free |
+| Routing | Capability routing | Same (the replay uses the same routing and failover) |
+| Limits | — | Max 50 pending tasks per account, then `429` |
