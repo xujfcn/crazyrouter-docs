@@ -1,0 +1,89 @@
+---
+title: 'AI ツールにドキュメントを渡す'
+description: 'https://docs.crazyrouter.com/llms.txt を使って、AI ツールに Crazyrouter の正しい連携方法を理解してもらいましょう'
+---
+> 最終更新：2026-09-27
+
+# AI ツールにドキュメントを渡す
+
+ChatGPT、Claude、Cursor、Cline、Aider、Codex などの AI ツールでコードを書く場合は、次のドキュメントの入口を共有してください。
+
+```text
+https://docs.crazyrouter.com/llms.txt
+```
+
+AI ツールはこの索引から、Crazyrouter のクイックスタート、認証方法、API エンドポイント、モデル一覧、画像・動画・音声 API、各ツールの連携ガイドを探せます。
+
+## コピーして使えるプロンプト
+
+次のプロンプトを AI ツールに貼り付けてください。
+
+```text
+まず https://docs.crazyrouter.com/llms.txt を読み、Crazyrouter の公式ドキュメントに基づいて質問に答えてください。
+
+目的：[ここに目的を書いてください。例：Python から Sora 2 を呼び出して 5 秒の動画を生成する]
+
+注意事項：
+- OpenAI 互換 SDK では通常、base_url に https://api.crazyrouter.com/v1 を使ってください。
+- モデル名、料金、課金方法については https://crazyrouter.com/pricing を参照してください。
+- モデルが利用可能か不明な場合は、Pricing ページまたは /v1/models で確認するよう案内してください。
+- そのまま実行できるコード例を示してください。
+```
+
+## よくある使い方
+
+| AI に頼みたいこと | プロンプトの例 |
+| --- | --- |
+| 連携コードの作成 | 「llms.txt を読み、Python または Node.js で Crazyrouter API を呼び出す例を書いてください。」 |
+| 特定のモデルの利用 | 「llms.txt を読み、このモデルで使う Crazyrouter API エンドポイントを確認してください。」 |
+| IDE やエージェントの設定 | 「llms.txt を読み、Cursor、Cline、Claude Code で Crazyrouter を設定する方法を教えてください。」 |
+| エラーの調査 | 「llms.txt とエラー処理のドキュメントを読み、この Crazyrouter API エラーを調査してください。」 |
+| 動画や画像の生成 | 「llms.txt を読み、動画または画像を生成するリクエスト例を示してください。」 |
+
+## llms-full.txt を使う場合
+
+`llms.txt` は簡潔な索引です。AI が最初に読むべきページを判断するのに適しています。
+
+AI ツールが長いテキストを読み込める場合や、ドキュメント全体の文脈を一度に渡したい場合は、次の URL も共有してください。
+
+```text
+https://docs.crazyrouter.com/llms-full.txt
+```
+
+## モデルと料金の確認先
+
+利用できるモデルは、チャネル、権限、プラットフォームの設定によって変わります。ドキュメントの例はリクエスト形式を説明するもので、モデルの完全な一覧ではありません。
+
+現在公開されているモデル、料金、課金方法は次のページで確認してください。
+
+```text
+https://crazyrouter.com/pricing
+```
+
+API キーを持っている場合は、次のリクエストでそのキーが呼び出せるモデルを確認できます。
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/models \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+<Warning>
+実際の API キーを、信頼できない AI ツールや公開された会話に貼り付けないでください。AI にコードを作成してもらう場合は、`YOUR_API_KEY` のようなプレースホルダーを使ってください。
+</Warning>
+
+## ページ単位の Markdown
+
+多くのドキュメントページは Markdown 形式でも読めます。ページの URL の末尾に `.md` を追加してください。
+
+```text
+https://docs.crazyrouter.com/jp/quickstart.md
+https://docs.crazyrouter.com/jp/api-endpoint.md
+https://docs.crazyrouter.com/jp/video/sora.md
+```
+
+AI ツールがサイト全体をうまく読み取れない場合は、最初に `llms.txt` を渡し、その後で必要なページの `.md` リンクを共有してください。
+
+## 開発ツールの設定
+
+- [Claude Code の設定ガイド](/jp/integrations/claude-code)
+- [Codex CLI の設定ガイド](/jp/integrations/codex)
