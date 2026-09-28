@@ -2,7 +2,11 @@
 title: "Nano Banana Pro"
 description: "使用 nano-banana-pro 进行基于参考图的生成与编辑，兼容 OpenAI Images API"
 ---
-> 更新日期：2026-06-06
+> 更新日期：2026-09-18
+
+<Tip>
+  需要提交后立即返回、稍后轮询取图片 URL？该模型支持[异步生图](/images/async)：Gemini 系把路径后缀换成 `:asyncGenerateContent`，OpenAI 系加 `Prefer: respond-async` 头，请求体一个字节都不用改。
+</Tip>
 
 # Nano Banana Pro
 
@@ -21,7 +25,8 @@ POST /v1/images/generations
 - 本页只覆盖 `nano-banana-pro` / `nano-banana-pro`
 - 客户请求入口统一是 `POST /v1/images/generations`
 - 输入图片字段统一是 `image_input`
-- 当前公开协议收紧为 `image_input` 的 URL 引用，不对外暴露 `image` 或 `data:` 输入
+- 默认公开协议仍建议使用 `image_input` URL；指定灰度账号已额外支持 dataURL、raw Base64 和三图 multipart 图片编辑
+- `data:` / Base64 / multipart 是 Crazyrouter 的兼容扩展，不代表所有上游 carrier 原生支持
 - 背后承载可以是 Gemini / Vertex 等 provider，但这些 provider 细节不属于客户协议的一部分
 - 用户侧不要传 `generationConfig`、`imageConfig`、`imageOutputOptions`、`image_output_options`；这些字段由 Crazyrouter 从统一参数自动转换
 
@@ -41,6 +46,8 @@ POST /v1/images/generations
 | `I2I + 1K` | `Verified` | 单图编辑 live 已闭环 |
 | `I2I + 4K` | `Verified` | `4K + 21:9 + png/jpeg/jpg` live 已闭环 |
 | `Reference + 1..2 refs` | `Verified` | `2` 图 live 已闭环 |
+| `11257` 灰度：dataURL / raw Base64 | `Verified` | 生产渠道 304 已验证单图和三图 `image_input` |
+| `11257` 灰度：三图 multipart | `Verified` | `/v1/images/edits` 支持 `image`、`image[]`、`image[n]` |
 | `2K` | `Beta` | 当前公开 artifact 仍待补充 |
 | 更高多图上限 / 精确 `30 MiB` 边界 | `Beta` | 当前公开 contract 不承诺 |
 
@@ -50,7 +57,7 @@ POST /v1/images/generations
 
 ## 当前已验证能力
 
-以下结论基于 `2026-03-31` 的 live 验证：
+以下结论基于历史 live 验证和 `2026-08-18` 生产灰度验证：
 
 - 官方 Vertex `channel 318 (vertexsophie)` 直连已验证：
   - `2` 张参考图可用
@@ -64,7 +71,13 @@ POST /v1/images/generations
   - `aspect_ratio: "21:9"` 可用
   - `output_format: "png"` 可用
   - `output_format: "jpg"` 可用
-  - 响应可直接返回 `data[].url`
+- 响应可直接返回 `data[].url`
+
+指定灰度账号 `11257` 在生产渠道 `304` 已验证：
+
+- `/v1/images/generations` 的 `image_input` 支持 dataURL、raw Base64 和多图输入
+- `/v1/images/edits` 支持 multipart 的 `image`、`image[]`、`image[n]`
+- 原图、批注图、参考图可按上传顺序组成三图编辑请求
 
 以下能力当前不要对客户写成已完全承诺：
 
@@ -75,9 +88,9 @@ POST /v1/images/generations
 - 其他 `aspect_ratio` 组合
 - `output_compression` 的精确语义边界
 
-<Warning>
-  `nano-banana-pro` 当前只对外承诺 `image_input` URL 输入。`image` 字段会被服务端拒绝，`data:` / Base64 也不属于当前公开协议。
-</Warning>
+<Note>
+  默认账号仍按 URL-only 公开口径处理。Base64、dataURL 和 multipart 图片编辑目前只对指定灰度账号开放；如需开通，请先确认账号已加入灰度名单。
+</Note>
 
 ---
 
@@ -87,7 +100,7 @@ POST /v1/images/generations
 |------|------|------|------|
 | `model` | string | 是 | 推荐 `nano-banana-pro`；也兼容 `nano-banana-pro` |
 | `prompt` | string | 是 | 生成或编辑指令 |
-| `image_input` | string 或 string[] | 否 | 参考图 URL；当前公开保守范围先写 `1` 到 `2` 张 |
+| `image_input` | string 或 string[] | 否 | 默认传参考图 URL；灰度账号也可传 dataURL / raw Base64，当前已验证三图 |
 | `resolution` | string | 否 | 当前公开承诺 `1K`、`4K` |
 | `aspect_ratio` | string | 否 | 当前公开承诺 `1:1`、`21:9` |
 | `output_format` | string | 否 | 当前公开承诺 `png`、`jpeg` / `jpg` |
@@ -97,13 +110,30 @@ POST /v1/images/generations
 ### 多图当前状态
 
 - `2` 张：已验证
-- 更高张数：上游 exact max 仍待补测，暂不对外承诺
+- `11257` 灰度三图：已验证
+- 更高张数：上游 exact max 仍待补测，暂不承诺
 
 ### 路由说明
 
 - 单图请求可以命中常规可用承载
-- 多图请求当前只会路由到官方 `Gemini / Vertex` carrier
+- 默认多图请求只会路由到官方 `Gemini / Vertex` carrier；指定灰度账号可使用已验证的灰度 carrier
 - 这是服务端内部路由策略，客户协议保持不变
+
+### 灰度三图 multipart
+
+`11257` 灰度账号可使用 `/v1/images/edits`：
+
+```bash
+curl -X POST https://api.crazyrouter.com/v1/images/edits \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "model=nano-banana-pro" \
+  -F "prompt=以第一张为原图，第二张为批注图，第三张为参考图，仅修改批注区域" \
+  -F "image[]=@original.png" \
+  -F "image[]=@annotation.png" \
+  -F "image[]=@reference.png"
+```
+
+图片顺序由客户端提交顺序决定。批注图目前作为视觉参考输入，不承诺 GPT mask 式的像素级区域锁定。
 
 ---
 
@@ -229,9 +259,8 @@ curl -X POST https://api.crazyrouter.com/v1/images/generations \
 
 ## 当前已知限制
 
-- 不接受 `image`
-- 不接受 `data:` / Base64 作为公开输入协议
-- 当前文档不承诺高于 `2` 张的多图输入
+- 非灰度账号不接受 `image`、`data:` / Base64 或 multipart 图片输入
+- 灰度账号当前验证到三图，不承诺更高张数上限
 - 当前文档不承诺精确 `30 MiB` URL 边界
 - 当前文档不承诺所有截图列出的比例和参数都已经完全闭环
 

@@ -2,29 +2,22 @@
 title: "Gemini Image Editing"
 description: "Current Gemini image-editing availability note updated from the 2026-04-14 Crazyrouter production retest"
 ---
-> 更新日: 2026-06-06
+> 更新日: 2026-08-18
 
 # Gemini Image Editing
 
 ```
-POST /v1beta/models/{model}:generateContent
+POST /v1/images/generations
 ```
 
-As of April 14, 2026, the latest Crazyrouter retest for Gemini image-editing-related routes showed:
-
-- native `nano-banana-2:generateContent` can now return image output again
-- native `nano-banana:generateContent` can also return image output, but billing consistency is still under review
-- the Nano Banana-family public Images-compatible route through `POST /v1/images/generations` is currently unhealthy
-
-The unhealthy path right now is the older public Images-compatible layer, not every Gemini-native image path. For editing and reference-image workloads, the current guidance should converge on native Gemini `generateContent`.
+The customer-facing Gemini / Nano Banana editing contract is the OpenAI-compatible Images API. Use `POST /v1/images/generations` for URL references and, for designated gray accounts, data URLs, raw Base64, or multipart editing through `POST /v1/images/edits`.
 
 <Warning>
-  Do not keep documenting Nano Banana-family `POST /v1/images/generations` as the stable image-editing route. `nano-banana-2` should move to `nano-banana-2:generateContent`, while `nano-banana` remains controlled-testing only.
+  Provider-native `generateContent` details are internal. Use the public Images API contract; gray-only input extensions must not be assumed for non-gray accounts.
 </Warning>
 
 <Note>
-  The more usable path right now is [Nano Banana 2](/jp/images/nano-banana-2), which now points to native Gemini `nano-banana-2:generateContent`.
-  [Nano Banana](/jp/images/nano-banana) now keeps only the controlled-test note for `nano-banana:generateContent`, not a stable production recommendation.
+  See [Nano Banana Pro](/jp/images/nano-banana-pro) for the current gray-release limits and examples.
 </Note>
 
 ---
@@ -34,13 +27,13 @@ The unhealthy path right now is the older public Images-compatible layer, not ev
 1. If your goal is Gemini text-to-image, use [Gemini Image Generation](/jp/chat/gemini/image-gen)
 2. If your goal is a currently usable reference-image editing route, start with [Nano Banana 2](/jp/images/nano-banana-2)
 3. If you must evaluate `nano-banana`, follow the controlled-test guidance on [Nano Banana](/jp/images/nano-banana)
-4. Do not keep treating `POST /v1/images/generations` as the default entry point for the Nano Banana family
+4. Use `POST /v1/images/generations` as the public Nano Banana entry point; see the model page for gray-only input extensions
 
 ---
 
 ## Retest Template
 
-This is now the more recommended minimal template for retesting or integration. The same workload should no longer be documented through `/v1/images/generations`:
+For public integration, use the Images API examples on the model page. Native `generateContent` is an internal provider path:
 
 ```bash
 curl "https://api.crazyrouter.com/v1beta/models/nano-banana-2:generateContent?key=YOUR_API_KEY" \

@@ -2,12 +2,16 @@
 title: 'Image Upload Guidance'
 description: 'Upload local images and get 48-hour temporary public URLs for image-to-image, image-to-video, and vision APIs'
 ---
-> Last updated: 2026-06-06
+> Last updated: 2026-08-18
 
 Crazyrouter provides temporary public image upload endpoints for converting local reference images into model-readable public URLs. They are suitable for Kling, Veo, Seedance, Runway, Luma, MiniMax, Nano Banana Pro, Doubao Seedream, and other APIs that accept `image_url`, `image_urls`, `image_list`, `images`, or `image_input`.
 
 <Note>
   Temporary images are kept for 48 hours by default and then cleaned up automatically. Storage during that period is not billed separately; current anti-abuse controls use per-user upload quota and rate limits.
+</Note>
+
+<Note>
+  The returned `id` is an internal file record ID. Use the returned `url` in `image_input`; do not pass the `id` directly. Nano Banana Pro Base64 and multipart editing are currently enabled only for designated gray accounts.
 </Note>
 
 ## Endpoint Overview

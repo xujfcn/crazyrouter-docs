@@ -2,12 +2,16 @@
 title: 'Image Upload Guidance'
 description: 'Upload images and get temporary public URLs for APIs that accept image input'
 ---
-> Дата обновления: 2026-06-21
+> Дата обновления: 2026-08-18
 
 Crazyrouter provides temporary public image upload endpoints for converting local or remote images into model-readable public URLs. Use them for vision, image editing, image-to-video, and workflow integrations.
 
 <Note>
   Temporary images are kept for 48 hours by default and then cleaned up automatically. Storage during that period is not billed separately; per-user upload quota and rate limits apply.
+</Note>
+
+<Note>
+  The returned `id` is an internal file record ID. Use the returned `url` in `image_input`, not the `id` itself. Nano Banana Pro Base64 and multipart editing are enabled only for designated gray accounts.
 </Note>
 
 ## Endpoint Overview

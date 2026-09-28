@@ -2,7 +2,11 @@
 title: "Nano Banana Pro"
 description: "Use nano-banana-pro for reference-image generation and editing through the OpenAI Images API"
 ---
-> 更新日: 2026-06-06
+> 更新日: 2026-09-18
+
+<Tip>
+  送信後すぐに戻り、あとで画像 URL を取得したい場合は[非同期画像生成](/jp/images/async)を使えます。Gemini 系はパス接尾辞を `:asyncGenerateContent` に、OpenAI 系は `Prefer: respond-async` ヘッダーを付けるだけで、リクエストボディは 1 バイトも変えません。
+</Tip>
 
 # Nano Banana Pro
 
@@ -17,7 +21,7 @@ Use `nano-banana-pro` for image generation and reference-image editing through o
 - This page only covers `nano-banana-pro`
 - The customer-facing entry point is `POST /v1/images/generations`
 - The input image field is `image_input`
-- The current public contract is limited to URL references in `image_input`; `image` and `data:` inputs are not exposed publicly
+- The default public contract remains URL-based `image_input`; designated gray accounts also support data URLs, raw Base64, and three-image multipart editing
 - Gemini / Vertex and other providers may sit behind this route, but those provider details are not part of the customer contract
 
 ## Capability Status
@@ -63,7 +67,7 @@ Do not present the following as fully promised customer-facing capability yet:
 - exact `output_compression` semantics
 
 <Warning>
-  `nano-banana-pro` currently exposes only `image_input` URL input publicly. The `image` field is rejected by the service, and `data:` / Base64 is not part of the current public contract.
+  Non-gray accounts remain URL-only. Base64, data URLs, and multipart editing are currently enabled only for designated gray accounts.
 </Warning>
 
 ---
@@ -74,7 +78,7 @@ Do not present the following as fully promised customer-facing capability yet:
 |-----------|------|----------|-------------|
 | `model` | string | Yes | Fixed as `nano-banana-pro` |
 | `prompt` | string | Yes | Generation or edit instruction |
-| `image_input` | string or string[] | No | Reference image URL(s); current public-safe range is conservatively `1` to `2` |
+| `image_input` | string or string[] | No | URLs by default; designated gray accounts may also send data URLs/raw Base64, with three images verified |
 | `resolution` | string | No | Current public promise is `1K` and `4K` |
 | `aspect_ratio` | string | No | Current public promise is `1:1` and `21:9` |
 | `output_format` | string | No | Current public promise is `png` and `jpg` |
@@ -83,12 +87,13 @@ Do not present the following as fully promised customer-facing capability yet:
 ### Current Multi-Image Status
 
 - `2` references: verified
+- gray user `11257` with three references: verified
 - higher counts: exact upstream max is still pending, so do not promise it publicly yet
 
 ### Routing Note
 
 - single-image requests can use normal available carriers
-- multi-image requests are currently routed only to official `Gemini / Vertex` carriers
+- multi-image requests normally use official `Gemini / Vertex` carriers; designated gray accounts may use an explicitly verified gray carrier
 - that is a server-side routing rule; the customer contract stays the same
 
 ---
@@ -200,7 +205,7 @@ To retrieve the generated image, read `data[0].url`. Crazyrouter currently archi
 ## Current Known Limits
 
 - `image` is not accepted
-- `data:` / Base64 is not part of the public input contract
+- `data:` / Base64 is available only for designated gray accounts; other accounts remain URL-only
 - the docs do not promise more than `2` references yet
 - the docs do not promise the exact `30 MiB` URL boundary yet
 - the docs do not promise full closure on every screenshot-listed ratio or parameter yet
