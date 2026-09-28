@@ -1,0 +1,84 @@
+---
+title: 'Gemini CLI 설정 가이드'
+description: 'Gemini CLI에서 Crazyrouter API를 설정하고, 실제 요청으로 검증된 모델과 인증 방식을 사용합니다'
+---
+> 업데이트: 2026-06-06
+
+## 개요
+
+Gemini CLI는 Google의 커맨드라인 AI 어시스턴트입니다. Crazyrouter의 Gemini 네이티브 엔드포인트를 설정하면, 본 사이트 프로덕션 환경에서 실제 요청으로 검증을 완료한 Gemini 모델을 커맨드라인에서 바로 사용할 수 있습니다.
+
+## 설정 방법
+
+### 환경 변수
+
+Gemini CLI 현재 버전은 API Key 모드에서 최소한 `GEMINI_API_KEY`를 명시적으로 제공해야 합니다. Crazyrouter의 Gemini 네이티브 엔드포인트에 연동하려면, 다음 3개 환경 변수를 함께 설정하는 것을 권장합니다:
+
+```bash
+export GEMINI_API_KEY=sk-xxx
+export GEMINI_MODEL=gemini-3.1-pro
+export GOOGLE_GEMINI_BASE_URL=https://api.crazyrouter.com
+```
+
+Windows PowerShell:
+
+```powershell
+$env:GEMINI_API_KEY="sk-xxx"
+$env:GEMINI_MODEL="gemini-3.1-pro"
+$env:GOOGLE_GEMINI_BASE_URL="https://api.crazyrouter.com"
+```
+
+터미널을 열 때마다 자동으로 적용되게 하려면, `~/.gemini/.env` 또는 PowerShell 프로필에 작성하면 됩니다.
+
+### 설정 파일
+
+`~/.gemini/settings.json`을 편집합니다:
+
+```json
+{
+  "security": {
+    "auth": {
+      "selectedType": "gemini-api-key"
+    }
+  },
+  "apiKey": "sk-xxx",
+  "baseUrl": "https://api.crazyrouter.com",
+  "model": {
+    "name": "gemini-3.1-pro"
+  }
+}
+```
+
+주의:
+
+- 인증 방식을 `oauth-personal`로 남겨두지 마십시오. 그렇게 하면 CLI가 계속 Google 로그인 방식을 사용하게 됩니다.
+- `model`을 문자열로 작성하지 마십시오. 현재 버전은 `model.name`을 사용해야 합니다.
+- `settings.json`만 작성하는 것으로는 일부 경우 충분하지 않을 수 있으며, 커맨드라인 모드에서는 여전히 `GEMINI_API_KEY` 환경 변수가 필요할 수 있습니다.
+
+### `.gemini/.env` 예시
+
+`~/.gemini/.env`에 직접 작성할 수도 있습니다:
+
+```bash
+GEMINI_API_KEY=sk-xxx
+GEMINI_MODEL=gemini-3.1-pro
+GOOGLE_GEMINI_BASE_URL=https://api.crazyrouter.com
+```
+
+### 실행
+
+```bash
+gemini
+```
+
+## 권장 모델
+
+| 모델 | 설명 |
+|------|------|
+| `gemini-3.1-pro` | 2026년 4월 8일 Crazyrouter 프로덕션 환경에서 Gemini CLI를 통한 실제 요청 테스트를 통과했으며, 현재 메인 베이스라인으로 적합합니다 |
+
+<Note>
+  Crazyrouter는 Gemini 네이티브 API 형식과 OpenAI 호환 형식을 모두 지원합니다. Gemini CLI는 Gemini 네이티브 형식을 사용합니다. 본 문서의 `gemini-3.1-pro`, `gemini-api-key` 인증 방식, 그리고 `GOOGLE_GEMINI_BASE_URL=https://api.crazyrouter.com`은 실제 CLI 요청을 통해 검증되었습니다.
+</Note>
+
+

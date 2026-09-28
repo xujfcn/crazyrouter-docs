@@ -1,0 +1,239 @@
+---
+title: "Gemini 네이티브 형식"
+description: "프로덕션 환경 재검증을 기반으로, Gemini 3 Pro의 네이티브 API 기능을 사용합니다"
+---
+> 업데이트: 2026-06-06
+
+# Gemini 네이티브 형식
+
+이 문서 페이지에는 `2026-03-22`에 Crazyrouter 프로덕션 환경에서 재검증된 Gemini Native 사용법만 기재합니다.
+
+현재 메인 예제 모델:
+
+- `gemini-3.1-pro`
+
+성공한 요청 경험을 기준으로 별도로 정리한 멀티모달 페이지:
+
+- [Gemini 이미지 이해](/ko/chat/gemini/vision)
+- [Gemini 동영상 이해](/ko/chat/gemini/video)
+- [Gemini 오디오 이해](/ko/chat/gemini/audio)
+
+## 엔드포인트
+
+```text
+POST /v1beta/models/{model}:generateContent
+POST /v1beta/models/{model}:streamGenerateContent
+```
+
+## 인증
+
+URL 파라미터로 API Key를 전달합니다.
+
+```text
+?key=YOUR_API_KEY
+```
+
+---
+
+## 기본 텍스트 생성
+
+```bash cURL
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Explain machine learning in one sentence."
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "maxOutputTokens": 128
+    }
+  }'
+```
+
+현재 프로덕션에서 반환되는 핵심 구조:
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "...",
+            "thoughtSignature": "..."
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+---
+
+## 스트리밍 생성
+
+이번 라운드에서 `streamGenerateContent`가 SSE를 통해 증분 콘텐츠를 반환할 수 있음을 재검증했습니다.
+
+```bash cURL
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:streamGenerateContent?key=YOUR_API_KEY&alt=sse" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Write one short sentence about AI."
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+현재 프로덕션에서 수신되는 SSE 조각의 형태는 다음과 유사합니다.
+
+```text
+data: {"candidates":[{"content":{"parts":[{"text":"...","thoughtSignature":"..."}]}}]}
+```
+
+---
+
+## 구조화된 출력
+
+현재 프로덕션에서 `responseMimeType + responseSchema`가 사용 가능함을 재검증했습니다.
+
+```bash cURL
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Return a JSON object with keys city and country for Tokyo."
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "responseMimeType": "application/json",
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "city": {"type": "string"},
+          "country": {"type": "string"}
+        },
+        "required": ["city", "country"]
+      }
+    }
+  }'
+```
+
+현재 프로덕션 검증 반환값:
+
+```json
+{"city":"Tokyo","country":"Japan"}
+```
+
+---
+
+## Google Search
+
+현재 프로덕션에서 `googleSearch` 도구가 사용 가능함을 재검증했습니다.
+
+```bash cURL
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Use Google Search to find one recent headline from a major technology news site."
+          }
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "googleSearch": {}
+      }
+    ]
+  }'
+```
+
+현재 프로덕션에서 반환되는 핵심 필드에는 다음이 포함됩니다.
+
+- `groundingMetadata.webSearchQueries`
+- `groundingMetadata.groundingChunks`
+- `groundingMetadata.groundingSupports`
+
+---
+
+## Thinking
+
+현재 프로덕션에서 `thinkingConfig`가 사용 가능함을 재검증했습니다.
+
+```bash cURL
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Which is larger, 9.11 or 9.9? Explain briefly."
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "thinkingConfig": {
+        "thinkingBudget": 256
+      },
+      "maxOutputTokens": 512
+    }
+  }'
+```
+
+현재 프로덕션에서 검증된 핵심 지표:
+
+```json
+{
+  "usageMetadata": {
+    "thoughtsTokenCount": 120
+  }
+}
+```
+
+---
+
+## generationConfig 자주 쓰는 필드
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| `maxOutputTokens` | integer | 최대 출력 토큰 수 |
+| `temperature` | number | 샘플링 온도 |
+| `responseMimeType` | string | 구조화된 출력 시 MIME 타입 |
+| `responseSchema` | object | 구조화된 출력 제약 조건 |
+| `thinkingConfig` | object | 사고 모드 설정 |
+
+<Note>
+  Gemini Native는 OpenAI의 `messages` 구조가 아니라 `contents[].parts[]` 구조를 사용합니다. OpenAI 스타일을 사용하고 싶다면 [Gemini OpenAI 호환 형식](/ko/chat/gemini/openai-compat)을 사용하세요.
+</Note>
+
+관련 페이지:
+
+- [모델 공식 가격 책정 방식](/ko/reference/official-pricing-methods)

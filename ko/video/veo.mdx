@@ -1,0 +1,159 @@
+---
+title: "Veo 3.1"
+description: "Crazyrouter 통합 비디오 API를 통해 Veo 3.1 Fast 및 Veo 3.1 Quality 호출"
+---
+> 업데이트: 2026-06-06
+
+# Veo 3.1
+
+현재 Crazyrouter가 클라이언트에게 공개한 Veo 3.1 모델은 다음과 같습니다:
+
+- `veo-3.1-fast`
+- `veo-3.1-quality`
+
+이 두 이름은 클라이언트 대상 public alias입니다. 내부 canonical provider 이름은 클라이언트에게 직접 노출되지 않습니다.
+
+<Note>
+  `veo-3.1`은 클라이언트가 직접 제출할 수 있는 `model` 값이 아닙니다. 클라이언트 요청 시 항상 `veo-3.1-fast` 또는 `veo-3.1-quality`를 사용하십시오.
+</Note>
+
+## 통합 비디오 API를 통한 호출
+
+```
+POST /v1/video/create
+```
+
+현재 이 페이지는 클라이언트에게 확정된 기능만 다룹니다:
+
+- 텍스트로 비디오 생성
+- 단일 이미지로 비디오 생성
+
+Google 공식 문서에 있는 `referenceImages`, style reference, 그리고 더 세부적인 provider-native 모드는 현재 공개 contract에 포함되지 않습니다.
+
+### 현재 사용 가능한 모델
+
+| 모델 | 설명 |
+|------|------|
+| `veo-3.1-fast` | 더 낮은 지연 시간에 특화되어 있으며, 사용 가능한 첫 결과를 더 빠르게 얻는 데 적합합니다 |
+| `veo-3.1-quality` | 품질 우선에 특화되어 있으며, 기본 메인 전시용으로 적합합니다 |
+
+### 기능 상태
+
+| 기능 / 규격 | 상태 | 설명 |
+|------|------|------|
+| 텍스트로 비디오 생성 `720P / 1080P` | `Verified` | 현재 공개 contract가 확정되었습니다 |
+| 단일 이미지로 비디오 생성 `720P / 1080P` | `Verified` | 현재 공개 contract가 확정되었습니다 |
+| 오디오 활성화 | `Beta` | 공식 기능은 존재하지만, 현재 공개 artifact는 아직 보완이 필요합니다 |
+| `start_end` | `Beta` | 현재 공개 페이지에서 아직 보장하지 않습니다 |
+| `referenceImages` / reference assets | `Beta` | 현재 공개 페이지에서 아직 보장하지 않습니다 |
+| `4K` | `Beta` | 현재 공개 페이지에서 아직 보장하지 않습니다 |
+
+<Note>
+  가격 페이지와 이 문서는 동일한 상태 기준을 사용합니다. `Verified`는 현재 최소 live 검증이 완료되었음을 의미하고, `Beta`는 공식 기능은 존재하지만 현재 공개 검증 또는 경계가 여전히 보완 중임을 의미합니다.
+</Note>
+
+### 요청 파라미터
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| `model` | string | 예 | `veo-3.1-fast` 또는 `veo-3.1-quality` |
+| `prompt` | string | 예 | 비디오 설명 프롬프트 |
+| `aspect_ratio` | string | 아니요 | 현재 공개적으로 `16:9` 또는 `9:16` 사용을 권장합니다 |
+| `size` | string | 아니요 | 현재 공개적으로 `720P` 또는 `1080P` 사용을 권장합니다 |
+| `images` | array | 아니요 | 단일 이미지로 비디오 생성 시 이미지 URL 1개를 전달합니다 |
+| `duration` | integer | 아니요 | 일반적인 값은 `8`입니다 |
+
+### 요청 예시
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/create \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "veo-3.1-quality",
+    "prompt": "A cinematic shot of a spaceship landing on Mars, dust clouds rising, golden hour lighting",
+    "aspect_ratio": "16:9"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/v1/video/create",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "veo-3.1-quality",
+        "prompt": "A cinematic shot of a spaceship landing on Mars",
+        "aspect_ratio": "16:9"
+    }
+)
+
+task_id = response.json()["task_id"]
+print(f"작업 ID: {task_id}")
+```
+
+</CodeGroup>
+
+### 응답 예시
+
+```json
+{
+  "task_id": "veo_task_abc123",
+  "status": "processing"
+}
+```
+
+---
+
+## 단일 이미지로 비디오 생성 예시
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/create \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "veo-3.1-fast",
+    "prompt": "The person in the image slowly turns their head and smiles",
+    "images": ["https://example.com/portrait.jpg"],
+    "aspect_ratio": "9:16",
+    "size": "720P"
+  }'
+```
+
+---
+
+## 작업 조회
+
+```
+GET /v1/video/query?id={task_id}
+```
+
+```bash cURL
+curl "https://api.crazyrouter.com/v1/video/query?id=veo_task_abc123" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### 응답 예시(완료됨)
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "task_id": "veo_task_abc123",
+    "status": "SUCCESS",
+    "url": "https://media.crazyrouter.com/task-artifacts/example.mp4",
+    "artifact_url": "https://media.crazyrouter.com/task-artifacts/example.mp4"
+  }
+}
+```
+
+<Note>
+  Google 공식 문서에는 Veo 3.1의 `reference asset images`, 그리고 더 세부적인 provider-native 기능 경계도 설명되어 있습니다. 현재 Crazyrouter의 클라이언트 공개 페이지에서는 우선 `veo-3.1-fast` / `veo-3.1-quality`의 텍스트로 비디오 생성 및 단일 이미지로 비디오 생성만 확정합니다. 향후 Veo의 더 많은 1차 기능이 개방되면 별도로 문서와 검증 기록을 보완할 예정입니다.
+</Note>

@@ -1,0 +1,94 @@
+---
+title: 'API 빠른 시작 가이드'
+description: '5분 만에 첫 API 호출 완료하기'
+---
+> 업데이트: 2026-06-16
+
+## 1단계: API Key 발급받기
+
+1. [Crazyrouter](https://crazyrouter.com)에 접속하여 계정 등록
+2. 로그인 후 [Token 관리](https://crazyrouter.com/console/token) 페이지로 이동
+3. 「새 토큰」을 클릭하여 API Key 생성
+
+## 2단계: 요청 보내기
+
+<Note>
+기본 국제 접속 주소는 `https://api.crazyrouter.com/v1`을 우선 입력하세요. 동아시아 지역은 `https://cn.crazyrouter.com/v1`을 우선 사용하세요. 특정 클라이언트가 루트 도메인을 입력해야 하는지 `/v1`을 입력해야 하는지 확실하지 않다면, 먼저 [API Endpoint 설명](https://docs.crazyrouter.com/ko/api-endpoint)을 참고하세요.
+</Note>
+
+<CodeGroup>
+```bash cURL
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "messages": [
+      {"role": "user", "content": "안녕하세요"}
+    ]
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="gpt-5.5",
+    messages=[{"role": "user", "content": "안녕하세요"}]
+)
+print(response.choices[0].message.content)
+```
+
+```javascript Node.js
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: 'YOUR_API_KEY',
+  baseURL: 'https://api.crazyrouter.com/v1'
+});
+
+const response = await client.chat.completions.create({
+  model: 'gpt-5.5',
+  messages: [{ role: 'user', content: '안녕하세요' }]
+});
+console.log(response.choices[0].message.content);
+```
+</CodeGroup>
+
+## 3단계: 결과 확인하기
+
+성공적인 응답 예시:
+
+```json
+{
+  "id": "chatcmpl-abc123",
+  "object": "chat.completion",
+  "created": 1677652288,
+  "choices": [{
+    "index": 0,
+    "message": {
+      "role": "assistant",
+      "content": "안녕하세요! 무엇을 도와드릴까요?"
+    },
+    "finish_reason": "stop"
+  }],
+  "usage": {
+    "prompt_tokens": 9,
+    "completion_tokens": 12,
+    "total_tokens": 21
+  }
+}
+```
+
+<Note>
+현재 빠른 시작 페이지의 `gpt-5.5` 예시는 2026-06-06 문서 기준선에 맞춰 업데이트되었습니다.
+</Note>
+
+<Note>
+OpenAI와 호환되는 모든 클라이언트와 프레임워크(예: LangChain, LlamaIndex, Cursor 등)는 `base_url`과 `api_key`만 수정하면 바로 연동할 수 있습니다.
+</Note>

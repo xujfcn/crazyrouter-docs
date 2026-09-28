@@ -1,0 +1,118 @@
+---
+title: 'PHP 예제'
+description: 'PHP로 Crazyrouter API를 호출하는 예제'
+---
+> 업데이트: 2026-06-06
+
+## 기본 대화
+
+```php
+<?php
+
+$apiKey = 'sk-xxx';
+$baseUrl = 'https://api.crazyrouter.com/v1';
+
+$data = [
+    'model' => 'gpt-5.5',
+    'messages' => [
+        ['role' => 'user', 'content' => '안녕하세요, PHP로 버블 정렬을 작성해 주세요']
+    ]
+];
+
+$ch = curl_init($baseUrl . '/chat/completions');
+curl_setopt_array($ch, [
+    CURLOPT_POST => true,
+    CURLOPT_HTTPHEADER => [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . $apiKey,
+    ],
+    CURLOPT_POSTFIELDS => json_encode($data),
+    CURLOPT_RETURNTRANSFER => true,
+]);
+
+$response = curl_exec($ch);
+curl_close($ch);
+
+$result = json_decode($response, true);
+echo $result['choices'][0]['message']['content'];
+```
+
+## 이미지 편집
+
+```php
+<?php
+
+$apiKey = 'sk-xxx';
+$baseUrl = 'https://api.crazyrouter.com/v1';
+
+// GPT-Image-2를 사용하여 이미지 편집
+$ch = curl_init($baseUrl . '/images/edits');
+
+$postFields = [
+    'model' => 'gpt-image-2',
+    'image' => new CURLFile('original.png', 'image/png'),
+    'prompt' => '배경을 별이 빛나는 밤하늘로 바꿔주세요',
+];
+
+curl_setopt_array($ch, [
+    CURLOPT_POST => true,
+    CURLOPT_HTTPHEADER => [
+        'Authorization: Bearer ' . $apiKey,
+    ],
+    CURLOPT_POSTFIELDS => $postFields,
+    CURLOPT_RETURNTRANSFER => true,
+]);
+
+$response = curl_exec($ch);
+curl_close($ch);
+
+$result = json_decode($response, true);
+
+// gpt-image-2는 일반적으로 data[0].url을 반환합니다; response_format=b64_json은 전달하지 마세요
+$imageUrl = $result['data'][0]['url'] ?? null;
+echo "이미지 주소: " . $imageUrl . "\n";
+```
+
+## 스트리밍 출력
+
+```php
+<?php
+
+$apiKey = 'sk-xxx';
+$baseUrl = 'https://api.crazyrouter.com/v1';
+
+$data = [
+    'model' => 'gpt-5.5',
+    'messages' => [['role' => 'user', 'content' => '농담 하나 해주세요']],
+    'stream' => true,
+];
+
+$ch = curl_init($baseUrl . '/chat/completions');
+curl_setopt_array($ch, [
+    CURLOPT_POST => true,
+    CURLOPT_HTTPHEADER => [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . $apiKey,
+    ],
+    CURLOPT_POSTFIELDS => json_encode($data),
+    CURLOPT_WRITEFUNCTION => function ($ch, $data) {
+        $lines = explode("\n", $data);
+        foreach ($lines as $line) {
+            if (str_starts_with($line, 'data: ') && $line !== 'data: [DONE]') {
+                $json = json_decode(substr($line, 6), true);
+                $content = $json['choices'][0]['delta']['content'] ?? '';
+                echo $content;
+            }
+        }
+        return strlen($data);
+    },
+]);
+
+curl_exec($ch);
+curl_close($ch);
+echo "\n";
+```
+
+<Note>
+  위 채팅 예제는 기본적으로 2026년 3월 23일 프로덕션 환경에서 실제로 테스트를 통과한 `gpt-5.5`를 사용합니다. 모델을 변경하려면, 마찬가지로 검증된 `claude-opus-4-8` 또는 `gemini-3.1-pro`로 우선 변경하는 것을 권장합니다.
+</Note>

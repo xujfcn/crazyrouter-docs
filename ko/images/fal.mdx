@@ -1,0 +1,131 @@
+---
+title: "Fal.ai 이미지"
+description: "Fal.ai 엔드포인트를 통한 텍스트-이미지 생성 및 이미지 편집"
+---
+> 업데이트: 2026-06-06
+
+# Fal.ai 이미지
+
+Crazyrouter는 Fal.ai의 이미지 생성 엔드포인트를 프록시하며, 텍스트-이미지 생성과 이미지 편집을 지원합니다.
+
+## 텍스트-이미지 생성
+
+```
+POST /fal-ai/nano-banana
+```
+
+### 요청 파라미터
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| `prompt` | string | 예 | 이미지 설명 프롬프트 |
+| `negative_prompt` | string | 아니오 | 네거티브 프롬프트 |
+| `image_size` | string | 아니오 | 이미지 크기: `square_hd`, `landscape_4_3`, `portrait_4_3`, `landscape_16_9`, `portrait_16_9` |
+| `num_images` | integer | 아니오 | 생성 개수, 기본값 1 |
+| `seed` | integer | 아니오 | 랜덤 시드 |
+| `guidance_scale` | number | 아니오 | 가이던스 강도 |
+| `num_inference_steps` | integer | 아니오 | 추론 스텝 수 |
+
+### 요청 예시
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/fal-ai/nano-banana \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "A majestic eagle soaring over snow-capped mountains at sunrise",
+    "image_size": "landscape_16_9",
+    "num_images": 1
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/fal-ai/nano-banana",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "prompt": "A majestic eagle soaring over snow-capped mountains at sunrise",
+        "image_size": "landscape_16_9",
+        "num_images": 1
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### 응답 예시
+
+```json
+{
+  "images": [
+    {
+      "url": "https://fal.media/files/...",
+      "width": 1344,
+      "height": 768,
+      "content_type": "image/jpeg"
+    }
+  ],
+  "seed": 42,
+  "prompt": "A majestic eagle soaring over snow-capped mountains at sunrise"
+}
+```
+
+---
+
+## 이미지 편집
+
+```
+POST /fal-ai/nano-banana/edit
+```
+
+기존 이미지를 기반으로 편집합니다.
+
+### 요청 파라미터
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| `prompt` | string | 예 | 편집 설명 |
+| `image_url` | string | 예 | 원본 이미지 URL |
+| `mask_url` | string | 아니오 | 마스크 이미지 URL |
+| `strength` | number | 아니오 | 편집 강도, 0-1 |
+
+### 요청 예시
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/fal-ai/nano-banana/edit \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "Add a rainbow in the sky",
+    "image_url": "https://example.com/landscape.jpg",
+    "strength": 0.6
+  }'
+```
+
+### 응답 예시
+
+```json
+{
+  "images": [
+    {
+      "url": "https://fal.media/files/...",
+      "width": 1024,
+      "height": 1024,
+      "content_type": "image/jpeg"
+    }
+  ]
+}
+```
+
+<Note>
+  Fal.ai 엔드포인트는 다양한 기반 모델을 지원합니다. 구체적으로 사용 가능한 모델은 [모델 가격](https://crazyrouter.com/pricing) 페이지를 참고하세요.
+</Note>

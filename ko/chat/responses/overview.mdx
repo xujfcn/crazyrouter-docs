@@ -1,0 +1,91 @@
+---
+title: "Responses API 개요"
+description: "프로덕션 환경 재검토를 기반으로, Crazyrouter에서 Responses API와 Chat Completions 사이의 선택 기준을 이해합니다"
+---
+> 업데이트: 2026-06-06
+
+# Responses API 개요
+
+Responses API는 현재 Crazyrouter에서 GPT 신규 기능을 지원하는 주요 라우트 중 하나입니다.
+
+이 문서 페이지는 `2026-03-22`에 프로덕션 환경에서 재검토된 결론만 기재합니다.
+
+<Note>
+  현재 프로덕션 검증 범위에서 Claude는 `POST /v1/messages`와 `POST /v1/chat/completions`만 지원하며 `POST /v1/responses`는 지원하지 않습니다. Responses 관련 페이지는 기본적으로 GPT 경로 기준으로만 이해해야 합니다.
+</Note>
+
+## 현재 권장 이해
+
+- 관찰 가능한 reasoning 출력이 필요한 경우: `/v1/responses` 우선 사용
+- OpenAI 스타일 Web Search가 필요한 경우: `/v1/responses` 우선 사용
+- 일반적인 채팅이나 기존 프로젝트의 연속 사용만 필요한 경우: `/v1/chat/completions`를 계속 사용 가능
+
+## Responses API vs Chat Completions API
+
+| 항목 | Responses API | Chat Completions API |
+|------|---------------|----------------------|
+| 엔드포인트 | `/v1/responses` | `/v1/chat/completions` |
+| 입력 형식 | `input` | `messages` |
+| 출력 형태 | `output[]` item 목록 | `choices[].message` |
+| GPT reasoning | `reasoning` item 재검토 완료 | `reasoning_effort` 사용 가능하지만 `reasoning_content`는 불안정 |
+| OpenAI 스타일 Web Search | `web_search_preview` 재검토 완료 | 기존 방식 `web_search`는 이번 라운드에서 안정적인 트리거 신호를 얻지 못함 |
+| 스트리밍 이벤트 | 이벤트 유형이 더 풍부함 | 전통적인 delta SSE |
+
+---
+
+## 최소 사용 예시
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+response = client.responses.create(
+    model="gpt-5.5",
+    input="Explain what a REST API is in one sentence."
+)
+
+print(response.output_text)
+```
+
+현재 프로덕션 재검토에서, 이런 최소 요청은 다음을 반환합니다.
+
+```json
+{
+  "object": "response",
+  "output": [
+    {
+      "type": "message"
+    }
+  ]
+}
+```
+
+---
+
+## Responses를 우선 선택해야 하는 경우
+
+- `gpt-5.5`의 reasoning 요약을 사용하려는 경우
+- 모델이 실제로 `web_search_call`을 트리거했는지 판단해야 하는 경우
+- 더 풍부한 SSE 이벤트를 소비하려는 경우
+
+관련 페이지:
+
+- [GPT-5 사고 모드](/ko/chat/responses/gpt5-thinking)
+- [Responses Web 검색](/ko/chat/responses/web-search)
+- [Responses Function Calling](/ko/chat/responses/function-calling)
+
+---
+
+## 계속 Chat Completions를 사용해야 하는 경우
+
+- 이미 안정적인 Chat Completions 연동 코드가 있는 경우
+- 최종 답변에만 관심이 있고 `reasoning` item에는 관심이 없는 경우
+- Claude, Gemini 등 OpenAI 호환 모델을 연동하는 경우
+
+<Note>
+  두 API는 동일한 프로젝트에서 공존할 수 있습니다. 현재 더 합리적인 방식은 대체로 "전체 마이그레이션"이 아니라, 새로운 기능이 필요한 요청만 `/v1/responses`로 전환하는 것입니다.
+</Note>

@@ -1,0 +1,269 @@
+---
+title: "Nano Banana Pro"
+description: "참조 이미지 기반 생성 및 편집을 위한 nano-banana-pro, OpenAI Images API 호환"
+---
+> 업데이트: 2026-09-18
+
+<Tip>
+  제출 후 즉시 응답을 받고 나중에 이미지 URL을 폴링하고 싶으신가요? 이 모델은 [비동기 이미지 생성](/ko/images/async)을 지원합니다: Gemini 계열은 경로 접미사를 `:asyncGenerateContent`로 바꾸고, OpenAI 계열은 `Prefer: respond-async` 헤더를 추가하면 되며, 요청 본문은 한 바이트도 바꿀 필요가 없습니다.
+</Tip>
+
+# Nano Banana Pro
+
+```
+POST /v1/images/generations
+```
+
+`nano-banana-pro`를 사용하여 이미지 생성 및 참조 이미지 편집을 수행하며, `OpenAI Images API` 스타일의 공개 프로토콜을 통일적으로 사용합니다.
+
+<Warning>
+  이미지 생성, 이미지 편집, 다중 참조 이미지 요청은 일반적으로 처리 시간이 길어질 수 있습니다. 프로덕션 연동 시에는 메인 트래픽 처리 경로인 `https://api.crazyrouter.com/v1`을 우선 사용하십시오. 완전한 생성 엔드포인트는 `https://api.crazyrouter.com/v1/images/generations`입니다. 계정 로그인, 충전 및 콘솔은 여전히 `https://crazyrouter.com`을 사용합니다.
+</Warning>
+
+## 이 페이지에서 다루는 내용
+
+- 이 페이지는 `nano-banana-pro` / `nano-banana-pro`만 다룹니다
+- 클라이언트 요청 진입점은 통일적으로 `POST /v1/images/generations`입니다
+- 입력 이미지 필드는 통일적으로 `image_input`입니다
+- 기본 공개 프로토콜은 여전히 `image_input` URL 사용을 권장합니다. 지정된 그레이 릴리스 계정에는 dataURL, raw Base64 및 3장 multipart 이미지 편집이 추가로 지원됩니다
+- `data:` / Base64 / multipart는 Crazyrouter의 호환 확장 기능이며, 모든 업스트림 carrier가 네이티브로 지원한다는 의미는 아닙니다
+- 백엔드는 Gemini / Vertex 등의 provider일 수 있지만, 이러한 provider의 세부 사항은 클라이언트 프로토콜의 일부가 아닙니다
+- 사용자 측에서는 `generationConfig`, `imageConfig`, `imageOutputOptions`, `image_output_options`를 전달하지 마십시오. 이러한 필드는 Crazyrouter가 통합 파라미터로부터 자동으로 변환합니다
+
+## 모델명
+
+| 권장 모델명 | 동등한 하위 모델 |
+|------|------|
+| `nano-banana-pro` | `nano-banana-pro` |
+
+클라이언트 코드에서는 `nano-banana-pro`를 사용하는 것을 권장합니다. 시스템에서 이미 `nano-banana-pro`를 직접 작성했다면, 동일한 `/v1/images/generations` 진입점을 통해 계속 호출할 수 있습니다.
+
+## 기능 상태
+
+| 기능 / 규격 | 상태 | 설명 |
+|------|------|------|
+| `T2I` | `Beta` | 과거 커버리지는 있으나, 현재 공개 artifact 집합은 여전히 편집 / 참조 이미지 경로가 중심입니다 |
+| `I2I + 1K` | `Verified` | 단일 이미지 편집 live 검증이 완료되었습니다 |
+| `I2I + 4K` | `Verified` | `4K + 21:9 + png/jpeg/jpg` live 검증이 완료되었습니다 |
+| `Reference + 1..2 refs` | `Verified` | `2`장 참조 이미지 live 검증이 완료되었습니다 |
+| `11257` 그레이 릴리스: dataURL / raw Base64 | `Verified` | 프로덕션 채널 304에서 단일 이미지 및 3장 `image_input`을 검증했습니다 |
+| `11257` 그레이 릴리스: 3장 multipart | `Verified` | `/v1/images/edits`는 `image`, `image[]`, `image[n]`을 지원합니다 |
+| `2K` | `Beta` | 현재 공개 artifact가 아직 보완이 필요합니다 |
+| 더 높은 다중 이미지 상한 / 정확한 `30 MiB` 경계 | `Beta` | 현재 공개 contract에서 보장하지 않습니다 |
+
+<Note>
+  가격 페이지와 이 문서는 동일한 상태 기준을 사용합니다. `Verified`는 현재 최소 live 검증이 완료되었음을 의미하고, `Beta`는 공식 기능은 존재하지만 현재 공개 검증 또는 경계가 여전히 보완 중임을 의미합니다.
+</Note>
+
+## 현재 검증된 기능
+
+다음 결론은 과거 live 검증 및 `2026-08-18` 프로덕션 그레이 릴리스 검증에 기반합니다:
+
+- 공식 Vertex `채널 318 (vertexsophie)` 직접 연결에서 검증됨:
+  - `2`장 참조 이미지 사용 가능
+- 로컬 `4000` 포트, 고정 `채널 318`에서 검증됨:
+  - 단일 `WEBP` URL 참조 이미지 사용 가능
+  - 단일 `JPEG` URL 참조 이미지 사용 가능
+  - `2`장 `PNG` URL 참조 이미지 사용 가능
+  - `resolution: "1K"` 사용 가능
+  - `resolution: "4K"` 사용 가능
+  - `aspect_ratio: "1:1"` 사용 가능
+  - `aspect_ratio: "21:9"` 사용 가능
+  - `output_format: "png"` 사용 가능
+  - `output_format: "jpg"` 사용 가능
+- 응답은 `data[].url`을 직접 반환할 수 있습니다
+
+지정된 그레이 릴리스 계정 `11257`은 프로덕션 채널 `304`에서 검증되었습니다:
+
+- `/v1/images/generations`의 `image_input`은 dataURL, raw Base64 및 다중 이미지 입력을 지원합니다
+- `/v1/images/edits`는 multipart의 `image`, `image[]`, `image[n]`을 지원합니다
+- 원본 이미지, 주석 이미지, 참조 이미지는 업로드 순서에 따라 3장 편집 요청을 구성할 수 있습니다
+
+다음 기능은 현재 클라이언트에게 완전히 보장된 것으로 작성해서는 안 됩니다:
+
+- 정확한 다중 이미지 상한이 `8`인지 그 이상인지
+- `2K`
+- 정확한 대용량 파일 URL 상한
+- 정확한 `30 MiB` 경계
+- 기타 `aspect_ratio` 조합
+- `output_compression`의 정확한 의미 경계
+
+<Note>
+  기본 계정은 여전히 URL-only 공개 기준으로 처리됩니다. Base64, dataURL 및 multipart 이미지 편집은 현재 지정된 그레이 릴리스 계정에만 개방되어 있습니다. 활성화가 필요한 경우, 먼저 계정이 그레이 릴리스 명단에 포함되었는지 확인하십시오.
+</Note>
+
+---
+
+## 요청 파라미터
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| `model` | string | 예 | `nano-banana-pro` 권장, `nano-banana-pro`도 호환 |
+| `prompt` | string | 예 | 생성 또는 편집 지시문 |
+| `image_input` | string 또는 string[] | 아니요 | 기본적으로 참조 이미지 URL을 전달합니다. 그레이 릴리스 계정은 dataURL / raw Base64도 전달할 수 있으며, 현재 3장까지 검증되었습니다 |
+| `resolution` | string | 아니요 | 현재 공개적으로 보장하는 값은 `1K`, `4K` |
+| `aspect_ratio` | string | 아니요 | 현재 공개적으로 보장하는 값은 `1:1`, `21:9` |
+| `output_format` | string | 아니요 | 현재 공개적으로 보장하는 값은 `png`, `jpeg` / `jpg` |
+| `output_compression` | integer | 아니요 | `0-100`, JPEG 압축 품질에 사용 |
+| `n` | integer | 아니요 | 생성 수량, 기본값 `1` |
+
+### 다중 이미지 현재 상태
+
+- `2`장: 검증됨
+- `11257` 그레이 릴리스 3장: 검증됨
+- 더 높은 수량: 업스트림의 정확한 최댓값은 아직 추가 테스트가 필요하며, 현재는 보장하지 않습니다
+
+### 라우팅 설명
+
+- 단일 이미지 요청은 일반적인 사용 가능 carrier에 도달할 수 있습니다
+- 기본 다중 이미지 요청은 공식 `Gemini / Vertex` carrier로만 라우팅됩니다. 지정된 그레이 릴리스 계정은 이미 검증된 그레이 릴리스 carrier를 사용할 수 있습니다
+- 이는 서버 측 내부 라우팅 정책이며, 클라이언트 프로토콜은 변경되지 않습니다
+
+### 그레이 릴리스 3장 multipart
+
+`11257` 그레이 릴리스 계정은 `/v1/images/edits`를 사용할 수 있습니다:
+
+```bash
+curl -X POST https://api.crazyrouter.com/v1/images/edits \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "model=nano-banana-pro" \
+  -F "prompt=첫 번째 이미지를 원본으로, 두 번째 이미지를 주석 이미지로, 세 번째 이미지를 참조 이미지로 사용하여 주석 영역만 수정" \
+  -F "image[]=@original.png" \
+  -F "image[]=@annotation.png" \
+  -F "image[]=@reference.png"
+```
+
+이미지 순서는 클라이언트 제출 순서에 따라 결정됩니다. 주석 이미지는 현재 시각적 참조 입력으로 사용되며, GPT mask 방식의 픽셀 단위 영역 잠금을 보장하지 않습니다.
+
+---
+
+## 요청 예시
+
+### 단일 이미지 편집
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "nano-banana-pro",
+    "prompt": "이 상품 이미지를 초와이드 배너 KV로 바꾸고, 배경을 더 깔끔하게 하되 주체 구조는 유지",
+    "image_input": [
+      "https://help-static-aliyun-doc.aliyuncs.com/file-manage-files/zh-CN/20250925/fpakfo/image36.webp"
+    ],
+    "resolution": "4K",
+    "aspect_ratio": "21:9",
+    "output_format": "png"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/v1/images/generations",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "nano-banana-pro",
+        "prompt": "이 상품 이미지를 초와이드 배너 KV로 바꾸고, 배경을 더 깔끔하게 하되 주체 구조는 유지",
+        "image_input": [
+            "https://help-static-aliyun-doc.aliyuncs.com/file-manage-files/zh-CN/20250925/fpakfo/image36.webp"
+        ],
+        "resolution": "4K",
+        "aspect_ratio": "21:9",
+        "output_format": "png"
+    }
+)
+
+data = response.json()
+print(data["data"][0]["url"])
+```
+
+</CodeGroup>
+
+### 텍스트로 이미지 생성
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "nano-banana-pro",
+    "prompt": "A premium product poster for a red apple, studio lighting, clean background",
+    "resolution": "1K",
+    "aspect_ratio": "1:1",
+    "output_format": "jpeg",
+    "output_compression": 85
+  }'
+```
+
+### 2장 참조 이미지
+
+```json
+{
+  "model": "nano-banana-pro",
+  "prompt": "두 장의 참조 이미지의 주체와 구도를 융합하여, 고품질 메인 비주얼 이미지 한 장을 생성",
+  "image_input": [
+    "https://example.com/ref-1.png",
+    "https://example.com/ref-2.png"
+  ],
+  "resolution": "1K",
+  "aspect_ratio": "1:1"
+}
+```
+
+---
+
+## 응답 예시
+
+기본적으로 `data[].url`을 직접 사용하는 것을 권장합니다:
+
+```json
+{
+  "created": 1774846705,
+  "data": [
+    {
+      "url": "https://media.crazyrouter.com/task-artifacts/2026/03/30/sync-image/20260331073825672515332JyP6hAcs-1.png"
+    }
+  ]
+}
+```
+
+최종 생성된 이미지 결과를 얻으려면 `data[0].url`을 바로 읽으면 됩니다. 현재 Crazyrouter는 업스트림의 인라인 이미지를 접근 가능한 URL로 아카이빙한 후 클라이언트에 반환합니다.
+
+---
+
+## 검증된 결과 요약
+
+| 항목 | 현재 상태 |
+|------|----------|
+| 단일 URL 참조 이미지 | 검증됨 |
+| `2`장 URL 참조 이미지 | 검증됨 |
+| `WEBP` URL | 검증됨 |
+| `JPEG` URL | 검증됨 |
+| `PNG` URL | 검증됨 |
+| `1K` | 검증됨 |
+| `4K` | 검증됨 |
+| `1:1` | 검증됨 |
+| `21:9` | 검증됨 |
+| `output_format = png` | 검증됨 |
+| `output_format = jpeg / jpg` | 검증됨 |
+| 정확한 `8`장 상한 | `Beta` |
+| 정확한 `30 MiB` URL 경계 | `Beta` |
+| `2K` | `Beta` |
+
+## 현재 알려진 제한 사항
+
+- 그레이 릴리스 계정이 아닌 경우 `image`, `data:` / Base64 또는 multipart 이미지 입력을 받지 않습니다
+- 그레이 릴리스 계정은 현재 3장까지 검증되었으며, 더 높은 수량 상한은 보장하지 않습니다
+- 현재 문서는 정확한 `30 MiB` URL 경계를 보장하지 않습니다
+- 현재 문서는 스크린샷에 나열된 모든 비율 및 파라미터가 완전히 검증되었다고 보장하지 않습니다
+
+<Note>
+  Gemini / Nano Banana 이미지 생성 또는 편집에 대한 통합 파라미터 설명이 필요하다면 [Gemini 이미지 생성](/ko/chat/gemini/image-gen)과 [Gemini 이미지 편집](/ko/chat/gemini/image-edit)을 참고하십시오. 다른 등급이 필요하다면 [Nano Banana](/ko/images/nano-banana)와 [Nano Banana 2](/ko/images/nano-banana-2)를 참고하십시오.
+</Note>

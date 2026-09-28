@@ -1,0 +1,80 @@
+---
+title: 'HTTP 상태 코드 및 오류 처리'
+description: 'API가 반환하는 상태 코드와 오류 정보에 대해 알아봅니다'
+---
+> 업데이트: 2026-06-06
+
+## HTTP 상태 코드
+
+| 상태 코드 | 설명 |
+|--------|------|
+| 200 | 요청 성공 |
+| 400 | 요청 파라미터 오류 |
+| 401 | 인증 실패, API Key가 유효하지 않거나 누락됨 |
+| 403 | 권한 부족, 토큰이 해당 모델에 접근할 권한이 없음 |
+| 429 | 요청 빈도 초과 |
+| 500 | 서버 내부 오류 |
+| 502 | 업스트림 서비스 사용 불가 |
+| 503 | 서비스 임시 사용 불가 |
+
+## 오류 응답 형식
+
+```json
+{
+  "error": {
+    "message": "오류 설명 정보",
+    "type": "error_type",
+    "code": "error_code"
+  }
+}
+```
+
+## 자주 발생하는 오류
+
+### 401 - 인증 실패
+
+```json
+{
+  "error": {
+    "message": "Invalid API key",
+    "type": "authentication_error",
+    "code": "invalid_api_key"
+  }
+}
+```
+
+**해결 방법**: API Key가 올바른지 확인하고, `sk-`로 시작하는지 확인하십시오.
+
+### 429 - 빈도 제한
+
+```json
+{
+  "error": {
+    "message": "Rate limit exceeded",
+    "type": "rate_limit_error",
+    "code": "rate_limit_exceeded"
+  }
+}
+```
+
+**해결 방법**: 요청 빈도를 낮추거나, 고객센터에 문의하여 한도를 상향 조정하십시오.
+
+### 403 - 잔액 부족
+
+```json
+{
+  "error": {
+    "message": "Insufficient quota",
+    "type": "insufficient_quota",
+    "code": "insufficient_quota"
+  }
+}
+```
+
+**해결 방법**: [충전 페이지](https://crazyrouter.com/topup)로 이동하여 충전하십시오.
+
+## 재시도 권장 사항
+
+- 429 오류의 경우, 지수 백오프(exponential backoff) 재시도를 권장합니다
+- 500/502/503 오류의 경우, 몇 초 대기 후 재시도를 권장합니다
+- 400/401/403 오류의 경우, 요청 파라미터와 인증 정보를 확인하십시오

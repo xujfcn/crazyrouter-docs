@@ -1,0 +1,165 @@
+---
+title: "Wan 비디오"
+description: "Wan 비디오 모델 개요입니다. Wan 텍스트-투-비디오는 /v1/video/generations를 사용하며, 이미지-투-비디오, 첫/끝 프레임, 주체 참조 등 알리바바 형식 워크플로는 /alibailian/api/v1/* 호환 경로를 사용합니다"
+---
+> 업데이트: 2026-06-07
+
+# Wan 비디오
+
+Wan 시리즈는 현재 기능에 따라 서로 다른 대외 프로토콜을 사용합니다.
+
+- 텍스트-투-비디오(`wan2.5-t2v-preview`, `wan2.2-t2v-plus`): `POST /v1/video/generations`를 사용하고, `GET /v1/video/generations/{task_id}`로 조회합니다.
+- 이미지-투-비디오, 첫/끝 프레임 비디오 생성, 주체 참조 비디오 생성: 알리바바 바이리안 호환 경로 `POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis`를 사용하고, `GET /alibailian/api/v1/tasks/{task_id}`로 조회합니다.
+
+<Warning>
+  `wan2.2-t2v-plus`를 `/alibailian/api/v1/services/aigc/video-generation/video-synthesis`로 제출하지 마십시오. 프로덕션 환경에서는 `invalid_request`를 반환하며 `/v1/video/generations`를 사용하라는 안내가 표시됩니다.
+</Warning>
+
+알리바바 형식 워크플로의 전체 요청 본문과 작업 조회 형식은 [알리바바 바이리안 비디오 인터페이스](/ko/video/alibailian)를 참고하십시오. 이 문서는 현재 첫 번째로 공개된 `Wan` 모델, 기능, 과금 기준, 권장 프로토콜을 정리합니다.
+
+## 첫 번째 공개 모델
+
+| 모델 | 대외 기능 | 공식 과금 기준 | 현재 상태 |
+|------|----------|--------------|----------|
+| `wan2.5-t2v-preview` | 텍스트-투-비디오 | 초당 | 검증됨 |
+| `wan2.5-i2v-preview` | 이미지-투-비디오 | 초당 | 검증됨 |
+| `wan2.2-t2v-plus` | 텍스트-투-비디오 | 초당 | 검증됨 |
+| `wan2.2-i2v-plus` | 이미지-투-비디오 | 초당 | 검증됨 |
+| `wan2.2-i2v-flash` | 이미지-투-비디오 | 초당 | 검증됨 |
+| `wan2.2-kf2v-flash` | 첫/끝 프레임 비디오 생성 | 초당 | Beta |
+| `wan2.2-s2v` | 주체 참조 비디오 생성 | 초당 | Beta |
+
+<Note>
+  `wan2.2-kf2v-flash`와 `wan2.2-s2v`는 이미 코드와 과금 기능 버킷 정렬이 완료되었지만, 현재 live artifact가 계속 보완 중이므로 일단 Beta 표시를 유지합니다.
+</Note>
+
+## 기능 및 공식 가격
+
+| 모델 | 기능 버킷 | 해상도 | 공식 단가 |
+|------|--------|--------|----------|
+| `wan2.5-t2v-preview` | 텍스트-투-비디오 | `480P / 720P / 1080P` | `¥0.30 / ¥0.60 / ¥1.00 / 초` |
+| `wan2.2-t2v-plus` | 텍스트-투-비디오 | `480P / 1080P` | `¥0.14 / ¥0.70 / 초` |
+| `wan2.2-i2v-plus` | 이미지-투-비디오 | `480P / 1080P` | `¥0.14 / ¥0.70 / 초` |
+| `wan2.2-i2v-flash` | 이미지-투-비디오 | `480P / 720P / 1080P` | `¥0.10 / ¥0.20 / ¥0.48 / 초` |
+| `wan2.2-kf2v-flash` | 첫/끝 프레임 비디오 생성 | `480P / 720P / 1080P` | `¥0.10 / ¥0.20 / ¥0.48 / 초` |
+| `wan2.2-s2v` | 주체 참조 비디오 생성 | `480P / 720P` | `¥0.50 / ¥0.90 / 초` |
+
+## 프로토콜 규칙
+
+### 1. 텍스트-투-비디오
+
+- 권장 제출 경로: `POST /v1/video/generations`
+- 권장 조회 경로: `GET /v1/video/generations/{task_id}`
+- 주요 필드: `model`, `prompt`, `seconds`, `size`
+- 대표 모델: `wan2.5-t2v-preview`, `wan2.2-t2v-plus`
+
+### 2. 이미지-투-비디오
+
+- 주요 필드: `input.img_url`
+- 대표 모델: `wan2.5-i2v-preview`, `wan2.2-i2v-plus`, `wan2.2-i2v-flash`
+
+### 3. 첫/끝 프레임 비디오 생성
+
+- 주요 필드: `input.first_frame_url`, `input.last_frame_url`
+- 대표 모델: `wan2.2-kf2v-flash`
+
+### 4. 주체 참조 비디오 생성
+
+- 주요 필드: `input.image_url`
+- 대표 모델: `wan2.2-s2v`
+
+## 요청 예시
+
+### 텍스트-투-비디오: Wan 2.2 T2V Plus
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "wan2.2-t2v-plus",
+    "prompt": "고요한 영화 같은 산속 운해 장면",
+    "seconds": "5",
+    "size": "480P"
+  }'
+```
+
+### 이미지-투-비디오
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/alibailian/api/v1/services/aigc/video-generation/video-synthesis \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "wan2.5-i2v-preview",
+    "input": {
+      "prompt": "화면 속 인물이 카메라 쪽으로 고개를 돌리게 해주세요",
+      "img_url": "https://example.com/first-frame.png"
+    },
+    "parameters": {
+      "resolution": "720P",
+      "duration": 5,
+      "prompt_extend": true,
+      "audio": true
+    }
+  }'
+```
+
+### 첫/끝 프레임 비디오 생성
+
+```json
+{
+  "model": "wan2.2-kf2v-flash",
+  "input": {
+    "prompt": "화면이 낮에서 밤으로 부드럽게 전환됩니다",
+    "first_frame_url": "https://example.com/frame-start.png",
+    "last_frame_url": "https://example.com/frame-end.png"
+  },
+  "parameters": {
+    "resolution": "720P",
+    "duration": 5
+  }
+}
+```
+
+### 주체 참조 비디오 생성
+
+```json
+{
+  "model": "wan2.2-s2v",
+  "input": {
+    "prompt": "참조 인물이 자연스럽게 말하며 미세한 머리 동작을 하게 해주세요",
+    "image_url": "https://example.com/portrait.png",
+    "audio_url": "https://example.com/voice.mp3"
+  },
+  "parameters": {
+    "resolution": "720P",
+    "duration": 5
+  }
+}
+```
+
+## 작업 결과 조회
+
+Wan은 현재도 비동기 작업 모델입니다. 클라이언트가 작업을 생성한 후, 제출 프로토콜에 따라 조회합니다.
+
+텍스트-투-비디오:
+
+```http
+GET /v1/video/generations/{task_id}
+```
+
+알리바바 호환 이미지-투-비디오, 첫/끝 프레임, 주체 참조 워크플로:
+
+```http
+GET /alibailian/api/v1/tasks/{task_id}
+```
+
+조회 결과가 `status = SUCCESS`일 때 `result_url` 또는 `artifact_url`에서 최종 비디오 결과를 가져옵니다.
+
+## 범위 설명
+
+- Wan 텍스트-투-비디오의 현재 권장 대외 프로토콜은 `/v1/video/generations`이며, 알리바바 바이리안 호환 제출 경로가 아닙니다.
+- 알리바바 바이리안 호환 경로는 주로 이미지-투-비디오, 첫/끝 프레임 비디오 생성, 주체 참조 비디오 생성 등 알리바바 형식 마이그레이션 시나리오에 사용됩니다.
+- Crazyrouter 내부에서는 공식, ApiPass, Kie 또는 기타 서드파티를 provider로 사용할 수 있지만, 이러한 provider가 별도로 고객 프로토콜을 정의하지는 않습니다.
+- 현재 Beta 항목은 먼저 대외적으로 노출할 수 있습니다. 출시 후에는 프로덕션 작업 로그와 함께 live evidence를 계속 보완하고, 성공적으로 사이클이 닫힌 후 Beta 표시를 제거해야 합니다.

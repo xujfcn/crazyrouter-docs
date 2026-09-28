@@ -1,0 +1,120 @@
+---
+title: "Web 검색"
+description: "프로덕션 환경 재검증을 기반으로, Crazyrouter의 OpenAI 스타일 웹 연결 검색 기능을 사용합니다"
+---
+> 업데이트: 2026-06-06
+
+# Web 검색
+
+이 문서 페이지에는 `2026-03-22`에 Crazyrouter 프로덕션 환경에서 재검증된 OpenAI 스타일 Web Search 사용법만 기재합니다.
+
+현재 메인 권장 경로:
+
+- `gpt-5.5`
+- `POST /v1/responses`
+- `tools: [{ "type": "web_search_preview" }]`
+
+## 현재 주요 결론
+
+오늘 진행한 프로덕션 재검증에서:
+
+- `gpt-5.5`는 Responses API를 통해 `web_search_call`을 안정적으로 반환할 수 있습니다
+- 기존 방식인 Chat Completions의 `tools: [{ "type": "web_search" }]` 프로브 요청은 `200`을 반환했지만, 이번 라운드에서는 검증 가능한 검색 트리거 신호를 얻지 못했으므로 여기서는 메인 예제로 작성하지 않습니다
+
+---
+
+## 검증된 요청
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "input": "Use web search to find one current technology headline published recently.",
+    "tools": [
+      {
+        "type": "web_search_preview"
+      }
+    ]
+  }'
+```
+
+현재 프로덕션 검증에서 반환된 핵심 `output.type`:
+
+```json
+["web_search_call", "message"]
+```
+
+이는 검색 단계와 최종 답변이 별도로 반환됨을 의미합니다.
+
+---
+
+## Python 예시
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+response = client.responses.create(
+    model="gpt-5.5",
+    input="Use web search to find one current technology headline published recently.",
+    tools=[
+        {"type": "web_search_preview"}
+    ]
+)
+
+print(response.output_text)
+```
+
+---
+
+## 실제로 검색이 트리거되었는지 확인하는 방법
+
+`response.output`을 직접 확인하는 것을 권장합니다.
+
+```python Python
+for item in response.output:
+    print(item.type)
+```
+
+출력에 다음이 나타나면:
+
+```text
+web_search_call
+message
+```
+
+이는 모델이 먼저 검색을 수행한 후 최종 답변을 반환했음을 의미합니다.
+
+---
+
+## 메인 예제로 계속 작성하지 않는 것을 권장하는 기존 방식
+
+이번 라운드 프로덕션 프로브에서는 Chat Completions의 기존 방식도 확인했습니다.
+
+```json
+{
+  "tools": [
+    {
+      "type": "web_search"
+    }
+  ]
+}
+```
+
+결과는 다음과 같습니다.
+
+- 요청은 `200`을 반환함
+- 그러나 안정적으로 검증 가능한 검색 트리거 신호는 얻지 못함
+
+따라서 현재 Crazyrouter 문서에서는 OpenAI 스타일 Web Search를 Responses API를 기준으로 작성해야 합니다.
+
+관련 페이지:
+
+- [Responses Web 검색](/ko/chat/responses/web-search)
+- [핵심 기능: Web Search](/ko/features/web-search)

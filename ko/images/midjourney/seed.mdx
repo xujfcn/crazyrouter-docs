@@ -1,0 +1,65 @@
+---
+title: "Seed 가져오기"
+description: "Midjourney 작업의 이미지 Seed 값을 가져옵니다"
+---
+> 업데이트: 2026-06-06
+
+# Seed 가져오기
+
+```
+GET /mj/task/{id}/image-seed
+```
+
+완료된 작업의 이미지 Seed 값을 가져옵니다. Seed는 유사한 생성 결과를 재현하는 데 사용할 수 있습니다.
+
+## 요청 예시
+
+<CodeGroup>
+
+```bash cURL
+curl https://api.crazyrouter.com/mj/task/task_1234567890/image-seed \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    "https://api.crazyrouter.com/mj/task/task_1234567890/image-seed",
+    headers={"Authorization": "Bearer YOUR_API_KEY"}
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+## 응답 예시
+
+```json
+{
+  "code": 1,
+  "description": "성공",
+  "result": "1234567890"
+}
+```
+
+| 필드 | 설명 |
+|------|------|
+| `result` | Seed 값, Imagine 프롬프트에서 `--seed 1234567890`으로 사용해 재현 가능 |
+
+---
+
+## Seed 사용하기
+
+Imagine 요청의 prompt에 `--seed` 파라미터를 추가합니다.
+
+```json
+{
+  "prompt": "a beautiful sunset over the ocean --ar 16:9 --v 6 --seed 1234567890"
+}
+```
+
+<Note>
+  Seed는 작업이 성공적으로 완료된 후에만 가져올 수 있습니다. 동일한 Seed와 동일한 Prompt를 사용하면 매우 유사한(완전히 동일하지는 않은) 이미지를 생성할 수 있습니다.
+</Note>

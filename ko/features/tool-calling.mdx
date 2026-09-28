@@ -1,0 +1,230 @@
+---
+title: "Tool Calling"
+description: "생산 환경 실측을 기반으로, GPT, Claude, Gemini 최신 주력 모델을 사용한 Tool Calling"
+---
+> 업데이트: 2026-06-23
+
+# Tool Calling
+
+본 문서는 **Crazyrouter 생산 환경에서 실제 요청으로 검증에 성공한** Tool Calling 사용법만 수록합니다.
+
+검증 일시:
+
+- `2026-03-22`
+
+검증 완료된 모델:
+
+- `gpt-5.5`
+- `claude-opus-4-8`
+- `gemini-3.1-pro`
+
+---
+
+## 검증 완료 기능 매트릭스
+
+| 모델 | 프로토콜 | 엔드포인트 | 성공 표지 |
+|------|------|------|----------|
+| `gpt-5.5` | OpenAI Chat Completions | `POST /v1/chat/completions` | `tool_calls` 반환 |
+| `claude-opus-4-8` | Anthropic Messages | `POST /v1/messages` | `tool_use` 블록 반환 |
+| `gemini-3.1-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | `functionCall` 반환 |
+
+<Warning>
+Claude의 Tool Calling은 현재 Anthropic Messages 프로토콜 기준으로 검증되었습니다. 즉 `POST /v1/messages`가 `tool_use` 블록을 반환하는 방식입니다. 이 결론을 Claude의 OpenAI 호환 `/v1/chat/completions` 경로로 확대 적용하지 마세요. Copilot, Continue, 일부 VS Code Agent, 또는 Tool Calling에 의존하는 다른 코딩 시나리오에서는 OpenAI 호환 엔드포인트가 Claude 네이티브 Tool Calling을 정상적으로 끌어내지 못할 수 있습니다. Claude 코딩 Agent 기능이 필요할 때는 Claude Code 또는 Anthropic 네이티브 클라이언트 설정을 우선 사용하세요.
+</Warning>
+
+---
+
+## GPT-5.4
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Use the get_time tool for Asia/Shanghai. Do not answer without calling the tool."
+      }
+    ],
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "get_time",
+          "description": "Get the current time for a timezone",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "timezone": {
+                "type": "string"
+              }
+            },
+            "required": ["timezone"],
+            "additionalProperties": false
+          }
+        }
+      }
+    ],
+    "tool_choice": "required"
+  }'
+```
+
+생산 환경 검증에서 반환된 핵심 필드:
+
+```json
+{
+  "tool_calls": [
+    {
+      "type": "function",
+      "function": {
+        "name": "get_time",
+        "arguments": "{\"timezone\":\"Asia/Shanghai\"}"
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Claude Sonnet 4.6
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-opus-4-8",
+    "max_tokens": 256,
+    "tools": [
+      {
+        "name": "get_time",
+        "description": "Get the current time for a timezone",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "timezone": {
+              "type": "string"
+            }
+          },
+          "required": ["timezone"]
+        }
+      }
+    ],
+    "tool_choice": {
+      "type": "any"
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Use the get_time tool for Asia/Shanghai. Do not answer directly."
+      }
+    ]
+  }'
+```
+
+생산 환경 검증에서 반환된 핵심 필드:
+
+```json
+{
+  "stop_reason": "tool_use",
+  "content": [
+    {
+      "type": "tool_use",
+      "name": "get_time",
+      "input": {
+        "timezone": "Asia/Shanghai"
+      }
+    }
+  ]
+}
+```
+
+첫 라운드 연동 시 권장 사항:
+
+- Claude 네이티브 `/v1/messages`의 경우, 우선 명시적으로 `tool_choice`를 추가하세요
+- 프롬프트에서 "반드시 도구를 호출해야 하며, 직접 답하지 마세요"라고 명확히 요구하세요
+- 이렇게 하면 `tool_use`를 더 안정적으로 재현할 수 있습니다
+
+---
+
+## Gemini 3 Pro
+
+```bash cURL
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Use the get_time function for Asia/Shanghai."
+          }
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "functionDeclarations": [
+          {
+            "name": "get_time",
+            "description": "Get the current time for a timezone",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "timezone": {
+                  "type": "string"
+                }
+              },
+              "required": ["timezone"]
+            }
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+생산 환경 검증에서 반환된 핵심 필드:
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "functionCall": {
+              "name": "get_time",
+              "args": {
+                "timezone": "Asia/Shanghai"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+---
+
+## 어떤 상황에 어떤 프로토콜을 사용할지
+
+- 프로젝트에서 이미 OpenAI SDK를 사용하고 있다면, `gpt-5.5`의 OpenAI 호환 방식을 우선 사용하세요
+- Claude 네이티브 연동을 하고 있다면, `/v1/messages`를 우선 사용하고, 첫 라운드 검증 시 `tool_choice`를 추가하세요
+- Gemini 네이티브 기능 연동을 하고 있다면, Gemini Native API를 우선 사용하세요
+
+---
+
+## 관련 문서
+
+- [OpenAI Function Calling](/ko/chat/openai/function-calling)
+- [Responses Function Calling](/ko/chat/responses/function-calling)
+- [Gemini Tool Calling](/ko/chat/gemini/tools)
+- [Claude 네이티브 포맷](/ko/chat/anthropic/messages)

@@ -1,0 +1,72 @@
+---
+title: '토큰 삭제'
+description: '지정한 API 토큰을 삭제합니다'
+api: 'DELETE /api/token/{id}'
+---
+> 업데이트: 2026-07-20
+
+## 인터페이스 설명
+
+지정한 API 토큰을 영구적으로 삭제합니다. 삭제 후 해당 토큰의 API Key는 즉시 무효화됩니다.
+
+<Note>
+  이 `/api/token/*` 인터페이스 그룹은 주로 Crazyrouter 콘솔의 API Key 관리 자동화에 사용됩니다. 사용자 `access token`과 `New-Api-User` 요청 헤더가 필요하며, 일반적인 `sk-xxx` 모델 호출 흐름에서 직접 사용하는 인터페이스가 아닙니다. 요청 기본 주소는 반드시 `https://crazyrouter.com`을 사용해야 합니다. `https://api.crazyrouter.com`은 모델 API 전용 진입점이며, 관리 경로를 호출하면 `404 api_only_endpoint`가 반환됩니다.
+</Note>
+
+## 인증 방식
+
+사용자 측 인증을 사용하며, 요청 헤더에 다음을 포함해야 합니다.
+
+```text
+Authorization: Bearer your_access_token
+New-Api-User: 1
+```
+
+## 경로 파라미터
+
+<ParamField path="id" type="integer" required>
+  삭제할 토큰 ID
+</ParamField>
+
+## 응답 형식
+
+```json
+{
+  "success": true,
+  "message": "토큰이 삭제되었습니다"
+}
+```
+
+## 코드 예시
+
+<CodeGroup>
+
+```python Python
+import requests
+
+headers = {
+    "Authorization": "Bearer your_access_token",
+    "New-Api-User": "1",
+    "User-Agent": "Mozilla/5.0"
+}
+
+token_id = 10
+response = requests.delete(
+    f"https://crazyrouter.com/api/token/{token_id}",
+    headers=headers
+)
+
+print(response.json())
+```
+
+```bash cURL
+curl -X DELETE https://crazyrouter.com/api/token/10 \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 1"
+```
+
+</CodeGroup>
+
+<Warning>
+  삭제 작업은 되돌릴 수 없습니다. 삭제 후 해당 Key를 사용하는 모든 애플리케이션은 즉시 API를 호출할 수 없게 됩니다.
+</Warning>

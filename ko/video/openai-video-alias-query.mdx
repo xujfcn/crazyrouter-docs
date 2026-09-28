@@ -1,0 +1,66 @@
+---
+title: "비디오 작업 조회 별칭"
+description: "GET /v1/video/generations/{task_id} 호환 별칭 인터페이스, 비디오 작업 상태 조회에 사용"
+---
+> 업데이트: 2026-06-06
+
+# 비디오 작업 조회 별칭
+
+```
+GET /v1/video/generations/{task_id}
+```
+
+호환 비디오 라우트를 통해 제출된 작업의 상태를 조회하는 데 사용됩니다. 이는 `/v1/video/generations`의 조회 전용 라우트입니다.
+
+## 인증
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## 요청 예시
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/video/generations/video_task_abc123   -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+## 일반적인 성공 응답
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "id": "video_task_abc123",
+    "task_id": "video_task_abc123",
+    "status": "SUCCESS",
+    "result_url": "https://media.crazyrouter.com/task-artifacts/example.mp4",
+    "artifact_url": "https://media.crazyrouter.com/task-artifacts/example.mp4"
+  }
+}
+```
+
+## 로컬에서 확인된 존재하지 않는 작업 응답
+
+로컬 `http://127.0.0.1:4000` 환경에서 존재하지 않는 작업을 조회하면 다음이 반환됩니다.
+
+```json
+{
+  "code": "task_not_exist",
+  "message": "task_not_exist",
+  "data": null
+}
+```
+
+## 일반적인 상태
+
+| 상태 | 설명 |
+|------|------|
+| `queued` | 작업이 제출되었거나 대기열 중 |
+| `processing` | 작업 처리 중 |
+| `SUCCESS` | 작업 완료됨 |
+| `failed` | 작업 실패 |
+
+<Note>
+비디오 모델과 업스트림에 따라 완료 결과 필드가 약간 다를 수 있습니다. 가장 안정적인 방법은 생성과 조회를 최대한 동일한 호환 경로 안에서 유지하고, `data.artifact_url` 또는 `data.result_url`을 우선 읽는 것입니다.
+</Note>

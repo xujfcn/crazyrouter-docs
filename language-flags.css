@@ -3,7 +3,7 @@
  * Flags are decorative: the original visible language names stay accessible.
  */
 [data-component-part="localization-select-trigger"][data-docs-flag]::before,
-:is(#localization-select-item-cn, #localization-select-item-en, #localization-select-item-jp, #localization-select-item-ru)::before {
+:is(#localization-select-item-cn, #localization-select-item-en, #localization-select-item-jp, #localization-select-item-ru, #localization-select-item-ko)::before {
   content: "";
   display: inline-block;
   width: 20px;
@@ -34,4 +34,9 @@
 [data-component-part="localization-select-trigger"][data-docs-flag="ru"],
 #localization-select-item-ru {
   --docs-language-flag: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ijg1LjMzMyA4NS4zMzMgMzQxLjMzMyAzNDEuMzMzIj48cGF0aCBmaWxsPSIjRkZGIiBkPSJNMCA4NS4zM3YzNDEuMzMyaDUxMlY4NS4zM3oiLz48cGF0aCBmaWxsPSIjMDA1MkI0IiBkPSJNMCA4NS4zMzNoNTEyVjQyNi42N0gweiIvPjxwYXRoIGZpbGw9IiNGRkYiIGQ9Ik0wIDg1LjMzM2g1MTJ2MTEzLjc3NUgweiIvPjxwYXRoIGZpbGw9IiNEODAwMjciIGQ9Ik0wIDMxMi44ODRoNTEydjExMy43NzVIMHoiLz48L3N2Zz4=");
+}
+
+[data-component-part="localization-select-trigger"][data-docs-flag="ko"],
+#localization-select-item-ko {
+  --docs-language-flag: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ijg1LjUgMCAzNDIgMzQyIj48cGF0aCBmaWxsPSIjRkZGIiBkPSJNMCAwaDUxM3YzNDJIMHoiLz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgyNTYuNSAxNzEpIHNjYWxlKDYuNSkiPjxnIHRyYW5zZm9ybT0icm90YXRlKC01Ni4zKSI+PHBhdGggZD0iTS02LTI2SDZ2MkgtNlptMCAzSDZ2MkgtNlptMCAzSDZ2MkgtNlpNLTYgMThINnYySC02Wm0wIDNINnYySC02Wm0wIDNINnYySC02WiIvPjxwYXRoIHN0cm9rZT0iI0ZGRiIgZD0iTTAgMTd2MTAiLz48cGF0aCBmaWxsPSIjQ0QyRTNBIiBkPSJNMC0xMmExMiAxMiAwIDAgMSAwIDI0WiIvPjxwYXRoIGZpbGw9IiMwMDQ3QTAiIGQ9Ik0wLTEyYTEyIDEyIDAgMCAwIDAgMjRBNiA2IDAgMCAwIDAgMFoiLz48Y2lyY2xlIGN5PSItNiIgcj0iNiIgZmlsbD0iI0NEMkUzQSIvPjwvZz48ZyB0cmFuc2Zvcm09InJvdGF0ZSgtMTIzLjcpIj48cGF0aCBkPSJNLTYtMjZINnYySC02Wm0wIDNINnYySC02Wm0wIDNINnYySC02Wk0tNiAxOEg2djJILTZabTAgM0g2djJILTZabTAgM0g2djJILTZaIi8+PHBhdGggc3Ryb2tlPSIjRkZGIiBkPSJNMC0yMy41djNNMCAxN3YzLjVtMCAzdjMiLz48L2c+PC9nPjwvc3ZnPg==");
 }

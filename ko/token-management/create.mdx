@@ -1,0 +1,120 @@
+---
+title: '토큰 생성'
+description: '새 API 토큰을 생성합니다'
+api: 'POST /api/token/'
+---
+> 업데이트: 2026-07-20
+
+## 인터페이스 설명
+
+AI 모델 API를 호출하기 위한 새 API 토큰(Token)을 생성합니다.
+
+<Note>
+  이 `/api/token/*` 인터페이스 그룹은 주로 Crazyrouter 콘솔의 API Key 관리 자동화에 사용됩니다. 사용자 `access token`과 `New-Api-User` 요청 헤더가 필요하며, 일반적인 `sk-xxx` 모델 호출 흐름에서 직접 사용하는 인터페이스가 아닙니다. 요청 기본 주소는 반드시 `https://crazyrouter.com`을 사용해야 합니다. `https://api.crazyrouter.com`은 모델 API 전용 진입점이며, 관리 경로를 호출하면 `404 api_only_endpoint`가 반환됩니다.
+</Note>
+
+## 인증 방식
+
+이 인터페이스는 사용자 측 인증이 필요합니다.
+
+```text
+Authorization: Bearer your_access_token
+New-Api-User: 1
+```
+
+## 요청 파라미터
+
+<ParamField body="name" type="string" required>
+  토큰 이름, 용도를 식별하기 위해 사용
+</ParamField>
+
+<ParamField body="remain_quota" type="integer" default="0">
+  초기 할당량(단위: 내부 할당량 값). 0으로 설정할 경우 `unlimited_quota`와 함께 사용해야 함
+</ParamField>
+
+<ParamField body="unlimited_quota" type="boolean" default="false">
+  무제한 할당량으로 설정할지 여부
+</ParamField>
+
+<ParamField body="expired_time" type="integer" default="-1">
+  만료 시간(Unix 타임스탬프), `-1`은 영구 만료되지 않음을 의미
+</ParamField>
+
+<ParamField body="model_limits_enabled" type="boolean" default="false">
+  모델 화이트리스트 제한을 활성화할지 여부
+</ParamField>
+
+<ParamField body="model_limits" type="string">
+  모델 제한 설정. 현재 인터페이스 필드는 문자열이며, 보통 JSON 문자열로 저장됩니다. 예: `["gpt-5.5","claude-opus-4-8"]`
+</ParamField>
+
+<ParamField body="allow_ips" type="string">
+  IP 화이트리스트 문자열. 단일 IP를 입력하거나, 여러 IP를 줄바꿈으로 구분하여 입력 가능
+</ParamField>
+
+<ParamField body="group" type="string">
+  토큰이 속한 그룹. 현재 사용자가 사용 권한이 있는 그룹만 설정 가능
+</ParamField>
+
+## 응답 형식
+
+현재 인터페이스는 생성 성공 시 성공 상태만 반환합니다.
+
+```json
+{
+  "success": true,
+  "message": ""
+}
+```
+
+## 코드 예시
+
+<CodeGroup>
+
+```python Python
+import json
+import requests
+
+headers = {
+    "Authorization": "Bearer your_access_token",
+    "New-Api-User": "1",
+    "Content-Type": "application/json",
+    "User-Agent": "Mozilla/5.0"
+}
+
+response = requests.post(
+    "https://crazyrouter.com/api/token/",
+    headers=headers,
+    json={
+        "name": "생산 환경",
+        "remain_quota": 100000,
+        "unlimited_quota": False,
+        "expired_time": -1,
+        "model_limits_enabled": True,
+        "model_limits": json.dumps(["gpt-5.5", "claude-opus-4-8"]),
+        "allow_ips": "203.0.113.10"
+    }
+)
+
+print(response.json())
+```
+
+```bash cURL
+curl -X POST https://crazyrouter.com/api/token/ \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 1" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "생산 환경",
+    "remain_quota": 100000,
+    "expired_time": -1,
+    "model_limits_enabled": true,
+    "model_limits": "[\"gpt-5.5\"]"
+  }'
+```
+
+</CodeGroup>
+
+<Warning>
+  현재 생성 인터페이스는 응답에 새로 생성된 완전한 `key`를 반환하지 않습니다. 완전한 키를 즉시 복사해야 하는 흐름이라면, 콘솔 페이지를 통해 생성하고 저장하는 것을 우선 권장합니다.
+</Warning>

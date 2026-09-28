@@ -1,0 +1,63 @@
+---
+title: "완성 생성 (Legacy)"
+description: "POST /v1/completions 호환성 엔드포인트의 현재 프로덕션 상태"
+---
+> 업데이트: 2026-06-06
+
+# 완성 생성 (Legacy)
+
+```
+POST /v1/completions
+```
+
+<Warning>
+  이 엔드포인트는 호환성 엔드포인트이며, 현재 주 권장 경로가 아닙니다. 신규 연동 시 `/v1/chat/completions` 또는 `/v1/responses`를 우선 사용하세요.
+</Warning>
+
+## 현재 프로덕션 상태
+
+2026년 3월 23일 기준, Crazyrouter 프로덕션 환경에서 다음이 확인되었습니다.
+
+- 라우팅은 여전히 존재합니다
+- 클래식 예시 모델 `gpt-5-mini`로 요청을 보내면 `503`이 반환됩니다
+- 오류 코드는 `model_not_found`입니다
+- 오류 메시지는 "temporarily unavailable"입니다
+
+즉, 이 엔드포인트는 현재 "필요 시 구형 클라이언트 호환성을 테스트하는 용도"에 더 적합하며, 기본 신규 연동 방안으로는 적합하지 않습니다.
+
+---
+
+## 현재 권장 사항
+
+1. 신규 프로젝트는 [`Chat Completions`](/ko/chat/openai/completions)를 직접 사용하세요
+2. GPT-5 추론, Web Search 등 신규 기능이 필요하다면 [`Responses`](/ko/chat/responses/overview)를 우선 사용하세요
+3. 이미 구형 클라이언트를 보유하고 있고 사용 중인 legacy 모델이 현재 환경에서 사용 가능함을 확인한 경우에만 `/v1/completions`를 계속 시도하세요
+
+---
+
+## 재테스트 템플릿
+
+특정 구형 모델이 여전히 이 엔드포인트를 통해 동작하는지 검증해야 한다면, 먼저 [`/v1/models`](/ko/chat/openai/models)로 모델 ID를 확인한 후 최소한의 요청을 보내는 것을 권장합니다.
+
+```bash
+curl https://api.crazyrouter.com/v1/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "YOUR_LEGACY_MODEL",
+    "prompt": "Say hello in three words.",
+    "max_tokens": 16
+  }'
+```
+
+이번 프로덕션 환경에서 실제로 발생한 오류 예시:
+
+```json
+{
+  "error": {
+    "code": "model_not_found",
+    "message": "Model gpt-5-mini is temporarily unavailable",
+    "type": "new_api_error"
+  }
+}
+```

@@ -1,0 +1,65 @@
+---
+title: 'GPT Academic 설정 가이드'
+description: 'GPT Academic에서 Crazyrouter API를 설정하고, 현재 검증된 최신 모델로 전환하는 방법'
+---
+> 업데이트: 2026-06-06
+
+## 개요
+
+GPT Academic(학술판 GPT)은 논문 교정, 번역, 코드 설명 등의 시나리오를 대상으로 합니다. Crazyrouter와 연동할 때는 기존의 OpenAI URL 리다이렉트 방식을 계속 사용하되, 기본 모델은 현재 프로덕션 환경에서 검증된 최신 사용 가능 모델로 전환하는 것을 권장합니다.
+
+## 설정 방법
+
+### 설정 파일 수정
+
+`config.py` 또는 `config_private.py`를 편집하세요.
+
+```python
+API_KEY = "sk-xxx"
+API_URL_REDIRECT = {
+    "https://api.openai.com/v1/chat/completions": "https://api.crazyrouter.com/v1/chat/completions"
+}
+
+# 또는 직접 설정
+LLM_MODEL = "gpt-5.5"
+AVAIL_LLM_MODELS = [
+    "gpt-5.5",
+    "claude-opus-4-8",
+    "gemini-3.1-pro"
+]
+```
+
+### 환경 변수 방식
+
+```bash
+export API_KEY=sk-xxx
+export API_URL_REDIRECT='{"https://api.openai.com/v1/chat/completions": "https://api.crazyrouter.com/v1/chat/completions"}'
+export LLM_MODEL=gpt-5.5
+```
+
+### Docker 배포
+
+```yaml
+services:
+  gpt-academic:
+    image: ghcr.io/binary-husky/gpt_academic
+    ports:
+      - "22303:22303"
+    environment:
+      - API_KEY=sk-xxx
+      - LLM_MODEL=gpt-5.5
+      - API_URL_REDIRECT={"https://api.openai.com/v1/chat/completions": "https://api.crazyrouter.com/v1/chat/completions"}
+```
+
+## 권장 모델
+
+| 시나리오 | 모델 | 설명 |
+|------|------|------|
+| 첫 학술 어시스턴트 검증 | `gpt-5.5` | 2026년 3월 23일 프로덕션 환경에서 실측 성공했으며, OpenAI 호환 기준선으로 가장 적합 |
+| 고품질 장문 요약 | `claude-opus-4-8` | 복잡한 설명, 장문 재작성, 요약에 더 적합 |
+| Gemini 예비 등급 | `gemini-3.1-pro` | 두 번째 공급자 호환성 검증 경로를 보완하는 데 적합 |
+
+<Note>
+  GPT Academic의 URL 리다이렉트 기능은 OpenAI 요청을 Crazyrouter로 바로 전달할 수 있습니다. 먼저 `gpt-5.5`만으로 최소한의 대화를 검증한 후, 단계적으로 모델 목록과 복잡한 플러그인 기능을 추가하는 것을 권장합니다.
+</Note>
+

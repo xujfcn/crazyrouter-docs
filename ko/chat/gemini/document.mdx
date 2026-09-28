@@ -1,0 +1,118 @@
+---
+title: "Gemini 문서 이해"
+description: "2026-03-23 Crazyrouter 생산 환경 검증을 기반으로 한 Gemini PDF 이해 및 구조화 추출"
+---
+> 업데이트: 2026-06-06
+
+# Gemini 문서 이해
+
+```
+POST /v1beta/models/{model}:generateContent
+```
+
+2026년 3월 23일 기준, Crazyrouter 생산 환경에서는 `gemini-3.1-pro`가 다음을 지원함을 검증했습니다.
+
+- `inlineData`를 통한 PDF 읽기
+- `responseMimeType` + `responseSchema`를 결합하여 파싱 가능한 JSON 출력
+
+---
+
+## PDF 요약
+
+아래 요청은 생산 환경에서 PDF를 성공적으로 읽고 요약 텍스트를 반환했습니다.
+
+```bash
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "Summarize the attached PDF in one sentence."},
+          {
+            "inlineData": {
+              "mimeType": "application/pdf",
+              "data": "JVBERi0xLjQK..."
+            }
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+이번 생산 환경 테스트에서, 모델은 PDF 내용에 대한 한 문장 요약을 성공적으로 반환했습니다.
+
+---
+
+## PDF + 구조화 출력
+
+아래 요청은 생산 환경에서 바로 `json.loads()`로 파싱 가능한 JSON 텍스트를 성공적으로 반환했습니다.
+
+```bash
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "Extract the key topic and whether the document mentions gamma."},
+          {
+            "inlineData": {
+              "mimeType": "application/pdf",
+              "data": "JVBERi0xLjQK..."
+            }
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "responseMimeType": "application/json",
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "topic": {"type": "string"},
+          "mentions_gamma": {"type": "boolean"}
+        },
+        "required": ["topic", "mentions_gamma"]
+      }
+    }
+  }'
+```
+
+생산 환경 실제 반환 예시:
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\n  \"topic\": \"Crazyrouter PDF test document\",\n  \"mentions_gamma\": false\n}"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+해당 코드에서는 바로 파싱하면 됩니다.
+
+```python
+import json
+
+text = response["candidates"][0]["content"]["parts"][0]["text"]
+data = json.loads(text)
+```
+
+<Note>
+  현재 페이지는 PDF 입력과 JSON 구조화 출력이라는 두 링크만 확인했습니다. 더 복잡한 표 추출, 긴 문서 비교 등의 시나리오는, 자신의 실제 샘플로 먼저 한 차례 생산 환경 검증을 하는 것을 권장합니다.
+</Note>
+
+<Warning>
+  대용량 PDF는 입력 토큰을 크게 증가시킵니다. 정식 연동 전에는 먼저 작은 문서로 필드와 프롬프트를 검증한 후, 점진적으로 입력 규모를 늘리는 것을 권장합니다.
+</Warning>

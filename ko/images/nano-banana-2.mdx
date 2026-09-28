@@ -1,0 +1,145 @@
+---
+title: "Nano Banana 2"
+description: "nano-banana-2를 사용하여 OpenAI Images API로 Gemini 3.1 Flash Image 호출"
+---
+> 업데이트: 2026-09-18
+
+<Tip>
+  제출 후 즉시 반환받고 나중에 폴링으로 이미지 URL을 가져오고 싶으신가요? 이 모델은 [비동기 이미지 생성](/ko/images/async)을 지원합니다. Gemini 계열은 경로 접미사를 `:asyncGenerateContent`로 변경하고, OpenAI 계열은 `Prefer: respond-async` 헤더를 추가하면 요청 본문은 한 글자도 바꿀 필요가 없습니다.
+</Tip>
+
+# Nano Banana 2
+
+```
+POST /v1/images/generations
+```
+
+`nano-banana-2`는 `nano-banana-2`의 공개 별칭입니다. 사용자 측에서는 OpenAI Images 호환 프로토콜을 통일해서 사용하며, 서버는 `output_format`, `output_compression`, `resolution`, `aspect_ratio` 등의 통합 파라미터를 Gemini / Vertex 네이티브 요청으로 변환합니다.
+
+<Warning>
+  `nano-banana-2`는 장시간이 소요되는 이미지 모델입니다. 프로덕션 연동 시 주 처리 라인인 `https://api.crazyrouter.com/v1`을 우선 사용하세요. 전체 생성 엔드포인트는 `https://api.crazyrouter.com/v1/images/generations`입니다. 계정 로그인, 충전, 콘솔은 여전히 `https://crazyrouter.com`을 사용합니다.
+</Warning>
+
+## 모델명
+
+| 권장 모델명 | 동일한 기반 모델 |
+|------|------|
+| `nano-banana-2` | `nano-banana-2` |
+
+클라이언트 코드에서는 `nano-banana-2`를 사용하는 것을 권장합니다. 시스템에서 이미 `nano-banana-2`를 직접 사용하고 있다면, 동일한 `/v1/images/generations` 엔드포인트를 통해 계속 호출할 수 있습니다.
+
+## 요청 파라미터
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| `model` | string | 예 | `nano-banana-2` 권장, `nano-banana-2`도 호환 |
+| `prompt` | string | 예 | 생성 또는 편집 지시문 |
+| `image_input` | string 또는 string[] | 아니오 | 참조 이미지 URL, 전달하지 않으면 텍스트-이미지 생성 |
+| `resolution` | string | 아니오 | `1K`, `2K`, `4K` |
+| `aspect_ratio` | string | 아니오 | 예: `1:1`, `16:9`, `9:16`, `21:9`, `auto` |
+| `output_format` | string | 아니오 | `png`, `jpeg` / `jpg` |
+| `output_compression` | integer | 아니오 | `0-100`, JPEG 압축 품질에 사용 |
+| `n` | integer | 아니오 | 생성 개수, 기본값 `1` |
+
+<Note>
+  클라이언트 요청에 Gemini 네이티브 필드, 예를 들어 `generationConfig`, `imageConfig`, `imageOutputOptions`, `image_output_options`를 전달하지 마세요. 이 필드들은 Crazyrouter가 서버 측에서 현재 업스트림 프로토콜에 맞춰 자동으로 생성합니다.
+</Note>
+
+## 텍스트-이미지 생성 예시
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "nano-banana-2",
+    "prompt": "A clean ecommerce hero shot of a red apple on a white background",
+    "resolution": "1K",
+    "aspect_ratio": "16:9",
+    "output_format": "jpeg",
+    "output_compression": 85
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://api.crazyrouter.com/v1",
+)
+
+response = client.images.generate(
+    model="nano-banana-2",
+    prompt="A clean ecommerce hero shot of a red apple on a white background",
+    n=1,
+    extra_body={
+        "resolution": "1K",
+        "aspect_ratio": "16:9",
+        "output_format": "jpeg",
+        "output_compression": 85,
+    },
+)
+
+print(response.data[0].url or response.data[0].b64_json)
+```
+
+</CodeGroup>
+
+## 참조 이미지 편집 예시
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "nano-banana-2",
+    "prompt": "참조 이미지를 배너 광고 이미지로 변경하고, 주요 피사체는 유지하되 배경은 더 깔끔하게",
+    "image_input": [
+      "https://example.com/reference.png"
+    ],
+    "resolution": "1K",
+    "aspect_ratio": "16:9",
+    "output_format": "png"
+  }'
+```
+
+## 응답
+
+응답은 OpenAI Images 형식을 유지합니다. 기본적으로 `data[0].url`을 우선 읽으며, 일부 호환 채널에서는 `data[0].b64_json`을 반환할 수 있습니다.
+
+```json
+{
+  "created": 1778990000,
+  "data": [
+    {
+      "url": "https://media.crazyrouter.com/task-artifacts/2026/05/17/sync-image/request-id-1.png"
+    }
+  ]
+}
+```
+
+## 마이그레이션 안내
+
+기존 코드에서 다음과 같이 직접 호출했다면:
+
+```text
+POST /v1beta/models/nano-banana-2:generateContent
+```
+
+다음으로 마이그레이션하는 것을 권장합니다.
+
+```text
+POST https://api.crazyrouter.com/v1/images/generations
+```
+
+그리고 Gemini 네이티브 파라미터를 통합 파라미터로 변경하세요.
+
+| Gemini 네이티브 개념 | Crazyrouter 통합 파라미터 |
+|------|------|
+| `imageConfig.aspectRatio` | `aspect_ratio` |
+| `imageConfig.imageSize` | `resolution` |
+| `imageOutputOptions.mimeType` | `output_format` |
+| `imageOutputOptions.compressionQuality` | `output_compression` |

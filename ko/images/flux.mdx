@@ -1,0 +1,27 @@
+---
+title: "Flux"
+description: "Flux 모델은 현재 본 사이트의 pricing 페이지에 공개되어 있지 않습니다"
+---
+> 업데이트: 2026-06-06
+
+# Flux
+
+<Warning>
+  현재 본 사이트의 pricing 페이지에는 직접 호출 가능한 공개 Flux `model_name`이 없습니다. 따라서 이 문서는 더 이상 Flux 요청 예시를 제공하지 않으며, 프로덕션 구성에 기존의 `flux-*` 모델명을 입력하는 것을 권장하지 않습니다.
+</Warning>
+
+## 현재 사용 가능한 대안
+
+이미지 생성 또는 이미지 편집이 필요하다면, pricing 페이지에 현재 공개된 모델을 우선 사용하십시오.
+
+| 시나리오 | 권장 모델 |
+|------|----------|
+| OpenAI 이미지 인터페이스 | `gpt-image-2`, `dall-e-3` |
+| Gemini 이미지 인터페이스 | `nano-banana`, `nano-banana-2`, `nano-banana-pro` |
+| Grok 이미지 인터페이스 | `grok-4-image` |
+| Qwen 이미지 인터페이스 | `qwen-image-2.0`, `qwen-image-plus`, `qwen-image-max` |
+| Doubao 이미지 인터페이스 | `doubao-seedream-4-5`, `doubao-seedream-5-0` |
+
+## 확인 방법
+
+`https://crazyrouter.com/pricing`과 `GET /v1/models`가 반환하는 현재 토큰에서 확인 가능한 모델을 기준으로 하십시오. 공개적으로 확인 가능하고 성공적으로 제출할 수 있는 모델명만 문서 예시 및 고객 구성 기본값으로 적합합니다.

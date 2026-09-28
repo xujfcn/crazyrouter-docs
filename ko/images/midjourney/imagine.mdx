@@ -1,0 +1,118 @@
+---
+title: "Imagine 작업 제출"
+description: "POST /mj/submit/imagine을 사용하여 Midjourney 이미지 생성 작업을 제출합니다"
+---
+> 업데이트: 2026-06-06
+
+# Imagine 작업 제출
+
+```
+POST /mj/submit/imagine
+```
+
+프롬프트를 기반으로 이미지를 생성하는 Midjourney Imagine 작업을 제출합니다.
+
+## 요청 파라미터
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| `botType` | string | 아니오 | 봇 타입: `MID_JOURNEY`(기본값) 또는 `NIJI_JOURNEY` |
+| `prompt` | string | 예 | 프롬프트, Midjourney 네이티브 문법 지원(예: `--ar 16:9 --v 6`) |
+| `base64Array` | array | 아니오 | 참조 이미지를 위한 Base64 인코딩 이미지 배열 |
+| `notifyHook` | string | 아니오 | 작업 상태 변경 콜백 주소 |
+| `state` | string | 아니오 | 사용자 정의 상태 정보, 콜백에서 그대로 반환됨 |
+
+---
+
+## 요청 예시
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/mj/submit/imagine \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "botType": "MID_JOURNEY",
+    "prompt": "a beautiful sunset over the ocean, cinematic lighting --ar 16:9 --v 6",
+    "notifyHook": "",
+    "state": ""
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/mj/submit/imagine",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "botType": "MID_JOURNEY",
+        "prompt": "a beautiful sunset over the ocean, cinematic lighting --ar 16:9 --v 6"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### 응답 예시
+
+```json
+{
+  "code": 1,
+  "description": "제출 성공",
+  "result": "task_1234567890",
+  "properties": {}
+}
+```
+
+| 필드 | 설명 |
+|------|------|
+| `code` | 상태 코드, `1`은 성공, `22`는 대기열 중을 의미 |
+| `description` | 상태 설명 |
+| `result` | 작업 ID, 이후 조회에 사용 |
+
+---
+
+## 참조 이미지가 포함된 요청
+
+`base64Array`를 사용하여 참조 이미지를 전달합니다.
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/mj/submit/imagine \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "botType": "MID_JOURNEY",
+    "prompt": "a cat in the style of the reference image --v 6",
+    "base64Array": [
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg..."
+    ]
+  }'
+```
+
+---
+
+## Niji Journey 사용
+
+`botType`을 `NIJI_JOURNEY`로 설정하여 Niji 모델로 애니메이션 스타일 이미지를 생성합니다.
+
+```json
+{
+  "botType": "NIJI_JOURNEY",
+  "prompt": "a cute anime girl with blue hair, cherry blossoms --niji 6"
+}
+```
+
+<Note>
+  제출에 성공하면 작업 ID가 반환되며, [작업 상태 조회](/ko/images/midjourney/query) 인터페이스를 통해 생성 결과를 가져와야 합니다.
+</Note>
+
+<Warning>
+  `base64Array`에 포함된 이미지는 요청 크기를 늘리므로, 이미지 한 장당 4MB를 초과하지 않는 것을 권장합니다.
+</Warning>

@@ -1,0 +1,479 @@
+---
+title: 'Suno SDK 한국어 가이드'
+description: '동일한 Crazyrouter API Key로 Suno 통합 작업 모델 계열을 호출합니다. 생성, 이어쓰기, 커버, 업로드 이어쓰기, 타임스탬프 가사, 보컬 분리를 포함합니다'
+---
+> 업데이트: 2026-08-13
+
+<Note>
+프로덕션 검증(2026-08-13 +08:00): `suno/generate`, `suno/cover`, `suno/upload-extend` 그리고 리소스 필드를 보완한 `suno/vocal-separation`은 본 사이트의 실제 작업 체인을 통과했습니다. `suno_lyrics`는 현재 프로덕션 `/v1/models`에 없으며, `suno/timestamped-lyrics`는 여전히 업스트림에서 `Invalid request`를 반환하고 있어 안정적인 사용 가능성을 보장하지 않습니다.
+</Note>
+
+## 적용 범위
+
+이 문서는 Crazyrouter의 현재 Suno 통합 작업 모델 계열을 다룹니다.
+
+- `suno/generate`
+- `suno/extend`
+- `suno/upload-extend`
+- `suno/cover`
+- `suno/timestamped-lyrics`
+- `suno/vocal-separation`
+
+이들은 OpenAI SDK의 내장 메서드가 아니며, 동일한 API Key를 사용해 Crazyrouter의 네이티브 비동기 작업 경로로 호출해야 합니다.
+
+```text
+POST /v1/video/generations
+GET  /v1/video/generations/{task_id}
+GET  /v1/videos/{task_id}/content
+```
+
+<Warning>
+이 `suno/*` 모델들을 `client.audio.*`나 `client.responses.*`처럼 호출하지 마십시오. 이들은 현재 Crazyrouter 고유의 작업 인터페이스에 속하며, OpenAI 공식 SDK의 표준 오디오 메서드가 아닙니다.
+</Warning>
+
+## 기본 주소
+
+국제 기본 엔드포인트:
+
+```text
+https://api.crazyrouter.com
+```
+
+이미 비즈니스에서 메인 사이트 도메인을 통일해서 사용하고 있다면 다음도 사용할 수 있습니다.
+
+```text
+https://crazyrouter.com
+```
+
+## 인증
+
+모든 요청은 동일한 Crazyrouter API Key를 사용합니다.
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+특정 검증된 채널(예: `258`)로 고정해서 호출하려면 현재 가장 안정적인 방법은 채널 접미사를 Key 뒤에 붙이는 것입니다.
+
+```text
+Bearer YOUR_API_KEY-258
+```
+
+기본적으로 지정하지 않으면 자동 라우팅을 사용합니다.
+
+## 버전 파라미터
+
+Suno 통합 작업 모델 계열은 `metadata.model_version`을 사용하며, 기존 `/suno/submit/music` 라우트의 `mv`가 아닙니다.
+
+현재 사용 가능한 버전 값:
+
+| UI 표기 | `model_version` 값 |
+|---|---|
+| `V5.5 (Latest)` | `V5_5` |
+| `V5` | `V5` |
+| `V4.5 Plus` | `V4_5PLUS` |
+| `V4.5 All` | `V4_5ALL` |
+| `V4.5` | `V4_5` |
+| `V4` | `V4` |
+
+`2026-06-24 +08:00`에 `258` 채널에서 개별적으로 실제 테스트한 결과, 위 6개 버전 모두 `suno/generate` 메인 체인에서 성공했습니다.
+
+## 공통 제출 형식
+
+모든 모델은 동일한 제출 엔드포인트를 사용합니다.
+
+```json
+{
+  "model": "suno/generate",
+  "channel": "auto",
+  "prompt": "A short bright synth pop song",
+  "metadata": {
+    "model_version": "V5_5"
+  }
+}
+```
+
+여기서:
+
+- `model`은 구체적인 Suno 하위 모델 이름입니다
+- `callBackUrl`은 선택 사항입니다
+- `channel`은 선택 사항이며 기본값 `auto`를 권장합니다
+- `prompt`는 통합 작업 인터페이스의 필수 최상위 필드입니다
+- Suno 전용 파라미터는 `metadata`에 넣으며, 본 사이트가 업스트림 `input`으로 변환합니다
+
+## 작업 조회
+
+제출 후 `task_id`를 받으면 다시 폴링합니다.
+
+```bash
+curl https://api.crazyrouter.com/v1/video/generations/TASK_ID \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+일반적인 응답:
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "status": "succeeded",
+    "task_id": "task_xxx",
+    "format": "mp4",
+    "url": "https://api.crazyrouter.com/v1/videos/task_xxx/content",
+    "metadata": null,
+    "error": null
+  }
+}
+```
+
+최종 콘텐츠 다운로드:
+
+```bash
+curl -L https://api.crazyrouter.com/v1/videos/TASK_ID/content -o result.mp4
+```
+
+<Note>
+현재 일부 Suno 라우트의 조회 결과는 `task_id`, `status`, `url`만 안정적으로 반환하며, `audioId`가 항상 반환되지는 않습니다. 파생 모델에 의존하는 체인이라면 먼저 업스트림 결과에서 필요한 필드를 얻을 수 있는지 확인하십시오.
+</Note>
+
+## 모델 목록 및 요청 예시
+
+### 1. `suno/generate`
+
+텍스트로 노래를 생성합니다.
+
+가장 많이 사용하는 파라미터:
+
+- `model_version`
+- `prompt`
+- `customMode`
+- `instrumental`
+- `style`
+- `title`
+
+```bash
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "suno/generate",
+    "channel": "auto",
+    "metadata": {
+      "model_version": "V5_5",
+      "customMode": true,
+      "instrumental": false,
+      "prompt": "[Verse]\nMorning lights across the wire\nTiny sparks climb higher\n[Chorus]\nTest the route and let it sing\nClear and bright on everything",
+      "style": "bright synth pop, short, clean vocals",
+      "title": "CR Suno Route Test"
+    }
+  }'
+```
+
+### 2. `suno/extend`
+
+기존 Suno 오디오를 기반으로 이어서 작곡합니다.
+
+가장 많이 사용하는 파라미터:
+
+- `model_version`
+- `audioId`
+- `continueAt`
+- `prompt`
+- `style`
+- `title`
+- `instrumental`
+
+```json
+{
+  "model": "suno/extend",
+  "channel": "auto",
+  "prompt": "Suno task prompt",
+  "metadata": {
+    "model_version": "V5",
+    "audioId": "abc123-def456",
+    "continueAt": 20,
+    "instrumental": false,
+    "prompt": "[Bridge]\nCarry the melody forward with a brighter chorus and soft harmonies",
+    "style": "bright synth pop, clean vocals",
+    "title": "CR Suno Route Test Extended"
+  }
+}
+```
+
+### 3. `suno/upload-extend`
+
+외부 오디오 URL을 기반으로 이어서 작곡합니다.
+
+가장 많이 사용하는 파라미터:
+
+- `model_version`
+- `audioUrl`
+- `continueAt`
+- `prompt`
+- `style`
+- `title`
+
+```json
+{
+  "model": "suno/upload-extend",
+  "channel": "auto",
+  "prompt": "Suno task prompt",
+  "metadata": {
+    "model_version": "V4_5PLUS",
+    "audioUrl": "https://your-storage.example.com/source.mp3",
+    "continueAt": 20,
+    "instrumental": false,
+    "prompt": "Extend with a simple upbeat outro",
+    "style": "bright synth pop",
+    "title": "Upload Extend Demo"
+  }
+}
+```
+
+### 4. `suno/cover`
+
+기존 오디오를 기반으로 커버 또는 스타일 리라이트를 수행합니다.
+
+가장 많이 사용하는 파라미터:
+
+- `model_version`
+- `audioUrl`
+- `customMode`
+- `instrumental`
+- `prompt`
+- `style`
+- `title`
+- `vocalGender`
+
+```json
+{
+  "model": "suno/cover",
+  "channel": "auto",
+  "prompt": "Suno task prompt",
+  "metadata": {
+    "model_version": "V4_5ALL",
+    "audioUrl": "https://your-storage.example.com/original.mp3",
+    "customMode": false,
+    "instrumental": false,
+    "prompt": "Transform into an acoustic pop cover with gentle guitar",
+    "style": "acoustic pop",
+    "title": "Acoustic Cover Demo",
+    "vocalGender": "f"
+  }
+}
+```
+
+### 5. `suno/timestamped-lyrics`
+
+타임스탬프 가사를 가져옵니다.
+
+가장 많이 사용하는 파라미터:
+
+- `taskId`
+- `audioId`
+
+```json
+{
+  "model": "suno/timestamped-lyrics",
+  "channel": "auto",
+  "prompt": "Suno task prompt",
+  "metadata": {
+    "taskId": "task_xxx",
+    "audioId": "audio_xxx"
+  }
+}
+```
+
+<Warning>
+현재 `258` 채널을 `2026-06-24 +08:00`에 재테스트한 결과, `timestamped-lyrics`는 여전히 불안정합니다. `metadata` 방식은 `400 invalid_request`를 반환하며, `input` 방식에서도 업스트림 `502`가 발생한 적이 있습니다. 이 기능을 출시하려면 먼저 채널 단위로 별도 검증을 진행하고, `generate`와 동일하게 안정적이라고 가정하지 마십시오.
+</Warning>
+
+### 6. `suno/vocal-separation`
+
+보컬과 반주를 분리합니다.
+
+현재 가장 안정적인 파라미터 조합:
+
+- `taskId`
+- `audioId`
+- `audioUrl`
+
+```json
+{
+  "model": "suno/vocal-separation",
+  "channel": "auto",
+  "prompt": "Suno task prompt",
+  "metadata": {
+    "taskId": "task_xxx",
+    "audioId": "audio_xxx",
+    "audioUrl": "https://your-storage.example.com/source.mp3",
+    "prompt": "Separate vocals and instrumental stems"
+  }
+}
+```
+
+<Note>
+`2026-06-24 +08:00`에 진행한 최소 수정 검증에서 확인한 바로는, `audioUrl`만 전달하는 것으로는 충분히 안정적이지 않으며, `taskId + audioId + audioUrl`을 모두 채운 뒤에는 `258` 채널에서 성공했습니다.
+</Note>
+
+## JavaScript / TypeScript 전체 예시
+
+```ts
+const apiKey = process.env.CRAZYROUTER_API_KEY;
+const baseURL = process.env.CRAZYROUTER_BASE_URL ?? 'https://api.crazyrouter.com';
+
+if (!apiKey) {
+  throw new Error('Missing CRAZYROUTER_API_KEY');
+}
+
+async function crazyrouterFetch(path: string, init: RequestInit = {}) {
+  const response = await fetch(`${baseURL}${path}`, {
+    ...init,
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      Accept: 'application/json',
+      ...(init.body ? { 'Content-Type': 'application/json' } : {}),
+      ...init.headers,
+    },
+  });
+
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}: ${JSON.stringify(body)}`);
+  }
+  return body;
+}
+
+async function submitSunoGenerate() {
+  const task = await crazyrouterFetch('/v1/video/generations', {
+    method: 'POST',
+    body: JSON.stringify({
+      model: 'suno/generate',
+      channel: 'auto',
+      prompt: '[Verse]\\nMorning lights across the wire\\nTiny sparks climb higher',
+      metadata: {
+        model_version: 'V5_5',
+        customMode: true,
+        instrumental: false,
+        prompt:
+          '[Verse]\\nMorning lights across the wire\\nTiny sparks climb higher\\n[Chorus]\\nTest the route and let it sing\\nClear and bright on everything',
+        style: 'bright synth pop, short, clean vocals',
+        title: 'CR Suno SDK Demo',
+      },
+    }),
+  });
+
+  const taskId = task.data?.task_id ?? task.task_id ?? task.id;
+  if (!taskId) {
+    throw new Error(`Missing task_id: ${JSON.stringify(task)}`);
+  }
+  return taskId;
+}
+
+async function waitForTask(taskId: string, timeoutMs = 10 * 60 * 1000) {
+  const deadline = Date.now() + timeoutMs;
+
+  while (Date.now() < deadline) {
+    const result = await crazyrouterFetch(`/v1/video/generations/${encodeURIComponent(taskId)}`);
+    const status = String(result.data?.status ?? result.status ?? '').toLowerCase();
+
+    if (['succeeded', 'success', 'completed', 'done'].includes(status)) {
+      return result;
+    }
+    if (['failed', 'failure', 'error', 'cancelled', 'canceled'].includes(status)) {
+      throw new Error(`Task failed: ${JSON.stringify(result)}`);
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 8000));
+  }
+
+  throw new Error(`Task timeout: ${taskId}`);
+}
+
+const taskId = await submitSunoGenerate();
+console.log('taskId:', taskId);
+
+const result = await waitForTask(taskId);
+console.log('status:', result.data?.status);
+console.log('content url:', result.data?.url);
+```
+
+## Python 전체 예시
+
+```python
+import os
+import time
+import requests
+
+BASE_URL = os.getenv("CRAZYROUTER_BASE_URL", "https://api.crazyrouter.com")
+API_KEY = os.getenv("CRAZYROUTER_API_KEY")
+
+if not API_KEY:
+    raise RuntimeError("Missing CRAZYROUTER_API_KEY")
+
+HEADERS = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+}
+
+submit = requests.post(
+    f"{BASE_URL}/v1/video/generations",
+    headers=HEADERS,
+    json={
+        "model": "suno/generate",
+        "channel": "auto",
+        "metadata": {
+            "model_version": "V5_5",
+            "customMode": True,
+            "instrumental": False,
+            "prompt": "[Verse]\\nMorning lights across the wire\\nTiny sparks climb higher\\n[Chorus]\\nTest the route and let it sing\\nClear and bright on everything",
+            "style": "bright synth pop, short, clean vocals",
+            "title": "CR Suno Python Demo",
+        },
+    },
+    timeout=120,
+)
+submit.raise_for_status()
+task = submit.json()
+task_id = task.get("data", {}).get("task_id") or task.get("task_id") or task.get("id")
+
+if not task_id:
+    raise RuntimeError(f"Missing task_id: {task}")
+
+print("task_id:", task_id)
+
+while True:
+    resp = requests.get(
+        f"{BASE_URL}/v1/video/generations/{task_id}",
+        headers={"Authorization": f"Bearer {API_KEY}", "Accept": "application/json"},
+        timeout=120,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    status = str(data.get("data", {}).get("status", "")).lower()
+    print("status:", status)
+
+    if status in {"succeeded", "success", "completed", "done"}:
+        print("content url:", data.get("data", {}).get("url"))
+        break
+    if status in {"failed", "failure", "error", "cancelled", "canceled"}:
+        raise RuntimeError(data)
+
+    time.sleep(8)
+```
+
+## 자주 묻는 질문
+
+### 생성은 되는데 왜 `audioId`를 받을 수 없나요?
+
+이는 대부분 요청 본문의 문제가 아니라, 현재 채널이나 업스트림이 조회 결과에서 Suno 원본 오디오 항목을 완전히 노출하지 않기 때문입니다. 메인 체인 `generate`가 성공했다고 해서 모든 파생 기능이 반드시 사용 가능한 것은 아닙니다.
+
+### 기존 `/suno/submit/music`과 여기는 어떤 관계인가요?
+
+기존 라우트는 Crazyrouter 초기에 남겨둔 Suno 네이티브 인터페이스입니다. 이 문서는 현재의 통합 작업 모델 계열, 즉 `model: "suno/*"`와 `/v1/video/generations`를 결합한 방식을 다룹니다. 새 프로젝트는 이 문서의 방식으로 접근하는 것을 우선하십시오.
+
+### `mv`를 전달해야 하나요, 아니면 `model_version`을 전달해야 하나요?
+
+이 통합 작업 모델 계열은 `metadata.model_version`을 전달합니다. `mv`는 기존 `/suno/submit/music`에서만 전달합니다.

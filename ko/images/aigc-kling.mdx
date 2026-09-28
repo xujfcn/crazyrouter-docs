@@ -1,0 +1,123 @@
+---
+title: "AIGC Kling 3.0 이미지 생성"
+description: "Crazyrouter의 Tencent VOD 라인을 통해 aigc-image-kling-3.0을 호출하여 이미지를 생성합니다"
+---
+> 업데이트: 2026-08-07
+
+# AIGC Kling 3.0 이미지 생성
+
+`aigc-image-kling-3.0`은 Crazyrouter가 Tencent VOD 라인을 통해 개방한 Kling 3.0 텍스트-투-이미지 모델입니다. 클라이언트는 OpenAI Images 호환 인터페이스를 사용합니다.
+
+```http
+POST /v1/images/generations
+```
+
+<Warning>
+  전체 엔드포인트는 `https://api.crazyrouter.com/v1/images/generations`입니다. 이 모델을 `/kling/v1/images/generations`로 제출하지 마시고, 모델명을 비디오 모델인 `aigc-video-kling-3.0`으로 잘못 쓰지 마세요.
+</Warning>
+
+## 요청 파라미터
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| `model` | string | 예 | `aigc-image-kling-3.0`으로 고정 |
+| `prompt` | string | 예 | 이미지 생성 프롬프트 |
+| `aspect_ratio` | string | 아니오 | 출력 비율. 자주 쓰는 값은 `1:1`, `16:9`, `9:16`, `4:3`, `3:4`; 기본값 `1:1` |
+| `size` | string | 아니오 | 호환용 사이즈 표기, 서버 측에서 출력 비율로 환산함, 아래 표 참고 |
+
+현재 공개된 기능은 텍스트-투-이미지입니다. 이 모델에 대한 요청에는 참조 이미지를 전달하지 말고, `/v1/images/edits`를 사용하지 마세요.
+
+### 사이즈와 비율
+
+`aspect_ratio`를 직접 전달하는 것을 권장합니다. `size`를 사용하는 경우 현재 환산 규칙은 다음과 같습니다.
+
+| `size` | 실제 출력 비율 |
+|------|------|
+| `1024x1024` | `1:1` |
+| `1792x1024`, `1536x1024` | `16:9` |
+| `1024x1792`, `1024x1536` | `9:16` |
+| `1024x768` | `4:3` |
+| `768x1024` | `3:4` |
+
+<Note>
+  `aspect_ratio`와 `size`를 동시에 전달하면 `aspect_ratio`가 우선 적용됩니다. 표에 없는 나머지 `size` 값은 현재 `1:1`로 처리됩니다.
+</Note>
+
+## 요청 예시
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-image-kling-3.0",
+    "prompt": "영화 같은 미래 도시의 야경, 비 온 뒤 거리에 네온 불빛이 반사되고, 화면 디테일이 풍부하다",
+    "aspect_ratio": "16:9"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/v1/images/generations",
+    headers={
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Content-Type": "application/json",
+    },
+    json={
+        "model": "aigc-image-kling-3.0",
+        "prompt": "영화 같은 미래 도시의 야경, 비 온 뒤 거리에 네온 불빛이 반사되고, 화면 디테일이 풍부하다",
+        "aspect_ratio": "16:9",
+    },
+    timeout=240,
+)
+
+response.raise_for_status()
+result = response.json()
+print(result["data"][0]["url"])
+```
+
+</CodeGroup>
+
+## 응답 예시
+
+```json
+{
+  "created": 1786000000,
+  "data": [
+    {
+      "url": "https://media.crazyrouter.com/task-artifacts/example.png",
+      "b64_json": "",
+      "revised_prompt": ""
+    }
+  ],
+  "extra": {
+    "provider": "tencent-vod",
+    "task_id": "AigcImageTask-example",
+    "request_id": "request-example"
+  }
+}
+```
+
+`data[0].url`을 직접 읽으면 생성 결과를 얻을 수 있습니다.
+
+## 요청 소요 시간
+
+Tencent VOD 업스트림은 비동기 작업으로 실행되지만, Crazyrouter는 서버 측에서 작업이 완료될 때까지 대기한 뒤, 현재 HTTP 요청을 통해 OpenAI Images 형식의 최종 결과를 반환합니다. 클라이언트는 별도로 작업을 조회할 필요가 없습니다.
+
+<Note>
+  이미지 생성은 수십 초가 걸릴 수 있습니다. 클라이언트 타임아웃을 최소 `240`초로 설정하고 현재 요청이 완료될 때까지 기다리는 것을 권장하며, 일시적으로 응답이 없다고 즉시 재요청하지 마세요. 그렇지 않으면 중복 작업과 중복 과금이 발생할 수 있습니다.
+</Note>
+
+## 다른 Kling 모델과의 차이
+
+| 모델 | 용도 | 요청 경로 |
+|------|------|------|
+| `aigc-image-kling-3.0` | Tencent VOD Kling 3.0 텍스트-투-이미지 | `POST /v1/images/generations` |
+| `aigc-video-kling-3.0` | Tencent VOD Kling 3.0 비디오 생성 | `POST /v1/video/generations` |
+| 네이티브 Kling 이미지 모델 | 네이티브 Kling 이미지 프로토콜 | `POST /kling/v1/images/generations` |
+
+이 모델은 이미지 생성 성공 건수에 따라 과금됩니다. 실시간 가격, 할인 및 사용 가능 상태는 [Pricing 페이지](/pricing)와 현재 API Key의 `GET /v1/models` 반환값을 기준으로 합니다.

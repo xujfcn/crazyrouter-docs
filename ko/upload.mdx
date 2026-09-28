@@ -1,0 +1,171 @@
+---
+title: '이미지 업로드 안내'
+description: '로컬 이미지를 업로드하고 48시간 임시 공개 URL을 발급받아 이미지 생성, 이미지-비디오 변환, 이미지 인식 인터페이스에 사용합니다'
+---
+> 업데이트: 2026-08-18
+
+Crazyrouter는 로컬 참조 이미지를 모델이 접근할 수 있는 공개 URL로 변환하는 임시 공개 이미지 업로드 인터페이스를 제공합니다. Kling, Veo, Seedance, Runway, Luma, MiniMax, Nano Banana Pro, Doubao Seedream 등 `image_url`, `image_urls`, `image_list`, `images` 또는 `image_input`이 필요한 인터페이스에 적합합니다.
+
+<Note>
+  임시 이미지는 기본적으로 48시간 동안 보관되며, 기한이 지나면 자동으로 삭제됩니다. 보관 기간 동안 별도의 일별 과금은 없습니다; 현재는 사용자별 업로드 할당량과 속도 제한으로 악용을 방지합니다.
+</Note>
+
+<Note>
+  반환되는 `id`는 본 사이트의 파일 레코드 ID이며, 모델 요청의 `image_input`에는 반환된 `url`을 사용해야 하고 `id`를 직접 전달할 수 없습니다. `nano-banana-pro`의 Base64 / multipart 그레이 릴리스 기능은 지정된 계정에만 개방됩니다.
+</Note>
+
+## 인터페이스 개요
+
+| 시나리오 | 인터페이스 |
+|------|------|
+| 로컬 파일 업로드 | `POST /v1/files/uploads` |
+| Base64 이미지 업로드 | `POST /v1/files/uploads/base64` |
+| 원격 이미지 전송 | `POST /v1/files/uploads/url` |
+| 사전 서명 R2 직접 업로드 | `POST /v1/files/uploads/presign` |
+
+공통 제한 사항:
+
+| 항목 | 현재 규칙 |
+|------|------|
+| 인증 | `Authorization: Bearer YOUR_API_KEY` |
+| 지원 형식 | `image/png`, `image/jpeg`, `image/webp`, `image/gif` |
+| 단일 파일 크기 | 20MB |
+| 사용자 업로드 할당량 | 200MB / 24시간 롤링 윈도우 |
+| 기본 유효 기간 | 48시간 |
+| 반환 URL | `https://media.crazyrouter.com/task-artifacts/tmp-inputs/...` |
+
+## 로컬 파일 업로드
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/files/uploads \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "file=@./reference.png" \
+  -F "purpose=model_input"
+```
+
+응답 예시:
+
+```json
+{
+  "id": "file_e5bbce820b5941409682a9c5e9ba79f1",
+  "url": "https://media.crazyrouter.com/task-artifacts/tmp-inputs/2026/05/13/user-1/file_e5bbce820b5941409682a9c5e9ba79f1.png",
+  "mime_type": "image/png",
+  "size": 2025,
+  "expires_at": "2026-05-16T04:41:35.0131789Z"
+}
+```
+
+## Base64 업로드
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/files/uploads/base64 \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "data": "data:image/png;base64,iVBORw0KGgoAAA...",
+    "filename": "reference.png",
+    "purpose": "model_input"
+  }'
+```
+
+## 원격 URL 전송
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/files/uploads/url \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "url": "https://example.com/reference.png",
+    "filename": "reference.png",
+    "purpose": "model_input"
+  }'
+```
+
+원격 URL은 Crazyrouter 서버가 접근할 수 있는 `http` 또는 `https` 이미지 주소여야 합니다. 시스템은 파일 크기, MIME 유형, SSRF 방지 검사를 수행합니다.
+
+## 사전 서명 R2 직접 업로드
+
+업로드 빈도가 높은 시나리오에서는 먼저 사전 서명된 업로드 URL을 요청한 후, 클라이언트가 이미지를 스토리지 엔드포인트로 직접 `PUT` 할 수 있습니다. 이렇게 하면 이미지 바이너리가 Crazyrouter 애플리케이션 서버를 거치지 않으므로, 매일 대량의 이미지를 업로드하는 워크플로우에 적합합니다.
+
+1단계, 직접 업로드 URL 요청:
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/files/uploads/presign \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "filename": "reference.jpg",
+    "content_type": "image/jpeg",
+    "size": 12345,
+    "purpose": "model_input"
+  }'
+```
+
+응답 예시:
+
+```json
+{
+  "id": "file_e5bbce820b5941409682a9c5e9ba79f1",
+  "upload_url": "https://...r2.cloudflarestorage.com/...?...",
+  "url": "https://media.crazyrouter.com/task-artifacts/tmp-inputs/2026/06/21/user-1/file_e5bbce820b5941409682a9c5e9ba79f1.jpg",
+  "method": "PUT",
+  "headers": {
+    "Content-Type": "image/jpeg",
+    "Content-Length": "12345"
+  },
+  "mime_type": "image/jpeg",
+  "size": 12345,
+  "expires_at": "2026-06-22T04:41:35Z",
+  "upload_expires_at": "2026-06-21T04:56:35Z"
+}
+```
+
+2단계, 클라이언트가 `upload_url`로 직접 업로드:
+
+```bash cURL
+curl -X PUT "$UPLOAD_URL" \
+  -H "Content-Type: image/jpeg" \
+  -H "Content-Length: 12345" \
+  --data-binary @./reference.jpg
+```
+
+업로드가 완료되면, 응답에 포함된 `url`을 모델 요청의 이미지 URL로 사용합니다.
+
+<Warning>
+  `upload_url`은 단기간만 유효한 쓰기 주소로, 기본적으로 약 15분 이내에 사용해야 합니다. `Content-Type`과 `Content-Length`는 요청 시와 일치해야 합니다; `upload_url`을 모델에 전달하지 말고, 모델 요청에는 반환된 `url`을 사용해야 합니다.
+</Warning>
+
+## 실제 사례: 로컬 참조 이미지를 Kling 이미지-비디오 변환에 사용
+
+1단계, 로컬 참조 이미지 업로드:
+
+```bash cURL
+UPLOAD_RESPONSE=$(curl -sS -X POST https://api.crazyrouter.com/v1/files/uploads \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "file=@./portrait.png" \
+  -F "purpose=model_input")
+
+IMAGE_URL=$(python -c "import json,sys; print(json.load(sys.stdin)['url'])" <<< "$UPLOAD_RESPONSE")
+echo "$IMAGE_URL"
+```
+
+2단계, 반환된 `IMAGE_URL`을 Kling 이미지-비디오 변환에 전달:
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/kling/v1/videos/image2video \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d "{
+    \"model_name\": \"kling-v3\",
+    \"prompt\": \"사진 속 인물이 천천히 고개를 돌리며 미소를 짓고, 카메라가 살짝 줌인하며 영화 같은 조명 효과를 표현\",
+    \"image_urls\": [\"$IMAGE_URL\"],
+    \"duration\": \"5\",
+    \"mode\": \"std\"
+  }"
+```
+
+제출이 성공하면 작업 ID가 반환됩니다. [Kling 작업 조회](/ko/video/kling/query)를 통해 최종 비디오 결과를 확인합니다.
+
+<Warning>
+  임시 URL은 영구적인 소재 저장소가 아닙니다. 작업 제출 전 URL이 아직 만료되지 않았는지 확인하시고, 장기적인 업무용 이미지 주소로 저장해서는 안 됩니다.
+</Warning>

@@ -1,0 +1,65 @@
+---
+title: "Claude PDF 지원"
+description: "2026-03-23 Crazyrouter 프로덕션 환경 검증 기반의 Claude PDF 입력"
+---
+> 업데이트: 2026-06-06
+
+# Claude PDF 지원
+
+```
+POST /v1/messages
+```
+
+2026년 3월 23일 기준, Crazyrouter 프로덕션 환경에서 `claude-opus-4-8`이 네이티브 Messages API를 통해 Base64 PDF를 읽고 텍스트 요약을 반환할 수 있는 것이 검증되었습니다.
+
+---
+
+## 검증된 최소 요청
+
+```bash
+curl https://api.crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-opus-4-8",
+    "max_tokens": 512,
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "document",
+            "source": {
+              "type": "base64",
+              "media_type": "application/pdf",
+              "data": "JVBERi0xLjQK..."
+            }
+          },
+          {
+            "type": "text",
+            "text": "Summarize the document in one sentence."
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+프로덕션 환경에서 실제로 반환되는 핵심 형태:
+
+```json
+{
+  "model": "claude-opus-4-8",
+  "content": [
+    {
+      "type": "text",
+      "text": "The document is a simple Crazyrouter PDF test document..."
+    }
+  ]
+}
+```
+
+<Note>
+  현재 페이지는 재검증에 성공한 Base64 PDF 입력 경로만 다룹니다. 원격 URL, 다중 PDF 비교, 스트리밍 PDF 출력 등 더 복잡한 시나리오는 이번에는 개별적으로 재검증하지 않았습니다.
+</Note>

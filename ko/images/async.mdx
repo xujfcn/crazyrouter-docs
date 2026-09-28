@@ -1,0 +1,246 @@
+---
+title: "비동기 이미지 생성"
+description: "제출 즉시 작업 ID를 반환하고, 폴링으로 이미지 URL을 회수합니다; gpt-image-2, nano-banana-2, nano-banana-pro 등 긴 처리 시간이 필요한 이미지 모델에 적합합니다"
+---
+> 업데이트: 2026-09-18
+
+# 비동기 이미지 생성
+
+이미지 모델은 한 번 생성하는 데 보통 20~120초가 걸립니다. 동기 인터페이스는 클라이언트가 결과를 기다리는 동안 HTTP 연결을 계속 유지해야 하며, 게이트웨이/프록시의 읽기 타임아웃에 걸리기 쉽고, 반환되는 base64도 용량이 큽니다. 비동기 모드는 이 과정을 두 번의 호출로 분리합니다:
+
+1. **제출**: 요청이 즉시 `202`와 작업 ID를 반환합니다(1초 미만).
+2. **폴링**: 작업 ID로 `GET /v1/tasks/{id}`를 조회하면, 완료 후 `result`에 이미지의 **https URL**이 담깁니다(`media.crazyrouter.com`에 영구 보관), base64는 반환되지 않습니다.
+
+```
+제출 (세 가지 트리거 방식, 아래 참조)
+  POST /v1beta/models/{model}:asyncGenerateContent      # Gemini 계열, 경로 별칭
+  POST /v1/images/generations  + Prefer: respond-async   # OpenAI 계열
+  POST /v1/images/edits        + Prefer: respond-async   # OpenAI 계열(참조 이미지 포함)
+
+조회
+  GET  /v1/tasks/{task_id}
+```
+
+<Note>
+  **모델명, 요청 본문, 과금은 동기 방식과 완전히 동일합니다.** 비동기는 단지 "결과를 언제 받는지"만 바꿉니다. 동일한 API Key로 일부 요청은 동기, 일부는 비동기로 사용할 수 있습니다. 작업이 실패하면 과금되지 않습니다.
+</Note>
+
+## 지원 모델
+
+| 모델 | 제출 방식 | 일반적인 소요 시간 |
+|------|------|------|
+| `nano-banana-2`(Gemini 3.1 Flash Image) | `:asyncGenerateContent` | 15~30초 |
+| `nano-banana-pro`(Gemini 3 Pro Image) | `:asyncGenerateContent` | 30~60초 |
+| `gpt-image-2`, `gpt-image-1.5`, `gpt-image-2.5-*` | `Prefer: respond-async` 헤더 또는 `async: true` 필드 | 60~120초 |
+| 기타 이미지 출력 모델 | 위와 동일, 기존 엔드포인트에 따름 | — |
+
+## 방식 1: Gemini 경로 별칭 (Gemini 클라이언트 권장)
+
+**요청 본문, 요청 헤더, 쿼리 파라미터의 어떤 바이트도 변경할 필요가 없으며**, 동작 접미사만 `:generateContent`에서 `:asyncGenerateContent`로 바꾸면 됩니다.
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1beta/models/nano-banana-2:asyncGenerateContent \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [{"role": "user", "parts": [{"text": "draw a cat"}]}],
+    "generationConfig": {
+      "responseModalities": ["IMAGE"],
+      "imageConfig": {"aspectRatio": "16:9"}
+    }
+  }'
+```
+
+`202` 반환:
+
+```json
+{
+  "id": "task_17754fd677574c3fbfb178ace1ee7551",
+  "object": "task",
+  "kind": "image",
+  "model": "gemini-3.1-flash-image-preview",
+  "status": "queued",
+  "created_at": 1789716402
+}
+```
+
+<Note>
+  반환되는 `model`은 파싱된 실제 하위 모델명입니다(예: `gemini-3.1-flash-image-preview`), 소비 로그와 일치합니다; 이는 `nano-banana-2`로 제출하는 것에 영향을 주지 않습니다. 참조 이미지 편집은 동기 방식과 작성법이 동일합니다: `parts`에 `inlineData`(base64) 또는 `fileData`(URL)를 넣으면 됩니다.
+</Note>
+
+`:asyncGenerateContent`는 이미지 출력 모델만 지원합니다; 텍스트 모델로 호출하면 `400 async mode is only available for image models`가 반환됩니다. 스트리밍 동작 `:streamGenerateContent`는 비동기를 지원하지 않습니다.
+
+## 방식 2: OpenAI 이미지 엔드포인트에 `Prefer` 헤더 추가
+
+기존 `/v1/images/generations` 또는 `/v1/images/edits` 요청에 HTTP 헤더 `Prefer: respond-async`를 추가하며, 나머지는 그대로 유지합니다. 요청 본문 필드 `"async": true`(JSON) 또는 폼 필드 `async=true`(multipart)로 바꾸어도 동일한 효과가 있습니다.
+
+<CodeGroup>
+
+```bash 텍스트-이미지 생성
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Prefer: respond-async" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-image-2",
+    "prompt": "a tiny cartoon cat sticker",
+    "size": "1024x1024",
+    "quality": "low",
+    "n": 1
+  }'
+```
+
+```bash 참조 이미지 편집 (multipart)
+curl -X POST https://api.crazyrouter.com/v1/images/edits \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Prefer: respond-async" \
+  -F model=gpt-image-2 \
+  -F prompt="turn this into a cartoon cat sticker" \
+  -F size=1024x1024 \
+  -F quality=low \
+  -F image=@reference.png
+```
+
+```python Python (requests)
+import requests, time
+
+BASE = "https://api.crazyrouter.com"
+H = {"Authorization": "Bearer YOUR_API_KEY"}
+
+r = requests.post(f"{BASE}/v1/images/edits",
+                  headers={**H, "Prefer": "respond-async"},
+                  data={"model": "gpt-image-2", "prompt": "turn this into a cartoon cat sticker",
+                        "size": "1024x1024", "quality": "low"},
+                  files={"image": open("reference.png", "rb")})
+task_id = r.json()["id"]
+
+while True:
+    env = requests.get(f"{BASE}/v1/tasks/{task_id}", headers=H).json()
+    if env["status"] in ("completed", "failed"):
+        break
+    time.sleep(3)
+
+if env["status"] == "completed":
+    print(env["result"]["data"][0]["url"])
+else:
+    print(env["error"])
+```
+
+</CodeGroup>
+
+응답 헤더에 `Preference-Applied: respond-async`가 포함되며, 본문은 방식 1과 동일합니다(`202` + 작업 ID).
+
+## 작업 조회
+
+```
+GET https://api.crazyrouter.com/v1/tasks/{task_id}
+Authorization: Bearer YOUR_API_KEY
+```
+
+본인 계정이 제출한 작업만 조회할 수 있으며, 다른 계정의 ID는 모두 `404`가 반환됩니다. 2~3초 간격으로 폴링하는 것을 권장하며, 10분이 지나도 완료되지 않으면 실패로 간주할 수 있습니다.
+
+### 상태
+
+| `status` | 의미 |
+|------|------|
+| `queued` | 접수 완료, 실행 대기 중 |
+| `running` | 생성 진행 중 |
+| `completed` | 성공, `result`가 채워짐 |
+| `failed` | 실패, `error`가 채워짐, **과금되지 않음** |
+
+### 완료 시 응답 (Gemini 계열)
+
+`result`는 네이티브 Gemini `GenerateContentResponse`이며, `inlineData`만 이미지 URL을 가리키는 `fileData`로 바뀌어 있습니다:
+
+```json
+{
+  "id": "task_17754fd677574c3fbfb178ace1ee7551",
+  "object": "task",
+  "kind": "image",
+  "model": "gemini-3.1-flash-image-preview",
+  "status": "completed",
+  "progress": "100%",
+  "created_at": 1789716402,
+  "started_at": 1789716403,
+  "completed_at": 1789716419,
+  "result": {
+    "candidates": [{
+      "content": {
+        "role": "model",
+        "parts": [
+          {"fileData": {"mimeType": "image/png", "fileUri": "https://media.crazyrouter.com/task-artifacts/2026/09/18/sync-image/task_17754fd677574c3fbfb178ace1ee7551-0.png"}}
+        ]
+      },
+      "finishReason": "STOP"
+    }],
+    "usageMetadata": {"promptTokenCount": 15, "candidatesTokenCount": 1022, "totalTokenCount": 1037}
+  },
+  "error": null
+}
+```
+
+### 완료 시 응답 (OpenAI 계열)
+
+`result`는 동기 `/v1/images/*`의 반환 형태와 동일하며, 이미지는 `data[].url`에 담깁니다:
+
+```json
+{
+  "id": "task_b210db17cea14754818e9b965bd8a61c",
+  "object": "task",
+  "kind": "image",
+  "model": "gpt-image-2",
+  "status": "completed",
+  "result": {
+    "created": 1789716295,
+    "data": [
+      {"url": "https://media.crazyrouter.com/task-artifacts/2026/09/18/sync-image/task_b210db17cea14754818e9b965bd8a61c-0.png"}
+    ],
+    "usage": {"input_tokens": 77, "output_tokens": 196, "total_tokens": 273}
+  },
+  "error": null
+}
+```
+
+정말로 base64가 필요한 경우, 조회 시 `?inline=true`를 추가하면 서버가 보관된 이미지를 다시 읽어 `inlineData` / `b64_json`으로 복원해 줍니다(권장하지 않으며, 대용량 이미지는 느립니다).
+
+### 실패 시 응답
+
+```json
+{
+  "id": "task_…",
+  "status": "failed",
+  "result": null,
+  "error": {
+    "code": "provider_failed",
+    "message": "upstream returned 502",
+    "retryable": true
+  }
+}
+```
+
+| `error.code` | 의미 | 재시도 가능 |
+|------|------|------|
+| `validation_failed` | 요청 파라미터가 거부됨 (4xx) | 아니요 |
+| `token_invalid` | API Key가 만료되었거나 해당 모델을 사용할 수 없음 | 아니요 |
+| `insufficient_quota` | 잔액 부족 | 아니요 |
+| `rate_limited` | 업스트림/채널 속도 제한 | 예 |
+| `provider_failed` | 업스트림 생성 실패 | 예 |
+| `timeout` | 단일 생성이 10분을 초과함 | 예 |
+| `no_image` | 모델이 콘텐츠를 반환했지만 이미지가 없음(예: 안전 필터링), 이 경우 동기 규칙에 따라 **정상적으로 과금됨** | 아니요 |
+
+`retryable: true`는 새 작업을 다시 제출할 수 있음을 의미합니다; 시스템은 자동으로 재시도하지 않습니다.
+
+## 멱등 제출
+
+네트워크 재시도로 동일한 작업이 중복 제출될 수 있습니다. 제출 요청에 `Idempotency-Key: <임의의 문자열>` 헤더를 추가하면, 동일 계정·동일 키에 대해 동일한 작업 ID가 반환됩니다(두 번째 호출은 `202`가 아니라 `200`을 반환), 중복 생성도 중복 과금도 발생하지 않습니다.
+
+## 동기 방식과의 차이 비교
+
+| | 동기 | 비동기 |
+|------|------|------|
+| 제출 반환 | 생성이 완료된 후 이미지 반환 (20~120초) | 1초 미만에 작업 ID 반환 |
+| 이미지 형식 | URL 또는 base64 (채널에 따라 다름) | 항상 URL |
+| 연결 타임아웃 위험 | 있음 | 없음 |
+| 과금 | 모델/사이즈에 따라 과금 | 완전히 동일; 실패 시 과금 없음 |
+| 라우팅 | 역량 라우팅 | 동일 (재생 시 동일한 라우팅 및 장애 전환 사용) |
+| 제한 | — | 계정당 최대 50개의 미완료 작업, 초과 시 `429` 반환 |

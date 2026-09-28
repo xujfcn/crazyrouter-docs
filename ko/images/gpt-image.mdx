@@ -1,0 +1,225 @@
+---
+title: "GPT Image"
+description: "gpt-image-2를 사용하여 이미지를 생성 및 편집하며, OpenAI Images API와 호환됩니다"
+---
+> 업데이트: 2026-09-18
+
+<Tip>
+  제출 후 즉시 반환받고 나중에 폴링하여 이미지 URL을 가져오고 싶으신가요? 이 모델은 [비동기 이미지 생성](/ko/images/async)을 지원합니다. Gemini 계열은 경로 접미사를 `:asyncGenerateContent`로 변경하고, OpenAI 계열은 `Prefer: respond-async` 헤더를 추가하면 되며, 요청 본문은 한 글자도 수정할 필요가 없습니다.
+</Tip>
+
+# GPT Image
+
+`gpt-image-2`는 OpenAI Images API 호환 경로를 통해 호출됩니다.
+
+```text
+POST /v1/images/generations
+POST /v1/images/edits
+```
+
+<Warning>
+  `gpt-image-2` 이미지 생성 요청은 주 처리 라인 `https://api.crazyrouter.com/v1`을 우선 사용하세요. 전체 생성 엔드포인트는 `https://api.crazyrouter.com/v1/images/generations`입니다. 계정 로그인, 충전과 콘솔은 여전히 `https://crazyrouter.com`을 사용합니다.
+</Warning>
+
+## 이미지 생성
+
+### 요청 파라미터
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| `model` | string | 예 | `gpt-image-2`로 고정 |
+| `prompt` | string | 예 | 이미지 설명 프롬프트 |
+| `n` | integer | 아니오 | 생성 수, 기본값 `1`, 범위 `1-10` |
+| `size` | string | 아니오 | `auto` 또는 `가로x세로`. 가로세로는 16의 배수여야 하며, 한 변이 3840을 넘지 않고, 총 픽셀은 655360~8294400 사이, 장단변 비율은 3:1을 넘지 않음. 자주 쓰는 값: `1024x1024`, `1536x1024`, `1024x1536` |
+| `quality` | string | 아니오 | `auto`, `low`, `medium`, `high`. `hd`와 호환되며 서버 측에서 `high`로 정규화됨; `standard`와 호환되며 서버 측에서 `auto`로 정규화됨 |
+| `background` | string | 아니오 | `auto` 또는 `opaque`. `gpt-image-2`는 `transparent`를 지원하지 않음 |
+| `output_format` | string | 아니오 | `png`, `jpeg`, `webp` |
+| `output_compression` | integer | 아니오 | `0-100`, `output_format`이 `jpeg` 또는 `webp`일 때만 사용 가능 |
+| `moderation` | string | 아니오 | `auto` 또는 `low` |
+| `stream` | boolean | 아니오 | SSE 스트리밍 응답 사용 여부 |
+| `partial_images` | integer | 아니오 | `0-3`, `stream=true`일 때만 사용 가능 |
+| `user` | string | 아니오 | 최종 사용자 식별자 |
+
+기존 DALL-E / OpenAI Images 클라이언트와의 호환을 위해, `gpt-image-2`는 `response_format=url`, `response_format=b64_json`, `quality=standard`, `style=vivid/natural`을 받아들입니다. 이 중 `response_format`과 `style`은 업스트림으로 전달되지 않으며, `quality=standard`는 `auto`로 정규화됩니다.
+
+<Warning>
+  `response_format`은 Crazyrouter가 기존 클라이언트를 위해 남겨둔 호환 필드일 뿐, `gpt-image-2`의 업스트림 파라미터가 아닙니다. 신규 연동 시에는 `output_format="png"`, `"jpeg"` 또는 `"webp"`로 이미지 파일 형식을 제어하고, 기본적으로 응답의 `data[0].url`을 읽는 것을 우선하세요. 기존 클라이언트가 `response_format="b64_json"`을 전달하는 경우, 서버 측에서는 최대한 base64 응답 시맨틱을 유지합니다.
+</Warning>
+
+여전히 거부되는 파라미터 조합에는 `input_fidelity`, `background=transparent`, `output_format=png`와 `output_compression`의 조합이 포함됩니다.
+
+### 요청 예시
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-image-2",
+    "prompt": "우주복을 입은 고양이가 달 위를 걷고 있고, 배경에는 지구가 보인다",
+    "n": 1,
+    "size": "1024x1024",
+    "quality": "low",
+    "output_format": "png"
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://api.crazyrouter.com/v1",
+)
+
+response = client.images.generate(
+    model="gpt-image-2",
+    prompt="우주복을 입은 고양이가 달 위를 걷고 있고, 배경에는 지구가 보인다",
+    n=1,
+    size="1024x1024",
+    quality="low",
+    output_format="png",
+)
+
+print(response.data[0].url)
+```
+
+</CodeGroup>
+
+### 스트리밍 생성
+
+`gpt-image-2`는 `stream=true`를 지원합니다. 요청에 `partial_images`가 포함된 경우, 반드시 `stream`을 동시에 켜야 하며 값의 범위는 `0-3`입니다.
+
+```bash cURL
+curl -N -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-image-2",
+    "prompt": "파란색 미니멀한 인증 아이콘, 흰색 배경",
+    "size": "1024x1024",
+    "quality": "high",
+    "stream": true,
+    "partial_images": 2
+  }'
+```
+
+<Note>
+  `quality=high` 또는 호환 표기인 `quality=hd`의 동기 요청은 시간이 오래 걸릴 수 있습니다. 이미지 생성 업무는 `https://api.crazyrouter.com/v1`을 우선 사용하고, 고품질 요청에는 `stream=true` 사용을 권장하거나 클라이언트 타임아웃을 180초 이상으로 설정하세요.
+</Note>
+
+### 응답 예시
+
+```json
+{
+  "created": 1778990000,
+  "data": [
+    {
+      "url": "https://media.crazyrouter.com/task-artifacts/2026/05/17/sync-image/request-id-1.png"
+    }
+  ],
+  "output_format": "png",
+  "quality": "low",
+  "size": "1024x1024"
+}
+```
+
+---
+
+## 이미지 편집
+
+```
+POST /v1/images/edits
+```
+
+기존 이미지를 기반으로 편집하며, 마스크 영역 편집을 지원하고 여러 참조 이미지를 전달해 융합, 스타일 전이 또는 부분 조합도 지원합니다.
+
+### 요청 파라미터
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| `model` | string | 예 | `gpt-image-2`로 고정 |
+| `image` / `image[]` | file 또는 file[] | 예 | 원본 이미지 또는 참조 이미지 파일(multipart); `gpt-image-2`는 최대 `16`장의 참조 이미지를 지원 |
+| `prompt` | string | 예 | 편집 설명 |
+| `mask` | file | 아니오 | 마스크 이미지, 투명 영역이 편집할 부분 |
+| `n` | integer | 아니오 | 생성 수, 기본값 `1`, 범위 `1-10` |
+| `size` | string | 아니오 | 생성 인터페이스와 동일 |
+| `quality` | string | 아니오 | `auto`, `low`, `medium`, `high`; `hd`는 `high`로 정규화됨 |
+| `background` | string | 아니오 | `auto` 또는 `opaque` |
+| `output_format` | string | 아니오 | `png`, `jpeg`, `webp` |
+| `output_compression` | integer | 아니오 | `0-100`, `output_format`이 `jpeg` 또는 `webp`일 때만 사용 가능 |
+| `stream` | boolean | 아니오 | SSE 스트리밍 응답 사용 여부 |
+| `partial_images` | integer | 아니오 | `0-3`, `stream=true`일 때만 사용 가능 |
+
+### 단일 이미지 편집 예시
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://api.crazyrouter.com/v1",
+)
+
+response = client.images.edit(
+    model="gpt-image-2",
+    image=open("original.png", "rb"),
+    mask=open("mask.png", "rb"),
+    prompt="하늘에 무지개를 추가해줘",
+    n=1,
+    size="1024x1024",
+    quality="low",
+)
+
+print(response.data[0].url)
+```
+
+### 다중 이미지 참조 편집 예시
+
+다중 이미지 편집 요청은 반드시 `multipart/form-data`를 사용해야 합니다. 여러 개의 `image[]` 필드로 참조 이미지를 전달하는 것을 권장하며, 서버 측은 중복된 `image` 필드도 호환합니다.
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/images/edits \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "model=gpt-image-2" \
+  -F "prompt=첫 번째 이미지의 인물과 두 번째 이미지의 배경을 자연스러운 홍보 이미지로 합성해줘" \
+  -F "size=1024x1024" \
+  -F "quality=low" \
+  -F "n=1" \
+  -F "image[]=@person.png" \
+  -F "image[]=@background.png"
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/v1/images/edits",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    data={
+        "model": "gpt-image-2",
+        "prompt": "첫 번째 이미지의 인물과 두 번째 이미지의 배경을 자연스러운 홍보 이미지로 합성해줘",
+        "size": "1024x1024",
+        "quality": "low",
+        "n": "1",
+    },
+    files=[
+        ("image[]", ("person.png", open("person.png", "rb"), "image/png")),
+        ("image[]", ("background.png", open("background.png", "rb"), "image/png")),
+    ],
+    timeout=240,
+)
+
+response.raise_for_status()
+print(response.json()["data"][0]["url"])
+```
+
+</CodeGroup>
+
+<Note>
+  `gpt-image-2`의 다중 이미지 참조는 최대 16장의 이미지를 지원합니다. 다중 이미지 요청은 다중 이미지 참조를 지원하는 공식 OpenAI 처리 채널로 우선 라우팅됩니다.
+</Note>

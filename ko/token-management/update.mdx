@@ -1,0 +1,137 @@
+---
+title: '토큰 수정'
+description: '기존 토큰의 설정을 업데이트합니다'
+api: 'PUT /api/token/'
+---
+> 업데이트: 2026-07-20
+
+## 인터페이스 설명
+
+기존 토큰의 이름, 크레딧, 만료 시간, 모델 권한 등 설정을 수정합니다.
+
+<Note>
+  이 `/api/token/*` 계열 인터페이스는 주로 Crazyrouter 콘솔에서 API Key 관리 자동화를 위해 사용됩니다. 사용자 `access token`과 `New-Api-User` 요청 헤더가 필요하며, 일반적인 `sk-xxx` 모델 호출 흐름에서 직접 사용하는 인터페이스가 아닙니다. 요청 기본 주소는 반드시 `https://crazyrouter.com`을 사용해야 합니다. `https://api.crazyrouter.com`은 모델 API 전용 엔드포인트이며, 관리용 경로를 호출하면 `404 api_only_endpoint`가 반환됩니다.
+</Note>
+
+## 인증 방식
+
+사용자 측 인증을 사용하며, 요청 헤더에 다음을 포함해야 합니다.
+
+```text
+Authorization: Bearer your_access_token
+New-Api-User: 1
+```
+
+## 요청 파라미터
+
+<ParamField body="id" type="integer" required>
+  토큰 ID
+</ParamField>
+
+<ParamField body="name" type="string">
+  토큰 이름
+</ParamField>
+
+<ParamField body="remain_quota" type="integer">
+  남은 크레딧
+</ParamField>
+
+<ParamField body="unlimited_quota" type="boolean">
+  무제한 크레딧 여부
+</ParamField>
+
+<ParamField body="expired_time" type="integer">
+  만료 타임스탬프, `-1`은 만료되지 않음
+</ParamField>
+
+<ParamField body="model_limits_enabled" type="boolean">
+  모델 화이트리스트 사용 여부
+</ParamField>
+
+<ParamField body="model_limits" type="string">
+  모델 제한 설정 문자열, 예: `["gpt-5.5","claude-opus-4-8"]`
+</ParamField>
+
+<ParamField body="status" type="integer">
+  상태: 1=사용, 2=사용 중지
+</ParamField>
+
+<ParamField body="allow_ips" type="string">
+  IP 화이트리스트 문자열
+</ParamField>
+
+<ParamField body="group" type="string">
+  그룹
+</ParamField>
+
+## 응답 형식
+
+현재 인터페이스는 업데이트된 token 객체를 반환합니다.
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "id": 10,
+    "name": "생산환경-업데이트됨",
+    "status": 1,
+    "remain_quota": 200000,
+    "unlimited_quota": false,
+    "model_limits_enabled": true,
+    "model_limits": "[\"gpt-5.5\",\"claude-opus-4-8\"]",
+    "allow_ips": "203.0.113.10",
+    "group": "default"
+  }
+}
+```
+
+## 코드 예시
+
+<CodeGroup>
+
+```python Python
+import json
+import requests
+
+headers = {
+    "Authorization": "Bearer your_access_token",
+    "New-Api-User": "1",
+    "Content-Type": "application/json",
+    "User-Agent": "Mozilla/5.0"
+}
+
+response = requests.put(
+    "https://crazyrouter.com/api/token/",
+    headers=headers,
+    json={
+        "id": 10,
+        "name": "생산환경-업데이트됨",
+        "remain_quota": 200000,
+        "model_limits_enabled": True,
+        "model_limits": json.dumps(["gpt-5.5", "claude-opus-4-8"])
+    }
+)
+
+print(response.json())
+```
+
+```bash cURL
+curl -X PUT https://crazyrouter.com/api/token/ \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 1" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": 10,
+    "name": "생산환경-업데이트됨",
+    "remain_quota": 200000,
+    "model_limits_enabled": true,
+    "model_limits": "[\"gpt-5.5\"]"
+  }'
+```
+
+</CodeGroup>
+
+<Warning>
+  토큰 수정은 API Key를 재생성하지 않습니다. Key를 교체해야 한다면 삭제 후 다시 생성하세요.
+</Warning>

@@ -1,0 +1,88 @@
+---
+title: "모델 응답 생성"
+description: "2026-03-23 Crazyrouter 프로덕션 환경 검증을 기반으로 한 Responses API 기본 호출 방식"
+---
+> 업데이트: 2026-06-06
+
+# 모델 응답 생성
+
+```
+POST /v1/responses
+```
+
+2026년 3월 23일 기준, Crazyrouter 프로덕션 환경에서 다음이 검증되었습니다.
+
+- `gpt-5.5`는 `object: "response"`를 정상적으로 반환할 수 있습니다
+- 기본 텍스트 요청의 `output`은 현재 `message`를 안정적으로 얻을 수 있습니다
+- 스트리밍 요청에서는 `response.created`, `response.in_progress`, `response.output_item.added`, `response.content_part.added`, `response.output_text.delta`를 안정적으로 관찰할 수 있습니다
+
+<Note>
+  Claude는 현재 `POST /v1/responses`를 지원하지 않습니다. Claude를 연동하는 경우 `POST /v1/messages` 또는 `POST /v1/chat/completions`를 대신 사용하세요.
+</Note>
+
+---
+
+## 기본 요청
+
+```bash
+curl https://api.crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "input": "한 문장으로 API가 무엇인지 설명해 주세요"
+  }'
+```
+
+프로덕션 환경의 실제 응답 핵심 형태:
+
+```json
+{
+  "object": "response",
+  "model": "gpt-5.5",
+  "output": [
+    {
+      "type": "message"
+    }
+  ]
+}
+```
+
+---
+
+## 스트리밍 요청
+
+```bash
+curl https://api.crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "input": "Say hello in one sentence.",
+    "stream": true
+  }'
+```
+
+2026-03-23 프로덕션 환경 스트리밍 프로브에서 관찰된 이벤트 순서의 시작 부분은 다음과 같습니다.
+
+```text
+event: response.created
+event: response.in_progress
+event: response.output_item.added
+event: response.content_part.added
+event: response.output_text.delta
+```
+
+따라서 현재 가장 안정적인 처리 방식은 다음과 같습니다.
+
+1. `response.output_text.delta`로 텍스트를 점진적으로 연결
+2. `response.completed` 또는 연결 종료를 마무리 신호로 사용
+
+---
+
+## 현재 권장 사항
+
+- 새로운 GPT 텍스트 호출은 `gpt-5.5` + `/v1/responses`로 시작하는 것을 권장합니다
+- 도구 호출이 필요하다면 [Responses Function Calling](/ko/chat/responses/function-calling)을 계속 참고하세요
+- 웹 연결 검색이 필요하다면 [Responses Web 검색](/ko/chat/responses/web-search)을 계속 참고하세요
+- 가시적인 추론 마커가 필요하다면 [GPT-5 Thinking](/ko/chat/responses/gpt5-thinking)을 계속 참고하세요

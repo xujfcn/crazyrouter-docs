@@ -1,0 +1,104 @@
+---
+title: "Responses Function Calling"
+description: "2026-03-23 Crazyrouter 프로덕션 환경 검증 기반의 Responses 도구 호출"
+---
+> 업데이트: 2026-06-06
+
+# Responses Function Calling
+
+```
+POST /v1/responses
+```
+
+2026년 3월 23일 기준, Crazyrouter 프로덕션 환경에서 `gpt-5.5`가 Responses API에서 `function_call`을 안정적으로 반환하는 것이 검증되었습니다.
+
+<Note>
+  Claude는 현재 `POST /v1/responses`를 지원하지 않습니다. Claude의 도구 호출이 필요하다면 `POST /v1/messages` 또는 `POST /v1/chat/completions`를 사용하세요.
+</Note>
+
+---
+
+## 1단계: 모델이 함수 호출을 생성하도록 하기
+
+```bash
+curl https://api.crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "input": "What is the weather in Beijing? Use the tool.",
+    "tools": [
+      {
+        "type": "function",
+        "name": "get_weather",
+        "description": "Get weather info for a city",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "city": {"type": "string"}
+          },
+          "required": ["city"],
+          "additionalProperties": false
+        }
+      }
+    ]
+  }'
+```
+
+프로덕션 환경에서 실제로 응답되는 핵심 형태:
+
+```json
+{
+  "output": [
+    {
+      "type": "function_call",
+      "name": "get_weather",
+      "arguments": "{\"city\":\"Beijing\"}"
+    }
+  ]
+}
+```
+
+---
+
+## 2단계: 함수 결과 회신하기
+
+`function_call`을 받은 후, 직접 함수를 실행하여 얻은 결과를 `function_call_output`으로 다시 보냅니다.
+
+```json
+{
+  "model": "gpt-5.5",
+  "input": [
+    {
+      "type": "function_call",
+      "call_id": "call_123",
+      "name": "get_weather",
+      "arguments": "{\"city\":\"Beijing\"}"
+    },
+    {
+      "type": "function_call_output",
+      "call_id": "call_123",
+      "output": "{\"temperature\":22,\"condition\":\"sunny\"}"
+    }
+  ],
+  "tools": [
+    {
+      "type": "function",
+      "name": "get_weather",
+      "description": "Get weather info for a city",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "city": {"type": "string"}
+        },
+        "required": ["city"],
+        "additionalProperties": false
+      }
+    }
+  ]
+}
+```
+
+<Note>
+  현재 페이지는 프로덕션 환경에서 성공적으로 검증된 `function_call` 경로만 다룹니다. 더 복잡한 다중 도구 연쇄 호출이나 스트리밍 파라미터 증분에 대해서는 연동 전에 직접 당일 프로덕션 검증을 다시 수행하세요.
+</Note>

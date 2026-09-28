@@ -1,0 +1,172 @@
+---
+title: "Kling 작업 조회"
+description: "Kling 비디오, 이미지 생성 및 가상 피팅 작업의 상태와 결과를 조회합니다"
+---
+> 업데이트: 2026-06-06
+
+# Kling 작업 조회
+
+## 조회 가능한 작업 경로
+
+| 경로 | 용도 |
+|------|------|
+| `GET /kling/v1/videos/text2video/{task_id}` | 텍스트-투-비디오 작업 조회 |
+| `GET /kling/v1/videos/image2video/{task_id}` | 이미지-투-비디오 작업 조회 |
+| `GET /kling/v1/videos/multi-image2video/{task_id}` | 참조 이미지 비디오 생성 작업 조회 |
+| `GET /kling/v1/videos/omni-video/{task_id}` | Omni 비디오 작업 조회 |
+| `GET /kling/v1/images/generations/{task_id}` | 이미지 생성 작업 조회 |
+| `GET /kling/v1/images/kolors-virtual-try-on/{task_id}` | 가상 피팅 작업 조회 |
+
+## 응답 형식
+
+모든 Kling 조회 인터페이스는 동일한 작업 구조를 통일해서 반환합니다.
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "error": null,
+    "format": "mp4",
+    "metadata": null,
+    "status": "SUCCESS",
+    "task_id": "866168216002236456",
+    "result_url": "https://media.crazyrouter.com/task-artifacts/2026/06/30/kling/866168216002236456.mp4",
+    "artifact_url": "https://media.crazyrouter.com/task-artifacts/2026/06/30/kling/866168216002236456.mp4"
+  }
+}
+```
+
+### 대기 중
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "error": null,
+    "format": "mp4",
+    "metadata": null,
+    "status": "queued",
+    "task_id": "task_abc123",
+    "result_url": "",
+    "artifact_url": ""
+  }
+}
+```
+
+### 처리 중
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "error": null,
+    "format": "mp4",
+    "metadata": null,
+    "status": "processing",
+    "task_id": "task_abc123",
+    "result_url": "",
+    "artifact_url": ""
+  }
+}
+```
+
+### 완료됨
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "error": null,
+    "format": "mp4",
+    "metadata": null,
+    "status": "SUCCESS",
+    "task_id": "866168216002236456",
+    "result_url": "https://media.crazyrouter.com/task-artifacts/2026/06/30/kling/866168216002236456.mp4",
+    "artifact_url": "https://media.crazyrouter.com/task-artifacts/2026/06/30/kling/866168216002236456.mp4"
+  }
+}
+```
+
+### 실패
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "error": {
+      "message": "content moderation failed",
+      "code": "task_failed"
+    },
+    "format": "mp4",
+    "metadata": null,
+    "status": "failed",
+    "task_id": "task_abc123",
+    "result_url": "",
+    "artifact_url": ""
+  }
+}
+```
+
+## 작업 상태
+
+| 상태 | 설명 |
+|------|------|
+| `queued` | 제출됨 또는 대기 중 |
+| `processing` | 생성 진행 중 |
+| `SUCCESS` | 완료됨, `result_url` 또는 `artifact_url`로 바로 접근 가능 |
+| `failed` | 최종 실패 |
+
+---
+
+## 전체 흐름 예시
+
+```python Python
+import requests
+import time
+
+API_KEY = "YOUR_API_KEY"
+BASE_URL = "https://api.crazyrouter.com"
+headers = {
+    "Content-Type": "application/json",
+    "Authorization": f"Bearer {API_KEY}"
+}
+
+# 1. 텍스트-투-비디오 작업 제출
+resp = requests.post(
+    f"{BASE_URL}/kling/v1/videos/text2video",
+    headers=headers,
+    json={
+        "model_name": "kling-v2-5-turbo",
+        "prompt": "고양이 한 마리가 정원에서 나비를 쫓고 있다",
+        "duration": "5",
+        "aspect_ratio": "16:9"
+    }
+)
+task_id = resp.json()["data"]["task_id"]
+
+# 2. 폴링 조회
+while True:
+    resp = requests.get(
+        f"{BASE_URL}/kling/v1/videos/text2video/{task_id}",
+        headers=headers
+    )
+    data = resp.json()["data"]
+
+    if data["status"] == "SUCCESS":
+        print(f"비디오 주소: {data.get('artifact_url') or data.get('result_url')}")
+        break
+    if data["status"] == "failed":
+        print(f"실패: {data['error']}")
+        break
+
+    time.sleep(10)
+```
+
+<Note>
+  Kling의 표준 비디오, Omni 비디오, 이미지, 피팅 작업 결과는 모두 사이트 내 아카이브 주소 `media.crazyrouter.com/...`를 반환할 수 있습니다. 클라이언트 입장에서는 `artifact_url` 또는 `result_url`을 우선 사용하면 되며, 업스트림 원본 CDN을 별도로 파싱할 필요가 없습니다.
+</Note>

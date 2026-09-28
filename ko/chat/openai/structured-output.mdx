@@ -1,0 +1,90 @@
+---
+title: "구조화 출력"
+description: "2026-03-23 Crazyrouter 프로덕션 환경에서 검증된 OpenAI 스타일 구조화 출력을 기준으로 합니다"
+---
+> 업데이트: 2026-06-06
+
+# 구조화 출력
+
+```
+POST /v1/chat/completions
+```
+
+2026년 3월 23일 기준, Crazyrouter 프로덕션 환경에서는 `gpt-5.5` + `response_format.type = "json_schema"`를 사용하면 바로 파싱 가능한 JSON을 반환받을 수 있음이 검증되었습니다.
+
+---
+
+## 권장 경로: `json_schema`
+
+```bash
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Return the people and roles from: Alice is CTO. Bob is PM."
+      }
+    ],
+    "response_format": {
+      "type": "json_schema",
+      "json_schema": {
+        "name": "people_roles",
+        "strict": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {"type": "string"},
+                  "role": {"type": "string"}
+                },
+                "required": ["name", "role"],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": ["people"],
+          "additionalProperties": false
+        }
+      }
+    }
+  }'
+```
+
+프로덕션 환경에서 실제로 반환되는 `message.content`는 다음과 같이 바로 파싱할 수 있습니다:
+
+```json
+{
+  "people": [
+    {
+      "name": "Alice",
+      "role": "CTO"
+    },
+    {
+      "name": "Bob",
+      "role": "PM"
+    }
+  ]
+}
+```
+
+---
+
+## 코드 측 처리
+
+```python
+import json
+
+content = response["choices"][0]["message"]["content"]
+data = json.loads(content)
+```
+
+<Note>
+  이번 프로덕션 검증에서는 `json_schema`라는 이 엄격한 구조화 출력 경로만 확인되었습니다. 기존의 `json_object` 모드는 이번 검증에서 별도로 재테스트되지 않았으므로, 더 이상 현재의 주요 예시로 유지하지 않습니다.
+</Note>

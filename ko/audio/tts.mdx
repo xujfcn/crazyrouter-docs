@@ -1,0 +1,112 @@
+---
+title: "텍스트 음성 변환 (TTS)"
+description: "POST /v1/audio/speech를 사용하여 텍스트를 음성으로 변환합니다"
+---
+> 업데이트: 2026-06-06
+
+# 텍스트 음성 변환 (TTS)
+
+```
+POST /v1/audio/speech
+```
+
+텍스트를 자연스러운 음성으로 변환하며, OpenAI TTS API 형식과 호환됩니다.
+
+## 요청 파라미터
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| `model` | string | 예 | 모델명: `tts-1`, `tts-1`, `tts-1-hd-1106` |
+| `input` | string | 예 | 변환할 텍스트, 최대 4096자 |
+| `voice` | string | 예 | 음성 역할 |
+| `response_format` | string | 아니오 | 출력 형식: `mp3`(기본값), `opus`, `aac`, `flac`, `wav`, `pcm` |
+| `speed` | number | 아니오 | 말하기 속도, 0.25-4.0, 기본값 1.0 |
+
+### 사용 가능한 음성
+
+| 음성 | 특징 |
+|------|------|
+| `alloy` | 중성적, 균형감 있음 |
+| `echo` | 남성, 안정적 |
+| `fable` | 남성, 따뜻함 |
+| `onyx` | 남성, 깊이감 |
+| `nova` | 여성, 활기 있음 |
+| `shimmer` | 여성, 부드러움 |
+
+## 요청 예제
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/audio/speech \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "tts-1",
+    "input": "안녕하세요, Crazyrouter API를 이용해 주셔서 감사합니다. 오늘 날씨가 정말 좋네요!",
+    "voice": "nova",
+    "response_format": "mp3",
+    "speed": 1.0
+  }' \
+  --output speech.mp3
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+response = client.audio.speech.create(
+    model="tts-1",
+    input="안녕하세요, Crazyrouter API를 이용해 주셔서 감사합니다. 오늘 날씨가 정말 좋네요!",
+    voice="nova",
+    response_format="mp3",
+    speed=1.0
+)
+
+response.stream_to_file("speech.mp3")
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+import fs from "fs";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://api.crazyrouter.com/v1",
+});
+
+const response = await client.audio.speech.create({
+  model: "tts-1",
+  input: "안녕하세요, Crazyrouter API를 이용해 주셔서 감사합니다.",
+  voice: "nova",
+});
+
+const buffer = Buffer.from(await response.arrayBuffer());
+fs.writeFileSync("speech.mp3", buffer);
+```
+
+</CodeGroup>
+
+응답은 오디오 파일의 바이너리 스트림이며, 그대로 저장하면 됩니다.
+
+---
+
+## 모델 비교
+
+| 모델 | 품질 | 지연 시간 | 설명 |
+|------|------|------|------|
+| `tts-1` | 표준 | 낮음 | 실시간 시나리오에 적합 |
+| `tts-1-hd-1106` | HD | 중간 | 더 자연스러운 음성 |
+| `tts-1` | 최고 | 중간 | 최신 모델, 더 많은 언어와 감정 표현 지원 |
+
+<Note>
+  `tts-1`은 다국어를 지원하며, 입력 텍스트의 언어를 자동으로 인식하여 해당 발음을 사용합니다.
+</Note>
+
+<Warning>
+  응답은 바이너리 오디오 스트림이며 JSON이 아닙니다. `--output`을 사용하거나 스트리밍으로 파일에 기록하세요.
+</Warning>

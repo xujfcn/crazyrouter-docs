@@ -1,0 +1,127 @@
+---
+title: "DALL-E"
+description: "DALL-E 3 모델을 사용하여 이미지를 생성하고 편집합니다"
+---
+> 업데이트: 2026-06-06
+
+# DALL-E
+
+```
+POST /v1/images/generations
+```
+
+DALL-E 3 모델을 사용하여 이미지를 생성하며, OpenAI Images API 형식과 호환됩니다.
+
+## 이미지 생성
+
+### 요청 파라미터
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| `model` | string | 예 | `dall-e-3` 또는 `dall-e-3` |
+| `prompt` | string | 예 | 이미지 설명 프롬프트 |
+| `n` | integer | 아니요 | 생성 수량, DALL-E 3는 1만 지원 |
+| `size` | string | 아니요 | 이미지 크기 |
+| `quality` | string | 아니요 | 품질: `standard`(기본값), `hd` |
+| `style` | string | 아니요 | 스타일: `vivid`(기본값), `natural` |
+| `response_format` | string | 아니요 | 반환 형식: `url`(기본값), `b64_json` |
+
+### 크기 옵션
+
+| 모델 | 지원 크기 |
+|------|-----------|
+| `dall-e-3` | `1024x1024`, `1792x1024`, `1024x1792` |
+| `dall-e-3` | `256x256`, `512x512`, `1024x1024` |
+
+### 요청 예시
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "dall-e-3",
+    "prompt": "수묵화 스타일의 산수화, 멀리 폭포와 구름이 보임",
+    "n": 1,
+    "size": "1792x1024",
+    "quality": "hd",
+    "style": "natural"
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+response = client.images.generate(
+    model="dall-e-3",
+    prompt="수묵화 스타일의 산수화, 멀리 폭포와 구름이 보임",
+    n=1,
+    size="1792x1024",
+    quality="hd",
+    style="natural"
+)
+
+print(response.data[0].url)
+print(response.data[0].revised_prompt)
+```
+
+</CodeGroup>
+
+### 응답 예시
+
+```json
+{
+  "created": 1709123456,
+  "data": [
+    {
+      "url": "https://oaidalleapiprodscus.blob.core.windows.net/...",
+      "revised_prompt": "A traditional Chinese ink wash painting depicting a mountainous landscape with a waterfall cascading down rocky cliffs, surrounded by misty clouds..."
+    }
+  ]
+}
+```
+
+---
+
+## 이미지 편집
+
+```
+POST /v1/images/edits
+```
+
+DALL-E 2를 사용하여 이미지의 특정 영역을 편집합니다.
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+response = client.images.edit(
+    model="dall-e-3",
+    image=open("image.png", "rb"),
+    mask=open("mask.png", "rb"),
+    prompt="빈 영역에 새끼 고양이 한 마리를 추가",
+    n=1,
+    size="1024x1024"
+)
+
+print(response.data[0].url)
+```
+
+<Note>
+  DALL-E 3는 프롬프트를 자동으로 최적화하여(`revised_prompt`) 더 상세한 설명을 생성하여 이미지 품질을 높입니다.
+</Note>
+
+<Warning>
+  DALL-E 3는 요청당 이미지를 1장만 생성할 수 있습니다(`n=1`). 여러 장이 필요하면 여러 번 요청을 보내십시오.
+</Warning>

@@ -1,0 +1,85 @@
+---
+title: "Claude 이미지 인식"
+description: "2026-03-23 Crazyrouter 프로덕션 환경 검증을 기반으로 한 Claude 이미지 이해 기능"
+---
+> 업데이트: 2026-06-06
+
+# Claude 이미지 인식
+
+2026년 3월 23일 기준, Crazyrouter 프로덕션 환경에서 두 가지 Claude 비전 입력 경로가 검증되었습니다.
+
+- 네이티브 `POST /v1/messages` + `type: "image"` + Base64 PNG
+- OpenAI 호환 `POST /v1/chat/completions` + `type: "image_url"` + data URL
+
+---
+
+## 네이티브 형식: `/v1/messages`
+
+```bash
+curl https://api.crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-opus-4-8",
+    "max_tokens": 128,
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "image",
+            "source": {
+              "type": "base64",
+              "media_type": "image/png",
+              "data": "iVBORw0KGgoAAA..."
+            }
+          },
+          {
+            "type": "text",
+            "text": "What color is this image?"
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+이번 프로덕션 환경 점검에서 다음이 반환되었습니다.
+
+- `model: "claude-opus-4-8"`
+- `content[0].type = "text"`
+
+---
+
+## OpenAI 호환 형식: `/v1/chat/completions`
+
+```bash
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "claude-opus-4-8",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {"type": "text", "text": "What color is this image?"},
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "data:image/png;base64,iVBORw0KGgoAAA..."
+            }
+          }
+        ]
+      }
+    ],
+    "max_tokens": 128
+  }'
+```
+
+2026-03-23 프로덕션 환경 실측에서 모델이 반환한 `message.content`는 일반 문자열이었으며, 이미지 색상에 대한 텍스트 설명이 담겨 있었습니다.
+
+<Note>
+  현재 페이지에서는 재검증에 성공한 Base64 PNG / data URL 두 가지 비전 입력 방식만 다룹니다. 원격 URL, 더 많은 이미지 형식, 더 복잡한 다중 이미지 시나리오는 이번에는 항목별로 재검증하지 않았습니다.
+</Note>

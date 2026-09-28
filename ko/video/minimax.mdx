@@ -1,0 +1,117 @@
+---
+title: "MiniMax 비디오"
+description: "MiniMax/하이누오 API를 사용해 비디오를 생성합니다"
+---
+> 업데이트: 2026-06-06
+
+# MiniMax 비디오
+
+MiniMax(하이누오)는 고품질 비디오 생성 기능을 제공합니다.
+
+## 비디오 생성
+
+```
+POST /minimax/v1/video_generation
+```
+
+### 요청 파라미터
+
+| 파라미터 | 유형 | 필수 | 설명 |
+|------|------|------|------|
+| `model` | string | 예 | 모델 이름, 예: `video-01`, `video-01-live2d` |
+| `prompt` | string | 예 | 비디오 설명 프롬프트 |
+| `first_frame_image` | string | 아니요 | 첫 프레임 이미지 URL |
+
+### 요청 예시
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/minimax/v1/video_generation \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "video-01",
+    "prompt": "고양이 한 마리가 햇살 아래서 졸고 있고, 바람이 털을 살랑살랑 흔든다"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/minimax/v1/video_generation",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "video-01",
+        "prompt": "고양이 한 마리가 햇살 아래서 졸고 있고, 바람이 털을 살랑살랑 흔든다"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### 응답 예시
+
+```json
+{
+  "task_id": "minimax_video_abc123",
+  "base_resp": {
+    "status_code": 0,
+    "status_msg": "success"
+  }
+}
+```
+
+---
+
+## 이미지-투-비디오
+
+```json
+{
+  "model": "video-01",
+  "prompt": "사진 속 인물이 웃기 시작한다",
+  "first_frame_image": "https://example.com/portrait.jpg"
+}
+```
+
+---
+
+## 작업 조회
+
+```
+GET /minimax/v1/query/video_generation?task_id={task_id}
+```
+
+```bash cURL
+curl "https://api.crazyrouter.com/minimax/v1/query/video_generation?task_id=minimax_video_abc123" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### 응답 예시(완료됨)
+
+```json
+{
+  "task_id": "minimax_video_abc123",
+  "status": "Success",
+  "file_id": "file_abc123",
+  "base_resp": {
+    "status_code": 0,
+    "status_msg": "success"
+  }
+}
+```
+
+### 작업 상태
+
+| 상태 | 설명 |
+|------|------|
+| `Queueing` | 대기 중 |
+| `Processing` | 처리 중 |
+| `Success` | 성공 |
+| `Fail` | 실패 |

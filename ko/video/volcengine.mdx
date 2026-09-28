@@ -1,0 +1,116 @@
+---
+title: "볼케이노 엔진"
+description: "볼케이노 엔진 API를 사용한 비디오 생성"
+---
+> 업데이트: 2026-06-06
+
+# 볼케이노 엔진
+
+볼케이노 엔진(Volcengine)은 ByteDance 산하의 비디오 생성 기능을 제공합니다.
+
+## 비디오 작업 생성
+
+```
+POST /volc/v1/contents/generations/tasks
+```
+
+### 요청 파라미터
+
+| 파라미터 | 유형 | 필수 | 설명 |
+|------|------|------|------|
+| `model` | string | 예 | 모델 이름 |
+| `content` | object | 예 | 콘텐츠 설정 |
+| `content.prompt` | string | 예 | 비디오 설명 프롬프트 |
+| `content.image_url` | string | 아니오 | 참조 이미지 URL |
+| `content.aspect_ratio` | string | 아니오 | 종횡비 |
+
+### 요청 예시
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/volc/v1/contents/generations/tasks \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "doubao-video",
+    "content": {
+      "prompt": "나비 한 마리가 꽃밭 사이를 날아다니는 매크로 렌즈 장면",
+      "aspect_ratio": "16:9"
+    }
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/volc/v1/contents/generations/tasks",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "doubao-video",
+        "content": {
+            "prompt": "나비 한 마리가 꽃밭 사이를 날아다니는 매크로 렌즈 장면",
+            "aspect_ratio": "16:9"
+        }
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### 응답 예시
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "task_id": "volc_task_abc123"
+  }
+}
+```
+
+---
+
+## 작업 조회
+
+```
+GET /volc/v1/contents/generations/tasks/{task_id}
+```
+
+```bash cURL
+curl https://api.crazyrouter.com/volc/v1/contents/generations/tasks/volc_task_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### 응답 예시(완료됨)
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "task_id": "volc_task_abc123",
+    "status": "SUCCESS",
+    "content": {
+      "video_url": "https://cdn.volcengine.com/videos/...",
+      "duration": 5
+    }
+  }
+}
+```
+
+### 작업 상태
+
+| 상태 | 설명 |
+|------|------|
+| `SUBMITTED` | 제출됨 |
+| `PROCESSING` | 처리 중 |
+| `SUCCESS` | 성공 |
+| `FAILED` | 실패 |

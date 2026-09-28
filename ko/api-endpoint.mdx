@@ -1,0 +1,122 @@
+---
+title: '프록시 인터페이스 호출 주소'
+description: 'API 엔드포인트 주소 설명'
+---
+> 업데이트: 2026-07-20
+
+## API Base URL
+
+```
+https://api.crazyrouter.com
+```
+
+`https://api.crazyrouter.com`은 기본 국제 API 접속 진입점으로 활성화되어 있습니다. 계정 로그인, 충전, 콘솔은 여전히 다음을 사용합니다.
+
+```
+https://crazyrouter.com
+```
+
+<Warning>
+계정 및 관리 인터페이스는 반드시 메인 도메인 `https://crazyrouter.com`을 사용해야 하며, `/api/user/self`, `/api/token/*`, `/api/log/*`도 포함됩니다. 이 경로들을 `https://api.crazyrouter.com`이나 `https://cn.crazyrouter.com`으로 보내지 마세요. 이 도메인들은 모델 및 미디어 API 전용이며, 잘못 사용하면 `404 api_only_endpoint`가 반환됩니다. 모델 추론 인터페이스(예: `/v1/chat/completions`, `/v1/messages`, `/v1/models`)는 여전히 API 전용 도메인을 사용합니다.
+</Warning>
+
+동아시아 지역에서는 다음 API 접속 주소를 우선 사용하는 것을 권장합니다.
+
+```
+https://cn.crazyrouter.com
+```
+
+서드파티 클라이언트, SDK, IDE 또는 Agent를 설정하는 경우, 해당 도구가 루트 도메인을 입력해야 하는지 `/v1`을 입력해야 하는지 먼저 확인하세요.
+
+<Card title="접속 주소 설명 보기" icon="book" href="https://docs.crazyrouter.com/ko/api-endpoint">
+  이 섹션에서 루트 도메인을 입력해야 하는지 `/v1`을 입력해야 하는지 먼저 확인한 후, 구체적인 도구 문서로 돌아가 설정하세요.
+</Card>
+
+## 권장 접속 주소
+
+기본적으로 국제 API 진입점 `https://api.crazyrouter.com`을 우선 사용합니다. 동아시아 지역 사용자는 `https://cn.crazyrouter.com`을 우선 사용하는 것을 권장합니다. 이 두 주소는 API 요청에만 사용되며, 웹 계정, 충전, 콘솔, 가격 페이지는 계속 `https://crazyrouter.com`을 사용합니다.
+
+## 클라이언트별로 입력해야 하는 주소
+
+| 사용 방식 | 기본 국제 진입점 | 동아시아 지역 우선 진입점 | 설명 |
+|----------|----------------|----------------|------|
+| OpenAI 호환 SDK / 클라이언트 | `https://api.crazyrouter.com/v1` | `https://cn.crazyrouter.com/v1` | 클라이언트가 이 주소 뒤에 `/chat/completions`, `/models` 등의 경로를 이어서 붙입니다 |
+| Claude Code / Anthropic 네이티브 클라이언트 | `https://api.crazyrouter.com` | `https://cn.crazyrouter.com` | 클라이언트가 자체적으로 `/v1/messages`를 이어붙이므로 수동으로 `/v1`을 추가하지 마세요 |
+| curl / 직접 작성한 HTTP 요청 | 완전한 엔드포인트 사용, 예: `https://api.crazyrouter.com/v1/chat/completions` | 완전한 엔드포인트 사용, 예: `https://cn.crazyrouter.com/v1/chat/completions` | 직접 요청을 작성할 때는 완전한 API 경로를 써야 합니다 |
+| 계정, 잔액, Token, 로그 관리 인터페이스 | `https://crazyrouter.com` | `https://crazyrouter.com` | `/api/user/self`, `/api/token/*`, `/api/log/*`에 사용; API 전용 도메인을 사용하지 마세요 |
+
+<Warning>
+로그에 `/v1/v1/models`, `/v1/v1/messages`, `/v1/messages/v1/messages`가 나타난다면 클라이언트 설정에서 API 경로가 중복으로 이어붙었다는 뜻입니다. Claude Code / Anthropic 네이티브 클라이언트는 루트 도메인으로 되돌리고, OpenAI 호환 클라이언트는 `/v1`까지만 유지하세요.
+</Warning>
+
+<Warning>
+Claude의 네이티브 `tool_use`, Claude Code 프로그래밍 기능, 일부 IDE Agent 도구 호출 시나리오는 Anthropic Messages 경로, 즉 `POST /v1/messages`를 우선적으로 사용해야 합니다. OpenAI 호환 `/v1/chat/completions`는 일반적인 대화와 기본 호환 연동에 더 적합하며, Claude 네이티브 Messages API와 동등하지 않습니다. Claude 모델을 OpenAI 호환 엔드포인트에 넣고 도구 호출을 사용하면 도구를 안정적으로 실행하지 못할 수 있습니다.
+</Warning>
+
+## 주요 엔드포인트
+
+### 채팅 API
+
+| 엔드포인트 | 메서드 | 설명 |
+|------|------|------|
+| `/v1/chat/completions` | POST | OpenAI Chat 형식 |
+| `/v1/messages` | POST | Anthropic Claude 형식 |
+| `/v1/responses` | POST | OpenAI Responses API |
+| `/v1/completions` | POST | Legacy Completions |
+
+### Gemini 네이티브 형식
+
+| 엔드포인트 | 메서드 | 설명 |
+|------|------|------|
+| `/v1beta/models/{model}:generateContent` | POST | 텍스트 생성 |
+| `/v1beta/models/{model}:streamGenerateContent` | POST | 스트리밍 생성 |
+
+### 이미지 API
+
+| 엔드포인트 | 메서드 | 설명 |
+|------|------|------|
+| `/v1/images/generations` | POST | OpenAI 이미지 생성 |
+| `/v1/images/edits` | POST | 이미지 편집 |
+| `/mj/submit/imagine` | POST | Midjourney 이미지 생성 |
+| `/ideogram/v1/ideogram-v3/generate` | POST | Ideogram V3 |
+| `/kling/v1/images/generations` | POST | Kling 이미지 생성 |
+| `/kling/v1/images/kolors-virtual-try-on` | POST | Kling 가상 피팅 |
+
+### 비디오 API
+
+| 엔드포인트 | 메서드 | 설명 |
+|------|------|------|
+| `/v1/video/create` | POST | 통합 비디오 생성 |
+| `/v1/video/query` | GET | 통합 비디오 조회 |
+| `/kling/v1/videos/text2video` | POST | Kling 텍스트→비디오 |
+| `/kling/v1/videos/image2video` | POST | Kling 이미지→비디오 |
+| `/kling/v1/videos/multi-image2video` | POST | Kling 참조 이미지→비디오 |
+| `/kling/v1/videos/omni-video` | POST | Kling Omni 비디오 |
+| `/jimeng/submit/videos` | POST | Jimeng(即梦) 비디오 제출 |
+| `/jimeng/fetch/{task_id}` | GET | Jimeng(即梦) 작업 조회 |
+| `/luma/generations` | POST | Luma 비디오 생성 |
+| `/runwayml/v1/image_to_video` | POST | Runway 이미지→비디오 |
+| `/runwayml/v1/tasks/{task_id}` | GET | Runway 작업 조회 |
+
+### 오디오 API
+
+| 엔드포인트 | 메서드 | 설명 |
+|------|------|------|
+| `/v1/audio/speech` | POST | 텍스트 음성 변환(TTS) |
+| `/v1/audio/transcriptions` | POST | 음성 텍스트 변환(STT) |
+
+### 기타 API
+
+| 엔드포인트 | 메서드 | 설명 |
+|------|------|------|
+| `/v1/embeddings` | POST | 임베딩 벡터 |
+| `/v1/rerank` | POST | 재정렬(rerank) |
+| `/v1/models` | GET | 모델 목록 |
+| `/v1/files/uploads` | POST | 로컬 이미지 임시 업로드 |
+| `/v1/files/uploads/base64` | POST | Base64 이미지 임시 업로드 |
+| `/v1/files/uploads/url` | POST | 원격 이미지를 임시 URL로 변환 저장 |
+| `/v1/files/uploads/presign` | POST | 사전 서명된 R2 직접 업로드 |
+
+<Note>
+모든 엔드포인트는 HTTPS를 지원합니다. 기본 국제 API 진입점은 `https://api.crazyrouter.com`이며, 동아시아 지역은 `https://cn.crazyrouter.com`을 우선 사용합니다. 계정 로그인, 충전, 콘솔은 여전히 `https://crazyrouter.com`을 사용합니다.
+</Note>

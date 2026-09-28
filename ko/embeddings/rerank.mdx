@@ -1,0 +1,130 @@
+---
+title: '재정렬'
+description: '검색 결과를 의미론적으로 재정렬합니다'
+api: 'POST /v1/rerank'
+---
+> 업데이트: 2026-06-06
+
+## 인터페이스 설명
+
+문서 집합을 쿼리와의 의미론적 관련성에 따라 재정렬합니다. RAG(검색 증강 생성)의 2단계 정밀 정렬에 주로 사용됩니다.
+
+<Note>
+  [SiliconFlow Rerank API](https://docs.siliconflow.cn/cn/api-reference/rerank/create-rerank) 형식을 참고하여 구현되었습니다.
+</Note>
+
+## 지원 모델
+
+| 모델 | 설명 |
+|------|------|
+| `gte-rerank-v2` | 다국어 재정렬 모델, 권장 |
+| `gte-rerank-v2` | 영어 중심 |
+
+## 요청 파라미터
+
+<ParamField body="model" type="string" required>
+  재정렬 모델 이름, 예: `gte-rerank-v2`
+</ParamField>
+
+<ParamField body="query" type="string" required>
+  쿼리 텍스트
+</ParamField>
+
+<ParamField body="documents" type="string[]" required>
+  정렬할 문서 목록
+</ParamField>
+
+<ParamField body="top_n" type="integer">
+  반환할 상위 N개 결과, 기본값은 전체 반환
+</ParamField>
+
+<ParamField body="return_documents" type="boolean" default="true">
+  응답에 문서 원문을 포함할지 여부
+</ParamField>
+
+## 응답 형식
+
+```json
+{
+  "model": "gte-rerank-v2",
+  "results": [
+    {
+      "index": 2,
+      "relevance_score": 0.9875,
+      "document": { "text": "가장 관련성 높은 문서 내용" }
+    },
+    {
+      "index": 0,
+      "relevance_score": 0.7432,
+      "document": { "text": "차순위로 관련성 있는 문서 내용" }
+    },
+    {
+      "index": 1,
+      "relevance_score": 0.1205,
+      "document": { "text": "관련성이 낮은 문서 내용" }
+    }
+  ],
+  "usage": {
+    "total_tokens": 128
+  }
+}
+```
+
+## 코드 예시
+
+<CodeGroup>
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/v1/rerank",
+    headers={
+        "Authorization": "Bearer sk-xxx",
+        "Content-Type": "application/json"
+    },
+    json={
+        "model": "gte-rerank-v2",
+        "query": "벡터 데이터베이스란 무엇인가요",
+        "documents": [
+            "벡터 데이터베이스는 고차원 벡터를 저장하고 검색하기 위한 데이터베이스 시스템입니다",
+            "관계형 데이터베이스는 테이블을 사용해 구조화된 데이터를 저장합니다",
+            "벡터 데이터베이스는 근사 최근접 이웃 검색을 지원하여 의미 검색 시나리오에 적합합니다",
+            "Redis는 인메모리 키-값 저장 시스템입니다"
+        ],
+        "top_n": 2,
+        "return_documents": True
+    }
+)
+
+data = response.json()
+for result in data["results"]:
+    print(f"[{result['relevance_score']:.4f}] {result['document']['text']}")
+```
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/rerank \
+  -H "Authorization: Bearer sk-xxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gte-rerank-v2",
+    "query": "벡터 데이터베이스란 무엇인가요",
+    "documents": [
+      "벡터 데이터베이스는 고차원 벡터를 저장하고 검색하기 위한 데이터베이스 시스템입니다",
+      "관계형 데이터베이스는 테이블을 사용해 구조화된 데이터를 저장합니다"
+    ],
+    "top_n": 2
+  }'
+```
+
+</CodeGroup>
+
+## 일반적인 RAG 흐름
+
+```
+사용자 쿼리 → Embedding으로 Top-K 검색 → Rerank 정밀 정렬 → LLM 답변 생성
+```
+
+<Warning>
+  재정렬 모델에 입력하는 문서 수는 100개를 넘지 않는 것을 권장합니다. 문서가 너무 많으면 지연 시간과 비용이 증가합니다.
+</Warning>

@@ -1,0 +1,132 @@
+---
+title: "Gemini 호환 OpenAI 모델 목록"
+description: "프로덕션 환경 재검증을 기준으로, GET /v1beta/openai/models를 사용하여 OpenAI 스타일 모델 목록을 가져옵니다"
+---
+> 업데이트: 2026-06-06
+
+# Gemini 호환 OpenAI 모델 목록
+
+```
+GET /v1beta/openai/models
+```
+
+이 엔드포인트는 호환성 브릿지입니다:
+
+- 인증 방식은 Gemini 스타일을 사용할 수 있습니다
+- 반환 구조는 여전히 OpenAI 스타일 모델 목록입니다
+
+이 문서는 `2026-03-23`에 Crazyrouter 프로덕션 환경에서 재검증된 동작만 기술합니다.
+
+## 언제 사용하는가
+
+- 클라이언트가 `?key=` 방식에 익숙한 경우
+- 미들웨어가 이미 `x-goog-api-key`를 사용하는 경우
+- Gemini 네이티브 모델 메타데이터가 아닌, OpenAI 스타일의 `list + data[]` 구조를 얻고 싶은 경우
+
+표준 OpenAI 클라이언트라면 [GET /v1/models](/ko/chat/openai/models)를 우선 사용하십시오.
+
+## 인증
+
+이번 검증에서 다음 세 가지 방식이 모두 사용 가능함을 확인했습니다:
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+```http
+x-goog-api-key: YOUR_API_KEY
+```
+
+```text
+GET /v1beta/openai/models?key=YOUR_API_KEY
+```
+
+## 요청 예시
+
+<CodeGroup>
+
+```bash cURL
+curl "https://api.crazyrouter.com/v1beta/openai/models?key=YOUR_API_KEY"
+```
+
+```bash cURL with Header
+curl https://api.crazyrouter.com/v1beta/openai/models \
+  -H "x-goog-api-key: YOUR_API_KEY"
+```
+
+</CodeGroup>
+
+---
+
+## 현재 프로덕션 검증 결론
+
+`2026-03-23` 프로덕션 재검증에서:
+
+- `?key=` 요청은 `200`을 반환합니다
+- `x-goog-api-key` 요청은 `200`을 반환합니다
+- 최상위 `object`는 `list`입니다
+- 최상위 `success`는 `true`입니다
+- 현재 반환되는 모델 수는 `541`개입니다
+- `data[]` 요소에 자주 포함되는 필드는 다음과 같습니다:
+  - `id`
+  - `object`
+  - `created`
+  - `owned_by`
+  - `supported_endpoint_types`
+
+---
+
+## 응답 예시
+
+```json
+{
+  "object": "list",
+  "success": true,
+  "data": [
+    {
+      "id": "gpt-5.5",
+      "object": "model",
+      "created": 1700000000,
+      "owned_by": "openai",
+      "supported_endpoint_types": ["openai"]
+    },
+    {
+      "id": "claude-opus-4-8",
+      "object": "model",
+      "created": 1700000000,
+      "owned_by": "anthropic",
+      "supported_endpoint_types": ["openai", "anthropic"]
+    },
+    {
+      "id": "gemini-3.1-pro",
+      "object": "model",
+      "created": 1700000000,
+      "owned_by": "google",
+      "supported_endpoint_types": ["openai", "gemini"]
+    }
+  ]
+}
+```
+
+## 필드 설명
+
+| 필드 | 유형 | 설명 |
+|------|------|------|
+| `data[]` | array | 현재 토큰이 사용 가능한 모델 목록 |
+| `id` | string | 모델 식별자 |
+| `owned_by` | string | 모델의 출처 또는 소속 조직 |
+| `supported_endpoint_types` | array | 현재 모델이 지원하는 인터페이스 스타일 |
+| `object` | string | 항상 `list`로 고정 |
+| `success` | boolean | 요청 성공 여부 |
+
+<Note>
+  `supported_endpoint_types`는 현재 모델이 지원하는 인터페이스 스타일만 나타냅니다. 현재 `openai`는 `POST /v1/chat/completions`에 대응하고, `anthropic`은 `POST /v1/messages`에 대응하며, `openai-response`가 `POST /v1/responses`에 대응합니다. Claude는 현재 공개적으로 `openai` + `anthropic`을 지원하며, `openai-response`는 지원하지 않습니다.
+</Note>
+
+<Note>
+  이 엔드포인트는 "Gemini 모델만 반환"하는 것이 아닙니다. 현재 토큰이 볼 수 있는 모델의 OpenAI 스타일 목록을 반환하며, 다만 진입 경로와 인증 방식이 Gemini 스타일 클라이언트에 더 적합하게 되어 있을 뿐입니다.
+</Note>
+
+관련 페이지:
+
+- [모델 공식 정가 방식](/ko/reference/official-pricing-methods)

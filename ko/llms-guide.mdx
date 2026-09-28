@@ -1,0 +1,84 @@
+---
+title: '문서를 AI 도구에 제공하기'
+description: 'https://docs.crazyrouter.com/llms.txt를 사용하여 AI 도구가 Crazyrouter의 올바른 연동 방법을 빠르게 이해하도록 합니다'
+---
+> 업데이트: 2026-06-06
+
+# 문서를 AI 도구에 제공하기
+
+ChatGPT, Claude, Cursor, Cline, Aider, Codex 등의 AI 도구로 코드를 작성하고 있다면, 다음 문서 진입점을 바로 전달할 수 있습니다.
+
+```text
+https://docs.crazyrouter.com/llms.txt
+```
+
+AI 도구가 이를 읽으면 Crazyrouter의 빠른 시작, 인증 방식, API 엔드포인트, 모델 목록, 이미지/동영상/오디오 인터페이스, 자주 사용하는 도구 연동 문서를 빠르게 찾을 수 있습니다.
+
+## 복사해서 사용하기 권장
+
+다음 프롬프트를 복사해서 AI 도구에 전달하세요.
+
+```text
+먼저 https://docs.crazyrouter.com/llms.txt를 읽고, Crazyrouter 공식 문서를 기반으로 제 질문에 답변해 주세요.
+
+제 요구 사항은: [여기에 요구 사항을 작성하세요. 예: Python으로 Sora 2를 호출하여 5초짜리 동영상 생성]
+
+주의해 주세요:
+- OpenAI 호환 SDK는 기본적으로 base_url로 https://api.crazyrouter.com/v1을 사용합니다
+- 모델명, 가격, 청구 방식과 관련된 내용은 https://crazyrouter.com/pricing 을 기준으로 해주세요
+- 특정 모델의 사용 가능 여부가 확실하지 않다면, Pricing 페이지나 /v1/models에서 확인하도록 알려주세요
+- 바로 실행 가능한 코드 예시를 제공해 주세요
+```
+
+## 자주 쓰는 방법
+
+| AI에게 시키고 싶은 일 | 권장 문구 |
+| --- | --- |
+| 연동 코드 생성 | "llms.txt를 읽고, Python/Node.js로 Crazyrouter 호출 예시를 작성해 줘." |
+| 특정 모델 연동 | "llms.txt를 읽고, 이 모델이 어떤 Crazyrouter 인터페이스를 사용해야 하는지 확인해 줘." |
+| IDE 또는 Agent 설정 | "llms.txt를 읽고, Cursor / Cline / Claude Code에서 Crazyrouter를 어떻게 설정하는지 알려줘." |
+| 오류 분석 | "llms.txt와 오류 처리 문서를 읽고, 이 Crazyrouter API 오류를 분석해 줘." |
+| 동영상 또는 이미지 생성 | "llms.txt를 읽고, Crazyrouter 문서에 따라 동영상/이미지 생성 요청 예시를 제공해 줘." |
+
+## llms-full.txt는 언제 사용하나요
+
+`llms.txt`는 간략화된 인덱스로, AI가 어떤 문서를 읽어야 할지 먼저 판단하기에 적합합니다.
+
+AI 도구가 더 긴 텍스트를 읽을 수 있거나, 전체 문서 컨텍스트를 한 번에 얻기를 원한다면, 다음도 계속 제공할 수 있습니다.
+
+```text
+https://docs.crazyrouter.com/llms-full.txt
+```
+
+## 모델과 가격은 어디를 기준으로 하나요
+
+모델은 채널, 권한, 플랫폼 설정에 따라 달라집니다. 문서의 예시는 호출 방식을 설명하기 위한 것일 뿐, 전체 모델 목록을 나타내지 않습니다.
+
+현재 공개된 모델, 가격, 청구 방식을 확인하려면 다음을 사용하세요.
+
+```text
+https://crazyrouter.com/pricing
+```
+
+이미 API Key를 가지고 있고 현재 토큰으로 실제로 어떤 모델을 호출할 수 있는지 확인하고 싶다면, 다음을 요청할 수 있습니다.
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/models \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+<Warning>
+실제 API Key를 신뢰할 수 없는 AI 도구나 공개된 대화에 붙여넣지 마세요. AI에게 코드 작성을 도와달라고 할 때는 `YOUR_API_KEY`와 같은 placeholder를 사용하면 됩니다.
+</Warning>
+
+## 단일 페이지 Markdown
+
+많은 문서 페이지는 Markdown 형식으로도 읽을 수 있습니다. 페이지 URL 뒤에 `.md`를 붙이기만 하면 됩니다. 예:
+
+```text
+https://docs.crazyrouter.com/quickstart.md
+https://docs.crazyrouter.com/api-endpoint.md
+https://docs.crazyrouter.com/video/sora.md
+```
+
+AI 도구가 전체 사이트를 잘 읽지 못한다면, 먼저 `llms.txt`를 제공한 후 필요한 페이지의 `.md` 링크를 이어서 제공하세요.

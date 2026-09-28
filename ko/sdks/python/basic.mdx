@@ -1,0 +1,141 @@
+---
+title: 'Python 기본 대화'
+description: 'Python으로 구현하는 기본 채팅, 연속 대화 및 스트리밍 출력'
+---
+> 업데이트: 2026-06-06
+
+## 의존성 설치
+
+```bash
+pip install openai requests
+```
+
+## 기본 대화
+
+<CodeGroup>
+
+```python OpenAI SDK
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="gpt-5.5",
+    messages=[
+        {"role": "system", "content": "당신은 도움이 되는 어시스턴트입니다."},
+        {"role": "user", "content": "한 문장으로 인공지능이 무엇인지 설명해줘"}
+    ]
+)
+
+print(response.choices[0].message.content)
+```
+
+```python requests
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/v1/chat/completions",
+    headers={
+        "Authorization": "Bearer sk-xxx",
+        "Content-Type": "application/json"
+    },
+    json={
+        "model": "gpt-5.5",
+        "messages": [
+            {"role": "user", "content": "한 문장으로 인공지능이 무엇인지 설명해줘"}
+        ]
+    }
+)
+
+data = response.json()
+print(data["choices"][0]["message"]["content"])
+```
+
+</CodeGroup>
+
+## 연속 대화
+
+`messages` 목록을 유지하여 다중 턴 대화를 구현합니다:
+
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-xxx", base_url="https://api.crazyrouter.com/v1")
+
+messages = [
+    {"role": "system", "content": "당신은 Python 프로그래밍 어시스턴트입니다."}
+]
+
+def chat(user_input):
+    messages.append({"role": "user", "content": user_input})
+
+    response = client.chat.completions.create(
+        model="gpt-5.5",
+        messages=messages
+    )
+
+    reply = response.choices[0].message.content
+    messages.append({"role": "assistant", "content": reply})
+    return reply
+
+# 다중 턴 대화
+print(chat("CSV 파일을 어떻게 읽나요?"))
+print(chat("파일이 크면 어떻게 하나요?"))
+print(chat("pandas로 구현할 수 있나요?"))
+```
+
+## 스트리밍 출력
+
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-xxx", base_url="https://api.crazyrouter.com/v1")
+
+stream = client.chat.completions.create(
+    model="gpt-5.5",
+    messages=[{"role": "user", "content": "프로그래밍에 관한 시를 써줘"}],
+    stream=True
+)
+
+for chunk in stream:
+    if chunk.choices[0].delta.content:
+        print(chunk.choices[0].delta.content, end="", flush=True)
+print()
+```
+
+## requests로 스트리밍 구현하기
+
+```python
+import requests
+import json
+
+response = requests.post(
+    "https://api.crazyrouter.com/v1/chat/completions",
+    headers={
+        "Authorization": "Bearer sk-xxx",
+        "Content-Type": "application/json"
+    },
+    json={
+        "model": "gpt-5.5",
+        "messages": [{"role": "user", "content": "안녕하세요"}],
+        "stream": True
+    },
+    stream=True
+)
+
+for line in response.iter_lines():
+    if line:
+        line = line.decode("utf-8")
+        if line.startswith("data: ") and line != "data: [DONE]":
+            data = json.loads(line[6:])
+            content = data["choices"][0]["delta"].get("content", "")
+            print(content, end="", flush=True)
+print()
+```
+
+<Note>
+  모든 예제는 기본적으로 2026년 3월 23일 프로덕션 환경에서 실측이 완료된 `gpt-5.5`를 사용합니다. 모델을 전환하려면 동일하게 검증된 `claude-opus-4-8` 또는 `gemini-3.1-pro`로 변경하는 것을 우선 권장합니다.
+</Note>

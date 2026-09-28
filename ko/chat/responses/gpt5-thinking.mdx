@@ -1,0 +1,213 @@
+---
+title: "GPT-5 사고 모드"
+description: "프로덕션 환경 재검증을 기반으로, Responses API를 통해 GPT-5.4의 reasoning 모드를 사용합니다"
+---
+> 업데이트: 2026-06-06
+
+# GPT-5 사고 모드
+
+이 문서 페이지에는 `2026-03-22`에 Crazyrouter 프로덕션 환경에서 재검증된 GPT reasoning 동작만 기재되어 있습니다.
+
+현재 주요 예시에서는 다음을 사용합니다.
+
+- `gpt-5.5`
+- `POST /v1/responses`
+
+<Note>
+  Claude는 현재 `POST /v1/responses`를 지원하지 않습니다. Claude를 연동하는 경우 `POST /v1/messages` 또는 `POST /v1/chat/completions`를 사용하시고, 이 페이지의 Responses 요청 형태를 그대로 적용하지 마십시오.
+</Note>
+
+```
+POST /v1/responses
+```
+
+---
+
+## 기본 사용법
+
+<CodeGroup>
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "input": "Which is larger, 9.11 or 9.9? Explain briefly.",
+    "reasoning": {
+      "effort": "high",
+      "summary": "detailed"
+    }
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+response = client.responses.create(
+    model="gpt-5.5",
+    input="Which is larger, 9.11 or 9.9? Explain briefly.",
+    reasoning={
+        "effort": "high",
+        "summary": "detailed"
+    }
+)
+
+print(response.output_text)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://api.crazyrouter.com/v1",
+});
+
+const response = await client.responses.create({
+  model: "gpt-5.5",
+  input: "Which is larger, 9.11 or 9.9? Explain briefly.",
+  reasoning: {
+    effort: "high",
+    summary: "detailed",
+  },
+});
+
+console.log(response.output_text);
+```
+
+</CodeGroup>
+
+---
+
+## 프로덕션에서 검증된 응답 구조
+
+현재 프로덕션에서 반환되는 주요 `output.type`은 다음과 같습니다.
+
+```json
+["reasoning", "message"]
+```
+
+`reasoning` item의 일반적인 구조는 다음과 같습니다.
+
+```json
+{
+  "id": "rs_xxx",
+  "type": "reasoning",
+  "encrypted_content": "...",
+  "summary": [
+    {
+      "type": "summary_text",
+      "text": "..."
+    }
+  ]
+}
+```
+
+`message` item에는 최종 출력 텍스트가 포함됩니다.
+
+```json
+{
+  "type": "message",
+  "content": [
+    {
+      "type": "output_text",
+      "text": "..."
+    }
+  ]
+}
+```
+
+---
+
+## `reasoning` 파라미터
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| `effort` | string | 추론 강도, 현재 실측으로 사용 가능한 값은 `low`, `medium`, `high` |
+| `summary` | string | 사고 요약의 세분화 정도, 현재 실측으로 `concise`, `detailed` 사용 가능 |
+
+### 실용적인 판단 기준
+
+- 더 강한 추론만 필요하고 요약은 신경 쓰지 않는 경우: `effort`만 전달
+- 표시 가능한 reasoning 요약이 필요한 경우: `summary`도 함께 전달
+
+현재 재검증에서:
+
+- `effort`만 전달할 경우, `reasoning` item은 존재하지만 `summary`가 빈 배열일 수 있습니다
+- `summary: "detailed"`를 전달하면 안정적으로 `summary_text`를 받을 수 있습니다
+
+---
+
+## 사고 요약 추출
+
+```python Python
+response = client.responses.create(
+    model="gpt-5.5",
+    input="Design a high-concurrency message queue architecture.",
+    reasoning={
+        "effort": "high",
+        "summary": "detailed"
+    }
+)
+
+for item in response.output:
+    if item.type == "reasoning":
+        for part in item.summary:
+            if part.type == "summary_text":
+                print("사고 요약:", part.text)
+    elif item.type == "message":
+        for content in item.content:
+            if content.type == "output_text":
+                print("최종 답변:", content.text)
+```
+
+---
+
+## 스트리밍 사고
+
+현재 프로덕션 환경에서 다음 Responses SSE 이벤트명이 재검증되었습니다.
+
+- `response.reasoning_summary_part.added`
+- `response.reasoning_summary_text.delta`
+- `response.reasoning_summary_text.done`
+- `response.output_text.delta`
+- `response.output_text.done`
+- `response.completed`
+
+예시:
+
+```python Python
+stream = client.responses.create(
+    model="gpt-5.5",
+    input="Explain briefly why 9.9 is larger than 9.11.",
+    reasoning={
+        "effort": "high",
+        "summary": "detailed"
+    },
+    stream=True
+)
+
+for event in stream:
+    if event.type == "response.reasoning_summary_text.delta":
+        print(f"[사고 요약] {event.delta}", end="")
+    elif event.type == "response.output_text.delta":
+        print(event.delta, end="")
+```
+
+---
+
+## 현재 권장 사항
+
+- 표시 가능한 reasoning 필드가 필요하다면 `gpt-5.5` + Responses API를 우선 선택하십시오
+- `gpt-5.5` Chat Completions의 `reasoning_content`를 현재 주요 의존 필드로 사용하지 마십시오
+- 최종 답변만 필요하다면 Chat Completions에서 계속 `reasoning_effort`를 사용할 수 있습니다
+
+<Warning>
+  reasoning 모드는 지연 시간과 토큰 소비를 증가시킵니다. `effort`가 높을수록 일반적으로 비용도 높아집니다.
+</Warning>

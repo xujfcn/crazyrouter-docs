@@ -1,0 +1,157 @@
+---
+title: 'AI 씽킹 필드'
+description: '프로덕션 환경 재검토를 기반으로 Crazyrouter에서 프로토콜별로 노출되는 thinking/reasoning 필드 이해하기'
+---
+> 업데이트: 2026-06-06
+
+# AI 씽킹 필드
+
+본 문서는 `2026-03-22`에 Crazyrouter 프로덕션 환경에서 재검토된 thinking / reasoning 노출 방식만 다룹니다.
+
+핵심 전제는 다음과 같습니다. 프로토콜마다 "씽킹"을 노출하는 방식이 서로 다릅니다.
+
+- OpenAI Responses는 독립적인 `reasoning` item을 반환하는 방식을 선호합니다
+- Claude 네이티브 Messages는 `thinking` block을 반환합니다
+- Gemini Native는 현재 `usageMetadata.thoughtsTokenCount`를 통해 씽킹이 실제로 작동했는지 판단하는 것이 더 용이합니다
+
+## 현재 검증된 필드
+
+| 모델 | 프로토콜 | 검증된 필드 또는 플래그 | 설명 |
+|------|------|------------------|------|
+| `gpt-5.5` | Responses | `output[].type = "reasoning"` | `summary`와 함께 사용하면 표시 가능한 요약을 얻을 수 있습니다 |
+| `claude-opus-4-8` | Anthropic Messages | `content[].type = "thinking"` | `text` block과 나란히 반환됩니다 |
+| `gemini-3.1-pro` | Gemini Native | `usageMetadata.thoughtsTokenCount` | thinking budget이 실제로 소비되었음을 나타냅니다 |
+
+<Note>
+  이번 재검토에서 `gpt-5.5` Chat Completions의 `message.reasoning_content`는 안정적으로 의존할 수 있는 내용을 반환하지 않았으므로, 여기서는 주요 관찰 필드로 나열하지 않습니다.
+</Note>
+
+---
+
+## GPT: Responses의 `reasoning` item
+
+```json
+{
+  "output": [
+    {
+      "id": "rs_xxx",
+      "type": "reasoning",
+      "encrypted_content": "...",
+      "summary": [
+        {
+          "type": "summary_text",
+          "text": "..."
+        }
+      ]
+    },
+    {
+      "type": "message",
+      "content": [
+        {
+          "type": "output_text",
+          "text": "최종 답변"
+        }
+      ]
+    }
+  ]
+}
+```
+
+추출 방법:
+
+```python
+response = client.responses.create(
+    model="gpt-5.5",
+    input="Which is larger, 9.11 or 9.9?",
+    reasoning={"effort": "high", "summary": "detailed"}
+)
+
+for item in response.output:
+    if item.type == "reasoning":
+        for part in item.summary:
+            if part.type == "summary_text":
+                print("씽킹 요약:", part.text)
+```
+
+---
+
+## Claude: `thinking` block
+
+```json
+{
+  "content": [
+    {
+      "type": "thinking",
+      "thinking": "..."
+    },
+    {
+      "type": "text",
+      "text": "최종 답변"
+    }
+  ]
+}
+```
+
+추출 방법:
+
+```python
+message = client.messages.create(
+    model="claude-opus-4-8",
+    max_tokens=320,
+    thinking={
+        "type": "enabled",
+        "budget_tokens": 128
+    },
+    messages=[
+        {"role": "user", "content": "Which is larger, 9.11 or 9.9?"}
+    ]
+)
+
+for block in message.content:
+    if block.type == "thinking":
+        print("씽킹 내용:", block.thinking)
+    elif block.type == "text":
+        print("답변:", block.text)
+```
+
+---
+
+## Gemini: `thoughtsTokenCount`
+
+Gemini Native에서 이번 재검토 결과 가장 안정적인 관찰 포인트는 본문에 노출되는 씽킹 텍스트가 아니라 사용량 필드입니다.
+
+```json
+{
+  "usageMetadata": {
+    "thoughtsTokenCount": 120
+  }
+}
+```
+
+이는 다음을 의미합니다.
+
+- thinking budget이 실제로 생성 과정에 참여했습니다
+- 이번 요청에서 실제로 씽킹 토큰 소비가 발생했습니다
+
+추출 방법:
+
+```python
+data = response.json()
+thoughts = data.get("usageMetadata", {}).get("thoughtsTokenCount", 0)
+print("씽킹 토큰:", thoughts)
+```
+
+---
+
+## 사용 시 유의 사항
+
+- 모든 모델이 완전한 씽킹 과정을 평문으로 반환한다고 가정하지 마세요
+- 서로 다른 프로토콜의 thinking 필드를 섞어서 사용하지 마세요
+- 감사, 로깅, 프론트엔드 표시가 필요하다면, 먼저 프로토콜에 따라 `reasoning`, `thinking`, `thoughtsTokenCount` 중 무엇을 읽어야 하는지 판단하세요
+
+관련 페이지:
+
+- [GPT-5 씽킹 모드](/ko/chat/responses/gpt5-thinking)
+- [Claude 네이티브 포맷](/ko/chat/anthropic/messages)
+- [Gemini 네이티브 포맷](/ko/chat/gemini/native)
+

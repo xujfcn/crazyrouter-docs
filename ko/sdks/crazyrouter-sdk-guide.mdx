@@ -1,0 +1,392 @@
+---
+title: 'Crazyrouter SDK 완전 사용 가이드'
+description: 'OpenAI 공식 SDK로 Crazyrouter에 접속하여 채팅, 스트리밍 출력, 모델 목록, 임베딩 및 네이티브 비동기 작업의 엔드투엔드 검증을 완료합니다'
+---
+> 업데이트: 2026-06-23
+
+## 적용 시나리오
+
+Crazyrouter는 OpenAI SDK 호환 인터페이스에 대해 통합 접속을 제공합니다. 채팅, Responses API, 이미지, 오디오, 임베딩과 모델 목록은 우선적으로 OpenAI 공식 SDK를 사용하고, 비디오, Kling, Luma, Suno, Midjourney 등 비동기 또는 벤더 네이티브 인터페이스는 동일한 API Key로 `fetch`를 통해 Crazyrouter 네이티브 경로를 호출합니다.
+
+기본 국제 API 엔드포인트:
+
+```text
+https://api.crazyrouter.com
+```
+
+OpenAI SDK에는 `/v1`이 포함된 주소를 입력해야 합니다.
+
+```text
+https://api.crazyrouter.com/v1
+```
+
+<Warning>
+OpenAI SDK의 `baseURL`을 `https://api.crazyrouter.com`으로 설정하지 마세요. 그러면 SDK가 `/v1`을 추가로 붙이지 못합니다. 또한 `https://api.crazyrouter.com/v1/chat/completions`로 설정하지도 마세요. 그러면 SDK가 경로를 중복으로 붙이게 됩니다.
+</Warning>
+
+## SDK 설치
+
+```bash
+npm install openai
+```
+
+Node.js는 18 이상 버전을 권장합니다. Node.js 18+에는 이미 `fetch`, `FormData`, `Blob`이 내장되어 있습니다.
+
+## 환경 변수 설정
+
+macOS / Linux:
+
+```bash
+export CRAZYROUTER_API_KEY="sk-your-api-key"
+export CRAZYROUTER_BASE_URL="https://api.crazyrouter.com"
+```
+
+Windows PowerShell:
+
+```powershell
+$env:CRAZYROUTER_API_KEY = "sk-your-api-key"
+$env:CRAZYROUTER_BASE_URL = "https://api.crazyrouter.com"
+```
+
+## SDK Client 생성
+
+```ts
+import OpenAI from 'openai';
+
+const apiKey = process.env.CRAZYROUTER_API_KEY;
+
+if (!apiKey) {
+  throw new Error('Missing CRAZYROUTER_API_KEY');
+}
+
+const baseURL = process.env.CRAZYROUTER_BASE_URL ?? 'https://api.crazyrouter.com';
+
+export const client = new OpenAI({
+  apiKey,
+  baseURL: `${baseURL}/v1`,
+  timeout: 180_000,
+});
+```
+
+## Chat Completions
+
+```ts
+const response = await client.chat.completions.create({
+  model: 'gpt-5.5',
+  messages: [
+    { role: 'system', content: 'You are concise.' },
+    { role: 'user', content: 'Say sdk-ok and nothing else.' },
+  ],
+  max_tokens: 16,
+});
+
+console.log(response.choices[0]?.message?.content);
+```
+
+## 스트리밍 출력
+
+```ts
+const stream = await client.chat.completions.create({
+  model: 'gpt-5.5',
+  messages: [{ role: 'user', content: 'Count from 1 to 3.' }],
+  max_tokens: 32,
+  stream: true,
+});
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content ?? '');
+}
+```
+
+## 모델 목록
+
+```ts
+const models = await client.models.list();
+
+for (const model of models.data.slice(0, 10)) {
+  console.log(model.id);
+}
+```
+
+## Embeddings
+
+```ts
+const embedding = await client.embeddings.create({
+  model: 'text-embedding-3-small',
+  input: 'Crazyrouter SDK test',
+});
+
+console.log(embedding.data[0].embedding.length);
+```
+
+## Responses API
+
+Responses API는 `/v1/responses`를 지원하는 GPT 계열 모델에 적합합니다.
+
+```ts
+const response = await client.responses.create({
+  model: 'gpt-5.5',
+  input: 'Return only: responses-ok',
+  max_output_tokens: 16,
+});
+
+console.log(response.output_text);
+```
+
+<Note>
+Claude 모델은 Responses API 경로에서 테스트하지 마세요. Claude는 `/v1/messages` 또는 OpenAI 호환 `/v1/chat/completions` 사용을 권장합니다.
+</Note>
+
+## 이미지, 오디오 및 전사
+
+OpenAI 호환 이미지 및 오디오 인터페이스도 동일한 SDK client를 사용합니다.
+
+```ts
+const image = await client.images.generate({
+  model: 'gpt-image-2',
+  prompt: 'A simple white mug on a clean table',
+  size: '1024x1024',
+  output_format: 'png',
+});
+
+console.log(image.data[0]?.url);
+```
+
+```ts
+const speech = await client.audio.speech.create({
+  model: 'tts-1',
+  voice: 'alloy',
+  input: 'Hello from Crazyrouter.',
+});
+
+const audio = Buffer.from(await speech.arrayBuffer());
+console.log(audio.length);
+```
+
+## 네이티브 비동기 작업 인터페이스
+
+비디오, Kling, Luma, Suno, Midjourney 등의 비동기 작업은 대체로 OpenAI SDK 메서드가 아니라 Crazyrouter 네이티브 HTTP 경로입니다. 여전히 동일한 API Key를 사용합니다.
+
+```ts
+async function crazyrouterFetch<T>(
+  path: string,
+  options: RequestInit & { json?: Record<string, unknown> } = {},
+): Promise<T> {
+  const response = await fetch(`${baseURL}${path}`, {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      ...(options.json ? { 'Content-Type': 'application/json' } : {}),
+      ...options.headers,
+    },
+    body: options.json ? JSON.stringify(options.json) : options.body,
+  });
+
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(`Crazyrouter API error ${response.status}: ${JSON.stringify(body)}`);
+  }
+
+  return body as T;
+}
+```
+
+통합 비디오 작업 제출:
+
+```ts
+const task = await crazyrouterFetch<{
+  id?: string;
+  task_id?: string;
+  data?: { task_id?: string };
+}>('/v1/video/create', {
+  method: 'POST',
+  json: {
+    model: 'veo-3.1-fast',
+    prompt: 'A quiet city street after rain, cinematic lighting',
+    aspect_ratio: '16:9',
+    size: '1080P',
+  },
+});
+
+const taskId = task.data?.task_id ?? task.task_id ?? task.id;
+console.log(taskId);
+```
+
+작업 조회:
+
+```ts
+const result = await crazyrouterFetch(
+  `/v1/video/query?task_id=${encodeURIComponent(taskId!)}`,
+);
+
+console.log(result);
+```
+
+## 로컬 이미지 업로드
+
+로컬 참조 이미지를 image-to-video, vision 또는 이미지 편집 인터페이스에 전달해야 할 때는 먼저 Crazyrouter 임시 저장소에 업로드하세요.
+
+```ts
+import { readFile } from 'node:fs/promises';
+import { basename } from 'node:path';
+
+async function uploadImage(filePath: string) {
+  const bytes = await readFile(filePath);
+  const form = new FormData();
+
+  form.append(
+    'file',
+    new Blob([bytes], { type: 'image/png' }),
+    basename(filePath),
+  );
+  form.append('purpose', 'model_input');
+
+  const response = await fetch(`${baseURL}/v1/files/uploads`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: form,
+  });
+
+  const body = await response.json();
+  if (!response.ok) {
+    throw new Error(`Upload failed: ${JSON.stringify(body)}`);
+  }
+
+  return body as {
+    id: string;
+    url: string;
+    mime_type: string;
+    size: number;
+    expires_at: string;
+  };
+}
+
+const uploaded = await uploadImage('./reference.png');
+console.log(uploaded.url);
+```
+
+<Warning>
+임시 업로드 URL은 기본적으로 모델 입력용이며, 영구 이미지 호스팅이 아닙니다. 장기 보관 자산은 자체 스토리지를 사용하세요.
+</Warning>
+
+## 전체 SDK 테스트 스크립트
+
+`crazyrouter-sdk-smoke.mjs`로 저장:
+
+```js
+import OpenAI from 'openai';
+
+const apiKey = process.env.CRAZYROUTER_API_KEY;
+const rootBaseURL = process.env.CRAZYROUTER_BASE_URL ?? 'https://api.crazyrouter.com';
+
+if (!apiKey) {
+  throw new Error('Set CRAZYROUTER_API_KEY before running this test.');
+}
+
+const client = new OpenAI({
+  apiKey,
+  baseURL: `${rootBaseURL}/v1`,
+  timeout: 180_000,
+});
+
+const checks = [];
+
+async function check(name, fn) {
+  const started = Date.now();
+  try {
+    const detail = await fn();
+    checks.push({ name, ok: true, ms: Date.now() - started, detail });
+    console.log(`ok ${name}: ${detail}`);
+  } catch (error) {
+    checks.push({ name, ok: false, ms: Date.now() - started, detail: error.message });
+    console.error(`fail ${name}: ${error.message}`);
+  }
+}
+
+await check('models.list', async () => {
+  const models = await client.models.list();
+  return `${models.data.length} models`;
+});
+
+await check('chat.completions.create', async () => {
+  const response = await client.chat.completions.create({
+    model: 'gpt-5.5',
+    messages: [{ role: 'user', content: 'Return exactly sdk-ok' }],
+    max_tokens: 16,
+  });
+  return response.choices[0]?.message?.content?.trim() ?? '(empty)';
+});
+
+await check('chat.completions.stream', async () => {
+  const stream = await client.chat.completions.create({
+    model: 'gpt-5.5',
+    messages: [{ role: 'user', content: 'Return exactly stream-ok' }],
+    max_tokens: 16,
+    stream: true,
+  });
+
+  let text = '';
+  for await (const chunk of stream) {
+    text += chunk.choices[0]?.delta?.content ?? '';
+  }
+  return text.trim() || '(empty stream)';
+});
+
+await check('embeddings.create', async () => {
+  const response = await client.embeddings.create({
+    model: 'text-embedding-3-small',
+    input: 'Crazyrouter SDK smoke test',
+  });
+  return `${response.data[0].embedding.length} dimensions`;
+});
+
+await check('raw /v1/video/query route shape', async () => {
+  const response = await fetch(`${rootBaseURL}/v1/video/query?task_id=doc-smoke-test`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+    },
+  });
+
+  const text = await response.text();
+  if (response.status === 404 && text.toLowerCase().includes('not found')) {
+    throw new Error('route returned a path-level 404');
+  }
+
+  return `route reachable, status ${response.status}`;
+});
+
+const failed = checks.filter((item) => !item.ok);
+console.log(JSON.stringify({ total: checks.length, failed: failed.length, checks }, null, 2));
+
+if (failed.length > 0) {
+  process.exit(1);
+}
+```
+
+실행:
+
+```bash
+npm install openai
+node crazyrouter-sdk-smoke.mjs
+```
+
+테스트를 통과하면 최소한 다음을 확인할 수 있어야 합니다.
+
+- `models.list`가 모델 수를 반환
+- `chat.completions.create`가 텍스트를 반환
+- `chat.completions.stream`이 스트리밍 텍스트를 수신
+- `embeddings.create`가 벡터 차원을 반환
+- `/v1/video/query`가 작업 존재하지 않음 또는 기타 비즈니스 상태를 반환하여, 네이티브 비동기 작업 조회 라우트가 도달 가능함을 보여줌
+
+## 자주 발생하는 오류
+
+| 문제 | 처리 방법 |
+|------|----------|
+| `401 Unauthorized` | `CRAZYROUTER_API_KEY`가 설정되어 있는지, 형식이 `Authorization: Bearer sk-...`인지 확인 |
+| `404` 또는 `/v1/v1/...` | OpenAI SDK는 `https://api.crazyrouter.com/v1`을 사용하고, 네이티브 HTTP는 `https://api.crazyrouter.com`에 전체 경로를 붙여 사용 |
+| Chat은 되는데 Responses가 안 됨 | 모델이 `/v1/responses`를 지원하는지 확인, Claude는 Responses API를 사용하지 말 것 |
+| 이미지나 비디오 타임아웃 | SDK timeout을 늘리고, 비디오 계열 작업은 비동기 작업 조회를 우선 사용 |
+| 403 Forbidden | Token에 해당 모델 권한이 없거나, 모델이 해당 token의 사용 가능 범위에 없음 |

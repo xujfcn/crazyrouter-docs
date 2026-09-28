@@ -1,0 +1,372 @@
+---
+title: '원클릭 OpenClaw 배포'
+description: 'Linux 또는 macOS에서 Crazyrouter를 사용하여 OpenClaw를 빠르게 배포하고, WebUI, Telegram 및 일상적인 운영 설정을 완료합니다'
+icon: 'rocket'
+---
+> 업데이트: 2026-06-06
+
+원클릭 스크립트를 통해 Linux 또는 macOS에 [OpenClaw](https://github.com/open-claw/open-claw) AI 게이트웨이를 배포하고, Crazyrouter를 기본 백엔드로 사용합니다. 설치 프로그램은 바로 실행 가능한 `~/.openclaw/openclaw.json`을 작성하고, 시스템 서비스를 등록하며, 채팅, 코딩, 장문 컨텍스트 작업에 적합한 모델 세트를 미리 구성합니다.
+
+## 개요
+
+OpenClaw는 Crazyrouter를 스스로 제어할 수 있는 로컬 AI 진입점으로 만들기에 적합합니다.
+
+- 로컬 WebUI / 게이트웨이, 기본적으로 `18789` 포트를 리스닝
+- Crazyrouter의 모델과 크레딧을 그대로 재사용 가능
+- Telegram을 지원하며, DingTalk, WeCom, QQ Bot, Discord, Slack, Feishu 등의 플러그인 진입점을 미리 활성화
+- 개인 상시 봇, 팀 내부 비서, 홈 서버 또는 경량 셀프 호스팅 시나리오에 적합
+
+## 이런 분께 추천합니다
+
+- 명령어 한 줄로 Crazyrouter를 로컬 AI 게이트웨이에 연결하고 싶은 분
+- Telegram Bot을 자신의 서버에서 운영하고 싶은 분
+- 채팅, WebUI, IM 진입점을 통합 관리하고 싶은 분
+- 개발 머신이나 가정용 소형 호스트에 상시 비서를 배포하고 싶은 분
+
+## 사용 프로토콜
+
+권장 프로토콜: `OpenAI-compatible API`
+
+- 설치 프로그램은 기본적으로 `crazyrouter` provider를 `https://api.crazyrouter.com/v1`로 지정합니다
+- 동시에 `crazyrouter-claude`, `crazyrouter-minimax` provider도 작성하여 Anthropic Messages 호환 경로로 손쉽게 전환할 수 있습니다
+- OpenClaw 자체가 외부에 노출하는 것은 로컬 게이트웨이와 WebUI이며, 인증은 설치 시 생성된 `gateway.auth.token`에 의존합니다
+
+<Note>
+이후 OpenClaw의 provider 주소를 수동으로 조정해야 한다면, 먼저 [API Endpoint 설명](https://docs.crazyrouter.com/ko/api-endpoint)을 참고하여 현재 클라이언트가 루트 도메인을 입력해야 하는지 `/v1`을 입력해야 하는지 확인하세요.
+</Note>
+
+## 사전 준비 사항
+
+| 항목 | 설명 |
+|------|------|
+| Crazyrouter 계정 | 먼저 [crazyrouter.com](https://crazyrouter.com)에서 가입 |
+| Crazyrouter API Key | OpenClaw 전용 토큰을 별도로 생성하는 것을 권장하며, Cursor, Claude Code와 공유하지 마세요 |
+| 운영체제 | Linux 또는 macOS, x64 / arm64 모두 가능 |
+| 네트워크 | 서버가 공용 네트워크에 접근할 수 있어야 함; 다른 기기에서 WebUI에 접속하려면 `18789` 포트도 허용해야 함 |
+| Node.js | 설치 프로그램이 Node.js 22+를 최대한 자동으로 설치 시도 |
+| Telegram Bot Token | 선택 사항, Telegram을 연동할 때만 필요 |
+
+<Warning>
+OpenClaw 설치 프로그램은 기본적으로 게이트웨이를 사설망 주소(`bind: lan`)에 바인딩합니다. 호스트를 공용 네트워크에 직접 노출한다면 반드시 방화벽 제한을 함께 구성하고 게이트웨이 로그인 토큰을 안전하게 보관하세요.
+</Warning>
+
+## 5분 만에 빠르게 시작하기
+
+<Steps>
+  <Step title="전용 Crazyrouter 토큰 생성">
+    Crazyrouter 백엔드에서 OpenClaw 전용 `sk-...` 토큰을 생성합니다. 게이트웨이에서 사용할 모델만 먼저 허용하는 것을 권장합니다. 예: `claude-opus-4-8`, `gpt-5.5`, `gemini-3.1-pro`.
+  </Step>
+  <Step title="설치 스크립트 실행">
+    ```bash
+    curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-openclaw/main/install.sh | bash
+    ```
+    언어 선택과 API Key 입력을 건너뛰고 싶다면 다음과 같이 실행할 수도 있습니다.
+    ```bash
+    CRAZYROUTER_API_KEY=sk-xxx INSTALLER_LANG=zh \
+      curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-openclaw/main/install.sh | bash
+    ```
+  </Step>
+  <Step title="설치 프로그램이 출력한 3가지 값 기록하기">
+    - WebUI 주소: `http://<서버 IP>:18789`
+    - 자동 로그인 주소: `http://<서버 IP>:18789?token=<gateway_token>`
+    - 설정 파일: `~/.openclaw/openclaw.json`
+  </Step>
+  <Step title="WebUI를 열어 첫 검증 진행">
+    브라우저로 자동 로그인 주소에 접속하여 OpenClaw 콘솔에 정상적으로 진입할 수 있는지 확인하고, 기본 모델 `claude-opus-4-8`로 테스트 메시지를 하나 보냅니다. 예: "ok만 답해줘".
+  </Step>
+  <Step title="필요에 따라 Telegram 페어링 완료">
+    설치 프로그램은 지금 바로 Telegram을 설정할지 물어봅니다. 지금 설정하기를 선택하면 Bot Token을 입력한 뒤, 봇에게 아무 메시지나 보내면 첫 번째 owner 페어링이 완료됩니다.
+  </Step>
+</Steps>
+
+## 권장 모델 구성
+
+설치 프로그램의 기본 주력 모델은 `claude-opus-4-8`입니다. 일상적인 기본 모델을 변경하고 싶다면 `~/.openclaw/openclaw.json`의 `agents.defaults.model.primary`를 직접 수정하세요.
+
+| 시나리오 | 권장 모델 | 이유 |
+|------|----------|------|
+| 기본 일상 채팅 | `claude-opus-4-8` | 현재 기본 주력 모델, 고품질 일상 채팅 및 메인 컨트롤 모델로 적합 |
+| 코딩 / Agent | `gpt-5.5` | 최신 OpenAI 호환 주력 모델, 코딩 및 Agent 기본 라인으로 적합 |
+| 가성비 높은 대체 모델 | `claude-opus-4-8` | 품질, 안정성, 비용의 균형이 좋음 |
+| Gemini 대체 등급 | `gemini-3.1-pro` | 두 번째 호환성 검증 경로로 적합 |
+| 심층 추론 | `claude-opus-4-8` | 더 강력한 추론 체인이 필요한 시나리오에 적합 |
+
+예시: 기본 모델을 `gpt-5.5`로 변경
+
+```json
+{
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "crazyrouter/gpt-5.5"
+      }
+    }
+  }
+}
+```
+
+명시적으로 Claude 호환 provider를 사용하고 싶다면 다음과 같이 작성할 수 있습니다.
+
+```json
+{
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "crazyrouter-claude/claude-opus-4-8"
+      }
+    }
+  }
+}
+```
+
+## 토큰 설정 모범 사례
+
+| 설정 | 권장 | 설명 |
+|------|------|------|
+| 전용 토큰 | 필수 | OpenClaw와 다른 IDE / CLI가 동일한 토큰을 공유하지 않도록 하세요 |
+| 모델 화이트리스트 | 활성화 권장 | OpenClaw에서 사용할 모델만 남겨 오용을 줄이세요 |
+| IP 제한 | 고정 아웃바운드 서버에는 활성화 권장 | 호스트의 아웃바운드 IP가 고정되어 있다면 토큰을 해당 서버로 제한할 수 있습니다 |
+| 크레딧 상한 | 설정 권장 | 봇 시나리오 전용으로 월간 또는 일간 예산을 별도로 설정하세요 |
+| 환경 격리 | 권장 | 프로덕션 봇과 테스트 봇의 토큰을 분리하세요 |
+| 유출 대응 | 즉시 교체 | `openclaw.json`, 로그 또는 공유 링크에 토큰이 노출되었다면 즉시 Crazyrouter 토큰과 게이트웨이 토큰을 재설정해야 합니다 |
+
+<Tip>
+OpenClaw에는 최소 두 종류의 자격 증명이 있습니다. 하나는 모델 호출에 사용하는 Crazyrouter의 `sk-...` API Key이고, 다른 하나는 WebUI 진입에 사용하는 OpenClaw 로컬 게이트웨이 로그인 토큰입니다. 두 가지를 혼용하지 마세요.
+</Tip>
+
+## 첫 성공 체크리스트
+
+- [ ] 브라우저로 `http://<서버 IP>:18789?token=<gateway_token>`을 열 수 있음
+- [ ] OpenClaw WebUI에 정상적으로 진입할 수 있으며 반복적으로 로그인을 요구하지 않음
+- [ ] 기본 모델이 첫 메시지를 성공적으로 반환함
+- [ ] 모델 변경 후 서비스를 재시작해도 정상적으로 응답함
+- [ ] `journalctl --user -u openclaw -f` 또는 `tail -f ~/.openclaw/openclaw.log`에서 성공한 요청을 확인할 수 있음
+- [ ] Telegram을 활성화한 경우, 봇에게 메시지를 보내면 응답을 받을 수 있음
+- [ ] `~/.openclaw/openclaw.json`의 백업을 저장함
+
+## 주요 파일 및 설정 항목
+
+### 파일 위치
+
+| 경로 | 용도 |
+|------|------|
+| `~/.openclaw/openclaw.json` | 주 설정 파일 |
+| `~/.openclaw/start-gateway.sh` | 시작 스크립트, 시스템 서비스가 실제로 호출함 |
+| `~/.openclaw/crash-guard.cjs` | 설치 프로그램이 작성한 안정성 패치 |
+| `~/.openclaw/credentials/.telegram-owner-paired` | Telegram 첫 owner 페어링 완료 표시 파일 |
+| `~/.config/systemd/user/openclaw.service` | Linux 사용자 수준 systemd 서비스 |
+| `~/Library/LaunchAgents/com.crazyrouter.openclaw.plist` | macOS launchd 서비스 |
+| `~/.openclaw/openclaw.log` | macOS 일반 로그 |
+| `~/.openclaw/openclaw.err` | macOS 오류 로그 |
+
+### 가장 자주 수정하는 설정 항목
+
+| JSON 경로 | 역할 | 흔한 수정 |
+|-----------|------|----------|
+| `models.providers.crazyrouter.apiKey` | Crazyrouter OpenAI 호환 key | API Key 교체 |
+| `models.providers.crazyrouter.baseUrl` | OpenAI 호환 기본 주소 | 보통 `https://api.crazyrouter.com/v1` 유지 |
+| `agents.defaults.model.primary` | 기본 주력 모델 | `gpt-5.5`, `claude-opus-4-8` 등으로 전환 |
+| `gateway.port` | WebUI / 게이트웨이 포트 | 원하는 포트로 변경 |
+| `gateway.auth.token` | WebUI 로그인 토큰 | 유출 시 즉시 교체 |
+| `gateway.bind` | 리스닝 범위 | 기본값은 `lan` |
+| `channels.telegram.botToken` | Telegram Bot Token | Telegram 활성화 시 입력 |
+| `plugins.entries.*.enabled` | 각 IM 플러그인 활성화 여부 | 필요에 따라 미사용 플러그인 비활성화 |
+| `env.vars.OPENAI_API_KEY` | 일부 내부 기능이 재사용하는 API Key | 보통 주 key와 동일하게 유지 |
+
+## IM 연동
+
+### Telegram
+
+설치 프로그램이 가장 완전하게 지원하는 채널이며, Telegram부터 시작하는 것을 권장합니다.
+
+1. Telegram에서 `@BotFather` 검색
+2. `/newbot`을 보내 봇을 생성하고 Bot Token 받기
+3. 설치 프로그램이 `Set up Telegram Bot now?`를 물어볼 때 `Y` 선택
+4. Bot Token을 붙여넣으면 설치 프로그램이 `~/.openclaw/openclaw.json`에 기록함
+5. 설치 프로그램이 게이트웨이를 자동으로 재시작한 후, 봇에게 아무 메시지나 보내기
+6. 가장 먼저 메시지를 보낸 사람이 자동으로 owner로 페어링됨
+7. 자동 페어링이 실패하면 다음을 실행:
+
+```bash
+openclaw pairing list
+openclaw pairing approve <code>
+```
+
+Telegram 설정을 수동으로 보완할 때는 설치 프로그램이 작성한 구조를 참고할 수 있습니다.
+
+```json
+{
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "botToken": "123456789:ABCdef...",
+      "dmPolicy": "pairing",
+      "groupPolicy": "allowlist",
+      "streaming": "off"
+    }
+  },
+  "plugins": {
+    "entries": {
+      "telegram": { "enabled": true }
+    }
+  }
+}
+```
+
+### 기타 IM 플랫폼
+
+설치 프로그램은 다음 플러그인 진입점을 미리 활성화합니다.
+
+- `dingtalk`
+- `openclaw-wecom`
+- `qqbot`
+- `discord`
+- `slack`
+- `feishu`
+
+다만 이러한 채널들은 보통 여러분이 직접 플랫폼 자격 증명과 해당 `channels.<name>` 설정을 추가로 입력해야 합니다. 권장 흐름은 다음과 같습니다.
+
+1. 먼저 해당 플랫폼에서 봇 또는 애플리케이션 생성
+2. 플랫폼 자격 증명을 `~/.openclaw/openclaw.json`에 기록
+3. 해당 `plugins.entries.<name>.enabled`가 `true`인지 확인
+4. OpenClaw 서비스 재시작
+5. 로그로 해당 채널이 성공적으로 로드되었는지 검증
+
+| 플랫폼 | 설치 프로그램 상태 | 추가로 해야 할 작업 |
+|------|------------|----------------|
+| Telegram | 대화형 설정 지원 | Bot Token 입력, owner 페어링 완료 |
+| DingTalk | 플러그인이 설치 및 활성화됨 | 봇 자격 증명과 해당 channel 설정 보완 |
+| WeCom | 플러그인이 설치 및 활성화됨 | 기업 애플리케이션 자격 증명과 해당 channel 설정 보완 |
+| QQ Bot | 플러그인이 설치 및 활성화됨 | 봇 자격 증명과 해당 channel 설정 보완 |
+| Discord / Slack / Feishu | 플러그인 진입점이 활성화됨 | 각 봇 설정 요구사항에 따라 channel 자격 증명 보완 |
+
+<Note>
+OpenClaw를 팀 IM에 연동할 예정이라면, 팀 봇 전용으로 Crazyrouter 토큰을 별도로 생성하고 더 엄격한 모델 화이트리스트와 크레딧을 설정하는 것을 강력히 권장합니다.
+</Note>
+
+## 서비스 관리 및 로그
+
+<Tabs>
+  <Tab title="Linux (systemd)">
+    ```bash
+    systemctl --user status openclaw
+    systemctl --user start openclaw
+    systemctl --user restart openclaw
+    systemctl --user stop openclaw
+    journalctl --user -u openclaw -f
+    ```
+
+    설명: 설치 프로그램은 `loginctl enable-linger $(whoami)` 실행을 시도하므로, SSH 세션을 종료해도 세션 외부의 사용자 수준 서비스가 계속 실행될 수 있습니다.
+  </Tab>
+  <Tab title="macOS (launchd)">
+    ```bash
+    launchctl list | grep openclaw
+    launchctl start com.crazyrouter.openclaw
+    launchctl stop com.crazyrouter.openclaw
+    launchctl stop com.crazyrouter.openclaw && launchctl start com.crazyrouter.openclaw
+    tail -f ~/.openclaw/openclaw.log
+    cat ~/.openclaw/openclaw.err
+    ```
+
+    설명: macOS에서 `openclaw.log`는 보통 실행 로그를 확인하는 용도이며, `openclaw.err`는 시작 실패를 진단하는 데 더 적합합니다.
+  </Tab>
+</Tabs>
+
+## 성능 및 비용 권장 사항
+
+- 먼저 `claude-opus-4-8`을 사용하여 전체 흐름이 정상 작동하는지 확인한 후 모델 분업을 진행하세요
+- 빈도 높은 일상 질의응답이나 봇 알림 시나리오는 비용에 따라 `claude-opus-4-8` 또는 `gemini-3.1-pro`로 대체할 수 있습니다
+- 코딩 관련 워크플로우는 별도로 `gpt-5.5`로 전환하세요
+- 팀 시나리오에서는 Telegram / 기업 IM / WebUI를 서로 다른 토큰으로 분리하여 비용 정산과 리스크 격리를 용이하게 하세요
+- 필요한 플러그인과 모델만 유지하여 오호출 비용을 줄이세요
+
+## 업그레이드 가이드
+
+가장 안전한 업그레이드 방법은 설치 프로그램을 다시 실행하는 것입니다. OpenClaw 패키지, 패치, 서비스 스크립트를 함께 처리하기 때문입니다.
+
+<Steps>
+  <Step title="현재 설정 백업">
+    ```bash
+    cp ~/.openclaw/openclaw.json ~/.openclaw/openclaw.json.bak
+    ```
+  </Step>
+  <Step title="설치 스크립트 재실행">
+    ```bash
+    curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-openclaw/main/install.sh | bash
+    ```
+  </Step>
+  <Step title="커스텀 설정을 다시 채워야 하는지 확인">
+    Telegram 외의 channel을 수동으로 추가했거나 기본 모델을 변경한 적이 있다면 `openclaw.json`을 다시 비교하여 이러한 커스텀 항목이 여전히 존재하는지 확인하세요.
+  </Step>
+  <Step title="재시작 및 검증">
+    WebUI를 다시 열어 모델, 로그, 연동된 IM 채널이 모두 정상인지 확인하세요.
+  </Step>
+</Steps>
+
+OpenClaw npm 패키지만 업그레이드하고 싶다는 것이 명확하다면, 먼저 `npm install -g openclaw@latest`를 실행한 후 서비스를 재시작할 수도 있습니다. 다만 이 방식은 설치 프로그램의 패치와 스크립트 업데이트를 다시 적용해주지 않습니다.
+
+## 제거 가이드
+
+<Tabs>
+  <Tab title="Linux">
+    ```bash
+    systemctl --user disable --now openclaw
+    rm -f ~/.config/systemd/user/openclaw.service
+    systemctl --user daemon-reload
+    rm -rf ~/.openclaw
+    npm uninstall -g openclaw
+    ```
+  </Tab>
+  <Tab title="macOS">
+    ```bash
+    launchctl stop com.crazyrouter.openclaw
+    launchctl unload ~/Library/LaunchAgents/com.crazyrouter.openclaw.plist
+    rm -f ~/Library/LaunchAgents/com.crazyrouter.openclaw.plist
+    rm -rf ~/.openclaw
+    npm uninstall -g openclaw
+    ```
+  </Tab>
+</Tabs>
+
+애초에 OpenClaw를 위해서만 Node.js를 설치했다면, 다른 프로젝트가 의존하지 않는지 확인한 후 Node.js를 수동으로 제거할 수도 있습니다.
+
+## 자주 발생하는 오류와 해결 방법
+
+| 현상 | 흔한 원인 | 해결 방법 |
+|------|----------|----------|
+| WebUI가 열리지 않음 | 서비스 미시작, 포트 점유, 호스트 방화벽 미허용 | 먼저 서비스 상태를 확인한 후 `18789` 포트와 방화벽을 점검하세요 |
+| 페이지는 열리지만 계속 로그인을 요구함 | `gateway.auth.token`이 틀렸거나 자동 로그인 주소가 아닌 주소로 접속함 | 설치 프로그램이 출력한 `?token=...` 링크를 다시 읽고, 필요하면 `openclaw.json`을 확인하세요 |
+| 401 unauthorized | `models.providers.*.apiKey`의 Crazyrouter key가 유효하지 않거나 만료됨 | API Key를 갱신한 후 서비스를 재시작하세요 |
+| 403 / model not allowed | OpenClaw가 요청 중인 모델이 Crazyrouter 토큰 화이트리스트에 없음 | 토큰 설정에서 해당 모델을 허용하세요 |
+| 429 / 크레딧 소진 | 토큰 초과 또는 속도 제한 트리거 | 크레딧을 늘리거나 더 저렴한 모델로 변경하거나 토큰을 분리하세요 |
+| 모델 변경 후에도 이전 모델이 계속 호출됨 | 서비스가 재시작되지 않았거나 provider 경로를 잘못 변경함 | `agents.defaults.model.primary`를 확인한 후 재시작하세요 |
+| Telegram Bot이 응답하지 않음 | `botToken` 미입력, owner 페어링 미완료, 또는 서비스 미재시작 | `channels.telegram`을 확인하고 서비스를 재시작한 후 다시 메시지를 보내 페어링을 트리거하세요 |
+| Linux 설치 후 서비스가 시작되지 않았을 수 있다는 안내 | systemd 사용자 서비스 실패 | `journalctl --user -u openclaw -f`로 오류를 확인하세요 |
+| macOS 설치 후 서비스가 시작되지 않았을 수 있다는 안내 | launchd 시작 실패 | `~/.openclaw/openclaw.err`를 확인하세요 |
+
+## FAQ
+
+### Crazyrouter 백엔드로 어떤 주소를 사용해야 하나요?
+
+기본적으로 설치 프로그램이 작성한 값을 유지하면 됩니다. OpenAI 호환 provider는 `https://api.crazyrouter.com/v1`을, Claude / MiniMax 네이티브 호환 provider는 `https://api.crazyrouter.com`을 사용합니다.
+
+### 어떤 기본 모델을 유지해야 하나요?
+
+대부분의 경우 먼저 `claude-opus-4-8`을 유지하세요. OpenClaw를 주로 코드 비서로 사용한다면 `gpt-5.5`로 전환하세요.
+
+### 왜 모델 목록에 사용하고 싶은 모델이 보이지 않나요?
+
+보통 Crazyrouter 토큰이 해당 모델을 허용하지 않았거나, provider 접두사를 잘못 변경했기 때문입니다.
+
+### 왜 Telegram 개인 메시지는 되는데 그룹 채팅은 안 되나요?
+
+설치 프로그램은 기본적으로 Telegram 그룹 정책을 `allowlist`로 설정합니다. 자신의 사용 요구에 맞게 Telegram channel 설정을 계속 조정해야 합니다.
+
+### OpenClaw를 외부에 공개할 때 가장 안전한 방법은 무엇인가요?
+
+최소한 세 가지를 해야 합니다: 접근 출처 제한, `gateway.auth.token` 보호, OpenClaw 전용 Crazyrouter 토큰 사용. 공용 네트워크에 직접 노출한다면 리버스 프록시와 추가 접근 제어를 더하는 것을 권장합니다.
+
+<Card title="설치 스크립트 저장소 보기" icon="github" href="https://github.com/xujfcn/crazyrouter-openclaw">
+  설치 스크립트를 확인하고, Issue를 제출하거나, 원클릭 설치 로직을 직접 검토하세요.
+</Card>
+

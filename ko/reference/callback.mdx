@@ -1,0 +1,140 @@
+---
+title: 'Callback 프로토콜'
+description: '비동기 작업을 위한 Webhook 콜백 프로토콜'
+---
+> 업데이트: 2026-06-06
+
+## 개요
+
+비동기 작업(Midjourney 이미지 생성, 비디오 생성, 음악 생성 등)의 경우, Crazyrouter는 Webhook 콜백을 통해 작업 상태 변경을 알려주는 기능을 지원합니다.
+
+## 콜백 URL 설정
+
+작업을 제출할 때 `notifyHook` 파라미터로 콜백 주소를 지정합니다.
+
+```json
+{
+  "prompt": "a beautiful sunset",
+  "notifyHook": "https://your-server.com/api/callback"
+}
+```
+
+## 콜백 요청 형식
+
+Crazyrouter는 지정한 콜백 URL로 POST 요청을 전송합니다.
+
+```
+POST https://your-server.com/api/callback
+Content-Type: application/json
+```
+
+### Midjourney 콜백
+
+```json
+{
+  "id": "task_abc123",
+  "action": "IMAGINE",
+  "status": "SUCCESS",
+  "prompt": "a beautiful sunset",
+  "imageUrl": "https://cdn.example.com/image.png",
+  "progress": "100%",
+  "failReason": "",
+  "submitTime": 1706000000000,
+  "startTime": 1706000010000,
+  "finishTime": 1706000060000
+}
+```
+
+### 비디오 생성 콜백(Kling/Luma/Runway)
+
+```json
+{
+  "id": "task_xyz789",
+  "status": "succeed",
+  "type": "video",
+  "output": {
+    "video_url": "https://cdn.example.com/video.mp4",
+    "cover_url": "https://cdn.example.com/cover.jpg",
+    "duration": 5.0
+  },
+  "created_at": 1706000000,
+  "updated_at": 1706000120
+}
+```
+
+### Suno 음악 콜백
+
+```json
+{
+  "id": "task_music456",
+  "status": "complete",
+  "output": {
+    "audio_url": "https://cdn.example.com/song.mp3",
+    "title": "My Song",
+    "duration": 180
+  }
+}
+```
+
+## 콜백 상태 흐름
+
+```
+제출 → NOT_START → IN_PROGRESS → SUCCESS / FAILURE
+```
+
+상태가 변경될 때마다 콜백이 한 번씩 트리거됩니다.
+
+## 콜백 서버 예시
+
+<CodeGroup>
+
+```python Python (Flask)
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+@app.route("/api/callback", methods=["POST"])
+def callback():
+    data = request.json
+    task_id = data["id"]
+    status = data["status"]
+
+    print(f"작업 {task_id} 상태 업데이트: {status}")
+
+    if status == "SUCCESS":
+        image_url = data.get("imageUrl")
+        print(f"이미지 주소: {image_url}")
+
+    return jsonify({"success": True})
+
+app.run(port=8080)
+```
+
+```javascript Node.js (Express)
+const express = require('express');
+const app = express();
+app.use(express.json());
+
+app.post('/api/callback', (req, res) => {
+  const { id, status, imageUrl } = req.body;
+  console.log(`작업 ${id} 상태: ${status}`);
+
+  if (status === 'SUCCESS') {
+    console.log(`이미지: ${imageUrl}`);
+  }
+
+  res.json({ success: true });
+});
+
+app.listen(8080);
+```
+
+</CodeGroup>
+
+<Warning>
+  콜백 URL은 반드시 공개 인터넷에서 접근 가능한 주소여야 합니다. 서버가 POST 요청을 받을 수 있고 5초 이내에 200 상태 코드를 반환하는지 확인하세요.
+</Warning>
+
+<Note>
+  콜백이 실패하면 시스템은 최대 3회 재시도하며, 간격은 각각 10초, 30초, 60초입니다.
+</Note>

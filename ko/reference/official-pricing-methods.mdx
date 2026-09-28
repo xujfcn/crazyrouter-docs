@@ -1,0 +1,271 @@
+---
+title: '모델 공식 정가 방식'
+description: '모델별로 Crazyrouter 내 명칭에 대응하는 업스트림 공식 과금 기준을 설명합니다'
+---
+> 업데이트: 2026-06-06
+
+# 모델 공식 정가 방식
+
+이 문서는 업스트림 벤더의 공식 과금 기준만 설명하며, Crazyrouter의 실제 판매가와는 다릅니다.
+
+- 업스트림 공식 기준: 벤더 자체의 `input`, `output`, `cached input`, `tool call`, `search grounding`, `prompt caching` 등 과금 방식
+- Crazyrouter 기준: 본 사이트 자체의 판매가, 배율, 할인, 채널 차이 및 정산 방식
+
+<Note>
+  본 페이지는 `2026-04-27`에 조회한 벤더의 공식 문서를 기준으로 정리되었습니다. 벤더는 가격을 변경할 수 있으며, 프리뷰 모델, 롱 컨텍스트, 검색 도구 및 캐시 규칙도 조정될 수 있습니다. 실제 적용 전 공식 링크에서 다시 한 번 확인하시기 바랍니다.
+</Note>
+
+## 공식 단가 예시표
+
+아래 예시는 각 벤더에서 가장 흔하고 업무 예산과 직접 대응하기 쉬운 한 단계만 골랐습니다:
+
+- Anthropic: 표준 API 가격이며, `Fast mode`, `US-only inference` 배율 및 Batch 할인은 포함하지 않습니다
+- OpenAI: `Standard` 가격이며, Batch, Priority, Regional Processing 추가 요금은 포함하지 않습니다
+- Gemini: `Standard` 가격이며, 기본적으로 텍스트/이미지/비디오 입력을 기준으로 하고, `Gemini 3*`에 대해서는 `<= 200K prompt` 구간을 취합니다
+- xAI: 사이트 내 라우팅 명칭에 공개된 독립 단가가 없는 경우, 본 표에는 "단독 명시 없음"으로 명확히 표기합니다
+- Z.AI: 공식 `Text Models` 가격을 취합니다
+- MiniMax: 메인 표는 `Pay as You Go`를 기준으로 하고, 구독제는 `Token Plan`으로 별도 표기합니다
+
+<Note>
+  특별히 표기되지 않은 경우, 아래 표의 금액은 기본적으로 `USD / 1M tokens`입니다.
+</Note>
+
+### Anthropic 예시 단가
+
+| 사이트 내 모델 | 공식 대응 | Base Input | Cache 5m / 1h / Hit | Output | 비고 |
+| --- | --- | --- | --- | --- | --- |
+| `claude-opus-4-8` | `claude-opus-4-8` | `$3` | `$3.75 / $6 / $0.30` | `$15` | `1M context`는 표준가로 계산; Batch는 약 `50% 할인` |
+| `claude-opus-4-8` | `claude-opus-4-8` | `$5` | `$6.25 / $10 / $0.50` | `$25` | `Fast mode`는 표준가 대비 별도 `6배` 적용 |
+| `claude-opus-4-8` | `claude-opus-4-8` | `$5` | `$6.25 / $10 / $0.50` | `$25` | `US-only inference`를 활성화하면 공식 문서에 지역 배율이 별도로 있습니다 |
+| `claude-opus-4-8` | `claude-opus-4-8` 스냅샷 | `$3` | `$3.75 / $6 / $0.30` | `$15` | 스냅샷 명칭은 `Sonnet 4.5` 가격을 그대로 사용하며, 별도의 가격표가 아닙니다 |
+
+### OpenAI 예시 단가
+
+| 사이트 내 모델 | 공식 대응 | Input | Cached input | Output | 비고 |
+| --- | --- | --- | --- | --- | --- |
+| `gpt-5.5` | `gpt-5.5` | `$2.50` | `$0.25` | `$15.00` | 표준가는 `270K` 이하 컨텍스트에 적용; 초장문 컨텍스트는 별도 배율 적용 |
+| `gpt-4o` | `gpt-4o` | `$2.50` | `$1.25` | `$10.00` | 고전적인 통일 3단계 과금 |
+| `gpt-5` | `gpt-5` | `$1.25` | `$0.125` | `$10.00` | 도구 비용은 별도 계산 |
+| `gpt-5.5` | `gpt-5.1-codex-max` | `$1.25` | `$0.125` | `$10.00` | Codex / agentic coding 워크플로우에 자주 사용되며, 가격 구조는 여전히 표준 3단계 방식 |
+| `gpt-5-mini` | `gpt-5-mini` | `$0.25` | `$0.025` | `$2.00` | 소형 모델 버전 |
+| `gpt-5-nano` | `gpt-5-nano` | `$0.05` | `$0.005` | `$0.40` | 최저가 GPT-5 라인 |
+| `gpt-5.5` | `gpt-5.5` | `$1.75` | `$0.175` | `$14.00` | 이전 세대 플래그십, 여전히 표준 token 3단계 방식 |
+| `gpt-5.5` | `gpt-5.5` | `$5.00` | `$0.50` | `$30.00` | 현재 공식 플래그십 가격; 표준가 설명은 `270K` 이하 컨텍스트에 적용됩니다 |
+
+### Gemini 예시 단가
+
+| 사이트 내 모델 | 공식 대응 | Standard 입력가 | Standard 캐시가 | Standard 출력가 | 비고 |
+| --- | --- | --- | --- | --- | --- |
+| `gemini-3.1-pro` | `gemini-3.1-pro` | `$2.00` | `$0.20` + `$4.50 / 1M tok / hr` 저장 | `$12.00` | `<= 200K` prompt 구간; `> 200K`는 `$4 / $0.40 / $18`; Google은 현재 Gemini 3 계열에 대해 Search / Maps 무료 할당량과 `$14 / 1,000 search queries`도 별도로 명시합니다 |
+| `gemini-2.5-flash-lite` | `gemini-2.5-flash-lite` | `$0.10`（text / image / video） | `$0.01`（text / image / video） + `$1.00 / 1M tok / hr` 저장 | `$0.40` | 오디오 입력은 `$0.30`, 오디오 캐시는 `$0.03`; Search는 `1,500 RPD` 무료 후 `$35 / 1,000 grounded prompts` |
+
+### xAI 예시 단가
+
+| 사이트 내 모델 | 공식 대응 | Prompt / Cached / Output | Tool 비용 | 비고 |
+| --- | --- | --- | --- | --- |
+| `grok-4.1-fast` | 사이트 내 reasoning 라우팅 | 공식 정적 공개 페이지에 `grok-4.1-fast` 단독 단가가 명시되어 있지 않음 | `web_search $5 / 1k`, `x_search $5 / 1k`, `code_execution $5 / 1k`, `attachment_search $10 / 1k`, `collections_search $2.50 / 1k` | `reasoning tokens`는 `completion token price`로 과금 |
+| `grok-4.1` | 사이트 내 메인 라우팅 | 공식 정적 공개 페이지에 `grok-4.1` 단독 단가가 명시되어 있지 않음 | 위와 동일 | 사이트 내 명칭은 라우팅 레이어 명칭에 더 가까우며, xAI 정적 SKU와 직접 동일시해서는 안 됩니다 |
+
+<Note>
+  xAI 현재 공개된 정적 문서에서 안정적으로 확인할 수 있는 것은 token 분류 규칙, tool invocation 비용, Batch `50% 할인`, 그리고 "모델 상세 페이지 또는 콘솔에서 구체적인 per-model token price를 확인하라"는 안내입니다. `grok-4.1` / `grok-4.1-fast`가 정적 문서에 단독 가격으로 명시되어 있지 않으므로, 본 페이지는 다른 SKU의 숫자를 이들에게 억지로 대입하지 않습니다.
+</Note>
+
+### Z.AI / GLM 예시 단가
+
+| 사이트 내 모델 | 공식 대응 | Input | Cached input | Cached input storage | Output | 비고 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `glm-5` | `GLM-5` | `$1.0` | `$0.2` | `Limited-time Free` | `$3.2` | `Web Search`는 별도로 `$0.01 / use` 부과 |
+
+### MiniMax 예시 단가
+
+#### Pay as You Go
+
+| 사이트 내 모델 | 공식 대응 | Input | Prompt caching read | Prompt caching write | Output | 비고 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `MiniMax-M2.7` | `MiniMax-M2.7` | `$0.3` | `$0.06` | `$0.375` | `$1.2` | API 예산을 직접 산정하기에 가장 적합한 구간 |
+
+#### Token Plan
+
+| 요금제 | 월 요금 | `M2.7` 할당량 |
+| --- | --- | --- |
+| Starter | `$10 / month` | `1,500 requests / 5hrs` |
+| Plus | `$20 / month` | `4,500 requests / 5hrs` |
+| Max | `$50 / month` | `15,000 requests / 5hrs` |
+
+## Anthropic
+
+Anthropic 계열 모델의 공식 과금 방식은 단순한 `input / output` 두 항목이 아니라 다음과 같이 나뉩니다:
+
+- `Base Input Tokens`
+- `5m Cache Writes`
+- `1h Cache Writes`
+- `Cache Hits & Refreshes`
+- `Output Tokens`
+
+동시에 두 가지 공통 규칙이 있습니다:
+
+- `Batch API`의 입력과 출력은 보통 표준가 `50% 할인`으로 계산됩니다
+- Prompt caching의 공개된 배율 규칙은 다음과 같습니다: `5분 쓰기 캐시 = 1.25배 input`, `1시간 쓰기 캐시 = 2배 input`, `읽기 캐시 = 0.1배 input`
+
+| 사이트 내 모델명 | 공식 대응 | 공식 과금 방식 | 특별 설명 |
+| --- | --- | --- | --- |
+| `claude-opus-4-8` | Anthropic `claude-opus-4-8` | `base input / 5m cache write / 1h cache write / cache hit / output`로 과금 | Anthropic 공식은 `Sonnet 4.6`이 `1M context`를 지원한다고 명시하며, 이 롱 컨텍스트는 표준 단가로 과금되고 추가 인상은 없습니다 |
+| `claude-opus-4-8` | Anthropic `claude-opus-4-8` | `base input / 5m cache write / 1h cache write / cache hit / output`로 과금 | `Opus 4.6`도 `1M context` 표준 과금을 지원합니다; 또한 공식적으로 `Fast mode`를 별도 제공하며 가격은 표준가의 `6배`입니다 |
+| `claude-opus-4-8` | Anthropic `claude-opus-4-8` | `base input / 5m cache write / 1h cache write / cache hit / output`로 과금 | `Opus 4.7`은 현재 Anthropic 공식 공개 가격표에서 독립된 모델입니다; `US-only inference`를 활성화하면 공식 문서에 `1.1배` 배율이 있다고 안내합니다 |
+| `claude-opus-4-8` | Anthropic 스냅샷 ID `claude-opus-4-8`, 공개 별칭은 보통 `claude-opus-4-8`로 표기 | 여전히 `Sonnet 4.5`의 `base input / cache write / cache hit / output`로 과금 | 이것은 날짜가 포함된 API 스냅샷 명칭이며, 별도의 가격 체계가 아닙니다; 예산 산정 시 `Claude Sonnet 4.5` 공식 기준으로 이해해야 합니다 |
+
+공식 링크:
+
+- Anthropic Pricing: [platform.claude.com/docs/en/about-claude/pricing](https://platform.claude.com/docs/en/about-claude/pricing)
+- Anthropic Models Overview: [platform.claude.com/docs/en/about-claude/models/overview](https://platform.claude.com/docs/en/about-claude/models/overview)
+
+## OpenAI
+
+OpenAI 계열 텍스트 모델의 공식 공개 기준이 가장 통일되어 있으며, 핵심은 다음과 같습니다:
+
+- `Input`
+- `Cached input`
+- `Output`
+
+추가 규칙은 보통 다음과 같습니다:
+
+- `Responses API` 자체는 별도로 요금이 추가되지 않으며, 선택한 모델의 token 단가로 계속 과금됩니다
+- `Web search`, 컨테이너/코드 실행, Computer Use 등의 도구는 도구별로 과금되며, 순수 token 단가에는 포함되지 않습니다
+- `Batch API`의 입력과 출력은 보통 표준가 `50% 할인`으로 계산됩니다
+
+| 사이트 내 모델명 | 공식 대응 | 공식 과금 방식 | 특별 설명 |
+| --- | --- | --- | --- |
+| `gpt-5.5` | 사이트 내 별칭, 보통 OpenAI `gpt-5.5`에 대응 | `input / cached input / output`로 과금 | `gpt-5.5`의 공개 표준가는 `270K` 이하 컨텍스트에 적용; 리전 처리 엔드포인트는 별도로 `+10%` |
+| `gpt-4o` | OpenAI `gpt-4o` | `input / cached input / output`로 과금 | `gpt-4o`는 고전적인 통일 기준이며, Claude처럼 별도의 캐시 쓰기 항목도 없고 Gemini처럼 별도의 Search grounding 표도 없습니다 |
+| `gpt-5` | OpenAI `gpt-5` | `input / cached input / output`로 과금 | Responses API에서 도구를 활성화하면 도구 비용은 별도로 계산됩니다; 공개 가격 페이지에는 "thinking token 단가"가 별도로 명시되어 있지 않습니다 |
+| `gpt-5.5` | 사이트 내에서는 OpenAI `gpt-5.1-codex-max`에 대응 | `input / cached input / output`로 과금 | 이는 Codex 지향 모델이지만, 공개 가격 구조는 일반 GPT-5.1 텍스트 모델과 동일합니다; agentic coding / Codex 워크플로우 관점에서 이해하는 것이 더 적합합니다 |
+| `gpt-5-mini` | OpenAI `gpt-5-mini` | `input / cached input / output`로 과금 | 소형 모델 버전으로 구조는 동일하고 단가만 더 저렴합니다 |
+| `gpt-5-nano` | OpenAI `gpt-5-nano` | `input / cached input / output`로 과금 | Nano 버전도 표준 token 3단계 과금 방식을 그대로 따릅니다 |
+| `gpt-5.5` | OpenAI `gpt-5.5` | `input / cached input / output`로 과금 | `gpt-5.5`는 여전히 GPT-5 계열의 표준 기준에 속합니다; Web search / File search / Code interpreter를 호출하면 도구는 별도로 계산됩니다 |
+| `gpt-5.5` | OpenAI `gpt-5.5` | `input / cached input / output`로 과금 | 현재 OpenAI 공식이 플래그십 모델로 지정하고 있습니다; 공개 가격 페이지에는 표준가가 `270K` 이하 컨텍스트에 적용된다고 명시되어 있으며, 초장문 컨텍스트는 최신 상세 가격표를 다시 확인해야 합니다 |
+
+공식 링크:
+
+- OpenAI Pricing: [openai.com/api/pricing](https://openai.com/api/pricing/)
+- OpenAI Docs Pricing: [platform.openai.com/docs/pricing](https://platform.openai.com/docs/pricing/)
+- OpenAI Models: [developers.openai.com/api/docs/models](https://developers.openai.com/api/docs/models)
+
+## Google Gemini
+
+Gemini의 공식 과금 방식은 앞의 두 벤더와 차이가 가장 크며, 보통 표준가 하나만 있는 것이 아니라 다음을 동시에 제공합니다:
+
+- `Standard`
+- `Batch`
+- `Flex`
+- `Priority`
+
+그리고 다음 항목들을 별도로 나열합니다:
+
+- `Input`
+- `Output (including thinking tokens)`
+- `Context caching price`
+- `Context caching storage`
+- `Grounding with Google Search`
+- `Grounding with Google Maps`
+
+| 사이트 내 모델명 | 공식 대응 | 공식 과금 방식 | 특별 설명 |
+| --- | --- | --- | --- |
+| `gemini-3.1-pro` | Google `gemini-3.1-pro`, 사이트 내 표시명은 보통 `gemini-3.1-pro`로 표기 가능 | 공식적으로 `Standard / Batch / Flex / Priority` 네 가지 처리 모드별로 각각 과금되며, 각 모드마다 `input / output / caching / search grounding / maps grounding`으로 세분화됩니다 | 이것은 프리뷰 모델입니다; 또한 `<= 200K`와 `> 200K` prompt는 두 개의 서로 다른 가격 구간이며 단일 단가가 아닙니다 |
+| `gemini-2.5-flash-lite` | Google `gemini-2.5-flash-lite` | `Standard / Batch / Flex / Priority`별로 구간을 나누어 과금하며, `input / output / context caching / storage / Google Search / Google Maps`를 별도로 명시 | 이것은 안정 버전 모델이며 preview가 아닙니다; `output`은 공식적으로 "thinking tokens 포함"이라고 명시되어 있습니다 |
+
+공식 링크:
+
+- Gemini Pricing: [ai.google.dev/gemini-api/docs/pricing](https://ai.google.dev/gemini-api/docs/pricing)
+- Gemini Models: [ai.google.dev/models/gemini](https://ai.google.dev/models/gemini)
+
+## xAI Grok
+
+xAI 공식 규칙의 핵심은 "thinking 모델에 별도의 가격표가 있는가"가 아니라, token과 도구를 분리하는 것입니다:
+
+- `Prompt tokens`
+- `Cached prompt tokens`
+- `Completion tokens`
+- `Reasoning tokens`
+
+xAI 공식은 추가로 다음을 명시합니다:
+
+- `Reasoning tokens`는 `completion token price`로 과금
+- `Web Search`, `X Search`, `Code Execution`, `Collections Search` 등 server-side tools는 `1000회 호출당` 별도 과금
+- `Batch API`는 token 관련 비용에 대해 보통 `50% 할인`
+
+| 사이트 내 모델명 | 공식 대응 | 공식 과금 방식 | 특별 설명 |
+| --- | --- | --- | --- |
+| `grok-4.1-fast` | 사이트 내 reasoning 라우팅; 공식적으로는 의미상 Grok 4.1의 `Thinking` 구성에 대응 | 공식 기준은 `prompt / cached prompt / completion / reasoning` 네 가지 token 유형과, 필요 시 tool invocation 비용 | 현재 xAI 공개 API 가격 페이지가 중점적으로 보여주는 것은 `grok-4-1-fast-reasoning` 같은 SKU입니다; 따라서 여기서는 "xAI reasoning 모델의 공식 과금 구조에 따라 정산한다"고 이해하는 것이 더 정확하며, 사이트 내 명칭을 독립된 공식 SKU로 취급해서는 안 됩니다 |
+| `grok-4.1` | 사이트 내 Grok 4.1 메인 라우팅; 공식적으로는 의미상 Grok 4.1의 비사고(non-thinking) 구성에 더 가까움 | 공식 기준은 여전히 `prompt / cached prompt / completion`이며, 검색·코드 실행·첨부파일 검색 등 도구를 활성화하면 tool fee가 별도로 계산됩니다 | xAI는 현재 공개 API 페이지에서 `grok-4.1-fast`와 `grok-4-1-fast-*`를 더 강조하고 있습니다; 따라서 예산 산정 시 xAI가 현재 공개한 token 관련 및 tool 관련 과금 규칙을 중점적으로 확인해야 합니다 |
+
+공식 링크:
+
+- xAI Models and Pricing: [docs.x.ai/developers/models](https://docs.x.ai/developers/models)
+- xAI Consumption and Rate Limits: [docs.x.ai/developers/rate-limits](https://docs.x.ai/developers/rate-limits)
+- xAI Prompt Caching Pricing: [docs.x.ai/developers/advanced-api-usage/prompt-caching/usage-and-pricing](https://docs.x.ai/developers/advanced-api-usage/prompt-caching/usage-and-pricing)
+
+## Z.AI / GLM
+
+Z.AI의 `GLM-5` 공식 기준은 OpenAI와 유사하지만, 캐시 저장 비용이 하나 더 추가됩니다:
+
+- `Input`
+- `Cached Input`
+- `Cached Input Storage`
+- `Output`
+
+동시에 `Web Search` 등 내장 도구는 사용 횟수에 따라 별도로 과금됩니다.
+
+| 사이트 내 모델명 | 공식 대응 | 공식 과금 방식 | 특별 설명 |
+| --- | --- | --- | --- |
+| `glm-5` | Z.AI `GLM-5` | `input / cached input / cached input storage / output`로 과금 | 공식 내장 `Web Search`를 활성화하면 `per use`로 추가 과금됩니다; 이는 단순히 token 단가만 보는 것과 다릅니다 |
+
+공식 링크:
+
+- Z.AI Pricing: [docs.z.ai/guides/overview/pricing](https://docs.z.ai/guides/overview/pricing)
+- GLM-5 Overview: [docs.z.ai/guides/llm/glm-5](https://docs.z.ai/guides/llm/glm-5)
+
+## MiniMax
+
+MiniMax 계열 모델은 먼저 두 가지 공식 판매 방식을 구분해야 합니다:
+
+- `Pay as You Go`
+- `Token Plan`
+
+그중:
+
+- `Pay as You Go`는 표준 API 사용량 기반 과금입니다
+- `Token Plan`은 구독제이며, `M2.7`은 `5시간 롤링 윈도우의 요청 할당량`으로 계산되고, 단순히 token으로 정산되지 않습니다
+
+| 사이트 내 모델명 | 공식 대응 | 공식 과금 방식 | 특별 설명 |
+| --- | --- | --- | --- |
+| `MiniMax-M2.7` | 사이트 내에서는 `MiniMax-M2.7`에 대응해야 함 | `Pay as You Go`를 이용하는 경우 `input / output / prompt caching read / prompt caching write`로 과금; `Token Plan`을 이용하는 경우 `requests / 5hrs`의 구독 할당량으로 계산 | 이것은 본 페이지에서 가장 이질적인 벤더입니다. 프로덕션 예산을 산정할 때는 `Pay as You Go`를 우선 확인하고, 개발자가 코딩 작업을 대량으로 수행할 때는 `Token Plan`이 더 유리한지 다시 확인해야 합니다 |
+
+공식 링크:
+
+- MiniMax Pricing Overview: [platform.minimax.io/docs/pricing/overview](https://platform.minimax.io/docs/pricing/overview)
+- MiniMax Pay as You Go: [platform.minimax.io/docs/guides/pricing-paygo](https://platform.minimax.io/docs/guides/pricing-paygo)
+- MiniMax Token Plan: [platform.minimax.io/docs/guides/pricing-token-plan](https://platform.minimax.io/docs/guides/pricing-token-plan)
+
+## 결론
+
+"공식적으로 도대체 어떤 기준으로 과금하는가"를 빠르게 파악하려면 다음 몇 가지만 기억하면 됩니다:
+
+- Anthropic: `base input + cache write/read + output`
+- OpenAI: `input + cached input + output`, 도구는 별도 계산
+- Gemini: `여러 처리 모드 + input/output + caching + search/maps grounding`
+- xAI: `prompt/cached/completion/reasoning`, server-side tools는 별도 계산
+- Z.AI: `input + cached input + cached storage + output`
+- MiniMax: `사용량 기반 token` 또는 `구독 할당량` 두 방식이 병존
+
+<Warning>
+  본 페이지는 "업스트림 공식 정가 방식"을 설명하는 것이며, Crazyrouter의 대외 판매 가격이 아닙니다. 실제 충전, 차감, 배율 및 프로모션은 Crazyrouter 사이트 내 pricing, 콘솔, 그리고 `/api/pricing` 응답을 기준으로 해야 합니다.
+</Warning>
+
+## 관련 페이지
+
+- [OpenAI 모델 목록](/ko/chat/openai/models)
+- [Gemini 호환 OpenAI 모델 목록](/ko/chat/gemini/openai-models)
+- [Claude 네이티브 형식](/ko/chat/anthropic/messages)
+- [Gemini 네이티브 형식](/ko/chat/gemini/native)
+- [Grok 모델](/ko/chat/openai/grok)
+- [토큰 지원 모델 조회](/ko/token-management/models)

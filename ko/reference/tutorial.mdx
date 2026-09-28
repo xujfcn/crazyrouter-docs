@@ -1,0 +1,192 @@
+---
+title: '연동 튜토리얼'
+description: '프로덕션 환경 재검증을 기반으로, OpenAI, Anthropic, Gemini에서 Crazyrouter로 연동하는 시작 경로'
+---
+> 업데이트: 2026-06-06
+
+# 연동 튜토리얼
+
+이 문서 페이지에는 `2026-03-23`에 Crazyrouter 프로덕션 환경에서 재검증된 시작 경로만 작성되어 있습니다.
+
+가장 빠르게 시작하려면 먼저 세 가지 연동 방식을 구분하세요.
+
+- OpenAI 호환: `https://api.crazyrouter.com/v1`
+- Anthropic 네이티브: `https://api.crazyrouter.com`
+- Gemini 네이티브: `https://api.crazyrouter.com/v1beta/models/...`
+
+## 최소 마이그레이션 원칙
+
+OpenAI 호환 클라이언트에서 Crazyrouter로 마이그레이션할 때는 보통 두 가지만 변경하면 됩니다.
+
+1. `base_url`을 `https://api.crazyrouter.com/v1`로 변경
+2. `api_key`를 Crazyrouter의 `sk-xxx`로 변경
+
+---
+
+## OpenAI에서 마이그레이션
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="gpt-5.5",
+    messages=[{"role": "user", "content": "Hello"}],
+    max_tokens=64
+)
+```
+
+이번 프로덕션 재검증에서 확인된 사항:
+
+- `gpt-5.5`는 `/v1/chat/completions`를 통해 정상적으로 응답함
+- reasoning 요약이나 OpenAI 스타일 web search가 필요하다면 `/v1/responses`로 전환하는 것을 우선하세요
+
+관련 페이지:
+
+- [Responses API 개요](/ko/chat/responses/overview)
+- [GPT-5 사고 모드](/ko/chat/responses/gpt5-thinking)
+
+---
+
+## Anthropic에서 마이그레이션
+
+### 방안 A: OpenAI 호환 레이어 계속 사용
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="claude-opus-4-8",
+    messages=[{"role": "user", "content": "Hello"}],
+    max_tokens=64
+)
+```
+
+### 방안 B: Anthropic 네이티브 Messages 사용
+
+```python
+import anthropic
+
+client = anthropic.Anthropic(
+    api_key="sk-xxx",
+    base_url="https://api.crazyrouter.com"
+)
+
+response = client.messages.create(
+    model="claude-opus-4-8",
+    max_tokens=128,
+    messages=[{"role": "user", "content": "Hello"}]
+)
+```
+
+다음과 같은 목표가 있다면:
+
+- 일반적인 Claude 대화: `claude-opus-4-8`을 우선 사용
+- thinking block이 명확히 필요한 경우: `claude-opus-4-8`을 우선 사용
+
+관련 페이지:
+
+- [Claude 네이티브 형식](/ko/chat/anthropic/messages)
+
+---
+
+## Gemini에서 마이그레이션
+
+### 방안 A: OpenAI 호환 레이어
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="gemini-3.1-pro",
+    messages=[{"role": "user", "content": "Hello"}],
+    max_tokens=64
+)
+```
+
+### 방안 B: Gemini 네이티브
+
+```bash
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "Hello"}
+        ]
+      }
+    ]
+  }'
+```
+
+다음과 같은 목표가 있다면:
+
+- 기존 OpenAI SDK 코드만 재사용: 먼저 호환 레이어 사용
+- 구조화된 출력, Google Search, thinking이 필요: Gemini 네이티브를 우선 사용
+
+관련 페이지:
+
+- [Gemini OpenAI 호환 형식](/ko/chat/gemini/openai-compat)
+- [Gemini 네이티브 형식](/ko/chat/gemini/native)
+
+---
+
+## 환경 변수 방식
+
+OpenAI 호환 레이어를 사용한다면, 먼저 다음을 설정하는 것을 권장합니다.
+
+<Tabs>
+  <Tab title="Linux / macOS">
+    ```bash
+    export OPENAI_API_KEY=sk-xxx
+    export OPENAI_BASE_URL=https://api.crazyrouter.com/v1
+    ```
+  </Tab>
+  <Tab title="Windows">
+    ```powershell
+    $env:OPENAI_API_KEY = "sk-xxx"
+    $env:OPENAI_BASE_URL = "https://api.crazyrouter.com/v1"
+    ```
+  </Tab>
+</Tabs>
+
+그런 다음 코드에서 바로 다음과 같이 사용할 수 있습니다.
+
+```python
+from openai import OpenAI
+client = OpenAI()
+```
+
+---
+
+## 시작 권장 사항
+
+| 목표 | 권장 시작 방식 |
+|------|--------------|
+| GPT 가장 빠르게 연동 | OpenAI 호환 + `gpt-5.5` |
+| Claude 가장 빠르게 연동 | Anthropic 네이티브 + `claude-opus-4-8` |
+| Gemini 가장 빠르게 연동 | OpenAI 호환 또는 Gemini 네이티브 + `gemini-3.1-pro` |
+| reasoning 요약이 필요 | Responses API |
+| Claude thinking block이 필요 | `claude-opus-4-8` |
+| Gemini Google Search / thinking / responseSchema가 필요 | Gemini 네이티브 |
+
+<Note>
+  Crazyrouter는 OpenAI, Anthropic, Gemini 세 가지 프로토콜을 모두 지원합니다. 더 안정적인 방법은 보통 "모든 모델을 강제로 동일한 프로토콜로 처리"하는 것이 아니라, 능력에 따라 가장 적합한 진입점을 선택하는 것입니다.
+</Note>
+

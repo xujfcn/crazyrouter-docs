@@ -1,0 +1,135 @@
+---
+title: "Imagen 4"
+description: "Google Imagen 4 이미지 생성 모델을 Gemini API를 통해 호출합니다"
+---
+> 업데이트: 2026-06-06
+
+# Imagen 4
+
+Google Imagen 4는 Gemini API 엔드포인트를 통해 호출하는 전문 이미지 생성 모델입니다.
+
+<Warning>
+  Imagen 4는 현재 개발 단계에 있으며, 기능과 가용성이 변경될 수 있습니다.
+</Warning>
+
+```
+POST /v1beta/models/imagen-4:generateContent
+```
+
+---
+
+## 기본 사용법
+
+<CodeGroup>
+
+```bash cURL
+curl "https://api.crazyrouter.com/v1beta/models/imagen-4:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "화창한 잔디밭 위를 달리는 황금빛 래브라도 리트리버, 사진급 화질, 얕은 심도"}
+        ]
+      }
+    ],
+    "generationConfig": {
+      "responseModalities": ["IMAGE"],
+      "imageGenerationConfig": {
+        "numberOfImages": 1,
+        "aspectRatio": "16:9"
+      }
+    }
+  }'
+```
+
+```python Python
+import google.generativeai as genai
+import base64
+
+genai.configure(
+    api_key="YOUR_API_KEY",
+    transport="rest",
+    client_options={"api_endpoint": "https://api.crazyrouter.com"}
+)
+
+model = genai.GenerativeModel("imagen-4")
+
+response = model.generate_content(
+    "화창한 잔디밭 위를 달리는 황금빛 래브라도 리트리버, 사진급 화질",
+    generation_config=genai.GenerationConfig(
+        response_modalities=["IMAGE"],
+        image_generation_config={
+            "number_of_images": 1,
+            "aspect_ratio": "16:9"
+        }
+    )
+)
+
+for part in response.candidates[0].content.parts:
+    if hasattr(part, "inline_data"):
+        with open("imagen_output.png", "wb") as f:
+            f.write(base64.b64decode(part.inline_data.data))
+        print("이미지 저장 완료")
+```
+
+</CodeGroup>
+
+### 응답 형식
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "inlineData": {
+              "mimeType": "image/png",
+              "data": "iVBORw0KGgoAAAANSUhEUg..."
+            }
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP"
+    }
+  ]
+}
+```
+
+---
+
+## 파라미터 설명
+
+### imageGenerationConfig
+
+| 파라미터 | 유형 | 설명 |
+|------|------|------|
+| `numberOfImages` | integer | 생성할 이미지 수, 1~4 |
+| `aspectRatio` | string | 가로세로 비율: `1:1`, `16:9`, `9:16`, `4:3`, `3:4` |
+
+---
+
+## 일괄 생성
+
+```json
+{
+  "generationConfig": {
+    "responseModalities": ["IMAGE"],
+    "imageGenerationConfig": {
+      "numberOfImages": 4,
+      "aspectRatio": "1:1"
+    }
+  }
+}
+```
+
+<Note>
+  Imagen 4는 순수 이미지 생성 모델이므로 `responseModalities`는 `["IMAGE"]`로 설정해야 합니다. 텍스트 설명도 함께 반환해야 한다면 Gemini 이미지 생성 모델을 사용할 수 있습니다.
+</Note>
+
+<Note>
+  Imagen 4의 프롬프트는 스타일, 조명, 구도 등의 정보를 포함한 상세하고 묘사적인 언어를 사용하는 것을 권장합니다. 더 나은 생성 결과를 얻을 수 있습니다.
+</Note>

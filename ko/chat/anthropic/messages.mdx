@@ -1,0 +1,200 @@
+---
+title: "Claude 네이티브 형식"
+description: "프로덕션 환경 재검증을 기반으로, Anthropic Messages API를 사용하여 Claude를 호출합니다"
+---
+> 업데이트: 2026-06-06
+
+# Claude 네이티브 형식
+
+```
+POST /v1/messages
+```
+
+이 문서 페이지에는 `2026-03-22`에 Crazyrouter 프로덕션 환경에서 재검증된 Claude Messages 사용법만 기재합니다.
+
+현재 메인 예제 모델:
+
+- `claude-opus-4-8`
+- `claude-opus-4-8`
+
+## 인증
+
+이번 라운드에서 다음 두 가지 표기 방식이 모두 사용 가능함을 재검증했습니다.
+
+```text
+x-api-key: YOUR_API_KEY
+```
+
+```text
+Authorization: Bearer YOUR_API_KEY
+```
+
+동시에 다음도 유지합니다.
+
+```text
+anthropic-version: 2023-06-01
+```
+
+---
+
+## 기본 대화
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-opus-4-8",
+    "max_tokens": 128,
+    "messages": [
+      {
+        "role": "user",
+        "content": "Explain quantum computing in one sentence."
+      }
+    ]
+  }'
+```
+
+현재 프로덕션에서 반환되는 핵심 구조:
+
+```json
+{
+  "type": "message",
+  "content": [
+    {
+      "type": "text",
+      "text": "..."
+    }
+  ]
+}
+```
+
+---
+
+## Function Calling
+
+현재 프로덕션 환경에서 Claude의 도구 호출은 `/v1/messages`를 통해 `tool_use`를 안정적으로 반환할 수 있습니다.
+
+첫 연동 테스트 시 권장 사항:
+
+- `tool_choice`를 명시적으로 전달
+- 프롬프트에 "반드시 도구를 호출해야 하며, 직접 답변하지 말 것"을 명확히 작성
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-opus-4-8",
+    "max_tokens": 256,
+    "tools": [
+      {
+        "name": "get_time",
+        "description": "Get the current time for a timezone",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "timezone": {
+              "type": "string"
+            }
+          },
+          "required": ["timezone"]
+        }
+      }
+    ],
+    "tool_choice": {
+      "type": "any"
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Use the get_time tool for Asia/Shanghai. Do not answer directly."
+      }
+    ]
+  }'
+```
+
+현재 프로덕션 검증에서 반환된 핵심 필드:
+
+```json
+{
+  "stop_reason": "tool_use",
+  "content": [
+    {
+      "type": "tool_use",
+      "name": "get_time",
+      "input": {
+        "timezone": "Asia/Shanghai"
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Extended Thinking
+
+이번 라운드 프로덕션 재검증에서 `thinking` block을 명확히 반환하는 조합은 다음과 같습니다.
+
+- `claude-opus-4-8`
+
+기본 버전 `claude-opus-4-8`은 이번 라운드에서 동등하게 명확한 thinking block을 받지 못했으므로, 여기서는 thinking 기능을 우선적으로 기재합니다.
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-opus-4-8",
+    "max_tokens": 320,
+    "thinking": {
+      "type": "enabled",
+      "budget_tokens": 128
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Which is larger, 9.11 or 9.9? Explain briefly."
+      }
+    ]
+  }'
+```
+
+현재 프로덕션 검증에서 반환된 핵심 필드:
+
+```json
+{
+  "content": [
+    {
+      "type": "thinking",
+      "thinking": "..."
+    },
+    {
+      "type": "text",
+      "text": "..."
+    }
+  ]
+}
+```
+
+<Warning>
+  `thinking`을 사용할 때는 `max_tokens`가 반드시 `budget_tokens`보다 커야 합니다. 사고 토큰 역시 비용에 포함됩니다.
+</Warning>
+
+---
+
+## 현재 권장 사항
+
+- 일반 텍스트 대화: `claude-opus-4-8` 우선 사용
+- 도구 호출: `claude-opus-4-8` 우선 사용, 첫 검증 시 `tool_choice` 추가
+- thinking block이 명확히 필요한 경우: `claude-opus-4-8` 우선 사용
+
+관련 페이지:
+
+- [핵심 기능: Tool Calling](/ko/features/tool-calling)
+- [핵심 기능: Reasoning](/ko/features/reasoning)
+- [모델 공식 가격 책정 방식](/ko/reference/official-pricing-methods)

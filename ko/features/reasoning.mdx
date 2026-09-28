@@ -1,0 +1,169 @@
+---
+title: "Reasoning"
+description: "프로덕션 환경 실측을 기반으로 GPT, Claude, Gemini 최신 주력 모델의 추론(reasoning) 및 사고(thinking) 기능을 사용합니다"
+---
+> 업데이트: 2026-06-06
+
+# Reasoning
+
+이 문서는 **Crazyrouter 프로덕션 환경에서 실제 요청으로 검증에 성공한** Reasoning / Thinking 사용법만 수록합니다.
+
+검증 시각:
+
+- `2026-03-22`
+
+검증된 모델:
+
+- `gpt-5.5`
+- `claude-opus-4-8`
+- `gemini-3.1-pro`
+
+---
+
+## 검증된 기능 매트릭스
+
+| 모델 | 프로토콜 | 엔드포인트 | 성공 지표 |
+|------|------|------|----------|
+| `gpt-5.5` | OpenAI Responses | `POST /v1/responses` | `output`에 `reasoning` 항목이 나타남 |
+| `claude-opus-4-8` | Anthropic Messages | `POST /v1/messages` | `thinking` block이 반환됨 |
+| `gemini-3.1-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | `usageMetadata`에 `thoughtsTokenCount`가 나타남 |
+
+---
+
+## GPT-5.4
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "input": "Which is larger, 9.11 or 9.9? Explain briefly.",
+    "reasoning": {
+      "effort": "high",
+      "summary": "detailed"
+    }
+  }'
+```
+
+프로덕션 검증에서 반환된 핵심 `output.type`:
+
+```json
+["reasoning", "message"]
+```
+
+`reasoning` 항목의 핵심 필드는 다음을 포함합니다.
+
+```json
+{
+  "type": "reasoning",
+  "summary": [
+    {
+      "type": "summary_text",
+      "text": "..."
+    }
+  ]
+}
+```
+
+Crazyrouter의 현재 프로덕션 환경에서 `gpt-5.5`의 추론 능력은 Chat Completions의 `reasoning_content`에 의존하지 말고 Responses API의 `reasoning` 항목을 기준으로 삼아야 함을 나타냅니다.
+
+---
+
+## Claude Opus 4.7 Thinking
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-opus-4-8",
+    "max_tokens": 320,
+    "thinking": {
+      "type": "enabled",
+      "budget_tokens": 128
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Which is larger, 9.11 or 9.9? Explain briefly."
+      }
+    ]
+  }'
+```
+
+프로덕션 검증에서 반환된 핵심 필드:
+
+```json
+{
+  "content": [
+    {
+      "type": "thinking",
+      "thinking": "..."
+    },
+    {
+      "type": "text",
+      "text": "..."
+    }
+  ]
+}
+```
+
+주의:
+
+- `claude-opus-4-8` 기반 모델은 같은 날 테스트에서 일반 `text`만 반환했습니다
+- `claude-opus-4-8`에서만 명확한 thinking block이 검증되었습니다
+
+따라서 문서는 `claude-opus-4-8`을 Claude 4.7 추론 예제로 우선 사용해야 합니다.
+
+---
+
+## Gemini 3 Pro
+
+```bash cURL
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Which is larger, 9.11 or 9.9? Explain briefly."
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "thinkingConfig": {
+        "thinkingBudget": 256
+      },
+      "maxOutputTokens": 512
+    }
+  }'
+```
+
+프로덕션 검증에서 반환된 핵심 필드:
+
+- `usageMetadata.thoughtsTokenCount`
+
+이는 현재 프로덕션 환경에서 `gemini-3.1-pro`의 thinking 모드가 실제로 작동함을 보여줍니다.
+
+---
+
+## 현재 주요 결론에 포함하지 않는 조합
+
+- `gpt-5.5`의 Chat Completions 라우트는 이번 재검증에서 `reasoning_content`를 안정적으로 반환하지 않았으므로, 이 페이지에서는 더 이상 GPT 주요 예제로 사용하지 않습니다
+- `claude-opus-4-8` 기반 모델은 이번 검증에서 thinking block을 반환하지 않았습니다
+- `claude-opus-4-8`과 동등한 수준의 명확한 thinking 능력을 가진 모델은 발견되지 않았습니다
+
+---
+
+## 관련 문서
+
+- [OpenAI 추론 모델](/ko/chat/openai/reasoning)
+- [GPT-5 사고 모드](/ko/chat/responses/gpt5-thinking)
+- [AI 사고 필드](/ko/reference/thinking)
+- [Claude 네이티브 형식](/ko/chat/anthropic/messages)
+- [Gemini 네이티브 형식](/ko/chat/gemini/native)

@@ -1,0 +1,290 @@
+---
+title: "AIGC Kling VOD 호출 방법"
+description: "Crazyrouter의 AIGC Kling VOD 라인을 통해 Kling 비디오 모델을 호출합니다"
+---
+> 업데이트: 2026-06-24
+
+# AIGC Kling VOD 호출 방법
+
+`aigc-video-kling-*`는 Crazyrouter가 Tencent VOD 라인을 통해 연동한 Kling 비디오 모델입니다. 네이티브 Kling 문서의 `/kling/v1/videos/*` 경로와는 다르며, 고객 측 호출은 OpenAI 스타일의 비디오 비동기 인터페이스를 사용합니다.
+
+```http
+POST /v1/video/generations
+GET /v1/video/generations/{task_id}
+```
+
+<Note>
+  VOD 라인을 호출할 때는 반드시 `aigc-video-kling-*` 모델명을 사용해야 합니다. `kling-v2-5-turbo`, `kling-v2-6`, `kling-v3`를 이 페이지의 인터페이스에 직접 제출하지 마십시오. 그렇지 않으면 네이티브 Kling 라인으로 라우팅될 수 있습니다.
+</Note>
+
+<Note>
+  이미지 모델 `aigc-image-kling-3.0`을 사용하려면 [AIGC Kling 3.0 이미지 생성](/images/aigc-kling)을 참고하십시오. 이 모델은 `POST /v1/images/generations`를 사용하며 이 페이지의 비디오 인터페이스를 사용하지 않습니다.
+</Note>
+
+## 사용 가능한 모델
+
+| 모델 | 업스트림 버전 | 지원 기능 |
+|------|------|------|
+| `aigc-video-kling-1.6` | Kling 1.6 | 텍스트 생성, 이미지 생성, 첫·끝 프레임, 참조 이미지 |
+| `aigc-video-kling-2.0` | Kling 2.0 | 텍스트 생성, 이미지 생성, 첫·끝 프레임, 참조 이미지 |
+| `aigc-video-kling-2.1` | Kling 2.1 | 텍스트 생성, 이미지 생성, 첫·끝 프레임, 참조 이미지 |
+| `aigc-video-kling-2.5-turbo` | Kling 2.5 Turbo | 텍스트 생성, 이미지 생성, 첫·끝 프레임, 참조 이미지 |
+| `aigc-video-kling-2.6` | Kling 2.6 | 텍스트 생성, 이미지 생성, 첫·끝 프레임, 참조 이미지, 비디오 입력 |
+| `aigc-video-kling-2.6-motion-control` | Kling 2.6 Motion Control | 동작 제어 |
+| `aigc-video-kling-3.0` | Kling 3.0 | 텍스트 생성, 이미지 생성, 첫·끝 프레임, 참조 이미지 |
+| `aigc-video-kling-3.0-turbo` | Kling 3.0 Turbo | 텍스트 생성, 이미지 생성, 참조 이미지 |
+| `aigc-video-kling-3.0-motion-control` | Kling 3.0 Motion Control | 동작 제어 |
+| `aigc-video-kling-o1` | Kling O1 | 텍스트 생성, 이미지 생성, 참조 이미지, 비디오 입력 |
+| `aigc-video-kling-avatar` | Kling Avatar | 디지털 휴먼 / Avatar |
+| `aigc-video-kling-identifyface` | Kling Identifyface | 립싱크 |
+
+<Note>
+  Tencent VOD 문서의 `GV 3.1`, `3.1-fast`, `3.1-lite`는 Google Veo 라인이며 Kling 3.1이 아닙니다. 별도의 `aigc-video-gv-*` 모델을 사용하십시오.
+</Note>
+
+## 작업 생성
+
+```http
+POST https://api.crazyrouter.com/v1/video/generations
+Authorization: Bearer YOUR_API_KEY
+Content-Type: application/json
+```
+
+### 공통 파라미터
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| `model` | string | 예 | 이 페이지의 `aigc-video-kling-*` 모델명을 사용 |
+| `prompt` | string | 조건부 필수 | 텍스트-투-비디오에서는 필수; 멀티샷이나 일부 이미지 생성 시나리오에서는 확장 파라미터에 넣을 수 있음 |
+| `seconds` / `duration` | string / number | 아니오 | 비디오 길이, 일반적으로 `5` 또는 `10`, 기본값은 `5`초로 처리 |
+| `size` | string | 아니오 | 예: `1280x720`, `720x1280`, 출력 비율이 자동 산출됨 |
+| `image` | string | 아니오 | 단일 이미지-투-비디오의 첫 프레임 URL |
+| `images` | array[string] | 아니오 | 첫 번째 이미지는 첫 프레임으로 사용; 두 번째 이미지는 끝 프레임 또는 참조 이미지로 사용 가능 |
+| `metadata` | object | 아니오 | VOD Kling 확장 파라미터, 아래 필드 표 참고 |
+
+### 자주 사용하는 metadata 필드
+
+| 필드 | 설명 |
+|------|------|
+| `resolution` | 출력 규격, 예: `720P`, `1080P`, `2K`, `4K` |
+| `aspect_ratio` | 출력 비율, 예: `16:9`, `9:16`, `1:1` |
+| `sound` | 사운드 생성 여부, `true` / `false`, `on` / `off` 지원 |
+| `image_urls` | 첫·끝 프레임 배열, 최대 2장 |
+| `image_tail` / `last_frame_url` | 끝 프레임 URL, `image_urls[1]`보다 우선순위가 높음 |
+| `image_list` | 다중 참조 이미지 목록, 최대 9장 |
+| `multi_shots` / `multi_shot` | 멀티샷 스위치 |
+| `shot_type` | 샷 타입 |
+| `multi_prompt` | 멀티샷 프롬프트 배열 |
+| `kling_elements` / `element_list` | Kling 요소 제어 |
+| `camera_control` | 카메라 워크 제어 |
+| `motion_brush` / `dynamic_masks` | 동작 제어 파라미터 |
+| `video_list` | 비디오 참조 입력, 주로 O1 또는 비디오 입력 기능에 사용 |
+| `voice_list` | 사운드 참조 입력 |
+| `session_id` / `face_choose` | 립싱크 관련 파라미터 |
+
+## 텍스트-투-비디오
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-kling-2.6",
+    "prompt": "a red square logo slowly rotating on a clean white background",
+    "size": "1280x720",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "720P",
+      "sound": false
+    }
+  }'
+```
+
+## 이미지-투-비디오
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-kling-2.5-turbo",
+    "prompt": "make the picture gently move with a slow camera push in",
+    "image": "https://example.com/input.png",
+    "size": "1280x720",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "720P"
+    }
+  }'
+```
+
+## 첫·끝 프레임 비디오
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-kling-2.6",
+    "prompt": "transition naturally from the first frame to the last frame",
+    "images": [
+      "https://example.com/first.png",
+      "https://example.com/last.png"
+    ],
+    "seconds": "5",
+    "metadata": {
+      "resolution": "720P",
+      "sound": false
+    }
+  }'
+```
+
+<Note>
+  Kling 2.6 첫·끝 프레임에서는 `metadata.sound=false`를 명시적으로 전달하는 것을 권장합니다.
+</Note>
+
+## 다중 참조 이미지
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-kling-3.0",
+    "prompt": "keep the same character identity and create a cinematic walking shot",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "720P",
+      "image_list": [
+        "https://example.com/ref-1.png",
+        "https://example.com/ref-2.png"
+      ]
+    }
+  }'
+```
+
+## 동작 제어
+
+동작 제어 기능은 `aigc-video-kling-2.6-motion-control` 또는 `aigc-video-kling-3.0-motion-control`과 같은 전용 모델명을 사용합니다.
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-kling-3.0-motion-control",
+    "prompt": "animate the selected subject moving from left to right",
+    "image": "https://example.com/input.png",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "720P",
+      "dynamic_masks": [
+        {
+          "mask_url": "https://example.com/mask.png",
+          "trajectories": [
+            { "x": 220, "y": 380 },
+            { "x": 620, "y": 380 }
+          ]
+        }
+      ]
+    }
+  }'
+```
+
+## O1 비디오 입력
+
+`aigc-video-kling-o1`은 `metadata.video_list`를 통해 비디오 참조를 전달할 수 있습니다. 비디오 입력 포함 여부는 과금 규격에 영향을 줍니다.
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-kling-o1",
+    "prompt": "use the reference video motion style and generate a new cinematic shot",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "720P",
+      "video_list": [
+        { "url": "https://example.com/reference.mp4" }
+      ]
+    }
+  }'
+```
+
+## Avatar 및 립싱크
+
+Avatar는 `aigc-video-kling-avatar`를 사용합니다.
+
+```json
+{
+  "model": "aigc-video-kling-avatar",
+  "prompt": "a presenter speaks naturally to the camera",
+  "image": "https://example.com/avatar.png",
+  "seconds": "5",
+  "metadata": {
+    "resolution": "720P",
+    "voice_list": [
+      { "url": "https://example.com/voice.wav" }
+    ]
+  }
+}
+```
+
+립싱크는 `aigc-video-kling-identifyface`를 사용합니다. 비즈니스 측에 이미 업스트림에서 인식한 `session_id`와 `face_choose`가 있다면 `metadata`에 넣을 수 있습니다.
+
+```json
+{
+  "model": "aigc-video-kling-identifyface",
+  "prompt": "lip sync the face with the provided voice",
+  "image": "https://example.com/face.png",
+  "seconds": "5",
+  "metadata": {
+    "resolution": "720P",
+    "session_id": "SESSION_ID",
+    "face_choose": "FACE_ID",
+    "voice_list": [
+      { "url": "https://example.com/voice.wav" }
+    ]
+  }
+}
+```
+
+<Note>
+  립싱크의 전체 흐름은 일반적으로 먼저 얼굴 인식을 수행한 뒤 비디오 생성 작업을 제출해야 합니다. `session_id` / `face_choose`가 없으면 업스트림에서 파라미터 오류를 반환할 수 있습니다.
+</Note>
+
+## 작업 조회
+
+작업 생성 시 반환된 `id` 또는 `task_id`를 사용하여 동일한 호환 경로로 조회합니다.
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/video/generations/TASK_ID \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+완료 후에는 일반적으로 아카이브된 비디오 URL이 반환됩니다.
+
+```json
+{
+  "code": "success",
+  "data": {
+    "status": "SUCCESS",
+    "task_id": "vod_task_abc123",
+    "result_url": "https://media.crazyrouter.com/task-artifacts/example.mp4",
+    "artifact_url": "https://media.crazyrouter.com/task-artifacts/example.mp4"
+  }
+}
+```
+
+## 네이티브 Kling과의 차이
+
+| 항목 | AIGC Kling VOD | 네이티브 Kling |
+|------|------|------|
+| 모델명 | `aigc-video-kling-*` | `kling-v2-5-turbo`, `kling-v2-6`, `kling-v3` |
+| 생성 경로 | `POST /v1/video/generations` | `POST /kling/v1/videos/text2video` 등 |
+| 조회 경로 | `GET /v1/video/generations/{task_id}` | `GET /kling/v1/videos/{type}/{task_id}` |
+| 주요 필드 | `model`, `prompt`, `seconds`, `image`, `images`, `metadata` | `model_name`, `prompt`, `image_urls`, `duration` 등 |
+| 적합한 시나리오 | Tencent VOD 라인을 사용하며 VOD 가격 및 기능을 적용 | 네이티브 Kling 프로토콜 사용 |
+
+가격, 할인 및 사용 가능한 규격은 [Pricing 페이지](/pricing)를 기준으로 합니다.

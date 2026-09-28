@@ -1,0 +1,182 @@
+---
+title: "Ideogram V3"
+description: "Ideogram V3 API를 사용하여 이미지 생성, 편집, 믹스, 재구성 및 배경 교체를 수행합니다"
+---
+> 업데이트: 2026-06-06
+
+# Ideogram V3
+
+Ideogram V3는 최신 세대의 텍스트-투-이미지 모델로, 텍스트 렌더링과 이미지 품질 면에서 눈에 띄게 향상되었습니다.
+
+## 이미지 생성
+
+```
+POST /ideogram/v1/ideogram-v3/generate
+```
+
+### 요청 파라미터
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| `prompt` | string | 예 | 이미지 설명 프롬프트 |
+| `aspect_ratio` | string | 아니오 | 가로세로 비율, 예: `ASPECT_1_1`, `ASPECT_16_9`, `ASPECT_9_16` |
+| `model` | string | 아니오 | 모델 버전, 기본값 `V_3` |
+| `magic_prompt_option` | string | 아니오 | 프롬프트 향상: `AUTO`, `ON`, `OFF` |
+| `rendering_speed` | string | 아니오 | 렌더링 속도: `DEFAULT`, `TURBO`, `QUALITY` |
+| `style_type` | string | 아니오 | 스타일 유형: `AUTO`, `GENERAL`, `REALISTIC`, `DESIGN` |
+| `negative_prompt` | string | 아니오 | 네거티브 프롬프트 |
+
+### 요청 예시
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/ideogram/v1/ideogram-v3/generate \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "A serene Japanese garden with cherry blossoms, text saying \"Hello World\" on a wooden sign",
+    "aspect_ratio": "ASPECT_16_9",
+    "rendering_speed": "DEFAULT",
+    "style_type": "REALISTIC"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/ideogram/v1/ideogram-v3/generate",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "prompt": "A serene Japanese garden with cherry blossoms",
+        "aspect_ratio": "ASPECT_16_9",
+        "style_type": "REALISTIC"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### 응답 예시
+
+```json
+{
+  "created": 1709123456,
+  "data": [
+    {
+      "url": "https://ideogram.ai/assets/image/...",
+      "prompt": "A serene Japanese garden with cherry blossoms",
+      "resolution": "1344x768",
+      "is_image_safe": true,
+      "seed": 12345
+    }
+  ]
+}
+```
+
+---
+
+## 이미지 편집
+
+```
+POST /ideogram/v1/ideogram-v3/edit
+```
+
+기존 이미지를 기반으로 편집 수정을 수행합니다.
+
+### 요청 파라미터
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| `prompt` | string | 예 | 편집 설명 |
+| `image` | string | 예 | 원본 이미지 URL 또는 Base64 |
+| `mask` | string | 아니오 | 마스크 이미지, 편집이 필요한 영역을 표시 |
+| `style_type` | string | 아니오 | 스타일 유형 |
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/ideogram/v1/ideogram-v3/edit \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "Replace the sky with a starry night",
+    "image": "https://example.com/photo.jpg",
+    "mask": "https://example.com/mask.png"
+  }'
+```
+
+---
+
+## Remix 이미지
+
+```
+POST /ideogram/v1/ideogram-v3/remix
+```
+
+참조 이미지와 새 프롬프트를 기반으로 변형을 생성합니다.
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| `prompt` | string | 예 | 새 프롬프트 |
+| `image` | string | 예 | 참조 이미지 |
+| `image_weight` | number | 아니오 | 참조 이미지 가중치, 0-100 |
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/ideogram/v1/ideogram-v3/remix \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "Same scene but in watercolor painting style",
+    "image": "https://example.com/photo.jpg",
+    "image_weight": 50
+  }'
+```
+
+---
+
+## Reframe 재구성
+
+```
+POST /ideogram/v1/ideogram-v3/reframe
+```
+
+이미지 캔버스를 확장하여 원본 경계를 넘어서는 콘텐츠를 생성합니다.
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| `image` | string | 예 | 원본 이미지 |
+| `resolution` | string | 아니오 | 목표 해상도 |
+
+---
+
+## 배경 교체
+
+```
+POST /ideogram/v1/ideogram-v3/replace-background
+```
+
+주체를 자동으로 인식하고 배경을 교체합니다.
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| `prompt` | string | 예 | 새 배경 설명 |
+| `image` | string | 예 | 원본 이미지 |
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/ideogram/v1/ideogram-v3/replace-background \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "A tropical beach at sunset",
+    "image": "https://example.com/portrait.jpg"
+  }'
+```
+
+<Note>
+  Ideogram V3는 텍스트 렌더링 면에서 뛰어난 성능을 보여, 이미지에 텍스트를 포함해야 하는 시나리오에 적합합니다.
+</Note>

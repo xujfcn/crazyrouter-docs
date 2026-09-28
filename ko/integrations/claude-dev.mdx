@@ -1,0 +1,47 @@
+---
+title: 'Claude Dev 설정 튜토리얼'
+description: 'Claude Dev VS Code 확장에서 Crazyrouter API를 설정하고, 검증된 최신 Claude 모델을 사용합니다'
+---
+> 업데이트: 2026-06-06
+
+## 개요
+
+Claude Dev는 VS Code용 AI 코딩 확장으로, Claude 스타일의 코드 설명, 리팩터링 제안, 다중 회차 협업을 Crazyrouter에 연결하기에 적합합니다. 공개 문서에서는 OpenAI Compatible 경로를 우선 사용하는 것을 권장합니다. 이 경로가 본 사이트 문서 체계에서 더 일관되고 트러블슈팅도 더 쉽기 때문입니다.
+
+<Warning>
+이 문서의 `https://api.crazyrouter.com/v1`은 Claude Dev의 `OpenAI Compatible` provider에만 적용됩니다. 이 주소를 Claude Code의 `ANTHROPIC_BASE_URL`에 복사하지 마십시오. Claude Code에는 루트 도메인인 `https://api.crazyrouter.com` 또는 `https://api.crazyrouter.com`을 입력해야 합니다.
+</Warning>
+
+## 권장 설정
+
+<Steps>
+  <Step title="확장 설치">
+    VS Code 확장 마켓에서 `Claude Dev`를 검색하여 설치합니다.
+  </Step>
+  <Step title="설정 열기">
+    사이드바의 Claude Dev 아이콘을 클릭하여 설정으로 이동합니다.
+  </Step>
+  <Step title="Provider 선택">
+    API Provider로 `OpenAI Compatible`을 우선 선택합니다.
+  </Step>
+  <Step title="설정 입력">
+    - **Base URL**: `https://api.crazyrouter.com/v1`
+    - **API Key**: `sk-xxx`
+    - **Model**: `claude-opus-4-8`
+  </Step>
+</Steps>
+
+중국 지역에서 API 가속 라인을 사용하고 있고 Claude Dev에서 현재 `OpenAI Compatible` provider를 선택했다면, Base URL을 `https://api.crazyrouter.com/v1`로 변경할 수 있습니다.
+
+## 권장 모델
+
+| 시나리오 | 모델 |
+|------|------|
+| 일상적인 코딩 | `claude-opus-4-8` |
+| 더 무거운 추론 및 계획 | `claude-opus-4-8` |
+
+<Note>
+  `claude-opus-4-8`과 `claude-opus-4-8`은 모두 현재 검증된 최신 Claude 기준에 속합니다. VS Code 내에서 최소 검증만 먼저 진행한다면 `claude-opus-4-8`을 먼저 사용하십시오.
+</Note>
+
+

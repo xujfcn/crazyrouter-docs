@@ -1,0 +1,239 @@
+---
+title: '요청 보내기'
+description: 'API 요청을 올바르게 보내는 방법을 알아봅니다'
+---
+> 업데이트: 2026-06-14
+
+## 요청 형식
+
+모든 API 요청은 HTTPS 프로토콜을 사용하며, 요청 본문은 JSON 형식을 사용합니다.
+
+<Note>
+기본적으로 `https://api.crazyrouter.com/v1`을 우선 사용합니다. 어떤 도구에서 루트 도메인과 `/v1` 중 무엇을 입력해야 할지 확실하지 않다면, 먼저 [API Endpoint 설명](https://docs.crazyrouter.com/ko/api-endpoint)을 참고하세요.
+</Note>
+
+### 필수 요청 헤더
+
+| Header | 값 | 설명 |
+|--------|-----|------|
+| `Authorization` | `Bearer YOUR_API_KEY` | API 인증 키 |
+| `Content-Type` | `application/json` | 요청 본문 형식 |
+
+### 선택 요청 헤더
+
+| Header | 값 | 설명 |
+|--------|-----|------|
+| `Accept` | `application/json` | 응답 형식 |
+| `Content-Encoding` | `gzip` | 선택 사항. 요청 본문을 gzip으로 압축할 때 설정 |
+
+## 요청 예시
+
+```bash
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer sk-xxxxxxxx" \
+  -d '{
+    "model": "gpt-5.5",
+    "messages": [{"role": "user", "content": "Hello"}],
+    "stream": false
+  }'
+```
+
+## gzip으로 요청 본문 보내기
+
+요청 본문이 큰 경우, 예를 들어 매번 긴 컨텍스트, 긴 문서, 또는 대량의 메시지 히스토리를 업로드하는 경우, 원본 JSON 요청 본문을 gzip으로 압축한 후 보낼 수 있습니다.
+
+gzip을 활성화하면 전송 방식만 바뀌고 요청의 의미는 변하지 않습니다. 서버는 JSON을 파싱하기 전에 자동으로 압축을 해제합니다.
+
+다음 요청 헤더를 추가해야 합니다.
+
+```http
+Content-Type: application/json
+Content-Encoding: gzip
+```
+
+<Note>
+  `Content-Encoding: gzip`은 "요청 본문이 이미 gzip으로 압축되었음"을 의미합니다. `Accept-Encoding: gzip`과는 다른데, 후자는 일반적으로 응답 압축에 사용됩니다.
+</Note>
+
+### Python
+
+```python
+import gzip
+import json
+import requests
+
+payload = {
+    "model": "gpt-5.5",
+    "messages": [
+        {"role": "user", "content": "여기에 매우 긴 컨텍스트나 문서 내용을 넣으세요..."}
+    ],
+    "stream": False
+}
+
+raw = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+compressed = gzip.compress(raw)
+
+resp = requests.post(
+    "https://api.crazyrouter.com/v1/chat/completions",
+    headers={
+        "Authorization": "Bearer sk-xxxxxxxx",
+        "Content-Type": "application/json",
+        "Content-Encoding": "gzip",
+    },
+    data=compressed,
+    timeout=120,
+)
+
+print(resp.status_code, resp.text)
+```
+
+### Node.js
+
+```js
+import zlib from "node:zlib";
+
+const payload = {
+  model: "gpt-5.5",
+  messages: [
+    { role: "user", content: "여기에 매우 긴 컨텍스트나 문서 내용을 넣으세요..." },
+  ],
+  stream: false,
+};
+
+const raw = Buffer.from(JSON.stringify(payload));
+const compressed = zlib.gzipSync(raw);
+
+const resp = await fetch("https://api.crazyrouter.com/v1/chat/completions", {
+  method: "POST",
+  headers: {
+    Authorization: "Bearer sk-xxxxxxxx",
+    "Content-Type": "application/json",
+    "Content-Encoding": "gzip",
+  },
+  body: compressed,
+});
+
+console.log(resp.status, await resp.text());
+```
+
+### cURL
+
+```bash
+cat > body.json <<'JSON'
+{
+  "model": "gpt-5.5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "여기에 매우 긴 컨텍스트나 문서 내용을 넣으세요..."
+    }
+  ],
+  "stream": false
+}
+JSON
+
+gzip -c body.json > body.json.gz
+
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Authorization: Bearer sk-xxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -H "Content-Encoding: gzip" \
+  --data-binary @body.json.gz
+```
+
+### 크기에 따라 자동으로 gzip 활성화
+
+시스템이 하나의 워크플로라면, 일반적으로 비즈니스 로직에서 "어떤 요청은 압축하고 어떤 요청은 압축하지 않을지"를 직접 구분할 필요는 없습니다. 통일된 HTTP 클라이언트 래핑 계층에서 JSON body 크기를 판단하고, 임계값을 초과하면 자동으로 gzip을 적용하는 것을 권장합니다.
+
+권장 임계값:
+
+```text
+body >= 128KB: gzip 활성화
+body < 128KB: 원본 그대로 전송
+```
+
+요청이 자주 MB 단위인 경우, 임계값을 `256KB`로 설정할 수도 있습니다. 작은 요청에는 gzip을 강제로 적용하지 않는 것을 권장하는데, 압축 오버헤드와 gzip 헤더로 인해 오히려 크기가 커질 수 있기 때문입니다.
+
+Python 래핑 예시:
+
+```python
+import gzip
+import json
+import requests
+
+def post_json(url, payload, api_key, gzip_threshold=128 * 1024):
+    raw = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+
+    if len(raw) >= gzip_threshold:
+        body = gzip.compress(raw)
+        headers["Content-Encoding"] = "gzip"
+    else:
+        body = raw
+
+    return requests.post(url, headers=headers, data=body, timeout=120)
+```
+
+Node.js 래핑 예시:
+
+```js
+import zlib from "node:zlib";
+
+async function postJson(url, payload, apiKey, gzipThreshold = 128 * 1024) {
+  const raw = Buffer.from(JSON.stringify(payload));
+  const headers = {
+    Authorization: `Bearer ${apiKey}`,
+    "Content-Type": "application/json",
+  };
+
+  const body =
+    raw.length >= gzipThreshold
+      ? (() => {
+          headers["Content-Encoding"] = "gzip";
+          return zlib.gzipSync(raw);
+        })()
+      : raw;
+
+  return fetch(url, {
+    method: "POST",
+    headers,
+    body,
+  });
+}
+```
+
+적용 시나리오:
+
+- 단일 요청 본문이 일반적으로 1MB를 초과하는 경우
+- 긴 컨텍스트나 긴 문서를 반복적으로 업로드하는 경우
+- 클라이언트가 HTTP body와 요청 헤더를 직접 제어할 수 있는 경우
+
+## 스트리밍 요청
+
+`stream: true`를 설정하여 SSE 스트리밍 출력을 활성화합니다.
+
+```bash
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer sk-xxxxxxxx" \
+  -d '{
+    "model": "gpt-5.5",
+    "messages": [{"role": "user", "content": "Hello"}],
+    "stream": true
+  }'
+```
+
+스트리밍 응답 형식은 Server-Sent Events (SSE)이며, 각 이벤트는 `data: `로 시작하고 마지막에는 `data: [DONE]`으로 끝납니다.
+
+## 온라인 디버깅
+
+다음 방법으로 API를 온라인에서 디버깅할 수 있습니다.
+
+1. **Crazyrouter Playground** - 로그인 후 [crazyrouter.com/console/playground](https://crazyrouter.com/console/playground)에 접속하여 브라우저에서 직접 테스트
+2. **cURL** - 명령줄 도구로 요청 전송
+3. **Postman / Apifox** - API 디버깅 도구 사용

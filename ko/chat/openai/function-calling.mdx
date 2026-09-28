@@ -1,0 +1,128 @@
+---
+title: "Function Calling"
+description: "2026-03-23 Crazyrouter 프로덕션 환경 검증을 기반으로 한 Chat Completions 툴 호출"
+---
+> 업데이트: 2026-06-06
+
+# Function Calling
+
+```
+POST /v1/chat/completions
+```
+
+2026년 3월 23일 기준, Crazyrouter 프로덕션 환경에서 `gpt-5.5`가 Chat Completions 경로에서 `tool_calls`를 반환함을 검증했습니다.
+
+---
+
+## 1단계: 툴 정의
+
+```bash
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "messages": [
+      {"role": "user", "content": "What is the weather in Beijing? Use the tool."}
+    ],
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "get_weather",
+          "description": "Get weather info for a city",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "city": {"type": "string"}
+            },
+            "required": ["city"],
+            "additionalProperties": false
+          }
+        }
+      }
+    ]
+  }'
+```
+
+프로덕션 환경에서 실제로 반환된 핵심 형태:
+
+```json
+{
+  "object": "chat.completion",
+  "model": "gpt-5.5",
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": null,
+        "tool_calls": [
+          {
+            "id": "call_...",
+            "type": "function",
+            "function": {
+              "name": "get_weather",
+              "arguments": "{\"city\":\"Beijing\"}"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+---
+
+## 2단계: 툴 결과 회신
+
+`tool_calls`를 받은 후, 실행한 툴 결과를 `role: "tool"` 메시지로 다시 전송하세요.
+
+```json
+{
+  "model": "gpt-5.5",
+  "messages": [
+    {"role": "user", "content": "What is the weather in Beijing? Use the tool."},
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_123",
+          "type": "function",
+          "function": {
+            "name": "get_weather",
+            "arguments": "{\"city\":\"Beijing\"}"
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_123",
+      "content": "{\"temperature\":22,\"condition\":\"sunny\"}"
+    }
+  ],
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "get_weather",
+        "description": "Get weather info for a city",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "city": {"type": "string"}
+          },
+          "required": ["city"],
+          "additionalProperties": false
+        }
+      }
+    }
+  ]
+}
+```
+
+<Note>
+  이번 프로덕션 검증에서는 `tool_calls`라는 주 링크를 확인했으며, `message.reasoning_content`라는 키가 나타날 수 있음도 관찰했습니다. 다만 이는 현재 툴 호출 흐름에서 안정적으로 의존할 필드로 취급해서는 안 됩니다.
+</Note>

@@ -1,0 +1,133 @@
+---
+title: "Gemini OpenAI 호환 형식"
+description: "프로덕션 환경 재검증을 기반으로, /v1/chat/completions를 통해 Gemini 3 Pro 호출"
+---
+> 업데이트: 2026-06-06
+
+# Gemini OpenAI 호환 형식
+
+OpenAI Chat Completions 호환 형식을 통해 Gemini를 호출할 수 있습니다.
+
+```
+POST /v1/chat/completions
+```
+
+이 페이지는 `2026-03-22`에 Crazyrouter 프로덕션 환경에서 재검증된 호환 계층 동작만 기록합니다.
+
+현재 주요 예시 모델:
+
+- `gemini-3.1-pro`
+
+## 현재 주요 결론
+
+이번 프로덕션 재검증에서 다음을 확인했습니다.
+
+- `gemini-3.1-pro`는 `/v1/chat/completions`를 통해 정상적으로 대화할 수 있습니다
+- 스트리밍 응답은 `chat.completion.chunk` SSE 구조와 호환됩니다
+- Gemini의 구조화된 출력, Google Search, thinking 등의 기능이 필요하다면 현재는 [Gemini 네이티브 형식](/ko/chat/gemini/native)을 우선 참고해야 합니다
+
+---
+
+## 기본 대화
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gemini-3.1-pro",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a concise assistant."
+      },
+      {
+        "role": "user",
+        "content": "Explain quantum entanglement in one sentence."
+      }
+    ],
+    "max_tokens": 128
+  }'
+```
+
+현재 프로덕션 검증에서 반환된 핵심 구조:
+
+```json
+{
+  "object": "chat.completion",
+  "model": "gemini-3.1-pro",
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "..."
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Python 예시
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="gemini-3.1-pro",
+    messages=[
+        {"role": "system", "content": "You are a concise assistant."},
+        {"role": "user", "content": "Explain quantum entanglement in one sentence."}
+    ],
+    max_tokens=128
+)
+
+print(response.choices[0].message.content)
+```
+
+---
+
+## 스트리밍 출력
+
+이번 프로덕션 재검증에서는 스트리밍 호환 응답도 확인했습니다.
+
+```python Python
+stream = client.chat.completions.create(
+    model="gemini-3.1-pro",
+    messages=[
+        {"role": "user", "content": "Write one short sentence about AI."}
+    ],
+    max_tokens=64,
+    stream=True
+)
+
+for chunk in stream:
+    delta = chunk.choices[0].delta
+    if delta.content is not None:
+        print(delta.content, end="")
+```
+
+현재 프로덕션에서 수신되는 SSE 조각 형태는 다음과 유사합니다.
+
+```text
+data: {"object":"chat.completion.chunk","model":"gemini-3.1-pro",...}
+data: {"choices":[{"delta":{"content":"..."}}],...}
+data: [DONE]
+```
+
+---
+
+## 호환 형식과 네이티브 형식, 언제 무엇을 써야 하나
+
+- 이미 OpenAI SDK 코드가 있고 표준 대화만 필요한 경우: 호환 형식을 우선 사용하세요
+- Gemini의 구조화된 출력, Google Search, thinking, 네이티브 필드가 필요한 경우: [Gemini 네이티브 형식](/ko/chat/gemini/native)을 우선 사용하세요
+
+<Note>
+  이 페이지는 `/v1/chat/completions` 호환 계층만 다룹니다. Gemini 이미지 워크로드의 경우 통합 Images API를 사용하세요: `POST https://api.crazyrouter.com/v1/images/generations`, 그리고 [Nano Banana](/ko/images/nano-banana), [Nano Banana Pro](/ko/images/nano-banana-pro), [Nano Banana 2](/ko/images/nano-banana-2)를 참고하세요.
+</Note>

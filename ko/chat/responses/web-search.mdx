@@ -1,0 +1,67 @@
+---
+title: "Responses Web 검색"
+description: "2026-03-23 Crazyrouter 프로덕션 환경에서 검증된 Responses Web Search"
+---
+> 업데이트: 2026-06-06
+
+# Responses Web 검색
+
+```
+POST /v1/responses
+```
+
+2026년 3월 23일 기준, Crazyrouter 프로덕션 환경에서 `gpt-5.5`가 Responses API를 통해 다음을 사용하는 것이 검증되었습니다.
+
+- `tools: [{ "type": "web_search_preview" }]`
+- 반환된 `output` 타입 순서 `web_search_call`, `message`
+
+<Note>
+  Claude는 현재 `POST /v1/responses`를 지원하지 않습니다. Claude에서 Web Search를 연동하려면 `POST /v1/chat/completions` 또는 Claude 네이티브 인터페이스를 사용하세요.
+</Note>
+
+---
+
+## 최소 요청
+
+```bash
+curl https://api.crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "input": "Find one AI news item from March 2026.",
+    "tools": [
+      {
+        "type": "web_search_preview"
+      }
+    ]
+  }'
+```
+
+프로덕션 환경에서 실제로 반환되는 주요 형태:
+
+```json
+{
+  "output": [
+    {
+      "type": "web_search_call"
+    },
+    {
+      "type": "message"
+    }
+  ]
+}
+```
+
+---
+
+## 현재 판단 기준
+
+모델이 실제로 웹 검색을 트리거했는지 확인하려면, 현재 가장 확실한 점검 항목은 다음과 같습니다.
+
+- `output`에 `web_search_call`이 나타나는지 여부
+- 최종 답변이 여전히 `message` 형태로 반환되는지 여부
+
+<Warning>
+  이 페이지는 더 이상 오래되어 시대에 맞지 않는 예시를 유지하지 않으며, 재검증되지 않은 검색 파라미터도 현재 주요 문서로 작성하지 않습니다.
+</Warning>

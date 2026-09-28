@@ -1,0 +1,60 @@
+---
+title: 'Crazyrouter 문서 홈'
+description: '작업별로 Crazyrouter API, 도구 연동, 모델 기능, AI 판독 가능 문서를 빠르게 찾기'
+---
+> 업데이트: 2026-06-16
+
+<Note>
+  API 연동 경로: 기본 국제 진입점은 `https://api.crazyrouter.com`이며, 동아시아 지역은 `https://cn.crazyrouter.com`을 우선 사용하는 것을 권장합니다. OpenAI 호환 클라이언트는 일반적으로 루트 도메인 뒤에 `/v1`을 붙이며, Claude Code / Anthropic 네이티브 클라이언트는 루트 도메인을 사용하고 `/v1`을 붙이지 않습니다. 자세한 내용은 [API 엔드포인트](/ko/api-endpoint)를 참고하세요.
+</Note>
+
+Crazyrouter는 통합 AI 모델 API 게이트웨이입니다. API Key 하나로 텍스트, 이미지, 비디오, 오디오, 임베딩, Rerank 및 서드파티 도구 통합에 필요한 모델 기능을 호출할 수 있습니다.
+
+## 작업 선택하기
+
+<CardGroup cols={2}>
+  <Card title="llms.txt 사용법" icon="bot" href="/ko/llms-guide">
+    AI 도구가 `https://docs.crazyrouter.com/llms.txt`를 읽고 Pricing 페이지와 실제 라우팅에 따라 올바른 호출 방식을 생성하도록 합니다.
+  </Card>
+  <Card title="빠른 시작" icon="rocket" href="/ko/quickstart">
+    API Key를 발급받고 Base URL을 설정하여 5분 안에 첫 번째 요청을 완료하세요.
+  </Card>
+  <Card title="도구 연동" icon="plug" href="/ko/integrations/claude-code">
+    Claude Code, Codex CLI, Cursor, Cline, Cherry Studio, OpenClaw 등 자주 사용하는 AI 도구를 연동하세요.
+  </Card>
+  <Card title="텍스트 모델" icon="message" href="/ko/chat/openai/completions">
+    OpenAI Chat, Claude Messages, Gemini Native, Responses API를 사용하세요.
+  </Card>
+  <Card title="이미지 생성" icon="image" href="/ko/images/gpt-image">
+    GPT Image, Qwen Image, Midjourney, Nano Banana Pro, DALL-E 등 이미지 모델을 호출하세요.
+  </Card>
+  <Card title="비디오" icon="video" href="/ko/video/unified">
+    Veo, Kling, Seedance, Runway, Luma, Sora, Wan 등 비디오 생성 API를 연동하세요.
+  </Card>
+  <Card title="모델 및 요금" icon="tag" href="https://crazyrouter.com/pricing">
+    모델 가격, 사용 가능한 모델, 오류 처리, 서비스 상태, 콘솔 관리 설명을 확인하세요.
+  </Card>
+</CardGroup>
+
+## AI 도구가 문서 읽기
+
+<CardGroup cols={2}>
+  <Card title="AI 판독 가능 진입점" icon="bot" href="/ko/ai-tools">
+    Codex, Claude Code, ChatGPT, Cursor 등 AI 도구를 위한 문서 색인입니다.
+  </Card>
+  <Card title="전체 문서 컨텍스트" icon="file-text" href="https://docs.crazyrouter.com/llms-full.txt">
+    단일 파일로 통합된 문서로, 복사하거나 URL 읽기를 지원하는 AI 도구에 제공하기에 적합합니다.
+  </Card>
+</CardGroup>
+
+## 자주 찾는 경로
+
+| 하려는 작업 | 추천 문서 |
+| --- | --- |
+| Base URL과 라인 확인 | [API 엔드포인트](/ko/api-endpoint) |
+| API Key 생성 및 사용 | [인증 방식](/ko/authentication) |
+| 첫 번째 OpenAI 호환 요청 보내기 | [빠른 시작](/ko/quickstart) |
+| Claude Code 연동 | [Claude Code 연동](/ko/integrations/claude-code) |
+| Codex CLI 연동 | [Codex CLI 연동](/ko/integrations/codex) |
+| 로컬 이미지를 참조 이미지로 사용 | [이미지 업로드 안내](/ko/upload) |
+| 요청 오류 조사 | [오류 처리](/ko/error-handling) |

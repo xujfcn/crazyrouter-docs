@@ -1,0 +1,116 @@
+---
+title: 'Python 이미지 인식'
+description: 'Python으로 구현하는 gpt-5.5와 Claude의 비전 이미지 인식'
+---
+> 업데이트: 2026-06-06
+
+## gpt-5.5 이미지 인식 - URL 방식
+
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-xxx", base_url="https://api.crazyrouter.com/v1")
+
+response = client.chat.completions.create(
+    model="gpt-5.5",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "이 이미지의 내용을 설명해 주세요"},
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": "https://example.com/photo.jpg"
+                }
+            }
+        ]
+    }]
+)
+
+print(response.choices[0].message.content)
+```
+
+## gpt-5.5 이미지 인식 - 로컬 이미지
+
+```python
+import base64
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-xxx", base_url="https://api.crazyrouter.com/v1")
+
+# 로컬 이미지를 읽어 base64로 변환
+with open("photo.jpg", "rb") as f:
+    image_data = base64.b64encode(f.read()).decode("utf-8")
+
+response = client.chat.completions.create(
+    model="gpt-5.5",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "이 이미지에는 무엇이 있나요?"},
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/jpeg;base64,{image_data}"
+                }
+            }
+        ]
+    }]
+)
+
+print(response.choices[0].message.content)
+```
+
+## 여러 이미지 비교
+
+```python
+response = client.chat.completions.create(
+    model="gpt-5.5",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "이 두 이미지의 차이를 비교해 주세요"},
+            {"type": "image_url", "image_url": {"url": "https://example.com/img1.jpg"}},
+            {"type": "image_url", "image_url": {"url": "https://example.com/img2.jpg"}}
+        ]
+    }]
+)
+
+print(response.choices[0].message.content)
+```
+
+## Claude 이미지 인식
+
+Claude 모델도 OpenAI 호환 포맷을 통해 이미지 인식을 지원합니다.
+
+```python
+response = client.chat.completions.create(
+    model="claude-opus-4-8",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "이 이미지를 자세히 설명해 주세요"},
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/png;base64,{image_data}"
+                }
+            }
+        ]
+    }],
+    max_tokens=1024
+)
+
+print(response.choices[0].message.content)
+```
+
+## 지원되는 이미지 인식 모델
+
+| 모델 | 설명 |
+|------|------|
+| `gpt-5.5` | 2026년 3월 23일 생산 환경에서 실측 성공한 OpenAI 호환 비전 모델 |
+| `claude-opus-4-8` | 실측 성공한 Claude OpenAI 호환 비전 모델 |
+
+<Note>
+  `gpt-5.5`와 `claude-opus-4-8`의 비전 입력은 2026년 3월 23일 Crazyrouter 생산 환경에서 실측을 완료했습니다. 이미지 크기는 20MB를 넘지 않는 것을 권장하며, Base64 인코딩은 데이터 크기를 약 33% 증가시키므로 큰 이미지는 URL 방식을 우선 사용하는 것을 권장합니다.
+</Note>

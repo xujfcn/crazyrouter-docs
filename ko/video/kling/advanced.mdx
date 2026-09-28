@@ -1,0 +1,81 @@
+---
+title: "Kling 고급 기능"
+description: "Kling 고급 기능: 가상 피팅"
+---
+> 업데이트: 2026-06-06
+
+# Kling 고급 기능
+
+## 가상 피팅
+
+```
+POST /kling/v1/images/kolors-virtual-try-on
+```
+
+현재 공개적으로 연결된 Kling 고급 기능은 가상 피팅뿐입니다. 이 경로는 이미 제한된 범위에서 성공 검증을 완료했으며, `작업 성공 -> R2 아카이빙 -> media.crazyrouter.com`으로 이어지는 흐름이 이미 연결되어 있습니다.
+
+### 요청 파라미터
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| `model_name` | string | 아니오 | 일반적인 모델: `kolors-virtual-try-on-v1`, `kolors-virtual-try-on-v1-5` |
+| `human_image` | string | 예 | 인물 이미지, URL 또는 Base64 지원 |
+| `cloth_image` | string | 예 | 의류 이미지, URL 또는 Base64 지원 |
+| `callback_url` | string | 아니오 | 콜백 주소 |
+| `external_task_id` | string | 아니오 | 비즈니스 측에서 지정하는 사용자 정의 작업 ID |
+
+### 요청 예시
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/kling/v1/images/kolors-virtual-try-on \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model_name": "kolors-virtual-try-on-v1",
+    "human_image": "https://example.com/person.jpg",
+    "cloth_image": "https://example.com/jacket.jpg"
+  }'
+```
+
+### 제출 성공 응답 예시
+
+```json
+{
+  "created_at": 1774585120,
+  "id": "866361099762425934",
+  "model": "kolors-virtual-try-on-v1",
+  "object": "video",
+  "progress": 0,
+  "status": "",
+  "task_id": "866361099762425934"
+}
+```
+
+## 피팅 작업 조회
+
+```
+GET /kling/v1/images/kolors-virtual-try-on/{task_id}
+```
+
+```bash cURL
+curl https://api.crazyrouter.com/kling/v1/images/kolors-virtual-try-on/866361099762425934 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### 응답 예시(완료됨)
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "status": "succeeded",
+    "task_id": "866361099762425934",
+    "url": "https://media.crazyrouter.com/task-artifacts/2026/03/27/50/tryOnGenerate/866361099762425934.png"
+  }
+}
+```
+
+<Note>
+  현재 립싱크, 비디오 연장, 비디오 이펙트 등 그 외의 Kling 고급 기능은 이미 공개된 인터페이스로 작성하지 마세요. 이들은 아직 Crazyrouter의 공개 contract에 포함되지 않았습니다.
+</Note>

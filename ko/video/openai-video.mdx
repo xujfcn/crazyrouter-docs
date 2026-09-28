@@ -1,0 +1,175 @@
+---
+title: "OpenAI 비디오 형식"
+description: "OpenAI 호환 비디오 API 형식을 사용하여 비디오를 생성, 조회, 다운로드합니다"
+---
+> 업데이트: 2026-06-06
+
+# OpenAI 비디오 형식
+
+Crazyrouter는 OpenAI 공식 비디오 API 형식을 지원하며 OpenAI SDK와 호환됩니다.
+
+## 비디오 생성
+
+```
+POST /v1/videos
+```
+
+### 요청 파라미터
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| `model` | string | 예 | 모델 이름, 예: `veo-3.1-fast`, `veo-3.1-quality` |
+| `prompt` | string | 예 | 비디오 설명 프롬프트 |
+| `size` | string | 아니오 | 비디오 크기: `1920x1080`, `1080x1920`, `1080x1080` |
+| `duration` | integer | 아니오 | 비디오 길이(초) |
+| `image_url` | string | 아니오 | 참조 이미지 URL |
+| `storyboard` | array | 아니오 | 스토리보드 스크립트 |
+| `private` | boolean | 아니오 | 비공개 모드 여부 |
+
+### 요청 예시
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/videos \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "veo-3.1-fast",
+    "prompt": "A timelapse of a city skyline from day to night, clouds moving quickly",
+    "size": "1920x1080",
+    "duration": 10
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/v1/videos",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "veo-3.1-fast",
+        "prompt": "A timelapse of a city skyline from day to night",
+        "size": "1920x1080",
+        "duration": 10
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### 응답 예시
+
+```json
+{
+  "id": "video_abc123",
+  "object": "video",
+  "status": "processing",
+  "created_at": 1709123456
+}
+```
+
+---
+
+## 비디오 조회
+
+```
+GET /v1/videos/{id}
+```
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/videos/video_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### 응답 예시(완료됨)
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "id": "video_abc123",
+    "task_id": "video_abc123",
+    "status": "SUCCESS",
+    "artifact_url": "https://media.crazyrouter.com/task-artifacts/example.mp4",
+    "result_url": "https://media.crazyrouter.com/task-artifacts/example.mp4"
+  }
+}
+```
+
+---
+
+## 비디오 다운로드
+
+```
+GET /v1/videos/{id}/content
+```
+
+비디오 파일을 직접 다운로드합니다.
+
+```bash cURL
+curl -o output.mp4 https://api.crazyrouter.com/v1/videos/video_abc123/content \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+---
+
+## 비디오 편집
+
+생성 요청에 `image_url`을 전달하여 이미지-투-비디오를 수행합니다.
+
+```json
+{
+  "model": "veo-3.1-fast",
+  "prompt": "The scene comes to life with gentle movement",
+  "image_url": "https://example.com/scene.jpg",
+  "size": "1920x1080",
+  "duration": 5
+}
+```
+
+---
+
+## Storyboard 스토리보드
+
+```json
+{
+  "model": "veo-3.1-fast",
+  "storyboard": [
+    {"prompt": "Wide shot of a forest at dawn", "duration": 3},
+    {"prompt": "A deer walks into frame", "duration": 4},
+    {"prompt": "Close-up of the deer looking at camera", "duration": 3}
+  ],
+  "size": "1920x1080"
+}
+```
+
+---
+
+## 비공개 모드
+
+`private: true`로 설정하면 생성된 비디오가 공개 갤러리에 표시되지 않습니다.
+
+```json
+{
+  "model": "veo-3.1-fast",
+  "prompt": "A confidential product demo video",
+  "size": "1920x1080",
+  "private": true
+}
+```
+
+### 작업 상태
+
+| 상태 | 설명 |
+|------|------|
+| `processing` | 처리 중 |
+| `SUCCESS` | 완료됨 |
+| `failed` | 실패 |

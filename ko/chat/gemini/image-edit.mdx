@@ -1,0 +1,48 @@
+---
+title: "Gemini 이미지 편집"
+description: "OpenAI Images API를 통해 Gemini / Nano Banana 이미지 편집 기능 사용하기"
+---
+> 업데이트: 2026-08-18
+
+# Gemini 이미지 편집
+
+```
+POST /v1/images/generations
+```
+
+Gemini / Nano Banana 이미지 편집은 Crazyrouter에서 통합 OpenAI Images 호환 엔드포인트를 통해 처리됩니다. 기본적으로 `image_input` URL을 사용하며, 지정된 그레이 계정에서는 dataURL, raw Base64, 그리고 `/v1/images/edits` multipart 3장 이미지 편집도 지원합니다.
+
+<Warning>
+  이미지 편집, 다중 참조 이미지 같은 요청은 일반적으로 처리 시간이 오래 걸립니다. 프로덕션 연동 시 주 수신 라인인 `https://api.crazyrouter.com/v1`을 우선 사용하세요. 전체 엔드포인트는 `https://api.crazyrouter.com/v1/images/generations`입니다.
+</Warning>
+
+---
+
+## 현재 권장사항
+
+1. 신규 연동 시 `nano-banana-2` 또는 `nano-banana-pro`를 우선 사용하세요
+2. 이미지 입력은 `image_input`을 사용하여 URL 또는 URL 배열을 전달하세요
+3. Gemini 네이티브 필드(예: `generationConfig`, `imageConfig`, `imageOutputOptions`)는 전달하지 마세요
+4. 클라이언트 타임아웃은 180초 이상으로 설정하는 것을 권장합니다
+
+---
+
+## 요청 템플릿
+
+다음은 통합 Images API를 통해 참조 이미지를 편집하는 최소 요청입니다.
+
+```bash
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "nano-banana-2",
+    "prompt": "참조 이미지의 배경을 파란색으로 바꾸고, 주체 구조와 가장자리 디테일은 유지해줘",
+    "image_input": [
+      "https://example.com/reference.png"
+    ],
+    "resolution": "1K",
+    "aspect_ratio": "1:1",
+    "output_format": "png"
+  }'
+```

@@ -1,0 +1,76 @@
+---
+title: "Gemini 오디오 이해"
+description: "2026-04-08 Crazyrouter 본 사이트 성공 요청 경험을 기반으로 정리한 Gemini 네이티브 오디오 이해"
+---
+> 업데이트: 2026-06-06
+
+# Gemini 오디오 이해
+
+```text
+POST /v1beta/models/{model}:generateContent
+```
+
+`2026-04-08` 기준, Crazyrouter 본 사이트 및 로컬 `4000` 포트 재검증 결과:
+
+- `gemini-3.1-pro`는 `audio/wav`를 읽을 수 있습니다
+- 현재 안정적으로 검증된 주 경로는 `inlineData`입니다
+- 짧은 오디오에 대한 전사(transcription), 언어 판별, 요약 설명은 모두 텍스트 프롬프트만으로 직접 완료할 수 있습니다
+
+---
+
+## 검증된 최소 요청
+
+```bash
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "inlineData": {
+              "mimeType": "audio/wav",
+              "data": "BASE64_WAV_DATA"
+            }
+          },
+          {
+            "text": "JSON으로 반환해 주세요. 필드는 transcript, language, summary입니다."
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "maxOutputTokens": 512
+    }
+  }'
+```
+
+생산 환경에서 동일 유형으로 성공 반환된 핵심 형태:
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "```json\n{\n  \"transcript\": \"딩동\",\n  \"language\": \"zh-CN\",\n  \"summary\": \"오디오에는 짧은 알림음이 포함되어 있습니다.\"\n}\n```"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+## 요청 요점
+
+- 오디오 이해에는 `inlineData`를 우선 사용하세요
+- `mimeType`은 실제 오디오 형식과 일치시켜야 합니다. 예: `audio/wav`, `audio/mpeg`
+- `data`에는 Base64 콘텐츠만 넣고, Data URL 접두사는 붙이지 마세요
+- 엄격한 JSON이 필요하다면 [구조화 출력](/ko/features/structured-outputs) 제약을 추가로 적용할 수 있습니다
+
+<Note>
+  현재 페이지에는 이미 검증이 완료된 짧은 오디오 이해 주 경로만 작성되어 있습니다. 더 긴 오디오 전사와 음성 생성은 각각 기존의 [STT](/ko/audio/stt), [TTS](/ko/audio/tts) 페이지를 참고하세요. Realtime은 현재 공개 권장 사용 사례로 소개되지 않습니다.
+</Note>

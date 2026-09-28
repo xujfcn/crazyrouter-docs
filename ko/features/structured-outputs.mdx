@@ -1,0 +1,140 @@
+---
+title: "Structured Outputs"
+description: "생산 환경 실측을 기반으로, GPT와 Gemini 최신 주력 모델로 구조화된 JSON을 출력합니다"
+---
+> 업데이트: 2026-06-06
+
+# Structured Outputs
+
+본 문서는 **Crazyrouter 생산 환경에서 실제 요청으로 검증에 성공한** Structured Outputs 사용법만 수록합니다.
+
+검증 일시:
+
+- `2026-03-22`
+
+엄격 검증에 성공한 모델:
+
+- `gpt-5.5`
+- `gemini-3.1-pro`
+
+현재 엄격 성공 예시에 포함되지 않는 모델:
+
+- `claude-opus-4-8`
+
+이유:
+
+- 생산 환경 재검증에서, `claude-opus-4-8`은 현재 OpenAI 호환 `response_format=json_schema` 요청 형태에서 안정적인 "엄격한 순수 JSON" 동작을 보여주지 못했습니다
+- 이전 테스트에서 fenced code block이 발생한 적이 있습니다
+- `2026-03-22` 재검증 시에는 빈 `content`가 발생하기도 했습니다
+- 따라서 현재는 "엄격 구조화 출력 검증 성공"으로 기재하지 않습니다
+
+---
+
+## 검증 완료 기능 매트릭스
+
+| 모델 | 프로토콜 | 엔드포인트 | 성공 표지 |
+|------|------|------|----------|
+| `gpt-5.5` | OpenAI Chat Completions | `POST /v1/chat/completions` | 반환된 내용을 바로 `JSON.parse` 가능 |
+| `gemini-3.1-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | `application/json` 스타일 텍스트를 반환하며, 바로 파싱 가능 |
+
+---
+
+## GPT-5.4
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Return a JSON object with keys city and country for Tokyo."
+      }
+    ],
+    "response_format": {
+      "type": "json_schema",
+      "json_schema": {
+        "name": "city_country",
+        "strict": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "city": {"type": "string"},
+            "country": {"type": "string"}
+          },
+          "required": ["city", "country"],
+          "additionalProperties": false
+        }
+      }
+    }
+  }'
+```
+
+생산 환경 검증 반환값:
+
+```json
+{"city":"Tokyo","country":"Japan"}
+```
+
+---
+
+## Gemini 3 Pro
+
+```bash cURL
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Return a JSON object with keys city and country for Tokyo."
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "responseMimeType": "application/json",
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "city": {"type": "string"},
+          "country": {"type": "string"}
+        },
+        "required": ["city", "country"]
+      }
+    }
+  }'
+```
+
+생산 환경 검증 반환값:
+
+```json
+{"city":"Tokyo","country":"Japan"}
+```
+
+---
+
+## Claude 4.6 현재 결론
+
+`2026-03-22`의 생산 환경 테스트에서:
+
+- `claude-opus-4-8`은 해당 요청 형태에서 안정적으로 재현 가능한 엄격 JSON 출력을 제공하지 못했습니다
+- 서로 다른 테스트 라운드에서, fenced code block이 나타나기도 하고 빈 `content`가 나타나기도 했습니다
+- 따라서 현재는 Claude 4.6을 "엄격 schema 출력 검증 성공"으로 기재하는 것을 권장하지 않습니다
+
+향후 Claude 4.6을 여기에 포함시키려면, 먼저 더 세밀한 생산 환경 검증을 한 라운드 추가하고 다음을 확인하는 것을 권장합니다.
+
+- 더 적합한 네이티브 프로토콜 작성 방식이 있는지
+- 추가 system prompt가 필요한지
+- code fence를 안정적으로 제거할 수 있는지
+
+---
+
+## 관련 문서
+
+- [OpenAI Structured Output](/ko/chat/openai/structured-output)
+- [Gemini 문서 이해](/ko/chat/gemini/document)

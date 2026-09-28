@@ -1,0 +1,100 @@
+---
+title: "Claude 토큰 카운팅"
+description: "POST /v1/messages/count_tokens로 Claude Messages 요청의 입력 토큰 수를 예측합니다"
+---
+> 업데이트: 2026-06-06
+
+# Claude 토큰 카운팅
+
+```
+POST /v1/messages/count_tokens
+```
+
+실제로 `POST /v1/messages`를 호출하기 전에, 입력 부분이 소비할 토큰 수를 먼저 예측하는 데 사용됩니다. Claude CLI, Claude Code, 예산 관리 또는 컨텍스트 트리밍 로직에 적합합니다.
+
+## 인증
+
+Anthropic 스타일 요청 헤더 사용을 권장합니다:
+
+```http
+x-api-key: YOUR_API_KEY
+anthropic-version: 2023-06-01
+```
+
+표준 Bearer 인증도 사용할 수 있지만, Anthropic 생태계 클라이언트는 일반적으로 위의 헤더를 함께 전달합니다.
+
+## 요청 본문
+
+요청 본문은 Claude Messages 형식을 따릅니다. 최소로 사용 가능한 필드는 일반적으로 다음과 같습니다:
+
+- `model`
+- `messages`
+
+요청에 `system`, `tools`, 도구 결과 또는 텍스트 콘텐츠가 포함되어 있다면, 이 역시 예측에 함께 반영됩니다.
+
+## 요청 예시
+
+<CodeGroup>
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/messages/count_tokens   -H "Content-Type: application/json"   -H "x-api-key: YOUR_API_KEY"   -H "anthropic-version: 2023-06-01"   -d '{
+    "model": "claude-opus-4-8",
+    "messages": [
+      {"role": "user", "content": "hello"}
+    ]
+  }'
+```
+
+```python Python
+import requests
+
+resp = requests.post(
+    "https://api.crazyrouter.com/v1/messages/count_tokens",
+    headers={
+        "x-api-key": "YOUR_API_KEY",
+        "anthropic-version": "2023-06-01",
+        "Content-Type": "application/json",
+    },
+    json={
+        "model": "claude-opus-4-8",
+        "messages": [
+            {"role": "user", "content": "hello"}
+        ],
+    },
+)
+
+print(resp.json())
+```
+
+</CodeGroup>
+
+## 응답 예시
+
+```json
+{
+  "input_tokens": 4
+}
+```
+
+## 반환 필드
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| `input_tokens` | integer | 현재 요청의 텍스트 부분에 대한 예측 입력 토큰 수 |
+| `warning` | string | 선택적 경고. 요청에 이미지나 파일이 포함된 경우, 해당 콘텐츠가 예측에 포함되지 않았음을 알릴 수 있습니다 |
+
+## 제한 사항
+
+현재 구현에서 주로 예측하는 대상:
+
+- `system`
+- `messages` 내의 텍스트 콘텐츠
+- 도구 정의와 도구 결과 내의 텍스트/JSON
+
+<Warning>
+요청에 이미지나 파일이 포함되어 있으면, 이 인터페이스는 해당 이미지/파일 토큰을 `input_tokens`에 반영하지 않습니다. 이 경우 응답에 `warning`이 나타날 수 있으며, 실제 청구액은 여기서 예측한 값보다 높을 수 있습니다.
+</Warning>
+
+<Note>
+이 인터페이스가 반환하는 값은 예측값이며, 최종 정산값이 아닙니다. 실제 사용량은 여전히 실제 모델 호출 결과를 기준으로 합니다.
+</Note>

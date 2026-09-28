@@ -1,0 +1,108 @@
+---
+title: "Runway"
+description: "Runway API를 사용하여 이미지-투-비디오를 생성합니다"
+---
+> 업데이트: 2026-06-06
+
+# Runway
+
+```
+POST /runwayml/v1/image_to_video
+```
+
+Runway Gen-3 모델을 사용하여 이미지를 비디오로 변환합니다.
+
+## 요청 파라미터
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| `model` | string | 아니오 | 모델명, 예: `gen3a_turbo` |
+| `promptImage` | string | 예 | 입력 이미지 URL |
+| `promptText` | string | 아니오 | 비디오 설명 프롬프트 |
+| `duration` | integer | 아니오 | 비디오 길이(초), 기본값 5 |
+| `ratio` | string | 아니오 | 가로세로 비율: `16:9`, `9:16` |
+| `watermark` | boolean | 아니오 | 워터마크 추가 여부 |
+
+## 요청 예시
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/runwayml/v1/image_to_video \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gen3a_turbo",
+    "promptImage": "https://example.com/landscape.jpg",
+    "promptText": "Camera slowly pans across the landscape, clouds moving in the sky",
+    "duration": 5,
+    "ratio": "16:9",
+    "watermark": false
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/runwayml/v1/image_to_video",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "gen3a_turbo",
+        "promptImage": "https://example.com/landscape.jpg",
+        "promptText": "Camera slowly pans across the landscape",
+        "duration": 5,
+        "ratio": "16:9"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### 응답 예시
+
+```json
+{
+  "id": "runway_task_abc123",
+  "status": "PENDING"
+}
+```
+
+---
+
+## 작업 조회
+
+```
+GET /runwayml/v1/tasks/{task_id}
+```
+
+```bash cURL
+curl https://api.crazyrouter.com/runwayml/v1/tasks/runway_task_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### 응답 예시 (완료됨)
+
+```json
+{
+  "id": "runway_task_abc123",
+  "status": "SUCCEEDED",
+  "output": [
+    "https://runway-output.s3.amazonaws.com/..."
+  ]
+}
+```
+
+### 작업 상태
+
+| 상태 | 설명 |
+|------|------|
+| `PENDING` | 처리 대기 중 |
+| `RUNNING` | 생성 중 |
+| `SUCCEEDED` | 성공 |
+| `FAILED` | 실패 |

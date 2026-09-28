@@ -1,0 +1,42 @@
+---
+title: 'ChatGPT Sidebar 설정 가이드'
+description: 'ChatGPT Sidebar 브라우저 확장 프로그램에서 Crazyrouter API를 설정하고, 검증된 최신 모델을 사용합니다'
+---
+> 업데이트: 2026-06-06
+
+## 개요
+
+ChatGPT Sidebar는 브라우저 사이드바 AI 어시스턴트 확장 프로그램으로, 어떤 웹페이지에서든 즉석 질의응답, 번역, 요약과 페이지 보조 읽기에 적합합니다. Crazyrouter와 연동할 때는 `Custom API` 또는 `OpenAI` 커스텀 엔드포인트를 우선 사용하는 것을 권장하며, 먼저 프로덕션 환경에서 실측으로 검증된 모델로 최소 흐름을 완주하세요.
+
+## 설정 단계
+
+<Steps>
+  <Step title="확장 프로그램 설치">
+    Chrome 웹 스토어에서 ChatGPT Sidebar를 설치합니다.
+  </Step>
+  <Step title="설정 열기">
+    확장 프로그램 아이콘을 클릭하여 `Settings`로 이동합니다.
+  </Step>
+  <Step title="API 설정">
+    - **API Provider**: `Custom API` 또는 `OpenAI` 선택
+    - **API URL**: `https://api.crazyrouter.com/v1`
+    - **API Key**: `sk-xxx`
+    - **Model**: `gpt-5.5`
+  </Step>
+  <Step title="저장">
+    설정을 저장한 뒤, 어떤 웹페이지에서든 확장 프로그램 아이콘을 클릭하면 사용할 수 있습니다.
+  </Step>
+</Steps>
+
+## 권장 모델
+
+| 시나리오 | 모델 |
+|------|------|
+| 초기 흐름 검증 | `gpt-5.5` |
+| 고품질 장문과 설명 | `claude-opus-4-8` |
+| Gemini 보조 옵션 | `gemini-3.1-pro` |
+
+<Note>
+  `gpt-5.5`는 2026년 3월 23일 Crazyrouter 프로덕션 환경에서 실측을 완료했으며, 브라우저 확장 프로그램의 OpenAI 호환 기본 라인으로 적합합니다.
+</Note>
+

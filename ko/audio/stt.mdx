@@ -1,0 +1,141 @@
+---
+title: "음성을 텍스트로 변환 (STT)"
+description: "POST /v1/audio/transcriptions를 사용하여 음성을 텍스트로 변환합니다"
+---
+> 업데이트: 2026-06-06
+
+# 음성을 텍스트로 변환 (STT)
+
+```
+POST /v1/audio/transcriptions
+```
+
+오디오 파일을 텍스트로 전사하며, OpenAI Whisper API 형식과 호환됩니다.
+
+## 요청 파라미터
+
+| 파라미터 | 유형 | 필수 | 설명 |
+|------|------|------|------|
+| `file` | file | 예 | 오디오 파일 (multipart/form-data) |
+| `model` | string | 예 | 모델명: `whisper-1`, `whisper-1` |
+| `language` | string | 아니요 | 오디오 언어 (ISO-639-1 형식), 예: `zh`, `en`, `ja` |
+| `response_format` | string | 아니요 | 출력 형식: `json`(기본값), `text`, `srt`, `verbose_json`, `vtt` |
+| `temperature` | number | 아니요 | 샘플링 온도, 0-1 |
+| `prompt` | string | 아니요 | 프롬프트, 모델이 컨텍스트를 이해하는 데 도움을 줌 |
+
+### 지원하는 오디오 형식
+
+`mp3`, `mp4`, `mpeg`, `mpga`, `m4a`, `wav`, `webm`
+
+## 요청 예시
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/audio/transcriptions \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F file=@audio.mp3 \
+  -F model=whisper-1 \
+  -F language=zh \
+  -F response_format=json
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+with open("audio.mp3", "rb") as audio_file:
+    transcript = client.audio.transcriptions.create(
+        model="whisper-1",
+        file=audio_file,
+        language="zh",
+        response_format="json"
+    )
+
+print(transcript.text)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+import fs from "fs";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://api.crazyrouter.com/v1",
+});
+
+const transcript = await client.audio.transcriptions.create({
+  model: "whisper-1",
+  file: fs.createReadStream("audio.mp3"),
+  language: "zh",
+});
+
+console.log(transcript.text);
+```
+
+</CodeGroup>
+
+## 응답 예시
+
+### JSON 형식
+
+```json
+{
+  "text": "안녕하세요, Crazyrouter API를 이용해 주셔서 감사합니다. 오늘은 음성을 텍스트로 변환하는 기능을 소개하겠습니다."
+}
+```
+
+### verbose_json 형식
+
+```json
+{
+  "task": "transcribe",
+  "language": "chinese",
+  "duration": 5.2,
+  "text": "안녕하세요, Crazyrouter API를 이용해 주셔서 감사합니다.",
+  "segments": [
+    {
+      "id": 0,
+      "start": 0.0,
+      "end": 2.5,
+      "text": "안녕하세요, Crazyrouter API를 이용해 주셔서 감사합니다."
+    }
+  ]
+}
+```
+
+### SRT 형식
+
+```
+1
+00:00:00,000 --> 00:00:02,500
+안녕하세요, Crazyrouter API를 이용해 주셔서 감사합니다.
+```
+
+---
+
+## 오디오 번역
+
+```
+POST /v1/audio/translations
+```
+
+비영어권 오디오를 영어 텍스트로 번역합니다. 파라미터는 전사 인터페이스와 동일합니다.
+
+```python Python
+with open("chinese_audio.mp3", "rb") as audio_file:
+    translation = client.audio.translations.create(
+        model="whisper-1",
+        file=audio_file
+    )
+
+print(translation.text)  # 영어 번역 결과 출력
+```
+
+<Note>
+  `language` 파라미터를 지정하면 전사 정확도를 높일 수 있습니다. 오디오 파일 크기 제한은 25MB입니다.
+</Note>

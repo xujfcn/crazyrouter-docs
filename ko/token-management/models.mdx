@@ -1,0 +1,93 @@
+---
+title: '토큰이 지원하는 모델 조회'
+description: '지정한 토큰에서 사용 가능한 모델 목록을 조회합니다'
+api: 'GET /v1/models'
+---
+> 업데이트: 2026-06-06
+
+## 인터페이스 설명
+
+현재 토큰(API Key)이 호출할 수 있는 모델 목록을 조회합니다. 토큰에 모델 제한이 없으면 시스템에서 활성화된 모든 모델을 반환합니다.
+
+현재 권장되며 실제로 지원되는 인터페이스는 다음과 같습니다.
+
+```text
+GET /v1/models
+```
+
+`GET /api/token/models`는 현재 공개적으로 사용할 수 있는 인터페이스가 아니므로 `/v1/models`를 사용하세요.
+
+## 인증 방식
+
+API Key(sk-xxx)를 사용해 인증합니다.
+
+```
+Authorization: Bearer sk-xxx
+```
+
+## 응답 형식
+
+```json
+{
+  "success": true,
+  "object": "list",
+  "data": [
+    {
+      "id": "gpt-5.5",
+      "object": "model",
+      "owned_by": "openai"
+    },
+    {
+      "id": "claude-opus-4-8",
+      "object": "model",
+      "owned_by": "anthropic"
+    }
+  ]
+}
+```
+
+## 코드 예시
+
+<CodeGroup>
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+# OpenAI SDK를 통해 모델 목록 가져오기
+models = client.models.list()
+for model in models.data:
+    print(model.id)
+```
+
+```python Python (requests)
+import requests
+
+response = requests.get(
+    "https://api.crazyrouter.com/v1/models",
+    headers={"Authorization": "Bearer sk-xxx"}
+)
+
+models = response.json()["data"]
+for model in models:
+    print(model["id"])
+```
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/models \
+  -H "Authorization: Bearer sk-xxx"
+```
+
+</CodeGroup>
+
+<Note>
+  OpenAI SDK를 사용하는 경우 `client.models.list()`는 실제로 `GET /v1/models`를 호출하는 것입니다.
+</Note>
+
+관련 페이지:
+
+- [모델 공식 가격 산정 방식](/ko/reference/official-pricing-methods)

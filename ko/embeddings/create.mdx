@@ -1,0 +1,108 @@
+---
+title: '임베딩 생성'
+description: '텍스트를 벡터 표현으로 변환합니다'
+api: 'POST /v1/embeddings'
+---
+> 업데이트: 2026-06-06
+
+## 인터페이스 설명
+
+입력 텍스트를 고차원 벡터로 변환하여 의미 검색, 클러스터링, 추천 등의 시나리오에 사용합니다. OpenAI Embeddings API 형식과 완전히 호환됩니다.
+
+## 지원 모델
+
+| 모델 | 차원 | 설명 |
+|------|------|------|
+| `text-embedding-3-large` | 3072 | 고정밀, 프로덕션 환경에 권장 |
+| `text-embedding-3-small` | 1536 | 가성비가 높음 |
+| `text-embedding-ada-002` | 1536 | 클래식 모델 |
+
+## 요청 파라미터
+
+<ParamField body="model" type="string" required>
+  임베딩 모델명, 예: `text-embedding-3-large`
+</ParamField>
+
+<ParamField body="input" type="string | string[]" required>
+  임베딩할 텍스트, 단일 문자열 또는 문자열 배열 지원
+</ParamField>
+
+<ParamField body="encoding_format" type="string" default="float">
+  반환 형식: `float` 또는 `base64`
+</ParamField>
+
+<ParamField body="dimensions" type="integer">
+  출력 벡터 차원 (`text-embedding-3-*`만 지원)
+</ParamField>
+
+## 응답 형식
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "object": "embedding",
+      "index": 0,
+      "embedding": [0.0023064255, -0.009327292, ...]
+    }
+  ],
+  "model": "text-embedding-3-large",
+  "usage": {
+    "prompt_tokens": 8,
+    "total_tokens": 8
+  }
+}
+```
+
+## 코드 예시
+
+<CodeGroup>
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+response = client.embeddings.create(
+    model="text-embedding-3-large",
+    input="Crazyrouter는 AI 모델 게이트웨이입니다"
+)
+
+embedding = response.data[0].embedding
+print(f"벡터 차원: {len(embedding)}")
+print(f"앞 5개 값: {embedding[:5]}")
+```
+
+```python Python (배치)
+response = client.embeddings.create(
+    model="text-embedding-3-large",
+    input=[
+        "첫 번째 텍스트",
+        "두 번째 텍스트",
+        "세 번째 텍스트"
+    ]
+)
+
+for item in response.data:
+    print(f"인덱스 {item.index}: 차원 {len(item.embedding)}")
+```
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/embeddings \
+  -H "Authorization: Bearer sk-xxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "text-embedding-3-large",
+    "input": "Crazyrouter는 AI 모델 게이트웨이입니다"
+  }'
+```
+
+</CodeGroup>
+
+<Note>
+  배치 요청 시 1회 최대 2048개의 텍스트를 지원합니다. 각 텍스트는 8191 토큰을 넘지 않는 것을 권장합니다.
+</Note>

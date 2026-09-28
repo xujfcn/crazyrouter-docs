@@ -1,0 +1,110 @@
+---
+title: "채팅 완료 객체"
+description: "현재 프로덕션 동작을 기준으로 Chat Completion과 Chat Completion Chunk의 핵심 구조를 이해합니다"
+---
+> 업데이트: 2026-06-06
+
+# 채팅 완료 객체
+
+`/v1/chat/completions`는 비스트리밍 시 `chat.completion`을, 스트리밍 시 `chat.completion.chunk`를 반환합니다.
+
+이 문서는 Crazyrouter의 현재 OpenAI 호환 응답에서 가장 안정적이고 범용적인 구조 이해를 정리합니다.
+
+## 비스트리밍 객체
+
+현재 프로덕션의 최소 요청 예시:
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Explain what a REST API is in one sentence."
+      }
+    ],
+    "max_tokens": 64
+  }'
+```
+
+현재 프로덕션에서 반환되는 일반적인 뼈대:
+
+```json
+{
+  "id": "chatcmpl-xxx",
+  "object": "chat.completion",
+  "created": 1774177466,
+  "model": "gpt-5.5",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "...",
+        "reasoning_content": null,
+        "tool_calls": null
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}
+```
+
+### 이렇게 이해하면 됩니다
+
+- `message.content`는 최종 텍스트 출력입니다
+- `message.tool_calls`는 모델이 도구를 요청할 때만 나타납니다
+- `message.reasoning_content`는 일부 모델이나 일부 라우트에서 나타날 수 있지만, 현재는 항상 존재하는 안정적인 필드로 취급해서는 안 됩니다
+
+---
+
+## 스트리밍 객체
+
+스트리밍 요청 시 서버는 SSE를 통해 `chat.completion.chunk`를 청크 단위로 순차 반환합니다.
+
+```json
+{
+  "id": "chatcmpl-xxx",
+  "object": "chat.completion.chunk",
+  "created": 1774177466,
+  "model": "gpt-5.5",
+  "choices": [
+    {
+      "index": 0,
+      "delta": {
+        "role": "assistant",
+        "content": "..."
+      },
+      "finish_reason": null
+    }
+  ]
+}
+```
+
+일반적인 SSE 형태:
+
+```text
+data: {"object":"chat.completion.chunk",...}
+data: {"choices":[{"delta":{"content":"..."}}],...}
+data: [DONE]
+```
+
+---
+
+## 자주 확인하는 필드
+
+| 필드 | 설명 |
+|------|------|
+| `object` | 비스트리밍은 `chat.completion`, 스트리밍은 `chat.completion.chunk` |
+| `model` | 실제로 응답에 사용된 모델 이름 |
+| `choices[].message.content` | 비스트리밍의 최종 텍스트 |
+| `choices[].message.tool_calls` | 비스트리밍의 도구 호출 |
+| `choices[].delta.content` | 스트리밍의 증분 텍스트 |
+| `choices[].finish_reason` | 정지 사유, 예: `stop`, `length`, `tool_calls` |
+
+<Note>
+  업스트림 모델이 추가 필드를 그대로 전달할 수 있습니다. 클라이언트를 작성할 때는 안정적인 범용 필드를 우선 사용하고, 모든 모델이 동일한 확장 필드를 노출한다고 가정하지 마십시오.
+</Note>

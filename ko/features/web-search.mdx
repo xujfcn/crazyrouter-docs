@@ -1,0 +1,147 @@
+---
+title: "Web Search"
+description: "프로덕션 환경 실측을 기반으로, GPT, Claude, Gemini 최신 주력 모델을 사용한 웹 검색"
+---
+> 업데이트: 2026-06-06
+
+# Web Search
+
+이 문서에는 **Crazyrouter 프로덕션 환경에서 실제 요청으로 성공이 검증된** Web Search 사용법만 수록되어 있습니다.
+
+검증 시각:
+
+- `2026-03-22`
+
+검증된 모델:
+
+- `gpt-5.5`
+- `claude-opus-4-8`
+- `gemini-3.1-pro`
+
+---
+
+## 검증된 기능 매트릭스
+
+| 모델 | 프로토콜 | 엔드포인트 | 성공 표시 |
+|------|------|------|----------|
+| `gpt-5.5` | OpenAI Responses | `POST /v1/responses` | `output`에 `web_search_call`이 나타남 |
+| `claude-opus-4-8` | OpenAI-compatible Chat | `POST /v1/chat/completions` | `remote_web_search` 도구 호출을 반환 |
+| `gemini-3.1-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | `groundingMetadata`를 반환 |
+
+---
+
+## GPT-5.4
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "input": "Use web search to find one current headline from a major technology news site published recently.",
+    "tools": [
+      {
+        "type": "web_search_preview"
+      }
+    ]
+  }'
+```
+
+프로덕션에서 검증된 주요 `output.type`은 다음과 같습니다.
+
+```json
+["web_search_call", "web_search_call", "message"]
+```
+
+---
+
+## Claude Sonnet 4.6
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "claude-opus-4-8",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Find one recent technology headline. Use web search and do not answer from memory."
+      }
+    ],
+    "web_search_options": {
+      "search_context_size": "medium",
+      "user_location": {
+        "approximate": {
+          "timezone": "Asia/Shanghai",
+          "country": "CN"
+        }
+      }
+    },
+    "max_tokens": 200
+  }'
+```
+
+프로덕션에서 검증된 주요 필드:
+
+```json
+{
+  "tool_calls": [
+    {
+      "type": "function",
+      "function": {
+        "name": "remote_web_search"
+      }
+    }
+  ],
+  "finish_reason": "tool_calls"
+}
+```
+
+이는 Crazyrouter의 OpenAI-compatible 라우팅 하에서 Claude 4.6의 웹 검색이 도구 호출 형태로 노출된다는 것을 보여줍니다.
+
+첫 연동 테스트 시 권장 사항:
+
+- 프롬프트에 `Use web search`를 명시적으로 작성
+- `do not answer from memory`도 함께 추가
+- 프롬프트가 너무 약하면 모델이 텍스트로 직접 응답할 수 있으며, 반드시 `remote_web_search`가 명시적으로 트리거되지는 않습니다
+
+---
+
+## Gemini 3 Pro
+
+```bash cURL
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Use Google Search to find one recent headline from a major technology news site."
+          }
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "googleSearch": {}
+      }
+    ]
+  }'
+```
+
+프로덕션에서 다음 주요 필드가 검증되었습니다.
+
+- `groundingMetadata.webSearchQueries`
+- `groundingMetadata.groundingChunks`
+- `groundingMetadata.groundingSupports`
+
+---
+
+## 관련 문서
+
+- [Responses 웹 검색](/ko/chat/responses/web-search)
+- [OpenAI 웹 검색](/ko/chat/openai/web-search)
+- [Gemini 도구 호출](/ko/chat/gemini/tools)

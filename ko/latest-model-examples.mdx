@@ -1,0 +1,113 @@
+---
+title: "최신 모델 사용 예시"
+description: "로컬 공개 모델 인덱스를 기준으로 정리한 최신 모델 호출 예시"
+---
+> 업데이트: 2026-06-07
+
+# 최신 모델 사용 예시
+
+이 페이지는 `web/src/data/models/index.json`의 공개 모델 인덱스를 기준으로 정리되었습니다. 새로운 사용 예시는 이 모델들을 우선 사용하며, 이미 판매 종료되었거나 공개 인덱스에 포함되지 않은 모델은 더 이상 예시로 표시하지 않습니다.
+
+## 권장 모델 한눈에 보기
+
+| 시나리오 | 권장 모델 |
+|------|----------|
+| 기본 채팅, 범용 추론 | `gpt-5.5` |
+| 비용에 민감한 채팅 | `gpt-5-mini` |
+| Claude 코딩 및 긴 컨텍스트 | `claude-opus-4-8` |
+| Claude 고난도 작업 | `claude-opus-4-8` |
+| Claude 저비용 경량 작업 | `claude-opus-4-8` |
+| Gemini 네이티브 멀티모달 | `gemini-3.1-pro` |
+| Gemini 저지연 | `gemini-3.1-flash-lite` |
+| DeepSeek 추론 | `deepseek-v4-pro` |
+| xAI 빠른 채팅 | `grok-4.1-fast` |
+| MiniMax 긴 컨텍스트 | `MiniMax-M2.7` |
+| Qwen 비전 이해 | `qwen3-vl-235b-a22b-instruct` 또는 `qwen2.5-vl-72b-instruct` |
+| Suno 음악 | `suno_music` |
+
+## Chat Completions
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "messages": [
+      {"role": "user", "content": "이 인터페이스가 어떤 시나리오에 적합한지 세 문장으로 설명해 주세요"}
+    ]
+  }'
+```
+
+## Responses API
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "input": "안전하게 출시하기 전 API 문서 점검 체크리스트를 제시해 주세요"
+  }'
+```
+
+## Claude Messages
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-opus-4-8",
+    "max_tokens": 256,
+    "messages": [
+      {"role": "user", "content": "이 API 변경 설명이 명확한지 검토해 주세요"}
+    ]
+  }'
+```
+
+## Gemini 네이티브
+
+```bash cURL
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [{"text": "오늘 검증해야 할 API 문서의 핵심을 요약해 주세요"}]
+      }
+    ]
+  }'
+```
+
+## 비전 이해
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "qwen3-vl-235b-a22b-instruct",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {"type": "text", "text": "이 이미지의 핵심 정보를 설명해 주세요"},
+          {"type": "image_url", "image_url": {"url": "https://example.com/image.png"}}
+        ]
+      }
+    ]
+  }'
+```
+
+## 음악과 가사
+
+현재 프로덕션 공개 모델 인덱스에는 `suno_music`만 있습니다. 가사 생성 기능은 아직 안정적인 프로덕션 라우트가 제공되지 않습니다. 곡 제출, 조회, 이어쓰기 절차는 다음을 참고하세요.
+
+- [Suno SDK 통합 작업 가이드](/ko/sdks/suno-sdk)
+
+<Note>
+  실제 사용 가능한 모델은 Token 화이트리스트, 채널 상태, 플랫폼 업데이트에 따라 달라질 수 있습니다. 프로덕션 연동 전에 먼저 [`GET /v1/models`](/ko/chat/openai/models)를 호출해 현재 Token에서 보이는 모델 ID를 확인하세요.
+</Note>

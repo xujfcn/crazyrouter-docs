@@ -1,0 +1,133 @@
+---
+title: 'Hermes Agent 설정'
+description: 'Hermes Agent에서 Crazyrouter를 설정하여 OpenAI 호환 주소로 627개 이상의 AI 모델에 액세스합니다'
+icon: 'robot'
+---
+> 업데이트: 2026-06-06
+
+[crazyrouter-hermes](https://github.com/xujfcn/crazyrouter-hermes)를 통해 [Hermes Agent](https://github.com/NousResearch/Hermes-Agent)의 모델 백엔드를 Crazyrouter로 전환할 수 있습니다. 설정을 완료하면 Hermes는 Crazyrouter의 OpenAI 호환 `base_url`을 사용하며, 하나의 Crazyrouter API Key로 Claude, GPT, DeepSeek, Gemini, Qwen 등 627개 이상의 모델을 호출합니다.
+
+## 적합한 대상
+
+- 이미 Hermes Agent를 설치했고 바로 Crazyrouter에 연결하고 싶은 사용자
+- 로컬 Agent에서 Crazyrouter 모델과 크레딧을 통합해서 사용하고 싶은 사용자
+- 명령 한 줄로 `OPENAI_API_KEY`, `OPENAI_BASE_URL`, 기본 모델 설정을 완료하고 싶은 사용자
+
+## 사전 조건
+
+| 항목 | 설명 |
+|------|------|
+| Hermes Agent | 먼저 로컬에 설치하고 Hermes가 실행되는지 확인 |
+| Crazyrouter 계정 | [crazyrouter.com](https://crazyrouter.com)에서 가입 |
+| Crazyrouter API Key | Hermes용으로 별도의 `sk-...` 토큰 생성을 권장 |
+| 모델 권한 | 토큰에서 Hermes에서 사용할 모델을 허용 |
+
+<Tip>
+Hermes는 OpenAI 호환 설정으로 Crazyrouter에 연결하며, 기본 연결 주소는 `https://api.crazyrouter.com/v1`을 직접 사용합니다. 특정 클라이언트에 루트 도메인을 입력해야 할지 `/v1`을 입력해야 할지 확실하지 않다면 먼저 [API Endpoint 설명](https://docs.crazyrouter.com/ko/api-endpoint)을 참고하십시오. 계정 로그인, 충전, 콘솔은 여전히 `https://crazyrouter.com`을 사용합니다.
+</Tip>
+
+## 원클릭 설정
+
+<Tabs>
+  <Tab title="Linux / macOS / WSL2">
+    ```bash
+    curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup.sh | bash
+    ```
+  </Tab>
+  <Tab title="Windows PowerShell">
+    ```powershell
+    irm https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup.ps1 | iex
+    ```
+  </Tab>
+  <Tab title="Windows CMD">
+    ```bat
+    curl -o setup.bat https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup.bat
+    setup.bat
+    ```
+  </Tab>
+</Tabs>
+
+스크립트가 Crazyrouter API Key 입력, 기본 모델 선택, 선택적으로 연결 테스트까지 안내합니다.
+
+<Warning>
+원클릭 스크립트는 로컬 Hermes 설정을 덮어씁니다. 실행 전에 기존 `~/.hermes/.env`와 `~/.hermes/config.yaml`을 먼저 백업하는 것을 권장합니다.
+</Warning>
+
+## 수동 설정
+
+스크립트를 실행하고 싶지 않다면 Hermes 설정 파일을 수동으로 작성할 수도 있습니다.
+
+### 환경 변수
+
+`~/.hermes/.env`를 편집합니다.
+
+```bash
+OPENAI_API_KEY=sk-your-crazyrouter-key
+OPENAI_BASE_URL=https://api.crazyrouter.com/v1
+```
+
+기본적으로 이 국제 API 연결 주소를 유지하면 됩니다. 이 주소는 API 요청에만 사용되며, 계정 로그인, 충전, 콘솔은 여전히 `https://crazyrouter.com`을 사용합니다.
+
+```bash
+OPENAI_BASE_URL=https://api.crazyrouter.com/v1
+```
+
+### 기본 모델
+
+`~/.hermes/config.yaml`을 편집합니다.
+
+```yaml
+model:
+  provider: "custom"
+  default: "claude-opus-4-8"
+  base_url: "https://api.crazyrouter.com/v1"
+```
+
+기본값으로도 국제 API 연결 주소를 유지하는 것을 권장합니다.
+
+```yaml
+model:
+  provider: "custom"
+  default: "claude-opus-4-8"
+  base_url: "https://api.crazyrouter.com/v1"
+```
+
+`default`를 Crazyrouter 토큰에서 이미 허용한 모델로 변경하면 됩니다.
+
+## 모델 전환
+
+설정이 완료되면 Hermes 내에서 언제든지 `/model`로 모델을 전환할 수 있습니다.
+
+```text
+/model claude-opus-4-8
+/model gpt-5.5
+/model claude-opus-4-8
+/model gemini-3.1-pro
+/model deepseek-chat
+/model qwen-max
+/model gpt-4o
+```
+
+전환 후 `model not allowed` 또는 `403`이 반환된다면 보통 현재 Crazyrouter 토큰이 해당 모델을 허용하지 않은 경우입니다.
+
+## 검증 체크리스트
+
+- [ ] `~/.hermes/.env`의 `OPENAI_API_KEY`가 유효한 Crazyrouter 토큰인지
+- [ ] `OPENAI_BASE_URL`이 `https://api.crazyrouter.com/v1`인지
+- [ ] `~/.hermes/config.yaml`의 `provider`가 `custom`인지
+- [ ] 기본 모델이 Crazyrouter 토큰에서 허용되었는지
+- [ ] Hermes에서 테스트 메시지를 보내면 정상적으로 응답이 오는지
+- [ ] `/model gpt-5.5` 또는 다른 허용된 모델로 전환이 성공하는지
+
+## 자주 묻는 질문
+
+| 현상 | 흔한 원인 | 처리 방법 |
+|------|----------|----------|
+| 401 unauthorized | API Key를 잘못 입력했거나 만료되었거나 재설정됨 | Crazyrouter 토큰을 다시 생성하고 `~/.hermes/.env`를 업데이트 |
+| 403 / model not allowed | 토큰이 현재 모델을 허용하지 않음 | Crazyrouter 토큰 설정에서 해당 모델을 허용 |
+| 여전히 기존 공급자로 연결됨 | Hermes가 새 설정을 읽지 못했거나 설정 파일 경로가 맞지 않음 | Hermes를 재시작하고 `~/.hermes/.env`, `~/.hermes/config.yaml`을 확인 |
+| 연결 타임아웃 | 로컬 네트워크에서 Crazyrouter에 접속할 수 없음 | 네트워크 프록시, 방화벽, DNS를 확인 |
+
+<Card title="crazyrouter-hermes 저장소 보기" icon="github" href="https://github.com/xujfcn/crazyrouter-hermes">
+  원클릭 설정 스크립트, 수동 설정 예시, 최신 안내를 확인합니다.
+</Card>

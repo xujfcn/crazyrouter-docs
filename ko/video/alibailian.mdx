@@ -1,0 +1,149 @@
+---
+title: "알리바바 바이리안 비디오 인터페이스"
+description: "알리바바 바이리안 호환 비디오 인터페이스. 외부에는 /alibailian/api/v1/* 호환 경로를 사용하며, Crazyrouter 내부는 이미 DashScope 공식 /api/v1/* 상류에 연결되어 있습니다"
+---
+> 업데이트: 2026-06-07
+
+# 알리바바 바이리안 비디오 인터페이스
+
+Crazyrouter는 알리바바 호환 비디오 경로를 제공하며, 이미 DashScope / 알리바바 바이리안 비디오 형식으로 연동된 애플리케이션이 바로 마이그레이션하기에 적합합니다.
+
+## 이 페이지가 다루는 내용
+
+- 이 페이지는 Crazyrouter가 외부에 노출하는 알리바바 호환 별칭을 설명하며, 이미 DashScope / 알리바바 바이리안 비디오 형식으로 연동된 워크플로가 `/alibailian/api/v1/*`를 계속 사용하기에 적합합니다
+- Crazyrouter 내부에서 연결하는 공식 상류는 이미 DashScope `/api/v1/*` 경로로 통일되었습니다
+- Crazyrouter 통합 비디오 인터페이스를 사용하려는 경우, 즉 알리바바 호환 마이그레이션 경로가 아니라면 `/v1/video/generations`를 사용하세요
+- Wan 텍스트-투-비디오는 현재 `/v1/video/generations`를 사용합니다. 특히 `wan2.2-t2v-plus`는 본 페이지의 `/alibailian/...video-synthesis` 제출 경로를 지원하지 않습니다.
+- 현재 모델의 호출 가능 여부는 여전히 token 화이트리스트, 모델 가격 정책, 현재 프로덕션 탑재 상태에 따라 다릅니다. 알리바바 상류의 모든 모델을 기본적으로 개통된 것으로 간주하지 마세요
+
+## 지원 엔드포인트
+
+- `POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis`
+- `GET /alibailian/api/v1/tasks/{task_id}`
+
+## 내부 상류 경로 설명
+
+- 외부 호환 제출 경로: `POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis`
+- 외부 호환 조회 경로: `GET /alibailian/api/v1/tasks/{task_id}`
+- Crazyrouter 내부 제출 상류: `POST /api/v1/services/aigc/video-generation/video-synthesis`
+- Crazyrouter 내부 조회 상류: `GET /api/v1/tasks/{task_id}`
+
+## 인증
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## POST 비디오 생성
+
+```
+POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis
+```
+
+### 요청 본문 구조
+
+| 필드 | 유형 | 필수 | 설명 |
+|------|------|------|------|
+| `model` | string | 예 | 모델 이름, 예: `wan2.5-i2v-preview` |
+| `input` | object | 예 | 기본 입력 파라미터 |
+| `input.prompt` | string | 아니오 | 긍정 프롬프트 |
+| `input.negative_prompt` | string | 아니오 | 부정 프롬프트 |
+| `input.img_url` | string | 아니오 | 첫 프레임 이미지 URL 또는 Base64 |
+| `input.audio_url` | string | 아니오 | 오디오 파일 URL |
+| `input.template` | string | 아니오 | 비디오 특수 효과 템플릿 |
+| `parameters` | object | 아니오 | 고급 처리 파라미터 |
+| `parameters.resolution` | string | 아니오 | 해상도 등급, 예: `480P` |
+| `parameters.duration` | integer | 아니오 | 비디오 길이(초) |
+| `parameters.prompt_extend` | boolean | 아니오 | 스마트 재작성 활성화 여부 |
+| `parameters.watermark` | boolean | 아니오 | AI 워터마크 추가 여부 |
+| `parameters.audio` | boolean | 아니오 | 오디오 자동 추가 여부 |
+| `parameters.seed` | integer | 아니오 | 랜덤 시드 |
+
+<Warning>
+  `wan2.2-t2v-plus`를 본 페이지 경로로 제출하면 `invalid_request`가 반환됩니다. 프로덕션에서는 `/v1/video/generations`를 사용해야 합니다. Wan 텍스트-투-비디오는 [Wan 비디오](/ko/video/wan) 또는 [비디오 생성 별칭](/ko/video/openai-video-alias-create)을 참고하세요.
+</Warning>
+
+### 요청 예시
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/alibailian/api/v1/services/aigc/video-generation/video-synthesis \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "wan2.5-i2v-preview",
+    "input": {
+      "prompt": "조명을 조금 바꿔줘",
+      "img_url": "https://example.com/first-frame.png"
+    },
+    "parameters": {
+      "resolution": "480P",
+      "prompt_extend": true,
+      "audio": true
+    }
+  }'
+```
+
+### 응답 예시
+
+```json
+{
+  "request_id": "ccffb21f-c21e-4eba-861a-6c80e6db6e4d",
+  "output": {
+    "task_id": "a55bfe14-6e78-4b9d-b97d-128420399ed1",
+    "task_status": "PENDING"
+  }
+}
+```
+
+## GET 작업 조회
+
+```
+GET /alibailian/api/v1/tasks/{task_id}
+```
+
+### 요청 예시
+
+```bash cURL
+curl https://api.crazyrouter.com/alibailian/api/v1/tasks/a55bfe14-6e78-4b9d-b97d-128420399ed1 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### 응답 예시
+
+```json
+{
+  "usage": {
+    "SR": 480,
+    "duration": 5,
+    "video_count": 1
+  },
+  "output": {
+    "task_id": "a55bfe14-6e78-4b9d-b97d-128420399ed1",
+    "end_time": "2025-10-11 19:02:27.297",
+    "video_url": "https://dashscope-result.example.com/video.mp4",
+    "orig_prompt": "조명을 조금 바꿔줘",
+    "submit_time": "2025-10-11 18:55:56.952",
+    "task_status": "SUCCEEDED",
+    "actual_prompt": "주황색 옷을 입은 남성이 빗자루를 타고 화면 오른쪽에서 왼쪽으로 빠르게 날아간다……",
+    "scheduled_time": "2025-10-11 18:55:57.908"
+  },
+  "request_id": "ec8f059e-f2e5-4887-bb43-3306cd38f403"
+}
+```
+
+## 로컬에서 확인된 오류 응답
+
+- 로컬에서 생성 라우트 존재가 확인됨; 모델이 사용 불가할 경우 `404`가 아니라 `model_not_found` 유형의 비즈니스 오류가 반환됨
+- 로컬에서 조회 라우트 존재가 확인됨; 존재하지 않는 작업은 다음을 반환함:
+
+```json
+{
+  "code": "task_not_exist",
+  "message": "task_not_exist",
+  "data": null
+}
+```
+
+<Note>
+알리바바 바이리안의 이 경로 그룹은 "프로토콜 호환 마이그레이션"에 더 적합합니다. 요청 본문과 응답 본문은 Crazyrouter의 통합 비디오 형식이 아니라 원본 DashScope / 바이리안 스타일에 더 가깝습니다. 이는 "Crazyrouter가 알리바바 비디오 모델 전체를 이미 외부에 공개했다"는 의미도 아닙니다. 구체적인 개방 현황은 여전히 해당 시점의 pricing, 모델 화이트리스트, 실제 서비스 상태를 기준으로 합니다.
+</Note>

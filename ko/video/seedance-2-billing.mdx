@@ -1,0 +1,361 @@
+---
+title: "Seedance 2.0 과금 안내"
+description: "로컬 코드와 실측 사례를 기반으로 Seedance 2.0 / 2.0 Fast의 실제 정산 방식, quota 공식, 그리고 token과 초 수의 관계를 설명합니다"
+---
+> 업데이트: 2026-06-17
+
+# Seedance 2.0 과금 안내
+
+이 문서는 **Crazyrouter 현재 코드의 실제 정산 로직**만을 설명하며, 공식 가격 페이지에 대한 일반적인 해설이 아닙니다.
+
+적용 모델:
+
+- `doubao-seedance-2-0`
+- `doubao-seedance-2-0-fast`
+
+접속 주소는 `https://api.crazyrouter.com`으로 통일해서 사용하며, 기본 설정은 [API Endpoint](https://docs.crazyrouter.com/en/api-endpoint)를 참고하세요.
+
+## 먼저 결론부터
+
+1. `Seedance 2.0`과 `Seedance 2.0 Fast`는 로컬 코드에서 모두 `per_output_token` 기준으로 정산되며, 초 단위 정산이 아닙니다.
+2. 작업 제출 시, 이 두 유형 작업의 **선차감 금액은 기본적으로 0**입니다.
+3. 작업이 성공하면, 시스템은 업스트림이 반환한 `TotalTokens` 또는 `CompletionTokens`를 기준으로 최종 차감을 수행합니다.
+4. `duration`은 작업 특성으로 기록되지만 **Seedance 2.0의 최종 차감 공식에는 참여하지 않습니다**.
+5. 따라서 코드에는 **"몇 token = 몇 초"라는 고정된 전역 환산 공식이 존재하지 않습니다**.
+6. "초당 대략 얼마인가"에 답하려면, 작업 완료 후 `실제 출력 tokens / 실제 초 수`로 관측치를 산출할 수밖에 없으며, 이를 고정 과금 규칙으로 취급해서는 안 됩니다.
+
+## 로컬 코드의 과금 규칙
+
+### 1. 어떤 과금 규칙에 해당하는가
+
+Seedance 2.0 계열의 과금 규칙은 "비디오 입력 포함 여부"에 따라 결정됩니다.
+
+| 모델 | 조건 | Billing Key | 단가 |
+|------|------|------|------|
+| `doubao-seedance-2-0` | 비디오 입력 미포함 | `doubao-seedance-2-0:video0` | `46 / 7 USD / 100만 Tokens` |
+| `doubao-seedance-2-0` | 비디오 입력 포함 | `doubao-seedance-2-0:video1` | `28 / 7 USD / 100만 Tokens` |
+| `doubao-seedance-2-0-fast` | 비디오 입력 미포함 | `doubao-seedance-2-0-fast:video0` | `37 / 7 USD / 100만 Tokens` |
+| `doubao-seedance-2-0-fast` | 비디오 입력 포함 | `doubao-seedance-2-0-fast:video1` | `22 / 7 USD / 100만 Tokens` |
+
+여기서 `video0` / `video1`은 초 수가 아니라 다음을 의미합니다.
+
+- `video0`: 요청에 비디오 참조 입력이 없음
+- `video1`: 요청에 비디오 참조 입력이 포함됨
+
+대응 코드:
+
+- `model/video_billing_seedance.go`
+- `relay/video_billing_runtime.go`
+
+### 2. 작업 제출 시 왜 대체로 차감되지 않는가
+
+런타임에서 Seedance 2.0이 해당되는 플랫폼 과금 모드는 `per_output_token`입니다. 이런 유형의 작업은 제출 시:
+
+- `BasePrice`가 기록됨
+- `Ratio`가 `0`으로 설정됨
+- 따라서 제출 단계의 `quota = int(ratio * QuotaPerUnit)` 결과는 `0`이 됨
+
+대응 코드:
+
+- `relay/video_billing_runtime.go`
+- `relay/relay_task.go`
+
+이것이 Seedance 2.0에서 흔히 나타나는 다음과 같은 동작의 이유입니다.
+
+- 작업 제출 성공
+- 우선 차감하지 않거나, 선차감이 0
+- 작업 완료 후 실제 token 기준으로 추가 차감
+
+## 최종 차감 공식
+
+작업이 성공하면 시스템은 우선적으로 `settlePerOutputTokenTaskBilling`을 실행합니다.
+
+Seedance 계열에 대해, 코드가 token을 가져오는 우선순위는 다음과 같습니다.
+
+1. `taskResult.TotalTokens`
+2. 위 값이 없으면 `taskResult.CompletionTokens`를 사용
+
+대응 코드:
+
+- `controller/task_video.go`
+
+최종 가격 공식:
+
+```text
+actualPriceUSD =
+  unitPriceUSDPer1MTokens
+  * (billedTokens / 1_000_000)
+  * quantityMultiplier
+  * groupRatio
+  * discount
+```
+
+최종 quota 공식:
+
+```text
+actualQuota = int(actualPriceUSD * QuotaPerUnit)
+```
+
+현재 코드에서:
+
+```text
+QuotaPerUnit = 500000
+```
+
+대응 코드:
+
+- `controller/task_video.go`
+- `common/constants.go`
+
+## 초 수가 코드에서 담당하는 역할
+
+### 1. `duration`은 인식되고 기록됨
+
+코드는 다음 위치에서 초 수를 파싱합니다.
+
+- `req.Duration`
+- `req.Seconds`
+- `metadata.durationSeconds`
+- `metadata.duration_seconds`
+- `metadata.duration`
+- `metadata.seconds`
+
+대응 코드:
+
+- `relay/video_billing_runtime.go`
+
+### 2. 그러나 Seedance 2.0은 초 단위로 정산하지 않음
+
+`duration`은 작업 프로파일과 로그에 들어가지만, Seedance 2.0 / 2.0 Fast가 해당되는 모드는 `per_output_token`이므로:
+
+- `match.BilledSeconds`는 정산에 참여하지 않음
+- 최종 차감은 업스트림이 반환한 token만 참조
+
+이는 Veo, Wan과 같은 `per_second` 비디오 모델과 다릅니다.
+
+## token과 초 수를 어떻게 대응시킬 것인가
+
+### 정산 기준
+
+**직접 환산할 수 없습니다.**
+
+즉, 현재 코드에는 다음과 같은 규칙이 없습니다.
+
+```text
+1초 = 고정 N tokens
+```
+
+이유는 간단합니다.
+
+- Seedance 2.0의 판매 가격 설정은 `per_second`가 아님
+- 코드는 `duration`을 고정 token 등급으로 매핑하지도 않음
+- 최종적으로는 작업 완료 후 실제 token 사용량만 인정
+
+### 관측 기준
+
+"이번 작업이 평균적으로 초당 얼마의 token을 소모했는가"를 복기하고 싶다면, 작업 완료 후 다음과 같이 **관측값**을 만들 수 있습니다.
+
+```text
+초당 평균 tokens = billedTokens / requestedDurationSeconds
+```
+
+반대로:
+
+```text
+추정 초 수 = billedTokens / 초당 평균 tokens
+```
+
+하지만 이는 사후 분석일 뿐, 정산 공식이 아닙니다.
+
+## 실측 사례: 4초 720p 단순 영상
+
+아래는 Seedance 2.0을 실제로 호출한 결과로, 실제 `usage`로부터 "이번 작업의 평균 초당 비용"을 역산하는 방법을 설명합니다.
+
+<Warning>
+  이 사례는 `720p`이며 `1080p`가 아닙니다. 현재 Crazyrouter 문서에서 Seedance 2.0 / 2.0 Fast의 공개된 능력 범위는 여전히 `480p`, `720p`이며, `1080p`는 현재 공개 지원 범위에 포함되지 않습니다.
+</Warning>
+
+### 사례 1: 가장 단순한 텍스트-투-비디오
+
+요청 특성:
+
+- 모델: `doubao-seedance-2-0`
+- 입력: 텍스트만 있고 이미지나 비디오 참조 없음
+- 해상도: `720p`
+- 길이: `4s`
+- 작업 ID: `cgt-20260617212928-5s755`
+- 업스트림 실제 반환: `completion_tokens = 87300`, `total_tokens = 87300`
+
+요청에 비디오 참조 입력이 없으므로 다음에 해당됩니다.
+
+```text
+billing_key = doubao-seedance-2-0:video0
+unitPrice = 46 / 7 = 6.571428 USD / 100만 Tokens
+```
+
+계산 과정:
+
+```text
+tokensPerSecond = 87300 / 4 = 21825 tokens/s
+actualPrice = 87300 / 1000000 * 6.571428 = 0.5736 USD
+pricePerSecond = 0.5736 / 4 = 0.1434 USD/s
+```
+
+따라서 이 매우 단순한 `4s 720p` 텍스트-투-비디오의 관측 단가는 대략 다음과 같습니다.
+
+```text
+약 0.14 USD / 초
+```
+
+### 사례 2: 이전 영상을 기반으로 한 참조 비디오 생성
+
+요청 특성:
+
+- 모델: `doubao-seedance-2-0`
+- 입력: 텍스트 + 이전 작업에서 생성된 비디오를 `reference_video`로 사용
+- 해상도: `720p`
+- 길이: `4s`
+- 작업 ID: `cgt-20260617214300-rsnsx`
+- 업스트림 실제 반환: `completion_tokens = 173700`, `total_tokens = 173700`
+
+요청에 비디오 참조 입력이 포함되므로 다음에 해당됩니다.
+
+```text
+billing_key = doubao-seedance-2-0:video1
+unitPrice = 28 / 7 = 4.000000 USD / 100만 Tokens
+```
+
+계산 과정:
+
+```text
+tokensPerSecond = 173700 / 4 = 43425 tokens/s
+actualPrice = 173700 / 1000000 * 4.000000 = 0.6948 USD
+pricePerSecond = 0.6948 / 4 = 0.1737 USD/s
+```
+
+따라서 이 `4s 720p` 참조 비디오 생성의 관측 단가는 대략 다음과 같습니다.
+
+```text
+약 0.17 USD / 초
+```
+
+### 이 실측치를 고객에게 어떻게 설명할 것인가
+
+다음과 같이 설명할 수 있습니다.
+
+```text
+Seedance 2.0 does not have a fixed per-second price. It is billed by actual output tokens after the task completes.
+
+In one simple 4-second 720p text-to-video test, the task used 87,300 output tokens, which equals about 21,825 tokens/sec and about $0.14/sec.
+
+In another 4-second 720p reference-video test, the task used 173,700 output tokens, which equals about 43,425 tokens/sec and about $0.17/sec.
+
+These are observed examples, not fixed rates. More complex prompts, reference media, audio, and future resolution support may change the actual output tokens.
+```
+
+이것이 바로 "일반적으로 1초는 100,000 tokens"라고 미리 가정할 수 없는 이유입니다. 고객에게 신뢰할 수 있는 추정치를 제공하려면 실제 작업의 `usage.total_tokens` 또는 `usage.completion_tokens`를 역산해서 사용하는 것이 우선입니다.
+
+## 바로 적용 가능한 두 가지 예시
+
+### 예시 1: `doubao-seedance-2-0-fast`, 비디오 입력 포함
+
+가정:
+
+- `doubao-seedance-2-0-fast:video1`에 해당
+- 업스트림 반환 `TotalTokens = 1,200,000`
+- `quantityMultiplier = 1`
+- `groupRatio = 1`
+- `discount = 1`
+
+그러면:
+
+```text
+unitPrice = 22 / 7 = 3.142857 USD / 100만 Tokens
+actualPrice = 3.142857 * 1.2 = 3.771428 USD
+actualQuota = int(3.771428 * 500000) = 1885714
+```
+
+이 요청의 `duration = 12`라면, 다음과 같은 관측값만 얻을 수 있습니다.
+
+```text
+초당 평균 tokens = 1,200,000 / 12 = 100,000
+```
+
+이 `100,000 tokens/s`는 이번 작업에만 성립합니다.
+
+### 예시 2: `doubao-seedance-2-0`, 비디오 입력 미포함
+
+가정:
+
+- `doubao-seedance-2-0:video0`에 해당
+- 업스트림 반환 `CompletionTokens = 800,000`
+- `quantityMultiplier = 1`
+- `groupRatio = 1`
+- `discount = 1`
+
+그러면:
+
+```text
+unitPrice = 46 / 7 = 6.571428 USD / 100만 Tokens
+actualPrice = 6.571428 * 0.8 = 5.257142 USD
+actualQuota = int(5.257142 * 500000) = 2628571
+```
+
+요청 시 `duration = 8`을 입력했다면, 다음과 같이 관측만 할 수 있습니다.
+
+```text
+초당 평균 tokens = 800,000 / 8 = 100,000
+```
+
+여전히 "8초 작업은 항상 80만 token"이라는 결론을 내릴 수는 없습니다.
+
+## 어떤 필드를 확인해야 하는가
+
+Seedance 2.0 비용을 조사해야 한다면, 우선 다음 정보를 확인하세요.
+
+- 요청에 비디오 입력이 포함되었는지
+- 해당되는 `billing_key`
+- 작업 완료 후 업스트림이 반환한 `TotalTokens` / `CompletionTokens`
+- 해당 작업의 `groupRatio`
+- 해당 모델 할인 `discount`
+- 최종 `task.Quota`
+
+코드의 로그와 스냅샷에도 다음이 기록됩니다.
+
+- `billing_mode`
+- `billing_key`
+- `billing_total_price`
+- `billing_output_tokens`
+- `billing_billed_tokens`
+- `billing_token_kind`
+- `billing_settled`
+
+대응 코드:
+
+- `relay/relay_task.go`
+- `model/task.go`
+- `controller/task_video.go`
+
+## 한 문장으로 이해하기
+
+Seedance 2.0에 대해:
+
+- `초 수`는 요청 특성입니다
+- `token`은 정산 기준입니다
+- `quota`는 `token` 정산 후 환산되는 사이트 내 크레딧입니다
+
+따라서 올바른 순서는 다음과 같습니다.
+
+```text
+요청 duration -> 생성 완료 -> 업스트림이 tokens 반환 -> token으로 USD 계산 -> USD로 quota 계산
+```
+
+다음과 같은 순서가 아닙니다.
+
+```text
+duration -> 바로 quota 차감
+```
+
+<Note>
+  향후 플랫폼이 Seedance 2.0에 초당 판매 SKU를 별도로 추가한다면, 그때는 안정적인 "초 수-가격" 매핑이 생길 수 있습니다. 그러나 2026-06-06 기준으로 로컬 코드는 아직 그렇게 되어 있지 않습니다.
+</Note>

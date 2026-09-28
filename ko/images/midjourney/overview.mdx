@@ -1,0 +1,101 @@
+---
+title: "Midjourney 개요"
+description: "Midjourney 이미지 생성 API 개요, 작업 객체, 상태 설명 및 응답 필드를 포함합니다"
+---
+> 업데이트: 2026-06-06
+
+# Midjourney 개요
+
+Crazyrouter는 완전한 Midjourney API 프록시를 제공하며, Imagine, Blend, Describe, Upscale, Variation 등 모든 작업을 지원합니다. 모든 요청은 비동기 작업 방식으로 처리됩니다.
+
+## 기본 경로
+
+```
+https://api.crazyrouter.com/mj
+```
+
+## 인증
+
+요청 헤더에 API Key를 전달합니다.
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+---
+
+## 작업 객체
+
+Midjourney 요청을 제출할 때마다 시스템은 작업 객체를 반환합니다. 작업 객체는 다음 필드를 포함합니다.
+
+| 필드 | 유형 | 설명 |
+|------|------|------|
+| `id` | string | 작업 고유 식별자 |
+| `action` | string | 작업 유형: `IMAGINE`, `UPSCALE`, `VARIATION`, `BLEND`, `DESCRIBE` 등 |
+| `status` | string | 작업 상태 |
+| `prompt` | string | 제출한 프롬프트 |
+| `promptEn` | string | 번역된 영문 프롬프트 |
+| `description` | string | 작업 설명 |
+| `submitTime` | number | 제출 시간(밀리초 타임스탬프) |
+| `startTime` | number | 처리 시작 시간 |
+| `finishTime` | number | 완료 시간 |
+| `progress` | string | 진행률(예: `"100%"`) |
+| `imageUrl` | string | 생성된 이미지 URL |
+| `failReason` | string | 실패 사유(실패 시에만 값 존재) |
+| `properties` | object | 추가 속성 |
+| `buttons` | array | 실행 가능한 작업 버튼 목록 |
+
+---
+
+## 작업 상태
+
+| 상태 | 설명 |
+|------|------|
+| `NOT_START` | 작업이 제출되었으며 처리 대기 중 |
+| `SUBMITTED` | 작업이 Midjourney에 제출됨 |
+| `IN_PROGRESS` | 작업 처리 중 |
+| `SUCCESS` | 작업 완료 |
+| `FAILURE` | 작업 실패 |
+
+---
+
+## 작업 버튼
+
+작업이 완료되면 `buttons` 필드에 실행 가능한 후속 작업이 포함됩니다.
+
+```json
+{
+  "buttons": [
+    {"customId": "MJ::JOB::upsample::1::hash", "emoji": "U1", "label": "U1", "style": 2},
+    {"customId": "MJ::JOB::upsample::2::hash", "emoji": "U2", "label": "U2", "style": 2},
+    {"customId": "MJ::JOB::upsample::3::hash", "emoji": "U3", "label": "U3", "style": 2},
+    {"customId": "MJ::JOB::upsample::4::hash", "emoji": "U4", "label": "U4", "style": 2},
+    {"customId": "MJ::JOB::variation::1::hash", "emoji": "V1", "label": "V1", "style": 2},
+    {"customId": "MJ::JOB::variation::2::hash", "emoji": "V2", "label": "V2", "style": 2},
+    {"customId": "MJ::JOB::variation::3::hash", "emoji": "V3", "label": "V3", "style": 2},
+    {"customId": "MJ::JOB::variation::4::hash", "emoji": "V4", "label": "V4", "style": 2}
+  ]
+}
+```
+
+`customId`를 통해 Action 인터페이스를 호출하여 해당 작업(확대, 변형 등)을 실행할 수 있습니다.
+
+---
+
+## API 엔드포인트 목록
+
+| 메서드 | 엔드포인트 | 설명 |
+|------|------|------|
+| POST | `/mj/submit/imagine` | Imagine 작업 제출 |
+| POST | `/mj/submit/action` | 작업 실행(확대, 변형 등) |
+| POST | `/mj/submit/blend` | 이미지 혼합 |
+| POST | `/mj/submit/describe` | 이미지 설명 |
+| POST | `/mj/submit/modal` | 팝업 확인 제출 |
+| POST | `/mj/submit/shorten` | 프롬프트 단축 |
+| GET | `/mj/task/{id}/fetch` | 단일 작업 조회 |
+| POST | `/mj/task/list-by-condition` | 작업 일괄 조회 |
+| GET | `/mj/task/{id}/image-seed` | 이미지 Seed 가져오기 |
+
+<Note>
+  Midjourney 작업은 비동기로 처리되므로 제출 후 작업 상태를 폴링해서 조회해야 합니다. `SUCCESS` 또는 `FAILURE` 상태가 될 때까지 3~5초마다 한 번씩 조회하는 것을 권장합니다.
+</Note>

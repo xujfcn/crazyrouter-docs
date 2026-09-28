@@ -1,0 +1,60 @@
+---
+title: 'AI 도구용 문서 진입점'
+description: 'Codex, Claude Code, ChatGPT, Cursor 등 AI 도구가 사용하는 Crazyrouter 문서 진입점'
+---
+> 업데이트: 2026-07-20
+
+이 페이지는 Crazyrouter 문서를 AI 도구가 읽도록 제공하는 용도입니다. 아래의 안정적인 진입점을 우선 사용하세요.
+
+## 권장 진입점
+
+<CardGroup cols={2}>
+  <Card title="문서 인덱스 llms.txt" icon="list" href="https://docs.crazyrouter.com/llms.txt">
+    핵심 페이지와 설명을 나열한 간결한 인덱스로, AI가 어떤 문서를 읽어야 할지 먼저 판단하는 데 적합합니다.
+  </Card>
+  <Card title="전체 컨텍스트 llms-full.txt" icon="file-text" href="https://docs.crazyrouter.com/llms-full.txt">
+    전체 문서를 통합한 버전으로, 한 번에 모든 컨텍스트를 읽어야 하는 AI 도구에 적합합니다.
+  </Card>
+  <Card title="Sitemap" icon="sitemap" href="https://docs.crazyrouter.com/sitemap.xml">
+    표준 sitemap으로, 검색 엔진, 크롤러, 자체 인덱싱 프로그램에 적합합니다.
+  </Card>
+  <Card title="Markdown 페이지" icon="markdown" href="https://docs.crazyrouter.com/ko/quickstart.md">
+    단일 페이지 문서는 URL 뒤에 `.md`를 붙여 Markdown 버전을 읽을 수 있습니다.
+  </Card>
+</CardGroup>
+
+## AI 도구용 프롬프트
+
+```text
+먼저 https://docs.crazyrouter.com/llms.txt 를 읽고 관련 페이지를 판단하세요.
+전체 컨텍스트가 필요하면 https://docs.crazyrouter.com/llms-full.txt 를 읽으세요.
+모델 이름, 가격, 과금 방식은 https://crazyrouter.com/pricing 을 기준으로 해야 합니다.
+현재 API Key로 실제 사용 가능한 모델을 확인해야 한다면 GET https://api.crazyrouter.com/v1/models 를 호출하세요.
+OpenAI 호환 클라이언트를 연동할 때는 base_url로 https://api.crazyrouter.com/v1 을 사용하세요.
+Claude Code / Anthropic 네이티브 클라이언트를 연동할 때는 루트 도메인 https://api.crazyrouter.com 을 사용하고 /v1 을 추가하지 마세요.
+동아시아 지역은 https://cn.crazyrouter.com 을 우선 사용하며, OpenAI 호환 클라이언트는 https://cn.crazyrouter.com/v1 을 사용합니다.
+계정 및 관리 인터페이스(예: `/api/user/self`, `/api/token/*`, `/api/log/*`)는 반드시 https://crazyrouter.com 을 사용해야 하며, API 전용 도메인으로 보내면 404 api_only_endpoint가 반환됩니다.
+```
+
+## 가장 많이 사용하는 문서
+
+| 시나리오 | 문서 |
+| --- | --- |
+| 첫 연동 | [빠른 시작](/ko/quickstart) |
+| Base URL과 회선 | [API 엔드포인트](/ko/api-endpoint) |
+| API Key | [인증 방식](/ko/authentication) |
+| Claude Code | [Claude Code 연동](/ko/integrations/claude-code) |
+| Codex CLI | [Codex CLI 연동](/ko/integrations/codex) |
+| OpenAI Chat | [Create Chat Completion](/ko/chat/openai/completions) |
+| Claude Messages | [Claude Native Format](/ko/chat/anthropic/messages) |
+| Gemini Native | [Gemini Native Format](/ko/chat/gemini/native) |
+| 이미지 생성 | [GPT Image](/ko/images/gpt-image) |
+| 비디오 | [통합 비디오 인터페이스](/ko/video/unified) |
+
+## 기준 원칙
+
+- `llms.txt`는 전체 모델 목록이 아닙니다.
+- 모델, 가격, 과금 방식은 [Pricing 페이지](https://crazyrouter.com/pricing)를 기준으로 합니다.
+- 현재 Token으로 호출할 수 있는 모델은 `GET https://api.crazyrouter.com/v1/models`의 반환 결과를 기준으로 합니다.
+- 동아시아 지역은 `https://cn.crazyrouter.com`을 우선 사용하며, OpenAI 호환 클라이언트는 `https://cn.crazyrouter.com/v1`을 사용합니다.
+- 호출 코드를 생성할 때는 구체적인 모델 문서에서 이미 검증된 엔드포인트 예시를 우선 사용하세요.

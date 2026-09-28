@@ -1,0 +1,367 @@
+---
+title: '호출 로그 및 비용 모니터링'
+description: '관리 API를 통해 API Key 목록, 호출 로그, 누적 할당량, 달러 비용을 조회하는 방법'
+---
+> 업데이트: 2026-07-20
+
+## 적용 시나리오
+
+고객이 각 API Key를 모니터링해야 할 때는 비즈니스용 `sk-xxx`로 직접 조회하지 말고, Crazyrouter의 관리 API 조합을 사용하는 것을 권장합니다.
+
+- 현재 계정의 API Key 목록 조회
+- 시간 범위, Key 이름, 모델 이름으로 호출 로그 조회
+- 특정 Key의 총 소비 할당량 집계
+- 시스템 환율 파라미터를 기반으로 달러 비용 환산
+
+<Note>
+  관리 API는 모델 호출 시 사용하는 비즈니스용 Token이 아니라 사용자 신원 인증을 사용합니다.
+</Note>
+
+<Warning>
+  본 페이지의 모든 계정 및 관리 API(`/api/token/*`, `/api/log/*`, `/api/user/self` 포함)는 반드시 `https://crazyrouter.com`으로 요청해야 합니다. `https://api.crazyrouter.com`은 모델/미디어 API만 처리하며, 잘못 사용하면 `404 api_only_endpoint`가 반환됩니다.
+</Warning>
+
+## 인증 방식
+
+관리 API는 반드시 다음 두 개의 요청 헤더를 함께 전달해야 합니다.
+
+```text
+Authorization: Bearer {access_token}
+New-Api-User: {user_id}
+```
+
+- `access_token`: 사용자가 로그인 후 발급받는 액세스 토큰으로, 콘솔/관리 API 인증에 사용합니다
+- `New-Api-User`: 현재 사용자 ID로, 반드시 `access_token`에 대응하는 사용자와 일치해야 합니다
+- `sk-xxx`: 비즈니스 호출 Token으로, 모델 호출에만 사용하며 `/api/token/*`, `/api/log/*` 같은 관리 API에는 사용하지 않습니다
+
+## 권장 연동 흐름
+
+다음 순서로 연동하는 것을 권장합니다.
+
+1. `/api/token/`을 호출하여 현재 계정의 Key 목록을 가져옵니다
+2. `token_name`으로 `/api/log/self`를 호출하여 특정 Key의 상세 로그를 가져옵니다
+3. `/api/log/self/stat`을 호출하여 동일 조건의 누적 할당량을 가져옵니다
+4. `/api/status`를 호출하여 `quota_per_unit`을 가져옵니다
+5. `quota / quota_per_unit`으로 달러 비용을 환산합니다
+
+## 1. API Key 목록 조회
+
+```bash cURL
+curl "https://crazyrouter.com/api/token/?p=1&page_size=100" \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 485"
+```
+
+응답 예시:
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "page": 1,
+    "page_size": 100,
+    "total": 1,
+    "items": [
+      {
+        "id": 409,
+        "name": "gptai",
+        "key": "sk-xxxxxxxxxxxxxxxx",
+        "status": 2,
+        "used_quota": 16605808,
+        "model_limits_enabled": true,
+        "model_limits": "kimi-k2.5"
+      }
+    ]
+  }
+}
+```
+
+이후 모니터링을 위해 다음 필드를 저장해두는 것을 권장합니다.
+
+- `id`
+- `name`
+- `status`
+- `used_quota`
+- `model_limits_enabled`
+- `model_limits`
+
+## 2. 특정 Key의 호출 로그 조회
+
+`/api/log/self`를 통해 현재 사용자 본인의 소비 로그를 조회하며, 최소한 다음 파라미터를 포함하는 것을 권장합니다.
+
+- `type`
+- `token_name`
+- `start_timestamp`
+- `end_timestamp`
+- `p`
+- `page_size`
+
+예시:
+
+```bash cURL
+curl "https://crazyrouter.com/api/log/self?type=2&token_name=gptai&start_timestamp=1771334901&end_timestamp=1772309095&p=1&page_size=5" \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 485"
+```
+
+응답 예시:
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "page": 1,
+    "page_size": 5,
+    "total": 4988,
+    "items": [
+      {
+        "created_at": 1772308747,
+        "token_name": "gptai",
+        "model_name": "deepseek-chat",
+        "quota": 3188,
+        "cost_usd": 0.006376,
+        "prompt_tokens": 884,
+        "completion_tokens": 397,
+        "use_time": 16.48,
+        "is_stream": true,
+        "ip": "203.0.113.10",
+        "other": {
+          "client": "openai-python",
+          "request_id": "req_xxx",
+          "request_method": "POST",
+          "request_path": "/v1/chat/completions",
+          "http_status": 200,
+          "discount": 0
+        }
+      }
+    ]
+  }
+}
+```
+
+### 주요 필드 설명
+
+| 필드 | 설명 |
+|------|------|
+| `token_name` | 매칭된 비즈니스 Key |
+| `model_name` | 실제 과금된 모델 |
+| `quota` | 이번 요청에서 차감된 시스템 할당량 |
+| `cost_usd` | 이번 요청을 환산한 달러 비용 |
+| `prompt_tokens` | 입력 토큰 |
+| `completion_tokens` | 출력 토큰 |
+| `use_time` | 요청 소요 시간(초) |
+| `other.request_id` | 요청 ID로, 트레이싱에 적합 |
+| `other.client` | 호출 클라이언트 식별자 |
+| `other.request_path` | 실제로 매칭된 엔드포인트 경로 |
+| `other.http_status` | 업스트림 응답 상태 코드 |
+
+<Note>
+  `cost_usd`는 시스템 환산 기준으로 반환되는 달러 비용이며, 계산 방식은 `quota / quota_per_unit`입니다. 프로덕션 환경이 아직 이 필드를 포함하는 버전으로 업그레이드되지 않았다면, 먼저 누적 할당량을 직접 환산해서 사용하세요.
+</Note>
+
+<Warning>
+실패한 단일 요청은 과금되지 않으며, 로그의 `quota` / `cost_usd`는 0이어야 합니다. 다만 에이전트 모드, 워크플로우, 체인 호출, IDE 자동 프로그래밍에서는 사용자의 한 번의 조작이 여러 번의 모델 요청으로 나뉠 수 있습니다. 이전 요청이 이미 성공적으로 응답을 반환했다면, 이후 어느 단계에서 실패하더라도 앞서 성공적으로 완료된 요청은 실제 토큰 소비량에 따라 그대로 과금됩니다. 비정상적인 소비를 조사할 때는 최종 작업의 성공 여부만 보지 말고, 로그의 각 요청을 하나씩 확인하세요.
+</Warning>
+
+## 3. 누적 소비 조회
+
+건별 로그가 필요 없고 모니터링 대시보드나 일일 리포트만 필요하다면, 집계 API를 호출하는 것을 권장합니다.
+
+```bash cURL
+curl "https://crazyrouter.com/api/log/self/stat?type=2&token_name=gptai&start_timestamp=1771334901&end_timestamp=1772309095" \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 485"
+```
+
+응답 예시:
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "quota": 16605808,
+    "rpm": 0,
+    "tpm": 0
+  }
+}
+```
+
+여기서:
+
+- `quota`: 해당 필터 조건에서의 총 소비 할당량
+- `rpm`, `tpm`: 현재 API의 예약 필드로, 모니터링 확장에 사용할 수 있습니다
+
+## 4. 현재 계정 잔액 조회
+
+특정 비즈니스 Key 단위의 모니터링뿐만 아니라, 자체 백엔드에 Crazyrouter 계정의 현재 잔액을 직접 표시하고 싶다면 `/api/user/self`를 호출할 수 있습니다.
+
+요청 헤더는 다른 관리 API와 동일합니다.
+
+```bash cURL
+curl "https://crazyrouter.com/api/user/self" \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 4004"
+```
+
+응답 예시:
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "id": 4004,
+    "username": "google_4004",
+    "quota": 11000000,
+    "used_quota": 0,
+    "request_count": 0,
+    "group": "default"
+  }
+}
+```
+
+주요 필드:
+
+| 필드 | 설명 |
+|------|------|
+| `quota` | 현재 남은 할당량(시스템 내부 quota 단위) |
+| `used_quota` | 누적 사용 할당량(시스템 내부 quota 단위) |
+| `request_count` | 누적 요청 횟수 |
+| `group` | 현재 계정 그룹 |
+
+환산 방법:
+
+```text
+balance_usd = quota / quota_per_unit
+used_usd = used_quota / quota_per_unit
+```
+
+예시:
+
+```text
+quota = 11000000
+quota_per_unit = 500000
+
+balance_usd = 11000000 / 500000 = 22
+```
+
+즉, 위 예시의 잔액은 다음과 같습니다.
+
+```text
+$22.00
+```
+
+<Note>
+  `/api/user/self`는 "현재 계정의 총 잔액 표시"에 더 적합하고, `/api/log/self`와 `/api/log/self/stat`은 "시간 범위, Key, 모델 기준"의 소비 분석에 더 적합합니다.
+</Note>
+
+## 5. 달러 비용 환산
+
+시스템 환산 파라미터는 공개 API `/api/status`를 통해 조회할 수 있습니다.
+
+```bash cURL
+curl "https://api.crazyrouter.com/api/status"
+```
+
+응답에서 다음 항목을 확인하세요.
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "quota_per_unit": 500000,
+    "quota_display_type": "USD",
+    "usd_exchange_rate": 7.3
+  }
+}
+```
+
+환산 공식:
+
+```text
+cost_usd = quota / quota_per_unit
+```
+
+예시:
+
+```text
+16605808 / 500000 = 33.211616 USD
+```
+
+## Python 연동 예시
+
+```python
+import requests
+
+BASE_URL = "https://crazyrouter.com"
+ACCESS_TOKEN = "your_access_token"
+USER_ID = "485"
+TOKEN_NAME = "gptai"
+
+headers = {
+    "Authorization": f"Bearer {ACCESS_TOKEN}",
+    "New-Api-User": USER_ID,
+    "User-Agent": "Mozilla/5.0",
+}
+
+token_resp = requests.get(
+    f"{BASE_URL}/api/token/",
+    params={"p": 1, "page_size": 100},
+    headers=headers,
+    timeout=30,
+)
+token_resp.raise_for_status()
+tokens = token_resp.json()["data"]["items"]
+
+log_resp = requests.get(
+    f"{BASE_URL}/api/log/self/stat",
+    params={
+        "type": 2,
+        "token_name": TOKEN_NAME,
+        "start_timestamp": 1771334901,
+        "end_timestamp": 1772309095,
+    },
+    headers=headers,
+    timeout=30,
+)
+log_resp.raise_for_status()
+quota = log_resp.json()["data"]["quota"]
+
+status_resp = requests.get(f"{BASE_URL}/api/status", timeout=30)
+status_resp.raise_for_status()
+quota_per_unit = status_resp.json()["data"]["quota_per_unit"]
+
+cost_usd = quota / quota_per_unit
+
+print("tokens:", [item["name"] for item in tokens])
+print("quota:", quota)
+print("cost_usd:", round(cost_usd, 6))
+```
+
+## 모니터링 권장 사항
+
+고객 측 모니터링에는 최소한 다음 항목을 반영하는 것을 권장합니다.
+
+- `token_name` 기준으로 호출 횟수, 총 할당량, 총 비용 집계
+- `model_name` 기준으로 모델 소비 분포 집계
+- `other.request_path`로 `/v1/chat/completions`, `/v1/responses` 등의 엔드포인트 구분
+- `other.http_status` 기준으로 성공률과 실패율 집계
+- `other.request_id`를 보존하여 문제 추적 체인 확보
+
+## 자주 묻는 질문
+
+### 왜 관리 API에서는 `sk-xxx`를 직접 사용할 수 없나요?
+
+`sk-xxx`는 비즈니스 호출 자격 증명으로 `TokenAuth` 미들웨어가 검증하는 반면, `/api/token/*`, `/api/log/self*` 같은 관리 API는 사용자 신원 인증을 사용하며 `access_token`과 `New-Api-User`가 필요하기 때문입니다.
+
+### 특정 Key로 자신의 로그를 조회할 수 있나요?
+
+가능합니다. `token_name`으로 `/api/log/self`와 `/api/log/self/stat`을 필터링하는 것을 권장합니다.
+
+### API로 직접 비용 금액을 가져올 수 있나요?
+
+서버 버전이 `cost_usd` 필드를 이미 지원한다면, 로그 상세에서 단일 요청의 달러 비용을 직접 가져올 수 있습니다. 집계 기준의 경우 `quota / quota_per_unit`으로 직접 환산하는 것을 권장하며, 그 결과는 콘솔에 표시되는 기준과 일치합니다.

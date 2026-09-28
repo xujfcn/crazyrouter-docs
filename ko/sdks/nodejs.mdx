@@ -1,0 +1,106 @@
+---
+title: 'Node.js 기본 대화'
+description: 'Node.js에서 openai 패키지를 사용해 Crazyrouter에 연동합니다'
+---
+> 업데이트: 2026-06-06
+
+## 설치
+
+```bash
+npm install openai
+```
+
+## 기본 대화
+
+```javascript
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: 'sk-xxx',
+  baseURL: 'https://api.crazyrouter.com/v1',
+});
+
+async function main() {
+  const response = await client.chat.completions.create({
+    model: 'gpt-5.5',
+    messages: [
+      { role: 'system', content: '당신은 도움이 되는 어시스턴트입니다.' },
+      { role: 'user', content: '한 문장으로 Node.js가 무엇인지 설명해 주세요' },
+    ],
+  });
+
+  console.log(response.choices[0].message.content);
+}
+
+main();
+```
+
+## 스트리밍 출력
+
+```javascript
+async function streamChat() {
+  const stream = await client.chat.completions.create({
+    model: 'gpt-5.5',
+    messages: [{ role: 'user', content: '프로그래밍에 관한 시 한 편을 써 주세요' }],
+    stream: true,
+  });
+
+  for await (const chunk of stream) {
+    const content = chunk.choices[0]?.delta?.content || '';
+    process.stdout.write(content);
+  }
+  console.log();
+}
+
+streamChat();
+```
+
+## 연속 대화
+
+```javascript
+const messages = [
+  { role: 'system', content: '당신은 JavaScript 전문가입니다.' },
+];
+
+async function chat(userInput) {
+  messages.push({ role: 'user', content: userInput });
+
+  const response = await client.chat.completions.create({
+    model: 'gpt-5.5',
+    messages,
+  });
+
+  const reply = response.choices[0].message.content;
+  messages.push({ role: 'assistant', content: reply });
+  return reply;
+}
+
+async function main() {
+  console.log(await chat('Promise가 무엇인가요?'));
+  console.log(await chat('async/await와는 어떤 차이가 있나요?'));
+}
+
+main();
+```
+
+## CommonJS 사용법
+
+```javascript
+const OpenAI = require('openai');
+
+const client = new OpenAI({
+  apiKey: 'sk-xxx',
+  baseURL: 'https://api.crazyrouter.com/v1',
+});
+
+client.chat.completions
+  .create({
+    model: 'gpt-5.5',
+    messages: [{ role: 'user', content: '안녕하세요' }],
+  })
+  .then((res) => console.log(res.choices[0].message.content));
+```
+
+<Note>
+  위 예시는 기본적으로 2026년 3월 23일 생산 환경에서 실측 성공한 `gpt-5.5`를 사용합니다. 모델을 전환해야 한다면, 마찬가지로 검증이 완료된 `claude-opus-4-8` 또는 `gemini-3.1-pro`로 먼저 바꾼 후, 시나리오에 따라 계속 확장하는 것을 권장합니다.
+</Note>

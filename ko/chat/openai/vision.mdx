@@ -1,0 +1,112 @@
+---
+title: "채팅 이미지 인식"
+description: "OpenAI 스타일 이미지 입력, base64와 원격 URL 두 가지 사용법을 포함합니다"
+---
+> 업데이트: 2026-06-06
+
+# 채팅 이미지 인식
+
+```
+POST /v1/chat/completions
+```
+
+Crazyrouter 프로덕션 환경에서 검증된 OpenAI 스타일 `image_url` 입력을 지원하는 자주 쓰는 모델:
+
+- `gpt-4o`, `gpt-4o-mini`, `gpt-5.5`, `gpt-5.5` 등 OpenAI 비전 모델
+- 입력은 `data:image/...;base64,...` data URL과 공개 `https://` URL 두 가지 형태를 지원
+- 반환되는 `message.content`는 현재 일반 문자열입니다
+
+> 권장 순서: 로컬 이미지는 먼저 [이미지 업로드 인터페이스](/ko/upload)를 사용해 `media.crazyrouter.com` 임시 URL로 변환한 뒤 `image_url`에 전달하거나, base64 data URL을 직접 전송하세요. 원격 공개 URL도 사용할 수 있지만, 아래의 "원격 URL 제한"을 만족해야 합니다.
+
+---
+
+## base64 data URL 사용(가장 안정적)
+
+```bash
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o-mini",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {"type": "text", "text": "What color is this image?"},
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "data:image/png;base64,iVBORw0KGgoAAA..."
+            }
+          }
+        ]
+      }
+    ],
+    "max_tokens": 100
+  }'
+```
+
+응답 예시:
+
+```json
+{
+  "model": "gpt-4o-mini",
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "Red."
+      }
+    }
+  ]
+}
+```
+
+---
+
+## 원격 https URL 사용
+
+```bash
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o-mini",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {"type": "text", "text": "Describe in 5 words."},
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "https://www.gstatic.com/webp/gallery/1.jpg"
+            }
+          }
+        ]
+      }
+    ],
+    "max_tokens": 40
+  }'
+```
+
+### 원격 URL 제한
+
+URL은 반드시 **Crazyrouter 서버 측에서 접근 가능한** 이미지 주소여야 하며, "브라우저에서 열린다"는 것만으로는 충분하지 않습니다. 흔한 실패 원인:
+
+| 실패 유형 | 원인 | 해결 방법 |
+|---------|------|---------|
+| 도메인 해석 불가 | 사설망 주소, 오타 | 공개 https URL로 변경 |
+| 403 Forbidden | 일부 CDN(예: wikimedia, 사설 S3)이 서버 측 UA / Referer를 제한 | [이미지 업로드 인터페이스](/ko/upload) 또는 base64로 전환 |
+| Content-Type이 `image/*`가 아님 | URL이 HTML 페이지를 반환하거나 로그인 페이지로 리다이렉트 | URL이 직접 다운로드 가능한 링크인지 확인 |
+| 파일이 20MB 초과 | 단일 파일 크기 제한 | 압축 또는 크롭 후 업로드 |
+
+`Unable to process the image you provided. Please verify the image URL is publicly accessible, or upload it as base64.`라는 오류 메시지가 보인다면, URL이 서버 측에서 도달 불가능하다는 뜻이므로 위 표를 참고하여 확인하세요.
+
+---
+
+## 권장 방법
+
+- 내부 자료, 비공개 이미지, 접근 가능성이 확실하지 않은 이미지: 먼저 [`POST /v1/files/uploads`](/ko/upload)를 호출해 `media.crazyrouter.com/...`의 72시간 임시 URL을 받은 뒤 `image_url`에 전달
+- 크기가 작거나(< 1MB) 일회성인 이미지: base64 data URL을 직접 사용하여 추가 업로드 요청을 피함
+- 다중 이미지, `detail` 파라미터 등 고급 사용법: 현재 OpenAI 업스트림이 모두 지원하며, OpenAI 공식 프로토콜대로 전달하면 됨

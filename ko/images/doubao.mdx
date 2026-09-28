@@ -1,0 +1,157 @@
+---
+title: "Doubao Seedream"
+description: "Doubao Seedream 시리즈 모델을 사용한 이미지 생성, 클라이언트는 계속 OpenAI Images 호환 프로토콜을 사용합니다"
+---
+> 업데이트: 2026-07-25
+
+# Doubao Seedream
+
+```
+POST /v1/images/generations
+```
+
+Crazyrouter는 현재 `Seedream` 시리즈 이미지 모델을 OpenAI Images 호환 프로토콜로 외부에 공개합니다. 고객은 계속 통합된 `/v1/images/generations`를 사용하며, ByteDance 공식 및 기타 서드파티 채널은 내부 provider로만 사용되고 고객 프로토콜을 별도로 노출하지 않습니다.
+
+## 현재 공개된 모델
+
+| 모델 | 공식 대응 | 현재 고객 대상 기능 | 문서 상태 |
+|------|----------|--------------|----------|
+| `doubao-seedream-4-0` | Seedream 4.0 | 텍스트-투-이미지, 이미지-투-이미지, 다중 참조 이미지, 그룹 이미지 출력 | Beta |
+| `doubao-seedream-4-5` | Seedream 4.5 | 텍스트-투-이미지, 이미지-투-이미지, 다중 참조 이미지, 그룹 이미지 출력 | Beta |
+| `doubao-seedream-5-0` | Seedream 5.0 lite | 텍스트-투-이미지, 이미지-투-이미지, 다중 참조 이미지, 그룹 이미지 출력 | Beta |
+| `doubao-seedream-3-0` | Seedream 3.0 | 호환성 유지용 | Legacy |
+
+<Note>
+  여기서 "Beta"의 의미는 고객 프로토콜과 공식 기능 정의는 이미 정렬되었으나, 현재 프로덕션 처리 능력과 실측 아티팩트가 여전히 보완 중이라는 것입니다. 공식 기능은 완전한 형태로 먼저 문서화하고, 아직 완결되지 않은 부분은 Beta로 표시해 둡니다.
+</Note>
+
+## 고객 프로토콜
+
+### 요청 파라미터
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| `model` | string | 예 | `doubao-seedream-4-0`, `doubao-seedream-4-5`, `doubao-seedream-5-0` |
+| `prompt` | string | 예 | 생성 프롬프트 |
+| `image_input` | string 또는 string[] | 아니오 | 참조 이미지 URL, 공식 4.0 / 4.5 / 5.0 lite의 현재 상한은 `14`장 |
+| `size` | string | 아니오 | 출력 크기. `Seedream 4.5`는 공식적으로 `2K`, `4K` 및 범위 내 명시적 가로×세로를 지원; `Seedream 5.0 lite`는 현재 가로×세로 총 픽셀 수가 `3,686,400` 이상이어야 함 |
+| `n` | integer | 아니오 | 출력 매수, 기본값 `1` |
+| `response_format` | string | 아니오 | `url` 또는 `b64_json` |
+| `watermark` | boolean | 아니오 | 워터마크 추가 여부 |
+| `sequential_image_generation` | string | 아니오 | `auto` 또는 `disabled`; 그룹 이미지 출력 및 연속 생성 시맨틱에 사용 |
+| `optimize_prompt_options` | object | 아니오 | 공식 프롬프트 최적화 옵션; 현재 `Seedream 4.5`와 `5.0 lite`는 `mode: "standard"`만 확인됨 |
+
+### Seedream 5.0 크기 요구사항
+
+`doubao-seedream-5-0`의 명시적 `가로x세로` 크기는 다음 조건을 만족해야 합니다.
+
+```text
+가로 × 세로 >= 3,686,400
+```
+
+| 크기 | 총 픽셀 수 | 최소 기준 충족 여부 |
+|------|--------|------------------|
+| `2688x1152` | `3,096,576` | 아니오; 업스트림이 `InvalidParameter`를 반환 |
+| `2048x2048` | `4,194,304` | 예; 단, 모델이 지원하는 가로세로 및 비율 범위도 충족해야 함 |
+
+<Warning>
+  동일한 유효하지 않은 크기로 반복 재시도하거나 이를 근거로 모델이 사용 불가능하다고 판단하지 마십시오. 오류 로그에 "Service temporarily unavailable" 또는 "The requested model is temporarily unavailable"이 표시되면 먼저 `size`를 확인하십시오. 현재 일반 오류 로그는 업스트림의 더 구체적인 크기 오류를 숨길 수 있습니다.
+</Warning>
+
+### 참조 이미지 제약
+
+- `Seedream 4.0`, `4.5`, `5.0 lite`는 공식적으로 최대 `14`장의 참조 이미지를 지원
+- 참조 이미지 한 장당 최대 `10MB`
+- 공식 지원 입력 포맷은 `jpeg`, `png`, `webp`, `bmp`, `tiff`, `gif`로 확장됨
+- 공식 지원 입력 이미지의 가로세로 비율 범위는 `1/16`에서 `16`까지
+
+### 요청 예시
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "doubao-seedream-4-5",
+    "prompt": "고급스러운 제품 포스터, 투명 유리 향수병이 주체이며 아침 안개 조명, 간결한 한글 타이틀",
+    "size": "2K",
+    "n": 1,
+    "response_format": "url",
+    "watermark": false,
+    "optimize_prompt_options": {
+      "mode": "standard"
+    }
+  }'
+```
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "doubao-seedream-4-5",
+    "prompt": "이 참조 이미지를 바탕으로 동일한 캐릭터의 상품 포스터 세트를 생성하되, 주체는 일관되게 유지하고 카메라 앵글과 레이아웃은 다르게 구성",
+    "image_input": [
+      "https://example.com/ref-1.png",
+      "https://example.com/ref-2.png"
+    ],
+    "size": "2K",
+    "sequential_image_generation": "auto",
+    "response_format": "url",
+    "optimize_prompt_options": {
+      "mode": "standard"
+    }
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+response = client.images.generate(
+    model="doubao-seedream-4-5",
+    prompt="고급스러운 제품 포스터, 투명 유리 향수병이 주체이며 아침 안개 조명, 간결한 한글 타이틀",
+    size="2K",
+    n=1
+)
+
+print(response.data[0].url)
+```
+
+</CodeGroup>
+
+### 응답 예시
+
+```json
+{
+  "created": 1709123456,
+  "data": [
+    {
+      "url": "https://crazyrouter.com/files/seedream_image_abc123.png"
+    }
+  ]
+}
+```
+
+## 공식 과금 기준
+
+현재 확인된 공식 사실은 "성공적으로 생성된 이미지 수량 기준 과금"이며, 입력/출력 토큰 과금 표시가 아닙니다.
+
+| 모델 | 공식 기준 | 공식 단가 | 현재 문서 상태 |
+|------|----------|----------|--------------|
+| `doubao-seedream-4-0` | 이미지 단위 | `$0.03 / 이미지` | 공식과 정렬 완료 |
+| `doubao-seedream-4-5` | 이미지 단위 | `$0.04 / 이미지` | 공식과 정렬 완료 |
+| `doubao-seedream-5-0` | 이미지 단위 | 공식 정식 가격 대기 중 | Beta |
+
+## 정렬 설명
+
+- 고객 프로토콜은 통합된 `/v1/images/generations`로 수렴되었습니다
+- `Seedream 4.5`의 공식 크기 지원은 현재 `2K`, `4K` 위주이며 기본값은 `2048x2048`입니다
+- `Seedream 4.5`와 `5.0 lite`의 `optimize_prompt_options.mode`는 현재 `standard`만 정렬되어 있습니다; `fast`는 현재 고객 대상 약속에 포함되지 않습니다
+- `Seedream 3.0`은 계속 호환 별칭으로 유지되지만, 이 페이지의 공식 정렬 초점은 이미 `4.0 / 4.5 / 5.0 lite`로 전환되었습니다

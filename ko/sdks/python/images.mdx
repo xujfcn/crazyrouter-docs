@@ -1,0 +1,89 @@
+---
+title: 'Python 이미지 생성'
+description: 'Python으로 DALL-E와 GPT-Image-2를 사용하여 이미지를 생성하고 편집하기'
+---
+> 업데이트: 2026-06-06
+
+## DALL-E 3로 이미지 생성
+
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-xxx", base_url="https://api.crazyrouter.com/v1")
+
+response = client.images.generate(
+    model="dall-e-3",
+    prompt="우주복을 입은 고양이가 달에서 산책하는 모습, 디지털 아트 스타일",
+    size="1024x1024",
+    quality="hd",
+    n=1
+)
+
+image_url = response.data[0].url
+print(f"이미지 주소: {image_url}")
+```
+
+### DALL-E 파라미터
+
+| 파라미터 | 선택 가능한 값 | 설명 |
+|------|--------|------|
+| `size` | `1024x1024`, `1792x1024`, `1024x1792` | 이미지 크기 |
+| `quality` | `standard`, `hd` | 이미지 품질 |
+| `style` | `vivid`, `natural` | 스타일 |
+
+## GPT-Image-2로 이미지 생성
+
+```python
+response = client.images.generate(
+    model="gpt-image-2",
+    prompt="인공지능을 주제로 한 현대적이고 미니멀한 로고",
+    size="1024x1024",
+    quality="low",
+    output_format="png",
+    n=1
+)
+
+print(response.data[0].url)
+```
+
+## GPT-Image-2로 이미지 편집
+
+```python
+# 이미지 편집(원본 이미지 필요)
+response = client.images.edit(
+    model="gpt-image-2",
+    image=open("original.png", "rb"),
+    prompt="배경을 해변의 노을로 바꿔줘",
+    size="1024x1024",
+    quality="low"
+)
+
+print(response.data[0].url)
+```
+
+## 이미지 다운로드 및 저장
+
+```python
+import requests
+
+response = client.images.generate(
+    model="dall-e-3",
+    prompt="사이버펑크 스타일의 도시 야경",
+    size="1792x1024"
+)
+
+# 이미지 다운로드
+image_url = response.data[0].url
+img_data = requests.get(image_url).content
+with open("cyberpunk_city.png", "wb") as f:
+    f.write(img_data)
+print("이미지가 저장되었습니다")
+```
+
+<Note>
+  `gpt-image-2`는 일반적으로 `data[0].url`을 반환합니다. `gpt-image-2`에는 `response_format`을 전달하지 마세요. 이미지 파일 형식을 제어하려면 `output_format="png"`, `"jpeg"` 또는 `"webp"`를 사용하세요. 프로덕션 이미지 요청에는 주 처리 라인인 `https://api.crazyrouter.com/v1` 사용을 권장합니다.
+</Note>
+
+<Warning>
+  이미지 생성 비용은 상대적으로 높으므로, 먼저 작은 크기로 프롬프트 효과를 테스트한 후 만족스러우면 고품질 대형 이미지를 생성하는 것을 권장합니다.
+</Warning>

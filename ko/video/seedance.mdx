@@ -1,0 +1,242 @@
+---
+title: "Seedance"
+description: "Seedance 네이티브 API를 사용해 비디오를 생성합니다"
+---
+> 업데이트: 2026-06-06
+
+# Seedance
+
+Seedance는 바이트댄스(ByteDance) / 도우바오(Doubao)의 비디오 생성 모델 계열입니다. Crazyrouter는 현재 대외적으로 Volcengine 네이티브 `/volc/v1/*` 프로토콜을 유지하며, 기존 통합 비디오 인터페이스의 `doubao-seedance-2-0-fast`를 더 이상 공개 주 프로토콜로 사용하지 않습니다.
+
+**Crazyrouter에서 Seedance 2.0 / 2.0 Fast의 실제 결제(정산) 로직**, 즉 "왜 작업 완료 후 토큰 기준으로 추가 차감되는지"와 "토큰과 초 수를 고정 환산할 수 있는지"를 알고 싶다면, 전용 페이지를 바로 확인하세요: [Seedance 2.0 요금 안내](/ko/video/seedance-2-billing).
+
+## 현재 공개 모델
+
+| 모델 | 현재 공개 포지셔닝 |
+|------|------|
+| `doubao-seedance-1-0-lite-t2v` | 텍스트 투 비디오 |
+| `doubao-seedance-1-0-lite-i2v` | 단일 이미지 투 비디오 |
+| `doubao-seedance-1-0-pro` | 범용 고품질 비디오 생성 |
+| `doubao-seedance-1-0-pro-fast` | 범용 고속 비디오 생성 |
+| `doubao-seedance-1-5-pro` | 상위 버전, 이후 공식 기능 파라미터를 계속 확장 가능 |
+| `doubao-seedance-2-0` | Seedance 2.0 공식 멀티모달 비디오 생성 |
+| `doubao-seedance-2-0-fast` | Seedance 2.0 Fast 공식 멀티모달 비디오 생성 |
+
+## 비디오 작업 제출
+
+```
+POST /volc/v1/contents/generations/tasks
+```
+
+### 현재 공개된 요청 파라미터
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| `model` | string | 예 | 대외 모델명, 위 표의 canonical 모델명을 사용 |
+| `content` | array | 예 | 입력 콘텐츠 배열 |
+| `content[].type` | string | 예 | 현재 `text`, `image_url`, `video_url`, `audio_url`, `draft_task`를 지원 |
+| `content[].text` | string | 조건부 필수 | `type=text`일 때 프롬프트를 입력 |
+| `content[].image_url.url` | string | 조건부 필수 | `type=image_url`일 때 이미지 URL을 입력 |
+| `content[].video_url.url` | string | 조건부 필수 | `type=video_url`일 때 참조 비디오 URL을 입력 |
+| `content[].audio_url.url` | string | 조건부 필수 | `type=audio_url`일 때 참조 오디오 URL을 입력 |
+| `content[].role` | string | 선택 | Seedance 2.0은 `first_frame`, `last_frame`, `reference_image`, `reference_video`, `reference_audio`를 지원 |
+| `generate_audio` | boolean | 선택 | Seedance 2.0은 오디오 생성 여부를 지원 |
+| `ratio` | string | 선택 | 출력 비율, 예: `16:9` |
+| `resolution` | string | 선택 | Seedance 2.0 / 2.0 fast는 현재 `480p`, `720p`만 지원 |
+| `duration` | integer | 선택 | Seedance 2.0 / 2.0 fast는 `4-15` 또는 `-1`을 지원 |
+| `watermark` | boolean | 선택 | 워터마크 추가 여부 |
+| `seed` | integer | 선택 | 랜덤 시드 |
+
+### Seedance 2.0 공식 기능 경계
+
+- 4가지 모달 입력을 지원합니다: 텍스트, 이미지, 비디오, 오디오.
+- 멀티모달 참조를 지원합니다: 최대 이미지 `9`장, 비디오 `3`개, 오디오 `3`개, 혼합 파일 총 개수 상한 `12`.
+- 이미지 형식: `jpeg`, `png`, `webp`, `bmp`, `tiff`, `gif`; 이미지 1장당 크기 `< 30MB`.
+- 비디오 형식: `mp4`, `mov`; 최대 비디오 참조 `3`개, 총 길이는 `[2, 15]s` 권장, 총 파일 크기 `< 50MB`.
+- 오디오 형식: `mp3`, `wav`; 최대 오디오 참조 `3`개, 총 길이 `<= 15s`, 총 파일 크기 `< 15MB`.
+- 오디오는 단독으로 입력할 수 없으며, 최소 이미지 또는 비디오 참조 `1`개를 함께 제공해야 합니다.
+- 생성 길이는 `4-15s`를 지원하며, `-1`을 지정하면 업스트림 기본 길이를 사용합니다.
+- `480p`, `720p`를 지원합니다; `1080p`는 현재 Seedance 2.0 / 2.0 fast에 적용되지 않습니다.
+- `frames`는 현재 Seedance 2.0 / 2.0 fast에 적용되지 않습니다.
+- `camera_fixed`는 현재 Seedance 2.0 / 2.0 fast에 적용되지 않습니다.
+- 제품 형태상, Seedance 2.0은 현재 주로 "첫끝 프레임"과 "전능 참조" 두 가지 입구로 나뉘며; API 측면에서는 통일적으로 `content[].role`과 `content[].type`에 반영됩니다.
+- 업스트림은 현재 실사 인물 얼굴 소재 업로드에 대해 컴플라이언스 제한이 있으며, 선명한 실사 얼굴을 포함하는 이미지나 비디오 참조는 업스트림에서 바로 차단될 수 있습니다.
+
+### Seedance 2.0 공식 과금 실측값
+
+| 모델 | 공식 과금 방식 | 공식 단가 |
+|------|------|------|
+| `doubao-seedance-2-0` | 출력 토큰 기준 과금 | 비디오 입력 포함 `28위안 / 백만 출력 토큰`; 비디오 입력 미포함 `46위안 / 백만 출력 토큰` |
+| `doubao-seedance-2-0-fast` | 출력 토큰 기준 과금 | 비디오 입력 포함 `22위안 / 백만 출력 토큰`; 비디오 입력 미포함 `37위안 / 백만 출력 토큰` |
+
+<Note>
+  원격 URL 소재의 MIME, 길이, 크기는 최종적으로 업스트림에서 검증합니다. Crazyrouter는 현재 제출 전에 개수, 길이 파라미터, 오디오 단독 입력 불가, 그리고 480p/720p / `frames` / `camera_fixed` 등 명시적 경계를 검증합니다.
+</Note>
+
+### 텍스트 투 비디오 예시
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/volc/v1/contents/generations/tasks \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "doubao-seedance-1-0-lite-t2v",
+    "content": [
+      {
+        "type": "text",
+        "text": "카메라가 천천히 줌인하며, 하얀 갈매기 한 마리가 해수면을 스치듯 날아가고, 석양의 금빛이 파도 위에 반사된다"
+      }
+    ]
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/volc/v1/contents/generations/tasks",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "doubao-seedance-1-0-lite-t2v",
+        "content": [
+            {
+                "type": "text",
+                "text": "카메라가 천천히 줌인하며, 하얀 갈매기 한 마리가 해수면을 스치듯 날아가고, 석양의 금빛이 파도 위에 반사된다"
+            }
+        ]
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### 단일 이미지 투 비디오 예시
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/volc/v1/contents/generations/tasks \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "doubao-seedance-1-0-lite-i2v",
+    "content": [
+      {
+        "type": "text",
+        "text": "인물이 자연스럽게 몸을 돌리고, 머리카락이 바람에 살짝 흩날린다"
+      },
+      {
+        "type": "image_url",
+        "image_url": {
+          "url": "https://example.com/portrait.png"
+        }
+      }
+    ]
+  }'
+```
+
+### Seedance 2.0 멀티모달 예시
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/volc/v1/contents/generations/tasks \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "doubao-seedance-2-0",
+    "content": [
+      {
+        "type": "text",
+        "text": "해변의 여자아이가 석양 무렵 뒤를 돌아보며, 카메라 워크는 더 영화 같은 느낌을 주고, 환경음은 자연스럽게"
+      },
+      {
+        "type": "image_url",
+        "image_url": {
+          "url": "https://example.com/first-frame.png"
+        },
+        "role": "reference_image"
+      },
+      {
+        "type": "video_url",
+        "video_url": {
+          "url": "https://example.com/reference-video.mp4"
+        },
+        "role": "reference_video"
+      },
+      {
+        "type": "audio_url",
+        "audio_url": {
+          "url": "https://example.com/reference-audio.mp3"
+        },
+        "role": "reference_audio"
+      }
+    ],
+    "generate_audio": true,
+    "ratio": "16:9",
+    "duration": 11,
+    "watermark": false
+  }'
+```
+
+### 제출 성공 응답 예시
+
+```json
+{
+  "id": "cgt_task_abc123",
+  "task_id": "cgt_task_abc123"
+}
+```
+
+---
+
+## 작업 조회
+
+```
+GET /volc/v1/contents/generations/tasks/{task_id}
+```
+
+```bash cURL
+curl https://api.crazyrouter.com/volc/v1/contents/generations/tasks/cgt_task_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### 응답 예시(완료됨)
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "id": "cgt_task_abc123",
+    "task_id": "cgt_task_abc123",
+    "model": "doubao-seedance-2-0-fast",
+    "status": "SUCCESS",
+    "result_url": "https://media.crazyrouter.com/task-artifacts/2026/06/30/seedance/cgt_task_abc123.mp4",
+    "artifact_url": "https://media.crazyrouter.com/task-artifacts/2026/06/30/seedance/cgt_task_abc123.mp4",
+    "content": {
+      "video_url": "https://media.crazyrouter.com/task-artifacts/2026/06/30/seedance/cgt_task_abc123.mp4"
+    }
+  }
+}
+```
+
+### 작업 상태
+
+| 상태 | 설명 |
+|------|------|
+| `NOT_START` | 제출됨, 업스트림 처리 대기 중 |
+| `IN_PROGRESS` | 생성 중 |
+| `SUCCESS` | 완료됨, `result_url`, `artifact_url` 또는 `content.video_url`에서 결과를 가져올 수 있음 |
+| `FAILURE` | 최종 실패 |
+
+<Note>
+  현재 공개 문서는 네이티브 `/volc/v1/*` 경로와 canonical 모델명만 보장합니다. 기존 `doubao-seedance-2-0-fast`는 과거 기준으로만 유지되며, 더 이상 새로운 대외 주 프로토콜로 사용되지 않습니다.
+</Note>
+
+<Note>
+  Seedance 공식 가격 실측값은 현재 `per_output_token` 기준으로 유지되며, 초 단위가 아닙니다. pricing 페이지에서 이후 플랫폼 정규화 표시를 하게 되면, 그것은 플랫폼 판매 기준이며 공식 네이티브 단위가 아니라는 점을 명확히 해야 합니다.
+</Note>

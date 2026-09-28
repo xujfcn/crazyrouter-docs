@@ -1,0 +1,88 @@
+---
+title: '토큰 검색'
+description: '키워드로 토큰 검색'
+api: 'GET /api/token/search'
+---
+> 업데이트: 2026-07-20
+
+## 인터페이스 설명
+
+키워드로 토큰을 검색하며, 이름 퍼지 매칭과 토큰 조각 필터링을 지원합니다.
+
+<Note>
+  이 `/api/token/*` 계열 인터페이스는 주로 Crazyrouter 콘솔에서 API Key 관리 자동화에 사용됩니다. 사용자 `access token`과 `New-Api-User` 요청 헤더가 필요하며, 일반적인 `sk-xxx` 모델 호출 흐름에서 직접 사용하는 인터페이스가 아닙니다. 요청 기본 주소는 반드시 `https://crazyrouter.com`을 사용해야 합니다. `https://api.crazyrouter.com`은 모델 API 전용 진입점이므로 관리 경로를 호출하면 `404 api_only_endpoint`가 반환됩니다.
+</Note>
+
+## 인증 방식
+
+사용자 측 인증을 사용하며, 요청 헤더에 다음을 포함하세요.
+
+```text
+Authorization: Bearer your_access_token
+New-Api-User: 1
+```
+
+## 요청 파라미터
+
+<ParamField query="keyword" type="string" required>
+  검색 키워드, 토큰 이름과 매칭
+</ParamField>
+
+<ParamField query="token" type="string">
+  선택 사항. 토큰 문자열 조각으로 필터링
+</ParamField>
+
+## 응답 형식
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": [
+    {
+      "id": 5,
+      "name": "프로덕션 환경",
+      "key": "sk-xxxxxxxx",
+      "status": 1,
+      "remain_quota": 50000,
+      "used_quota": 8000,
+      "created_time": 1706000000,
+      "model_limits_enabled": false,
+      "model_limits": "",
+      "allow_ips": "",
+      "group": "default"
+    }
+  ]
+}
+```
+
+## 코드 예시
+
+<CodeGroup>
+
+```python Python
+import requests
+
+headers = {
+    "Authorization": "Bearer your_access_token",
+    "New-Api-User": "1",
+    "User-Agent": "Mozilla/5.0"
+}
+
+response = requests.get(
+    "https://crazyrouter.com/api/token/search?keyword=생산&token=sk-",
+    headers=headers
+)
+
+tokens = response.json()["data"]
+for token in tokens:
+    print(f"[{token['id']}] {token['name']} - 잔여 크레딧: {token['remain_quota']}")
+```
+
+```bash cURL
+curl "https://crazyrouter.com/api/token/search?keyword=생산&token=sk-" \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 1"
+```
+
+</CodeGroup>

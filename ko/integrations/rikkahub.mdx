@@ -1,0 +1,42 @@
+---
+title: 'RikkaHub 설정 가이드'
+description: 'RikkaHub에서 Crazyrouter API 설정하기'
+---
+> 업데이트: 2026-06-06
+
+## 개요
+
+RikkaHub는 다양한 모델 서비스 제공업체를 통합 관리할 수 있는 AI 모델 통합 클라이언트입니다.
+
+## 설정 단계
+
+<Steps>
+  <Step title="설정 열기">
+    RikkaHub 설정 페이지로 이동하여 `모델 서비스` 또는 `API 설정` 옵션을 찾습니다.
+  </Step>
+  <Step title="서비스 제공업체 추가">
+    새 서비스 제공업체 추가를 클릭합니다:
+    - **유형**: OpenAI Compatible
+    - **이름**: Crazyrouter
+    - **API Base URL**: `https://api.crazyrouter.com/v1`
+    - **API Key**: `sk-xxx`
+  </Step>
+  <Step title="모델 선택">
+    설정이 완료되면, 모델 목록에서 사용할 모델을 선택합니다.
+  </Step>
+</Steps>
+
+## 사용 가능한 모델
+
+설정이 완료되면, 현재 검증된 주력 모델을 먼저 추가하는 것을 권장합니다:
+
+- `gpt-5.5`
+- `claude-opus-4-8`
+- `gemini-3.1-pro`
+
+먼저 `gpt-5.5`로 첫 라운드 연결 검증을 완료한 후, 필요에 따라 Claude, Gemini 또는 본 사이트 모델 목록에 개방된 다른 모델을 추가하십시오.
+
+<Note>
+  RikkaHub는 여러 서비스 제공업체를 동시에 설정하는 것을 지원하며, 대화 중에 유연하게 전환할 수 있습니다.
+</Note>
+

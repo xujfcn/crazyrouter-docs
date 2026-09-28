@@ -1,0 +1,88 @@
+---
+title: "Claude OpenAI 호환 형식"
+description: "2026-03-23 Crazyrouter 프로덕션 환경에서 검증된 Claude Chat Completions 호환 경로"
+---
+> 업데이트: 2026-06-23
+
+# Claude OpenAI 호환 형식
+
+```
+POST /v1/chat/completions
+```
+
+2026년 3월 23일 기준, Crazyrouter 프로덕션 환경에서 다음이 검증되었습니다.
+
+- `claude-opus-4-8`의 비스트리밍 요청은 `object: "chat.completion"`을 반환
+- `message`는 현재 `role`, `content`를 안정적으로 포함
+- 스트리밍 요청은 `chat.completion.chunk`를 반환
+- SSE는 여전히 `data: [DONE]`으로 종료
+
+<Warning>
+이 페이지는 Claude가 OpenAI Chat Completions 호환 형식으로 처리하는 일반 대화 경로입니다. Claude 네이티브 `tool_use`, Claude Code, 그리고 도구 호출에 의존하는 Agent 프로그래밍 시나리오에는 [Claude 네이티브 형식](/ko/chat/anthropic/messages)의 `POST /v1/messages`를 우선 사용하세요. OpenAI 호환 형식은 Claude 네이티브 도구 블록과 동등한 지원을 보장하지 않습니다.
+</Warning>
+
+---
+
+## 비스트리밍 요청
+
+```bash
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "claude-opus-4-8",
+    "messages": [
+      {"role": "system", "content": "You are a concise assistant."},
+      {"role": "user", "content": "Compare PostgreSQL and MySQL in one paragraph."}
+    ],
+    "max_tokens": 256,
+    "temperature": 0.2
+  }'
+```
+
+주요 응답 형태:
+
+```json
+{
+  "object": "chat.completion",
+  "model": "claude-opus-4-8",
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "PostgreSQL and MySQL are both popular..."
+      }
+    }
+  ]
+}
+```
+
+---
+
+## 스트리밍 요청
+
+```bash
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "claude-opus-4-8",
+    "messages": [
+      {"role": "user", "content": "Say hello in one sentence."}
+    ],
+    "max_tokens": 128,
+    "stream": true
+  }'
+```
+
+2026-03-23 프로덕션 환경 스트리밍 프로브에서의 시작 부분은 다음과 같습니다.
+
+```text
+data: {"object":"chat.completion.chunk","model":"claude-opus-4-8","choices":[{"delta":{"role":"assistant"}}]}
+data: {"object":"chat.completion.chunk","model":"claude-opus-4-8","choices":[{"delta":{"content":"Hello! ..."}}]}
+data: [DONE]
+```
+
+<Note>
+  Claude 네이티브 `thinking`, 네이티브 도구 블록 또는 문서 입력이 필요하다면 [Claude Messages](/ko/chat/anthropic/messages)를 우선 사용하세요.
+</Note>

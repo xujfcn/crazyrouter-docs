@@ -1,0 +1,156 @@
+---
+title: "즉몽 (Jimeng)"
+description: "즉몽(Jimeng) API로 영상 생성하기"
+---
+> 업데이트: 2026-06-06
+
+# 즉몽 (Jimeng)
+
+즉몽(Jimeng)은 바이트댄스(ByteDance)의 영상 생성 서비스입니다. Crazyrouter는 현재 고객 대상으로 `/jimeng/*` 경로만 사용할 것을 권장하며, 상위 `Action + Version`을 주 프로토콜로 직접 노출하지 않습니다.
+
+## 현재 검증된 범위
+
+- `POST /jimeng/submit/videos`는 `jimeng-video-3.0`을 사용한 텍스트-투-비디오 제출이 검증되었습니다
+- 단일 이미지 입력 및 단일 이미지 `recamera`가 사용 가능함을 검증했습니다
+- 현재 안정적인 정상 케이스의 주 링크는 `1080P`에 집중되어 있습니다
+- `720P / recamera`는 여전히 `ch119`의 carrier 수준 follow-up이며, 현재 공개된 hard contract 확장 범위에는 포함되지 않습니다
+- 조회 결과는 Crazyrouter에 이미 보관된 미디어 주소(예: `https://media.crazyrouter.com/...`)를 우선 반환합니다
+- `expired` 후보 작업의 재조회 경로는 이미 닫혀 있지만, 자연 만료 샘플은 여전히 백엔드에서 더 긴 보존 기간을 기다리고 있으며 주 링크 연동에는 영향을 주지 않습니다
+
+## 영상 작업 제출
+
+```
+POST /jimeng/submit/videos
+```
+
+### 현재 권장 모델
+
+- `jimeng-video-3.0`: 현재 고객 대상 주 권장 모델
+
+### 요청 파라미터
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| `model` | string | 예 | 고객 대상 모델명, 현재 `jimeng-video-3.0` 권장 |
+| `prompt` | string | 조건부 필수 | 텍스트-투-비디오에는 필수 권장; `recamera`에도 동작 설명을 추가하는 것을 권장 |
+| `duration` | integer | 아니오 | `5` 또는 `10` 사용 권장 |
+| `aspect_ratio` | string | 아니오 | 비율, 예: `16:9`, `9:16` |
+| `image_url` | string | 아니오 | 단일 이미지 URL 입력 |
+| `binary_data_base64` | string[] | 아니오 | 단일 이미지 Base64 입력 |
+| `image_urls` | string[] | 아니오 | 배열 표기 호환용; 현재 다중 참조 이미지 기능으로 공개 약속된 것은 아님 |
+| `template_id` | string | 아니오 | 단일 이미지 `recamera` 템플릿, 예: `handheld` |
+| `camera_strength` | string | 아니오 | 단일 이미지 `recamera` 강도, 예: `weak`, `medium`, `strong` |
+| `req_key` | string | 아니오 | 디버깅 또는 호환 시나리오에 사용; 일반 연동에서는 명시적으로 전달하지 않는 것을 권장 |
+
+### 텍스트-투-비디오 예제
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/jimeng/submit/videos \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "jimeng-video-3.0",
+    "prompt": "카메라가 천천히 줌인, 귤색 고양이가 창가에서 하품하고 있고 아침 햇살이 부드럽다",
+    "duration": 5,
+    "aspect_ratio": "9:16"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/jimeng/submit/videos",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "jimeng-video-3.0",
+        "prompt": "카메라가 천천히 줌인, 귤색 고양이가 창가에서 하품하고 있고 아침 햇살이 부드럽다",
+        "duration": 5,
+        "aspect_ratio": "9:16"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### 단일 이미지 `recamera` 예제
+
+```json
+{
+  "model": "jimeng-video-3.0",
+  "prompt": "카메라가 자연스럽게 핸드헬드로 줌인하고, 인물이 살짝 몸을 돌린다",
+  "image_url": "https://example.com/portrait.png",
+  "duration": 5,
+  "aspect_ratio": "9:16",
+  "template_id": "handheld",
+  "camera_strength": "medium"
+}
+```
+
+### 제출 성공 응답 예제
+
+```json
+{
+  "id": "2526913314163451526",
+  "task_id": "2526913314163451526",
+  "object": "video",
+  "model": "jimeng-video-3.0",
+  "status": "",
+  "progress": 0,
+  "created_at": 1774570545
+}
+```
+
+---
+
+## 작업 조회
+
+```
+GET /jimeng/fetch/{task_id}
+```
+
+```bash cURL
+curl https://api.crazyrouter.com/jimeng/fetch/2526913314163451526 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### 응답 예제 (완료됨)
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "error": null,
+    "format": "mp4",
+    "metadata": null,
+    "status": "succeeded",
+    "task_id": "2526913314163451526",
+    "url": "https://media.crazyrouter.com/task-artifacts/2026/03/27/51/generate/2526913314163451526.mp4"
+  }
+}
+```
+
+### 작업 상태
+
+| 상태 | 설명 |
+|------|------|
+| `queued` | 제출되었거나 대기 중 |
+| `processing` | 생성 중 |
+| `succeeded` | 완료됨, `url`을 바로 가져올 수 있음 |
+| `failed` | 최종 실패 |
+
+<Note>
+  현재 공개 문서는 단일 이미지 입력과 단일 이미지 `recamera`만 보장합니다. `image_urls`를 즉몽의 다중 참조 이미지 hard contract로 오인하여 작성하지 말고, `frames`도 권장 공개 파라미터로 취급하지 마세요. 지원되지 않는 `frames` 값은 상위 알고리즘 단계에서 지연 실패할 수 있습니다.
+</Note>
+
+<Note>
+  현재 공개 문서는 검증된 안정 범위로 한정합니다: `jimeng-video-3.0 + 텍스트-투-비디오 / 단일 이미지 입력 / 단일 이미지 recamera`. `720P / recamera`를 추가로 개방할지 여부는 향후 carrier 샘플 재검증에 달려 있으며, 리포지토리 코드가 계속 전달 가능한지 여부와는 무관합니다.
+</Note>

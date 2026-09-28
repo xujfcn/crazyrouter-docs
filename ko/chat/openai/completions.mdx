@@ -1,0 +1,171 @@
+---
+title: "채팅 완성 생성"
+description: "현재 프로덕션 동작을 기준으로, POST /v1/chat/completions를 사용하여 채팅 완성을 생성합니다"
+---
+> 업데이트: 2026-06-06
+
+# 채팅 완성 생성
+
+```
+POST /v1/chat/completions
+```
+
+입력된 메시지 목록을 기반으로 모델 응답을 생성하며, 비스트리밍과 스트리밍 응답을 모두 지원합니다.
+
+이 문서는 `2026-03-23`에 Crazyrouter 프로덕션 환경에서 재검증된 공통 동작만 기술합니다.
+
+## 인증
+
+```text
+Authorization: Bearer YOUR_API_KEY
+```
+
+## 핵심 파라미터
+
+| 파라미터 | 유형 | 필수 | 설명 |
+|------|------|------|------|
+| `model` | string | 예 | 모델명, 예: `gpt-5.5`, `claude-opus-4-8`, `gemini-3.1-pro` |
+| `messages` | array | 예 | 메시지 목록 |
+| `stream` | boolean | 아니요 | 스트리밍 출력 사용 여부 |
+| `max_tokens` | integer | 아니요 | 최대 출력 토큰 수 |
+| `temperature` | number | 아니요 | 샘플링 온도 |
+| `response_format` | object | 아니요 | 구조화 출력 형식 제약 |
+| `tools` | array | 아니요 | 도구 목록 |
+| `tool_choice` | string\|object | 아니요 | 도구 선택 전략 |
+| `stream_options` | object | 아니요 | 스트리밍 부가 옵션, 예: `include_usage` |
+
+<Note>
+  모델마다 선택적 파라미터에 대한 지원 정도가 다릅니다. 클라이언트를 작성할 때는 공통 필드에 우선 의존해야 하며, 모든 모델이 동일한 고급 파라미터 세트를 완전히 지원한다고 가정해서는 안 됩니다.
+</Note>
+
+---
+
+## 비스트리밍 요청
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a helpful assistant."
+      },
+      {
+        "role": "user",
+        "content": "Explain artificial intelligence in one sentence."
+      }
+    ],
+    "max_tokens": 64
+  }'
+```
+
+현재 프로덕션에서 반환되는 일반적인 구조:
+
+```json
+{
+  "object": "chat.completion",
+  "model": "gpt-5.5",
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "...",
+        "reasoning_content": null,
+        "tool_calls": null
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}
+```
+
+### 특히 주의할 점
+
+- `message.content`는 가장 안정적인 최종 텍스트 필드입니다
+- `message.tool_calls`는 도구 호출 시에만 나타납니다
+- `message.reasoning_content` 키가 존재할 수 있지만, 현재는 항상 값이 있다고 안정적으로 간주해서는 안 됩니다
+
+---
+
+## 스트리밍 요청
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Explain AI in one short sentence."
+      }
+    ],
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    },
+    "max_tokens": 64
+  }'
+```
+
+이번 프로덕션 재검증에서 확인된 사항:
+
+- 스트리밍 응답은 `chat.completion.chunk` 형태로 반환됩니다
+- SSE는 `data: ...` 형식으로 청크 단위로 전송됩니다
+- 스트림이 끝날 때도 여전히 `data: [DONE]`입니다
+
+현재 수신되는 SSE 조각의 형태는 다음과 유사합니다:
+
+```text
+data: {"object":"chat.completion.chunk","model":"gpt-5.5","choices":[{"delta":{"role":"assistant","content":"AI","reasoning_content":null,"tool_calls":null}}]}
+```
+
+```text
+data: [DONE]
+```
+
+---
+
+## Python 예시
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+stream = client.chat.completions.create(
+    model="gpt-5.5",
+    messages=[
+        {"role": "user", "content": "Explain AI in one short sentence."}
+    ],
+    stream=True,
+    stream_options={"include_usage": True},
+    max_tokens=64
+)
+
+for chunk in stream:
+    delta = chunk.choices[0].delta
+    if delta.content is not None:
+        print(delta.content, end="")
+```
+
+---
+
+## 현재 권장 사항
+
+- 일반적인 텍스트 대화: `/v1/chat/completions`
+- reasoning 요약 또는 OpenAI 스타일 web search가 필요한 경우: `/v1/responses`를 우선 사용
+- 더 복잡한 기능 판단이 필요한 경우, 본 페이지만 보지 말고 해당 기능 페이지를 먼저 확인
+
+관련 페이지:
+
+- [채팅 완성 객체](/ko/chat/openai/overview)
+- [추론 모델](/ko/chat/openai/reasoning)
+- [웹 검색](/ko/chat/openai/web-search)

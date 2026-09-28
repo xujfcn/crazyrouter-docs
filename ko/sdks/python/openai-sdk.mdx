@@ -1,0 +1,143 @@
+---
+title: 'Python OpenAI SDK'
+description: 'OpenAI 공식 SDK, LangChain, LlamaIndex를 사용하여 Crazyrouter 연동하기'
+---
+> 업데이트: 2026-06-06
+
+## OpenAI 공식 SDK
+
+```bash
+pip install openai
+```
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+# 동기 호출
+response = client.chat.completions.create(
+    model="gpt-5.5",
+    messages=[{"role": "user", "content": "안녕하세요"}],
+    temperature=0.7,
+    max_tokens=1000
+)
+print(response.choices[0].message.content)
+```
+
+### 비동기 호출
+
+```python
+from openai import AsyncOpenAI
+import asyncio
+
+client = AsyncOpenAI(
+    api_key="sk-xxx",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+async def main():
+    response = await client.chat.completions.create(
+        model="gpt-5.5",
+        messages=[{"role": "user", "content": "안녕하세요"}]
+    )
+    print(response.choices[0].message.content)
+
+asyncio.run(main())
+```
+
+## LangChain 통합
+
+```bash
+pip install langchain-openai
+```
+
+```python
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(
+    model="gpt-5.5",
+    api_key="sk-xxx",
+    base_url="https://api.crazyrouter.com/v1",
+    temperature=0.7
+)
+
+# 간단한 호출
+response = llm.invoke("Python으로 퀵 정렬을 작성해줘")
+print(response.content)
+```
+
+### LangChain 체인 호출
+
+```python
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+
+llm = ChatOpenAI(
+    model="gpt-5.5",
+    api_key="sk-xxx",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "당신은 {role}입니다."),
+    ("user", "{input}")
+])
+
+chain = prompt | llm
+response = chain.invoke({"role": "Python 전문가", "input": "데코레이터를 설명해줘"})
+print(response.content)
+```
+
+### LangChain Embeddings
+
+```python
+from langchain_openai import OpenAIEmbeddings
+
+embeddings = OpenAIEmbeddings(
+    model="text-embedding-3-large",
+    api_key="sk-xxx",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+vectors = embeddings.embed_documents(["텍스트 1", "텍스트 2"])
+print(f"벡터 차원: {len(vectors[0])}")
+```
+
+## LlamaIndex 통합
+
+```bash
+pip install llama-index-llms-openai llama-index-embeddings-openai
+```
+
+```python
+from llama_index.llms.openai import OpenAI
+from llama_index.embeddings.openai import OpenAIEmbedding
+
+# LLM 설정
+llm = OpenAI(
+    model="gpt-5.5",
+    api_key="sk-xxx",
+    api_base="https://api.crazyrouter.com/v1"
+)
+
+response = llm.complete("RAG란 무엇인가요?")
+print(response.text)
+
+# Embedding 설정
+embed_model = OpenAIEmbedding(
+    model="text-embedding-3-large",
+    api_key="sk-xxx",
+    api_base="https://api.crazyrouter.com/v1"
+)
+
+vector = embed_model.get_text_embedding("테스트 텍스트")
+print(f"차원: {len(vector)}")
+```
+
+<Note>
+  위 채팅 예시는 기본적으로 2026년 3월 23일 프로덕션 환경에서 성공적으로 검증된 `gpt-5.5`를 사용합니다. 모델을 교체하려면 마찬가지로 검증된 `claude-opus-4-8`로 변경하는 것을 우선 권장하며, Embedding 예시는 계속 `text-embedding-3-large`를 사용합니다.
+</Note>

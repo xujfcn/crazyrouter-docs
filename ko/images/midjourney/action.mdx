@@ -1,0 +1,156 @@
+---
+title: "작업 실행"
+description: "Midjourney 후속 작업 실행: 업스케일, 변형, 블렌드, 설명 등"
+---
+> 업데이트: 2026-06-06
+
+# 작업 실행
+
+## Action - 업스케일 / 변형
+
+```
+POST /mj/submit/action
+```
+
+완료된 Imagine 작업에 대해 업스케일(Upscale), 변형(Variation) 등의 후속 작업을 실행합니다.
+
+### 요청 파라미터
+
+| 파라미터 | 유형 | 필수 | 설명 |
+|------|------|------|------|
+| `taskId` | string | 예 | 원본 작업 ID |
+| `customId` | string | 예 | 작업 버튼의 `customId`, 작업의 `buttons` 필드에서 가져옴 |
+| `notifyHook` | string | 아니요 | 콜백 주소 |
+| `state` | string | 아니요 | 사용자 정의 상태 |
+
+### 요청 예시
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/mj/submit/action \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "taskId": "task_1234567890",
+    "customId": "MJ::JOB::upsample::1::abc123"
+  }'
+```
+
+### 응답 예시
+
+```json
+{
+  "code": 1,
+  "description": "제출 성공",
+  "result": "task_action_001",
+  "properties": {}
+}
+```
+
+---
+
+## Blend - 이미지 블렌드
+
+```
+POST /mj/submit/blend
+```
+
+여러 이미지를 블렌드하여 새로운 이미지를 생성합니다.
+
+### 요청 파라미터
+
+| 파라미터 | 유형 | 필수 | 설명 |
+|------|------|------|------|
+| `botType` | string | 아니요 | `MID_JOURNEY`(기본값) 또는 `NIJI_JOURNEY` |
+| `base64Array` | array | 예 | Base64로 인코딩된 이미지 배열, 2~5장 |
+| `dimensions` | string | 아니요 | 출력 크기: `PORTRAIT`, `SQUARE`, `LANDSCAPE` |
+| `notifyHook` | string | 아니요 | 콜백 주소 |
+| `state` | string | 아니요 | 사용자 정의 상태 |
+
+### 요청 예시
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/mj/submit/blend \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "base64Array": [
+      "data:image/png;base64,iVBORw0KGgo...",
+      "data:image/png;base64,iVBORw0KGgo..."
+    ],
+    "dimensions": "SQUARE"
+  }'
+```
+
+### 응답 예시
+
+```json
+{
+  "code": 1,
+  "description": "제출 성공",
+  "result": "task_blend_001"
+}
+```
+
+---
+
+## Describe - 이미지 설명
+
+```
+POST /mj/submit/describe
+```
+
+이미지를 업로드하면 Midjourney가 이에 대응하는 프롬프트 설명을 생성합니다.
+
+### 요청 파라미터
+
+| 파라미터 | 유형 | 필수 | 설명 |
+|------|------|------|------|
+| `botType` | string | 아니요 | `MID_JOURNEY`(기본값) 또는 `NIJI_JOURNEY` |
+| `base64` | string | 예 | Base64로 인코딩된 이미지 |
+| `notifyHook` | string | 아니요 | 콜백 주소 |
+| `state` | string | 아니요 | 사용자 정의 상태 |
+
+### 요청 예시
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/mj/submit/describe \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "base64": "data:image/png;base64,iVBORw0KGgo..."
+  }'
+```
+
+---
+
+## Modal - 팝업 확인
+
+```
+POST /mj/submit/modal
+```
+
+Midjourney 팝업 확인 작업을 제출합니다(예: Region Vary 등 재확인이 필요한 작업).
+
+### 요청 파라미터
+
+| 파라미터 | 유형 | 필수 | 설명 |
+|------|------|------|------|
+| `taskId` | string | 예 | 원본 작업 ID |
+| `prompt` | string | 아니요 | 팝업 내 프롬프트 |
+| `maskBase64` | string | 아니요 | 마스크 이미지의 Base64 인코딩 |
+
+### 요청 예시
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/mj/submit/modal \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "taskId": "task_1234567890",
+    "prompt": "add a rainbow in the sky"
+  }'
+```
+
+<Note>
+  모든 작업은 제출 후 새로운 작업 ID를 반환하며, [작업 상태 조회](/ko/images/midjourney/query) 인터페이스를 통해 결과를 가져와야 합니다.
+</Note>
