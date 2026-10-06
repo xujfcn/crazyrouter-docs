@@ -110,3 +110,10 @@ URL は **Crazyrouter サーバーから到達可能** である必要があり�
 - 社内素材、プライベート画像、到達性が不確かな画像：先に [`POST /v1/files/uploads`](/jp/upload) で 72 時間有効な `media.crazyrouter.com/...` URL を取得し、それを `image_url` に渡す
 - 小さい（< 1MB）画像、使い捨ての画像：base64 data URL を直接送り、追加リクエストを省く
 - 複数画像入力、`detail` パラメータなどの高度な使い方：OpenAI 上流で対応済みなので、OpenAI 公式仕様どおりに送れば動作します
+
+{/* crazyrouter-model-links */}
+## 関連ページ（crazyrouter.com）
+
+- [GPT Image 1.5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT Image 2 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [OpenAI の全モデルと料金](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)

@@ -110,3 +110,10 @@ URL은 반드시 **Crazyrouter 서버 측에서 접근 가능한** 이미지 주
 - 내부 자료, 비공개 이미지, 접근 가능성이 확실하지 않은 이미지: 먼저 [`POST /v1/files/uploads`](/ko/upload)를 호출해 `media.crazyrouter.com/...`의 72시간 임시 URL을 받은 뒤 `image_url`에 전달
 - 크기가 작거나(< 1MB) 일회성인 이미지: base64 data URL을 직접 사용하여 추가 업로드 요청을 피함
 - 다중 이미지, `detail` 파라미터 등 고급 사용법: 현재 OpenAI 업스트림이 모두 지원하며, OpenAI 공식 프로토콜대로 전달하면 됨
+
+{/* crazyrouter-model-links */}
+## 관련 페이지 (crazyrouter.com)
+
+- [GPT Image 1.5 모델 페이지: 실시간 가격, 샘플, 코드](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT Image 2 모델 페이지: 실시간 가격, 샘플, 코드](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [OpenAI 전체 모델과 가격](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)

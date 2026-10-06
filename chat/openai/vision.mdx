@@ -110,3 +110,10 @@ URL 必须是 **Crazyrouter 服务端可访问**的图片地址，仅"浏览器�
 - 内部素材、私有图、不确定可达性的图：先调 [`POST /v1/files/uploads`](/upload) 拿到 `media.crazyrouter.com/...` 的 72 小时临时 URL，再传给 `image_url`
 - 体积小（< 1MB）或一次性图：直接 base64 data URL，避免一次额外的上传请求
 - 多图、`detail` 参数等高级用法：当前 OpenAI 上游均支持，按 OpenAI 官方协议传即可
+
+{/* crazyrouter-model-links */}
+## 相关页面
+
+- [GPT Image 1.5 模型页：实时价格、真实样例、调用代码](https://crazyrouter.com/zh/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT Image 2 模型页：实时价格、真实样例、调用代码](https://crazyrouter.com/zh/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [OpenAI 全部模型与价格](https://crazyrouter.com/zh/models/openai?utm_source=docs&utm_medium=related)
