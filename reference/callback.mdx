@@ -6,7 +6,7 @@ description: '异步任务的 Webhook 回调协议'
 
 ## 概述
 
-对于异步任务（Midjourney 绘图、视频生成、音乐生成等），Crazyrouter 支持通过 Webhook 回调通知任务状态变更。
+对于异步任务（Midjourney 绘图、视频生成等），Crazyrouter 支持通过 Webhook 回调通知任务状态变更。
 
 ## 回调 URL 配置
 
@@ -59,20 +59,6 @@ Content-Type: application/json
   },
   "created_at": 1706000000,
   "updated_at": 1706000120
-}
-```
-
-### Suno 音乐回调
-
-```json
-{
-  "id": "task_music456",
-  "status": "complete",
-  "output": {
-    "audio_url": "https://cdn.example.com/song.mp3",
-    "title": "My Song",
-    "duration": 180
-  }
 }
 ```
 

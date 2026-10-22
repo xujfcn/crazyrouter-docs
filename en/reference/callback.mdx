@@ -6,7 +6,7 @@ description: 'Webhook callback protocol for async tasks'
 
 ## Overview
 
-For async tasks (Midjourney image generation, video generation, music generation, etc.), Crazyrouter supports Webhook callbacks to notify task status changes.
+For async tasks (Midjourney image generation, video generation, etc.), Crazyrouter supports Webhook callbacks to notify task status changes.
 
 ## Callback URL Configuration
 
@@ -59,20 +59,6 @@ Content-Type: application/json
   },
   "created_at": 1706000000,
   "updated_at": 1706000120
-}
-```
-
-### Suno Music Callback
-
-```json
-{
-  "id": "task_music456",
-  "status": "complete",
-  "output": {
-    "audio_url": "https://cdn.example.com/song.mp3",
-    "title": "My Song",
-    "duration": 180
-  }
 }
 ```
 
@@ -138,9 +124,3 @@ app.listen(8080);
 <Note>
   If a callback fails, the system retries up to 3 times with intervals of 10 seconds, 30 seconds, and 60 seconds.
 </Note>
-
-{/* crazyrouter-model-links v2 */}
-## Related on crazyrouter.com
-
-- [Suno Music model page: live price, real samples, code](https://crazyrouter.com/en/models/suno/suno-music?utm_source=docs&utm_medium=related)
-- [All Suno models with live prices](https://crazyrouter.com/en/models/suno?utm_source=docs&utm_medium=related)

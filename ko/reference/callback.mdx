@@ -6,7 +6,7 @@ description: '비동기 작업을 위한 Webhook 콜백 프로토콜'
 
 ## 개요
 
-비동기 작업(Midjourney 이미지 생성, 비디오 생성, 음악 생성 등)의 경우, Crazyrouter는 Webhook 콜백을 통해 작업 상태 변경을 알려주는 기능을 지원합니다.
+비동기 작업(Midjourney 이미지 생성, 비디오 생성 등)의 경우, Crazyrouter는 Webhook 콜백을 통해 작업 상태 변경을 알려주는 기능을 지원합니다.
 
 ## 콜백 URL 설정
 
@@ -59,20 +59,6 @@ Content-Type: application/json
   },
   "created_at": 1706000000,
   "updated_at": 1706000120
-}
-```
-
-### Suno 음악 콜백
-
-```json
-{
-  "id": "task_music456",
-  "status": "complete",
-  "output": {
-    "audio_url": "https://cdn.example.com/song.mp3",
-    "title": "My Song",
-    "duration": 180
-  }
 }
 ```
 

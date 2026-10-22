@@ -23,7 +23,6 @@ description: "로컬 공개 모델 인덱스를 기준으로 정리한 최신 �
 | xAI 빠른 채팅 | `grok-4.1-fast` |
 | MiniMax 긴 컨텍스트 | `MiniMax-M2.7` |
 | Qwen 비전 이해 | `qwen3-vl-235b-a22b-instruct` 또는 `qwen2.5-vl-72b-instruct` |
-| Suno 음악 | `suno_music` |
 
 ## Chat Completions
 
@@ -101,12 +100,6 @@ curl -X POST https://api.crazyrouter.com/v1/chat/completions \
     ]
   }'
 ```
-
-## 음악과 가사
-
-현재 프로덕션 공개 모델 인덱스에는 `suno_music`만 있습니다. 가사 생성 기능은 아직 안정적인 프로덕션 라우트가 제공되지 않습니다. 곡 제출, 조회, 이어쓰기 절차는 다음을 참고하세요.
-
-- [Suno SDK 통합 작업 가이드](/ko/sdks/suno-sdk)
 
 <Note>
   실제 사용 가능한 모델은 Token 화이트리스트, 채널 상태, 플랫폼 업데이트에 따라 달라질 수 있습니다. 프로덕션 연동 전에 먼저 [`GET /v1/models`](/ko/chat/openai/models)를 호출해 현재 Token에서 보이는 모델 ID를 확인하세요.

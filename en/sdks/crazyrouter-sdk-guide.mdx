@@ -6,7 +6,7 @@ description: 'Use the official OpenAI SDK with Crazyrouter and run an end-to-end
 
 ## When To Use This Guide
 
-Crazyrouter supports the official OpenAI SDK for OpenAI-compatible routes. Use it for chat, Responses API, images, audio, embeddings, and model listing. For video, Kling, Luma, Suno, Midjourney, and other async or provider-native routes, use the same API key with `fetch` against Crazyrouter native paths.
+Crazyrouter supports the official OpenAI SDK for OpenAI-compatible routes. Use it for chat, Responses API, images, audio, embeddings, and model listing. For video, Kling, Luma, Midjourney, and other async or provider-native routes, use the same API key with `fetch` against Crazyrouter native paths.
 
 Default international API entry:
 
@@ -165,7 +165,7 @@ console.log(audio.length);
 
 ## Native Async Task Routes
 
-Video, Kling, Luma, Suno, Midjourney, and similar async tasks are usually not OpenAI SDK methods. Call Crazyrouter native HTTP paths with the same API key.
+Video, Kling, Luma, Midjourney, and similar async tasks are usually not OpenAI SDK methods. Call Crazyrouter native HTTP paths with the same API key.
 
 ```ts
 async function crazyrouterFetch<T>(

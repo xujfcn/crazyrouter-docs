@@ -23,7 +23,6 @@ This page follows the public model index in `web/src/data/models/index.json`. Ne
 | Fast xAI chat | `grok-4.1-fast` |
 | MiniMax long context | `MiniMax-M2.7` |
 | Qwen vision | `qwen3-vl-235b-a22b-instruct` or `qwen2.5-vl-72b-instruct` |
-| Suno music | `suno_music` |
 
 ## Chat Completions
 
@@ -101,12 +100,6 @@ curl -X POST https://api.crazyrouter.com/v1/chat/completions \
     ]
   }'
 ```
-
-## Music And Lyrics
-
-The current production model index exposes `suno_music`. Lyrics generation does not have a stable production route. For song submission, query, and continuation flows, see:
-
-- [Suno SDK unified task guide](/en/sdks/suno-sdk)
 
 <Note>
   Actual availability also depends on token allowlists, channel state, and platform updates. Before production rollout, call [`GET /v1/models`](/en/chat/openai/models) to confirm the model IDs visible to your token.

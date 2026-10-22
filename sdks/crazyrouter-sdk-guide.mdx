@@ -6,7 +6,7 @@ description: '使用 OpenAI 官方 SDK 接入 Crazyrouter，并完成聊天、�
 
 ## 适用场景
 
-Crazyrouter 对 OpenAI SDK 兼容接口提供统一接入。聊天、Responses API、图片、音频、嵌入和模型列表优先使用官方 OpenAI SDK；视频、Kling、Luma、Suno、Midjourney 等异步或厂商原生接口使用同一个 API Key，通过 `fetch` 调用 Crazyrouter 原生路径。
+Crazyrouter 对 OpenAI SDK 兼容接口提供统一接入。聊天、Responses API、图片、音频、嵌入和模型列表优先使用官方 OpenAI SDK；视频、Kling、Luma、Midjourney 等异步或厂商原生接口使用同一个 API Key，通过 `fetch` 调用 Crazyrouter 原生路径。
 
 默认国际 API 入口：
 
@@ -165,7 +165,7 @@ console.log(audio.length);
 
 ## 原生异步任务接口
 
-视频、Kling、Luma、Suno、Midjourney 等异步任务通常不是 OpenAI SDK 方法，而是 Crazyrouter 原生 HTTP 路径。仍然使用同一个 API Key。
+视频、Kling、Luma、Midjourney 等异步任务通常不是 OpenAI SDK 方法，而是 Crazyrouter 原生 HTTP 路径。仍然使用同一个 API Key。
 
 ```ts
 async function crazyrouterFetch<T>(

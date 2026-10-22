@@ -6,7 +6,7 @@ description: 'OpenAI 공식 SDK로 Crazyrouter에 접속하여 채팅, 스트리
 
 ## 적용 시나리오
 
-Crazyrouter는 OpenAI SDK 호환 인터페이스에 대해 통합 접속을 제공합니다. 채팅, Responses API, 이미지, 오디오, 임베딩과 모델 목록은 우선적으로 OpenAI 공식 SDK를 사용하고, 비디오, Kling, Luma, Suno, Midjourney 등 비동기 또는 벤더 네이티브 인터페이스는 동일한 API Key로 `fetch`를 통해 Crazyrouter 네이티브 경로를 호출합니다.
+Crazyrouter는 OpenAI SDK 호환 인터페이스에 대해 통합 접속을 제공합니다. 채팅, Responses API, 이미지, 오디오, 임베딩과 모델 목록은 우선적으로 OpenAI 공식 SDK를 사용하고, 비디오, Kling, Luma, Midjourney 등 비동기 또는 벤더 네이티브 인터페이스는 동일한 API Key로 `fetch`를 통해 Crazyrouter 네이티브 경로를 호출합니다.
 
 기본 국제 API 엔드포인트:
 
@@ -165,7 +165,7 @@ console.log(audio.length);
 
 ## 네이티브 비동기 작업 인터페이스
 
-비디오, Kling, Luma, Suno, Midjourney 등의 비동기 작업은 대체로 OpenAI SDK 메서드가 아니라 Crazyrouter 네이티브 HTTP 경로입니다. 여전히 동일한 API Key를 사용합니다.
+비디오, Kling, Luma, Midjourney 등의 비동기 작업은 대체로 OpenAI SDK 메서드가 아니라 Crazyrouter 네이티브 HTTP 경로입니다. 여전히 동일한 API Key를 사용합니다.
 
 ```ts
 async function crazyrouterFetch<T>(
