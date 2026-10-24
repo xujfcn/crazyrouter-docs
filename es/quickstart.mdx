@@ -1,0 +1,94 @@
+---
+title: "Guía rápida para comenzar con la API"
+description: "Realiza tu primera llamada a la API en 5 minutos"
+---
+> Contenido actualizado: 2026-06-16
+
+## Paso uno: Obtener tu API Key
+
+1. Visita [Crazyrouter](https://crazyrouter.com) para registrar una cuenta
+2. Después de iniciar sesión, ve a la página de [Gestión de Token](https://crazyrouter.com/console/token)
+3. Haz clic en "Crear nuevo token" para generar tu API Key
+
+## Paso dos: Realizar una solicitud
+
+<Note>
+Por defecto, usa como dirección principal de acceso internacional `https://api.crazyrouter.com/v1`. Para la región del Este de Asia, usa preferentemente `https://cn.crazyrouter.com/v1`. Si no estás seguro de si tu cliente debe utilizar el dominio raíz o `/v1`, consulta primero la [Descripción del Endpoint de la API](https://docs.crazyrouter.com/es/api-endpoint).
+</Note>
+
+<CodeGroup>
+```bash cURL
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "messages": [
+      {"role": "user", "content": "你好"}
+    ]
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="gpt-5.5",
+    messages=[{"role": "user", "content": "你好"}]
+)
+print(response.choices[0].message.content)
+```
+
+```javascript Node.js
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: 'YOUR_API_KEY',
+  baseURL: 'https://api.crazyrouter.com/v1'
+});
+
+const response = await client.chat.completions.create({
+  model: 'gpt-5.5',
+  messages: [{ role: 'user', content: '你好' }]
+});
+console.log(response.choices[0].message.content);
+```
+</CodeGroup>
+
+## Paso tres: Verifica el resultado
+
+Ejemplo de respuesta exitosa:
+
+```json
+{
+  "id": "chatcmpl-abc123",
+  "object": "chat.completion",
+  "created": 1677652288,
+  "choices": [{
+    "index": 0,
+    "message": {
+      "role": "assistant",
+      "content": "你好！有什么可以帮助你的吗？"
+    },
+    "finish_reason": "stop"
+  }],
+  "usage": {
+    "prompt_tokens": 9,
+    "completion_tokens": 12,
+    "total_tokens": 21
+  }
+}
+```
+
+<Note>
+Los ejemplos de `gpt-5.5` en esta página de inicio rápido se han actualizado según la línea base de la documentación del 2026-06-06.
+</Note>
+
+<Note>
+Todos los clientes y frameworks compatibles con OpenAI (como LangChain, LlamaIndex, Cursor, entre otros) solo necesitan modificar `base_url` y `api_key` para conectarse.
+</Note>

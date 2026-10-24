@@ -1,38 +1,38 @@
 ---
-title: 'Search Tokens'
-description: 'Search tokens by keyword'
+title: "トークン検索"
+description: "キーワードでトークンを検索する"
 api: 'GET /api/token/search'
 ---
-> 更新日: 2026-07-20
+> 内容更新日: 2026-07-20
 
-## Overview
+## インターフェース説明
 
-Search for tokens by keyword with fuzzy matching on token names. You can also filter by token fragments.
+キーワードによりトークンを検索し、名前の部分一致やトークンの一部によるフィルタもサポートしています。
 
 <Note>
-  The `/api/token/*` endpoints are mainly for Crazyrouter dashboard automation around API key management. They require a user `access token` plus the `New-Api-User` header, and are not the normal interface for `sk-xxx` model calls. Use `https://crazyrouter.com` as the base URL; `https://api.crazyrouter.com` is reserved for model APIs and returns `404 api_only_endpoint` for management paths.
+  この `/api/token/*` インターフェース群は、主に Crazyrouter コンソールにおける API Key 管理の自動化に使われます。ユーザー `access token` および `New-Api-User` ヘッダーが必要であり、一般的な `sk-xxx` モデルの呼び出しフローに直接利用するためのものではありません。リクエストのベース URL には必ず `https://crazyrouter.com` を使用してください。`https://api.crazyrouter.com` はモデル API 専用エントリーポイントであり、管理パスを呼び出すと `404 api_only_endpoint` が返されます。
 </Note>
 
-## Authentication
+## 認証方式
 
-Use user-side authentication with these headers:
+ユーザー側認証を使用し、リクエストヘッダーに以下を含めてください：
 
 ```text
 Authorization: Bearer your_access_token
 New-Api-User: 1
 ```
 
-## Request Parameters
+## リクエストパラメータ
 
 <ParamField query="keyword" type="string" required>
-  Search keyword, matches against token names
+  検索キーワード（トークン名に一致）
 </ParamField>
 
 <ParamField query="token" type="string">
-  Optional. Filter by token string fragment
+  オプション。トークン文字列の一部で絞り込み
 </ParamField>
 
-## Response Format
+## レスポンス形式
 
 ```json
 {
@@ -41,7 +41,7 @@ New-Api-User: 1
   "data": [
     {
       "id": 5,
-      "name": "Production",
+      "name": "生产环境",
       "key": "sk-xxxxxxxx",
       "status": 1,
       "remain_quota": 50000,
@@ -56,7 +56,7 @@ New-Api-User: 1
 }
 ```
 
-## Code Examples
+## コード例
 
 <CodeGroup>
 
@@ -70,17 +70,17 @@ headers = {
 }
 
 response = requests.get(
-    "https://crazyrouter.com/api/token/search?keyword=production&token=sk-",
+    "https://crazyrouter.com/api/token/search?keyword=生产&token=sk-",
     headers=headers
 )
 
 tokens = response.json()["data"]
 for token in tokens:
-    print(f"[{token['id']}] {token['name']} - Remaining quota: {token['remain_quota']}")
+    print(f"[{token['id']}] {token['name']} - 剩余额度: {token['remain_quota']}")
 ```
 
 ```bash cURL
-curl "https://crazyrouter.com/api/token/search?keyword=production&token=sk-" \
+curl "https://crazyrouter.com/api/token/search?keyword=生产&token=sk-" \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 1"
 ```

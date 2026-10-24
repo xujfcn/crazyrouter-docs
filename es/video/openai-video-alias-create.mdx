@@ -1,0 +1,99 @@
+---
+title: "Alias de generación de video"
+description: "POST /v1/video/generations es una interfaz de alias compatible, para que los clientes que dependen de esta ruta envíen tareas de generación de video"
+---
+> Contenido actualizado: 2026-06-30
+
+# Alias de generación de video
+
+```
+POST /v1/video/generations
+```
+
+Esta es una ruta de alias compatible proporcionada por Crazyrouter, adecuada para aquellos clientes de video o capas intermedias que usan de manera fija la ruta `/v1/video/generations`.
+
+## Autenticación
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Cuándo usarlo
+
+- Tu cliente ya tiene codificada la ruta `/v1/video/generations`
+- Estás migrando un flujo de trabajo de video histórico y no quieres cambiar la ruta de llamada
+- Necesitas ser compatible con formatos de solicitud de terceros ya publicados
+- Quieres enviar videos generativos Wan, como `wan2.5-t2v-preview` o `wan2.2-t2v-plus`
+
+Si estás desarrollando una nueva integración, considera priorizar:
+
+- Videos generativos Wan: usa la ruta `POST /v1/video/generations` de esta página
+- Veo / flujo de trabajo de video unificado: usa `POST /v1/video/create` y envía `veo-3.1-fast` o `veo-3.1-quality`
+- Flujo de trabajo de video OpenAI oficial compatible: usa `POST /v1/videos`
+
+## Ejemplo mínimo de solicitud
+
+### Wan 2.2 T2V Plus
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "wan2.2-t2v-plus",
+    "prompt": "一段平静的电影感山间云海镜头",
+    "seconds": "5",
+    "size": "480P"
+  }'
+```
+
+### Ejemplo mínimo general
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations   -H "Content-Type: application/json"   -H "Authorization: Bearer YOUR_API_KEY"   -d '{
+    "model": "wan2.5-t2v-preview",
+    "prompt": "A cinematic shot of waves hitting a cliff at sunset"
+  }'
+```
+
+## Respuesta exitosa típica
+
+```json
+{
+  "id": "video_task_abc123",
+  "task_id": "video_task_abc123",
+  "status": "processing",
+  "status_update_time": 1709123456
+}
+```
+
+## Respuesta de error validada localmente
+
+En el entorno local `http://127.0.0.1:4000`, se ha verificado la existencia de esta ruta. Cuando el modelo no está disponible temporalmente, se devuelve un error de negocio en lugar de `404`:
+
+```json
+{
+  "code": "get_channel_failed",
+  "message": "model wan2.2-t2v-plus is temporarily unavailable, please try again later",
+  "data": null
+}
+```
+
+## Consideraciones
+
+- Los campos del cuerpo de la solicitud variarán según el modelo de video específico y la capacidad del proveedor ascendente
+- La disponibilidad de `model` depende de la lista blanca actual de Token y del estado del canal ascendente
+- Los videos generativos Wan usan `model`, `prompt`, `seconds`, `size`; las combinaciones verificadas de `wan2.2-t2v-plus` son `seconds: "5"`, `size: "480P"` o `"1080P"`.
+- `wan2.2-t2v-plus` no debe enviarse a `/alibailian/api/v1/services/aigc/video-generation/video-synthesis`.
+- Después de crear la tarea con éxito, puedes seguir llamando a `GET /v1/video/generations/{task_id}` para consultar el estado
+
+<Note>
+Esta ruta es un alias compatible y no significa que todos los modelos de video compartan exactamente los mismos campos de solicitud. Actualmente se recomienda que los videos generativos Wan utilicen la ruta de esta página; para Veo o el flujo de trabajo de video unificado, utiliza `/v1/video/create` y envía `veo-3.1-fast` o `veo-3.1-quality`.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Página del modelo Wan 2.2 T2V Plus: precio en tiempo real, ejemplo real, código de llamada](https://crazyrouter.com/es/models/alibaba/wan2-2-t2v-plus?utm_source=docs&utm_medium=related)
+- [Página del modelo GPT Image 1.5: precio en tiempo real, ejemplo real, código de llamada](https://crazyrouter.com/es/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Alibaba Cloud todos los modelos y precios](https://crazyrouter.com/es/models/alibaba?utm_source=docs&utm_medium=related)

@@ -1,29 +1,29 @@
 ---
-title: "Web Search"
-description: "Production-revalidated OpenAI-style web search on Crazyrouter"
+title: "ウェブ検索"
+description: "Crazyrouter上で本番再検証されたOpenAI風ウェブ検索"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Web Search
+# ウェブ検索
 
-This page only documents OpenAI-style web search behavior that was revalidated against Crazyrouter production on `2026-03-22`.
+このページでは、`2026-03-22`上のCrazyrouter本番環境で再検証された、OpenAIスタイルのウェブ検索挙動のみを記載しています。
 
-The current primary path is:
+現在の主なパスは以下の通りです：
 
 - `gpt-5.5`
 - `POST /v1/responses`
 - `tools: [{ "type": "web_search_preview" }]`
 
-## Current conclusion
+## 現時点での結論
 
-In today's production recheck:
+本日の本番再確認では：
 
-- `gpt-5.5` via the Responses API reliably returned `web_search_call`
-- the older Chat Completions probe using `tools: [{ "type": "web_search" }]` returned `200`, but did not provide a stable, verifiable search trigger signal, so it is not used as the primary documented pattern
+- Responses APIを通じた`gpt-5.5`は安定して`web_search_call`を返しました
+- 従来型のChat Completionsプローブである`tools: [{ "type": "web_search" }]`は`200`を返しましたが、安定的かつ検証可能な検索トリガー信号を得られなかったため、主な記載パターンとはしていません
 
 ---
 
-## Verified request
+## 検証されたリクエスト
 
 ```bash cURL
 curl https://api.crazyrouter.com/v1/responses \
@@ -40,17 +40,17 @@ curl https://api.crazyrouter.com/v1/responses \
   }'
 ```
 
-Verified `output.type` values:
+検証済み`output.type`値：
 
 ```json
 ["web_search_call", "message"]
 ```
 
-This shows that the search step and the final answer are returned separately.
+これにより、検索プロセスと最終回答が別々に返ってくることを示しています。
 
 ---
 
-## Python example
+## Python例
 
 ```python Python
 from openai import OpenAI
@@ -73,29 +73,29 @@ print(response.output_text)
 
 ---
 
-## How to confirm search actually ran
+## 検索が実際に実行されたかの確認方法
 
-Inspect `response.output` directly:
+`response.output`を直接確認してください：
 
 ```python Python
 for item in response.output:
     print(item.type)
 ```
 
-If you see:
+次のような内容が見られた場合：
 
 ```text
 web_search_call
 message
 ```
 
-then the model searched first and answered second.
+モデルが最初に検索を行い、その後回答したことになります。
 
 ---
 
-## Older pattern not recommended as primary
+## 主な方法としては推奨されない旧パターン
 
-This production recheck also probed the older Chat Completions shape:
+今回の本番再確認では、旧型のChat Completionsの型についても調査しました：
 
 ```json
 {
@@ -107,21 +107,21 @@ This production recheck also probed the older Chat Completions shape:
 }
 ```
 
-Result:
+結果：
 
-- the request returned `200`
-- but no stable, verifiable search trigger marker was observed
+- リクエストは`200`を返却しました
+- しかし、安定した検証可能な検索トリガーマーカーは検出されませんでした
 
-So for Crazyrouter docs, OpenAI-style web search should currently be documented through the Responses API first.
+したがって、Crazyrouterのドキュメントでは、現在OpenAIスタイルのウェブ検索は主にResponses API経由で記載するべきです。
 
-Related pages:
+関連ページ：
 
 - [Responses Web Search](/jp/chat/responses/web-search)
 - [Feature Hub: Web Search](/jp/features/web-search)
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## crazyrouter.comの関連情報
 
-- [GPT Image 1.5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [OpenAI の全モデルと料金](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [GPT Image 1.5 モデルページ: リアルタイム価格、実例、コード](https://crazyrouter.com/ja/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT Image 2 モデルページ: リアルタイム価格、実例、コード](https://crazyrouter.com/ja/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [ライブ価格付きOpenAI全モデル](https://crazyrouter.com/ja/models/openai?utm_source=docs&utm_medium=related)

@@ -1,91 +1,76 @@
 ---
-title: "Wan Video"
-description: "Wan video family overview. Wan text-to-video uses /v1/video/generations; image-to-video, first-last-frame, and subject-reference workflows use the /alibailian/api/v1/* compatibility contract"
+title: "Wan ビデオ"
+description: "Wan ビデオモデルの概要です。Wan テキストから動画生成は /v1/video/generations を使用します。画像生成、始終フレーム、および主体参照などのAlibabaフォーマットワークフローは /alibailian/api/v1/* 互換パスを利用します"
 ---
-> 更新日: 2026-06-07
+> 内容更新日: 2026-06-30
 
-# Wan Video
+# Wan ビデオ
 
-The Wan family currently uses different public contracts by capability:
+Wan シリーズは現在、能力ごとに異なる対ユーザー用プロトコルを採用しています：
 
-- Text-to-video (`wan2.5-t2v-preview`, `wan2.2-t2v-plus`): submit with `POST /v1/video/generations` and query with `GET /v1/video/generations/{task_id}`.
-- Image-to-video, first-last-frame, and subject-reference video: submit with the Ali Bailian-compatible `POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis` path and query with `GET /alibailian/api/v1/tasks/{task_id}`.
+- テキストから動画生成（`wan2.5-t2v-preview`、`wan2.2-t2v-plus`）：`POST /v1/video/generations` を使用し、`GET /v1/video/generations/{task_id}` にて検索します。
+- 画像から動画生成、始終フレーム生成、主体参照動画生成：Alibaba百炼互換パス `POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis` を使用し、`GET /alibailian/api/v1/tasks/{task_id}` にて検索します。
 
 <Warning>
-  Do not submit `wan2.2-t2v-plus` to `/alibailian/api/v1/services/aigc/video-generation/video-synthesis`. Production rejects that model on the Ali-compatible path with `invalid_request` and tells clients to use `/v1/video/generations`.
+  `wan2.2-t2v-plus` を `/alibailian/api/v1/services/aigc/video-generation/video-synthesis` に送信しないでください。プロダクション環境では `invalid_request`が返され、`/v1/video/generations`を使うよう案内されます。
 </Warning>
 
-For Ali-shaped workflows, see the full request and task-query schema in [Ali Bailian Video API](/jp/video/alibailian). This page closes the first batch of public `Wan` models, capabilities, billing truth, and recommended protocol.
+Alibabaフォーマットワークフローの完全なリクエスト体、およびタスク検索フォーマットについては [Alibaba百炼動画API](/jp/video/alibailian) をご覧ください。本ページは現時点で外部公開されている最初の `Wan` モデル・能力・課金体系・推奨プロトコルをまとめています。
 
-## First-Batch Models
+## 初期モデル
 
-| Model | Customer-facing capability | Official billing truth | Current state |
-|------|-----------------------------|------------------------|---------------|
-| `wan2.5-t2v-preview` | text-to-video | per second | verified |
-| `wan2.5-i2v-preview` | image-to-video | per second | verified |
-| `wan2.2-t2v-plus` | text-to-video | per second | verified |
-| `wan2.2-i2v-plus` | image-to-video | per second | verified |
-| `wan2.2-i2v-flash` | image-to-video | per second | verified |
-| `wan2.2-kf2v-flash` | first-last-frame video | per second | Beta |
-| `wan2.2-s2v` | subject-reference video | per second | Beta |
+| モデル | 顧客向け能力 | 公式課金体系 | 現在の状態 |
+|------|----------|--------------|----------|
+| `wan2.5-t2v-preview` | テキストから動画生成 | 秒単位 | 検証済み |
+| `wan2.5-i2v-preview` | 画像から動画生成 | 秒単位 | 検証済み |
+| `wan2.2-t2v-plus` | テキストから動画生成 | 秒単位 | 検証済み |
+| `wan2.2-i2v-plus` | 画像から動画生成 | 秒単位 | 検証済み |
+| `wan2.2-i2v-flash` | 画像から動画生成 | 秒単位 | 検証済み |
+| `wan2.2-kf2v-flash` | 始終フレーム生成 | 秒単位 | Beta |
+| `wan2.2-s2v` | 主体参照動画生成 | 秒単位 | Beta |
 
 <Note>
-  `wan2.2-kf2v-flash` and `wan2.2-s2v` are already aligned in code and billing capability buckets, but their live artifact closure is still in progress, so they remain Beta.
+  `wan2.2-kf2v-flash` と `wan2.2-s2v` はすでにコードと課金能力バケットの同期が完了していますが、現在のライブ成果物は追加対応中につき、Betaラベルは暫定保持しています。
 </Note>
 
-## Capabilities And Official Prices
+## 能力および公式価格
 
-| Model | Capability bucket | Resolution | Official price |
-|------|--------------------|------------|----------------|
-| `wan2.5-t2v-preview` | text-to-video | `480P / 720P / 1080P` | `¥0.30 / ¥0.60 / ¥1.00 / sec` |
-| `wan2.5-i2v-preview` | image-to-video | `480P / 720P / 1080P` | `¥0.30 / ¥0.60 / ¥1.00 / sec` |
-| `wan2.2-t2v-plus` | text-to-video | `480P / 1080P` | `¥0.14 / ¥0.70 / sec` |
-| `wan2.2-i2v-plus` | image-to-video | `480P / 1080P` | `¥0.14 / ¥0.70 / sec` |
-| `wan2.2-i2v-flash` | image-to-video | `480P / 720P / 1080P` | `¥0.10 / ¥0.20 / ¥0.48 / sec` |
-| `wan2.2-kf2v-flash` | first-last-frame video | `480P / 720P / 1080P` | `¥0.10 / ¥0.20 / ¥0.48 / sec` |
-| `wan2.2-s2v` | subject-reference video | `480P / 720P` | `¥0.50 / ¥0.90 / sec` |
+| モデル | 能力バケット | 解像度 | 公式単価 |
+|------|--------|--------|----------|
+| `wan2.5-t2v-preview` | テキストから動画生成 | `480P / 720P / 1080P` | `¥0.30 / ¥0.60 / ¥1.00 / 秒` |
+| `wan2.2-t2v-plus` | テキストから動画生成 | `480P / 1080P` | `¥0.14 / ¥0.70 / 秒` |
+| `wan2.2-i2v-plus` | 画像から動画生成 | `480P / 1080P` | `¥0.14 / ¥0.70 / 秒` |
+| `wan2.2-i2v-flash` | 画像から動画生成 | `480P / 720P / 1080P` | `¥0.10 / ¥0.20 / ¥0.48 / 秒` |
+| `wan2.2-kf2v-flash` | 始終フレーム生成 | `480P / 720P / 1080P` | `¥0.10 / ¥0.20 / ¥0.48 / 秒` |
+| `wan2.2-s2v` | 主体参照動画生成 | `480P / 720P` | `¥0.50 / ¥0.90 / 秒` |
 
-## Protocol Conventions
+## プロトコル規定
 
-### 1. Text-to-video
+### 1. テキストから動画生成
 
-- Recommended submit path: `POST /v1/video/generations`
-- Recommended query path: `GET /v1/video/generations/{task_id}`
-- Key fields: `model`, `prompt`, `seconds`, `size`
-- Typical models: `wan2.5-t2v-preview`, `wan2.2-t2v-plus`
+- 推奨提出パス：`POST /v1/video/generations`
+- 推奨検索パス：`GET /v1/video/generations/{task_id}`
+- 主要フィールド：`model`、`prompt`、`seconds`、`size`
+- 主なモデル：`wan2.5-t2v-preview`、`wan2.2-t2v-plus`
 
-### 2. Image-to-video
+### 2. 画像から動画生成
 
-- Key field: `input.img_url`
-- Typical models: `wan2.5-i2v-preview`, `wan2.2-i2v-plus`, `wan2.2-i2v-flash`
+- 主要フィールド：`input.img_url`
+- 主なモデル：`wan2.5-i2v-preview`、`wan2.2-i2v-plus`、`wan2.2-i2v-flash`
 
-### 3. First-last-frame video
+### 3. 始終フレーム生成
 
-- Key fields: `input.first_frame_url`, `input.last_frame_url`
-- Typical model: `wan2.2-kf2v-flash`
+- 主要フィールド：`input.first_frame_url`、`input.last_frame_url`
+- 主なモデル：`wan2.2-kf2v-flash`
 
-### 4. Subject-reference video
+### 4. 主体参照動画生成
 
-- Key field: `input.image_url`
-- Typical model: `wan2.2-s2v`
+- 主要フィールド：`input.image_url`
+- 主なモデル：`wan2.2-s2v`
 
-## Request Examples
+## リクエスト例
 
-### Text-to-video: Wan 2.5
-
-```bash cURL
-curl -X POST https://api.crazyrouter.com/v1/video/generations \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "model": "wan2.5-t2v-preview",
-    "prompt": "A cinematic seaside sunset with a slow camera push-in",
-    "seconds": "5",
-    "size": "1280*720"
-  }'
-```
-
-### Text-to-video: Wan 2.2 T2V Plus
+### テキストから動画生成：Wan 2.2 T2V Plus
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/video/generations \
@@ -93,13 +78,13 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "wan2.2-t2v-plus",
-    "prompt": "A calm cinematic shot of clouds over mountains",
+    "prompt": "一段平静的电影感山间云海镜头",
     "seconds": "5",
     "size": "480P"
   }'
 ```
 
-### Image-to-video
+### 画像から動画生成
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/alibailian/api/v1/services/aigc/video-generation/video-synthesis \
@@ -108,7 +93,7 @@ curl -X POST https://api.crazyrouter.com/alibailian/api/v1/services/aigc/video-g
   -d '{
     "model": "wan2.5-i2v-preview",
     "input": {
-      "prompt": "Make the subject turn toward the camera",
+      "prompt": "让画面中的人物转头看向镜头",
       "img_url": "https://example.com/first-frame.png"
     },
     "parameters": {
@@ -120,13 +105,13 @@ curl -X POST https://api.crazyrouter.com/alibailian/api/v1/services/aigc/video-g
   }'
 ```
 
-### First-last-frame video
+### 始終フレーム生成
 
 ```json
 {
   "model": "wan2.2-kf2v-flash",
   "input": {
-    "prompt": "A smooth transition from day to night",
+    "prompt": "镜头从白天平滑过渡到夜晚",
     "first_frame_url": "https://example.com/frame-start.png",
     "last_frame_url": "https://example.com/frame-end.png"
   },
@@ -137,13 +122,13 @@ curl -X POST https://api.crazyrouter.com/alibailian/api/v1/services/aigc/video-g
 }
 ```
 
-### Subject-reference video
+### 主体参照動画生成
 
 ```json
 {
   "model": "wan2.2-s2v",
   "input": {
-    "prompt": "Animate the reference portrait with light natural speaking motion",
+    "prompt": "让参考人物自然说话并有轻微头部动作",
     "image_url": "https://example.com/portrait.png",
     "audio_url": "https://example.com/voice.mp3"
   },
@@ -154,33 +139,33 @@ curl -X POST https://api.crazyrouter.com/alibailian/api/v1/services/aigc/video-g
 }
 ```
 
-## Task Retrieval
+## タスク取得
 
-Wan remains an async task family. Query with the matching route for the submit contract.
+Wanは現状では非同期タスクモデルを採用しています。顧客がタスクを作成後、提出プロトコルに従って検索します：
 
-Text-to-video:
+テキストから動画生成：
 
 ```http
 GET /v1/video/generations/{task_id}
 ```
 
-Ali-compatible image-to-video, first-last-frame, and subject-reference workflows:
+Alibaba互換の画像生成、始終フレーム、主体参照ワークフロー：
 
 ```http
 GET /alibailian/api/v1/tasks/{task_id}
 ```
 
-When `output.task_status` reaches success, use `output.video_url` as the final video result.
+検索結果が `status = SUCCESS` の場合は、`result_url` または `artifact_url` から最終動画結果を取得してください。
 
-## Scope Notes
+## 境界説明
 
-- The current recommended customer-facing contract for Wan text-to-video is `/v1/video/generations`, not the Ali Bailian-compatible submit path.
-- The Ali Bailian-compatible path is primarily for image-to-video, first-last-frame, subject-reference, and other Ali-shaped migration workflows.
-- Crazyrouter can internally route to official, ApiPass, Kie, or other third-party providers, but those providers do not define customer protocols.
-- Beta rows can still be shown publicly now; after launch, use production task logs to close live evidence and then remove the Beta label.
+- Wan テキストから動画生成の推奨顧客プロトコルは `/v1/video/generations`であり、Alibaba百炼互換の提出パスではありません。
+- Alibaba百炼互換パスは主に画像生成、始終フレーム生成、主体参照動画生成などのAlibabaフォーマット移行シナリオで利用されます。
+- Crazyrouter内部では公式、ApiPass、Kie、その他サードパーティーをプロバイダーとして利用できますが、これらのプロバイダーは顧客プロトコルを独自に定義しません。
+- 現在のBeta項目は顧客向けに暫定公開できます。ローンチ後はプロダクションタスクログとライブエビデンスを統合して検証し、成功後Betaラベルを除去します。
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [Wan 2.2 T2V Plus モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/alibaba/wan2-2-t2v-plus?utm_source=docs&utm_medium=related)
-- [Alibaba Cloud の全モデルと料金](https://crazyrouter.com/en/models/alibaba?utm_source=docs&utm_medium=related)
+- [Wan 2.2 T2V Plus モデルページ：リアルタイム価格、実サンプル、呼び出しコード](https://crazyrouter.com/ja/models/alibaba/wan2-2-t2v-plus?utm_source=docs&utm_medium=related)
+- [Alibaba Cloud 全モデル・価格一覧](https://crazyrouter.com/ja/models/alibaba?utm_source=docs&utm_medium=related)

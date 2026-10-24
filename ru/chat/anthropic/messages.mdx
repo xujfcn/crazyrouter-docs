@@ -1,25 +1,26 @@
 ---
-title: "Claude Native Format"
-description: "Production-revalidated Anthropic Messages usage for Claude on Crazyrouter"
+title: "Нативный формат Claude"
+description: "На основе проверки в производственной среде используется вызов Anthropic Messages API для Claude"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Claude Native Format
+
+# Нативный формат Claude
 
 ```
 POST /v1/messages
 ```
 
-This page only documents Claude Messages behavior that was revalidated against Crazyrouter production on `2026-03-22`.
+На этой странице описаны варианты использования Claude Messages `2026-03-22`, которые были проверены в производственной среде Crazyrouter.
 
-Current primary example models:
+Текущие основные примеры моделей:
 
 - `claude-opus-4-8`
 - `claude-opus-4-8`
 
-## Authentication
+## Аутентификация
 
-This recheck confirmed that both of the following auth styles work:
+На этом этапе подтверждено, что оба следующих способа могут использоваться:
 
 ```text
 x-api-key: YOUR_API_KEY
@@ -29,7 +30,7 @@ x-api-key: YOUR_API_KEY
 Authorization: Bearer YOUR_API_KEY
 ```
 
-Keep:
+Также сохраняется:
 
 ```text
 anthropic-version: 2023-06-01
@@ -37,7 +38,7 @@ anthropic-version: 2023-06-01
 
 ---
 
-## Basic conversation
+## Базовый диалог
 
 ```bash cURL
 curl https://api.crazyrouter.com/v1/messages \
@@ -56,7 +57,7 @@ curl https://api.crazyrouter.com/v1/messages \
   }'
 ```
 
-Verified response shape:
+Ключевые структуры, возвращаемые в производственной среде:
 
 ```json
 {
@@ -72,14 +73,14 @@ Verified response shape:
 
 ---
 
-## Function calling
+## Function Calling
 
-In the current production environment, Claude tool calling is reproducible through `/v1/messages` and returns `tool_use`.
+В текущей производственной среде вызов инструментов Claude стабильно возвращает `/v1/messages` и `tool_use`.
 
-For first-pass validation, use:
+Рекомендуемое поведение при первом совместном тестировании:
 
-- an explicit `tool_choice`
-- a prompt that clearly says Claude must call the tool and not answer directly
+- Явным образом передавать `tool_choice`
+- В промпте четко указывать "необходимо вызвать инструмент, не отвечать напрямую"
 
 ```bash cURL
 curl https://api.crazyrouter.com/v1/messages \
@@ -116,7 +117,7 @@ curl https://api.crazyrouter.com/v1/messages \
   }'
 ```
 
-Verified response shape:
+Ключевые поля, подтвержденные в производственной среде:
 
 ```json
 {
@@ -135,13 +136,13 @@ Verified response shape:
 
 ---
 
-## Extended thinking
+## Расширенное мышление
 
-In this production recheck, the combination that clearly returned a `thinking` block was:
+На этом этапе проверки в производственной среде явно подтверждено возвращение комбинации блока `thinking`:
 
 - `claude-opus-4-8`
 
-Base `claude-opus-4-8` did not produce an equally explicit thinking block in this round, so the docs prioritize the thinking variant here.
+В базовой версии `claude-opus-4-8` в этом цикле явный thinking block не был получен, поэтому здесь преимущественно описаны thinking способности.
 
 ```bash cURL
 curl https://api.crazyrouter.com/v1/messages \
@@ -164,7 +165,7 @@ curl https://api.crazyrouter.com/v1/messages \
   }'
 ```
 
-Verified response shape:
+Ключевые поля возращаемые при подтверждении в производственной среде:
 
 ```json
 {
@@ -182,26 +183,26 @@ Verified response shape:
 ```
 
 <Warning>
-  When using `thinking`, `max_tokens` must be greater than `budget_tokens`. Thinking tokens are billed as well.
+  При использовании `thinking`, `max_tokens` должен быть больше `budget_tokens`. Токены размышлений также учитываются в стоимости.
 </Warning>
 
 ---
 
-## Current recommendation
+## Текущие рекомендации
 
-- Standard text chat: use `claude-opus-4-8`
-- Tool calling: use `claude-opus-4-8`, and include `tool_choice` in first-pass validation
-- Explicit thinking blocks: use `claude-opus-4-8`
+- Обычный текстовый диалог: рекомендуется использовать `claude-opus-4-8`
+- Вызов инструментов: рекомендуется использовать `claude-opus-4-8` и добавить `tool_choice` в первую валидацию
+- Явная необходимость thinking block: рекомендуется использовать `claude-opus-4-8`
 
-Related pages:
+Связанные страницы:
 
-- [Feature Hub: Tool Calling](/ru/features/tool-calling)
-- [Feature Hub: Reasoning](/ru/features/reasoning)
-- [Official Model Pricing Methods](/ru/reference/official-pricing-methods)
+- [Основные возможности: Tool Calling](/ru/features/tool-calling)
+- [Основные возможности: Reasoning](/ru/features/reasoning)
+- [Официальные методы моделирования цен](/ru/reference/official-pricing-methods)
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [Claude Fable 5: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
-- [Claude Fable 5: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
-- [Claude Haiku 4.5: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/claude-haiku-4-5?utm_source=docs&utm_medium=related)
+- [Сравнение цен Claude Fable 5: официальная / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Страница модели Claude Fable 5: актуальные цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Сравнение цен Claude Haiku 4.5: официальная / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/claude-haiku-4-5?utm_source=docs&utm_medium=related)

@@ -1,52 +1,52 @@
 ---
-title: 'Claude Dev Setup Guide'
-description: 'Configure Crazyrouter API in the Claude Dev VS Code extension with the latest verified Claude models'
+title: "Руководство по настройке Claude Dev"
+description: "Настройте API Crazyrouter в расширении Claude Dev для VS Code с последними проверенными моделями Claude"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-16
 
-## Overview
+## Обзор
 
-Claude Dev is a VS Code AI coding extension suited for Claude-style code explanation, refactoring suggestions, and multi-turn collaboration through Crazyrouter. For public docs, prefer the OpenAI Compatible route first because it is more consistent with the rest of the Crazyrouter integration stack and easier to troubleshoot.
+Claude Dev — это расширение для ИИ-кодинга в VS Code, предназначенное для объяснения кода в стиле Claude, предложений по рефакторингу и многоходового сотрудничества через Crazyrouter. Для публичной документации рекомендуется сначала использовать совместимый с OpenAI маршрут, потому что он более согласован с остальной частью интеграционного стека Crazyrouter и проще для устранения неполадок.
 
 <Warning>
-The `https://api.crazyrouter.com/v1` URL on this page applies only to Claude Dev's `OpenAI Compatible` provider. Do not copy it into Claude Code's `ANTHROPIC_BASE_URL`; Claude Code should use the root domain `https://api.crazyrouter.com`.
+URL `https://api.crazyrouter.com/v1` на этой странице применим только к провайдеру `OpenAI Compatible` Claude Dev. Не копируйте его в `ANTHROPIC_BASE_URL` Claude Code; Claude Code должен использовать корневой домен `https://api.crazyrouter.com`.
 </Warning>
 
-## Recommended Configuration
+## Рекомендуемая конфигурация
 
 <Steps>
-  <Step title="Install Extension">
-    Search for `Claude Dev` in the VS Code extension marketplace and install it.
+  <Step title="Установить расширение">
+    Найдите `Claude Dev` в маркетплейсе расширений VS Code и установите его.
   </Step>
-  <Step title="Open Settings">
-    Click the Claude Dev icon in the sidebar to enter settings.
+  <Step title="Открыть настройки">
+    Нажмите на иконку Claude Dev на боковой панели, чтобы перейти к настройкам.
   </Step>
-  <Step title="Select Provider">
-    Prefer `OpenAI Compatible` as the API provider.
+  <Step title="Выберите поставщика">
+    Отдавайте предпочтение `OpenAI Compatible` как поставщику API.
   </Step>
-  <Step title="Enter Configuration">
-    - **Base URL**: `https://api.crazyrouter.com/v1`
-    - **API Key**: `sk-xxx`
-    - **Model**: `claude-opus-4-8`
+  <Step title="Введите конфигурацию">
+    - **Базовый URL**: `https://api.crazyrouter.com/v1`
+    - **Ключ API**: `sk-xxx`
+    - **Модель**: `claude-opus-4-8`
   </Step>
 </Steps>
 
-For the default international API entry, set Claude Dev's `OpenAI Compatible` Base URL to `https://api.crazyrouter.com/v1`.
+Для основной международной точки доступа API установите Base URL `OpenAI Compatible` в Claude Dev на `https://api.crazyrouter.com/v1`.
 
-## Recommended Models
+## Рекомендуемые модели
 
-| Scenario | Model |
+| Сценарий | Модель |
 |----------|-------|
-| Daily coding | `claude-opus-4-8` |
-| Heavier reasoning and planning | `claude-opus-4-8` |
+| Ежедневное программирование | `claude-opus-4-8` |
+| Более сложные рассуждения и планирование | `claude-opus-4-8` |
 
 <Note>
-  `claude-opus-4-8` and `claude-opus-4-8` match the latest verified Claude model guidance in this doc set. For the smallest first-pass VS Code validation, start with `claude-opus-4-8`.
+  `claude-opus-4-8` и `claude-opus-4-8` соответствуют последним проверенным рекомендациям по моделям Claude в этом наборе документации. Для самого простого первого этапа проверки в VS Code начните с `claude-opus-4-8`.
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Ссылки на crazyrouter.com
 
-- [Руководство по интеграции Cline](https://crazyrouter.com/en/integrations/cline?utm_source=docs&utm_medium=related)
-- [Claude Fable 5: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
-- [Claude Fable 5: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Руководство по интеграции Cline (скрипт в один клик, базовый URL, рекомендуемые модели)](https://crazyrouter.com/en/integrations/cline?utm_source=docs&utm_medium=related)
+- [Сравнение цен Claude Fable 5: полный список против Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Страница моделей Claude Fable 5: актуальные цены, реальные примеры, код](https://crazyrouter.com/ru/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)

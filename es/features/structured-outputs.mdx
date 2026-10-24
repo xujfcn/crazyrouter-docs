@@ -1,0 +1,147 @@
+---
+title: "Salidas Estructuradas"
+description: "Basado en pruebas reales en producción, utiliza los modelos principales más recientes de GPT y Gemini para generar salida JSON estructurada"
+---
+> Contenido actualizado: 2026-06-09
+
+# Salidas Estructuradas
+
+Este documento solo recopila **usos de Salidas Estructuradas que ya se han verificado exitosamente en solicitudes reales del entorno de producción de Crazyrouter**.
+
+Tiempo de verificación:
+
+- `2026-03-22`
+
+Modelos rigurosamente verificados exitosamente:
+
+- `gpt-5.5`
+- `gemini-3.1-pro`
+
+Modelos actualmente no incluidos como ejemplos de éxito estricto:
+
+- `claude-opus-4-8`
+
+Razones:
+
+- En la revisión en producción, `claude-opus-4-8` no mostró un comportamiento estable de “JSON estrictamente puro” bajo la forma de solicitud compatible con OpenAI `response_format=json_schema`
+- En pruebas anteriores aparecieron bloques de código con cercado (fenced code block)
+- Durante la revisión de `2026-03-22`, volvieron a aparecer `content` vacíos
+- Por lo tanto, por ahora no se escribe como "salida estructurada estrictamente verificada como exitosa"
+
+---
+
+## Matriz de Capacidades Verificadas
+
+| Modelo | Protocolo | Punto final | Marca de éxito |
+|--------|-----------|-------------|----------------|
+| `gpt-5.5` | OpenAI Chat Completions | `POST /v1/chat/completions` | El contenido devuelto se puede `JSON.parse` directamente |
+| `gemini-3.1-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | Devuelve texto de estilo `application/json`, se puede analizar directamente |
+
+---
+
+## GPT-5.4
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Return a JSON object with keys city and country for Tokyo."
+      }
+    ],
+    "response_format": {
+      "type": "json_schema",
+      "json_schema": {
+        "name": "city_country",
+        "strict": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "city": {"type": "string"},
+            "country": {"type": "string"}
+          },
+          "required": ["city", "country"],
+          "additionalProperties": false
+        }
+      }
+    }
+  }'
+```
+
+Respuesta de verificación en producción:
+
+```json
+{"city":"Tokyo","country":"Japan"}
+```
+
+---
+
+## Gemini 3 Pro
+
+```bash cURL
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Return a JSON object with keys city and country for Tokyo."
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "responseMimeType": "application/json",
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "city": {"type": "string"},
+          "country": {"type": "string"}
+        },
+        "required": ["city", "country"]
+      }
+    }
+  }'
+```
+
+Respuesta de verificación en producción:
+
+```json
+{"city":"Tokyo","country":"Japan"}
+```
+
+---
+
+## Claude 4.6 conclusión actual
+
+En las pruebas de producción de `2026-03-22`:
+
+- `claude-opus-4-8` no proporcionó salida JSON estrictamente estable y reproducible bajo esta forma de solicitud
+- En diferentes rondas de prueba, aparecieron tanto bloques de código con cercado como `content` vacíos
+- Por lo tanto, actualmente no se recomienda registrar Claude 4.6 como "salida de esquema estrictamente verificada como exitosa"
+
+Si en el futuro se desea incluir Claude 4.6 aquí, se recomienda realizar una ronda adicional de verificación de producción más detallada, y confirmar:
+
+- Si existe una forma más adecuada de protocolo nativo
+- Si se necesita un system prompt adicional
+- Si se puede eliminar de forma estable el cercado del código (code fence)
+
+---
+
+## Documentos Relacionados
+
+- [OpenAI Structured Output](/es/chat/openai/structured-output)
+- [Gemini Comprensión de Documentos](/es/chat/gemini/document)
+
+{/* crazyrouter-model-links v2 */}
+## Páginas Relacionadas
+
+- [Comparación de precios de GPT-5.4: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/gpt-5-4?utm_source=docs&utm_medium=related)
+- [Página de modelo GPT-5.4: Precio en tiempo real, ejemplos reales, código de invocación](https://crazyrouter.com/es/models/openai/gpt-5-4?utm_source=docs&utm_medium=related)
+- [Todos los modelos y precios de OpenAI](https://crazyrouter.com/es/models/openai?utm_source=docs&utm_medium=related)

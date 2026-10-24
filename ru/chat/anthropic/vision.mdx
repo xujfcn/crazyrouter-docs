@@ -1,19 +1,20 @@
 ---
-title: "Claude Vision"
-description: "Claude image understanding verified against Crazyrouter production on 2026-03-23"
+title: "Claude распознавание изображений"
+description: "Понимание изображений Claude, подтверждённое в производственной среде Crazyrouter от 2026-03-23"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Claude Vision
 
-As of March 23, 2026, Crazyrouter production has verified two Claude image-input paths:
+# Claude распознавание изображений
 
-- native `POST /v1/messages` with `type: "image"` and Base64 PNG
-- OpenAI-compatible `POST /v1/chat/completions` with `type: "image_url"` and a data URL
+На 23 марта 2026 года в производственной среде Crazyrouter подтверждены два пути визуального ввода Claude:
+
+- Нативный `POST /v1/messages` + `type: "image"` + Base64 PNG
+- Совместимый с OpenAI `POST /v1/chat/completions` + `type: "image_url"` + data URL
 
 ---
 
-## Native Format: `/v1/messages`
+## Нативный формат: `/v1/messages`
 
 ```bash
 curl https://api.crazyrouter.com/v1/messages \
@@ -45,14 +46,14 @@ curl https://api.crazyrouter.com/v1/messages \
   }'
 ```
 
-This production check returned:
+В рамках этой проверки производственной среды были возвращены:
 
 - `model: "claude-opus-4-8"`
 - `content[0].type = "text"`
 
 ---
 
-## OpenAI-Compatible Format: `/v1/chat/completions`
+## Формат, совместимый с OpenAI: `/v1/chat/completions`
 
 ```bash
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -78,15 +79,15 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-In the 2026-03-23 production check, `message.content` came back as plain text describing the image color.
+В производственной проверке 2026-03-23 модель возвращает `message.content` в виде обычной строки, содержащей текстовое описание цвета изображения.
 
 <Note>
-  This page keeps only the Base64 PNG / data-URL paths that were revalidated successfully. Remote URLs, additional image formats, and more complex multi-image cases were not rechecked item by item in this pass.
+  На текущей странице сохраняются только два успешных визуальных входа: Base64 PNG / data URL. В этой итерации не проводилась повторная проверка удалённых URL, других форматов изображений и более сложных сцен с несколькими изображениями.
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [Claude Fable 5: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
-- [Claude Fable 5: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
-- [Claude Haiku 4.5: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/claude-haiku-4-5?utm_source=docs&utm_medium=related)
+- [Сравнение цен Claude Fable 5: официальный / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Страница модели Claude Fable 5: актуальные цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Сравнение цен Claude Haiku 4.5: официальный / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/claude-haiku-4-5?utm_source=docs&utm_medium=related)

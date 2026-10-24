@@ -1,26 +1,26 @@
 ---
-title: "Vision via Chat"
-description: "Ввод изображений в стиле OpenAI: оба варианта — base64 и удалённый URL"
+title: "Чат-распознавание изображений"
+description: "Ввод изображений в стиле OpenAI, поддержка base64 и удалённых URL"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Vision via Chat
+# Чат-распознавание изображений
 
 ```
 POST /v1/chat/completions
 ```
 
-В продакшене Crazyrouter проверена работа `image_url` в стиле OpenAI на основных визуальных моделях:
+В рабочей среде Crazyrouter подтверждена поддержка распространённых моделей с вводом в стиле OpenAI (`image_url`):
 
-- `gpt-4o`, `gpt-4o-mini`, `gpt-4.1`, `gpt-5.5` и другие визуальные модели OpenAI
-- Поддерживаются как data URL `data:image/...;base64,...`, так и публичные `https://` URL
-- `message.content` сейчас возвращается обычной строкой
+- Визуальные модели OpenAI, такие как `gpt-4o`, `gpt-4o-mini`, `gpt-5.5`, `gpt-5.5` и др.
+- На входе поддерживаются 2 формата: data URL (`data:image/...;base64,...`) и публичный URL (`https://`)
+- Ответ `message.content` на данный момент — обычная строка
 
-> Рекомендуемый порядок: для локальных файлов сначала вызывайте [эндпоинт загрузки изображений](/ru/upload), чтобы получить временный URL `media.crazyrouter.com`, затем передавайте его в `image_url`; либо сразу отправляйте base64 data URL. Удалённые публичные URL тоже работают, но должны удовлетворять условиям ниже.
+> Рекомендуемый порядок: сначала используйте [интерфейс загрузки изображения](/ru/upload) для преобразования локальных файлов в временный URL (`media.crazyrouter.com`), затем отправляйте в `image_url`; либо отправьте сразу data URL в base64. Также допускаются удалённые публичные URL, но для них действуют ограничения, описанные ниже в разделе «Ограничения для удалённых URL».
 
 ---
 
-## Через base64 data URL (самый надёжный путь)
+## Использование base64 data URL (самый надёжный способ)
 
 ```bash
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -64,7 +64,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
 
 ---
 
-## Через удалённый https URL
+## Использование удалённого https URL
 
 ```bash
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -90,30 +90,30 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-### Ограничения удалённых URL
+### Ограничения для удалённых URL
 
-URL должен быть **доступен с серверов Crazyrouter**, а не просто открываться в браузере. Типичные причины ошибок:
+URL должен быть **доступен с серверной стороны Crazyrouter** ― возможность открыть его только в браузере недостаточна. Основные причины неудач:
 
-| Сбой | Причина | Решение |
-|------|---------|---------|
-| Домен не резолвится | Приватный/некорректный адрес | Использовать публичный https URL |
-| 403 Forbidden | Некоторые CDN (wikimedia, приватные S3) блокируют серверный UA или требуют Referer | Использовать [эндпоинт загрузки](/ru/upload) или base64 |
-| Content-Type не `image/*` | URL возвращает HTML или редирект на страницу логина | Убедиться, что это прямая ссылка на изображение |
-| Файл больше 20MB | Лимит на размер одного файла | Сжать или обрезать |
+| Сценарий ошибки | Причина | Решение |
+|----------------|--------|---------|
+| Не разрешается домен | Приватный адрес, ошибка написания | Используйте публичный https URL |
+| 403 Forbidden | Часть CDN (например, wikimedia или приватные S3) ограничивает User-Agent/Referer на стороне сервера | Используйте [интерфейс загрузки изображения](/ru/upload) или base64 |
+| Content-Type не `image/*` | URL возвращает HTML или перенаправляет на страницу входа | Убедитесь, что URL ведёт на прямую ссылку для скачивания |
+| Размер файла больше 20MB | Ограничение на размер одиночного файла | Сожмите или обрежьте перед загрузкой |
 
-Если видите ошибку `Unable to process the image you provided. Please verify the image URL is publicly accessible, or upload it as base64.`, значит URL недоступен серверу — пройдитесь по таблице выше.
+Если вы видите сообщение об ошибке `Unable to process the image you provided. Please verify the image URL is publicly accessible, or upload it as base64.`, это означает, что URL недоступен с сервера — проверьте по таблице выше.
 
 ---
 
-## Рекомендуемый подход
+## Рекомендации по использованию
 
-- Для внутренних ассетов, приватных и непроверенных по доступности изображений: сначала вызовите [`POST /v1/files/uploads`](/ru/upload) и получите 72-часовой URL `media.crazyrouter.com/...`, затем передайте его в `image_url`
-- Для маленьких (< 1MB) и одноразовых изображений: отправляйте base64 data URL напрямую, экономя один лишний запрос
-- Несколько изображений, параметр `detail` и другие продвинутые опции: апстрим OpenAI это поддерживает, передавайте по официальной спецификации OpenAI
+- Внутренние ресурсы, приватные либо сомнительные на доступность изображения: сначала вызовите [`POST /v1/files/uploads`](/ru/upload), чтобы получить временный 72-часовой URL (`media.crazyrouter.com/...`), затем передавайте в `image_url`
+- Маленькие (< 1MB) или одноразовые изображения: сразу используйте base64 data URL — это избавит от лишнего запроса на загрузку
+- Расширенное использование, например, работа с несколькими изображениями, параметры `detail` и пр.: сейчас такие сценарии поддерживаются OpenAI и работают по официальному протоколу OpenAI
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [GPT Image 1.5: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [Все модели OpenAI с актуальными ценами](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [Страница модели GPT Image 1.5: текущие цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Страница модели GPT Image 2: текущие цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Все модели и цены OpenAI](https://crazyrouter.com/ru/models/openai?utm_source=docs&utm_medium=related)

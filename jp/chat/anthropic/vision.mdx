@@ -1,19 +1,20 @@
 ---
-title: "Claude Vision"
-description: "Claude image understanding verified against Crazyrouter production on 2026-03-23"
+title: "Claude 画像理解"
+description: "2026年3月23日時点のCrazyrouter本番環境によるClaude画像理解の検証"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Claude Vision
 
-As of March 23, 2026, Crazyrouter production has verified two Claude image-input paths:
+# Claude 画像理解
 
-- native `POST /v1/messages` with `type: "image"` and Base64 PNG
-- OpenAI-compatible `POST /v1/chat/completions` with `type: "image_url"` and a data URL
+2026年3月23日までに、Crazyrouter本番環境ではClaudeの画像入力経路が2種類検証されています：
+
+- ネイティブ `POST /v1/messages` + `type: "image"` + Base64 PNG
+- OpenAI互換 `POST /v1/chat/completions` + `type: "image_url"` + data URL
 
 ---
 
-## Native Format: `/v1/messages`
+## ネイティブ形式：`/v1/messages`
 
 ```bash
 curl https://api.crazyrouter.com/v1/messages \
@@ -45,14 +46,14 @@ curl https://api.crazyrouter.com/v1/messages \
   }'
 ```
 
-This production check returned:
+今回の本番環境チェックで返却されたもの：
 
 - `model: "claude-opus-4-8"`
 - `content[0].type = "text"`
 
 ---
 
-## OpenAI-Compatible Format: `/v1/chat/completions`
+## OpenAI互換形式：`/v1/chat/completions`
 
 ```bash
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -78,15 +79,15 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-In the 2026-03-23 production check, `message.content` came back as plain text describing the image color.
+2026年3月23日の本番環境実測では、モデルから返された`message.content`は通常の文字列で、画像色のテキスト説明が内容になっています。
 
 <Note>
-  This page keeps only the Base64 PNG / data-URL paths that were revalidated successfully. Remote URLs, additional image formats, and more complex multi-image cases were not rechecked item by item in this pass.
+  現在ページではBase64 PNGとdata URLの2つの検証済み画像入力方式のみ記載しております。リモートURLや他の画像形式、複数画像入力の複雑なシーンについては今回再検証しておりません。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [Claude Fable 5 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
-- [Claude Fable 5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
-- [Claude Haiku 4.5 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/claude-haiku-4-5?utm_source=docs&utm_medium=related)
+- [Claude Fable 5価格比較：公式／Azure／Bedrock／Vertex＋Crazyrouter](https://crazyrouter.com/ja/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Claude Fable 5モデルページ：リアルタイム価格・実際のサンプル・利用コード](https://crazyrouter.com/ja/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Claude Haiku 4.5価格比較：公式／Azure／Bedrock／Vertex＋Crazyrouter](https://crazyrouter.com/ja/pricing/claude-haiku-4-5?utm_source=docs&utm_medium=related)

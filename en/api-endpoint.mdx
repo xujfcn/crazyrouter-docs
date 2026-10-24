@@ -1,8 +1,8 @@
 ---
-title: 'API Endpoints'
-description: 'API endpoint addresses and reference'
+title: "Proxy API Call Addresses"
+description: "Explanation of API Endpoint Addresses"
 ---
-> Last updated: 2026-07-20
+> Content updated: 2026-08-13
 
 ## API Base URL
 
@@ -10,40 +10,47 @@ description: 'API endpoint addresses and reference'
 https://api.crazyrouter.com
 ```
 
-`https://api.crazyrouter.com` is now the default international API access entry. Account login, billing, and the dashboard still use:
+`https://api.crazyrouter.com` has already been enabled as the default international API access point. Account login, recharging, and the console still use:
 
-```text
+```
 https://crazyrouter.com
 ```
 
 <Warning>
-Account and management endpoints must use the primary domain `https://crazyrouter.com`, including `/api/user/self`, `/api/token/*`, and `/api/log/*`. Do not send these paths to `https://api.crazyrouter.com` or `https://cn.crazyrouter.com`; those domains are reserved for model and media APIs and return `404 api_only_endpoint` for management routes. Model inference endpoints such as `/v1/chat/completions`, `/v1/messages`, and `/v1/models` should continue to use the API-specific domains.
+Account and management interfaces must use the main domain `https://crazyrouter.com`, including `/api/user/self`, `/api/token/*`, and `/api/log/*`. Do not send these paths to `https://api.crazyrouter.com` or `https://cn.crazyrouter.com`; these domains are only for model and media APIs, and using them incorrectly will return `404 api_only_endpoint`. Model inference endpoints (such as `/v1/chat/completions`, `/v1/messages`, `/v1/models`) still use the dedicated API domain.
 </Warning>
 
-For East Asia, prefer this API access address:
+East Asia region should preferentially use the following API access address:
 
-```text
+```
 https://cn.crazyrouter.com
 ```
 
-Before configuring an SDK, IDE, agent, or third-party client, use this page as the canonical reference for whether that tool should point to the root domain or the `/v1` path.
+If you are setting up a third-party client, SDK, IDE, or Agent, first confirm whether the tool should use the root domain or `/v1`:
 
+<Card title="View Access Address Instructions" icon="book" href="https://docs.crazyrouter.com/en/api-endpoint">
+  Follow this section to confirm whether to use the root domain or `/v1`, then return to the specific tool’s documentation to configure it.
+</Card>
 
-## Recommended Access Address
+## Recommended Access Addresses
 
-Use the international API entry `https://api.crazyrouter.com` by default for API access. Users in East Asia should prefer `https://cn.crazyrouter.com`. These addresses are for API requests only; account login, billing, dashboard, and pricing pages remain on `https://crazyrouter.com`.
+Default priority is the international API endpoint `https://api.crazyrouter.com`. Users in East Asia should prioritize `https://cn.crazyrouter.com`. These two addresses are for API requests only; web-based accounts, recharging, console, and pricing pages continue to use `https://crazyrouter.com`.
 
-## Which Base URL To Use
+## Addresses to Use for Different Clients
 
-| Use case | Default international entry | Preferred East Asia entry | Notes |
-|----------|-----------------------------|---------------------------|-------|
-| OpenAI-compatible SDKs / clients | `https://api.crazyrouter.com/v1` | `https://cn.crazyrouter.com/v1` | The client appends paths such as `/chat/completions` and `/models` |
-| Claude Code / Anthropic-native clients | `https://api.crazyrouter.com` | `https://cn.crazyrouter.com` | The client appends `/v1/messages` itself, so do not add `/v1` manually |
-| curl / raw HTTP requests | Full endpoint, for example `https://api.crazyrouter.com/v1/chat/completions` | Full endpoint, for example `https://cn.crazyrouter.com/v1/chat/completions` | Raw requests must include the full API path |
-| Account, wallet, token, and log management | `https://crazyrouter.com` | `https://crazyrouter.com` | Use for `/api/user/self`, `/api/token/*`, and `/api/log/*`; do not use an API-only domain |
+| Usage     | Default International Entry | East Asia Preferred Entry | Note |
+|-----------|----------------------------|--------------------------|------|
+| OpenAI-compatible SDK / Client | `https://api.crazyrouter.com/v1` | `https://cn.crazyrouter.com/v1` | The client will append `/chat/completions`, `/models`, etc., after this address |
+| Claude Code / Anthropic Native Client | `https://api.crazyrouter.com` | `https://cn.crazyrouter.com` | The client will concatenate `/v1/messages` itself; do not manually add `/v1` |
+| curl / manual HTTP request            | Use complete endpoint, e.g. `https://api.crazyrouter.com/v1/chat/completions` | Use complete endpoint, e.g. `https://cn.crazyrouter.com/v1/chat/completions` | For manual requests, the full API path needs to be written |
+| Account, Balance, Token, and Log Management Interfaces | `https://crazyrouter.com` | `https://crazyrouter.com` | Used for `/api/user/self`, `/api/token/*`, `/api/log/*`; do not use API-only domains |
 
 <Warning>
-If logs show `/v1/v1/models`, `/v1/v1/messages`, or `/v1/messages/v1/messages`, the client is duplicating API paths. For Claude Code / Anthropic-native clients, reset the base URL to the root domain. For OpenAI-compatible clients, keep only the `/v1` base URL.
+If you see `/v1/v1/models`, `/v1/v1/messages`, or `/v1/messages/v1/messages` in the logs, this means the client configuration is concatenating the API path redundantly. For Claude Code / Anthropic native clients, switch back to the root domain; for OpenAI compatible clients, only keep up to `/v1`.
+</Warning>
+
+<Warning>
+For Claude's native `tool_use`, Claude Code coding capabilities, and some IDE Agent tool invocation scenarios, Anthropic Messages route should be preferred, that is `POST /v1/messages`. The OpenAI-compatible `/v1/chat/completions` is better suited for simple conversations and basic compatibility access, but is not equivalent to Claude's native Messages API. If Claude models are accessed via OpenAI-compatible endpoints with tool invocation, tools may not launch reliably.
 </Warning>
 
 ## Main Endpoints
@@ -61,35 +68,35 @@ If logs show `/v1/v1/models`, `/v1/v1/messages`, or `/v1/messages/v1/messages`, 
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/v1beta/models/{model}:generateContent` | POST | Content generation |
-| `/v1beta/models/{model}:streamGenerateContent` | POST | Streaming generation |
+| `/v1beta/models/{model}:generateContent` | POST | Text Generation |
+| `/v1beta/models/{model}:streamGenerateContent` | POST | Streaming Generation |
 
 ### Image API
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/v1/images/generations` | POST | OpenAI image generation |
-| `/v1/images/edits` | POST | Image editing |
-| `/mj/submit/imagine` | POST | Midjourney image generation |
+| `/v1/images/generations` | POST | OpenAI Image Generation |
+| `/v1/images/edits` | POST | Image Editing |
+| `/mj/submit/imagine` | POST | Midjourney Drawing |
 | `/ideogram/v1/ideogram-v3/generate` | POST | Ideogram V3 |
-| `/kling/v1/images/generations` | POST | Kling image generation |
-| `/kling/v1/images/kolors-virtual-try-on` | POST | Kling virtual try-on |
+| `/kling/v1/images/generations` | POST | Kling Image Generation |
+| `/kling/v1/images/kolors-virtual-try-on` | POST | Kling Virtual Try-on |
 
 ### Video API
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/v1/video/create` | POST | Unified video creation |
-| `/v1/video/query` | GET | Unified video query |
-| `/kling/v1/videos/text2video` | POST | Kling text-to-video |
-| `/kling/v1/videos/image2video` | POST | Kling image-to-video |
-| `/kling/v1/videos/multi-image2video` | POST | Kling multi-image reference video |
-| `/kling/v1/videos/omni-video` | POST | Kling omni-video |
-| `/jimeng/submit/videos` | POST | Jimeng video submit |
-| `/jimeng/fetch/{task_id}` | GET | Jimeng task query |
-| `/luma/generations` | POST | Luma video generation |
-| `/runwayml/v1/image_to_video` | POST | Runway image-to-video |
-| `/runwayml/v1/tasks/{task_id}` | GET | Runway task query |
+| `/v1/video/create` | POST | Unified Video Creation |
+| `/v1/video/query` | GET  | Unified Video Query |
+| `/kling/v1/videos/text2video` | POST | Kling Text-to-Video |
+| `/kling/v1/videos/image2video` | POST | Kling Image-to-Video |
+| `/kling/v1/videos/multi-image2video` | POST | Kling Reference Image-to-Video |
+| `/kling/v1/videos/omni-video` | POST | Kling Omni Video |
+| `/jimeng/submit/videos` | POST | Jimeng Video Submission |
+| `/jimeng/fetch/{task_id}` | GET  | Jimeng Task Query |
+| `/luma/generations` | POST | Luma Video Generation |
+| `/runwayml/v1/image_to_video` | POST | Runway Image-to-Video |
+| `/runwayml/v1/tasks/{task_id}` | GET  | Runway Task Query |
 
 ### Audio API
 
@@ -98,18 +105,18 @@ If logs show `/v1/v1/models`, `/v1/v1/messages`, or `/v1/messages/v1/messages`, 
 | `/v1/audio/speech` | POST | Text-to-Speech (TTS) |
 | `/v1/audio/transcriptions` | POST | Speech-to-Text (STT) |
 
-### Other APIs
+### Other API
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/v1/embeddings` | POST | Embeddings |
-| `/v1/rerank` | POST | Reranking |
-| `/v1/models` | GET | Model list |
-| `/v1/files/uploads` | POST | Temporary local image upload |
-| `/v1/files/uploads/base64` | POST | Temporary Base64 image upload |
-| `/v1/files/uploads/url` | POST | Rehost a remote image as a temporary URL |
-| `/v1/files/uploads/presign` | POST | Presigned direct R2 upload |
+| `/v1/embeddings` | POST | Embedding Vectors |
+| `/v1/rerank` | POST | Re-ranking |
+| `/v1/models` | GET  | Model List |
+| `/v1/files/uploads` | POST | Local Image Temporary Upload |
+| `/v1/files/uploads/base64` | POST | Base64 Image Temporary Upload |
+| `/v1/files/uploads/url` | POST | Remote Image Transfer to Temporary URL |
+| `/v1/files/uploads/presign` | POST | Presigned Direct R2 Upload |
 
 <Note>
-All endpoints support HTTPS. The default international API entry is `https://api.crazyrouter.com`; users in East Asia should prefer `https://cn.crazyrouter.com`; account login, billing, and the dashboard still use `https://crazyrouter.com`.
+All endpoints support HTTPS. The default international API entry is `https://api.crazyrouter.com`; East Asia region should prioritize using `https://cn.crazyrouter.com`; account login, recharging, and the console still use `https://crazyrouter.com`.
 </Note>

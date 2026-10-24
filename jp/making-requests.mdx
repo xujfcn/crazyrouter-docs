@@ -1,26 +1,30 @@
 ---
-title: 'リクエストの作成'
-description: 'Crazyrouter API へ正しくリクエストする方法'
+title: "リクエストの送信"
+description: "APIリクエストを正しく送信する方法について理解する"
 ---
-> 更新日: 2026-06-14
+> 内容更新日: 2026-06-16
 
 ## リクエスト形式
 
-API リクエストは HTTPS と JSON リクエストボディを使用します。
+すべてのAPIリクエストはHTTPSプロトコルを使用し、リクエストボディはJSON形式です。
 
-### 必須ヘッダー
+<Note>
+デフォルトでは`https://api.crazyrouter.com/v1`を優先して使用します。もし、あるツールでルートドメインを記入すべきか`/v1`を記入すべきか分からない場合、まずは[API Endpointの説明](https://docs.crazyrouter.com/jp/api-endpoint)を参照してください。
+</Note>
 
-| Header | Value | 説明 |
-|--------|-------|------|
-| `Authorization` | `Bearer YOUR_API_KEY` | API 認証キー |
-| `Content-Type` | `application/json` | リクエストボディ形式 |
+### 必須リクエストヘッダー
 
-### 任意ヘッダー
+| Header | 値 | 説明 |
+|--------|-----|------|
+| `Authorization` | `Bearer YOUR_API_KEY` | API認証キー |
+| `Content-Type` | `application/json` | リクエストボディの形式 |
 
-| Header | Value | 説明 |
-|--------|-------|------|
+### オプションリクエストヘッダー
+
+| Header | 値 | 説明 |
+|--------|-----|------|
 | `Accept` | `application/json` | レスポンス形式 |
-| `Content-Encoding` | `gzip` | 任意。リクエストボディを gzip 圧縮して送信する場合に設定 |
+| `Content-Encoding` | `gzip` | オプション。リクエストボディがgzip圧縮されている場合に設定 |
 
 ## リクエスト例
 
@@ -35,13 +39,13 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-## gzip でリクエストボディを送信する
+## gzipを使用したリクエストボディの送信
 
-長いコンテキスト、長文ドキュメント、大量のメッセージ履歴など、リクエストボディが大きい場合は、元の JSON ボディを gzip 圧縮して送信できます。
+リクエストボディが大きい場合、例えば長いコンテキストや長文書、大量のメッセージ履歴を毎回アップロードする場合は、元のJSONリクエストボディをgzip圧縮して送信できます。
 
-gzip は転送形式だけを変更します。リクエストの意味は変わりません。Crazyrouter は JSON を解析する前にリクエストボディを自動で解凍します。
+gzipを有効にすると転送方法のみが変わり、リクエストの意味は変わりません。サーバー側はJSON解析前に自動で解凍します。
 
-次のヘッダーを追加してください。
+リクエストヘッダーを追加する必要があります：
 
 ```http
 Content-Type: application/json
@@ -49,7 +53,7 @@ Content-Encoding: gzip
 ```
 
 <Note>
-  `Content-Encoding: gzip` は「リクエストボディ自体が gzip 圧縮されている」ことを示します。通常レスポンス圧縮に使われる `Accept-Encoding: gzip` とは異なります。
+  `Content-Encoding: gzip`は「リクエストボディがgzip圧縮されている」ことを示します。これは`Accept-Encoding: gzip`とは異なり、通常後者はレスポンス圧縮で使用されます。
 </Note>
 
 ### Python
@@ -62,7 +66,7 @@ import requests
 payload = {
     "model": "gpt-5.5",
     "messages": [
-        {"role": "user", "content": "長いコンテキストやドキュメント内容をここに入れます..."}
+        {"role": "user", "content": "这里放很长的上下文或文档内容..."}
     ],
     "stream": False
 }
@@ -92,7 +96,7 @@ import zlib from "node:zlib";
 const payload = {
   model: "gpt-5.5",
   messages: [
-    { role: "user", content: "長いコンテキストやドキュメント内容をここに入れます..." },
+    { role: "user", content: "这里放很长的上下文或文档内容..." },
   ],
   stream: false,
 };
@@ -122,7 +126,7 @@ cat > body.json <<'JSON'
   "messages": [
     {
       "role": "user",
-      "content": "長いコンテキストやドキュメント内容をここに入れます..."
+      "content": "这里放很长的上下文或文档内容..."
     }
   ],
   "stream": false
@@ -138,20 +142,20 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   --data-binary @body.json.gz
 ```
 
-### ボディサイズに応じて gzip を自動で有効にする
+### サイズに応じて自動的にgzipを有効化
 
-システムがワークフローになっている場合でも、どの業務ステップで gzip を使うかを手動で分ける必要は通常ありません。共通の HTTP クライアント層で JSON を bytes に変換し、サイズがしきい値を超えた場合だけ gzip するのがおすすめです。
+システムがワークフローの場合、一般的にどのリクエストを圧縮するかしないかをビジネスロジックで手動で区別する必要はありません。統一されたHTTPクライアントラッパーでJSONボディのサイズを判定し、閾値を超えた場合に自動的にgzipすることを推奨します。
 
-推奨しきい値：
+推奨閾値：
 
 ```text
-body >= 128KB：gzip を有効化
-body < 128KB：通常の JSON として送信
+body >= 128KB：启用 gzip
+body < 128KB：保持原样发送
 ```
 
-リクエストが MB 単位になることが多い場合は、しきい値を `256KB` にしても構いません。非常に小さいリクエストは gzip ヘッダーや圧縮処理の影響で、逆に大きくなることがあります。
+リクエストが頻繁にMB単位になる場合は、閾値を`256KB`に設定しても構いません。小さいリクエストはgzipを強制することは推奨されません。圧縮オーバーヘッドやgzipヘッダーにより、サイズがむしろ大きくなる可能性があります。
 
-Python ラッパー例：
+Pythonラッパー例：
 
 ```python
 import gzip
@@ -175,7 +179,7 @@ def post_json(url, payload, api_key, gzip_threshold=128 * 1024):
     return requests.post(url, headers=headers, data=body, timeout=120)
 ```
 
-Node.js ラッパー例：
+Node.jsラッパー例：
 
 ```js
 import zlib from "node:zlib";
@@ -203,15 +207,15 @@ async function postJson(url, payload, apiKey, gzipThreshold = 128 * 1024) {
 }
 ```
 
-次のような場合に適しています。
+適用シーン：
 
-- 1 回のリクエストボディが 1 MB を超えることが多い
-- 長いコンテキストや長文ドキュメントを繰り返しアップロードする
-- クライアント側で HTTP body とヘッダーを直接制御できる
+- 単一リクエストボディが通常1MBを超える場合
+- 長いコンテキストや長文書を繰り返しアップロードする場合
+- クライアント側でHTTPボディやリクエストヘッダーを直接制御できる場合
 
-## ストリーミング
+## ストリーミングリクエスト
 
-`stream: true` を設定すると、SSE 形式のストリーミング出力を利用できます。
+`stream: true`を設定してSSEストリーミング出力を有効にします：
 
 ```bash
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -224,12 +228,12 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-ストリーミングレスポンスは Server-Sent Events 形式です。各イベントは `data: ` で始まり、最後は `data: [DONE]` で終了します。
+ストリーミングレスポンス形式はServer-Sent Events（SSE）で、各イベントは`data: `で始まり、最後は`data: [DONE]`で終了します。
 
 ## オンラインデバッグ
 
-次の方法で API をテストできます。
+APIのオンラインデバッグには次の方法が使用できます：
 
-- **Crazyrouter Playground**: ログイン後、[crazyrouter.com/console/playground](https://crazyrouter.com/console/playground) でブラウザから直接テスト
-- **cURL**: コマンドラインからリクエスト送信
-- **Postman / Apifox**: API デバッグツールを利用
+1. **Crazyrouter Playground** - ログイン後、[crazyrouter.com/console/playground](https://crazyrouter.com/console/playground)にアクセスし、ブラウザ上で直接テスト
+2. **cURL** - コマンドラインツールでリクエストを送信
+3. **Postman / Apifox** - APIデバッグツールを利用

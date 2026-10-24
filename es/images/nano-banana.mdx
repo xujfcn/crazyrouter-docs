@@ -1,0 +1,132 @@
+---
+title: "Nano Banana"
+description: "Genera y edita imágenes usando nano-banana a través de la API de imágenes de OpenAI"
+---
+> Contenido actualizado: 2026-06-06
+
+# Nano Banana
+
+```
+POST /v1/images/generations
+```
+
+`nano-banana` es el alias público de `nano-banana`. Del lado del usuario, utiliza un protocolo compatible con OpenAI Images de forma unificada; la transmisión nativa Gemini / Vertex, conversión de campos y selección de enrutamiento son gestionadas por Crazyrouter en el servidor.
+
+<Warning>
+  Las solicitudes como generación de imágenes, edición de imágenes y solicitud de referencias múltiples suelen requerir más tiempo. Para entornos de producción, se debe priorizar el uso de la ruta principal `https://api.crazyrouter.com/v1`; el endpoint de generación completo es `https://api.crazyrouter.com/v1/images/generations`. El inicio de sesión de la cuenta, recargas y consola utilizan `https://crazyrouter.com`.
+</Warning>
+
+## Nombres de modelos
+
+| Nombre de modelo recomendado | Modelo subyacente equivalente |
+|------|------|
+| `nano-banana` | `nano-banana` |
+
+Se recomienda utilizar `nano-banana` en el código cliente. Si tu sistema ya utiliza directamente `nano-banana`, también puedes continuar llamando a través del mismo punto de entrada `/v1/images/generations`.
+
+## Parámetros de solicitud
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `model` | string | Sí | Se recomienda `nano-banana`; también es compatible con `nano-banana` |
+| `prompt` | string | Sí | Instrucción de generación o edición |
+| `image_input` | string o string[] | No | URL de imagen de referencia; si no se proporciona, se genera la imagen a partir de texto |
+| `resolution` | string | No | `1K`, `2K`, `4K` |
+| `aspect_ratio` | string | No | Como `1:1`, `16:9`, `9:16`, `21:9`, `auto` |
+| `output_format` | string | No | `png`, `jpeg` / `jpg` |
+| `output_compression` | integer | No | `0-100`, utilizado para la calidad de compresión JPEG |
+| `n` | integer | No | Cantidad a generar, valor predeterminado `1` |
+
+<Note>
+  No incluya campos nativos de Gemini en solicitudes de clientes, como `generationConfig`, `imageConfig`, `imageOutputOptions`, `image_output_options`. Estos pertenecen a detalles del proveedor ascendente; Crazyrouter los convierte automáticamente desde parámetros unificados.
+</Note>
+
+## Ejemplo de generación de imagen desde texto
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "nano-banana",
+    "prompt": "A clean banana icon on a white background, minimal product style",
+    "resolution": "1K",
+    "aspect_ratio": "1:1",
+    "output_format": "png"
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://api.crazyrouter.com/v1",
+)
+
+response = client.images.generate(
+    model="nano-banana",
+    prompt="A clean banana icon on a white background, minimal product style",
+    n=1,
+    extra_body={
+        "resolution": "1K",
+        "aspect_ratio": "1:1",
+        "output_format": "png",
+    },
+)
+
+print(response.data[0].url or response.data[0].b64_json)
+```
+
+</CodeGroup>
+
+## Ejemplo de edición con imagen de referencia
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "nano-banana",
+    "prompt": "保持主体不变，把背景改成白色电商棚拍风格",
+    "image_input": [
+      "https://example.com/product.png"
+    ],
+    "resolution": "1K",
+    "aspect_ratio": "1:1",
+    "output_format": "jpeg",
+    "output_compression": 85
+  }'
+```
+
+## Respuesta
+
+La respuesta mantiene el estilo de OpenAI Images. Por defecto se da prioridad a la lectura de `data[0].url`; algunos canales compatibles pueden devolver `data[0].b64_json`.
+
+```json
+{
+  "created": 1778990000,
+  "data": [
+    {
+      "url": "https://media.crazyrouter.com/task-artifacts/2026/05/17/sync-image/request-id-1.png"
+    }
+  ]
+}
+```
+
+## Errores comunes
+
+| Uso incorrecto | Uso correcto |
+|------|------|
+| Llamar directamente a `/v1beta/models/nano-banana:generateContent` | Utiliza `POST /v1/images/generations` en su lugar |
+| Incluir `image_output_options` en la solicitud | Utiliza los parámetros unificados `output_format`, `output_compression` |
+| Configurar solo la URL base como `https://api.crazyrouter.com` y dejar que el SDK agregue la ruta de OpenAI | El SDK de OpenAI debe usar `https://api.crazyrouter.com/v1` |
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Página del modelo Nano Banana 2: precio en tiempo real, muestras reales, código de llamada](https://crazyrouter.com/es/models/google/nano-banana-2?utm_source=docs&utm_medium=related)
+- [Página del modelo Nano Banana Pro: precio en tiempo real, muestras reales, código de llamada](https://crazyrouter.com/es/models/google/nano-banana-pro?utm_source=docs&utm_medium=related)
+- [Todos los modelos y precios de Google](https://crazyrouter.com/es/models/google?utm_source=docs&utm_medium=related)

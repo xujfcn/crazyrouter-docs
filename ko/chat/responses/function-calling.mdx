@@ -1,16 +1,16 @@
 ---
-title: "Responses Function Calling"
-description: "2026-03-23 Crazyrouter 프로덕션 환경 검증 기반의 Responses 도구 호출"
+title: "응답 함수 호출"
+description: "응답 도구 호출이 2026-03-23 Crazyrouter 프로덕션에서 검증됨"
 ---
-> 업데이트: 2026-06-06
+> 내용 업데이트: 2026-06-09
 
-# Responses Function Calling
+# 응답 함수 호출
 
 ```
 POST /v1/responses
 ```
 
-2026년 3월 23일 기준, Crazyrouter 프로덕션 환경에서 `gpt-5.5`가 Responses API에서 `function_call`을 안정적으로 반환하는 것이 검증되었습니다.
+2026년 3월 23일 기준으로 Crazyrouter 프로덕션에서 `gpt-5.5`가 Responses API에서 신뢰성 있게 `function_call`를 반환함이 확인되었습니다.
 
 <Note>
   Claude는 현재 `POST /v1/responses`를 지원하지 않습니다. Claude의 도구 호출이 필요하다면 `POST /v1/messages` 또는 `POST /v1/chat/completions`를 사용하세요.
@@ -18,7 +18,7 @@ POST /v1/responses
 
 ---
 
-## 1단계: 모델이 함수 호출을 생성하도록 하기
+## 1단계: 모델이 함수 호출을 생성하도록 하십시오
 
 ```bash
 curl https://api.crazyrouter.com/v1/responses \
@@ -45,7 +45,7 @@ curl https://api.crazyrouter.com/v1/responses \
   }'
 ```
 
-프로덕션 환경에서 실제로 응답되는 핵심 형태:
+프로덕션에서 관찰된 응답 형태:
 
 ```json
 {
@@ -61,9 +61,9 @@ curl https://api.crazyrouter.com/v1/responses \
 
 ---
 
-## 2단계: 함수 결과 회신하기
+## 2단계: 도구 결과 반환하기
 
-`function_call`을 받은 후, 직접 함수를 실행하여 얻은 결과를 `function_call_output`으로 다시 보냅니다.
+`function_call`을(를) 받으면, 실제 도구 결과를 `function_call_output`로 다시 전송하십시오:
 
 ```json
 {
@@ -100,10 +100,10 @@ curl https://api.crazyrouter.com/v1/responses \
 ```
 
 <Note>
-  현재 페이지는 프로덕션 환경에서 성공적으로 검증된 `function_call` 경로만 다룹니다. 더 복잡한 다중 도구 연쇄 호출이나 스트리밍 파라미터 증분에 대해서는 연동 전에 직접 당일 프로덕션 검증을 다시 수행하세요.
+  이 페이지에서는 프로덕션에서 재현된 `function_call` 경로만 유지합니다. 더 복잡한 다중 도구 체인 또는 스트리밍 인자 델타의 경우, 의존하기 전에 같은 날에 다시 검증하시기 바랍니다.
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 관련 페이지 (crazyrouter.com)
+## crazyrouter.com 관련 문서
 
-- [OpenAI 전체 모델과 가격](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [실시간 가격이 포함된 모든 OpenAI 모델](https://crazyrouter.com/ko/models/openai?utm_source=docs&utm_medium=related)

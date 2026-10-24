@@ -1,0 +1,48 @@
+---
+title: 'Tutorial de configuración de ChatGPT Sidebar'
+description: 'Configura la API de Crazyrouter en la extensión de navegador ChatGPT Sidebar y utiliza los modelos más recientes y verificados.'
+---
+> Contenido actualizado: 2026-06-09
+
+## Descripción general
+
+ChatGPT Sidebar es una extensión de asistente de IA en la barra lateral del navegador, ideal para preguntas instantáneas, traducción, resúmenes y asistencia de lectura en cualquier página web. Al integrarla con Crazyrouter, se recomienda priorizar el uso de sus puntos de acceso personalizados `Custom API` o `OpenAI`, y primero probar la ruta mínima exitosa con un modelo comprobado en un entorno de producción.
+
+## Pasos de configuración
+
+<Steps>
+  <Step title="Instalar extensión">
+    Instala ChatGPT Sidebar desde la tienda web de Chrome.
+  </Step>
+  <Step title="Abrir configuración">
+    Haz clic en el ícono de la extensión para entrar en `Settings`.
+  </Step>
+  <Step title="Configurar API">
+    - **Proveedor de API**: selecciona `Custom API` o `OpenAI`
+    - **URL de API**: `https://api.crazyrouter.com/v1`
+    - **Clave API**: `sk-xxx`
+    - **Modelo**: `gpt-5.5`
+  </Step>
+  <Step title="Guardar">
+    Guarda la configuración y luego haz clic en el ícono de la extensión en cualquier página para comenzar a usarla.
+  </Step>
+</Steps>
+
+## Modelos recomendados
+
+| Escenario | Modelo |
+|------|------|
+| Verificación inicial de la ruta | `gpt-5.5` |
+| Texto largo de alta calidad y explicaciones | `claude-opus-4-8` |
+| Alternativa Gemini | `gemini-3.1-pro` |
+
+<Note>
+  `gpt-5.5` fue comprobado en un entorno de producción de Crazyrouter el 23 de marzo de 2026 y es adecuado como línea base principal de compatibilidad OpenAI para extensiones de navegador.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Página del modelo GPT Image 1.5: precio en tiempo real, ejemplos reales, código de invocación](https://crazyrouter.com/es/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Página del modelo GPT Image 2: precio en tiempo real, ejemplos reales, código de invocación](https://crazyrouter.com/es/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Todos los modelos y precios de OpenAI](https://crazyrouter.com/es/models/openai?utm_source=docs&utm_medium=related)

@@ -1,37 +1,38 @@
 ---
-title: "Video Generation Alias"
-description: "POST /v1/video/generations compatibility alias for clients that already depend on this video-generation path"
+title: "Псевдоним генерации видео"
+description: "POST /v1/video/generations - совместимый псевдоним-интерфейс для клиентов, которые зависят от этого пути, для отправки заданий на генерацию видео"
 ---
-> Дата обновления: 2026-06-07
+> Обновление содержания: 2026-06-30
 
-# Video Generation Alias
+
+# Псевдоним генерации видео
 
 ```
 POST /v1/video/generations
 ```
 
-This is a Crazyrouter compatibility alias for clients or middleware that are already pinned to the `/v1/video/generations` path.
+Это совместимый псевдоним-маршрут от Crazyrouter, подходит для клиентов или промежуточных уровней, которые постоянно используют путь `/v1/video/generations`.
 
-## Authentication
+## Аутентификация
 
 ```http
 Authorization: Bearer YOUR_API_KEY
 ```
 
-## When To Use It
+## Когда его использовать
 
-- your client is hardcoded to `/v1/video/generations`
-- you are migrating an older video workflow and do not want to change the path
-- you need to preserve compatibility with an existing third-party request shape
-- you want to submit Wan text-to-video models such as `wan2.5-t2v-preview` or `wan2.2-t2v-plus`
+- Ваш клиент жестко запрограммирован на путь `/v1/video/generations`
+- Вы переносите старый видео рабочий процесс и не хотите менять путь вызова
+- Вам требуется совместимость с форматом запросов сторонних приложений
+- Вы подаете заявку на создание видео через Wan, например, `wan2.5-t2v-preview` или `wan2.2-t2v-plus`
 
-For new integrations, prefer:
+Если вы разрабатываете новое подключение, рекомендуем:
 
-- Wan text-to-video: use this page's `POST /v1/video/generations`
-- Veo / unified-video workflows: use `POST /v1/video/create` with `veo-3.1-fast` or `veo-3.1-quality`
-- OpenAI-compatible video workflows: use `POST /v1/videos`
+- Генерация видео Wan: используйте `POST /v1/video/generations` на этой странице
+- Veo / унифицированный видео рабочий процесс: используйте `POST /v1/video/create`, отправьте `veo-3.1-fast` или `veo-3.1-quality`
+- Официальный совместимый видео рабочий процесс OpenAI: используйте `POST /v1/videos`
 
-## Minimal Request Example
+## Минимальный пример запроса
 
 ### Wan 2.2 T2V Plus
 
@@ -41,13 +42,13 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "wan2.2-t2v-plus",
-    "prompt": "A calm cinematic shot of clouds over mountains",
+    "prompt": "一段平静的电影感山间云海镜头",
     "seconds": "5",
     "size": "480P"
   }'
 ```
 
-### Generic Minimal Example
+### Общий минимальный пример
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/video/generations   -H "Content-Type: application/json"   -H "Authorization: Bearer YOUR_API_KEY"   -d '{
@@ -56,19 +57,20 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations   -H "Content-Type
   }'
 ```
 
-## Typical Success Response
+## Типичный успешный ответ
 
 ```json
 {
   "id": "video_task_abc123",
+  "task_id": "video_task_abc123",
   "status": "processing",
   "status_update_time": 1709123456
 }
 ```
 
-## Error Response Verified Locally
+## Ошибка, обнаруженная при локальной проверке
 
-On the local `http://127.0.0.1:4000` environment, this route was verified to exist. When the model is temporarily unavailable, it returns a business error rather than `404`:
+В вашей локальной среде `http://127.0.0.1:4000` этот маршрут уже был проверен. Когда модель временно недоступна, возвращается бизнес-ошибка, а не `404`:
 
 ```json
 {
@@ -78,21 +80,21 @@ On the local `http://127.0.0.1:4000` environment, this route was verified to exi
 }
 ```
 
-## Notes
+## Важные замечания
 
-- request fields vary by video model and upstream capability
-- model availability depends on the token whitelist and current upstream state
-- Wan text-to-video uses `model`, `prompt`, `seconds`, and `size`; the verified `wan2.2-t2v-plus` combinations are `seconds: "5"` with `size: "480P"` or `"1080P"`.
-- Do not submit `wan2.2-t2v-plus` to `/alibailian/api/v1/services/aigc/video-generation/video-synthesis`.
-- after task creation, query status with `GET /v1/video/generations/{task_id}`
+- Поля тела запроса могут изменяться в зависимости от конкретной видеомодели и возможностей интеграции
+- Доступность `model` зависит от текущего белого списка токенов и статуса вышестоящего канала
+- Генерация видео Wan использует `model`, `prompt`, `seconds`, `size`; проверенные комбинации `wan2.2-t2v-plus` - это `seconds: "5"`, `size: "480P"` или `"1080P"`.
+- `wan2.2-t2v-plus` не должен подаваться на `/alibailian/api/v1/services/aigc/video-generation/video-synthesis`.
+- После успешного создания задачи вы можете продолжить вызов `GET /v1/video/generations/{task_id}` для проверки статуса
 
 <Note>
-This route is a compatibility alias. It does not guarantee that every video model shares the exact same body schema. Wan text-to-video currently uses this route; Veo and unified-video workflows should use `/v1/video/create` with `veo-3.1-fast` or `veo-3.1-quality`.
+Этот маршрут является совместимым псевдонимом и не гарантирует, что все видеомодели полностью идентичны по полям запроса. На данный момент для генерации видео Wan рекомендуется использовать этот маршрут; для Veo или унифицированного рабочего видеопроцесса используйте `/v1/video/create` и передайте `veo-3.1-fast` или `veo-3.1-quality`.
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [Wan 2.2 T2V Plus: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/alibaba/wan2-2-t2v-plus?utm_source=docs&utm_medium=related)
-- [GPT Image 1.5: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [Все модели Alibaba Cloud с актуальными ценами](https://crazyrouter.com/en/models/alibaba?utm_source=docs&utm_medium=related)
+- [Страница модели Wan 2.2 T2V Plus: актуальная цена, реальные примеры, код вызова](https://crazyrouter.com/ru/models/alibaba/wan2-2-t2v-plus?utm_source=docs&utm_medium=related)
+- [Страница модели GPT Image 1.5: актуальная цена, реальные примеры, код вызова](https://crazyrouter.com/ru/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Все модели и цены Alibaba Cloud](https://crazyrouter.com/ru/models/alibaba?utm_source=docs&utm_medium=related)

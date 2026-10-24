@@ -1,12 +1,12 @@
 ---
-title: "AIGC GV VOD Guide"
-description: "Call GV / Google Veo video models through Crazyrouter's Tencent VOD route"
+title: "AIGC GV VOD Usage Guide"
+description: "Use the GV / Google Veo video model via Crazyrouter's Tencent VOD connection"
 ---
-> Last updated: 2026-06-24
+> Content updated: 2026-06-29
 
-# AIGC GV VOD Guide
+# AIGC GV VOD Usage Guide
 
-`aigc-video-gv-*` models are GV / Google Veo video models exposed through Crazyrouter's Tencent VOD route. They use the same OpenAI-style async video route as AIGC Kling VOD:
+`aigc-video-gv-*` is the GV / Google Veo video model connected by Crazyrouter through the Tencent VOD route. The calling method is the same as AIGC Kling VOD, using the OpenAI-style asynchronous video API:
 
 ```http
 POST /v1/video/generations
@@ -14,22 +14,22 @@ GET /v1/video/generations/{task_id}
 ```
 
 <Note>
-  `aigc-video-gv-*` only uses `/v1/video/generations` and the matching query route. Do not send these models to `/v1/video/create`; a route mismatch will surface as `model_not_found` or a similar upstream error.
+  `aigc-video-gv-*` only uses `/v1/video/generations` and the corresponding query route. Do not send these models to `/v1/video/create`; a route mismatch will result in `model_not_found` or a similar upstream error.
 </Note>
 
 ## Available Models
 
-| Model | Upstream version | Notes |
+| Model | Upstream Version | Description |
 |------|------|------|
-| `aigc-video-gv-3.1` | GV 3.1 | Quality version with audio support |
-| `aigc-video-gv-3.1-fast` | GV 3.1 Fast | Faster version with audio support |
-| `aigc-video-gv-3.1-lite` | GV 3.1 Lite | Lightweight version with audio support |
+| `aigc-video-gv-3.1` | GV 3.1 | High-quality version, supports videos with audio |
+| `aigc-video-gv-3.1-fast` | GV 3.1 Fast | Faster version, supports videos with audio |
+| `aigc-video-gv-3.1-lite` | GV 3.1 Lite | Lightweight version, supports videos with audio |
 
 <Note>
-  Tencent VOD GV 3.1 is a Google Veo route, not Kling. Do not use model names such as `aigc-video-kling-3.1`.
+  Tencent VOD's GV 3.1 is the Google Veo route, not Kling. Do not use model names like `aigc-video-kling-3.1`.
 </Note>
 
-## Create a Task
+## Creating a Task
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/video/generations \
@@ -46,9 +46,9 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
   }'
 ```
 
-## Image and Multi-Image Reference
+## Image-to-Video and Multi-Image Reference
 
-Use `image` for a single input image. For multi-image references, use `metadata.image_list`:
+For single image input, use `image`; for multi-image reference, use `metadata.image_list`:
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/video/generations \
@@ -75,24 +75,24 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
 ```
 
 <Warning>
-  GV multi-image input must be sent through `FileInfos`. Crazyrouter converts `image_list` into `FileInfos` and does not use `LastFrameUrl` for GV multi-image requests.
+  GV multi-image input must be provided through `FileInfos`. The site will convert `image_list` to `FileInfos`, and will not use `LastFrameUrl` for GV multi-image requests.
 </Warning>
 
-## Common `metadata` Fields
+## Common Metadata Fields
 
 | Field | Description |
 |------|------|
-| `resolution` | `720P`, `1080P`, `2K`, or `4K`. Available specs are shown on the Pricing page |
-| `sound` | Audio generation toggle: `true` / `false`, `on` / `off` |
-| `audio_generation` | Direct `Enabled` / `Disabled` value |
-| `image_list` | Multi-image reference list |
-| `reference_type` / `ReferenceType` | GV reference type, commonly `asset` or `style` |
+| `resolution` | `720P`, `1080P`, `2K`, `4K`. The actual available specifications are subject to the Pricing page |
+| `sound` | Whether to generate sound, supports `true` / `false`, `on` / `off` |
+| `audio_generation` | Directly pass `Enabled` / `Disabled` |
+| `image_list` | Multi-image reference array |
+| `reference_type` / `ReferenceType` | GV reference types, typically `asset` or `style` |
 
-Use the live [Pricing page](/pricing) as the source of truth for prices, discounts, and enabled specs.
+Pricing, discounts, and available specifications are subject to the [Pricing Page](https://crazyrouter.com/en/pricing).
 
 {/* crazyrouter-model-links v2 */}
-## Related on crazyrouter.com
+## Related Pages
 
-- [Google Veo 3.1 model page: live price, real samples, code](https://crazyrouter.com/en/models/google/aigc-video-gv-3-1?utm_source=docs&utm_medium=related)
-- [Kling 2.6 model page: live price, real samples, code](https://crazyrouter.com/en/models/kling/aigc-video-kling-2-6?utm_source=docs&utm_medium=related)
-- [All Google models with live prices](https://crazyrouter.com/en/models/google?utm_source=docs&utm_medium=related)
+- [Google Veo 3.1 Model Page: Real-time Pricing, Real Examples, Invocation Code](https://crazyrouter.com/en/models/google/aigc-video-gv-3-1?utm_source=docs&utm_medium=related)
+- [Kling 2.6 Model Page: Real-time Pricing, Real Examples, Invocation Code](https://crazyrouter.com/en/models/kling/aigc-video-kling-2-6?utm_source=docs&utm_medium=related)
+- [All Google Models and Prices](https://crazyrouter.com/en/models/google?utm_source=docs&utm_medium=related)

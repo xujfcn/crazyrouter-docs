@@ -1,28 +1,29 @@
 ---
-title: 'GPTs Conversations'
-description: 'Call OpenAI GPTs applications via API'
+title: "Диалог с GPTs"
+description: "Вызовайте приложение OpenAI GPTs через API"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-06
 
-## Overview
 
-Crazyrouter supports calling OpenAI GPTs (custom GPT applications) through the standard Chat Completions API. Simply set the model name to the GPTs-specific format.
+## Обзор
 
-## Model Name Format
+Crazyrouter поддерживает вызовы OpenAI GPTs (кастомные GPT-приложения) через стандартный Chat Completions API. Просто задайте имя модели в специально формате GPTs.
+
+## Формат имени модели
 
 ```
 gpt-4-gizmo-{gizmo_id}
 ```
 
-The `gizmo_id` is the unique identifier for the GPT, which can be extracted from the GPTs URL.
+Где `gizmo_id` — это уникальный идентификатор GPTs, который можно получить из URL приложения GPTs.
 
-## Getting the Gizmo ID
+## Получение Gizmo ID
 
-1. Visit the [ChatGPT GPTs Store](https://chatgpt.com/gpts)
-2. Open the target GPT application
-3. Extract the ID from the URL: `https://chatgpt.com/g/g-B3hgivKK9-xxx` → ID is `g-B3hgivKK9`
+1. Перейдите в [магазин ChatGPT GPTs](https://chatgpt.com/gpts)
+2. Откройте нужное GPT-приложение
+3. Извлеките ID из URL: `https://chatgpt.com/g/g-B3hgivKK9-xxx` → ID: `g-B3hgivKK9`
 
-## Code Examples
+## Пример кода
 
 <CodeGroup>
 
@@ -34,11 +35,11 @@ client = OpenAI(
     base_url="https://api.crazyrouter.com/v1"
 )
 
-# Chat with a GPT
+# 使用 GPTs 对话
 response = client.chat.completions.create(
     model="gpt-4-gizmo-g-B3hgivKK9",
     messages=[
-        {"role": "user", "content": "Hello, please introduce yourself"}
+        {"role": "user", "content": "你好，请介绍一下你自己"}
     ]
 )
 
@@ -52,7 +53,7 @@ curl -X POST https://api.crazyrouter.com/v1/chat/completions \
   -d '{
     "model": "gpt-4-gizmo-g-B3hgivKK9",
     "messages": [
-      {"role": "user", "content": "Hello, please introduce yourself"}
+      {"role": "user", "content": "你好，请介绍一下你自己"}
     ]
   }'
 ```
@@ -60,16 +61,16 @@ curl -X POST https://api.crazyrouter.com/v1/chat/completions \
 </CodeGroup>
 
 <Warning>
-  GPTs calls require upstream channel support. Not all GPTs are available - availability depends on channel configuration.
+  Для вызова GPTs требуется поддержка на стороне upstream-канала. Не все GPTs доступны — это зависит от конфигурации канала.
 </Warning>
 
 <Note>
-  GPTs conversations support streaming output by setting `stream: true`. Billing is calculated based on GPT-4 model pricing.
+  Диалоги с GPTs поддерживают потоковый вывод, для этого установите `stream: true`. Оплата производится по цене модели GPT-4.
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [GPT Image 1.5: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [Все модели OpenAI с актуальными ценами](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [Страница модели GPT Image 1.5: актуальные цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Страница модели GPT Image 2: актуальные цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Все модели OpenAI и их цены](https://crazyrouter.com/ru/models/openai?utm_source=docs&utm_medium=related)

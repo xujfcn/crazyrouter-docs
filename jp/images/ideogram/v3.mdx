@@ -1,32 +1,32 @@
 ---
 title: "Ideogram V3"
-description: "Use the Ideogram V3 API for image generation, editing, blending, reframing, and background replacement"
+description: "Ideogram V3 API を使用して画像生成、編集、ミックス、再構成、背景置換を行う"
 ---
-> 更新日: 2026-06-23
+> 内容更新日: 2026-06-09
 
 # Ideogram V3
 
-Ideogram V3 is the latest generation text-to-image model with significant improvements in text rendering and image quality.
+Ideogram V3 は最新世代のテキストから画像へのモデルであり、文字描画や画像品質が大幅に向上しています。
 
-## Generate Image
+## 画像生成
 
 ```
 POST /ideogram/v1/ideogram-v3/generate
 ```
 
-### Request Parameters
+### リクエストパラメータ
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `prompt` | string | Yes | Image description prompt |
-| `aspect_ratio` | string | No | Aspect ratio, e.g. `ASPECT_1_1`, `ASPECT_16_9`, `ASPECT_9_16` |
-| `model` | string | No | Model version, defaults to `V_3` |
-| `magic_prompt_option` | string | No | Prompt enhancement: `AUTO`, `ON`, `OFF` |
-| `rendering_speed` | string | No | Rendering speed: `DEFAULT`, `TURBO`, `QUALITY` |
-| `style_type` | string | No | Style type: `AUTO`, `GENERAL`, `REALISTIC`, `DESIGN` |
-| `negative_prompt` | string | No | Negative prompt |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `prompt` | string | はい | 画像の説明用プロンプト |
+| `aspect_ratio` | string | いいえ | アスペクト比（例：`ASPECT_1_1`、`ASPECT_16_9`、`ASPECT_9_16`） |
+| `model` | string | いいえ | モデルバージョン（デフォルトは `V_3`） |
+| `magic_prompt_option` | string | いいえ | プロンプト強化：`AUTO`、`ON`、`OFF` |
+| `rendering_speed` | string | いいえ | レンダリング速度：`DEFAULT`、`TURBO`、`QUALITY` |
+| `style_type` | string | いいえ | スタイルタイプ：`AUTO`、`GENERAL`、`REALISTIC`、`DESIGN` |
+| `negative_prompt` | string | いいえ | ネガティブプロンプト |
 
-### Request Examples
+### リクエスト例
 
 <CodeGroup>
 
@@ -63,7 +63,7 @@ print(response.json())
 
 </CodeGroup>
 
-### Response Example
+### レスポンス例
 
 ```json
 {
@@ -82,22 +82,22 @@ print(response.json())
 
 ---
 
-## Edit Image
+## 画像編集
 
 ```
 POST /ideogram/v1/ideogram-v3/edit
 ```
 
-Edit and modify an existing image.
+既存画像に対して編集・修正を行います。
 
-### Request Parameters
+### リクエストパラメータ
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `prompt` | string | Yes | Edit description |
-| `image` | string | Yes | Original image URL or Base64 |
-| `mask` | string | No | Mask image, marking the area to be edited |
-| `style_type` | string | No | Style type |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `prompt` | string | はい | 編集内容の説明 |
+| `image` | string | はい | 元画像URLまたはBase64 |
+| `mask` | string | いいえ | マスク画像（編集する領域を指定） |
+| `style_type` | string | いいえ | スタイルタイプ |
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/ideogram/v1/ideogram-v3/edit \
@@ -112,19 +112,19 @@ curl -X POST https://api.crazyrouter.com/ideogram/v1/ideogram-v3/edit \
 
 ---
 
-## Remix Image
+## Remix画像
 
 ```
 POST /ideogram/v1/ideogram-v3/remix
 ```
 
-Generate variations based on a reference image and new prompt.
+参考画像と新しいプロンプトに基づきバリエーション画像を生成します。
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `prompt` | string | Yes | New prompt |
-| `image` | string | Yes | Reference image |
-| `image_weight` | number | No | Reference image weight, 0-100 |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `prompt` | string | はい | 新しいプロンプト |
+| `image` | string | はい | 参考画像 |
+| `image_weight` | number | いいえ | 参考画像の重み（0～100） |
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/ideogram/v1/ideogram-v3/remix \
@@ -139,33 +139,33 @@ curl -X POST https://api.crazyrouter.com/ideogram/v1/ideogram-v3/remix \
 
 ---
 
-## Reframe
+## Reframe再構成
 
 ```
 POST /ideogram/v1/ideogram-v3/reframe
 ```
 
-Expand the image canvas, generating content beyond the original boundaries.
+画像キャンバスを拡張し、元画像の枠を超えた内容を生成します。
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `image` | string | Yes | Original image |
-| `resolution` | string | No | Target resolution |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `image` | string | はい | 元画像 |
+| `resolution` | string | いいえ | 目標解像度 |
 
 ---
 
-## Replace Background
+## 背景置換
 
 ```
 POST /ideogram/v1/ideogram-v3/replace-background
 ```
 
-Automatically detect the subject and replace the background.
+被写体を自動認識し、背景を置き換えます。
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `prompt` | string | Yes | New background description |
-| `image` | string | Yes | Original image |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `prompt` | string | はい | 新しい背景の説明 |
+| `image` | string | はい | 元画像 |
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/ideogram/v1/ideogram-v3/replace-background \
@@ -178,5 +178,5 @@ curl -X POST https://api.crazyrouter.com/ideogram/v1/ideogram-v3/replace-backgro
 ```
 
 <Note>
-  Ideogram V3 excels at text rendering, making it ideal for scenarios that require text within images.
+  Ideogram V3 は文字描画性能が優れており、画像内に文字を含めたい用途に最適です。
 </Note>

@@ -1,39 +1,39 @@
 ---
-title: "Text-to-Speech (TTS)"
-description: "Use POST /v1/audio/speech to convert text to speech"
+title: "テキスト音声合成 (TTS)"
+description: "POST /v1/audio/speech を使用してテキストを音声に変換します"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-06
 
-# Text-to-Speech (TTS)
+# テキスト音声合成 (TTS)
 
 ```
 POST /v1/audio/speech
 ```
 
-Convert text to natural speech, compatible with the OpenAI TTS API format.
+テキストを自然な音声に変換します。OpenAI TTS API フォーマットと互換性があります。
 
-## Request Parameters
+## リクエストパラメータ
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model` | string | Yes | Model name: `tts-1`, `tts-1`, `tts-1-hd-1106` |
-| `input` | string | Yes | Text to convert, max 4096 characters |
-| `voice` | string | Yes | Voice character |
-| `response_format` | string | No | Output format: `mp3` (default), `opus`, `aac`, `flac`, `wav`, `pcm` |
-| `speed` | number | No | Speed, 0.25-4.0, default 1.0 |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `model` | string | はい | モデル名：`tts-1`、`tts-1`、`tts-1-hd-1106` |
+| `input` | string | はい | 変換するテキスト。最大 4096 文字 |
+| `voice` | string | はい | 音声の役割 |
+| `response_format` | string | いいえ | 出力形式：`mp3`（デフォルト）、`opus`、`aac`、`flac`、`wav`、`pcm` |
+| `speed` | number | いいえ | 話速、0.25-4.0、デフォルト 1.0 |
 
-### Available Voices
+### 利用可能な音声
 
-| Voice | Characteristics |
-|-------|----------------|
-| `alloy` | Neutral, balanced |
-| `echo` | Male, steady |
-| `fable` | Male, warm |
-| `onyx` | Male, deep |
-| `nova` | Female, lively |
-| `shimmer` | Female, soft |
+| 音声 | 特徴 |
+|------|------|
+| `alloy` | 中性・バランス |
+| `echo` | 男性・落ち着き |
+| `fable` | 男性・温かみ |
+| `onyx` | 男性・深み |
+| `nova` | 女性・元気 |
+| `shimmer` | 女性・柔らかさ |
 
-## Request Examples
+## リクエスト例
 
 <CodeGroup>
 
@@ -43,7 +43,7 @@ curl -X POST https://api.crazyrouter.com/v1/audio/speech \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "tts-1",
-    "input": "Hello, welcome to the Crazyrouter API. What a beautiful day!",
+    "input": "你好，欢迎使用 Crazyrouter API。今天天气真不错！",
     "voice": "nova",
     "response_format": "mp3",
     "speed": 1.0
@@ -61,7 +61,7 @@ client = OpenAI(
 
 response = client.audio.speech.create(
     model="tts-1",
-    input="Hello, welcome to the Crazyrouter API. What a beautiful day!",
+    input="你好，欢迎使用 Crazyrouter API。今天天气真不错！",
     voice="nova",
     response_format="mp3",
     speed=1.0
@@ -81,7 +81,7 @@ const client = new OpenAI({
 
 const response = await client.audio.speech.create({
   model: "tts-1",
-  input: "Hello, welcome to the Crazyrouter API.",
+  input: "你好，欢迎使用 Crazyrouter API。",
   voice: "nova",
 });
 
@@ -91,22 +91,22 @@ fs.writeFileSync("speech.mp3", buffer);
 
 </CodeGroup>
 
-The response is a binary audio stream. Save it directly to a file.
+レスポンスは音声ファイルのバイナリストリームで、直接保存できます。
 
 ---
 
-## Model Comparison
+## モデル比較
 
-| Model | Quality | Latency | Description |
-|-------|---------|---------|-------------|
-| `tts-1` | Standard | Low | Suitable for real-time scenarios |
-| `tts-1-hd-1106` | HD | Medium | More natural speech |
-| `tts-1` | Highest | Medium | Latest model, supports more languages and emotions |
+| モデル | 品質 | レイテンシ | 説明 |
+|------|------|------|------|
+| `tts-1` | 標準 | 低 | リアルタイム用途に適しています |
+| `tts-1-hd-1106` | 高精細 | 中 | より自然な音声 |
+| `tts-1` | 最高 | 中 | 最新モデル。より多くの言語と感情をサポート |
 
 <Note>
-  `tts-1` supports multiple languages and automatically detects the input text language to use the corresponding pronunciation.
+  `tts-1` は多言語をサポートしており、入力テキストの言語を自動認識し、適切な発音を使用します。
 </Note>
 
 <Warning>
-  The response is a binary audio stream, not JSON. Use `--output` or stream-write to a file.
+  レスポンスはバイナリ音声ストリームであり、JSON ではありません。`--output` またはストリーム書き込みでファイル保存してください。
 </Warning>

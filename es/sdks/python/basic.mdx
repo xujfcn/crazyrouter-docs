@@ -1,0 +1,141 @@
+---
+title: "Diálogo básico de Python"
+description: "Implementación de chat básico, conversación continua y salida en streaming con Python"
+---
+> Contenido actualizado: 2026-06-09
+
+## Instalación de dependencias
+
+```bash
+pip install openai requests
+```
+
+## Diálogo básico
+
+<CodeGroup>
+
+```python OpenAI SDK
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="gpt-5.5",
+    messages=[
+        {"role": "system", "content": "你是一个有帮助的助手。"},
+        {"role": "user", "content": "用一句话解释什么是人工智能"}
+    ]
+)
+
+print(response.choices[0].message.content)
+```
+
+```python requests
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/v1/chat/completions",
+    headers={
+        "Authorization": "Bearer sk-xxx",
+        "Content-Type": "application/json"
+    },
+    json={
+        "model": "gpt-5.5",
+        "messages": [
+            {"role": "user", "content": "用一句话解释什么是人工智能"}
+        ]
+    }
+)
+
+data = response.json()
+print(data["choices"][0]["message"]["content"])
+```
+
+</CodeGroup>
+
+## Conversación continua
+
+Mediante el mantenimiento de la lista `messages` se logra una conversación multi-turno:
+
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-xxx", base_url="https://api.crazyrouter.com/v1")
+
+messages = [
+    {"role": "system", "content": "你是一个 Python 编程助手。"}
+]
+
+def chat(user_input):
+    messages.append({"role": "user", "content": user_input})
+
+    response = client.chat.completions.create(
+        model="gpt-5.5",
+        messages=messages
+    )
+
+    reply = response.choices[0].message.content
+    messages.append({"role": "assistant", "content": reply})
+    return reply
+
+# 多轮对话
+print(chat("如何读取 CSV 文件？"))
+print(chat("如果文件很大怎么办？"))
+print(chat("能用 pandas 实现吗？"))
+```
+
+## Salida en streaming
+
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-xxx", base_url="https://api.crazyrouter.com/v1")
+
+stream = client.chat.completions.create(
+    model="gpt-5.5",
+    messages=[{"role": "user", "content": "写一首关于编程的诗"}],
+    stream=True
+)
+
+for chunk in stream:
+    if chunk.choices[0].delta.content:
+        print(chunk.choices[0].delta.content, end="", flush=True)
+print()
+```
+
+## Implementar streaming usando requests
+
+```python
+import requests
+import json
+
+response = requests.post(
+    "https://api.crazyrouter.com/v1/chat/completions",
+    headers={
+        "Authorization": "Bearer sk-xxx",
+        "Content-Type": "application/json"
+    },
+    json={
+        "model": "gpt-5.5",
+        "messages": [{"role": "user", "content": "你好"}],
+        "stream": True
+    },
+    stream=True
+)
+
+for line in response.iter_lines():
+    if line:
+        line = line.decode("utf-8")
+        if line.startswith("data: ") and line != "data: [DONE]":
+            data = json.loads(line[6:])
+            content = data["choices"][0]["delta"].get("content", "")
+            print(content, end="", flush=True)
+print()
+```
+
+<Note>
+  Todos los ejemplos usan por defecto `gpt-5.5`, que desde el 23 de marzo de 2026 ha sido verificado exitosamente en entorno de producción. Si deseas cambiar el modelo, prioriza hacerlo por `claude-opus-4-8` o `gemini-3.1-pro`, que también han sido validados.
+</Note>

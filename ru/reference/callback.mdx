@@ -1,16 +1,16 @@
 ---
-title: 'Callback Protocol'
-description: 'Webhook callback protocol for async tasks'
+title: "Протокол Callback"
+description: "Webhook-протокол для асинхронных задач"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-10-22
 
-## Overview
+## Обзор
 
-For async tasks (Midjourney image generation, video generation, etc.), Crazyrouter supports Webhook callbacks to notify task status changes.
+Для асинхронных задач (создание изображений в Midjourney, генерация видео и др.) Crazyrouter поддерживает уведомление об изменении статуса задачи через Webhook callback.
 
-## Callback URL Configuration
+## Настройка URL для callback
 
-Specify the callback URL via the `notifyHook` parameter when submitting a task:
+При отправке задачи укажите адрес callback через параметр `notifyHook`:
 
 ```json
 {
@@ -19,16 +19,16 @@ Specify the callback URL via the `notifyHook` parameter when submitting a task:
 }
 ```
 
-## Callback Request Format
+## Формат callback-запроса
 
-Crazyrouter sends a POST request to your callback URL:
+Crazyrouter будет отправлять POST-запросы на ваш callback URL:
 
 ```
 POST https://your-server.com/api/callback
 Content-Type: application/json
 ```
 
-### Midjourney Callback
+### Callback для Midjourney
 
 ```json
 {
@@ -45,7 +45,7 @@ Content-Type: application/json
 }
 ```
 
-### Video Generation Callback (Kling/Luma/Runway)
+### Callback для генерации видео (Kling/Luma/Runway)
 
 ```json
 {
@@ -62,15 +62,15 @@ Content-Type: application/json
 }
 ```
 
-## Callback Status Flow
+## Смена статуса callback
 
 ```
-Submitted → NOT_START → IN_PROGRESS → SUCCESS / FAILURE
+提交 → NOT_START → IN_PROGRESS → SUCCESS / FAILURE
 ```
 
-A callback is triggered on each status change.
+Каждое изменение статуса вызывает отдельный callback.
 
-## Callback Server Examples
+## Пример сервера для callback
 
 <CodeGroup>
 
@@ -85,11 +85,11 @@ def callback():
     task_id = data["id"]
     status = data["status"]
 
-    print(f"Task {task_id} status update: {status}")
+    print(f"任务 {task_id} 状态更新: {status}")
 
     if status == "SUCCESS":
         image_url = data.get("imageUrl")
-        print(f"Image URL: {image_url}")
+        print(f"图片地址: {image_url}")
 
     return jsonify({"success": True})
 
@@ -103,10 +103,10 @@ app.use(express.json());
 
 app.post('/api/callback', (req, res) => {
   const { id, status, imageUrl } = req.body;
-  console.log(`Task ${id} status: ${status}`);
+  console.log(`任务 ${id} 状态: ${status}`);
 
   if (status === 'SUCCESS') {
-    console.log(`Image: ${imageUrl}`);
+    console.log(`图片: ${imageUrl}`);
   }
 
   res.json({ success: true });
@@ -118,9 +118,9 @@ app.listen(8080);
 </CodeGroup>
 
 <Warning>
-  The callback URL must be publicly accessible. Ensure your server can receive POST requests and return a 200 status code within 5 seconds.
+  Callback URL должен быть доступен из интернета. Убедитесь, что ваш сервер может принимать POST-запросы и возвращает статус-код 200 в течение 5 секунд.
 </Warning>
 
 <Note>
-  If a callback fails, the system retries up to 3 times with intervals of 10 seconds, 30 seconds, and 60 seconds.
+  В случае неудачи система повторит попытку до 3 раз, с интервалами 10 секунд, 30 секунд и 60 секунд соответственно.
 </Note>

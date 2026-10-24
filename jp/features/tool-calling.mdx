@@ -1,34 +1,42 @@
 ---
-title: "Tool Calling"
-description: "Production-verified tool calling with the latest GPT, Claude, and Gemini models"
+title: "ツール呼び出し"
+description: "生産環境で実際に検証した結果に基づき、GPT、Claude、Geminiの最新主力モデルを使用したツール呼び出し"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-23
 
-# Tool Calling
+# ツール呼び出し
 
-This page only documents Tool Calling flows that were **verified with real requests against Crazyrouter production**.
+本ドキュメントでは **Crazyrouter生産環境で実際にリクエストが成功した** ツール呼び出しの使用方法のみを収録しています。
 
-Verification date:
+検証日時：
 
 - `2026-03-22`
 
-Verified models:
+検証済みモデル：
 
 - `gpt-5.5`
 - `claude-opus-4-8`
 - `gemini-3.1-pro`
 
-## Verified matrix
+---
 
-| Model | Protocol | Endpoint | Success marker |
+## 検証済み機能マトリックス
+
+| モデル | プロトコル | エンドポイント | 成功の判定 |
 |------|------|------|----------|
-| `gpt-5.5` | OpenAI Chat Completions | `POST /v1/chat/completions` | Returns `tool_calls` |
-| `claude-opus-4-8` | Anthropic Messages | `POST /v1/messages` | Returns `tool_use` block |
-| `gemini-3.1-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | Returns `functionCall` |
+| `gpt-5.5` | OpenAI Chat Completions | `POST /v1/chat/completions` | `tool_calls`が返される |
+| `claude-opus-4-8` | Anthropic Messages | `POST /v1/messages` | `tool_use` blockが返される |
+| `gemini-3.1-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | `functionCall`が返される |
+
+<Warning>
+Claudeツール呼び出しは現在Anthropic Messagesプロトコルで検証されており、つまり`POST /v1/messages`が返され、`tool_use` blockとなります。この結論をClaudeのOpenAI互換`/v1/chat/completions`パスへ安易に適用しないでください。Copilot、Continue、VS Code Agentの一部やその他ツール呼び出し依存のプログラミング環境では、OpenAI互換エンドポイントでClaudeネイティブのツール呼び出しが動作しない場合があります。ClaudeのプログラミングAgent能力が必要な場合は、Claude CodeやAnthropicネイティブクライアント設定の利用を優先してください。
+</Warning>
+
+---
 
 ## GPT-5.4
 
-```bash
+```bash cURL
 curl https://api.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
@@ -49,7 +57,9 @@ curl https://api.crazyrouter.com/v1/chat/completions \
           "parameters": {
             "type": "object",
             "properties": {
-              "timezone": { "type": "string" }
+              "timezone": {
+                "type": "string"
+              }
             },
             "required": ["timezone"],
             "additionalProperties": false
@@ -61,7 +71,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-Verified response shape:
+生産環境の検証で返される重要なフィールド：
 
 ```json
 {
@@ -69,16 +79,19 @@ Verified response shape:
     {
       "type": "function",
       "function": {
-        "name": "get_time"
+        "name": "get_time",
+        "arguments": "{\"timezone\":\"Asia/Shanghai\"}"
       }
     }
   ]
 }
 ```
 
+---
+
 ## Claude Sonnet 4.6
 
-```bash
+```bash cURL
 curl https://api.crazyrouter.com/v1/messages \
   -H "Content-Type: application/json" \
   -H "x-api-key: YOUR_API_KEY" \
@@ -93,7 +106,9 @@ curl https://api.crazyrouter.com/v1/messages \
         "input_schema": {
           "type": "object",
           "properties": {
-            "timezone": { "type": "string" }
+            "timezone": {
+              "type": "string"
+            }
           },
           "required": ["timezone"]
         }
@@ -111,7 +126,7 @@ curl https://api.crazyrouter.com/v1/messages \
   }'
 ```
 
-Verified response shape:
+生産環境の検証で返される重要なフィールド：
 
 ```json
 {
@@ -119,17 +134,26 @@ Verified response shape:
   "content": [
     {
       "type": "tool_use",
-      "name": "get_time"
+      "name": "get_time",
+      "input": {
+        "timezone": "Asia/Shanghai"
+      }
     }
   ]
 }
 ```
 
-For first-pass validation, use an explicit `tool_choice` and clearly instruct Claude not to answer directly.
+初回連携テストのおすすめ：
+
+- Claudeネイティブ`/v1/messages`には、優先して明示的に`tool_choice`を追加してください
+- プロンプト内で「必ずツールを呼び出し、直接回答しない」と明記する
+- これにより`tool_use`を安定して再現しやすくなります
+
+---
 
 ## Gemini 3 Pro
 
-```bash
+```bash cURL
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -152,7 +176,9 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
             "parameters": {
               "type": "object",
               "properties": {
-                "timezone": { "type": "string" }
+                "timezone": {
+                  "type": "string"
+                }
               },
               "required": ["timezone"]
             }
@@ -163,7 +189,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Verified response shape:
+生産環境の検証で返される重要なフィールド：
 
 ```json
 {
@@ -173,7 +199,10 @@ Verified response shape:
         "parts": [
           {
             "functionCall": {
-              "name": "get_time"
+              "name": "get_time",
+              "args": {
+                "timezone": "Asia/Shanghai"
+              }
             }
           }
         ]
@@ -183,16 +212,26 @@ Verified response shape:
 }
 ```
 
-## See Also
+---
+
+## どのプロトコルを使うべきか
+
+- すでにOpenAI SDKを使っているプロジェクトでは、まず`gpt-5.5`のOpenAI互換方式を推奨します
+- Claudeネイティブ導入の場合、まず`/v1/messages`を使い、初回検証時には`tool_choice`を追加してください
+- Geminiネイティブ導入の場合は、Gemini Native APIの利用を優先してください
+
+---
+
+## 関連ドキュメント
 
 - [OpenAI Function Calling](/jp/chat/openai/function-calling)
 - [Responses Function Calling](/jp/chat/responses/function-calling)
-- [Gemini Tools](/jp/chat/gemini/tools)
-- [Claude Native Messages](/jp/chat/anthropic/messages)
+- [Geminiツール呼び出し](/jp/chat/gemini/tools)
+- [Claudeネイティブ形式](/jp/chat/anthropic/messages)
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
 - [Claude Sonnet 4.6 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/claude-sonnet-4-6?utm_source=docs&utm_medium=related)
-- [Claude Sonnet 4.6 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/anthropic/claude-sonnet-4-6?utm_source=docs&utm_medium=related)
+- [Claude Sonnet 4.6 モデルページ：リアルタイム価格、実例、呼び出しコード](https://crazyrouter.com/ja/models/anthropic/claude-sonnet-4-6?utm_source=docs&utm_medium=related)
 - [GPT-5.4 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gpt-5-4?utm_source=docs&utm_medium=related)

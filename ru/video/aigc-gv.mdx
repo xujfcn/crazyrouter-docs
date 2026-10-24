@@ -1,12 +1,12 @@
 ---
-title: "AIGC GV VOD: руководство"
-description: "Как вызывать видео-модели GV / Google Veo через маршрут Tencent VOD в Crazyrouter"
+title: "Метод вызова AIGC GV VOD"
+description: "Вызов видео моделей GV / Google Veo через Tencent VOD с помощью Crazyrouter"
 ---
-> Дата обновления: 2026-06-24
+> Обновление содержания: 2026-06-29
 
-# AIGC GV VOD: руководство
+# Метод вызова AIGC GV VOD
 
-Модели `aigc-video-gv-*` — это видео-модели GV / Google Veo, опубликованные в Crazyrouter через маршрут Tencent VOD. Они используют тот же OpenAI-совместимый асинхронный видео-маршрут, что и AIGC Kling VOD:
+`aigc-video-gv-*` — это видео модель GV / Google Veo, интегрированная Crazyrouter через Tencent VOD. Способ вызова совпадает с AIGC Kling VOD: используется асинхронный видео-интерфейс в стиле OpenAI:
 
 ```http
 POST /v1/video/generations
@@ -14,19 +14,19 @@ GET /v1/video/generations/{task_id}
 ```
 
 <Note>
-  `aigc-video-gv-*` only uses `/v1/video/generations` and the matching query route. Do not send these models to `/v1/video/create`; a route mismatch will surface as `model_not_found` or a similar upstream error.
+  `aigc-video-gv-*` использует только `/v1/video/generations` и подходящий маршрут запроса. Не отправляйте эти модели на `/v1/video/create`; несоответствие маршрута приведет к ошибке вида `model_not_found` или аналогичной ошибке вышестоящего уровня.
 </Note>
 
 ## Доступные модели
 
 | Модель | Версия upstream | Описание |
 |------|------|------|
-| `aigc-video-gv-3.1` | GV 3.1 | Качественная версия с поддержкой звука |
-| `aigc-video-gv-3.1-fast` | GV 3.1 Fast | Более быстрая версия с поддержкой звука |
-| `aigc-video-gv-3.1-lite` | GV 3.1 Lite | Облегченная версия с поддержкой звука |
+| `aigc-video-gv-3.1` | GV 3.1 | Версия высокого качества, поддерживает видео со звуком |
+| `aigc-video-gv-3.1-fast` | GV 3.1 Fast | Более быстрая версия, поддерживает видео со звуком |
+| `aigc-video-gv-3.1-lite` | GV 3.1 Lite | Лёгкая версия, поддерживает видео со звуком |
 
 <Note>
-  GV 3.1 в Tencent VOD — это маршрут Google Veo, а не Kling. Не используйте имена моделей вроде `aigc-video-kling-3.1`.
+  GV 3.1 из Tencent VOD — это линия Google Veo, а не Kling. Не используйте такие имена моделей, как `aigc-video-kling-3.1`.
 </Note>
 
 ## Создание задачи
@@ -46,9 +46,9 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
   }'
 ```
 
-## Изображение и несколько референсов
+## Генерация по изображению и мульти-референс
 
-Для одного изображения можно использовать `image`. Для нескольких референс-изображений используйте `metadata.image_list`:
+Для одного изображения используйте `image`; для мульти-референса рекомендуется `metadata.image_list`:
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/video/generations \
@@ -75,24 +75,24 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
 ```
 
 <Warning>
-  Для GV несколько изображений должны передаваться через `FileInfos`. Crazyrouter преобразует `image_list` в `FileInfos` и не использует `LastFrameUrl` для multi-image запросов GV.
+  Мульти-референс GV должен передаваться через `FileInfos`. Наш сайт преобразует `image_list` в `FileInfos` и не использует `LastFrameUrl` для GV мульти-запросов.
 </Warning>
 
-## Часто используемые поля `metadata`
+## Часто используемые поля metadata
 
 | Поле | Описание |
 |------|------|
-| `resolution` | `720P`, `1080P`, `2K` или `4K`. Доступные спецификации смотрите на странице Pricing |
-| `sound` | Генерация звука: `true` / `false`, `on` / `off` |
-| `audio_generation` | Прямое значение `Enabled` / `Disabled` |
-| `image_list` | Список референс-изображений |
-| `reference_type` / `ReferenceType` | Тип референса GV, обычно `asset` или `style` |
+| `resolution` | `720P`, `1080P`, `2K`, `4K`. Актуальные спецификации доступны на странице ценообразования |
+| `sound` | Генерировать ли звук: поддерживает `true` / `false`, `on` / `off` |
+| `audio_generation` | Передать прямо `Enabled` / `Disabled` |
+| `image_list` | Массив мульти-референс изображений |
+| `reference_type` / `ReferenceType` | Тип GV референса, обычно `asset` или `style` |
 
-Цены, скидки и доступные спецификации смотрите на актуальной странице [Pricing](/pricing).
+Стоимость, скидки и доступные спецификации смотрите на [странице Pricing](https://crazyrouter.com/ru/pricing).
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [Google Veo 3.1: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/google/aigc-video-gv-3-1?utm_source=docs&utm_medium=related)
-- [Kling 2.6: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/kling/aigc-video-kling-2-6?utm_source=docs&utm_medium=related)
-- [Все модели Google с актуальными ценами](https://crazyrouter.com/en/models/google?utm_source=docs&utm_medium=related)
+- [Google Veo 3.1: страница модели — актуальная цена, реальные примеры и код вызова](https://crazyrouter.com/ru/models/google/aigc-video-gv-3-1?utm_source=docs&utm_medium=related)
+- [Kling 2.6: страница модели — актуальная цена, реальные примеры и код вызова](https://crazyrouter.com/ru/models/kling/aigc-video-kling-2-6?utm_source=docs&utm_medium=related)
+- [Все модели Google и цены](https://crazyrouter.com/ru/models/google?utm_source=docs&utm_medium=related)

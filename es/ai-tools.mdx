@@ -1,0 +1,60 @@
+---
+title: "Lectura de documentos por herramientas de IA"
+description: "Entrada a la documentación de Crazyrouter para herramientas de IA como Codex, Claude Code, ChatGPT, Cursor, etc."
+---
+> Contenido actualizado: 2026-07-20
+
+Esta página está destinada a proporcionar la documentación de Crazyrouter a las herramientas de IA. Utiliza preferentemente las siguientes entradas estables.
+
+## Entradas recomendadas
+
+<CardGroup cols={2}>
+  <Card title="Índice de documentación llms.txt" icon="list" href="https://docs.crazyrouter.com/llms.txt">
+    Índice reducido que enumera las páginas clave y sus descripciones, adecuado para que la IA determine primero qué documentos debe leer.
+  </Card>
+  <Card title="Contexto completo llms-full.txt" icon="file-text" href="https://docs.crazyrouter.com/llms-full.txt">
+    Documentación completa y agregada, ideal para herramientas de IA que necesitan leer todo el contexto de una vez.
+  </Card>
+  <Card title="Mapa del sitio" icon="sitemap" href="https://docs.crazyrouter.com/sitemap.xml">
+    Sitemap estándar, adecuado para motores de búsqueda, rastreadores y programas de indexación propios.
+  </Card>
+  <Card title="Página Markdown" icon="markdown" href="https://docs.crazyrouter.com/quickstart.md">
+    Los documentos de una sola página pueden leerse en versión Markdown agregando `.md` al final de la URL.
+  </Card>
+</CardGroup>
+
+## Sugerencia de prompt para herramientas de IA
+
+```text
+请先读取 https://docs.crazyrouter.com/llms.txt 判断相关页面。
+如果需要完整上下文，再读取 https://docs.crazyrouter.com/llms-full.txt。
+模型名称、价格和计费方式必须以 https://crazyrouter.com/pricing 为准。
+如需确认当前 API Key 实际可用模型，请调用 GET https://api.crazyrouter.com/v1/models。
+接入 OpenAI 兼容客户端时 base_url 使用 https://api.crazyrouter.com/v1。
+接入 Claude Code / Anthropic 原生客户端时使用根域名 https://api.crazyrouter.com，不要追加 /v1。
+东亚地区优先使用 https://cn.crazyrouter.com；OpenAI 兼容客户端对应 https://cn.crazyrouter.com/v1。
+账户与管理接口（如 `/api/user/self`、`/api/token/*`、`/api/log/*`）必须使用 https://crazyrouter.com；发送到 API-only 域名会返回 404 api_only_endpoint。
+```
+
+## Documentación más usada
+
+| Escenario | Documentación |
+| --- | --- |
+| Primera integración | [Inicio rápido](/es/quickstart) |
+| Base URL y rutas | [Puntos finales de la API](/es/api-endpoint) |
+| Clave de API | [Métodos de autenticación](/es/authentication) |
+| Claude Code | [Integración de Claude Code](/es/integrations/claude-code) |
+| Codex CLI | [Integración Codex CLI](/es/integrations/codex) |
+| OpenAI Chat | [Crear completado de chat](/es/chat/openai/completions) |
+| Claude Messages | [Formato nativo de Claude](/es/chat/anthropic/messages) |
+| Gemini Native | [Formato nativo de Gemini](/es/chat/gemini/native) |
+| Generación de imágenes | [Imagen GPT](/es/images/gpt-image) |
+| Video | [Interfaz unificada de video](/es/video/unified) |
+
+## Requisitos de referencia
+
+- `llms.txt` no es una lista completa de modelos.
+- Los modelos, precios y métodos de facturación se rigen por la [página de precios](https://crazyrouter.com/pricing).
+- Los modelos a los que tu Token puede acceder actualmente están determinados por el resultado devuelto por `GET https://api.crazyrouter.com/v1/models`.
+- Para la región de Asia Oriental se debe dar prioridad a `https://cn.crazyrouter.com`, y los clientes compatibles con OpenAI deben usar `https://cn.crazyrouter.com/v1`.
+- Al generar código de llamada, da prioridad a los ejemplos de puntos finales ya verificados en la documentación de cada modelo específico.

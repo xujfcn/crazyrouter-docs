@@ -1,0 +1,130 @@
+---
+title: "Generación de imágenes AIGC Kling 3.0"
+description: "Genera imágenes usando aigc-image-kling-3.0 a través de la ruta Tencent VOD de Crazyrouter"
+---
+> Contenido actualizado: 2026-08-07
+
+# Generación de imágenes AIGC Kling 3.0
+
+`aigc-image-kling-3.0` es el modelo de texto a imagen Kling 3.0 de Crazyrouter, accesible por la ruta Tencent VOD. El cliente utiliza la interfaz compatible con OpenAI Images:
+
+```http
+POST /v1/images/generations
+```
+
+<Warning>
+  El endpoint completo es `https://api.crazyrouter.com/v1/images/generations`. No envíes este modelo a `/kling/v1/images/generations`, ni escribas el nombre del modelo como el modelo de video `aigc-video-kling-3.0`.
+</Warning>
+
+## Parámetros de solicitud
+
+| Parámetro | Tipo | Requerido | Descripción |
+|-----------|------|-----------|-------------|
+| `model` | string | Sí | Fijo como `aigc-image-kling-3.0` |
+| `prompt` | string | Sí | Palabra clave para generación de imagen |
+| `aspect_ratio` | string | No | Proporción de salida. Valores comunes: `1:1`, `16:9`, `9:16`, `4:3`, `3:4`; por defecto `1:1` |
+| `size` | string | No | Expresión de tamaño compatible, el servidor lo convertirá a proporción de salida, ver la tabla siguiente |
+
+Actualmente, la capacidad pública es texto a imagen. Por favor, no envíes imágenes de referencia en la solicitud de este modelo ni uses `/v1/images/edits`.
+
+### Tamaños y proporciones
+
+Se recomienda enviar directamente `aspect_ratio`. Si utilizas `size`, la regla de conversión actual es la siguiente:
+
+| `size` | Proporción de salida real |
+|-----------------|------------------------|
+| `1024x1024` | `1:1` |
+| `1792x1024`, `1536x1024` | `16:9` |
+| `1024x1792`, `1024x1536` | `9:16` |
+| `1024x768` | `4:3` |
+| `768x1024` | `3:4` |
+
+<Note>
+  Cuando se envían tanto `aspect_ratio` como `size`, prevalece `aspect_ratio`. Otros `size` no listados actualmente se tratarán como `1:1`.
+</Note>
+
+## Ejemplo de solicitud
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-image-kling-3.0",
+    "prompt": "一张电影感的未来城市夜景，雨后的街道反射霓虹灯光，画面细节丰富",
+    "aspect_ratio": "16:9"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/v1/images/generations",
+    headers={
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Content-Type": "application/json",
+    },
+    json={
+        "model": "aigc-image-kling-3.0",
+        "prompt": "一张电影感的未来城市夜景，雨后的街道反射霓虹灯光，画面细节丰富",
+        "aspect_ratio": "16:9",
+    },
+    timeout=240,
+)
+
+response.raise_for_status()
+result = response.json()
+print(result["data"][0]["url"])
+```
+
+</CodeGroup>
+
+## Ejemplo de respuesta
+
+```json
+{
+  "created": 1786000000,
+  "data": [
+    {
+      "url": "https://media.crazyrouter.com/task-artifacts/example.png",
+      "b64_json": "",
+      "revised_prompt": ""
+    }
+  ],
+  "extra": {
+    "provider": "tencent-vod",
+    "task_id": "AigcImageTask-example",
+    "request_id": "request-example"
+  }
+}
+```
+
+Simplemente lee `data[0].url` para obtener el resultado generado.
+
+## Tiempo de procesamiento de la solicitud
+
+En Tencent VOD, la tarea es ejecutada de forma asíncrona, pero Crazyrouter esperará su finalización en el servidor y luego devolverá el resultado final en formato OpenAI Images a través de la solicitud HTTP actual. El cliente no necesita consultar la tarea por separado.
+
+<Note>
+  La generación de imágenes puede tomar varios segundos o decenas de segundos. Se recomienda configurar el tiempo de espera del cliente en al menos `240` segundos y esperar a que la solicitud finalice; no re-envíes la solicitud inmediatamente por no recibir respuesta temporalmente, ya que esto podría generar tareas y cargos duplicados.
+</Note>
+
+## Diferencias con otros modelos Kling
+
+| Modelo | Uso | Ruta de solicitud |
+|--------|-----|------------------|
+| `aigc-image-kling-3.0` | Tencent VOD Kling 3.0 texto a imagen | `POST /v1/images/generations` |
+| `aigc-video-kling-3.0` | Tencent VOD Kling 3.0 generación de video | `POST /v1/video/generations` |
+| Modelo de imagen nativo Kling | Protocolo de imagen nativo Kling | `POST /kling/v1/images/generations` |
+
+Este modelo se cobra por cada imagen generada con éxito. El precio en tiempo real, descuentos y estatus disponible se corresponden con la [página de Precios](https://crazyrouter.com/es/pricing) y el `GET /v1/models` retornado por la clave API actual.
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Página del modelo Kling 3.0: precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/kling/aigc-video-kling-3-0?utm_source=docs&utm_medium=related)
+- [Página del modelo Kling Image 3.0: precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/kling/aigc-image-kling-3-0?utm_source=docs&utm_medium=related)
+- [Todos los modelos y precios de Kling AI](https://crazyrouter.com/es/models/kling?utm_source=docs&utm_medium=related)

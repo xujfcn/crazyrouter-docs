@@ -1,18 +1,19 @@
 ---
-title: 'Gemini CLI Setup Guide'
-description: 'Configure Gemini CLI for Crazyrouter using the auth and model settings verified by real requests'
+title: "Gemini CLI設定チュートリアル"
+description: "Gemini CLIでCrazyrouter APIを設定し、実際のリクエスト検証済みのモデルと認証方法を利用する"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-## Overview
 
-Gemini CLI is Google's command-line AI assistant. By configuring Crazyrouter's Gemini-native endpoint, you can use Gemini models that have been verified with real requests in Crazyrouter production.
+## 概要
 
-## Configuration
+Gemini CLIはGoogleのコマンドラインAIアシスタントです。CrazyrouterのGeminiネイティブエントリを設定することで、コマンドラインから直接、当サイトの本番環境で実際のリクエスト検証が完了したGeminiモデルを利用できます。
 
-### Environment Variables
+## 設定方法
 
-In the current Gemini CLI release, API-key mode still requires `GEMINI_API_KEY` to be present explicitly. For Crazyrouter's Gemini-native endpoint, set these three variables together:
+### 環境変数
+
+Gemini CLIの現在バージョンはAPI Key方式において、最低限明示的に`GEMINI_API_KEY`を提供する必要があります。CrazyrouterのGeminiネイティブエントリを利用する場合は、この3つの環境変数を同時に設定することを推奨します：
 
 ```bash
 export GEMINI_API_KEY=sk-xxx
@@ -20,7 +21,7 @@ export GEMINI_MODEL=gemini-3.1-pro
 export GOOGLE_GEMINI_BASE_URL=https://api.crazyrouter.com
 ```
 
-PowerShell:
+Windows PowerShell:
 
 ```powershell
 $env:GEMINI_API_KEY="sk-xxx"
@@ -28,11 +29,11 @@ $env:GEMINI_MODEL="gemini-3.1-pro"
 $env:GOOGLE_GEMINI_BASE_URL="https://api.crazyrouter.com"
 ```
 
-If you want this to persist across sessions, put the same values into `~/.gemini/.env` or your PowerShell profile.
+開くたびに自動的に有効にしたい場合、`~/.gemini/.env`やPowerShellプロファイルに記述できます。
 
-### Configuration File
+### 設定ファイル
 
-Edit `~/.gemini/settings.json`:
+`~/.gemini/settings.json`を編集します：
 
 ```json
 {
@@ -49,13 +50,15 @@ Edit `~/.gemini/settings.json`:
 }
 ```
 
-Notes:
+注意：
 
-- Do not leave the auth mode as `oauth-personal`, or the CLI will continue trying Google sign-in.
-- Do not write `model` as a plain string in current versions; use `model.name`.
-- In some CLI paths, `settings.json` alone is not enough. Headless mode may still require the `GEMINI_API_KEY` environment variable.
+- 認証方式を`oauth-personal`のままにしないでください。そうするとCLIはGoogleログインを継続します。
+- `model`を文字列として記述しないでください。現在バージョンでは`model.name`を使用してください。
+- `settings.json`だけでは一部の場面で不十分です。コマンドライン方式では`GEMINI_API_KEY`環境変数が引き続き必要な場合があります。
 
-### `~/.gemini/.env` Example
+### `.gemini/.env`の例
+
+`~/.gemini/.env`に直接記述することもできます：
 
 ```bash
 GEMINI_API_KEY=sk-xxx
@@ -63,25 +66,25 @@ GEMINI_MODEL=gemini-3.1-pro
 GOOGLE_GEMINI_BASE_URL=https://api.crazyrouter.com
 ```
 
-### Launch
+### 起動
 
 ```bash
 gemini
 ```
 
-## Recommended Model
+## 推奨モデル
 
-| Model | Description |
-|-------|-------------|
-| `gemini-3.1-pro` | Verified successfully with a real Gemini CLI request in Crazyrouter production on April 8, 2026, and recommended as the current baseline |
+| モデル | 説明 |
+|------|------|
+| `gemini-3.1-pro` | 2026年4月8日にCrazyrouter本番環境でGemini CLIによる実際のリクエストで検証済み、現時点の主基準として最適 |
 
 <Note>
-  Crazyrouter supports both the Gemini native API format and the OpenAI-compatible format. Gemini CLI uses the Gemini-native format. The `gemini-3.1-pro` example above, the `gemini-api-key` auth mode, and `GOOGLE_GEMINI_BASE_URL=https://api.crazyrouter.com` have been validated with a real CLI request.
+  CrazyrouterはGeminiネイティブAPI形式とOpenAI互換形式を両方サポートしています。Gemini CLIはGeminiネイティブ形式を使用します。本ドキュメントに記載されている`gemini-3.1-pro`、`gemini-api-key`の認証方法と、`GOOGLE_GEMINI_BASE_URL=https://api.crazyrouter.com`は実際のCLIリクエストによる検証が完了しています。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [Gemini CLI 連携ガイド](https://crazyrouter.com/en/integrations/gemini-cli?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Gemini CLI接続ガイド（ワンクリックスクリプト、Base URL、推奨モデル）](https://crazyrouter.com/zh/integrations/gemini-cli?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash価格比較：公式 / Azure / Bedrock / VertexとCrazyrouter](https://crazyrouter.com/ja/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flashモデルページ：リアルタイム価格、実際のサンプル、呼び出しコード](https://crazyrouter.com/ja/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)

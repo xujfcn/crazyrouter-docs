@@ -1,64 +1,64 @@
 ---
-title: 'Create Token'
-description: 'Create a new API token'
+title: "新しいトークンの追加"
+description: "新しい API トークンを作成します"
 api: 'POST /api/token/'
 ---
-> 更新日: 2026-07-20
+> 内容更新日: 2026-07-20
 
-## Overview
+## インターフェース概要
 
-Create a new API token for calling AI model APIs.
+新しい API トークン（Token）を作成し、AI モデル API の呼び出しに使用します。
 
 <Note>
-  The `/api/token/*` endpoints are mainly for Crazyrouter dashboard automation around API key management. They require a user `access token` plus the `New-Api-User` header, and are not the normal interface for `sk-xxx` model calls. Use `https://crazyrouter.com` as the base URL; `https://api.crazyrouter.com` is reserved for model APIs and returns `404 api_only_endpoint` for management paths.
+  この `/api/token/*` 一連のインターフェースは Crazyrouter コンソールの API Key 管理自動化のために主に用意されています。これらのご利用にはユーザー `access token` および `New-Api-User` リクエストヘッダーが必要で、通常の `sk-xxx` モデル呼び出しプロセスでは直接は使われません。リクエストのベースURLには必ず `https://crazyrouter.com` をご利用ください；`https://api.crazyrouter.com` はモデル API 専用の入口で、管理系パスを呼び出すと `404 api_only_endpoint` が返されます。
 </Note>
 
-## Authentication
+## 認証方式
 
-This endpoint requires user-side authentication:
+このインターフェースを利用するにはユーザー側で認証を行う必要があります：
 
 ```text
 Authorization: Bearer your_access_token
 New-Api-User: 1
 ```
 
-## Request Parameters
+## リクエストパラメータ
 
 <ParamField body="name" type="string" required>
-  Token name for easy identification
+  トークン名。目的を識別しやすくするための名前です。
 </ParamField>
 
 <ParamField body="remain_quota" type="integer" default="0">
-  Initial quota in internal quota units. If set to 0, use it together with `unlimited_quota`
+  初期クレジット（単位：内部クレジット値）。0 に設定した場合は `unlimited_quota` と合わせてご利用ください。
 </ParamField>
 
 <ParamField body="unlimited_quota" type="boolean" default="false">
-  Whether the token has unlimited quota
+  無制限クレジットに設定するかどうか
 </ParamField>
 
 <ParamField body="expired_time" type="integer" default="-1">
-  Expiration timestamp. `-1` means never expires
+  有効期限（UNIX タイムスタンプ）。`-1` は無期限を意味します。
 </ParamField>
 
 <ParamField body="model_limits_enabled" type="boolean" default="false">
-  Whether to enable a model whitelist
+  モデルホワイトリスト制限を有効にするかどうか
 </ParamField>
 
 <ParamField body="model_limits" type="string">
-  Model restriction config as a string, usually a JSON string such as `["gpt-5.5","claude-opus-4-8"]`
+  モデル制限の設定。現時点ではこの項目は文字列になっており、通常は JSON 形式の文字列（例：`["gpt-5.5","claude-opus-4-8"]`）で保存します。
 </ParamField>
 
 <ParamField body="allow_ips" type="string">
-  IP whitelist string. You can pass a single IP or multiple IPs separated by newlines
+  IP ホワイトリスト文字列。1件の IP または改行で複数の IP を指定できます。
 </ParamField>
 
 <ParamField body="group" type="string">
-  Token group. It must be a group the current user is allowed to use
+  トークンが属するグループ。現在のユーザーが権限を持つグループのみ設定可能です。
 </ParamField>
 
-## Response Format
+## レスポンスフォーマット
 
-The current implementation only returns a success state after creation:
+このインターフェースでの作成に成功した場合は、成功ステータスのみを返します：
 
 ```json
 {
@@ -67,7 +67,7 @@ The current implementation only returns a success state after creation:
 }
 ```
 
-## Code Examples
+## コード例
 
 <CodeGroup>
 
@@ -86,7 +86,7 @@ response = requests.post(
     "https://crazyrouter.com/api/token/",
     headers=headers,
     json={
-        "name": "Production",
+        "name": "生产环境",
         "remain_quota": 100000,
         "unlimited_quota": False,
         "expired_time": -1,
@@ -105,7 +105,7 @@ curl -X POST https://crazyrouter.com/api/token/ \
   -H "New-Api-User: 1" \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "Production",
+    "name": "生产环境",
     "remain_quota": 100000,
     "expired_time": -1,
     "model_limits_enabled": true,
@@ -116,5 +116,5 @@ curl -X POST https://crazyrouter.com/api/token/ \
 </CodeGroup>
 
 <Warning>
-  The current create endpoint does not return the full generated `key` in the response. If your workflow requires copying the full token immediately, prefer creating it from the console UI and saving it there.
+  この作成インターフェースは作成した新規 `key` の完全な内容をレスポンスとして返しません。その場で完全なキーをコピーする必要がある場合は、コンソール画面からの作成＆保存を優先的にご利用ください。
 </Warning>

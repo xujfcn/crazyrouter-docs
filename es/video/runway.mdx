@@ -1,0 +1,108 @@
+---
+title: "Runway"
+description: "Genera videos a partir de imágenes usando la API de Runway"
+---
+> Contenido actualizado: 2026-06-09
+
+# Runway
+
+```
+POST /runwayml/v1/image_to_video
+```
+
+Convierte imágenes en videos utilizando el modelo Runway Gen-3.
+
+## Parámetros de solicitud
+
+| Parámetro | Tipo | Requerido | Descripción |
+|------|------|------|------|
+| `model` | string | No | Nombre del modelo, como `gen3a_turbo` |
+| `promptImage` | string | Sí | URL de la imagen de entrada |
+| `promptText` | string | No | Palabras clave descriptivas del video |
+| `duration` | integer | No | Duración del video (segundos), por defecto 5 |
+| `ratio` | string | No | Relación de aspecto: `16:9`, `9:16` |
+| `watermark` | boolean | No | Si se agrega marca de agua |
+
+## Ejemplo de solicitud
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/runwayml/v1/image_to_video \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gen3a_turbo",
+    "promptImage": "https://example.com/landscape.jpg",
+    "promptText": "Camera slowly pans across the landscape, clouds moving in the sky",
+    "duration": 5,
+    "ratio": "16:9",
+    "watermark": false
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/runwayml/v1/image_to_video",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "gen3a_turbo",
+        "promptImage": "https://example.com/landscape.jpg",
+        "promptText": "Camera slowly pans across the landscape",
+        "duration": 5,
+        "ratio": "16:9"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### Ejemplo de respuesta
+
+```json
+{
+  "id": "runway_task_abc123",
+  "status": "PENDING"
+}
+```
+
+---
+
+## Consultar tarea
+
+```
+GET /runwayml/v1/tasks/{task_id}
+```
+
+```bash cURL
+curl https://api.crazyrouter.com/runwayml/v1/tasks/runway_task_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Ejemplo de respuesta (completado)
+
+```json
+{
+  "id": "runway_task_abc123",
+  "status": "SUCCEEDED",
+  "output": [
+    "https://runway-output.s3.amazonaws.com/..."
+  ]
+}
+```
+
+### Estado de la tarea
+
+| Estado | Descripción |
+|------|------|
+| `PENDING` | Esperando procesamiento |
+| `RUNNING` | Generando |
+| `SUCCEEDED` | Exitoso |
+| `FAILED` | Fallido |

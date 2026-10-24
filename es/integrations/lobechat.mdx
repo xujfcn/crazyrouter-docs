@@ -1,0 +1,190 @@
+---
+title: 'Tutorial de configuración de LobeChat'
+description: 'Conecta modelos compatibles con OpenAI a LobeChat vía Crazyrouter y completa la configuración de chat, auto-despliegue, gestión de modelos y resolución de problemas.'
+---
+> Contenido actualizado: 2026-06-09
+
+LobeChat es ideal para ser el punto de entrada de chat de equipos, escritorio personal multi-modelo y front-end de IA auto-desplegado para conversaciones. Al conectar con Crazyrouter, la forma más estable es usar la ruta `OpenAI` de LobeChat y apuntar la dirección del proxy a la base compatible con OpenAI de Crazyrouter.
+
+## Resumen
+
+A través de las opciones de configuración de OpenAI en LobeChat, puedes dirigir peticiones de conversación a Crazyrouter:
+
+- Protocolo recomendado: `OpenAI-compatible API`
+- Método recomendado: Provider `OpenAI` de LobeChat
+- Base URL: `https://api.crazyrouter.com/v1`
+- Método de autenticación: Token `sk-...`
+- Modelo recomendado para primera verificación: `gpt-5.5`
+
+Si despliegas LobeChat por tu cuenta, también puedes usar variables de entorno para predeterminar la ruta de OpenAI hacia Crazyrouter.
+
+## ¿A quién está dirigido?
+
+- Personas que quieren desplegar un front-end de chat estable
+- Personas que quieren usar Crazyrouter como escritorio de chat personal o de equipo
+- Personas que desean gestionar múltiples modelos y mantener el historial de conversaciones
+- Personas que quieren entregar configuraciones y modelos fijos a miembros internos por defecto
+
+## Protocolo de uso
+
+Protocolo recomendado: `OpenAI-compatible API`
+
+En LobeChat, al conectar con Crazyrouter se debe usar la base compatible con OpenAI:
+
+```text
+https://api.crazyrouter.com/v1
+```
+
+No uses:
+
+- `https://api.crazyrouter.com`
+- `https://api.crazyrouter.com/v1/chat/completions`
+
+<Note>
+La documentación de LobeChat describe `OPENAI_PROXY_URL` como “Dirección de solicitud de la API de OpenAI”, los valores y ejemplos por defecto suelen ser del estilo `/v1`; además, el ejemplo de enlace oficial local `http://127.0.0.1:4000/api/status` también es `{address}/v1`. Así que al conectar con Crazyrouter, pon primero `https://api.crazyrouter.com/v1`. Si tu reverse proxy ya agrega una capa extra `/v1`, ajústalo por separado para evitar sufijos duplicados.
+</Note>
+
+## Requisitos previos
+
+| Proyecto | Descripción |
+|------|------|
+| Cuenta de Crazyrouter | Regístrate primero en [crazyrouter.com](https://crazyrouter.com) |
+| Token de Crazyrouter | Se recomienda crear un token `sk-...` separado para LobeChat |
+| LobeChat | Puedes usar la versión online o la auto-desplegada, se recomienda la versión estable actual |
+| Modelo disponible | Permite al menos uno compatible con chat de OpenAI probado exitosamente ese día, como `gpt-5.5` |
+
+Lista de modelos recomendados para la primera whitelist:
+
+- `gpt-5.5`
+- `claude-opus-4-8`
+- `gemini-3.1-pro`
+
+<Tip>
+Si también planeas conectar Cursor, Codex, Claude Code a Crazyrouter, es mejor usar un token separado para LobeChat: así será más fácil rastrear el consumo por el chat.
+</Tip>
+
+## Inicio rápido en 5 minutos
+
+<Steps>
+  <Step title="Crear un token exclusivo para LobeChat">
+    En el panel de Crazyrouter, crea un token llamado `lobechat`, permitiendo solo modelos probados ese día como `gpt-5.5` y `claude-opus-4-8`.
+  </Step>
+  <Step title="Abrir la configuración del modelo de lenguaje">
+    Entra en LobeChat, haz clic en el avatar o en la entrada de configuración abajo a la izquierda y abre `Ajustes` → `Modelo de lenguaje`.
+  </Step>
+  <Step title="Configurar la ruta de OpenAI">
+    En la configuración relacionada con `OpenAI`, rellena:
+    - `API Key`: tu `sk-...`
+    - `Dirección del proxy de la API / API Proxy URL`: `https://api.crazyrouter.com/v1`
+
+    Activa al mismo tiempo `Usar una dirección personalizada de proxy de la API` o una opción equivalente.
+  </Step>
+  <Step title="Seleccionar un modelo base">
+    Tras guardar, selecciona `gpt-5.5` como modelo por defecto; no agregues muchos modelos al principio.
+  </Step>
+  <Step title="Realizar la primera validación">
+    Crea una nueva conversación y envía: `Reply only OK`. Si responde correctamente y aparecen logs en Crazyrouter, la conexión fue exitosa.
+  </Step>
+</Steps>
+
+## Configuración rápida para auto-despliegue
+
+Si usas Docker para auto-desplegar LobeChat, puedes configurar los valores predeterminados de OpenAI en variables de entorno:
+
+```yaml
+services:
+  lobechat:
+    image: lobehub/lobe-chat
+    ports:
+      - "3210:3210"
+    environment:
+      - OPENAI_API_KEY=sk-xxx
+      - OPENAI_PROXY_URL=https://api.crazyrouter.com/v1
+      - OPENAI_MODEL_LIST=gpt-5.5,claude-opus-4-8,gemini-3.1-pro
+```
+
+Si no quieres que los usuarios del front-end cambien la Key, utiliza las opciones de ocultación o gestión disponibles en tu versión actual para fijar la Key por defecto en las variables de entorno del servidor.
+
+## Configuración de modelos recomendada
+
+| Escenario de uso | Modelo recomendado | Razón |
+|----------|----------|------|
+| Modelo principal de chat por defecto | `gpt-5.5` | Probado exitosamente en el día, ideal como base principal en LobeChat |
+| Escritura / código de alta calidad | `claude-opus-4-8` | Mejor experiencia para texto largo, escritura y ayuda de código |
+| Backup de Gemini | `gemini-3.1-pro` | Útil para tener una ruta secundaria de verificación de compatibilidad |
+
+Orden recomendado: primero valida con `gpt-5.5`, luego expande a `claude-opus-4-8` y `gemini-3.1-pro`.
+
+## Mejores prácticas para configuración de token
+
+| Configuración | Recomendación | Descripción |
+|------|------|------|
+| Token dedicado | Obligatorio | LobeChat no debe compartir token con IDE / CLI |
+| Whitelist de modelos | Muy recomendable | Solo permite los modelos que usará el chat |
+| Restricción de IP | Recomendado si el despliegue tiene salida fija | Usa con cuidado si el acceso es público o la IP cambia frecuentemente |
+| Límite de cuota | Muy recomendable | El chat de equipo puede hacer que varios usen el mismo token |
+| Aislamiento ambiental | Recomendado | Usa tokens distintos para pruebas y producción |
+| Control de modelos por defecto | Recomendado | Retira los modelos caros del listado por defecto y habilítalos solo si se necesitan |
+
+## Lista de verificación
+
+- [ ] `API Key` guardado correctamente
+- [ ] `Dirección del proxy de la API / API Proxy URL` ajustado a `https://api.crazyrouter.com/v1`
+- [ ] El interruptor de dirección de proxy personalizada está activo
+- [ ] El primer modelo fue seleccionado exitosamente
+- [ ] Primera petición de conversación devuelve correctamente
+- [ ] Salida streaming funciona
+- [ ] Los logs en Crazyrouter muestran la solicitud
+- [ ] La cuota del token y la whitelist de modelos cumplen lo previsto
+
+## Errores comunes y soluciones
+
+| Síntoma | Causa común | Solución |
+|------|----------|----------|
+| No se puede guardar o falla la validación | Error de API Key o dirección de proxy incorrecta | Revisa `sk-...` y `https://api.crazyrouter.com/v1` |
+| 401 unauthorized | Token inválido, expirado o borrado por error | Regenera el token y reemplázalo |
+| 403 / model not allowed | El modelo no está en la whitelist del token | Permite el modelo en Crazyrouter |
+| 404 | Proxy configurado como dominio raíz o interface específica | Usa `https://api.crazyrouter.com/v1` |
+| Configuración parece correcta pero da 404 | El gateway, reverse proxy o capa de despliegue ya agregó `/v1` automáticamente | Comprueba si hay sufijo duplicado; si el upstream ya agregó `/v1`, no lo repitas |
+| Modelo parece seleccionable pero da error en uso | LobeChat cachea modelos antiguos o el modelo por defecto no existe | Cambia a `gpt-5.5`, refresca la página y selecciona de nuevo |
+| El chat envía mensajes pero el streaming falla | Problemas de versión del cliente o incompatibilidad de modelo | Valida primero con `gpt-5.5` y actualiza LobeChat |
+| El consumo es muy rápido al usar con muchos en equipo | Un solo token compartido y sin límite de cuota | Configura cuota exclusiva para el equipo y divide tokens si es necesario |
+| Después de auto-despliegue los usuarios pueden cambiar el upstream | Solo configuraste valor por defecto, sin limitar la personalización del front-end | Usa configuración gestionada o desactiva la personalización del usuario en la capa de despliegue |
+
+## Consejos de rendimiento y costos
+
+- En la primera fase, sólo mantén `gpt-5.5`
+- El modelo por defecto para chat de equipo debe ser de bajo costo; reserva los modelos caros para usuarios avanzados o casos específicos
+- Si tienes activado knowledge base, plugins o sesiones largas, ajusta la cuota de LobeChat por separado
+- En ambientes auto-desplegados, usa tokens distintos para producción y pruebas para evitar que las pruebas internas consuman cuotas oficiales
+- Ante consumos anómolos, revisa los logs de Crazyrouter para ver si múltiples usuarios o chats largos son la causa
+
+## Preguntas frecuentes
+
+### ¿Qué Base URL debe rellenarse en LobeChat?
+
+Rellena `https://api.crazyrouter.com/v1`.
+
+### ¿Por qué aquí no se debe usar solo el dominio raíz?
+
+Porque la configuración de proxy OpenAI en LobeChat está pensada para usar directamente la base compatible con OpenAI, no el dominio raíz.
+
+### ¿Qué hacer si mi reverse proxy ya agrega `/v1` automáticamente?
+
+Entonces no escribas de nuevo `/v1` en la dirección final expuesta a LobeChat. Revisa tu cadena de proxies para evitar sufijos dobles.
+
+### ¿Cuál es el primer modelo recomendado?
+
+Usa `gpt-5.5` primero.
+
+### ¿LobeChat puede conectar varios modelos a la vez?
+
+Sí, pero se aconseja validar con uno primero y expandir gradualmente.
+
+### ¿Al auto-desplegar, conviene fijar el token en variables de entorno?
+
+Si quieres controlar upstream y costos, se recomienda hacerlo; si prefieres que cada usuario traiga su propia Key, permite la personalización del front-end.
+
+<Note>
+Si tu objetivo es un front-end de chat estable y escritorio compartido para el equipo, LobeChat es una muy buena elección; si buscas proxy de código y ejecución automática, es mejor priorizar herramientas como Cursor, Claude Code, Codex o Cline.
+</Note>

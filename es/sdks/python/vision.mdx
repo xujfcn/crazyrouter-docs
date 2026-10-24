@@ -1,0 +1,123 @@
+---
+title: "Python reconocimiento de imágenes"
+description: "Implementación en Python de gpt-5.5 y Claude para reconocimiento visual"
+---
+> Contenido actualizado: 2026-06-09
+
+## gpt-5.5 reconocimiento de imágenes - vía URL
+
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-xxx", base_url="https://api.crazyrouter.com/v1")
+
+response = client.chat.completions.create(
+    model="gpt-5.5",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "描述这张图片的内容"},
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": "https://example.com/photo.jpg"
+                }
+            }
+        ]
+    }]
+)
+
+print(response.choices[0].message.content)
+```
+
+## gpt-5.5 reconocimiento de imágenes - imagen local
+
+```python
+import base64
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-xxx", base_url="https://api.crazyrouter.com/v1")
+
+# 读取本地图片并转为 base64
+with open("photo.jpg", "rb") as f:
+    image_data = base64.b64encode(f.read()).decode("utf-8")
+
+response = client.chat.completions.create(
+    model="gpt-5.5",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "这张图片里有什么？"},
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/jpeg;base64,{image_data}"
+                }
+            }
+        ]
+    }]
+)
+
+print(response.choices[0].message.content)
+```
+
+## Comparación de múltiples imágenes
+
+```python
+response = client.chat.completions.create(
+    model="gpt-5.5",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "对比这两张图片的区别"},
+            {"type": "image_url", "image_url": {"url": "https://example.com/img1.jpg"}},
+            {"type": "image_url", "image_url": {"url": "https://example.com/img2.jpg"}}
+        ]
+    }]
+)
+
+print(response.choices[0].message.content)
+```
+
+## Reconocimiento de imágenes con Claude
+
+El modelo Claude también admite reconocimiento de imágenes a través del formato compatible con OpenAI:
+
+```python
+response = client.chat.completions.create(
+    model="claude-opus-4-8",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "text", "text": "详细描述这张图片"},
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/png;base64,{image_data}"
+                }
+            }
+        ]
+    }],
+    max_tokens=1024
+)
+
+print(response.choices[0].message.content)
+```
+
+## Modelos de reconocimiento de imágenes soportados
+
+| Modelo | Descripción |
+|------|------|
+| `gpt-5.5` | Modelo visual compatible con OpenAI verificado en entorno de producción el 23 de marzo de 2026 |
+| `claude-opus-4-8` | Modelo visual compatible con OpenAI Claude verificado exitosamente |
+
+<Note>
+  Las entradas visuales de `gpt-5.5` y `claude-opus-4-8` se verificaron en producción bajo Crazyrouter el 23 de marzo de 2026. Se recomienda que el tamaño de imagen no supere los 20MB; la codificación Base64 incrementa el tamaño en aproximadamente un 33%, por lo que para imágenes grandes es preferible usar URL.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Comparación de precios de GPT-5.5: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/gpt-5-5?utm_source=docs&utm_medium=related)
+- [Página del modelo GPT-5.5: Precio en tiempo real, ejemplos reales, código de invocación](https://crazyrouter.com/es/models/openai/gpt-5-5?utm_source=docs&utm_medium=related)
+- [Todos los modelos y precios de OpenAI](https://crazyrouter.com/es/models/openai?utm_source=docs&utm_medium=related)

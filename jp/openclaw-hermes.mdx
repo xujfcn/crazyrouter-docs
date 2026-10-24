@@ -1,32 +1,32 @@
 ---
-title: 'Hermes Agent の設定'
-description: 'Hermes Agent に Crazyrouter を設定し、OpenAI 互換エンドポイント経由で 627 以上の AI モデルを利用します'
-icon: 'robot'
+title: "Hermes Agentの設定"
+description: "Hermes AgentをCrazyrouterで動作させ、OpenAI互換エンドポイント経由で対応するAIモデルを利用しましょう"
+icon: "robot"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-10-12
 
-[crazyrouter-hermes](https://github.com/xujfcn/crazyrouter-hermes) を使うと、[Hermes Agent](https://github.com/NousResearch/Hermes-Agent) のモデルプロバイダーを Crazyrouter に切り替えられます。設定後、Hermes は `https://api.crazyrouter.com/v1` を OpenAI 互換エンドポイントとして使い、1 つの Crazyrouter API Key で Claude、GPT、DeepSeek、Gemini、Qwen など 627 以上のモデルを呼び出します。
+[crazyrouter-hermes](https://github.com/xujfcn/crazyrouter-hermes)を使って[Hermes Agent](https://github.com/NousResearch/Hermes-Agent)のモデルプロバイダーをCrazyrouterに切り替えることができます。設定後、Hermesは`https://api.crazyrouter.com/v1`をOpenAI互換エンドポイントとして利用し、Claude、GPT、DeepSeek、Gemini、Qwen、627以上のモデルを1つのCrazyrouter API Keyで呼び出せます。
 
-## 向いている用途
+## 対象者
 
-- Hermes Agent から Crazyrouter をモデルプロバイダーとして使いたい場合
-- ローカル Agent のモデルと利用枠を Crazyrouter に統一したい場合
-- `OPENAI_API_KEY`、`OPENAI_BASE_URL`、デフォルトモデルを 1 コマンドで設定したい場合
+- Hermes Agentの利用者で、Crazyrouterをモデルプロバイダーとして使いたい方
+- モデルやクオータをCrazyrouterで管理したいローカルagentシナリオ
+- `OPENAI_API_KEY`、`OPENAI_BASE_URL`、及びデフォルトモデルを一括設定したい方
 
-## 前提条件
+## 必要条件
 
 | 項目 | 説明 |
-|------|------|
-| Hermes Agent | ローカルにインストールし、起動できることを確認します |
-| Crazyrouter アカウント | [crazyrouter.com](https://crazyrouter.com) で作成します |
-| Crazyrouter API Key | Hermes 専用の `sk-...` token を作成することを推奨します |
-| モデル権限 | Hermes で使うモデルを token で許可します |
+|------|----------|
+| Hermes Agent | Hermesをローカルにインストールし、正常に起動することを確認してください |
+| Crazyrouterアカウント | [crazyrouter.com](https://crazyrouter.com)でアカウントを作成してください |
+| Crazyrouter API Key | Hermes用に個別の`sk-...`トークン作成を推奨します |
+| モデルアクセス | 使用予定のモデルをトークンに許可してください |
 
 <Tip>
-Hermes は OpenAI 互換設定で Crazyrouter に接続します。Base URL は `https://api.crazyrouter.com/v1` のままにしてください。
+HermesはOpenAI互換設定を通じてCrazyrouterと接続します。Base URLには`https://api.crazyrouter.com/v1`を入力してください。
 </Tip>
 
-## ワンクリック設定
+## ワンコマンドでの設定
 
 <Tabs>
   <Tab title="Linux / macOS / WSL2">
@@ -47,19 +47,19 @@ Hermes は OpenAI 互換設定で Crazyrouter に接続します。Base URL は 
   </Tab>
 </Tabs>
 
-スクリプトは Crazyrouter API Key の入力、デフォルトモデルの選択、任意の接続テストを案内します。
+スクリプトはCrazyrouter API Keyの入力、デフォルトモデルの選択、必要なら接続の確認を求めます。
 
 <Warning>
-セットアップスクリプトはローカルの Hermes 設定を書き換えます。既存のカスタム設定がある場合は、先に `~/.hermes/.env` と `~/.hermes/config.yaml` をバックアップしてください。
+スクリプトはHermesのローカル設定を書き込みます。既に独自設定がある場合は、事前に`~/.hermes/.env`や`~/.hermes/config.yaml`のバックアップを取ってください。
 </Warning>
 
-## 手動設定
+## 手動による設定
 
-スクリプトを使わない場合は、Hermes の設定ファイルを手動で編集します。
+スクリプトを実行したくない場合は、Hermesの設定を手動で行ってください。
 
 ### 環境変数
 
-`~/.hermes/.env` を編集します。
+`~/.hermes/.env`を編集してください:
 
 ```bash
 OPENAI_API_KEY=sk-your-crazyrouter-key
@@ -68,7 +68,7 @@ OPENAI_BASE_URL=https://api.crazyrouter.com/v1
 
 ### デフォルトモデル
 
-`~/.hermes/config.yaml` を編集します。
+`~/.hermes/config.yaml`を編集してください:
 
 ```yaml
 model:
@@ -77,11 +77,11 @@ model:
   base_url: "https://api.crazyrouter.com/v1"
 ```
 
-`default` は Crazyrouter token で許可済みのモデル名に変更できます。
+`default`は、Crazyrouterトークンで許可された任意のモデルに置き換えてください。
 
 ## モデルの切り替え
 
-設定後、Hermes 内で `/model` を使ってモデルを切り替えられます。
+設定後はHermes内で`/model`を使ってモデルを切り替えられます:
 
 ```text
 /model claude-opus-4-8
@@ -93,26 +93,26 @@ model:
 /model gpt-4o
 ```
 
-切り替え時に `model not allowed` または `403` が返る場合、通常は現在の Crazyrouter token でそのモデルが許可されていません。
+切り替え時に`model not allowed`や`403`が表示された場合、選択したモデルが現在のCrazyrouterトークンで許可されていない事が多いです。
 
-## 確認チェックリスト
+## チェックリスト
 
-- [ ] `~/.hermes/.env` の `OPENAI_API_KEY` が有効な Crazyrouter token である
-- [ ] `OPENAI_BASE_URL` が `https://api.crazyrouter.com/v1` である
-- [ ] `~/.hermes/config.yaml` の `provider` が `custom` である
-- [ ] デフォルトモデルが Crazyrouter token で許可されている
-- [ ] Hermes でテストメッセージに応答が返る
-- [ ] `/model gpt-5.5` など、許可済みモデルへの切り替えが成功する
+- [ ] `OPENAI_API_KEY` in `~/.hermes/.env`は有効なCrazyrouterトークンである
+- [ ] `OPENAI_BASE_URL`が`https://api.crazyrouter.com/v1`と一致している
+- [ ] `provider` in `~/.hermes/config.yaml`が`custom`と一致している
+- [ ] デフォルトモデルがCrazyrouterトークンで許可されている
+- [ ] Hermesがテストメッセージに応答する
+- [ ] `/model gpt-5.5`または他の許可されたモデルが正しく切り替えられる
 
 ## よくある問題
 
-| 現象 | 主な原因 | 対処 |
-|------|----------|------|
-| `401 unauthorized` | API Key が間違っている、期限切れ、またはローテーション済み | Crazyrouter token を再作成し、`~/.hermes/.env` を更新します |
-| `403` または `model not allowed` | token で選択モデルが許可されていない | Crazyrouter token 設定でそのモデルを許可します |
-| 古いプロバイダーが使われる | Hermes が設定を再読み込みしていない、または別の設定ファイルを編集した | Hermes を再起動し、`~/.hermes/.env` と `~/.hermes/config.yaml` を確認します |
-| 接続タイムアウト | ローカルネットワークから Crazyrouter に到達できない | プロキシ、ファイアウォール、DNS を確認します |
+| 症状 | 推定原因 | 対処方法 |
+|---------|-------------------|---------|
+| `401 unauthorized` | API Keyが無効・期限切れ・上書きされた | 新しいCrazyrouterトークンを作成し、`~/.hermes/.env`を更新してください |
+| `403` または `model not allowed` | トークンが選択モデルを許可していない | Crazyrouterトークン設定でモデルを許可してください |
+| Hermesが以前のプロバイダーを使用している | 設定ファイルの再読込不足・別ファイルの変更 | Hermesを再起動し、`~/.hermes/.env`と`~/.hermes/config.yaml`の状態を確認してください |
+| 接続タイムアウト | ローカルネットワークがCrazyrouterに接続できない | proxy、firewall、DNSを確認してください |
 
-<Card title="crazyrouter-hermes リポジトリを見る" icon="github" href="https://github.com/xujfcn/crazyrouter-hermes">
-  セットアップスクリプト、手動設定例、最新の説明を確認できます。
+<Card title="crazyrouter-hermes リポジトリを開く" icon="github" href="https://github.com/xujfcn/crazyrouter-hermes">
+  設定スクリプト、手動設定例、最新のメモをご覧ください。
 </Card>

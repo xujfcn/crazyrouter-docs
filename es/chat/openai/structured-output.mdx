@@ -1,0 +1,97 @@
+---
+title: "Salidas Estructuradas"
+description: "Salida estructurada estilo OpenAI verificada con Crazyrouter producción el 2026-03-23"
+---
+> Contenido actualizado: 2026-06-09
+
+# Salidas Estructuradas
+
+```
+POST /v1/chat/completions
+```
+
+A partir del 23 de marzo de 2026, la producción de Crazyrouter ha verificado que `gpt-5.5` con `response_format.type = "json_schema"` devuelve JSON directamente analizable.
+
+---
+
+## Ruta Recomendada: `json_schema`
+
+```bash
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Return the people and roles from: Alice is CTO. Bob is PM."
+      }
+    ],
+    "response_format": {
+      "type": "json_schema",
+      "json_schema": {
+        "name": "people_roles",
+        "strict": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {"type": "string"},
+                  "role": {"type": "string"}
+                },
+                "required": ["name", "role"],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": ["people"],
+          "additionalProperties": false
+        }
+      }
+    }
+  }'
+```
+
+El `message.content` observado en producción se analizó directamente como:
+
+```json
+{
+  "people": [
+    {
+      "name": "Alice",
+      "role": "CTO"
+    },
+    {
+      "name": "Bob",
+      "role": "PM"
+    }
+  ]
+}
+```
+
+---
+
+## Manejo del Lado del Consumidor
+
+```python
+import json
+
+content = response["choices"][0]["message"]["content"]
+data = json.loads(content)
+```
+
+<Note>
+  Este pase de producción solo revalidó la ruta estricta `json_schema`. El modo anterior `json_object` no fue revisado por separado, así que ya no se mantiene como ejemplo principal aquí.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Relacionado en crazyrouter.com
+
+- [Página del modelo GPT Image 1.5: precio en vivo, muestras reales, código](https://crazyrouter.com/es/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Página del modelo GPT Image 2: precio en vivo, muestras reales, código](https://crazyrouter.com/es/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Todos los modelos de OpenAI con precios en vivo](https://crazyrouter.com/es/models/openai?utm_source=docs&utm_medium=related)

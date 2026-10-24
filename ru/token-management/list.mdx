@@ -1,38 +1,38 @@
 ---
-title: 'List Tokens'
-description: 'Get a paginated list of API tokens for the current user'
-api: 'GET /api/token/'
+title: "Получить список токенов"
+description: "Постраничное получение списка API-токенов текущего пользователя"
+api: "GET /api/token/"
 ---
-> Дата обновления: 2026-07-20
+> Обновление содержания: 2026-07-20
 
-## Overview
+## Описание интерфейса
 
-Retrieve all API tokens created by the current user, with pagination support.
+Получение всех API-токенов (Token), созданных текущим пользователем, с поддержкой постраничного вывода.
 
 <Note>
-  The `/api/token/*` endpoints are mainly for Crazyrouter dashboard automation around API key management. They require a user `access token` plus the `New-Api-User` header, and are not the normal interface for `sk-xxx` model calls. Use `https://crazyrouter.com` as the base URL; `https://api.crazyrouter.com` is reserved for model APIs and returns `404 api_only_endpoint` for management paths.
+  Данный набор `/api/token/*` интерфейсов предназначен преимущественно для автоматизации управления API-ключами в консоли Crazyrouter. Для работы требуются заголовки запроса `access token` и `New-Api-User` пользователя, эти интерфейсы не предназначены для прямого использования в обычных процессах вызова `sk-xxx`-моделей. Базовый адрес запроса должен быть `https://crazyrouter.com`; `https://api.crazyrouter.com` — это специальная точка входа для model API, вызовы к управленческому пути вернут `404 api_only_endpoint`.
 </Note>
 
-## Authentication
+## Способ аутентификации
 
-Authenticate using the user's access token with the following headers:
+Аутентификация с помощью Access Token пользователя, необходимо указать в заголовке запроса:
 
 ```text
 Authorization: Bearer {access_token}
 New-Api-User: {user_id}
 ```
 
-## Request Parameters
+## Параметры запроса
 
 <ParamField query="p" type="integer" default="1">
-  Page number. The backend accepts older styles too, but `1` is the recommended starting page
+  Номер страницы. Код совместим со старой реализацией, но рекомендуется начинать с `1`
 </ParamField>
 
 <ParamField query="size" type="integer" default="10">
-  Items per page, maximum 100
+  Количество элементов на странице, максимум 100
 </ParamField>
 
-## Response Format
+## Формат ответа
 
 ```json
 {
@@ -48,7 +48,7 @@ New-Api-User: {user_id}
         "user_id": 1,
         "key": "sk-xxxxxxxxxxxxxxxx",
         "status": 1,
-        "name": "My Token",
+        "name": "我的令牌",
         "created_time": 1706000000,
         "accessed_time": 1706100000,
         "expired_time": -1,
@@ -65,24 +65,24 @@ New-Api-User: {user_id}
 }
 ```
 
-## Field Descriptions
+## Описание полей
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | int | Token ID |
-| `key` | string | API key in `sk-xxx` format |
-| `status` | int | Status: 1=enabled, 2=disabled |
-| `name` | string | Token name |
-| `expired_time` | int | Expiration timestamp, `-1` means never expires |
-| `remain_quota` | int | Remaining quota |
-| `unlimited_quota` | bool | Whether quota is unlimited |
-| `used_quota` | int | Used quota |
-| `model_limits_enabled` | bool | Whether the model whitelist is enabled |
-| `model_limits` | string | Model restriction config string |
-| `allow_ips` | string | IP whitelist string |
-| `group` | string | Group |
+| Поле | Тип | Описание |
+|------|------|----------|
+| `id` | int | ID токена |
+| `key` | string | API Key (формат sk-xxx) |
+| `status` | int | Статус: 1=активирован, 2=деактивирован |
+| `name` | string | Название токена |
+| `expired_time` | int | Временная метка истечения, `-1` означает никогда не истекает |
+| `remain_quota` | int | Оставшийся лимит |
+| `unlimited_quota` | bool | Неограниченный лимит |
+| `used_quota` | int | Использованный лимит |
+| `model_limits_enabled` | bool | Включён ли белый список моделей |
+| `model_limits` | string | Строка конфигурации ограничений моделей |
+| `allow_ips` | string | Строка белого списка IP |
+| `group` | string | Группа |
 
-## Code Examples
+## Пример кода
 
 <CodeGroup>
 
@@ -102,7 +102,7 @@ response = requests.get(
 
 page = response.json()["data"]
 for token in page["items"]:
-    print(f"[{token['name']}] {token['key'][:10]}... Quota: {token['remain_quota']}")
+    print(f"[{token['name']}] {token['key'][:10]}... 额度: {token['remain_quota']}")
 ```
 
 ```bash cURL

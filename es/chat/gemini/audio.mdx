@@ -1,0 +1,83 @@
+---
+title: "Gemini comprensión de audio"
+description: "Gemini comprensión de audio nativa basada en las experiencias exitosas de solicitudes a Crazyrouter de este sitio hasta el 2026-04-08"
+---
+> Contenido actualizado: 2026-06-09
+
+# Gemini comprensión de audio
+
+```text
+POST /v1beta/models/{model}:generateContent
+```
+
+Hasta `2026-04-08`, las revisiones de Crazyrouter de este sitio y del puerto local `4000` demuestran:
+
+- `gemini-3.1-pro` puede leer `audio/wav`
+- El flujo principal ya estable que funciona es `inlineData`
+- Para audios cortos, la transcripción, la detección de idioma y el resumen se pueden realizar directamente con indicaciones de texto
+
+---
+
+## Solicitud mínima verificada
+
+```bash
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "inlineData": {
+              "mimeType": "audio/wav",
+              "data": "BASE64_WAV_DATA"
+            }
+          },
+          {
+            "text": "请返回 JSON，字段为 transcript、language、summary。"
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "maxOutputTokens": 512
+    }
+  }'
+```
+
+La forma clave de respuesta exitosa en el entorno de producción:
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "```json\n{\n  \"transcript\": \"叮\",\n  \"language\": \"zh-CN\",\n  \"summary\": \"音频中包含一个简短的提示音。\"\n}\n```"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+## Puntos clave de la solicitud
+
+- Para la comprensión de audio se recomienda priorizar `inlineData`
+- `mimeType` debe coincidir con el formato de audio real, por ejemplo, `audio/wav`, `audio/mpeg`
+- `data` debe contener solo el contenido en Base64, sin el prefijo de Data URL
+- Si necesitas JSON estricto, puedes agregar también la restricción de [salida estructurada](/es/features/structured-outputs)
+
+<Note>
+  Esta página actual está escrita para el flujo principal ya validado de comprensión de audio corto. Para transcripción de audio más largo y generación de voz, consulta las páginas [STT](/es/audio/stt) y [TTS](/es/audio/tts) respectivamente; Realtime actualmente no se muestra como ejemplo recomendado públicamente.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Comparativa de precios Gemini 2.5 Flash: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Página del modelo Gemini 2.5 Flash: Precios en tiempo real, ejemplos reales, código de uso](https://crazyrouter.com/es/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Comparativa de precios Gemini 2.5 Flash-Lite: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)

@@ -1,0 +1,425 @@
+---
+title: "Tutorial de configuración de LangChain"
+description: "Integra Crazyrouter en proyectos de Python y JavaScript / TypeScript de LangChain usando el método compatible con OpenAI, incluyendo los pasos de instalación, variables de entorno, validación, RAG y resolución de problemas"
+---
+> Contenido actualizado: 2026-06-09
+
+LangChain es uno de los marcos de desarrollo de aplicaciones LLM más utilizados, adecuado para encapsular interfaces de chat, cadenas de indicaciones, llamada de herramientas, RAG, flujos de trabajo tipo agente y orquestación a nivel de aplicación. Para conectar con Crazyrouter, la forma más estable es utilizar el componente compatible con OpenAI oficialmente soportado por LangChain.
+
+## Resumen
+
+A través del componente OpenAI de LangChain, puedes enviar solicitudes a Crazyrouter:
+
+- Protocolo recomendado: `OpenAI-compatible API`
+- Base URL: `https://api.crazyrouter.com/v1`
+- Variable de autenticación: `OPENAI_API_KEY`
+- Paquete principal de Python: `langchain-openai`
+- Paquete principal de JavaScript / TypeScript: `@langchain/openai`
+
+<Tip>
+Si planeas integrar Crazyrouter en tu código de aplicación (no solo chatear en el cliente de escritorio), LangChain suele ser el camino de integración ingenieril más natural.
+</Tip>
+
+## ¿Para quién es?
+
+- Desarrolladores que quieren integrar Crazyrouter formalmente en proyectos de Python o Node.js
+- Personas que desean construir cadenas de indicaciones, RAG, llamadas de herramientas y orquestación de flujos de trabajo
+- Quienes buscan abstraer la lógica de llamado a modelos y no quieren escribir solicitudes HTTP de bajo nivel manualmente
+- Usuarios que desean mantener flexibilidad para cambiar modelos o proveedores en el futuro
+
+## Protocolo de uso
+
+Protocolo recomendado: `OpenAI-compatible API`
+
+Configuración central de Crazyrouter relacionada:
+
+```text
+OPENAI_API_KEY=sk-xxx
+BASE_URL=https://api.crazyrouter.com/v1
+```
+
+La sintaxis habitual en LangChain sería:
+
+- Python: `api_key` + `base_url`
+- JavaScript / TypeScript: `apiKey` + `configuration.baseURL`
+
+## Requisitos del sistema y condiciones previas
+
+| Proyecto | Descripción |
+|------|------|
+| Cuenta de Crazyrouter | Regístrate primero en [crazyrouter.com](https://crazyrouter.com) |
+| Token de Crazyrouter | Se recomienda crear un token separado para el proyecto de LangChain |
+| Python | Recomendado `Python 3.10+` |
+| Node.js | Recomendado `Node.js 18+` |
+| Paquete de LangChain | Usar `langchain-openai` para Python; `@langchain/openai` para JS / TS |
+| Modelo disponible | Permitir al menos 1 modelo de chat; para búsqueda de vectores se debe permitir también el modelo de embedding |
+
+Lista blanca inicial recomendada:
+
+- `gpt-5.5`
+- `claude-opus-4-8`
+- `gemini-3.1-pro`
+- `text-embedding-3-large`
+
+## Ruta completa de integración para proyectos Python
+
+### Camino recomendado para Windows
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -U pip
+pip install -U langchain-openai langchain-community
+python --version
+pip --version
+```
+
+Si deseas ejecutar el ejemplo de FAISS, añade:
+
+```powershell
+pip install faiss-cpu
+```
+
+### Camino recomendado para macOS / Linux
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -U pip
+pip install -U langchain-openai langchain-community
+python --version
+pip --version
+```
+
+Si deseas ejecutar el ejemplo de FAISS, añade:
+
+```bash
+pip install faiss-cpu
+```
+
+## Ruta completa de integración para proyectos JavaScript / TypeScript
+
+### Windows PowerShell
+
+```powershell
+npm init -y
+npm install @langchain/openai @langchain/core
+node -v
+npm -v
+```
+
+### macOS / Linux
+
+```bash
+npm init -y
+npm install @langchain/openai @langchain/core
+node -v
+npm -v
+```
+
+## Configuración completa desde cero
+
+<Steps>
+  <Step title="Paso 1: Crear un token dedicado para LangChain en Crazyrouter">
+    Para la primera vez, solo se recomienda permitir:
+
+    - `gpt-5.5`
+    - `claude-opus-4-8`
+    - `text-embedding-3-large`
+
+    Si luego necesitas más modelos, amplía según sea necesario, pero la primera vez mantén la lista blanca mínima.
+  </Step>
+
+  <Step title="Paso 2: Configura variables de entorno primero">
+    <Tabs>
+      <Tab title="macOS / Linux">
+        ```bash
+        export OPENAI_API_KEY=sk-xxx
+        echo $OPENAI_API_KEY
+        ```
+      </Tab>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        $env:OPENAI_API_KEY = "sk-xxx"
+        echo $env:OPENAI_API_KEY
+        ```
+      </Tab>
+    </Tabs>
+
+    Si planeas desarrollar a largo plazo, configura la persistencia:
+
+    <Tabs>
+      <Tab title="Linux Bash">
+        ```bash
+        echo 'export OPENAI_API_KEY=sk-xxx' >> ~/.bashrc
+        source ~/.bashrc
+        ```
+      </Tab>
+      <Tab title="macOS / Zsh">
+        ```bash
+        echo 'export OPENAI_API_KEY=sk-xxx' >> ~/.zshrc
+        source ~/.zshrc
+        ```
+      </Tab>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        [System.Environment]::SetEnvironmentVariable("OPENAI_API_KEY", "sk-xxx", "User")
+        $env:OPENAI_API_KEY = "sk-xxx"
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="Paso 3: Completa la verificación mínima del chat en Python">
+    Crea un `test_langchain_chat.py` nuevo:
+
+    ```python
+    from langchain_openai import ChatOpenAI
+
+    llm = ChatOpenAI(
+        model="gpt-5.5",
+        api_key="sk-xxx",
+        base_url="https://api.crazyrouter.com/v1",
+        temperature=0,
+    )
+
+    response = llm.invoke("Reply only OK")
+    print(response.content)
+    ```
+
+    Ejecuta:
+
+    ```bash
+    python test_langchain_chat.py
+    ```
+  </Step>
+
+  <Step title="Paso 4: Modifica a la versión con variables de entorno">
+    Una vez funcione, no se recomienda codificar la key directamente en el código:
+
+    ```python
+    import os
+    from langchain_openai import ChatOpenAI
+
+    llm = ChatOpenAI(
+        model="gpt-5.5",
+        api_key=os.environ["OPENAI_API_KEY"],
+        base_url="https://api.crazyrouter.com/v1",
+        temperature=0,
+    )
+    ```
+  </Step>
+
+  <Step title="Paso 5: Realiza la verificación mínima del chat en JavaScript / TypeScript">
+    Crea un `test-langchain-chat.mjs` nuevo:
+
+    ```javascript
+    import { ChatOpenAI } from "@langchain/openai";
+
+    const llm = new ChatOpenAI({
+      model: "gpt-5.5",
+      apiKey: process.env.OPENAI_API_KEY,
+      configuration: {
+        baseURL: "https://api.crazyrouter.com/v1",
+      },
+      temperature: 0,
+    });
+
+    const response = await llm.invoke("Reply only OK");
+    console.log(response.content);
+    ```
+
+    Ejecuta:
+
+    ```bash
+    node test-langchain-chat.mjs
+    ```
+  </Step>
+
+  <Step title="Paso 6: Agrega paso a paso Embeddings, Prompt, RAG">
+    No se recomienda empezar directamente con cadenas complejas. Orden recomendado:
+
+    1. Ejecutar primero chat de un solo turno
+    2. Luego Prompt + Output Parser
+    3. Después agregar Embeddings
+    4. Finalmente implementar RAG o Agent
+  </Step>
+</Steps>
+
+## Ejemplo en Python
+
+### Ejemplo de chat mínimo
+
+```python
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(
+    model="gpt-5.5",
+    api_key="sk-xxx",
+    base_url="https://api.crazyrouter.com/v1",
+    temperature=0.7,
+)
+
+response = llm.invoke("什么是 LangChain？")
+print(response.content)
+```
+
+### Ejemplo de Embeddings
+
+```python
+from langchain_openai import OpenAIEmbeddings
+
+embeddings = OpenAIEmbeddings(
+    model="text-embedding-3-large",
+    api_key="sk-xxx",
+    base_url="https://api.crazyrouter.com/v1",
+)
+
+vectors = embeddings.embed_documents(["文本一", "文本二"])
+print(len(vectors), len(vectors[0]))
+```
+
+### Ejemplo de cadena Prompt
+
+```python
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+
+llm = ChatOpenAI(
+    model="gpt-5.5",
+    api_key="sk-xxx",
+    base_url="https://api.crazyrouter.com/v1",
+)
+
+prompt = ChatPromptTemplate.from_template("用简单的语言解释 {topic}")
+chain = prompt | llm | StrOutputParser()
+
+result = chain.invoke({"topic": "量子计算"})
+print(result)
+```
+
+### Ejemplo mínimo de RAG
+
+```python
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_community.vectorstores import FAISS
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnablePassthrough
+
+llm = ChatOpenAI(
+    model="gpt-5.5",
+    api_key="sk-xxx",
+    base_url="https://api.crazyrouter.com/v1",
+)
+
+embeddings = OpenAIEmbeddings(
+    model="text-embedding-3-large",
+    api_key="sk-xxx",
+    base_url="https://api.crazyrouter.com/v1",
+)
+
+texts = [
+    "Crazyrouter 支持多种 AI 模型协议",
+    "Crazyrouter 支持 OpenAI 兼容调用方式",
+]
+
+vectorstore = FAISS.from_texts(texts, embeddings)
+retriever = vectorstore.as_retriever()
+
+prompt = ChatPromptTemplate.from_template(
+    "根据以下上下文回答问题：\n{context}\n\n问题：{question}"
+)
+
+chain = {"context": retriever, "question": RunnablePassthrough()} | prompt | llm
+
+result = chain.invoke("Crazyrouter 适合用什么协议接 LangChain？")
+print(result.content)
+```
+
+## Ejemplo en JavaScript / TypeScript
+
+### Ejemplo de chat mínimo
+
+```javascript
+import { ChatOpenAI } from "@langchain/openai";
+
+const llm = new ChatOpenAI({
+  model: "gpt-5.5",
+  apiKey: process.env.OPENAI_API_KEY,
+  configuration: {
+    baseURL: "https://api.crazyrouter.com/v1",
+  },
+  temperature: 0,
+});
+
+const response = await llm.invoke("你好");
+console.log(response.content);
+```
+
+## Configuración de modelos recomendada
+
+| Caso de uso | Modelo recomendado | Razón |
+|----------|----------|------|
+| Validación de la primera cadena | `gpt-5.5` | Probado exitosamente en producción el 23 de marzo de 2026, ideal para verificar que LangChain y Crazyrouter están conectados |
+| Texto largo de alta calidad y cadenas complejas | `claude-opus-4-8` | Adecuado para explicaciones complejas, resúmenes y tareas de razonamiento intensivo |
+| Respaldo Gemini | `gemini-3.1-pro` | Útil como segunda vía de verificación de compatibilidad |
+| Búsqueda vectorial | `text-embedding-3-large` | Ideal para validar embeddings como línea base |
+
+## Mejores prácticas para la configuración de tokens
+
+| Configuración | Recomendación | Descripción |
+|------|------|------|
+| Token dedicado | Obligatorio | No uses el mismo token para el proyecto LangChain y el cliente de escritorio |
+| Lista blanca de modelos | Muy recomendado | Permitir solo modelos de chat + modelos de embedding inicialmente |
+| Límite de cuota | Muy recomendado | Las llamadas encadenadas, RAG y Agents incrementan el consumo |
+| Separación de entornos | Recomendado | Usar un token diferente para dev / staging / producción |
+| Manejo de filtraciones | Rotar inmediatamente | No enviar key al Git; si se filtra, cambiá la key de inmediato |
+
+## Lista de verificación de validación
+
+- [ ] Entorno de ejecución Python o Node.js listo
+- [ ] `OPENAI_API_KEY` configurado correctamente
+- [ ] `langchain-openai` o `@langchain/openai` instalado
+- [ ] El modelo de chat configurado como `base_url` / `baseURL` a `https://api.crazyrouter.com/v1`
+- [ ] Primera solicitud `Reply only OK` con respuesta exitosa
+- [ ] Puedes ver la solicitud correspondiente en los logs de Crazyrouter
+- [ ] Si usas embeddings, el modelo de embedding también está permitido
+- [ ] Si usas RAG, valida primero con el conjunto mínimo de texto
+
+## Errores comunes y soluciones
+
+| Síntoma | Causa común | Solución |
+|------|----------|----------|
+| 401 unauthorized | Error en `OPENAI_API_KEY`, expirado o mal copiado | Re-generar el token y configurar de nuevo la variable de entorno |
+| 404 | Error o falta de `base_url` / `baseURL` o omitido `/v1` | Cambiar a `https://api.crazyrouter.com/v1` |
+| `model not found` | Nombre del modelo mal escrito o token sin permisos | Volver a `gpt-5.5` o modelo validado y revisar lista blanca |
+| Error en embeddings | Olvidaste permitir el modelo embedding | Añade `text-embedding-3-large` al token |
+| RAG no funciona | Demasiados componentes conectados al inicio | Recomenzar con chat de un solo turno y aumentar gradual |
+| Consumo rápido | Llamadas encadenadas, búsquedas, múltiples Agents sumados | Reducir la cadena y controlar cuota del token individualmente |
+
+## FAQ
+
+### ¿Qué protocolo hay que usar para conectar Crazyrouter a LangChain?
+
+Prioriza el protocolo compatible con OpenAI.
+
+### ¿Qué Base URL hay que poner?
+
+Pon `https://api.crazyrouter.com/v1`.
+
+### ¿Qué paquete hay que usar en Python?
+
+Prioriza `langchain-openai`.
+
+### ¿Qué paquete hay que usar en JavaScript / TypeScript?
+
+Prioriza `@langchain/openai`.
+
+### ¿Por qué no se recomienda iniciar directamente con Agent o RAG a gran escala?
+
+Porque la complejidad de las cadenas en LangChain aumenta significativamente los costos de depuración. Es mejor validar primero el chat mínimo y luego agregar componentes gradualmente.
+
+<Note>
+Si planeas integrar Crazyrouter formalmente en tu aplicación, LangChain sigue siendo una de las documentaciones de marco de desarrollo más prioritarias para completar.
+</Note>

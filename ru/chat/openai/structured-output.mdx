@@ -1,20 +1,21 @@
 ---
-title: "Structured Outputs"
-description: "OpenAI-style structured output verified against Crazyrouter production on 2026-03-23"
+title: "Структурированные выводы"
+description: "Структурированный вывод в стиле OpenAI, проверенный на Crazyrouter production 23 марта 2026 года"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Structured Outputs
+
+# Структурированные выводы
 
 ```
 POST /v1/chat/completions
 ```
 
-As of March 23, 2026, Crazyrouter production has verified that `gpt-5.5` with `response_format.type = "json_schema"` returns directly parseable JSON.
+По состоянию на 23 марта 2026 года, в рабочей среде Crazyrouter подтверждено, что `gpt-5.5` с `response_format.type = "json_schema"` возвращает JSON, который можно непосредственно разобрать.
 
 ---
 
-## Recommended Path: `json_schema`
+## Рекомендуемый путь: `json_schema`
 
 ```bash
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -57,7 +58,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-The observed production `message.content` parsed directly as:
+Наблюдаемый в рабочей среде `message.content` непосредственно интерпретировался как:
 
 ```json
 {
@@ -76,7 +77,7 @@ The observed production `message.content` parsed directly as:
 
 ---
 
-## Consumer-Side Handling
+## Обработка на стороне пользователя
 
 ```python
 import json
@@ -86,12 +87,12 @@ data = json.loads(content)
 ```
 
 <Note>
-  This production pass only revalidated the strict `json_schema` path. The older `json_object` mode was not rechecked separately, so it is no longer kept as the primary example here.
+  На этом продакшн-этапе повторно была подтверждена только строгая схема `json_schema`. Старый режим `json_object` отдельно не перепроверялся, поэтому больше не приводится здесь в качестве основного примера.
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## По теме на crazyrouter.com
 
-- [GPT Image 1.5: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [Все модели OpenAI с актуальными ценами](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [Страница модели GPT Image 1.5: живая цена, реальные примеры, код](https://crazyrouter.com/ru/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Страница модели GPT Image 2: живая цена, реальные примеры, код](https://crazyrouter.com/ru/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Все модели OpenAI с актуальными ценами](https://crazyrouter.com/ru/models/openai?utm_source=docs&utm_medium=related)

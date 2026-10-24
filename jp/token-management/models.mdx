@@ -1,31 +1,31 @@
 ---
-title: 'Get Token Models'
-description: 'Query the list of models available to a specific token'
+title: "トークンサポートモデルの取得"
+description: "指定されたトークンで使用可能なモデル一覧を照会します"
 api: 'GET /v1/models'
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-## Overview
+## インターフェースの説明
 
-Get the list of models that the current token (API Key) can access. If the token has no model restrictions, all enabled system models are returned.
+現在のトークン（API Key）で利用できるモデルリストを取得します。トークンでモデルの制限がない場合、システムで有効化されているすべてのモデルが返されます。
 
-The currently supported public endpoint is:
+現在推奨され、実際にサポートされているインターフェースは：
 
 ```text
 GET /v1/models
 ```
 
-`GET /api/token/models` is not a currently exposed public endpoint. Use `/v1/models` instead.
+`GET /api/token/models` は現在一般公開されているインターフェースではありません。`/v1/models` をご利用ください。
 
-## Authentication
+## 認証方法
 
-Authenticate using an API Key (sk-xxx):
+API Key（sk-xxx）による認証を行います：
 
 ```
 Authorization: Bearer sk-xxx
 ```
 
-## Response Format
+## レスポンス形式
 
 ```json
 {
@@ -46,7 +46,7 @@ Authorization: Bearer sk-xxx
 }
 ```
 
-## Code Examples
+## コード例
 
 <CodeGroup>
 
@@ -58,7 +58,7 @@ client = OpenAI(
     base_url="https://api.crazyrouter.com/v1"
 )
 
-# Get model list via OpenAI SDK
+# 通过 OpenAI SDK 获取模型列表
 models = client.models.list()
 for model in models.data:
     print(model.id)
@@ -85,9 +85,9 @@ curl https://api.crazyrouter.com/v1/models \
 </CodeGroup>
 
 <Note>
-  If you use the OpenAI SDK, `client.models.list()` is effectively calling `GET /v1/models`.
+  OpenAI SDKをご利用の場合、`client.models.list()` は実際には `GET /v1/models` を呼び出しています。
 </Note>
 
-関連ページ:
+関連ページ：
 
-- [公式モデル課金方式](/jp/reference/official-pricing-methods)
+- [モデルの公式価格体系](/jp/reference/official-pricing-methods)

@@ -1,20 +1,20 @@
 ---
-title: "GPT-5 Thinking Mode"
-description: "Production-revalidated GPT-5.4 reasoning via the Responses API"
+title: "GPT-5 推論モード"
+description: "Responses API を通じて Crazyrouter 本番環境で再検証された GPT-5.4 の推論"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# GPT-5 Thinking Mode
+# GPT-5 推論モード
 
-This page only documents GPT reasoning behavior that was revalidated against Crazyrouter production on `2026-03-22`.
+このページでは、`2026-03-22` 上で Crazyrouter 本番環境にて再検証された GPT 推論動作のみを記載しています。
 
-The current primary example uses:
+現在の主要な例は以下を使用しています:
 
 - `gpt-5.5`
 - `POST /v1/responses`
 
 <Note>
-  Claude does not currently support `POST /v1/responses`. If you are integrating Claude, use `POST /v1/messages` or `POST /v1/chat/completions` instead of the request shape on this page.
+  Claudeは現在、`POST /v1/responses` をサポートしていません。Claude を統合する場合は、本ページのリクエスト形状の代わりに `POST /v1/messages` または `POST /v1/chat/completions` をご利用ください。
 </Note>
 
 ```
@@ -23,7 +23,7 @@ POST /v1/responses
 
 ---
 
-## Basic usage
+## 基本的な使い方
 
 <CodeGroup>
 
@@ -85,15 +85,15 @@ console.log(response.output_text);
 
 ---
 
-## Verified response shape
+## 検証済みレスポンス形式
 
-Verified `output.type` values:
+検証済み `output.type` の値:
 
 ```json
 ["reasoning", "message"]
 ```
 
-Typical `reasoning` item shape:
+一般的な `reasoning` アイテムの形:
 
 ```json
 {
@@ -109,7 +109,7 @@ Typical `reasoning` item shape:
 }
 ```
 
-The final answer is returned through the `message` item:
+最終的な回答は `message` アイテムを通じて返されます:
 
 ```json
 {
@@ -125,26 +125,26 @@ The final answer is returned through the `message` item:
 
 ---
 
-## `reasoning` parameter
+## `reasoning` パラメータ
 
-| Field | Type | Description |
+| フィールド | 型 | 説明 |
 |-------|------|-------------|
-| `effort` | string | Reasoning intensity. Verified values include `low`, `medium`, and `high` |
-| `summary` | string | Summary granularity. `concise` and `detailed` were revalidated |
+| `effort` | string | 推論強度。検証済み値は `low`、`medium`、`high` など |
+| `summary` | string | 要約粒度。`concise` と `detailed` が再検証されました |
 
-### Practical rule
+### 実践的なルール
 
-- If you only want stronger reasoning, send `effort`
-- If you need an inspectable reasoning summary, send both `effort` and `summary`
+- より強い推論のみが必要な場合は、`effort` を送信してください
+- 検証可能な推論要約が必要な場合は、`effort` と `summary` の両方を送信してください
 
-In the current recheck:
+現在の再確認では:
 
-- with only `effort`, the `reasoning` item existed but `summary` could be an empty array
-- with `summary: "detailed"`, `summary_text` was returned reliably
+- `effort` のみの場合、`reasoning` アイテムは存在しますが `summary` は空配列となることもあります
+- `summary: "detailed"` の場合、`summary_text` が安定して返されました
 
 ---
 
-## Extract the thinking summary
+## 推論要約の抽出
 
 ```python Python
 response = client.responses.create(
@@ -169,9 +169,9 @@ for item in response.output:
 
 ---
 
-## Streaming thinking
+## 推論のストリーミング
 
-The following Responses SSE event names were revalidated in production:
+以下の Responses SSE イベント名が本番環境で再検証されました:
 
 - `response.reasoning_summary_part.added`
 - `response.reasoning_summary_text.delta`
@@ -180,7 +180,7 @@ The following Responses SSE event names were revalidated in production:
 - `response.output_text.done`
 - `response.completed`
 
-Example:
+例:
 
 ```python Python
 stream = client.responses.create(
@@ -202,19 +202,19 @@ for event in stream:
 
 ---
 
-## Current recommendation
+## 現時点での推奨
 
-- If you need a visible reasoning field, prefer `gpt-5.5` with the Responses API
-- Do not treat `gpt-5.5` Chat Completions `reasoning_content` as the current primary contract
-- If you only care about the final answer, Chat Completions with `reasoning_effort` is still fine
+- 推論フィールドを表示したい場合は Responses API で `gpt-5.5` を推奨します
+- `gpt-5.5` Chat Completions `reasoning_content` を現在の主要な契約として扱わないでください
+- 最終回答のみが必要な場合は、`reasoning_effort` を用いた Chat Completions で問題ありません
 
 <Warning>
-  Reasoning mode increases both latency and token usage. Higher `effort` generally costs more.
+  推論モードは遅延とトークンの使用量がともに増加します。高い `effort` ほど、一般にコストも高くなります。
 </Warning>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## crazyrouter.com 関連
 
-- [GPT-5 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gpt-5?utm_source=docs&utm_medium=related)
-- [GPT-5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-5?utm_source=docs&utm_medium=related)
-- [GPT-5.4 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gpt-5-4?utm_source=docs&utm_medium=related)
+- [GPT-5 価格比較: list vs Azure / Bedrock / Vertex vs Crazyrouter](https://crazyrouter.com/ja/pricing/gpt-5?utm_source=docs&utm_medium=related)
+- [GPT-5 モデルページ: ライブ価格、実サンプル、コード](https://crazyrouter.com/ja/models/openai/gpt-5?utm_source=docs&utm_medium=related)
+- [GPT-5.4 価格比較: list vs Azure / Bedrock / Vertex vs Crazyrouter](https://crazyrouter.com/ja/pricing/gpt-5-4?utm_source=docs&utm_medium=related)

@@ -1,33 +1,33 @@
 ---
-title: "Speech-to-Text (STT)"
-description: "Use POST /v1/audio/transcriptions to convert speech to text"
+title: "Распознавание речи (STT)"
+description: "Используйте POST /v1/audio/transcriptions для преобразования речи в текст"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Speech-to-Text (STT)
+# Распознавание речи (STT)
 
 ```
 POST /v1/audio/transcriptions
 ```
 
-Transcribe audio files to text, compatible with the OpenAI Whisper API format.
+Транскрибируйте аудиофайл в текст, совместимо с форматом OpenAI Whisper API.
 
-## Request Parameters
+## Параметры запроса
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `file` | file | Yes | Audio file (multipart/form-data) |
-| `model` | string | Yes | Model name: `whisper-1`, `whisper-1` |
-| `language` | string | No | Audio language (ISO-639-1 format), e.g. `zh`, `en`, `ja` |
-| `response_format` | string | No | Output format: `json` (default), `text`, `srt`, `verbose_json`, `vtt` |
-| `temperature` | number | No | Sampling temperature, 0-1 |
-| `prompt` | string | No | Prompt to help the model understand context |
+| Параметр | Тип | Обязательно | Описание |
+|----------|-----|-------------|----------|
+| `file` | file | Да | Аудиофайл (multipart/form-data) |
+| `model` | string | Да | Название модели: `whisper-1`, `whisper-1` |
+| `language` | string | Нет | Язык аудио (в формате ISO-639-1), например, `zh`, `en`, `ja` |
+| `response_format` | string | Нет | Формат вывода: `json` (по умолчанию), `text`, `srt`, `verbose_json`, `vtt` |
+| `temperature` | number | Нет | Температура сэмплирования, 0-1 |
+| `prompt` | string | Нет | Подсказка, помогающая модели понять контекст |
 
-### Supported Audio Formats
+### Поддерживаемые форматы аудио
 
 `mp3`, `mp4`, `mpeg`, `mpga`, `m4a`, `wav`, `webm`
 
-## Request Examples
+## Пример запроса
 
 <CodeGroup>
 
@@ -36,7 +36,7 @@ curl -X POST https://api.crazyrouter.com/v1/audio/transcriptions \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -F file=@audio.mp3 \
   -F model=whisper-1 \
-  -F language=en \
+  -F language=zh \
   -F response_format=json
 ```
 
@@ -52,7 +52,7 @@ with open("audio.mp3", "rb") as audio_file:
     transcript = client.audio.transcriptions.create(
         model="whisper-1",
         file=audio_file,
-        language="en",
+        language="zh",
         response_format="json"
     )
 
@@ -71,7 +71,7 @@ const client = new OpenAI({
 const transcript = await client.audio.transcriptions.create({
   model: "whisper-1",
   file: fs.createReadStream("audio.mp3"),
-  language: "en",
+  language: "zh",
 });
 
 console.log(transcript.text);
@@ -79,52 +79,52 @@ console.log(transcript.text);
 
 </CodeGroup>
 
-## Response Examples
+## Пример ответа
 
-### JSON Format
+### Формат JSON
 
 ```json
 {
-  "text": "Hello, welcome to the Crazyrouter API. Today we'll introduce the speech-to-text feature."
+  "text": "你好，欢迎使用 Crazyrouter API。今天我们来介绍一下语音转文字功能。"
 }
 ```
 
-### verbose_json Format
+### Формат verbose_json
 
 ```json
 {
   "task": "transcribe",
-  "language": "english",
+  "language": "chinese",
   "duration": 5.2,
-  "text": "Hello, welcome to the Crazyrouter API.",
+  "text": "你好，欢迎使用 Crazyrouter API。",
   "segments": [
     {
       "id": 0,
       "start": 0.0,
       "end": 2.5,
-      "text": "Hello, welcome to the Crazyrouter API."
+      "text": "你好，欢迎使用 Crazyrouter API。"
     }
   ]
 }
 ```
 
-### SRT Format
+### Формат SRT
 
 ```
 1
 00:00:00,000 --> 00:00:02,500
-Hello, welcome to the Crazyrouter API.
+你好，欢迎使用 Crazyrouter API。
 ```
 
 ---
 
-## Audio Translation
+## Перевод аудио
 
 ```
 POST /v1/audio/translations
 ```
 
-Translate non-English audio to English text. Parameters are the same as the transcription endpoint.
+Переводит неанглоязычные аудио в английский текст. Параметры такие же, как в интерфейсе транскрипции.
 
 ```python Python
 with open("chinese_audio.mp3", "rb") as audio_file:
@@ -133,9 +133,9 @@ with open("chinese_audio.mp3", "rb") as audio_file:
         file=audio_file
     )
 
-print(translation.text)  # Outputs English translation
+print(translation.text)  # 输出英文翻译
 ```
 
 <Note>
-  Specifying the `language` parameter can improve transcription accuracy. Audio file size limit is 25MB.
+  Указание параметра `language` может повысить точность транскрипции. Максимальный размер аудиофайла — 25 МБ.
 </Note>

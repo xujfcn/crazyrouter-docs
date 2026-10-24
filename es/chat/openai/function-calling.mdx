@@ -1,0 +1,135 @@
+---
+title: "Llamada de Funciones"
+description: "La verificación de llamada de herramientas en Chat Completions fue comprobada contra Crazyrouter producción el 2026-03-23"
+---
+> Contenido actualizado: 2026-06-09
+
+# Llamada de Funciones
+
+```
+POST /v1/chat/completions
+```
+
+A partir del 23 de marzo de 2026, la producción de Crazyrouter ha verificado que `gpt-5.5` en la ruta de Chat Completions devuelve `tool_calls`.
+
+---
+
+## Paso 1: Definir la Herramienta
+
+```bash
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "messages": [
+      {"role": "user", "content": "What is the weather in Beijing? Use the tool."}
+    ],
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "get_weather",
+          "description": "Get weather info for a city",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "city": {"type": "string"}
+            },
+            "required": ["city"],
+            "additionalProperties": false
+          }
+        }
+      }
+    ]
+  }'
+```
+
+Forma observada de la respuesta en producción:
+
+```json
+{
+  "object": "chat.completion",
+  "model": "gpt-5.5",
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": null,
+        "tool_calls": [
+          {
+            "id": "call_...",
+            "type": "function",
+            "function": {
+              "name": "get_weather",
+              "arguments": "{\"city\":\"Beijing\"}"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Paso 2: Devolver el Resultado de la Herramienta
+
+Una vez que recibas `tool_calls`, envía el resultado de tu herramienta de vuelta como un mensaje `role: "tool"`:
+
+```json
+{
+  "model": "gpt-5.5",
+  "messages": [
+    {"role": "user", "content": "What is the weather in Beijing? Use the tool."},
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_123",
+          "type": "function",
+          "function": {
+            "name": "get_weather",
+            "arguments": "{\"city\":\"Beijing\"}"
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_123",
+      "content": "{\"temperature\":22,\"condition\":\"sunny\"}"
+    }
+  ],
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "get_weather",
+        "description": "Get weather info for a city",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "city": {"type": "string"}
+          },
+          "required": ["city"],
+          "additionalProperties": false
+        }
+      }
+    }
+  ]
+}
+```
+
+<Note>
+  Esta verificación en producción confirmó la ruta principal `tool_calls`. También se observó que `message.reasoning_content` puede aparecer como una clave, pero no debe ser tratada como una dependencia estable para los flujos de llamada de herramientas.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Relacionado en crazyrouter.com
+
+- [Página del modelo GPT Image 1.5: precio en vivo, muestras reales, código](https://crazyrouter.com/es/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Página del modelo GPT Image 2: precio en vivo, muestras reales, código](https://crazyrouter.com/es/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Todos los modelos de OpenAI con precios en vivo](https://crazyrouter.com/es/models/openai?utm_source=docs&utm_medium=related)

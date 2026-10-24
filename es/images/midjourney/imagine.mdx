@@ -1,0 +1,118 @@
+---
+title: "Enviar tarea Imagine"
+description: "Usa POST /mj/submit/imagine para enviar una tarea de generación de imágenes de Midjourney"
+---
+> Contenido actualizado: 2026-06-09
+
+# Enviar tarea Imagine
+
+```
+POST /mj/submit/imagine
+```
+
+Envía una tarea Imagine de Midjourney para generar imágenes basadas en un prompt.
+
+## Parámetros de la solicitud
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `botType` | string | No | Tipo de bot: `MID_JOURNEY` (por defecto) o `NIJI_JOURNEY` |
+| `prompt` | string | Sí | Prompt, admite la sintaxis nativa de Midjourney (como `--ar 16:9 --v 6`) |
+| `base64Array` | array | No | Arreglo de imágenes de referencia en Base64 para usar como guía |
+| `notifyHook` | string | No | URL de callback para cambios de estado de la tarea |
+| `state` | string | No | Información personalizada de estado, será devuelta tal cual en el callback |
+
+---
+
+## Ejemplo de solicitud
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/mj/submit/imagine \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "botType": "MID_JOURNEY",
+    "prompt": "a beautiful sunset over the ocean, cinematic lighting --ar 16:9 --v 6",
+    "notifyHook": "",
+    "state": ""
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/mj/submit/imagine",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "botType": "MID_JOURNEY",
+        "prompt": "a beautiful sunset over the ocean, cinematic lighting --ar 16:9 --v 6"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### Ejemplo de respuesta
+
+```json
+{
+  "code": 1,
+  "description": "提交成功",
+  "result": "task_1234567890",
+  "properties": {}
+}
+```
+
+| Campo | Descripción |
+|------|------|
+| `code` | Código de estado, `1` indica éxito, `22` indica en cola |
+| `description` | Descripción del estado |
+| `result` | ID de la tarea, usado para consultas posteriores |
+
+---
+
+## Solicitud con imagen de referencia
+
+Usa `base64Array` para enviar imágenes de referencia:
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/mj/submit/imagine \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "botType": "MID_JOURNEY",
+    "prompt": "a cat in the style of the reference image --v 6",
+    "base64Array": [
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg..."
+    ]
+  }'
+```
+
+---
+
+## Usar Niji Journey
+
+Configura `botType` como `NIJI_JOURNEY` para utilizar el modelo Niji y generar imágenes de estilo anime:
+
+```json
+{
+  "botType": "NIJI_JOURNEY",
+  "prompt": "a cute anime girl with blue hair, cherry blossoms --niji 6"
+}
+```
+
+<Note>
+  Después de enviar, se devuelve el ID de la tarea. Debes obtener el resultado a través de la interfaz [Consultar estado de la tarea](/es/images/midjourney/query).
+</Note>
+
+<Warning>
+  Las imágenes en `base64Array` aumentan el tamaño del cuerpo de la solicitud. Se recomienda que cada imagen no exceda los 4MB.
+</Warning>

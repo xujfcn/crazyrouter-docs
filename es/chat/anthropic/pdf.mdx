@@ -1,0 +1,73 @@
+---
+title: "Compatibilidad con Claude PDF"
+description: "Entrada de Claude PDF validada en el entorno de producción de Crazyrouter a partir del 23-03-2026"
+---
+> Contenido actualizado: 2026-06-09
+
+
+# Compatibilidad con Claude PDF
+
+```
+POST /v1/messages
+```
+
+Hasta el 23 de marzo de 2026, el entorno de producción de Crazyrouter ha verificado que `claude-opus-4-8` puede leer archivos PDF en Base64 mediante la API nativa de Messages y devolver un resumen de texto.
+
+---
+
+## Solicitud mínima verificada
+
+```bash
+curl https://api.crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-opus-4-8",
+    "max_tokens": 512,
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "document",
+            "source": {
+              "type": "base64",
+              "media_type": "application/pdf",
+              "data": "JVBERi0xLjQK..."
+            }
+          },
+          {
+            "type": "text",
+            "text": "Summarize the document in one sentence."
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+Forma clave devuelta realmente en producción:
+
+```json
+{
+  "model": "claude-opus-4-8",
+  "content": [
+    {
+      "type": "text",
+      "text": "The document is a simple Crazyrouter PDF test document..."
+    }
+  ]
+}
+```
+
+<Note>
+  Actualmente, esta página solo mantiene la ruta de entrada de PDF en Base64 que ya ha sido probada con éxito. En esta ronda no se volvieron a testear escenarios más complejos como URL remotos, comparación de múltiples PDF o salida de PDF en streaming.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Comparativa de precios de Claude Fable 5: Oficial / Azure / Bedrock / Vertex vs Crazyrouter](https://crazyrouter.com/es/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Página de modelos de Claude Fable 5: Precios en tiempo real, ejemplos reales, código de invocación](https://crazyrouter.com/es/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Comparativa de precios de Claude Haiku 4.5: Oficial / Azure / Bedrock / Vertex vs Crazyrouter](https://crazyrouter.com/es/pricing/claude-haiku-4-5?utm_source=docs&utm_medium=related)

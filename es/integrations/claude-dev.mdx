@@ -1,0 +1,52 @@
+---
+title: 'Guía de configuración de Claude Dev'
+description: 'Configura la API de Crazyrouter en la extensión Claude Dev para VS Code con los modelos Claude verificados más recientes'
+---
+> Contenido actualizado: 2026-06-16
+
+## Descripción general
+
+Claude Dev es una extensión de inteligencia artificial para codificación en VS Code, ideal para explicación de código al estilo Claude, sugerencias de refactorización y colaboración multivueltas a través de Crazyrouter. Para la documentación pública, se recomienda usar primero la ruta compatible con OpenAI porque es más consistente con el resto del stack de integración de Crazyrouter y más fácil de solucionar problemas.
+
+<Warning>
+La URL `https://api.crazyrouter.com/v1` en esta página aplica solo para el proveedor `OpenAI Compatible` de Claude Dev. No la copies en `ANTHROPIC_BASE_URL` de Claude Code; Claude Code debe usar el dominio raíz `https://api.crazyrouter.com`.
+</Warning>
+
+## Configuración recomendada
+
+<Steps>
+  <Step title="Instalar extensión">
+    Busca `Claude Dev` en el marketplace de extensiones de VS Code e instálala.
+  </Step>
+  <Step title="Abrir configuración">
+    Haz clic en el ícono de Claude Dev en la barra lateral para entrar en la configuración.
+  </Step>
+  <Step title="Seleccionar proveedor">
+    Prefiere `OpenAI Compatible` como proveedor de API.
+  </Step>
+  <Step title="Ingresar configuración">
+    - **URL base**: `https://api.crazyrouter.com/v1`
+    - **Clave API**: `sk-xxx`
+    - **Modelo**: `claude-opus-4-8`
+  </Step>
+</Steps>
+
+Para la entrada de API internacional predeterminada, establece la URL Base `OpenAI Compatible` de Claude Dev en `https://api.crazyrouter.com/v1`.
+
+## Modelos recomendados
+
+| Escenario | Modelo |
+|-----------|--------|
+| Codificación diaria | `claude-opus-4-8` |
+| Razonamiento y planificación más complejos | `claude-opus-4-8` |
+
+<Note>
+  `claude-opus-4-8` y `claude-opus-4-8` coinciden con la última guía de modelos Claude verificados en este conjunto de documentos. Para la validación inicial más pequeña de VS Code, comienza con `claude-opus-4-8`.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Relacionado en crazyrouter.com
+
+- [Guía de integración de Cline (script de un solo clic, URL base, modelos recomendados)](https://crazyrouter.com/en/integrations/cline?utm_source=docs&utm_medium=related)
+- [Comparativa de precios de Claude Fable 5: lista vs Azure / Bedrock / Vertex vs Crazyrouter](https://crazyrouter.com/es/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Página del modelo Claude Fable 5: precio en vivo, muestras reales, código](https://crazyrouter.com/es/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)

@@ -1,72 +1,72 @@
 ---
-title: 'Update Token'
-description: 'Update the configuration of an existing token'
+title: "トークンの編集"
+description: "既存トークンの設定を更新する"
 api: 'PUT /api/token/'
 ---
-> 更新日: 2026-07-20
+> 内容更新日: 2026-07-20
 
-## Overview
+## インターフェイス説明
 
-Modify the name, quota, expiration time, model permissions, and other settings of an existing token.
+既存のトークンの名前、クォータ、期限、モデル権限などの設定を編集します。
 
 <Note>
-  The `/api/token/*` endpoints are mainly for Crazyrouter dashboard automation around API key management. They require a user `access token` plus the `New-Api-User` header, and are not the normal interface for `sk-xxx` model calls. Use `https://crazyrouter.com` as the base URL; `https://api.crazyrouter.com` is reserved for model APIs and returns `404 api_only_endpoint` for management paths.
+  この `/api/token/*` のインターフェイス群は主に Crazyrouter コンソールにおける API Key 管理自動化のためのものです。これらの利用にはユーザー `access token` および `New-Api-User` リクエストヘッダーが必要であり、一般的な `sk-xxx` モデル呼び出しフローで直接利用するためのAPIではありません。リクエストのベースアドレスには必ず `https://crazyrouter.com` を使用してください。`https://api.crazyrouter.com` はモデルAPI専用エンドポイントであり、管理用パスを呼び出すと `404 api_only_endpoint` が返されます。
 </Note>
 
-## Authentication
+## 認証方式
 
-Use user-side authentication with these headers:
+ユーザー側認証を使用します。リクエストヘッダに以下を含めてください:
 
 ```text
 Authorization: Bearer your_access_token
 New-Api-User: 1
 ```
 
-## Request Parameters
+## リクエストパラメータ
 
 <ParamField body="id" type="integer" required>
-  Token ID
+  トークンID
 </ParamField>
 
 <ParamField body="name" type="string">
-  Token name
+  トークン名
 </ParamField>
 
 <ParamField body="remain_quota" type="integer">
-  Remaining quota
+  残りクォータ
 </ParamField>
 
 <ParamField body="unlimited_quota" type="boolean">
-  Whether quota is unlimited
+  無制限クォータか
 </ParamField>
 
 <ParamField body="expired_time" type="integer">
-  Expiration timestamp, `-1` means never expires
+  期限のタイムスタンプ、`-1` は無期限を意味します
 </ParamField>
 
 <ParamField body="model_limits_enabled" type="boolean">
-  Whether to enable the model whitelist
+  モデルホワイトリストを有効化するか
 </ParamField>
 
 <ParamField body="model_limits" type="string">
-  Model restriction config string, for example `["gpt-5.5","claude-opus-4-8"]`
+  モデル制限設定文字列、例：`["gpt-5.5","claude-opus-4-8"]`
 </ParamField>
 
 <ParamField body="status" type="integer">
-  Status: 1=enabled, 2=disabled
+  ステータス：1=有効、2=無効
 </ParamField>
 
 <ParamField body="allow_ips" type="string">
-  IP whitelist string
+  IPホワイトリスト文字列
 </ParamField>
 
 <ParamField body="group" type="string">
-  Group
+  グループ
 </ParamField>
 
-## Response Format
+## レスポンス形式
 
-The current endpoint returns the updated token object:
+本APIは更新後のtokenオブジェクトを返します：
 
 ```json
 {
@@ -74,7 +74,7 @@ The current endpoint returns the updated token object:
   "message": "",
   "data": {
     "id": 10,
-    "name": "Production-Updated",
+    "name": "生产环境-已更新",
     "status": 1,
     "remain_quota": 200000,
     "unlimited_quota": false,
@@ -86,7 +86,7 @@ The current endpoint returns the updated token object:
 }
 ```
 
-## Code Examples
+## コード例
 
 <CodeGroup>
 
@@ -106,7 +106,7 @@ response = requests.put(
     headers=headers,
     json={
         "id": 10,
-        "name": "Production-Updated",
+        "name": "生产环境-已更新",
         "remain_quota": 200000,
         "model_limits_enabled": True,
         "model_limits": json.dumps(["gpt-5.5", "claude-opus-4-8"])
@@ -123,7 +123,7 @@ curl -X PUT https://crazyrouter.com/api/token/ \
   -H "Content-Type: application/json" \
   -d '{
     "id": 10,
-    "name": "Production-Updated",
+    "name": "生产环境-已更新",
     "remain_quota": 200000,
     "model_limits_enabled": true,
     "model_limits": "[\"gpt-5.5\"]"
@@ -133,5 +133,5 @@ curl -X PUT https://crazyrouter.com/api/token/ \
 </CodeGroup>
 
 <Warning>
-  Updating a token does not regenerate the API key. If you need a new key, delete the token and create a new one.
+  トークンを編集してもAPI Keyは再発行されません。Keyを変更したい場合は、削除後に新規作成してください。
 </Warning>

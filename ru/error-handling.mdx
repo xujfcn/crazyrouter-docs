@@ -1,37 +1,37 @@
 ---
-title: 'HTTP Status Codes & Error Handling'
-description: 'Understanding API status codes and error responses'
+title: "HTTP статус-коды и обработка ошибок"
+description: "Узнайте о статус-кодах и сообщениях об ошибках, возвращаемых API"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-10-12
 
-## HTTP Status Codes
+## HTTP статус-коды
 
-| Status Code | Description |
-|-------------|-------------|
-| 200 | Request successful |
-| 400 | Invalid request parameters |
-| 401 | Authentication failed - API Key is invalid or missing |
-| 403 | Insufficient permissions - Token does not have access to this model |
-| 429 | Rate limit exceeded |
-| 500 | Internal server error |
-| 502 | Upstream service unavailable |
-| 503 | Service temporarily unavailable |
+| Статус-код | Описание |
+|-----------|----------|
+| 200 | Запрос успешно выполнен |
+| 400 | Ошибка параметров запроса |
+| 401 | Ошибка аутентификации, API Key недействителен или отсутствует |
+| 403 | Недостаточно прав, токен не имеет доступа к данной модели |
+| 429 | Частота запросов превышена |
+| 500 | Внутренняя ошибка сервера |
+| 502 | Вышестоящий сервис недоступен |
+| 503 | Сервис временно недоступен |
 
-## Error Response Format
+## Формат ответа об ошибке
 
 ```json
 {
   "error": {
-    "message": "Error description",
+    "message": "错误描述信息",
     "type": "error_type",
     "code": "error_code"
   }
 }
 ```
 
-## Common Errors
+## Частые ошибки
 
-### 401 - Authentication Failed
+### 401 – Ошибка аутентификации
 
 ```json
 {
@@ -43,9 +43,9 @@ description: 'Understanding API status codes and error responses'
 }
 ```
 
-**Solution**: Verify that your API Key is correct and starts with `sk-`.
+**Решение**: Проверьте правильность API Key, убедитесь, что он начинается с `sk-`.
 
-### 429 - Rate Limited
+### 429 – Ограничение по частоте
 
 ```json
 {
@@ -57,9 +57,9 @@ description: 'Understanding API status codes and error responses'
 }
 ```
 
-**Solution**: Reduce your request frequency, or contact support to increase your limit.
+**Решение**: Уменьшите частоту запросов или обратитесь в службу поддержки для увеличения лимита.
 
-### 403 - Insufficient Balance
+### 403 – Недостаточно баланса
 
 ```json
 {
@@ -71,10 +71,10 @@ description: 'Understanding API status codes and error responses'
 }
 ```
 
-**Solution**: Visit the [top-up page](https://crazyrouter.com/console/topup) to add funds.
+**Решение**: Перейдите на [страницу пополнения](https://crazyrouter.com/console/topup) для внесения оплаты.
 
-## Retry Recommendations
+## Рекомендации по повторному запросу
 
-- For 429 errors, use exponential backoff retry
-- For 500/502/503 errors, wait a few seconds before retrying
-- For 400/401/403 errors, check your request parameters and authentication credentials
+- Для ошибки 429 рекомендуется использовать экспоненциальное отступление при повторных попытках
+- Для ошибок 500/502/503 рекомендуется подождать несколько секунд и повторить запрос
+- Для ошибок 400/401/403 проверьте параметры запроса и данные для аутентификации

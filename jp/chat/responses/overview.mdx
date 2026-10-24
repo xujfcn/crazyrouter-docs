@@ -1,39 +1,39 @@
 ---
-title: "Responses API Overview"
-description: "Production-revalidated guidance for choosing between Responses API and Chat Completions on Crazyrouter"
+title: "レスポンス API 概要"
+description: "Crazyrouterにおけるレスポンス APIとChat Completionsの選択に関する運用環境で再検証されたガイダンス"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Responses API Overview
+# レスポンス API 概要
 
-The Responses API is currently one of the main routes for newer GPT capabilities on Crazyrouter.
+レスポンス API は、現在 Crazyrouter上の最新GPT機能の主なルートの一つです。
 
-This page only documents conclusions that were revalidated against production on `2026-03-22`.
+このページは、`2026-03-22`で運用環境にて再検証された結論のみを記載しています。
 
 <Note>
-  In the current production-verified scope, Claude supports only `POST /v1/messages` and `POST /v1/chat/completions`, not `POST /v1/responses`. Treat the Responses pages as GPT-first guidance.
+  現在運用環境で確認された範囲では、Claudeは`POST /v1/messages`と`POST /v1/chat/completions`のみ対応しており、`POST /v1/responses`には対応していません。レスポンスページはGPT優先のガイダンスとして扱ってください。
 </Note>
 
-## Current framing
+## 現在の位置付け
 
-- If you need inspectable reasoning output, prefer `/v1/responses`
-- If you need OpenAI-style web search, prefer `/v1/responses`
-- If you only need ordinary chat or want to keep an existing integration, `/v1/chat/completions` is still fine
+- 検証可能な推論出力が必要な場合、`/v1/responses`を推奨します
+- OpenAIスタイルのウェブ検索が必要な場合、`/v1/responses`を推奨します
+- 通常のチャットのみ必要、または既存の連携を維持したい場合は`/v1/chat/completions`も問題ありません
 
-## Responses API vs Chat Completions API
+## レスポンス APIとChat Completions APIの比較
 
-| Dimension | Responses API | Chat Completions API |
+| 次元 | レスポンス API | Chat Completions API |
 |-----------|---------------|----------------------|
-| Endpoint | `/v1/responses` | `/v1/chat/completions` |
-| Input shape | `input` | `messages` |
-| Output shape | `output[]` item list | `choices[].message` |
-| GPT reasoning | Verified `reasoning` item | `reasoning_effort` works, but `reasoning_content` is not stable |
-| OpenAI-style web search | Verified `web_search_preview` path | The older `web_search` shape did not produce a stable verifiable trigger in this round |
-| Streaming | Richer event types | Traditional delta SSE |
+| エンドポイント | `/v1/responses` | `/v1/chat/completions` |
+| 入力形式 | `input` | `messages` |
+| 出力形式 | `output[]` アイテムリスト | `choices[].message` |
+| GPT推論 | 検証済み`reasoning`アイテム | `reasoning_effort`は動作するが`reasoning_content`は安定しません |
+| OpenAIスタイルのウェブ検索 | 検証済み`web_search_preview`パス | 旧型`web_search`形式では安定した検証可能なトリガーはこのラウンドでは得られませんでした |
+| ストリーミング | より多様なイベントタイプ | 従来のデルタSSE |
 
 ---
 
-## Smallest useful example
+## 最小限の有用な例
 
 ```python Python
 from openai import OpenAI
@@ -51,7 +51,7 @@ response = client.responses.create(
 print(response.output_text)
 ```
 
-In the current production recheck, this kind of minimal request returned:
+現在の運用環境で再確認した際、この最小限のリクエストは以下を返しました：
 
 ```json
 {
@@ -66,31 +66,31 @@ In the current production recheck, this kind of minimal request returned:
 
 ---
 
-## When to prefer Responses
+## レスポンスを選ぶべきケース
 
-- You need `gpt-5.5` reasoning summaries
-- You need to verify whether the model actually triggered `web_search_call`
-- You want richer SSE events
+- `gpt-5.5`の推論要約が必要な場合
+- モデルが実際に`web_search_call`をトリガーしたか検証したい場合
+- より多様なSSEイベントが欲しい場合
 
-Related pages:
+関連ページ：
 
-- [GPT-5 Thinking Mode](/jp/chat/responses/gpt5-thinking)
-- [Responses Web Search](/jp/chat/responses/web-search)
-- [Responses Function Calling](/jp/chat/responses/function-calling)
+- [GPT-5思考モード](/jp/chat/responses/gpt5-thinking)
+- [レスポンスのウェブ検索](/jp/chat/responses/web-search)
+- [レスポンスの関数呼び出し](/jp/chat/responses/function-calling)
 
 ---
 
-## When to keep Chat Completions
+## Chat Completionsを維持すべきケース
 
-- You already have a stable Chat Completions integration
-- You only care about the final answer, not the `reasoning` item
-- You are integrating Claude, Gemini, or other OpenAI-compatible models
+- 既に安定したChat Completions連携がある場合
+- 最終回答だけ気にしており、`reasoning`アイテムは不要な場合
+- Claude、Gemini、その他OpenAI互換モデルを統合している場合
 
 <Note>
-  Both APIs can coexist in the same project. In practice, the better pattern is usually not a full migration, but moving only the requests that need newer capabilities onto `/v1/responses`.
+  両APIは同一プロジェクト内で共存可能です。実際には、最良のパターンは完全な移行ではなく、新機能が必要なリクエストのみを`/v1/responses`へ移行するのが一般的です。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## crazyrouter.comの関連情報
 
-- [OpenAI の全モデルと料金](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [全OpenAIモデルとリアルタイム価格](https://crazyrouter.com/ja/models/openai?utm_source=docs&utm_medium=related)

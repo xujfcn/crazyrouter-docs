@@ -1,18 +1,18 @@
 ---
-title: "Get Seed"
-description: "Get the image seed value of a Midjourney task"
+title: "Получить Seed"
+description: "Получить значение Seed изображения задачи Midjourney"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Get Seed
+# Получить Seed
 
 ```
 GET /mj/task/{id}/image-seed
 ```
 
-Get the image seed value of a completed task. The seed can be used to reproduce similar generation results.
+Получите значение Seed изображения для завершённой задачи. Seed можно использовать для воспроизведения похожих результатов генерации.
 
-## Request Examples
+## Пример запроса
 
 <CodeGroup>
 
@@ -34,25 +34,25 @@ print(response.json())
 
 </CodeGroup>
 
-## Response Example
+## Пример ответа
 
 ```json
 {
   "code": 1,
-  "description": "Success",
+  "description": "成功",
   "result": "1234567890"
 }
 ```
 
-| Field | Description |
-|-------|-------------|
-| `result` | Seed value, can be used in Imagine prompts with `--seed 1234567890` to reproduce results |
+| Поле | Описание |
+|------|------|
+| `result` | Значение Seed, можно использовать в подсказке Imagine с `--seed 1234567890` для воспроизведения |
 
 ---
 
-## Using the Seed
+## Использование Seed
 
-Add the `--seed` parameter to the prompt in an Imagine request:
+Добавьте параметр `--seed` в prompt запроса Imagine:
 
 ```json
 {
@@ -61,5 +61,5 @@ Add the `--seed` parameter to the prompt in an Imagine request:
 ```
 
 <Note>
-  The seed can only be retrieved after a task has completed successfully. The same seed + same prompt will generate very similar (but not identical) images.
+  Seed можно получить только после успешного завершения задачи. Одинаковый Seed + одинаковый Prompt позволяет создать очень похожие (но не полностью идентичные) изображения.
 </Note>

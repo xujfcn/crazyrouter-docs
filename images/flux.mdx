@@ -1,27 +1,27 @@
 ---
 title: "Flux"
-description: "Flux 模型当前未在本站 pricing 页面公开"
+description: "目前 Crazyrouter 价格页面未公开显示 Flux 模型"
 ---
-> 更新日期：2026-06-06
+> 内容更新: 2026-10-12
 
 # Flux
 
 <Warning>
-  当前本站 pricing 页面没有公开可直接调用的 Flux `model_name`。因此本文不再提供 Flux 请求示例，也不建议在生产配置里填写旧的 `flux-*` 模型名。
+  当前的 Crazyrouter 价格页面未显示可直接调用的 Flux `model_name`。本页面不再提供 Flux 请求示例，且旧的 `flux-*` 模型 ID 不应在生产配置中使用。
 </Warning>
 
-## 当前可用替代
+## 目前替代方案
 
-如果你需要图像生成或图像编辑，请优先使用 pricing 页面当前公开的模型：
+如需图像生成或编辑，请优先选择当前价格页面已公开的模型：
 
-| 场景 | 建议模型 |
-|------|----------|
-| OpenAI 图片接口 | `gpt-image-2`、`dall-e-3` |
-| Gemini 图片接口 | `nano-banana`、`nano-banana-2`、`nano-banana-pro` |
-| Grok 图片接口 | `grok-4-image` |
-| Qwen 图片接口 | `qwen-image-2.0`、`qwen-image-plus`、`qwen-image-max` |
-| Doubao 图片接口 | `doubao-seedream-4-5`、`doubao-seedream-5-0` |
+| 用例 | 推荐模型 |
+|----------|------------------|
+| OpenAI Images | `gpt-image-2` |
+| Gemini Images | `nano-banana`, `nano-banana-2`, `nano-banana-pro` |
+| Grok Images | `grok-4-image` |
+| Qwen Images | `qwen-image-2.0`, `qwen-image-plus`, `qwen-image-max` |
+| Doubao Images | `doubao-seedream-4-5`, `doubao-seedream-5-0` |
 
 ## 如何确认
 
-以 `https://crazyrouter.com/pricing` 和 `GET /v1/models` 返回的当前 Token 可见模型为准。只有公开可见且可提交成功的模型名才适合作为文档示例和客户配置默认值。
+请使用 `https://crazyrouter.com/pricing` 以及 `GET /v1/models` 返回的当前模型列表作为准确信息。仅允许使用可公开访问且能够成功提交的模型作为文档示例或面向客户的默认选项。

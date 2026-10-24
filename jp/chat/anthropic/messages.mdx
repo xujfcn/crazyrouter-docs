@@ -1,25 +1,26 @@
 ---
-title: "Claude Native Format"
-description: "Production-revalidated Anthropic Messages usage for Claude on Crazyrouter"
+title: "Claude ネイティブ形式"
+description: "本番環境でのレビューに基づき、Anthropic Messages API を使用して Claude を呼び出す"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Claude Native Format
+
+# Claude ネイティブ形式
 
 ```
 POST /v1/messages
 ```
 
-This page only documents Claude Messages behavior that was revalidated against Crazyrouter production on `2026-03-22`.
+本ページには、`2026-03-22` が Crazyrouter の本番環境でレビュー済みの Claude Messages の使用例のみを記載します。
 
-Current primary example models:
+現在の主な例示モデル：
 
 - `claude-opus-4-8`
 - `claude-opus-4-8`
 
-## Authentication
+## 認証
 
-This recheck confirmed that both of the following auth styles work:
+今回のレビューでは、以下の2つの記法がどちらも利用可能であることを確認しました：
 
 ```text
 x-api-key: YOUR_API_KEY
@@ -29,7 +30,7 @@ x-api-key: YOUR_API_KEY
 Authorization: Bearer YOUR_API_KEY
 ```
 
-Keep:
+両方とも保持します：
 
 ```text
 anthropic-version: 2023-06-01
@@ -37,7 +38,7 @@ anthropic-version: 2023-06-01
 
 ---
 
-## Basic conversation
+## 基本的な会話
 
 ```bash cURL
 curl https://api.crazyrouter.com/v1/messages \
@@ -56,7 +57,7 @@ curl https://api.crazyrouter.com/v1/messages \
   }'
 ```
 
-Verified response shape:
+現在、本番環境で返される主要な構造体は次のとおりです：
 
 ```json
 {
@@ -72,14 +73,14 @@ Verified response shape:
 
 ---
 
-## Function calling
+## Function Calling
 
-In the current production environment, Claude tool calling is reproducible through `/v1/messages` and returns `tool_use`.
+現在の本番環境では、Claude のツール呼び出しは `/v1/messages` を介して安定して `tool_use` を返します。
 
-For first-pass validation, use:
+初回の連携テストでの推奨事項：
 
-- an explicit `tool_choice`
-- a prompt that clearly says Claude must call the tool and not answer directly
+- 明示的に `tool_choice` を送信する
+- プロンプト内で「必ずツールを呼び出すこと、直接回答しないこと」を明確に記載する
 
 ```bash cURL
 curl https://api.crazyrouter.com/v1/messages \
@@ -116,7 +117,7 @@ curl https://api.crazyrouter.com/v1/messages \
   }'
 ```
 
-Verified response shape:
+現在、本番検証で返される主要なフィールド：
 
 ```json
 {
@@ -135,13 +136,13 @@ Verified response shape:
 
 ---
 
-## Extended thinking
+## Extended Thinking
 
-In this production recheck, the combination that clearly returned a `thinking` block was:
+今回の本番レビューでは、`thinking` ブロックが返される組み合わせは明確に次のとおりです：
 
 - `claude-opus-4-8`
 
-Base `claude-opus-4-8` did not produce an equally explicit thinking block in this round, so the docs prioritize the thinking variant here.
+ベーシック版 `claude-opus-4-8` では今回同等に明確な thinking ブロックが得られなかったため、ここではthinking能力を優先して記載します。
 
 ```bash cURL
 curl https://api.crazyrouter.com/v1/messages \
@@ -164,7 +165,7 @@ curl https://api.crazyrouter.com/v1/messages \
   }'
 ```
 
-Verified response shape:
+現在、実際の検証で返される主要なフィールド：
 
 ```json
 {
@@ -182,26 +183,26 @@ Verified response shape:
 ```
 
 <Warning>
-  When using `thinking`, `max_tokens` must be greater than `budget_tokens`. Thinking tokens are billed as well.
+  `thinking` を使用する場合は、`max_tokens` は必ず `budget_tokens` より大きくなければなりません。thinking トークンもコストに含まれます。
 </Warning>
 
 ---
 
-## Current recommendation
+## 現時点の推奨事項
 
-- Standard text chat: use `claude-opus-4-8`
-- Tool calling: use `claude-opus-4-8`, and include `tool_choice` in first-pass validation
-- Explicit thinking blocks: use `claude-opus-4-8`
+- 通常のテキスト会話：優先的に `claude-opus-4-8` を使用
+- ツール呼び出し：優先的に `claude-opus-4-8` を使用し、初回の検証で `tool_choice` を追加
+- thinking ブロックが必要な場合：優先的に `claude-opus-4-8` を使用
 
-Related pages:
+関連ページ：
 
-- [Feature Hub: Tool Calling](/jp/features/tool-calling)
-- [Feature Hub: Reasoning](/jp/features/reasoning)
-- [公式モデル課金方式](/jp/reference/official-pricing-methods)
+- [コア機能：Tool Calling](/jp/features/tool-calling)
+- [コア機能：Reasoning](/jp/features/reasoning)
+- [モデルの公式価格方式](/jp/reference/official-pricing-methods)
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [Claude Fable 5 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
-- [Claude Fable 5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
-- [Claude Haiku 4.5 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/claude-haiku-4-5?utm_source=docs&utm_medium=related)
+- [Claude Fable 5 価格比較：公式 / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ja/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Claude Fable 5 モデルページ：リアルタイム価格・実際のサンプル・呼び出しコード](https://crazyrouter.com/ja/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Claude Haiku 4.5 価格比較：公式 / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ja/pricing/claude-haiku-4-5?utm_source=docs&utm_medium=related)

@@ -1,30 +1,30 @@
 ---
-title: "Gemini OpenAI-Compatible Format"
-description: "Production-revalidated Gemini 3 Pro via /v1/chat/completions"
+title: "Gemini OpenAI compatible format"
+description: "Based on production environment review, call Gemini 3 Pro via /v1/chat/completions"
 ---
-> Last updated: 2026-06-06
+> Content updated: 2026-06-09
 
-# Gemini OpenAI-Compatible Format
+# Gemini OpenAI compatible format
 
-You can call Gemini through the OpenAI Chat Completions compatible route.
+You can call Gemini using a format compatible with OpenAI Chat Completions.
 
 ```
 POST /v1/chat/completions
 ```
 
-This page only documents compatibility-layer behavior that was revalidated against Crazyrouter production on `2026-03-22`.
+This page only documents the behavior of the compatibility layer `2026-03-22` that has already been reviewed in the Crazyrouter production environment.
 
-Current primary example model:
+Current main example model:
 
 - `gemini-3.1-pro`
 
-## Current conclusion
+## Current main conclusions
 
-This production recheck confirmed that:
+Production review in this round confirms:
 
-- `gemini-3.1-pro` works through `/v1/chat/completions` for normal text chat
-- streaming returns standard `chat.completion.chunk` SSE objects
-- for Gemini-specific capabilities such as structured outputs, Google Search, and thinking, you should still prefer [Gemini Native Format](/en/chat/gemini/native)
+- `gemini-3.1-pro` can interact normally via `/v1/chat/completions`
+- Streaming responses are compatible with `chat.completion.chunk` SSE structure
+- If you need Gemini's structured output, Google Search, thinking capabilities, etc., you should still prioritize [Gemini native format](/en/chat/gemini/native) for now
 
 ---
 
@@ -50,7 +50,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-Verified response shape:
+Key structures returned in current production validation:
 
 ```json
 {
@@ -95,7 +95,7 @@ print(response.choices[0].message.content)
 
 ## Streaming output
 
-This production recheck also confirmed streaming compatibility:
+This round of production has also reviewed streaming compatible returns:
 
 ```python Python
 stream = client.chat.completions.create(
@@ -113,7 +113,7 @@ for chunk in stream:
         print(delta.content, end="")
 ```
 
-Observed SSE shape:
+Typical SSE segment shapes received in current production look like:
 
 ```text
 data: {"object":"chat.completion.chunk","model":"gemini-3.1-pro",...}
@@ -123,20 +123,18 @@ data: [DONE]
 
 ---
 
-## When to use compatible vs native
+## When to use the compatible format, and when to use the native format
 
-- If you already have OpenAI SDK code and only need standard chat, use the compatible route
-- If you need Gemini-native structured outputs, Google Search, thinking, or native metadata, use [Gemini Native Format](/en/chat/gemini/native)
+- If you already have OpenAI SDK code and only need standard conversations: prioritize compatible format
+- If you need Gemini's structured output, Google Search, thinking, or native fields: prioritize [Gemini native format](/en/chat/gemini/native)
 
 <Note>
-  This page still only covers the `/v1/chat/completions` compatibility layer and does not fold Gemini-backed image behavior into it. For image workloads, do not keep documenting the Nano Banana family as a stable `/v1/images/generations` contract.
-  The currently preferred entry point is [Nano Banana 2](/en/images/nano-banana-2), which now points to native Gemini `POST /v1beta/models/nano-banana-2:generateContent`.
-  [Nano Banana](/en/images/nano-banana) remains controlled-testing only.
+  This page only covers the `/v1/chat/completions` compatibility layer. For Gemini image workloads, please use the unified Images API: `POST https://api.crazyrouter.com/v1/images/generations`, and see [Nano Banana](/en/images/nano-banana), [Nano Banana Pro](/en/images/nano-banana-pro), [Nano Banana 2](/en/images/nano-banana-2) for reference.
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## Related on crazyrouter.com
+## Related pages
 
-- [GPT Image 1.5 model page: live price, real samples, code](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2 model page: live price, real samples, code](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [All Google models with live prices](https://crazyrouter.com/en/models/google?utm_source=docs&utm_medium=related)
+- [GPT Image 1.5 model page: real-time pricing, real examples, calling code](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT Image 2 model page: real-time pricing, real examples, calling code](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [All Google models and prices](https://crazyrouter.com/en/models/google?utm_source=docs&utm_medium=related)

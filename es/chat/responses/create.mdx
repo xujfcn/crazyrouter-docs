@@ -1,0 +1,93 @@
+---
+title: "Crear respuesta"
+description: "Fundamentos de la API de Responses verificados contra Crazyrouter producción el 2026-03-23"
+---
+> Contenido actualizado: 2026-06-09
+
+# Crear respuesta
+
+```
+POST /v1/responses
+```
+
+A partir del 23 de marzo de 2026, la producción de Crazyrouter ha verificado:
+
+- `gpt-5.5` devuelve `object: "response"`
+- Las solicitudes de texto básicas actualmente devuelven elementos `output` de tipo `message`
+- Las solicitudes en streaming exponen consistentemente `response.created`, `response.in_progress`, `response.output_item.added`, `response.content_part.added` y `response.output_text.delta`
+
+<Note>
+  Claude actualmente no soporta `POST /v1/responses`. Usa `POST /v1/messages` o `POST /v1/chat/completions` en su lugar para Claude.
+</Note>
+
+---
+
+## Solicitud básica
+
+```bash
+curl https://api.crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "input": "Explain what an API is in one sentence."
+  }'
+```
+
+Forma de la respuesta observada en producción:
+
+```json
+{
+  "object": "response",
+  "model": "gpt-5.5",
+  "output": [
+    {
+      "type": "message"
+    }
+  ]
+}
+```
+
+---
+
+## Solicitud en streaming
+
+```bash
+curl https://api.crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "input": "Say hello in one sentence.",
+    "stream": true
+  }'
+```
+
+La prueba en streaming en producción el 2026-03-23 observó esta secuencia de eventos iniciales:
+
+```text
+event: response.created
+event: response.in_progress
+event: response.output_item.added
+event: response.content_part.added
+event: response.output_text.delta
+```
+
+Por lo tanto, la estrategia más segura para el consumidor actual es:
+
+1. acumular texto de `response.output_text.delta`
+2. tratar `response.completed` o la terminación del stream como la señal de finalización
+
+---
+
+## Recomendación actual
+
+- Comienza nuevas integraciones de texto GPT con `gpt-5.5` en `/v1/responses`
+- Para uso de herramientas, sigue con [Responses Function Calling](/es/chat/responses/function-calling)
+- Para acceso web en vivo, sigue con [Responses Web Search](/es/chat/responses/web-search)
+- Para marcadores visibles de razonamiento, sigue con [GPT-5 Thinking](/es/chat/responses/gpt5-thinking)
+
+{/* crazyrouter-model-links v2 */}
+## Relacionado en crazyrouter.com
+
+- [Todos los modelos OpenAI con precios en vivo](https://crazyrouter.com/es/models/openai?utm_source=docs&utm_medium=related)

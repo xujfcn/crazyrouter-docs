@@ -1,0 +1,199 @@
+---
+title: 'Tutorial de configuración de traducción inmersiva'
+description: 'Conecta Crazyrouter a través del servicio OpenAI en la extensión de navegador de Traducción Inmersiva y completa la dirección de API personalizada, modelo, control de frecuencia, verificación y explicación de resolución de problemas'
+---
+> Contenido actualizado: 2026-06-09
+
+Traducción Inmersiva es una extensión de navegador ideal para traducción diaria de páginas web, lectura bilingüe, traducción de selección y traducción de documentos. Al integrar con Crazyrouter, la forma más segura es utilizar la configuración de servicio `OpenAI` oficialmente soportada, y completar la dirección de API personalizada en `Más ajustes`.
+
+## Visión general
+
+A través de la configuración del servicio OpenAI de Traducción Inmersiva, puedes enviar las solicitudes a Crazyrouter:
+
+- Protocolo recomendado: `OpenAI-compatible API`
+- Tipo de servicio: `OpenAI`
+- API Key: tu `sk-...`
+- Dirección de API personalizada: `https://api.crazyrouter.com/v1/chat/completions`
+- Primer modelo de verificación recomendado: `gpt-5.5`
+
+<Tip>
+La mayor diferencia entre Traducción Inmersiva y ChatBox es: normalmente aquí se debe completar la ruta completa de la interfaz, no solo el dominio raíz.
+</Tip>
+
+## ¿Por qué aquí hay que escribir la ruta completa?
+
+Según la documentación oficial del servicio OpenAI de Traducción Inmersiva, permite personalizar la dirección de la API de OpenAI en `Más ajustes`. Por lo tanto, una forma más segura en Crazyrouter suele ser escribir la dirección completa:
+
+```text
+https://api.crazyrouter.com/v1/chat/completions
+```
+
+<Warning>
+No escribas aquí solo el dominio raíz `https://api.crazyrouter.com`, ni solo hasta `/v1`. Para esta forma de integración, se recomienda que la primera verificación utilice la ruta completa `/v1/chat/completions`.
+</Warning>
+
+## ¿Para quién está recomendado?
+
+- Personas que quieren hacer traducción inteligente de alta calidad en la web
+- Personas que quieren administrar el costo de traducción usando su propio token de Crazyrouter
+- Personas que quieren controlar el límite por navegador o dispositivo por separado
+- Quienes prefieren usar la compatibilidad OpenAI para conectar traducción en el navegador
+
+## Requisitos del sistema y condiciones previas
+
+| Proyecto | Descripción |
+|------|------|
+| Cuenta de Crazyrouter | Primero regístrate en [crazyrouter.com](https://crazyrouter.com) |
+| Token de Crazyrouter | Se recomienda crear un token exclusivo para Traducción Inmersiva |
+| Navegador | Chrome, Edge, Firefox y otros navegadores compatibles con la extensión |
+| Extensión de Traducción Inmersiva | Se recomienda la versión estable actual |
+| Modelos disponibles | Debe estar habilitado al menos un modelo de traducción |
+
+Lista blanca inicial recomendada:
+
+- `gpt-5.5`
+- `claude-opus-4-8`
+
+## Ruta de instalación y configuración
+
+### Ruta para Chrome / Edge
+
+1. Instala Traducción Inmersiva desde la tienda de extensiones
+2. Abre la configuración de la extensión
+3. Entra en `Servicio de traducción`
+4. Selecciona `OpenAI`
+5. Abre `Más ajustes`
+6. Introduce la clave de Crazyrouter y la dirección personalizada completa
+
+### Ruta para Firefox
+
+1. Instala Traducción Inmersiva desde los complementos de Firefox
+2. Abre la página de configuración
+3. Ve a `Servicio de traducción`
+4. Selecciona `OpenAI`
+5. Ve a `Más ajustes`
+6. Introduce los parámetros de Crazyrouter
+
+## Configuración completa desde cero
+
+<Steps>
+  <Step title="Paso 1: Instalar la extensión">
+    Instala "Traducción Inmersiva" desde la tienda oficial de extensiones.
+  </Step>
+
+  <Step title="Paso 2: Crear un token dedicado en Crazyrouter">
+    Para la primera vez, solo se recomienda habilitar:
+
+    - `gpt-5.5`
+    - `claude-opus-4-8`
+
+    No agregues muchos modelos a escenarios de traducción desde el principio.
+  </Step>
+
+  <Step title="Paso 3: Abrir la configuración del servicio OpenAI">
+    Tras hacer clic en el icono de la extensión entra en:
+
+    - `Ajustes`
+    - `Servicio de traducción`
+    - Selecciona `OpenAI`
+  </Step>
+
+  <Step title="Paso 4: Introducir la clave API y la dirección personalizada">
+    Completa:
+
+    - `API Key`: tu `sk-...`
+    - `Dirección personalizada de la API`: `https://api.crazyrouter.com/v1/chat/completions`
+    - `Modelo`: usa primero `gpt-5.5`
+
+    Si algunas opciones están colapsadas por defecto en la interfaz, recuerda expandir `Más ajustes` para ver todos los campos.
+  </Step>
+
+  <Step title="Paso 5: Primero ajusta la frecuencia de las solicitudes a un valor bajo">
+    En la documentación oficial de Traducción Inmersiva se destaca el tema de los límites de frecuencia para la ruta OpenAI. Al conectar por primera vez Crazyrouter, ajusta la frecuencia de solicitud a un nivel bajo, especialmente al traducir textos largos o ebooks.
+
+    Recomendaciones para la primera prueba:
+
+    - No establezcas demasiadas solicitudes por segundo
+    - Valida primero con páginas pequeñas o texto seleccionado
+    - Tras verificar, aumenta gradualmente
+  </Step>
+
+  <Step title="Paso 6: Realizar la primera validación mínima">
+    Orden de recomendación:
+
+    1. Traduce primero un pequeño texto seleccionado
+    2. Luego, una página web corta
+    3. Por último, prueba una página completa o un documento más largo
+
+    Así es más fácil distinguir si el "error es de configuración API" o si "el volumen de solicitud es demasiado para la estabilidad".
+  </Step>
+</Steps>
+
+## Configuración recomendada de modelos
+
+| Escenario de uso | Modelo recomendado | Motivo |
+|----------|----------|------|
+| Verificación mínima inicial | `gpt-5.5` | Verificado en entorno de producción el 23 de marzo de 2026, recomendable para validar la ruta de traducción compatible con OpenAI |
+| Traducciones de mayor calidad | `claude-opus-4-8` | Más adecuado para explicaciones largas, corrección de estilo y escenarios que exigen mayor calidad |
+| Respaldo Gemini | `gemini-3.1-pro` | Adecuado como segunda vía de verificación de compatibilidad, pero prueba primero la ruta principal |
+
+## Buenas prácticas para configuración de token
+
+| Parámetro | Recomendación | Descripción |
+|------|------|------|
+| Token dedicado | Obligatorio | No compartas el token entre extensiones de traducción de navegador e IDE/CLI |
+| Lista blanca de modelos | Altamente recomendado | Habilita solo 1 a 2 modelos de traducción al principio |
+| Límite de cuota | Altamente recomendado | La traducción de páginas completas o ebooks consume más que un chat corriente |
+| Aislamiento por dispositivo | Recomendado | Se pueden separar los tokens por cada navegador o dispositivo |
+| Gestión de fugas | Rotación inmediata | Si hay filtración por grabaciones, capturas o sincronización, cambia la clave de inmediato |
+
+## Lista de verificación
+
+- [ ] Extensión correctamente instalada
+- [ ] Se ha seleccionado el servicio de traducción `OpenAI`
+- [ ] `API Key` se ha completado correctamente
+- [ ] `Dirección personalizada de la API` configurado como `https://api.crazyrouter.com/v1/chat/completions`
+- [ ] Primer modelo configurado como `gpt-5.5` u otro modelo autorizado
+- [ ] Traducción exitosa de un pequeño texto seleccionado
+- [ ] Traducción exitosa de una página corta
+- [ ] Se observa la solicitud correspondiente en los registros de Crazyrouter
+
+## Fallos comunes y cómo solucionarlos
+
+| Síntoma | Causa común | Solución |
+|------|----------|----------|
+| 404 | Falta `/chat/completions` en la dirección API, o se utilizó solo el dominio raíz | Usa la dirección completa `https://api.crazyrouter.com/v1/chat/completions` |
+| 401 unauthorized | Clave API incorrecta, expirada o incompleta | Genera un nuevo token y vuelve a completar |
+| 403 / modelo no permitido | El token no tiene permiso para el modelo actual | Autoriza el modelo en la configuración del token de Crazyrouter |
+| 429 / Inestable | Frecuencia de solicitud demasiado alta | Disminuye la frecuencia, comienza con textos pequeños |
+| Tasa de error mayor al traducir textos largos | Concurrencia o frecuencia demasiado alta | Reduce el alcance de traducción y aumenta gradualmente |
+| Coste aumentando muy rápido | Traducción directa de páginas/websites/ebooks completos | Usa `gpt-5.5` para validar en pequeño alcance y controla el rango de traducción |
+
+## Consejos para ahorrar
+
+- Por defecto usa primero `gpt-5.5`
+- Da prioridad a la traducción de la zona seleccionada, en vez de la página completa de inmediato
+- Para documentos largos, primero evalúa la calidad por muestra antes de traducir todo
+- Si tienes la extensión en varios navegadores, usa tokens separados para contabilizar costes
+
+## FAQ
+
+### ¿Qué dirección API hay que completar en Traducción Inmersiva?
+
+Escribe la ruta completa: `https://api.crazyrouter.com/v1/chat/completions`.
+
+### ¿Por qué esto no es igual que ChatBox y no se recomienda solo el dominio raíz?
+
+Porque la entrada oficial de dirección personalizada OpenAI en Traducción Inmersiva está pensada para la ruta de interfaz completa, validando de forma más estable al principio.
+
+### ¿Cuál es el primer modelo recomendado?
+
+Usa primero `gpt-5.5`.
+
+### ¿Por qué no se recomienda traducir toda la página o un ebook la primera vez?
+
+Eso amplifica los posibles problemas de configuración, limites de frecuencia y costes. Primero traduce pequeños textos para agilizar la resolución.
+
+<Note>
+Si tu objetivo es "gestionar el coste de traducción AI en páginas web con Crazyrouter", Traducción Inmersiva es una extensión de navegador para la que vale la pena detallar estas explicaciones.
+</Note>

@@ -1,32 +1,32 @@
 ---
 title: "Ideogram V3"
-description: "Use the Ideogram V3 API for image generation, editing, blending, reframing, and background replacement"
+description: "Использование API Ideogram V3 для генерации, редактирования, смешивания, реконструкции изображений и замены фона"
 ---
-> Дата обновления: 2026-06-23
+> Обновление содержания: 2026-06-09
 
 # Ideogram V3
 
-Ideogram V3 is the latest generation text-to-image model with significant improvements in text rendering and image quality.
+Ideogram V3 — это новейшее поколение моделей преобразования текста в изображение, обладающее значительным улучшением рендеринга текста и качества изображения.
 
-## Generate Image
+## Генерация изображений
 
 ```
 POST /ideogram/v1/ideogram-v3/generate
 ```
 
-### Request Parameters
+### Параметры запроса
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `prompt` | string | Yes | Image description prompt |
-| `aspect_ratio` | string | No | Aspect ratio, e.g. `ASPECT_1_1`, `ASPECT_16_9`, `ASPECT_9_16` |
-| `model` | string | No | Model version, defaults to `V_3` |
-| `magic_prompt_option` | string | No | Prompt enhancement: `AUTO`, `ON`, `OFF` |
-| `rendering_speed` | string | No | Rendering speed: `DEFAULT`, `TURBO`, `QUALITY` |
-| `style_type` | string | No | Style type: `AUTO`, `GENERAL`, `REALISTIC`, `DESIGN` |
-| `negative_prompt` | string | No | Negative prompt |
+| Параметр | Тип | Обязательный | Описание |
+|------|------|------|------|
+| `prompt` | string | Да | Описательные подсказки для изображения |
+| `aspect_ratio` | string | Нет | Соотношение сторон, например `ASPECT_1_1`, `ASPECT_16_9`, `ASPECT_9_16` |
+| `model` | string | Нет | Версия модели, по умолчанию `V_3` |
+| `magic_prompt_option` | string | Нет | Усиление подсказок: `AUTO`, `ON`, `OFF` |
+| `rendering_speed` | string | Нет | Скорость рендеринга: `DEFAULT`, `TURBO`, `QUALITY` |
+| `style_type` | string | Нет | Тип стиля: `AUTO`, `GENERAL`, `REALISTIC`, `DESIGN` |
+| `negative_prompt` | string | Нет | Негативные подсказки |
 
-### Request Examples
+### Пример запроса
 
 <CodeGroup>
 
@@ -63,7 +63,7 @@ print(response.json())
 
 </CodeGroup>
 
-### Response Example
+### Пример ответа
 
 ```json
 {
@@ -82,22 +82,22 @@ print(response.json())
 
 ---
 
-## Edit Image
+## Редактирование изображений
 
 ```
 POST /ideogram/v1/ideogram-v3/edit
 ```
 
-Edit and modify an existing image.
+Редактирование и изменение уже существующего изображения.
 
-### Request Parameters
+### Параметры запроса
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `prompt` | string | Yes | Edit description |
-| `image` | string | Yes | Original image URL or Base64 |
-| `mask` | string | No | Mask image, marking the area to be edited |
-| `style_type` | string | No | Style type |
+| Параметр | Тип | Обязательный | Описание |
+|------|------|------|------|
+| `prompt` | string | Да | Описание изменения |
+| `image` | string | Да | URL исходного изображения или Base64 |
+| `mask` | string | Нет | Маска изображения, отмечает область для редактирования |
+| `style_type` | string | Нет | Тип стиля |
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/ideogram/v1/ideogram-v3/edit \
@@ -112,19 +112,19 @@ curl -X POST https://api.crazyrouter.com/ideogram/v1/ideogram-v3/edit \
 
 ---
 
-## Remix Image
+## Remix изображений
 
 ```
 POST /ideogram/v1/ideogram-v3/remix
 ```
 
-Generate variations based on a reference image and new prompt.
+Генерация вариаций на основе эталонного изображения и новых подсказок.
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `prompt` | string | Yes | New prompt |
-| `image` | string | Yes | Reference image |
-| `image_weight` | number | No | Reference image weight, 0-100 |
+| Параметр | Тип | Обязательный | Описание |
+|------|------|------|------|
+| `prompt` | string | Да | Новая подсказка |
+| `image` | string | Да | Эталонное изображение |
+| `image_weight` | number | Нет | Вес эталонного изображения, 0-100 |
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/ideogram/v1/ideogram-v3/remix \
@@ -139,33 +139,33 @@ curl -X POST https://api.crazyrouter.com/ideogram/v1/ideogram-v3/remix \
 
 ---
 
-## Reframe
+## Reframe — реконтурирование
 
 ```
 POST /ideogram/v1/ideogram-v3/reframe
 ```
 
-Expand the image canvas, generating content beyond the original boundaries.
+Расширение холста изображения, генерация содержания за пределами исходных границ.
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `image` | string | Yes | Original image |
-| `resolution` | string | No | Target resolution |
+| Параметр | Тип | Обязательный | Описание |
+|------|------|------|------|
+| `image` | string | Да | Исходное изображение |
+| `resolution` | string | Нет | Целевое разрешение |
 
 ---
 
-## Replace Background
+## Замена фона
 
 ```
 POST /ideogram/v1/ideogram-v3/replace-background
 ```
 
-Automatically detect the subject and replace the background.
+Автоматическое определение объекта и замена фона.
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `prompt` | string | Yes | New background description |
-| `image` | string | Yes | Original image |
+| Параметр | Тип | Обязательный | Описание |
+|------|------|------|------|
+| `prompt` | string | Да | Описание нового фона |
+| `image` | string | Да | Исходное изображение |
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/ideogram/v1/ideogram-v3/replace-background \
@@ -178,5 +178,5 @@ curl -X POST https://api.crazyrouter.com/ideogram/v1/ideogram-v3/replace-backgro
 ```
 
 <Note>
-  Ideogram V3 excels at text rendering, making it ideal for scenarios that require text within images.
+  Ideogram V3 отличается превосходной работой с рендерингом текста, что идеально подходит для сценариев, где изображение должно содержать текст.
 </Note>

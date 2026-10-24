@@ -1,77 +1,79 @@
 ---
 title: "Seedance"
-description: "Use the native Seedance API for video generation"
+description: "Seedance ネイティブ API を使って動画を生成する"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-30
 
 # Seedance
 
-Seedance is ByteDance / Doubao's video generation family. On Crazyrouter, the public contract stays on the native `/volc/v1/*` surface. The old unified-video `doubao-seedance-2-0-fast` label is no longer the primary customer-facing protocol.
+Seedance はバイトダンス / 豆包の動画生成モデル群です。Crazyrouter は現在、対顧客向けには火山ネイティブ `/volc/v1/*` プロトコルのみを提供しており、旧統一動画インターフェース内の `doubao-seedance-2-0-fast` は公開される主プロトコルとしては利用されなくなりました。
 
-## Current Public Models
+**Seedance 2.0 / 2.0 Fast の Crazyrouter における本当の決済ロジック**（「なぜタスク完了後に token での追加決済か」「token と秒数は固定換算できるか」等）を知りたい場合は、特集ページをご覧ください：[Seedance 2.0 料金説明](/jp/video/seedance-2-billing)。
 
-| Model | Current public positioning |
-|-------|----------------------------|
-| `doubao-seedance-1-0-lite-t2v` | text-to-video |
-| `doubao-seedance-1-0-lite-i2v` | single-image image-to-video |
-| `doubao-seedance-1-0-pro` | general higher-quality generation |
-| `doubao-seedance-1-0-pro-fast` | general faster generation |
-| `doubao-seedance-1-5-pro` | higher-end version with room for later official capability expansion |
-| `doubao-seedance-2-0` | official Seedance 2.0 multimodal video generation |
-| `doubao-seedance-2-0-fast` | official Seedance 2.0 Fast multimodal video generation |
+## 現在公開されているモデル
 
-## Submit a Video Task
+| モデル | 現在の公開用途 |
+|------|------|
+| `doubao-seedance-1-0-lite-t2v` | テキストから動画生成 |
+| `doubao-seedance-1-0-lite-i2v` | 単一画像から動画生成 |
+| `doubao-seedance-1-0-pro` | 汎用高品質動画生成 |
+| `doubao-seedance-1-0-pro-fast` | 汎用高速動画生成 |
+| `doubao-seedance-1-5-pro` | より高次のバージョンで、今後も公式機能パラメータの拡張が可能です |
+| `doubao-seedance-2-0` | Seedance 2.0 公式マルチモーダル動画生成 |
+| `doubao-seedance-2-0-fast` | Seedance 2.0 Fast 公式マルチモーダル動画生成 |
+
+## 動画タスクの提出
 
 ```
 POST /volc/v1/contents/generations/tasks
 ```
 
-### Current Public Request Parameters
+### 現在公開されているリクエストパラメータ
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model` | string | Yes | Public model name. Use one of the canonical model names above |
-| `content` | array | Yes | Input content array |
-| `content[].type` | string | Yes | Supported values are `text`, `image_url`, `video_url`, `audio_url`, and `draft_task` |
-| `content[].text` | string | Conditionally | Required when `type=text` |
-| `content[].image_url.url` | string | Conditionally | Required when `type=image_url` |
-| `content[].video_url.url` | string | Conditionally | Required when `type=video_url` |
-| `content[].audio_url.url` | string | Conditionally | Required when `type=audio_url` |
-| `content[].role` | string | Optional | Seedance 2.0 supports `first_frame`, `last_frame`, `reference_image`, `reference_video`, and `reference_audio` |
-| `generate_audio` | boolean | Optional | Whether to generate audio on Seedance 2.0 |
-| `ratio` | string | Optional | Output aspect ratio such as `16:9` |
-| `resolution` | string | Optional | Seedance 2.0 / 2.0 fast currently supports only `480p` and `720p` |
-| `duration` | integer | Optional | Seedance 2.0 / 2.0 fast supports `4-15` or `-1` |
-| `watermark` | boolean | Optional | Whether to add watermark |
-| `seed` | integer | Optional | Random seed |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `model` | string | はい | 顧客向けモデル名、上の表の canonical モデル名を使用してください |
+| `content` | array | はい | 入力内容の配列 |
+| `content[].type` | string | はい | 現在 `text`、`image_url`、`video_url`、`audio_url`、`draft_task` をサポートしています |
+| `content[].text` | string | 条件付き必須 | `type=text` の場合はプロンプトを入力してください |
+| `content[].image_url.url` | string | 条件付き必須 | `type=image_url` の場合は画像 URL を入力してください |
+| `content[].video_url.url` | string | 条件付き必須 | `type=video_url` の場合は参照動画 URL を入力してください |
+| `content[].audio_url.url` | string | 条件付き必須 | `type=audio_url` の場合は参照音声 URL を入力してください |
+| `content[].role` | string | 任意 | Seedance 2.0 では `first_frame`、`last_frame`、`reference_image`、`reference_video`、`reference_audio` をサポートしています |
+| `generate_audio` | boolean | 任意 | Seedance 2.0 で音声を生成するかどうかを指定します |
+| `ratio` | string | 任意 | 出力アスペクト比 例: `16:9` |
+| `resolution` | string | 任意 | Seedance 2.0 / 2.0 fast では現在 `480p`、`720p` のみをサポートしています |
+| `duration` | integer | 任意 | Seedance 2.0 / 2.0 fast では `4-15` か `-1` をサポートしています |
+| `watermark` | boolean | 任意 | 透かしを追加するかどうか |
+| `seed` | integer | 任意 | ランダムシード |
 
-### Seedance 2.0 Official Capability Boundary
+### Seedance 2.0 公式機能の制約
 
-- Supports four input modalities: text, image, video, and audio.
-- Supports multimodal references: up to `9` images, `3` videos, and `3` audios, with a mixed file limit of `12`.
-- Image formats: `jpeg`, `png`, `webp`, `bmp`, `tiff`, `gif`; each image must stay under `30MB`.
-- Video formats: `mp4`, `mov`; up to `3` video references, recommended combined duration in `[2, 15]s`, total file size under `50MB`.
-- Audio formats: `mp3`, `wav`; up to `3` audio references, combined duration `<= 15s`, total file size under `15MB`.
-- Audio cannot be provided alone. At least `1` image or video reference is required with it.
-- Output duration supports `4-15s`, and `-1` can be passed through to let the upstream use its default behavior.
-- Supports `480p` and `720p`; `1080p` is currently unsupported on Seedance 2.0 / 2.0 fast.
-- `frames` is currently unsupported for Seedance 2.0 / 2.0 fast.
-- `camera_fixed` is currently unsupported for Seedance 2.0 / 2.0 fast.
-- In the product UI, Seedance 2.0 is currently exposed mainly as “first/last frame” and “omni reference” entry points; on the API side those semantics map to `content[].role` and `content[].type`.
-- Upstream compliance currently blocks clearly realistic human-face image or video uploads.
+- 4 モーダル入力に対応：テキスト、画像、動画、音声。
+- マルチモーダル参照に対応：画像最大 `9` 枚、動画最大 `3` 個、音声最大 `3` 個、混在ファイルの合計上限 `12`。
+- 画像フォーマット：`jpeg`、`png`、`webp`、`bmp`、`tiff`、`gif`；1画像あたり最大サイズ `< 30MB`。
+- 動画フォーマット：`mp4`、`mov`；動画参照最大 `3` 個、合計再生時間は推奨 `[2, 15]s`、最大ファイルサイズ `< 50MB`。
+- 音声フォーマット：`mp3`、`wav`；音声参照は最大 `3` 個、合計再生時間 `<= 15s`、最大ファイルサイズ `< 15MB`。
+- 音声のみの入力はできません。少なくとも `1` 枚の画像または動画参照が必要です。
+- 生成可能時間は `4-15s` をサポートし、また `-1` で上位システムのデフォルト時間を使うこともできます。
+- `480p`、`720p` をサポートしますが、`1080p` は Seedance 2.0 / 2.0 fast には現在対応していません。
+- `frames` は現在 Seedance 2.0 / 2.0 fast には対応していません。
+- `camera_fixed` は現在 Seedance 2.0 / 2.0 fast には対応していません。
+- 製品の形式として、Seedance 2.0 は現在「最初と最後のフレーム」と「万能参照」の2つの入口に主に分かれます。API ではこれは `content[].role` および `content[].type` で統一的に反映されます。
+- 上位システムは現時点で、現実の顔写真素材のアップロードにコンプライアンス制限を設けています。高解像度かつ現実的な顔が含まれる画像や動画参照は、上位システムで即時ブロックされる可能性があります。
 
-### Official Seedance 2.0 Pricing Truth
+### Seedance 2.0 公式料金の実態
 
-| Model | Official billing mode | Official price |
+| モデル | 公式課金方式 | 公式単価 |
 |------|------|------|
-| `doubao-seedance-2-0` | per output token | `28 CNY / 1M output tokens` with video input; `46 CNY / 1M output tokens` without video input |
-| `doubao-seedance-2-0-fast` | per output token | `22 CNY / 1M output tokens` with video input; `37 CNY / 1M output tokens` without video input |
+| `doubao-seedance-2-0` | 出力 tokens ベースの課金 | 動画入力あり `出力トークン100万個につき28元`；動画入力なし `出力トークン100万個につき46元` |
+| `doubao-seedance-2-0-fast` | 出力 tokens ベースの課金 | 動画入力あり `出力トークン100万個につき22元`；動画入力なし `出力トークン100万個につき37元` |
 
 <Note>
-  MIME, duration, and file-size enforcement for remote URL assets is ultimately handled by the upstream. Crazyrouter currently pre-validates count limits, duration parameter boundaries, the no-audio-only rule, and explicit unsupported fields such as `frames`, `camera_fixed`, and non-480p/720p output requests.
+  リモート URL 素材の MIME、再生時間、サイズは最終的に上位システムで検証されます。Crazyrouter は、提出前に数・再生時間パラメータ・音声のみでの入力禁止・480p/720p / `frames` / `camera_fixed` などの明示的制約について検証します。
 </Note>
 
-### Text-to-Video Example
+### テキストから動画生成例
 
 <CodeGroup>
 
@@ -84,7 +86,7 @@ curl -X POST https://api.crazyrouter.com/volc/v1/contents/generations/tasks \
     "content": [
       {
         "type": "text",
-        "text": "A slow push-in shot of a white seagull skimming over the ocean with golden sunset reflections on the waves"
+        "text": "镜头缓慢推进，一只白色海鸥从海面掠过，日落金光反射在海浪上"
       }
     ]
   }'
@@ -104,7 +106,7 @@ response = requests.post(
         "content": [
             {
                 "type": "text",
-                "text": "A slow push-in shot of a white seagull skimming over the ocean with golden sunset reflections on the waves"
+                "text": "镜头缓慢推进，一只白色海鸥从海面掠过，日落金光反射在海浪上"
             }
         ]
     }
@@ -115,7 +117,7 @@ print(response.json())
 
 </CodeGroup>
 
-### Single-Image Image-to-Video Example
+### 単一画像から動画生成例
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/volc/v1/contents/generations/tasks \
@@ -126,7 +128,7 @@ curl -X POST https://api.crazyrouter.com/volc/v1/contents/generations/tasks \
     "content": [
       {
         "type": "text",
-        "text": "The subject turns naturally while wind lightly moves the hair"
+        "text": "人物自然转身，头发被风轻轻吹起"
       },
       {
         "type": "image_url",
@@ -138,7 +140,7 @@ curl -X POST https://api.crazyrouter.com/volc/v1/contents/generations/tasks \
   }'
 ```
 
-### Seedance 2.0 Multimodal Example
+### Seedance 2.0 マルチモーダル例
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/volc/v1/contents/generations/tasks \
@@ -149,7 +151,7 @@ curl -X POST https://api.crazyrouter.com/volc/v1/contents/generations/tasks \
     "content": [
       {
         "type": "text",
-        "text": "A girl turns back on the beach at sunset, with more cinematic motion and natural ambient sound"
+        "text": "海边女孩在日落时回头，镜头更有电影感，环境声自然"
       },
       {
         "type": "image_url",
@@ -180,7 +182,7 @@ curl -X POST https://api.crazyrouter.com/volc/v1/contents/generations/tasks \
   }'
 ```
 
-### Successful Submit Response
+### タスク提出成功時のレスポンス例
 
 ```json
 {
@@ -191,7 +193,7 @@ curl -X POST https://api.crazyrouter.com/volc/v1/contents/generations/tasks \
 
 ---
 
-## Query Task
+## タスクの照会
 
 ```
 GET /volc/v1/contents/generations/tasks/{task_id}
@@ -202,47 +204,45 @@ curl https://api.crazyrouter.com/volc/v1/contents/generations/tasks/cgt_task_abc
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-### Completed Response Example
+### レスポンス例（完了状態）
 
 ```json
 {
-  "id": "cgt_task_abc123",
-  "object": "video",
-  "model": "doubao-seedance-1-0-lite-t2v",
-  "status": "SUCCESS",
-  "progress": 100,
-  "created_at": 1774580000,
-  "completed_at": 1774580030,
-  "seconds": "5",
-  "metadata": {
-    "url": "https://media.crazyrouter.com/task-artifacts/2026/03/28/seedance/cgt_task_abc123.mp4",
-    "artifact_url": "https://media.crazyrouter.com/task-artifacts/2026/03/28/seedance/cgt_task_abc123.mp4",
-    "resolution": "720p",
-    "ratio": "16:9",
-    "frames_per_second": 24
+  "code": "success",
+  "message": "",
+  "data": {
+    "id": "cgt_task_abc123",
+    "task_id": "cgt_task_abc123",
+    "model": "doubao-seedance-2-0-fast",
+    "status": "SUCCESS",
+    "result_url": "https://media.crazyrouter.com/task-artifacts/2026/06/30/seedance/cgt_task_abc123.mp4",
+    "artifact_url": "https://media.crazyrouter.com/task-artifacts/2026/06/30/seedance/cgt_task_abc123.mp4",
+    "content": {
+      "video_url": "https://media.crazyrouter.com/task-artifacts/2026/06/30/seedance/cgt_task_abc123.mp4"
+    }
   }
 }
 ```
 
-### Task Status
+### タスク状況
 
-| Status | Description |
-|--------|-------------|
-| `queued` | submitted or waiting in queue |
-| `in_progress` | generation in progress |
-| `SUCCESS` | completed and ready from `metadata.url` |
-| `failed` | terminal failure |
+| 状態 | 説明 |
+|------|------|
+| `NOT_START` | 提出済み、上位処理待ち |
+| `IN_PROGRESS` | 生成中 |
+| `SUCCESS` | 完了、`result_url`、`artifact_url` または `content.video_url` から結果を取得可能 |
+| `FAILURE` | 最終失敗 |
 
 <Note>
-  The public docs now only commit to the native `/volc/v1/*` route family and canonical model names. The old `doubao-seedance-2-0-fast` label is retained only as historical context, not as the primary contract for new integrations.
+  現在公開しているドキュメントは、ネイティブ `/volc/v1/*` 経路と canonical モデル名のみを保証します。古い `doubao-seedance-2-0-fast` は歴史的参照のためだけに残されており、新たな顧客向け主プロトコルではありません。
 </Note>
 
 <Note>
-  The official Seedance pricing truth is currently tracked as `per_output_token`, not per-second. If the pricing page later shows a normalized platform billing unit, that should be treated as the platform sell-side view rather than the native official unit.
+  Seedance 公式の料金情報は現在 `per_output_token` で管理されており、秒単位ではありません。もし将来的に pricing ページでプラットフォーム統一表示される場合、その表示はあくまでプラットフォームの販売基準であり、公式のネイティブ単位ではないことを明記してください。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [Seedance 2.0 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/bytedance/doubao-seedance-2-0?utm_source=docs&utm_medium=related)
-- [ByteDance の全モデルと料金](https://crazyrouter.com/en/models/bytedance?utm_source=docs&utm_medium=related)
+- [Seedance 2.0 モデルページ：リアルタイム料金、実際のサンプル、呼び出しコード](https://crazyrouter.com/ja/models/bytedance/doubao-seedance-2-0?utm_source=docs&utm_medium=related)
+- [ByteDance 全モデルと価格一覧](https://crazyrouter.com/ja/models/bytedance?utm_source=docs&utm_medium=related)

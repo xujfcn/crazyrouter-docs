@@ -1,42 +1,42 @@
 ---
 title: "非同期画像生成"
-description: "送信後すぐにタスク ID を返し、ポーリングで画像 URL を取得。gpt-image-2、nano-banana-2、nano-banana-pro などの時間のかかる画像モデル向け"
+description: "送信するとすぐにタスクIDが返されます。画像URLはポーリングで取得します。gpt-image-2、nano-banana-2、nano-banana-pro などの長時間画像生成モデルに適しています。"
 ---
-> 更新日：2026-09-18
+> 内容更新日: 2026-09-18
 
 # 非同期画像生成
 
-画像生成は 1 回あたり通常 20〜120 秒かかります。同期 API では HTTP 接続を開いたまま待つ必要があり、ゲートウェイやプロキシの読み取りタイムアウトにかかりやすく、base64 のレスポンスも大きくなります。非同期モードでは呼び出しを 2 回に分けます。
+画像生成モデルでは、1回の生成に通常20～120秒かかります。同期インターフェースの場合、クライアントはHTTP接続を結果が出るまで維持する必要があり、ゲートウェイ/プロキシの読み取りタイムアウトに遭遇しやすく、返されるbase64データも大きくなります。非同期モードでは、この処理を2回の呼び出しに分けます：
 
-1. **送信**：リクエストは 1 秒以内に `202` とタスク ID を返します。
-2. **ポーリング**：`GET /v1/tasks/{id}` で完了を待ちます。完了後、`result` には各画像の **https URL**（`media.crazyrouter.com` に永続保存）が入ります。デフォルトで base64 は返しません。
+1. **送信**：リクエストするとすぐに`202`とタスクIDが返ります（1秒以内）。
+2. **ポーリング**：タスクIDを使って`GET /v1/tasks/{id}`へ問い合わせ、完了したら`result`に画像の**https URL**が入っています（永久に`media.crazyrouter.com`に保存）。base64は返しません。
 
 ```
-送信（3 通り、下記参照）
-  POST /v1beta/models/{model}:asyncGenerateContent      # Gemini 系、パスエイリアス
+提交（三种触发方式，见下文）
+  POST /v1beta/models/{model}:asyncGenerateContent      # Gemini 系，路径别名
   POST /v1/images/generations  + Prefer: respond-async   # OpenAI 系
-  POST /v1/images/edits        + Prefer: respond-async   # OpenAI 系（参照画像あり）
+  POST /v1/images/edits        + Prefer: respond-async   # OpenAI 系（带参考图）
 
-照会
+查询
   GET  /v1/tasks/{task_id}
 ```
 
 <Note>
-  **モデル名・リクエストボディ・課金は同期呼び出しと完全に同じです。** 非同期は「いつ結果を受け取るか」だけを変えます。同じ API キーで同期と非同期を混在させて構いません。失敗したタスクは課金されません。
+  **モデル名、リクエストボディ、課金方式は同期とまったく同じです。** 非同期は「いつ結果を取得するか」だけが異なり、同じAPIキーで一部のリクエストを同期、一部を非同期で使うことができます。タスクが失敗した場合は課金されません。
 </Note>
 
 ## 対応モデル
 
-| モデル | 送信方法 | 目安時間 |
+| モデル | 送信方法 | 典型的な所要時間 |
 |------|------|------|
-| `nano-banana-2`（Gemini 3.1 Flash Image） | `:asyncGenerateContent` | 15〜30 秒 |
-| `nano-banana-pro`（Gemini 3 Pro Image） | `:asyncGenerateContent` | 30〜60 秒 |
-| `gpt-image-2`、`gpt-image-1.5`、`gpt-image-2.5-*` | `Prefer: respond-async` ヘッダー、または `async: true` フィールド | 60〜120 秒 |
-| その他の画像出力モデル | 同上、既存のエンドポイントで | — |
+| `nano-banana-2`（Gemini 3.1 Flash Image） | `:asyncGenerateContent` | 15～30秒 |
+| `nano-banana-pro`（Gemini 3 Pro Image） | `:asyncGenerateContent` | 30～60秒 |
+| `gpt-image-2`、`gpt-image-1.5`、`gpt-image-2.5-*` | `Prefer: respond-async`ヘッダー または `async: true`フィールド | 60～120秒 |
+| その他の画像出力モデル | 同様、既存のエンドポイントに従う | — |
 
-## 方法 1：Gemini パスエイリアス（Gemini クライアント推奨）
+## 方法1：Geminiパス別名（Geminiクライアント推奨）
 
-**ボディ・ヘッダー・クエリ文字列を 1 バイトも変更する必要はありません。** アクション接尾辞 `:generateContent` を `:asyncGenerateContent` に置き換えるだけです。
+**リクエストボディ、ヘッダー、クエリパラメータのどのバイトも変更せずに**、動作のサフィックスを`:generateContent`から`:asyncGenerateContent`に変更するだけです。
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1beta/models/nano-banana-2:asyncGenerateContent \
@@ -51,7 +51,7 @@ curl -X POST https://api.crazyrouter.com/v1beta/models/nano-banana-2:asyncGenera
   }'
 ```
 
-`202` が返ります：
+返される`202`：
 
 ```json
 {
@@ -65,18 +65,18 @@ curl -X POST https://api.crazyrouter.com/v1beta/models/nano-banana-2:asyncGenera
 ```
 
 <Note>
-  レスポンスの `model` は解決後の実モデル名（例：`gemini-3.1-flash-image-preview`）で、利用ログと一致します。送信時は引き続き `nano-banana-2` を使えます。参照画像による編集は同期と同じで、`contents` の `parts` に `inlineData`（base64）または `fileData`（URL）を入れてください。
+  返された`model`は解析済みの内部モデル名（例えば`gemini-3.1-flash-image-preview`）で、課金ログと一致しますが、`nano-banana-2`で送信することに影響ありません。参考画像編集や同期と同じ方法で、`parts`に`inlineData`（base64）または`fileData`（URL）を入れるだけです。
 </Note>
 
-`:asyncGenerateContent` は画像出力モデル専用です。テキストモデルで呼ぶと `400 async mode is only available for image models` になります。ストリーミングの `:streamGenerateContent` に非同期版はありません。
+`:asyncGenerateContent`は画像出力モデルのみ受付けます。テキストモデルを使うと`400 async mode is only available for image models`が返ります。ストリーミング動作`:streamGenerateContent`は非同期に対応していません。
 
-## 方法 2：OpenAI 画像エンドポイント + `Prefer` ヘッダー
+## 方法2：OpenAI画像エンドポイント＋`Prefer`ヘッダー
 
-既存の `/v1/images/generations` または `/v1/images/edits` リクエストに HTTP ヘッダー `Prefer: respond-async` を付けるだけです。ボディの `"async": true`（JSON）やフォームフィールド `async=true`（multipart）でも同じ効果です。
+既存の`/v1/images/generations`または`/v1/images/edits`リクエストにHTTPヘッダー`Prefer: respond-async`を追加するだけです。他は変更不要。リクエストボディフィールド`"async": true`（JSON）、またはフォームフィールド`async=true`（multipart）でも同様に動作します。
 
 <CodeGroup>
 
-```bash テキストから画像
+```bash 文生图
 curl -X POST https://api.crazyrouter.com/v1/images/generations \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Prefer: respond-async" \
@@ -90,7 +90,7 @@ curl -X POST https://api.crazyrouter.com/v1/images/generations \
   }'
 ```
 
-```bash 参照画像で編集（multipart）
+```bash 参考图编辑（multipart）
 curl -X POST https://api.crazyrouter.com/v1/images/edits \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Prefer: respond-async" \
@@ -128,7 +128,7 @@ else:
 
 </CodeGroup>
 
-レスポンスヘッダーに `Preference-Applied: respond-async` が付き、ボディは方法 1 と同じ `202` + タスク ID です。
+レスポンスヘッダーには`Preference-Applied: respond-async`が含まれ、本文は方法1と同様（`202`＋タスクID）。
 
 ## タスクの照会
 
@@ -137,20 +137,20 @@ GET https://api.crazyrouter.com/v1/tasks/{task_id}
 Authorization: Bearer YOUR_API_KEY
 ```
 
-照会できるのは自分のアカウントで送信したタスクのみで、それ以外の ID は `404` です。2〜3 秒間隔でポーリングし、10 分経っても完了しない場合は失敗とみなしてください。
+同じアカウントで送信したタスクのみ照会できます。他のアカウントIDはすべて`404`になります。2～3秒ごとにポーリングし、10分経っても完了しない場合は失敗とみなします。
 
 ### ステータス
 
 | `status` | 意味 |
 |------|------|
-| `queued` | 受付済み、実行待ち |
+| `queued` | 受信済み、実行待ち |
 | `running` | 生成中 |
-| `completed` | 成功、`result` に結果あり |
-| `failed` | 失敗、`error` に理由あり、**課金なし** |
+| `completed` | 成功、`result`に入力済み |
+| `failed` | 失敗、`error`に入力済み、**課金なし** |
 
-### 完了時のレスポンス（Gemini 系）
+### 完了時のレスポンス（Gemini系）
 
-`result` はネイティブの Gemini `GenerateContentResponse` そのもので、`inlineData` が画像 URL を指す `fileData` に置き換わっている点だけが異なります。
+`result`は元のGemini `GenerateContentResponse`で、`inlineData`を画像URL指向の`fileData`に変更しただけです：
 
 ```json
 {
@@ -179,9 +179,9 @@ Authorization: Bearer YOUR_API_KEY
 }
 ```
 
-### 完了時のレスポンス（OpenAI 系）
+### 完了時のレスポンス（OpenAI系）
 
-`result` は同期の `/v1/images/*` レスポンスと同じ形で、画像は `data[].url` にあります。
+`result`は同期`/v1/images/*`のレスポンスと同じ形式で、画像は`data[].url`にあります：
 
 ```json
 {
@@ -201,7 +201,7 @@ Authorization: Bearer YOUR_API_KEY
 }
 ```
 
-どうしても base64 が必要な場合は照会時に `?inline=true` を付けてください。保存済み画像を読み戻して `inlineData` / `b64_json` に戻します（大きな画像では遅いため非推奨）。
+もしbase64が必要な場合は、照会時に`?inline=true`を追加すると、サーバー側で保存画像を再読込して`inlineData` / `b64_json`（推奨しません、画像が大きいと遅い）を返します。
 
 ### 失敗時のレスポンス
 
@@ -220,34 +220,34 @@ Authorization: Bearer YOUR_API_KEY
 
 | `error.code` | 意味 | 再試行可 |
 |------|------|------|
-| `validation_failed` | リクエストパラメータが拒否された（4xx） | いいえ |
-| `token_invalid` | API キーが無効、またはこのモデルが許可されていない | いいえ |
-| `insufficient_quota` | 残高不足 | いいえ |
-| `rate_limited` | 上流／チャネルのレート制限 | はい |
-| `provider_failed` | 上流での生成失敗 | はい |
-| `timeout` | 1 回の生成が 10 分を超過 | はい |
-| `no_image` | モデルが画像なしで応答（安全フィルタ等）。同期と同様に**課金対象** | いいえ |
+| `validation_failed` | リクエストパラメータが拒否された（4xx） | 不可 |
+| `token_invalid` | APIキーの無効化またはモデル未許可 | 不可 |
+| `insufficient_quota` | 残高不足 | 不可 |
+| `rate_limited` | 上流/チャネルのレート制限 | 可 |
+| `provider_failed` | 上流生成失敗 | 可 |
+| `timeout` | 1回の生成が10分を超えた場合 | 可 |
+| `no_image` | モデルが内容を返したが画像がない（例：安全ブロック）。この場合は同期ルール通り**通常課金**されます。 | 不可 |
 
-`retryable: true` は新しいタスクを再送信してよいという意味で、自動再試行は行われません。
+`retryable: true`は新しいタスクを再送信できることを示します。システムは自動再試行しません。
 
 ## 冪等な送信
 
-ネットワークの再試行で同じタスクが二重送信されることがあります。送信リクエストに `Idempotency-Key: <任意の文字列>` ヘッダーを付けると、同一アカウント・同一キーでは同じタスク ID が返り（2 回目は `202` ではなく `200`）、重複生成も重複課金も起きません。
+ネットワーク再試行で同じタスクが重複送信される場合もあります。送信リクエストに`Idempotency-Key: <任意の文字列>`ヘッダーを付けると、同じアカウントと同じキーで同じタスクIDが返ります（二回目は`200`が返り、`202`は返りません）、生成も課金も重複しません。
 
-## 同期と非同期の比較
+## 同期との違い一覧
 
 | | 同期 | 非同期 |
 |------|------|------|
-| 送信の戻り | 生成完了後に画像（20〜120 秒） | 1 秒以内にタスク ID |
-| 画像の形式 | URL または base64（チャネル依存） | 常に URL |
-| 接続タイムアウトのリスク | あり | なし |
-| 課金 | モデル／サイズ別 | 完全に同じ。失敗は無料 |
-| ルーティング | 能力ベースのルーティング | 同じ（再実行も同じルーティングとフェイルオーバー） |
-| 制限 | — | アカウントあたり未完了タスク最大 50 件、超過時は `429` |
+| 送信レスポンス | 生成完了後に画像返却（20～120秒） | 1秒以内にタスクID返却 |
+| 画像形式 | URLまたはbase64（チャネルによる） | 常にURL |
+| タイムアウトリスク | あり | なし |
+| 課金 | モデル/サイズによる課金 | 完全同じ、失敗は課金なし |
+| ルーティング | 機能ルーティング | 同じ（リプレイでも同じ経路と障害時自動切り替え） |
+| 制限 | — | 各アカウント最大50件未完了タスク、それを超えると`429`を返却 |
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [GPT Image 2 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [Nano Banana 2 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/google/nano-banana-2?utm_source=docs&utm_medium=related)
-- [OpenAI の全モデルと料金](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [GPT Image 2モデルページ：リアルタイム価格、実サンプル、実装コード](https://crazyrouter.com/ja/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Nano Banana 2モデルページ：リアルタイム価格、実サンプル、実装コード](https://crazyrouter.com/ja/models/google/nano-banana-2?utm_source=docs&utm_medium=related)
+- [OpenAI全モデル・価格一覧](https://crazyrouter.com/ja/models/openai?utm_source=docs&utm_medium=related)

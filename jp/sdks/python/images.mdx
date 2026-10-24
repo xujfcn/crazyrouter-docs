@@ -1,10 +1,11 @@
 ---
-title: 'Python Image Generation'
-description: 'Python image generation and editing with DALL-E and GPT-Image-2'
+title: "Python 画像生成"
+description: "Python で DALL-E と GPT-Image-2 を使った画像の生成と編集"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-06
 
-## DALL-E 3 Image Generation
+
+## DALL-E 3 で画像を生成
 
 ```python
 from openai import OpenAI
@@ -13,30 +14,30 @@ client = OpenAI(api_key="sk-xxx", base_url="https://api.crazyrouter.com/v1")
 
 response = client.images.generate(
     model="dall-e-3",
-    prompt="A cat wearing a spacesuit walking on the moon, digital art style",
+    prompt="一只穿着宇航服的猫在月球上散步，数字艺术风格",
     size="1024x1024",
     quality="hd",
     n=1
 )
 
 image_url = response.data[0].url
-print(f"Image URL: {image_url}")
+print(f"图片地址: {image_url}")
 ```
 
-### DALL-E Parameters
+### DALL-E パラメータ
 
-| Parameter | Options | Description |
-|-----------|---------|-------------|
-| `size` | `1024x1024`, `1792x1024`, `1024x1792` | Image dimensions |
-| `quality` | `standard`, `hd` | Image quality |
-| `style` | `vivid`, `natural` | Style |
+| パラメータ | 選択可能な値 | 説明 |
+|------|--------|------|
+| `size` | `1024x1024`, `1792x1024`, `1024x1792` | 画像サイズ |
+| `quality` | `standard`, `hd` | 画像品質 |
+| `style` | `vivid`, `natural` | スタイル |
 
-## GPT-Image-2 Image Generation
+## GPT-Image-2 で画像を生成
 
 ```python
 response = client.images.generate(
     model="gpt-image-2",
-    prompt="A modern minimalist logo with an artificial intelligence theme",
+    prompt="一个现代简约风格的 Logo，主题是人工智能",
     size="1024x1024",
     quality="low",
     output_format="png",
@@ -46,14 +47,14 @@ response = client.images.generate(
 print(response.data[0].url)
 ```
 
-## GPT-Image-2 Image Editing
+## GPT-Image-2 で画像を編集
 
 ```python
-# Image editing (requires original image)
+# 图像编辑（需要原图）
 response = client.images.edit(
     model="gpt-image-2",
     image=open("original.png", "rb"),
-    prompt="Change the background to a beach sunset",
+    prompt="把背景改成海滩日落",
     size="1024x1024",
     quality="low"
 )
@@ -61,35 +62,35 @@ response = client.images.edit(
 print(response.data[0].url)
 ```
 
-## Download and Save Images
+## 画像のダウンロードと保存
 
 ```python
 import requests
 
 response = client.images.generate(
     model="dall-e-3",
-    prompt="Cyberpunk city nightscape",
+    prompt="赛博朋克风格的城市夜景",
     size="1792x1024"
 )
 
-# Download image
+# 下载图片
 image_url = response.data[0].url
 img_data = requests.get(image_url).content
 with open("cyberpunk_city.png", "wb") as f:
     f.write(img_data)
-print("Image saved")
+print("图片已保存")
 ```
 
 <Note>
-  `gpt-image-2` usually returns `data[0].url`. Do not send `response_format` with `gpt-image-2`; use `output_format="png"`, `"jpeg"`, or `"webp"` to choose the image file format. For production image requests, use the primary route `https://api.crazyrouter.com/v1`.
+  `gpt-image-2` は通常 `data[0].url` を返します。`gpt-image-2` に `response_format` を渡さないでください。画像ファイル形式を制御したい場合は、`output_format="png"`、`"jpeg"`、または `"webp"` をご利用ください。画像生成のリクエストは、推奨されるメイン回線 `https://api.crazyrouter.com/v1` をご利用ください。
 </Note>
 
 <Warning>
-  Image generation costs are relatively high. Test your prompt with smaller sizes first, then generate high-quality large images once satisfied.
+  画像生成のコストが高いため、まず小さいサイズでプロンプトの効果をテストし、満足したら高品質の大きな画像を生成することを推奨します。
 </Warning>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [GPT Image 2 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [OpenAI の全モデルと料金](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [GPT Image 2 モデルページ：リアルタイム価格、実際のサンプル、呼び出しコード](https://crazyrouter.com/ja/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [OpenAI 全モデルと料金](https://crazyrouter.com/ja/models/openai?utm_source=docs&utm_medium=related)

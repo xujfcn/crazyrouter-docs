@@ -1,0 +1,55 @@
+---
+title: "Gemini edición de imágenes"
+description: "Utiliza la capacidad de edición de imágenes de Gemini / Nano Banana a través de la API de OpenAI Images"
+---
+> Contenido actualizado: 2026-09-28
+
+# Gemini edición de imágenes
+
+```
+POST /v1/images/generations
+```
+
+La edición de imágenes Gemini / Nano Banana en Crazyrouter utiliza una entrada compatible con OpenAI Images de manera unificada. Por defecto se usa la URL `image_input`; al especificar cuentas en fase de pruebas también se admite dataURL, Base64 sin procesar y la edición de tres imágenes `/v1/images/edits` por multipartes.
+
+<Warning>
+  Las solicitudes de edición de imágenes o múltiples imágenes de referencia suelen llevar más tiempo. Para entornos de producción, se recomienda priorizar la ruta principal `https://api.crazyrouter.com/v1`. El endpoint completo es `https://api.crazyrouter.com/v1/images/generations`.
+</Warning>
+
+---
+
+## Recomendaciones actuales
+
+1. Para nuevas integraciones, prioriza `nano-banana-2` o `nano-banana-pro`
+2. Para la entrada de imágenes, usa `image_input`, pasando una URL o un arreglo de URLs
+3. No envíes campos nativos de Gemini, como `generationConfig`, `imageConfig`, `imageOutputOptions`
+4. Se recomienda configurar el tiempo de espera del cliente a más de 180 segundos
+
+---
+
+## Plantilla de solicitud
+
+A continuación se muestra la solicitud mínima para edición de imágenes de referencia mediante la API unificada de Images:
+
+```bash
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "nano-banana-2",
+    "prompt": "把参考图背景改成蓝色，保留主体结构和边缘细节",
+    "image_input": [
+      "https://example.com/reference.png"
+    ],
+    "resolution": "1K",
+    "aspect_ratio": "1:1",
+    "output_format": "png"
+  }'
+```
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Comparación de precios de Gemini 2.5 Flash: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Página de modelo Gemini 2.5 Flash: precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Comparación de precios de Gemini 2.5 Flash-Lite: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)

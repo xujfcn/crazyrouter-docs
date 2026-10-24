@@ -1,18 +1,19 @@
 ---
-title: 'GPT Academic Setup Guide'
-description: 'Configure Crazyrouter API in GPT Academic and switch to currently verified latest models'
+title: 'GPT Academic 設定チュートリアル'
+description: 'GPT Academic で Crazyrouter API を設定し、現在認証済みの最新モデルに切り替える方法'
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-## Overview
 
-GPT Academic is aimed at paper polishing, translation, code explanation, and other academic workflows. When connecting it to Crazyrouter, keep its OpenAI URL redirect approach, but move the default model set to the latest options already verified in production.
+## 概要
 
-## Configuration
+GPT Academic（学術版 GPT）は、論文の校正、翻訳、コード解説などの場面に対応しています。Crazyrouter に接続する場合は、引き続き OpenAI の URL リダイレクト方式を利用することを推奨しますが、デフォルトモデルは現在運用環境で検証済みの最新利用可能モデルへ切り替える必要があります。
 
-### Edit Configuration File
+## 設定方法
 
-Edit `config.py` or `config_private.py`:
+### 設定ファイルを編集
+
+`config.py` または `config_private.py` を編集してください：
 
 ```python
 API_KEY = "sk-xxx"
@@ -20,7 +21,7 @@ API_URL_REDIRECT = {
     "https://api.openai.com/v1/chat/completions": "https://api.crazyrouter.com/v1/chat/completions"
 }
 
-# Or set directly
+# 或者直接设置
 LLM_MODEL = "gpt-5.5"
 AVAIL_LLM_MODELS = [
     "gpt-5.5",
@@ -29,7 +30,7 @@ AVAIL_LLM_MODELS = [
 ]
 ```
 
-### Environment Variables
+### 環境変数による方法
 
 ```bash
 export API_KEY=sk-xxx
@@ -37,7 +38,7 @@ export API_URL_REDIRECT='{"https://api.openai.com/v1/chat/completions": "https:/
 export LLM_MODEL=gpt-5.5
 ```
 
-### Docker Deployment
+### Docker によるデプロイ
 
 ```yaml
 services:
@@ -51,21 +52,21 @@ services:
       - API_URL_REDIRECT={"https://api.openai.com/v1/chat/completions": "https://api.crazyrouter.com/v1/chat/completions"}
 ```
 
-## Recommended Models
+## 推奨モデル
 
-| Scenario | Model | Description |
-|----------|-------|-------------|
-| First-pass academic workflow validation | `gpt-5.5` | Verified successfully in Crazyrouter production on March 23, 2026, and best for the OpenAI-compatible baseline |
-| Higher-quality long-form summarization | `claude-opus-4-8` | Better for complex explanation, rewriting, and summaries |
-| Gemini fallback path | `gemini-3.1-pro` | Useful as a second vendor-compatible validation path |
+| シナリオ | モデル | 説明 |
+|------|------|------|
+| 最初の学術アシスタント検証 | `gpt-5.5` | 2026年3月23日に運用環境で実地テスト済み、OpenAI 互換ベースラインとして最適 |
+| 高品質な長文要約 | `claude-opus-4-8` | 複雑な解説や長文リライト・要約により適しています |
+| Gemini バックアップ枠 | `gemini-3.1-pro` | 2番目のサプライヤ互換性検証パス補完に適しています |
 
 <Note>
-  GPT Academic's URL redirect feature forwards OpenAI requests directly to Crazyrouter. Start by validating one minimal session with `gpt-5.5`, then expand the model list and plugin usage gradually.
+  GPT Academic の URL リダイレクト機能により、OpenAI へのリクエストを Crazyrouter へ直接転送できます。まずは `gpt-5.5` だけを使って最低限のセッションをテストし、その後モデルリストや高度なプラグイン機能を段階的に追加していくのがおすすめです。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [GPT Image 1.5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [OpenAI の全モデルと料金](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [GPT Image 1.5 モデルページ：リアルタイム価格、実例、呼び出しコード](https://crazyrouter.com/ja/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT Image 2 モデルページ：リアルタイム価格、実例、呼び出しコード](https://crazyrouter.com/ja/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [OpenAI 全モデルと価格一覧](https://crazyrouter.com/ja/models/openai?utm_source=docs&utm_medium=related)

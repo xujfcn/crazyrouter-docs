@@ -1,53 +1,53 @@
 ---
-title: 'Claude Code Setup Guide'
-description: 'Connect Claude Code to Crazyrouter through the Anthropic Messages API, with full step-by-step instructions from Git and Node.js to installation commands, environment variables, and first-run validation'
+title: "Claude Code setup tutorial"
+description: "Integrate Crazyrouter into Claude Code via the Anthropic Messages API, with full step-by-step guidance from Git, Node.js, installation commands, and environment variables to initial verification."
 ---
-> Last updated: 2026-06-06
+> Content updated: 2026-06-16
 
-Claude Code is one of the best terminal coding tools to connect to Crazyrouter. It speaks the Anthropic Messages API directly and works especially well for code reading, editing, refactoring, command execution, tool use, and long-context repository analysis.
+Claude Code is currently one of the terminal coding tools most recommended for priority integration with Crazyrouter. It directly uses the Anthropic Messages API, making it suitable for reading code, modifying, refactoring, executing commands, tool invocation, and long-context repository analysis.
 
 ## Overview
 
-With a few environment variables, Claude Code can send Anthropic requests directly to Crazyrouter:
+By using environment variables, Claude Code can send Anthropic requests directly to Crazyrouter:
 
-- recommended protocol: `Anthropic Messages API`
-- base URL: `https://api.crazyrouter.com`
-- default international API base URL: `https://api.crazyrouter.com`
-- auth variable: `ANTHROPIC_API_KEY`
-- recommended default model: `claude-opus-4-8`
+- Recommended protocol: `Anthropic Messages API`
+- Base URL: `https://api.crazyrouter.com`
+- Default international API Base URL: `https://api.crazyrouter.com`
+- Authentication variable: `ANTHROPIC_API_KEY`
+- Recommended default model: `claude-opus-4-8`
 
 <Tip>
-Claude Code appends the Anthropic request path itself, so the base URL must stay at the site root: `https://api.crazyrouter.com`. Do not append `/v1` or `/v1/messages`.
+Claude Code will complete the Anthropic request path on its own, so you must write only the root domain for the Base URL, either `https://api.crazyrouter.com` or `https://api.crazyrouter.com`, and do not manually append `/v1` or `/v1/messages`.
 </Tip>
 
-<Card title="View the Claude Code one-click setup repository" icon="github" href="https://github.com/xujfcn/crazyrouter-claude-code">
-  If you want a script to install Claude Code and write the Crazyrouter environment variables for you, review the crazyrouter-claude-code repository.
+<Card title="View the one-click configuration repository for Claude Code" icon="github" href="https://github.com/xujfcn/crazyrouter-claude-code">
+  If you want to directly install Claude Code via script and write Crazyrouter environment variables, you can refer to the crazyrouter-claude-code repository.
 </Card>
 
-## Best For
+## Who is this for
 
-- developers who want Crazyrouter as the backend for Claude Code
-- users who want stable tool use, long context, and terminal-first coding workflows
-- teams that want Claude Code billed separately from Cursor, Codex, or Aider
-- cross-platform setups that need one consistent CLI configuration
+- Developers who want to use Crazyrouter as the backend for Claude Code
+- People who want stable tool invocation, long context support, and terminal coding workflows
+- Users who want to separately bill Claude Code and Cursor / Codex / Aider
+- Teams who want unified CLI configuration across Linux, macOS, and Windows
 
-## Protocol Used
+## Usage protocol
 
 Recommended protocol: `Anthropic Messages API`
 
-Use:
+When integrating Claude Code with Crazyrouter, use:
 
 ```text
 ANTHROPIC_BASE_URL=https://api.crazyrouter.com
 ```
 
-For the default international API entry, use:
+For the default international API endpoint, also use only the root address:
 
 ```text
 ANTHROPIC_BASE_URL=https://api.crazyrouter.com
 ```
 
-Do not use:
+Do not write it as:
 
 - `https://api.crazyrouter.com/v1`
 - `https://api.crazyrouter.com/v1/messages`
@@ -55,37 +55,37 @@ Do not use:
 - `https://api.crazyrouter.com/v1`
 - `https://api.crazyrouter.com/v1/messages`
 
-## System Requirements And Prerequisites
+## System requirements and prerequisites
 
-| Item | Notes |
-|------|-------|
-| Crazyrouter account | Create one at [crazyrouter.com](https://crazyrouter.com) |
-| Crazyrouter token | Create a dedicated `sk-...` token for Claude Code |
-| Git | `git 2.23+` is recommended for reviewing and rolling back AI edits |
+| Item | Description |
+|------|------|
+| Crazyrouter account | Register first at [crazyrouter.com](https://crazyrouter.com) |
+| Crazyrouter token | It is recommended to create a dedicated `sk-...` token for Claude Code |
+| Git | `git 2.23+` is recommended for easy rollback and AI change review |
 | Node.js | `Node.js 18+` is recommended |
-| Claude Code | Use a current stable release |
-| Claude model access | Allow at least `claude-opus-4-8` on the token |
+| Claude Code | Current stable release recommended |
+| Claude series model permissions | Allow at least `claude-opus-4-8` |
 
-Suggested starter allowlist:
+Suggested initial whitelist:
 
 - `claude-opus-4-8`
 - `claude-opus-4-8`
 
-## Full Install Paths By OS
+## Full installation paths by operating system
 
-### Recommended Windows path
+### Recommended path for Windows
 
-On Windows, the safest path is: `Git` + `Node.js` + `npm global install for Claude Code` + `PowerShell` for environment variables.
+The most reliable path for Claude Code on Windows is: `Git` + `Node.js` + `Global installation of Claude Code using npm` + `PowerShell` written into the environment variables.
 
-Recommended order:
+Recommended steps:
 
 1. Install Git
 2. Install Node.js LTS
-3. Install Claude Code with npm
-4. Set temporary variables in PowerShell
-5. Persist user-level variables in PowerShell
+3. Use npm to install Claude Code
+4. Use PowerShell for writing temporary variables
+5. Use PowerShell for writing user-level persistent variables
 
-Recommended verification:
+Recommended verification command:
 
 ```powershell
 git --version
@@ -97,22 +97,22 @@ where.exe node
 where.exe claude
 ```
 
-If `claude --version` is still not found, close and reopen PowerShell before retrying.
+If `claude --version` cannot find the command, close and reopen PowerShell before trying again.
 
-### Recommended macOS path
+### Recommended path for macOS
 
-On macOS, the smoothest path is usually: `Xcode Command Line Tools` + `Homebrew` + `Git` + `Node.js` + `npm global install for Claude Code` + `~/.zshrc` for persistent environment variables.
+For macOS, the smoothest path for Claude Code is usually: `Xcode Command Line Tools` + `Homebrew` + `Git` + `Node.js` + `Global installation of Claude Code using npm` + `~/.zshrc` for persistent environment variables.
 
-Recommended order:
+Recommended steps:
 
 1. Install Xcode Command Line Tools
-2. Install Homebrew if needed
+2. Install Homebrew (if you don't have it yet)
 3. Install Git and Node.js
-4. Install Claude Code with npm
-5. Persist variables in `~/.zshrc`
-6. Open a fresh terminal and verify the binary path
+4. Use npm to install Claude Code
+5. Write `~/.zshrc`
+6. Open a new terminal to verify the command path
 
-Recommended verification:
+Recommended verification command:
 
 ```bash
 git --version
@@ -124,29 +124,29 @@ which node
 which claude
 ```
 
-### Why you should not append API paths manually
+### Why manual API path entry is not recommended here
 
-Claude Code uses the Anthropic-native protocol. You only provide the site root:
-
-```text
-ANTHROPIC_BASE_URL=https://api.crazyrouter.com
-```
-
-The default international API entry also uses only the site root:
+Claude Code uses the native Anthropic protocol. You only need to provide the root site address:
 
 ```text
 ANTHROPIC_BASE_URL=https://api.crazyrouter.com
 ```
 
-Do not append `/v1`, `/v1/messages`, or any specific API path the way you would with an OpenAI-compatible client.
+For the default international API endpoint, also only fill in the root address:
 
-If you prefer a script that installs Claude Code and writes the Crazyrouter-related environment variables automatically, see [crazyrouter-claude-code](https://github.com/xujfcn/crazyrouter-claude-code). That repository provides one-click setup scripts for Windows, macOS, and Linux; this guide keeps the full manual path so you can audit each setting.
+```text
+ANTHROPIC_BASE_URL=https://api.crazyrouter.com
+```
 
-## Full Setup From Scratch
+Do not build `/v1`, `/v1/messages`, or other specific API paths as you would for an OpenAI-compatible client.
+
+If you want to script Claude Code installation and write related Crazyrouter environment variables automatically, you can check [crazyrouter-claude-code](https://github.com/xujfcn/crazyrouter-claude-code). This repository provides one-click setup scripts for Windows, macOS, and Linux; this document still includes a full manual setup for you to review each configuration item.
+
+## Complete installation from scratch
 
 <Steps>
   <Step title="Step 1: Install Git">
-    If Git is not installed yet, install it first before touching Claude Code.
+    If your machine doesn't have Git yet, install Git before continuing with Claude Code setup.
 
     <Tabs>
       <Tab title="Windows PowerShell">
@@ -160,7 +160,7 @@ If you prefer a script that installs Claude Code and writes the Crazyrouter-rela
         xcode-select --install
         git --version
         ```
-        If you already use Homebrew, you can also run:
+        If you are already using Homebrew, you can also:
         ```bash
         brew install git
         git --version
@@ -175,7 +175,7 @@ If you prefer a script that installs Claude Code and writes the Crazyrouter-rela
       </Tab>
     </Tabs>
 
-    After installation, set your global identity once:
+    After installation, it's recommended to add global identity information:
 
     ```bash
     git config --global user.name "Your Name"
@@ -184,8 +184,8 @@ If you prefer a script that installs Claude Code and writes the Crazyrouter-rela
     ```
   </Step>
 
-  <Step title="Step 2: Install Node.js 18+">
-    Claude Code depends on Node.js. Verify the installed version before going further.
+  <Step title="Step 2: Install Node.js 18 or above">
+    Claude Code depends on Node.js. Confirm the version before continuing to install Claude Code.
 
     <Tabs>
       <Tab title="Windows PowerShell">
@@ -212,7 +212,7 @@ If you prefer a script that installs Claude Code and writes the Crazyrouter-rela
       </Tab>
     </Tabs>
 
-    If `node -v` is still below 18 after installation, upgrade through `nvm` or the official Node installer before continuing.
+    If after installation `node -v` is still below 18, it is recommended to upgrade using `nvm` or the official Node installer before continuing.
   </Step>
 
   <Step title="Step 3: Install Claude Code">
@@ -234,23 +234,23 @@ If you prefer a script that installs Claude Code and writes the Crazyrouter-rela
     </Tabs>
 
     <Warning>
-    Do not use `sudo npm install -g @anthropic-ai/claude-code`. If global npm permissions are broken, fix the npm/Node environment first instead of forcing a privileged install.
+    Do not use `sudo npm install -g @anthropic-ai/claude-code`. If you encounter permission issues during global installation, fix the npm/Node environment before proceeding.
     </Warning>
   </Step>
 
-  <Step title="Step 4: Create a dedicated Crazyrouter token for Claude Code">
-    Log in to Crazyrouter and create a separate token named something obvious like `claude-code`.
+  <Step title="Step 4: Create a dedicated token for Claude Code in Crazyrouter">
+    After logging into the Crazyrouter dashboard, create a dedicated token, and it's recommended to name it `claude-code`.
 
-    For the first pass, allow only:
+    Initially, it's only recommended to allow:
 
     - `claude-opus-4-8`
     - `claude-opus-4-8`
 
-    Give it its own budget so it does not share spend with Cursor, Codex, or OpenClaw.
+    It's also recommended to set a separate quota for it to avoid sharing budget with Cursor, Codex, or OpenClaw.
   </Step>
 
-  <Step title="Step 5: Set temporary environment variables in the current terminal">
-    Start with a temporary setup first. Once validation succeeds, make it persistent.
+  <Step title="Step 5: First set temporary environment variables in the current terminal">
+    First set up a temporary configuration; after confirming it works, then write the persistent configuration.
 
     <Tabs>
       <Tab title="macOS / Linux">
@@ -271,11 +271,11 @@ If you prefer a script that installs Claude Code and writes the Crazyrouter-rela
       </Tab>
     </Tabs>
 
-    Set `ANTHROPIC_BASE_URL` to the root domain `https://api.crazyrouter.com`, not `https://api.crazyrouter.com/v1`.
+    Write `ANTHROPIC_BASE_URL` as the root domain `https://api.crazyrouter.com`, do not write it as `https://api.crazyrouter.com/v1`.
   </Step>
 
-  <Step title="Step 6: Persist the environment variables">
-    Temporary variables disappear after the shell closes. For regular use, write them to your shell profile.
+  <Step title="Step 6: Write environment variables into the persistent configuration">
+    Temporary variables are only valid for the current terminal. For daily use, write them into your shell configuration file.
 
     <Tabs>
       <Tab title="Linux Bash">
@@ -303,9 +303,9 @@ If you prefer a script that installs Claude Code and writes the Crazyrouter-rela
       </Tab>
     </Tabs>
 
-    Persist `ANTHROPIC_BASE_URL` as `https://api.crazyrouter.com`.
+    The `ANTHROPIC_BASE_URL` in the persistent variables should also be written as `https://api.crazyrouter.com`.
 
-    Then open a fresh terminal and re-check:
+    After finishing, it's recommended to open a new terminal, then run:
 
     <Tabs>
       <Tab title="macOS / Linux">
@@ -324,9 +324,9 @@ If you prefer a script that installs Claude Code and writes the Crazyrouter-rela
   </Step>
 
   <Step title="Step 7: Prepare your Git repository">
-    Claude Code can edit files and run commands. For the first validation, use a repo you know well.
+    Claude Code will read and write files and execute commands. For first integration, it's recommended to test in a small, familiar repository.
 
-    If the current folder is not a Git repo yet:
+    If the current directory is not a Git repository:
 
     ```bash
     git init
@@ -334,72 +334,65 @@ If you prefer a script that installs Claude Code and writes the Crazyrouter-rela
     git commit -m "chore: initial snapshot before Claude Code"
     ```
 
-    If it is already an existing repo, at least confirm the current state first:
+    If it is already an existing repository, at least make sure the working tree is in a state you can accept:
 
     ```bash
     git status
     ```
   </Step>
 
-  <Step title="Step 8: Launch Claude Code and complete the first validation">
-    Enter the project directory and run:
+  <Step title="Step 8: Launch Claude Code and complete the first verification">
+    After entering the project directory, run:
 
     ```bash
     cd /path/to/your/project
     claude
     ```
 
-    For the first validation, use this order:
+    For first-time verification, it's recommended to follow these steps in order:
 
-    1. `Reply with only OK`
-    2. `Read the current repository structure only. Do not modify any files.`
-    3. `Find obvious typos in the README, but do not edit files yet.`
+    1. First send: `Please reply with OK only`
+    2. Then send: `Only read the current repository structure, do not modify any files`
+    3. Finally, perform a low-risk task, such as: `Please identify obvious typos in the README before directly editing the file`
 
-    If all three work and Crazyrouter logs show matching requests, the setup is good.
+    If all three return normally, and request logs appear in the Crazyrouter dashboard, it means the link is now working end-to-end.
   </Step>
 </Steps>
 
-## Recommended Model Setup
+## Recommended model configuration
 
-| Use case | Recommended model | Why |
-|----------|-------------------|-----|
-| default daily driver | `claude-opus-4-8` | best balance of quality, speed, and cost for most coding tasks |
-| difficult refactors | `claude-opus-4-8` | stronger complex reasoning, planning, and code understanding |
-| long-context repo analysis | `claude-opus-4-8` | stable and strong for long sessions |
-| cost-sensitive first validation | `claude-opus-4-8` | first get the main path working reliably |
+| Usage scenario | Recommended model | Reason |
+|----------|----------|------|
+| Default main | `claude-opus-4-8` | Best balance of quality, speed, and cost; suitable for most coding tasks |
+| High-difficulty refactoring | `claude-opus-4-8` | Stronger complex reasoning, planning, and code understanding |
+| Long-context repository analysis | `claude-opus-4-8` | Stable and suitable for long-term sessions |
+| Cost-sensitive verification | `claude-opus-4-8` | Ensuring the main connection works is most important at first |
 
-Recommended rollout: stabilize normal work on `claude-opus-4-8`, then switch to `claude-opus-4-8` only for genuinely heavier tasks.
+It's recommended to first stabilize your default workflow using `claude-opus-4-8`, and only switch to `claude-opus-4-8` for genuinely complex tasks.
 
-## Using Non-Claude Models in Claude Code
+## Using non-Claude models in Claude Code
 
-Beyond the native Claude family, Crazyrouter exposes several third-party models through the Anthropic Messages protocol. You can use them in Claude Code simply by switching the model name. The list below has been **end-to-end verified** (text / system / tool use / streaming SSE all pass).
+In addition to the native Claude series, Crazyrouter also provides native Anthropic Messages access to a selection of domestic models. The following list contains only the models that **passed live client retesting on 2026-05-15**; untested legacy versions are no longer included.
 
-### Verified working models
+### List of models proven to work in real-world tests
 
-| Model ID | Provider | Tool Use | Streaming | Thinking | Best For |
-|----------|----------|----------|-----------|----------|----------|
-| `deepseek-v4-pro` | DeepSeek | ✅ | ✅ | — | General coding & refactors, best price/perf |
-| `deepseek-v4-flash` | DeepSeek | ✅ | ✅ | ✅ native | Reasoning with visible thinking blocks |
-| `deepseek-v4-pro` | DeepSeek | Yes | Yes | reasoning | General text and reasoning tasks |
-| `MiniMax-M2.7` | MiniMax | Yes | Yes | plain text | Long-context and Chinese-heavy tasks |
-| `kimi-k2.5` / `kimi-k2.6` | Moonshot Kimi | Yes | Yes | plain text | Long-context and Chinese-heavy work |
-| `kimi-k2-thinking` | Moonshot Kimi | ✅ | ✅ | reasoning | Complex reasoning |
-| `kimi-k2-0711-preview` / `kimi-k2-0905-preview` | Moonshot Kimi | ✅ | ✅ | — | Snapshot versions |
+| Model ID | Provider | `Reply only OK` | Read `agent.md` | Current Conclusion | Notes |
+|---------|----------|------------------|--------------------|---------------------|-------|
+| `deepseek-v4-pro` | DeepSeek | Passed | Passed | Claude Code P0 available | Suitable for general coding; Codex side currently not recommended to use Responses |
+| `MiniMax-M2.7` | MiniMax | Passed, but contains `<think>` | Passed, but contains `<think>` | Protocol is available | Poor experience for strict output tasks |
+| `kimi-k2.5` | Moonshot Kimi | Passed | Passed | Claude Code P0 available | Currently one of the most stable domestic model candidates |
+| `kimi-k2.6` | Moonshot Kimi | Passed | Passed | Claude Code P0 available | Same grade as `kimi-k2.5` |
+| `glm-5.1` | GLM | Passed | Passed | Claude Code P0 available | Only for Claude Code; Codex native Responses currently not available |
 
-> Tested against `https://api.crazyrouter.com/v1/messages` with `anthropic-version: 2023-06-01` using a standard Anthropic Messages payload.
+> The above tests are based on the real Claude Code client and are verified via original `POST /v1/messages` protocol through `https://api.crazyrouter.com` root domain name.
 
-<Warning>
-The following models currently return `get_channel_failed` on the Anthropic protocol (an upstream channel availability issue, not a protocol incompatibility). Use them via `/v1/chat/completions` (OpenAI protocol) for now:
+<Note>
+The scope of this table is "currently retested and available", not "all theoretically transferable third-party models for Anthropic protocol". If a model is not listed here, it means the current Chinese documentation does not include it as a validated and recommended item for Claude Code.
+</Note>
 
-- `moonshot-v1-8k` / `moonshot-v1-32k` / `moonshot-v1-128k`
-- `kimi-k2-0905` (without the `-preview` suffix)
+### How to Switch Models
 
-Channels such as `grok-*`, `coze`, `jimeng`, `baidu`, `zhipu`, `tencent`, `xunfei`, `mistral`, `cohere`, and `palm` **do not implement** Anthropic protocol conversion and cannot be used in Claude Code.
-</Warning>
-
-### How to switch models
-
-Claude Code picks the model from the `ANTHROPIC_MODEL` environment variable, or via the in-session `/model` command. Replace the value with any model ID from the table above.
+Claude Code selects models using either the `ANTHROPIC_MODEL` environment variable or the `/model` command within a session. Just replace the model name with any from the table above.
 
 <Tabs>
   <Tab title="macOS / Linux">
@@ -407,14 +400,11 @@ Claude Code picks the model from the `ANTHROPIC_MODEL` environment variable, or 
     export ANTHROPIC_BASE_URL=https://api.crazyrouter.com
     export ANTHROPIC_API_KEY=sk-xxx
 
-    # Default to DeepSeek V4 Pro
-    export ANTHROPIC_MODEL=deepseek-v4-pro
+    # 临时切到 Kimi K2.5
+    export ANTHROPIC_MODEL=kimi-k2.5
     claude
 
-    # Or one-off switch to Kimi thinking
-    ANTHROPIC_MODEL=kimi-k2-thinking claude
-
-    # Or one-off switch to MiniMax
+    # 或临时切到 MiniMax
     ANTHROPIC_MODEL=MiniMax-M2.7 claude
     ```
   </Tab>
@@ -423,33 +413,31 @@ Claude Code picks the model from the `ANTHROPIC_MODEL` environment variable, or 
     $env:ANTHROPIC_BASE_URL = "https://api.crazyrouter.com"
     $env:ANTHROPIC_API_KEY  = "sk-xxx"
 
-    $env:ANTHROPIC_MODEL = "deepseek-v4-pro"
+    $env:ANTHROPIC_MODEL = "kimi-k2.5"
     claude
 
-    # Or one-off switches
-    $env:ANTHROPIC_MODEL = "kimi-k2-thinking"; claude
+    # 或临时切换
     $env:ANTHROPIC_MODEL = "MiniMax-M2.7"; claude
     ```
   </Tab>
 </Tabs>
 
-You can also switch inside a running Claude Code session:
+You can also switch via session command after Claude Code starts:
 
 ```text
-/model deepseek-v4-pro
-/model kimi-k2-thinking
+/model kimi-k2.5
 /model MiniMax-M2.7
 ```
 
-### Usage notes and known differences
+### Recommendations and Known Differences
 
-- **DeepSeek family**: highest protocol fidelity. Tool calls, streaming, and `stop_reason=tool_use` all match Anthropic's spec; `deepseek-v4-flash` returns native `thinking` blocks that Claude Code renders as a thinking pane. **Recommended default: `deepseek-v4-pro`**.
-- **Kimi family**: strong long-context behavior, tool calls work normally. `kimi-k2-thinking` includes a reasoning trace, useful for hard tasks.
-- **MiniMax family**: use the current public `MiniMax-M2.7` ID for new examples. If an older MiniMax snapshot is still allowed on your token, verify it through `/v1/models` before putting it in a Claude Code profile.
-- **Token allowlist**: if your Claude Code-dedicated token has model allowlisting enabled, add the models above to it in the Crazyrouter dashboard, otherwise you will get `403 model not allowed`.
-- **Thinking and billing**: thinking-enabled models (`-thinking`, `-flash`, `reasoner`, `MiniMax-M2.7`) consume extra output tokens. Set a separate budget cap on the Claude Code token.
+- **Preferred Order**: If you wish to prioritize domestic models in Claude Code, currently recommended to start with `kimi-k2.5`, `kimi-k2.6`, then consider `deepseek-v4-pro`. For the Qwen series, please confirm available model IDs via `/v1/models` first, then verify individually.
+- **MiniMax Known Differences**: `MiniMax-M2.7`, although protocol is available, outputs its thinking process as plain text with `<think>...</think>` tags at start and end. For strict tasks like "output only one sentence", it's not recommended to pick this first.
+- **DeepSeek / GLM Boundaries**: `deepseek-v4-pro` and `glm-5.1` are available in Claude Code, but this does not mean they are also suitable for native Codex Responses configuration. These two are separate protocols—do not mix compatibility conclusions.
+- **Token Whitelist**: If your Claude Code-specific token enables a model whitelist, be sure to add the domestic models you want to use; otherwise, `403 model not allowed` will be returned.
+- **Recommend Real Client Validation First**: Run a round of `Reply only OK` first, then perform the "read a file and only return the title" task, as this is closer to the real usage scenario of Claude Code than just testing the bare API.
 
-### One-line check that a model works
+### One Command to Quickly Check If a Model is Available
 
 ```bash
 curl -sS https://api.crazyrouter.com/v1/messages \
@@ -457,99 +445,99 @@ curl -sS https://api.crazyrouter.com/v1/messages \
   -H "anthropic-version: 2023-06-01" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "deepseek-v4-pro",
+    "model": "kimi-k2.5",
     "max_tokens": 32,
     "messages": [{"role":"user","content":"reply OK"}]
   }'
 ```
 
-A `200` response with non-empty `content[].text` means Claude Code can use this model.
+A 200 response and a non-empty `content[].text` mean Claude Code can use the model normally.
 
-## Token Setup Best Practices
+## Best Practices for Token Settings
 
-| Setting | Recommendation | Notes |
-|---------|----------------|-------|
-| dedicated token | Required | Do not share Claude Code tokens with Cursor, Codex, or OpenClaw |
-| model allowlist | Strongly recommended | Most Claude Code setups only need 1 to 2 Claude models |
-| IP restriction | Recommended on fixed-egress environments | Be careful on laptops with changing IPs |
-| quota cap | Strongly recommended | Long sessions and tool use can steadily consume budget |
-| developer / host split | Recommended | Give each developer or shared host its own token |
-| incident rotation | Required | If shell history, recordings, or shared terminals expose the token, rotate it immediately |
+| Setting | Recommendation | Description |
+|---------|----------------|-------------|
+| Dedicated token | Required | Do not share Claude Code token with Cursor, Codex, OpenClaw |
+| Model whitelist | Highly recommended | Only permit the actual Claude or domestic models needed to simplify troubleshooting and control costs |
+| IP restriction | Recommend for fixed exit environments | Use with caution if your laptop IP changes frequently |
+| Quota limit | Highly recommended | Claude Code long sessions + tool use can keep consuming quota |
+| Dev / team isolation | Recommended | Each developer and each shared host should use a separate token |
+| Rotate if leaked | Required | Immediately rotate token if exposed through shell history, screen recording, or shared terminal |
 
 ## Verification Checklist
 
-- [ ] `git --version` works
-- [ ] `node -v` is at least 18
-- [ ] `claude --version` works
-- [ ] `ANTHROPIC_BASE_URL` is set to `https://api.crazyrouter.com`
-- [ ] `ANTHROPIC_API_KEY` is set correctly
-- [ ] Claude Code launches successfully
-- [ ] the first plain-text request succeeds
-- [ ] repository read-only inspection works
-- [ ] Crazyrouter logs show the Claude Code traffic
-- [ ] token quota and model allowlist match your intended setup
+- [ ] `git --version` is normal
+- [ ] `node -v` is not less than 18
+- [ ] `claude --version` is normal
+- [ ] `ANTHROPIC_BASE_URL` is set to `https://api.crazyrouter.com` or `https://api.crazyrouter.com`
+- [ ] `ANTHROPIC_API_KEY` is correctly set
+- [ ] Claude Code can start normally
+- [ ] First plain text request returns successfully
+- [ ] Read-only repository analysis works
+- [ ] Claude Code requests visible in Crazyrouter logs
+- [ ] Token quota and model whitelist meet expectations
 
-## Common Errors And Fixes
+## Common Errors and Fixes
 
-| Symptom | Likely cause | Fix |
-|---------|--------------|-----|
-| `claude: command not found` | Claude Code did not install cleanly, or the npm global path is not on PATH | reinstall and make sure the global npm bin directory is in PATH |
-| Node version is too old | local Node.js version is below the requirement | upgrade to Node.js 18+ and reinstall Claude Code |
-| `401 unauthorized` | invalid, expired, or badly pasted `ANTHROPIC_API_KEY` | create a new token and set the variables again |
-| `403` or `model not allowed` | the token does not allow the selected Claude model | allow the required model in Crazyrouter |
-| `404` | base URL was set with `/v1` or `/v1/messages` | reset it to `https://api.crazyrouter.com` |
-| logs show `/v1/v1/messages`, `/v1/v1/models`, or `/v1/messages/v1/messages` | Claude Code was given a base URL that already contains `/v1` or a full endpoint, then appended its own path | set `ANTHROPIC_BASE_URL` to the root domain with no path |
-| Claude Code still uses old settings | new environment variables were not reloaded | reopen the terminal or run `source ~/.bashrc` / `source ~/.zshrc` |
-| Git changes become messy | no repository snapshot was created before AI edits | commit an initial snapshot before larger changes |
-| cost is higher than expected | long context, repeated tool use, and long sessions | shorten sessions, split tasks, and cap budget per token |
+| Phenomenon | Common Reason | Fix |
+|------------|--------------|-----|
+| `claude: command not found` | Claude Code not installed, or npm global path not in PATH | Reinstall, confirm `npm bin -g` directory is in PATH |
+| `node` version too low | Local Node version is below requirements | Upgrade to Node.js 18+ and reinstall Claude Code |
+| 401 unauthorized | `ANTHROPIC_API_KEY` invalid, expired or copy error | Regenerate token and reset environment variable |
+| 403 / model not allowed | Token does not permit current Claude model | Permit needed model via Crazyrouter token settings |
+| 404 | Base URL incorrectly set to `/v1`, `/v1/messages` or other wrong path | Change to `https://api.crazyrouter.com` or `https://api.crazyrouter.com` |
+| Log paths showing `/v1/v1/messages`, `/v1/v1/models` or `/v1/messages/v1/messages` | Claude Code Base URL has `/v1` or full endpoint, client auto-appends path again | Change `ANTHROPIC_BASE_URL` to root domain, do not include any path |
+| Claude Code still uses old config after starting | New environment variable not reloaded | Start new terminal or `source ~/.bashrc` / `source ~/.zshrc` again |
+| Git changes too messy | No repo snapshot taken before letting AI edit code | Commit initial snapshot first, then modify in stages |
+| Unexpected cost | Long context + multiple tool calls + long session | Shorten sessions, split tasks, set dedicated budget for Claude Code |
 
-## Performance And Cost Tips
+## Performance and Cost Suggestions
 
-- start with `claude-opus-4-8`
-- switch to `claude-opus-4-8` only for hard architecture analysis or heavy refactors
-- validate first in a small repo, not a large production repo
-- check `git status` before each new task
-- watch Crazyrouter logs and quota more closely when tool use becomes frequent
+- Default to using `claude-opus-4-8` first
+- Only switch to `claude-opus-4-8` for complex architecture analysis or long chain refactoring
+- First integration, validate with a small repository, do not operate on large production repo directly
+- Check `git status` before each new task
+- For frequent tool calls, watch Crazyrouter logs and token consumption more closely
 
 ## FAQ
 
-### Which base URL should I use for Claude Code?
+### What should the Base URL be in Claude Code?
 
-Use the site root: `https://api.crazyrouter.com`
+Just use root domain: `https://api.crazyrouter.com`
 
-For the default international API entry, use the site root: `https://api.crazyrouter.com`
+Default international API entry: use root domain `https://api.crazyrouter.com`
 
-### Why should I not include `/v1` here?
+### Why can't `/v1` be used here?
 
-Because Claude Code appends the Anthropic Messages path itself. You only provide the site root.
+Because Claude Code will itself append the Anthropic Messages API path. Just provide the site root address.
 
-### What should I use on Windows?
+### What's recommended for Windows?
 
-If you mainly develop from the command line, prefer PowerShell or WSL2. In either case, make sure Git, Node.js, and Claude Code itself are installed correctly first.
+If you mainly develop in command line, prioritize PowerShell or WSL2. Make sure Git, Node.js, and Claude Code are properly installed, whichever method you choose.
 
-### On Windows, should I use PowerShell or Git Bash?
+### PowerShell or Git Bash for Windows?
 
-For first-time setup, prefer PowerShell. Environment-variable persistence, `where.exe` checks, and user-level configuration are all more direct there.
+For initial setup, use PowerShell: environment variable writing, `where.exe` validation, and user-level variable persistence are more straightforward.
 
-### Why should I create a Git snapshot before the first real task?
+### Why take a Git snapshot first?
 
-Because Claude Code can edit files and run commands. A clean snapshot makes review and rollback much easier.
+Because Claude Code will change files and run commands. Snapshots make review and rollback easier if issues occur.
 
-### Which model should I try first?
+### Which model is recommended first?
 
-Start with `claude-opus-4-8`. It is usually the safest baseline.
+Start with `claude-opus-4-8`, which is usually the most stable baseline model.
 
 <Note>
-If your first priority is Claude-family models plus a terminal-first coding workflow, Claude Code should be near the front of your Crazyrouter integration order.
+If you prioritize Claude series models + terminal coding experience, Claude Code should be at the top of the integration order in Crazyrouter code tools.
 </Note>
 
 <Card title="View the crazyrouter-claude-code repository" icon="github" href="https://github.com/xujfcn/crazyrouter-claude-code">
-  Review the one-click setup scripts, README, and latest usage notes.
+  Check one-click config scripts, README, and latest usage instructions.
 </Card>
 
 {/* crazyrouter-model-links v2 */}
-## Related on crazyrouter.com
+## Relevant Pages
 
-- [Claude Code integration guide (one-click script, base URL, recommended models)](https://crazyrouter.com/en/integrations/claude-code?utm_source=docs&utm_medium=related)
-- [Claude Fable 5 price comparison: list vs Azure / Bedrock / Vertex vs Crazyrouter](https://crazyrouter.com/en/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
-- [Claude Fable 5 model page: live price, real samples, code](https://crazyrouter.com/en/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Claude Code Integration Guide (One-click Script, Base URL, Recommended Model)](https://crazyrouter.com/zh/integrations/claude-code?utm_source=docs&utm_medium=related)
+- [Claude Fable 5 Price Comparison: Official / Azure / Bedrock / Vertex vs. Crazyrouter](https://crazyrouter.com/en/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Claude Fable 5 Model Page: Real-time Price, Real Examples, Call Code](https://crazyrouter.com/en/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)

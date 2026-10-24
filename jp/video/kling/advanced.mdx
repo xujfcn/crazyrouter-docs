@@ -1,30 +1,31 @@
 ---
-title: "Kling Advanced Features"
-description: "Kling advanced features: virtual try-on"
+title: "Kling 高度な機能"
+description: "Kling 高度な機能：バーチャル試着"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Kling Advanced Features
 
-## Virtual Try-On
+# Kling 高度な機能
+
+## バーチャル試着
 
 ```
 POST /kling/v1/images/kolors-virtual-try-on
 ```
 
-Virtual try-on is the only currently exposed Kling advanced capability. This path has completed bounded success verification, including the `task success -> R2 archive -> media.crazyrouter.com` flow.
+現在公開されている Kling の高度な機能は、バーチャル試着のみです。この機能パスは bounded の成功検証が完了しており、`タスク成功 -> R2 アーカイブ -> media.crazyrouter.com` ループもすでに連携済みです。
 
-### Request Parameters
+### リクエストパラメータ
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model_name` | string | No | Common models: `kolors-virtual-try-on-v1`, `kolors-virtual-try-on-v1-5` |
-| `human_image` | string | Yes | Person image. URL or Base64 is supported |
-| `cloth_image` | string | Yes | Clothing image. URL or Base64 is supported |
-| `callback_url` | string | No | Callback URL |
-| `external_task_id` | string | No | Custom business task ID |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `model_name` | string | いいえ | よくあるモデル例：`kolors-virtual-try-on-v1`、`kolors-virtual-try-on-v1-5` |
+| `human_image` | string | はい | 人物画像。URL または Base64 に対応 |
+| `cloth_image` | string | はい | 服装画像。URL または Base64 に対応 |
+| `callback_url` | string | いいえ | コールバック URL |
+| `external_task_id` | string | いいえ | ビジネス側のカスタムタスク ID |
 
-### Request Example
+### リクエスト例
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/kling/v1/images/kolors-virtual-try-on \
@@ -37,7 +38,7 @@ curl -X POST https://api.crazyrouter.com/kling/v1/images/kolors-virtual-try-on \
   }'
 ```
 
-### Successful Submit Response
+### 送信成功時のレスポンス例
 
 ```json
 {
@@ -51,7 +52,7 @@ curl -X POST https://api.crazyrouter.com/kling/v1/images/kolors-virtual-try-on \
 }
 ```
 
-## Query Try-On Task
+## 試着タスクのクエリ
 
 ```
 GET /kling/v1/images/kolors-virtual-try-on/{task_id}
@@ -62,7 +63,7 @@ curl https://api.crazyrouter.com/kling/v1/images/kolors-virtual-try-on/866361099
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-### Completed Response Example
+### レスポンス例（完了時）
 
 ```json
 {
@@ -77,12 +78,12 @@ curl https://api.crazyrouter.com/kling/v1/images/kolors-virtual-try-on/866361099
 ```
 
 <Note>
-  Do not document lip sync, video extension, or effects as publicly available Kling endpoints. They are still outside Crazyrouter's public contract.
+  現時点では、口の動きの同期、動画の延長、動画エフェクトなど、その他の Kling 高度な機能は公開 API として記載しないでください。これらはまだ Crazyrouter の公開 contract には含まれていません。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [Kling 2.6 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/kling/aigc-video-kling-2-6?utm_source=docs&utm_medium=related)
-- [Kling 3.0 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/kling/aigc-video-kling-3-0?utm_source=docs&utm_medium=related)
-- [Kling AI の全モデルと料金](https://crazyrouter.com/en/models/kling?utm_source=docs&utm_medium=related)
+- [Kling 2.6 モデルページ：リアルタイム価格、実際のサンプル、呼び出しコード](https://crazyrouter.com/ja/models/kling/aigc-video-kling-2-6?utm_source=docs&utm_medium=related)
+- [Kling 3.0 モデルページ：リアルタイム価格、実際のサンプル、呼び出しコード](https://crazyrouter.com/ja/models/kling/aigc-video-kling-3-0?utm_source=docs&utm_medium=related)
+- [Kling AI すべてのモデルと価格](https://crazyrouter.com/ja/models/kling?utm_source=docs&utm_medium=related)

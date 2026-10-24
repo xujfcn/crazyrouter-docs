@@ -1,20 +1,20 @@
 ---
-title: "Structured Outputs"
-description: "OpenAI-style structured output verified against Crazyrouter production on 2026-03-23"
+title: "構造化出力"
+description: "2026-03-23時点のCrazyrouter本番環境で検証されたOpenAIスタイルの構造化出力"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Structured Outputs
+# 構造化出力
 
 ```
 POST /v1/chat/completions
 ```
 
-As of March 23, 2026, Crazyrouter production has verified that `gpt-5.5` with `response_format.type = "json_schema"` returns directly parseable JSON.
+2026年3月23日現在、Crazyrouter本番環境では、`gpt-5.5`が`response_format.type = "json_schema"`と共に、直接パース可能なJSONを返すことが確認されています。
 
 ---
 
-## Recommended Path: `json_schema`
+## 推奨パス: `json_schema`
 
 ```bash
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -57,7 +57,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-The observed production `message.content` parsed directly as:
+実際の本番`message.content`は、次のように直接パースされました:
 
 ```json
 {
@@ -76,7 +76,7 @@ The observed production `message.content` parsed directly as:
 
 ---
 
-## Consumer-Side Handling
+## コンシューマー側での処理
 
 ```python
 import json
@@ -86,12 +86,12 @@ data = json.loads(content)
 ```
 
 <Note>
-  This production pass only revalidated the strict `json_schema` path. The older `json_object` mode was not rechecked separately, so it is no longer kept as the primary example here.
+  この本番更新では厳密な`json_schema`パスのみが再検証されています。従来の`json_object`モードは個別には再チェックされていないため、ここではもはや主要な例としては掲載していません。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## crazyrouter.com 関連情報
 
-- [GPT Image 1.5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [OpenAI の全モデルと料金](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [GPT Image 1.5モデルページ：リアルタイム価格、実サンプル、コード](https://crazyrouter.com/ja/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT Image 2 モデルページ：リアルタイム価格、実サンプル、コード](https://crazyrouter.com/ja/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [すべてのOpenAIモデルのリアルタイム価格一覧](https://crazyrouter.com/ja/models/openai?utm_source=docs&utm_medium=related)

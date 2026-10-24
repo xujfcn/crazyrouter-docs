@@ -1,0 +1,192 @@
+---
+title: "LiteLLM 接続ガイド"
+description: "Crazyrouter を LiteLLM AI ゲートウェイに接続する：モデルと価格設定のエクスポート、プロキシの起動、リクエストの検証、チーム予算と互換性境界の理解"
+---
+> 内容更新日: 2026-10-24
+
+LiteLLM は企業向けの統合 AI ゲートウェイとして利用できます：アプリケーションは LiteLLM に接続し、その後 LiteLLM から Crazyrouter を呼び出します。プロジェクト、部門、仮想キー、予算、監査ポリシーはあなた自身の LiteLLM 配置で設定する必要があり、Crazyrouter API キーを入力しただけでは自動で有効化されません。
+
+```text
+Application → LiteLLM Proxy → Crazyrouter → Model
+```
+
+## 接続アーキテクチャと準備
+
+Python 3.11、専用の Crazyrouter 推論キー、およびそのキーでアクセス可能なモデルを準備してください。本記事は **LiteLLM 1.106.2** で検証されていますが、これが最新バージョンを意味するものではありません。4つのサンプルモデルは `claude-opus-5-5`、`gpt-6-astra`、`glm-5.3`、`deepseek-v4.1-flash` です。利用可能なモデルに応じて調整してください。
+
+<Warning>
+`CRAZYROUTER_API_KEY` は LiteLLM サーバが Crazyrouter を呼び出すための認証情報です。`LITELLM_MASTER_KEY` は自身の LiteLLM 管理者キーとなります。混同しないでください。また、管理者キーは部門やエンドユーザーに配布しないでください。実際のキーはサーバ環境または秘密情報管理ツールのみに保管し、Git、ドキュメント、フロントエンド等に提出しないでください。
+</Warning>
+
+## 1. インストールと環境変数
+
+新しい作業ディレクトリで以下のコマンドを実行してください。環境変数は現在のターミナルのみに適用されます。既存ゲートウェイでは安全管理された主キーを使い続け、新たに生成しないでください。コンテナ展開の場合、環境変数は必ずコンテナ内部で渡してください。Windows で仮想環境が有効化できない場合、`.venv\Scripts` の `python.exe` および `litellm.exe` を直接呼び出すことで代用可能です。
+
+<CodeGroup>
+```bash macOS / Linux
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install "litellm[proxy]==1.106.2"
+read -rsp 'Crazyrouter API key: ' CRAZYROUTER_API_KEY; echo
+export CRAZYROUTER_API_KEY
+export LITELLM_MASTER_KEY="$(python -c 'import secrets; print("sk-" + secrets.token_hex(32))')"
+```
+
+```powershell Windows PowerShell
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install "litellm[proxy]==1.106.2"
+$secret = Read-Host 'Crazyrouter API key' -AsSecureString
+$env:CRAZYROUTER_API_KEY = [System.Net.NetworkCredential]::new('', $secret).Password
+$env:LITELLM_MASTER_KEY = python -c "import secrets; print('sk-' + secrets.token_hex(32))"
+```
+</CodeGroup>
+
+## 2. 設定エクスポートと起動
+
+認証済みの `GET /v1/litellm/config` を使用して、現在の認証情報に対応したモデルおよび価格スナップショットを取得することを推奨します。レスポンスはラップされたオブジェクトとなっており、**その中の `config` のみを LiteLLM の設定として保存してください**。レスポンス全体を直接コピーしてはいけません。下記スクリプトは `export_config.py` として保存し、JSON（YAML 互換）形式で、`model_info` 価格を残しつつ環境変数を参照し、実際のキーは書き込まないようにします。
+
+```python export_config.py
+import json
+import os
+from pathlib import Path
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode
+from urllib.request import HTTPRedirectHandler, Request, build_opener
+
+
+class NoRedirect(HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+key = os.environ["CRAZYROUTER_API_KEY"]
+if not key:
+    raise SystemExit("CRAZYROUTER_API_KEY is empty")
+query = urlencode({
+    "provider": "openai",
+    "models": "claude-opus-5-5,gpt-6-astra,glm-5.3,deepseek-v4.1-flash",
+})
+request = Request(
+    "https://api.crazyrouter.com/v1/litellm/config?" + query,
+    headers={"Authorization": "Bearer " + key,
+             "User-Agent": "Crazyrouter-LiteLLM-Setup/1.0"},
+)
+try:
+    with build_opener(NoRedirect).open(request, timeout=30) as response:
+        payload = json.load(response)
+except HTTPError as error:
+    raise SystemExit(f"Export failed (HTTP {error.code}); no file written.")
+except URLError:
+    raise SystemExit("Export connection failed; no file written.")
+
+config = payload["config"]
+if not config.get("model_list"):
+    raise SystemExit("Export contains no models")
+config.setdefault("litellm_settings", {})["drop_params"] = False
+config.setdefault("general_settings", {})["master_key"] = "os.environ/LITELLM_MASTER_KEY"
+output = json.dumps(config, ensure_ascii=False, indent=2)
+if key in output:
+    raise SystemExit("Refusing to write a secret")
+with Path("crazyrouter.config.json").open("x", encoding="utf-8") as handle:
+    handle.write(output + "\n")
+print("Saved configuration. Import/reload it in LiteLLM explicitly.")
+```
+
+```shell
+python export_config.py
+litellm --config ./crazyrouter.config.json --host 127.0.0.1 --port 4100
+```
+
+<Note>
+このスクリプトは既存ファイルを上書きしません。更新時は必ずバックアップ・差分比較後、既存ゲートウェイにマージ・明示的に再起動してください。`4100` はサンプルポートです。既に使用中の場合は 起動コマンドと検証アドレスの両方を変更してください。このコマンド実行は localhost のみリッスンし、現行サービスの変更や再起動は行いません。
+</Note>
+
+## 3. ローカルゲートウェイの検証
+
+プロキシターミナルをそのまま稼働させ、別の同環境のターミナルで**同一の** `LITELLM_MASTER_KEY` を安全に設定してください。新たに生成しないよう注意してください。以下のスクリプトを `verify_proxy.py` として保存します。管理者によるスモークテストでは実際にモデル利用量がカウントされますので、日常利用は権限制限付き仮想キーをご利用ください。
+
+```python verify_proxy.py
+import json
+import os
+from urllib.request import Request, urlopen
+
+base = "http://127.0.0.1:4100/v1"
+headers = {"Authorization": "Bearer " + os.environ["LITELLM_MASTER_KEY"],
+           "Content-Type": "application/json"}
+
+with urlopen(Request(base + "/models", headers=headers), timeout=30) as response:
+    models = json.load(response)["data"]
+assert any(model["id"] == "gpt-6-astra" for model in models), "Model not registered"
+
+body = {"model": "gpt-6-astra", "max_tokens": 1024,
+        "messages": [{"role": "user", "content": "Reply with exactly OK."}]}
+with urlopen(Request(base + "/chat/completions", headers=headers,
+                     data=json.dumps(body).encode()), timeout=120) as response:
+    result = json.load(response)
+choice = result["choices"][0]
+assert choice["finish_reason"] == "stop", "Incomplete response"
+assert (choice["message"].get("content") or "").strip() == "OK", "Check final answer"
+assert result.get("usage", {}).get("total_tokens", 0) > 0, "Missing usage"
+print("PASS: model registration, final answer, finish reason, usage")
+```
+
+```shell
+python verify_proxy.py
+```
+
+これは最小限のスモークテスト(動作確認)であり、完全な互換性の認証を担うものではありません。各モデルごとに通常リクエスト・ストリーミングリクエスト両方を検証してください：最終レスポンス本文、終了理由、SSE の `[DONE]`、最終 usage を確認します。ツールテストではパラメータとツール結果の正常な返却も必須です。HTTP 200 のみ・思考テキストやMarkdownや JSON フェンスが返るだけでは合格とはなりません。
+
+## 4. Claude ネイティブプロトコル（任意）
+
+エクスポートの標準は `openai/<model>` となります。`api_base` の場合 `https://api.crazyrouter.com/v1` となります。Claude のネイティブキャッシュや thinking などの語義を必要とする場合、`provider=anthropic&models=claude-opus-5-5` で別途エクスポートし、`anthropic/<model>` とルートアドレス `https://api.crazyrouter.com` を利用してください。`/v1`・`/chat/completions` は追加しないでください。
+
+```yaml
+model_list:
+  - model_name: claude-native
+    litellm_params:
+      model: anthropic/claude-opus-5-5
+      api_base: https://api.crazyrouter.com
+      api_key: os.environ/CRAZYROUTER_API_KEY
+litellm_settings:
+  drop_params: false
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+```
+
+上記例は接続構成のみ示し、価格情報はありません。実運用時はエクスポートしたネイティブ設定の `model_info` を統合してください。OpenAI アダプタも同時登録する場合は、ネイティブ項目用に `claude-native` など独自の `model_name` を使用し、クライアントがエイリアス経由で呼び出して同名エントリの混在による経路不一致を防いでください。
+
+## 互換性とエラー処理
+
+- `drop_params: false` を維持し、未対応パラメータを黙って無視しないでください。
+- Claude の `json_schema` は検証済み。`json_object` は未対応であり、他形式への自動変換もサポートしません。
+- 本検証における Claude パスでは、ツール / `required` を明示指定したリクエストは、HTTP `400`（直結エラーコード `unsupported_forced_tool_choice`）で拒否されます。自動ツール選択が必要な場合はクライアントで明示的に `tool_choice: "auto"` を選択してください。ゲートウェイによる自動ダウングレードや強制呼び出しは行われません。
+- 上述の拒否時、クライアントへは固定された安全な英文説明が返り、内部設定や証明情報は返しません。LiteLLM 1.106.2 の OpenAI アダプタは英文メッセージのままですが、エラーコードを `"400"` にラップしますので生のコードのみで判定しないでください。
+- Claude `cache_control` の `5m` / `1h` TTL は透過します。5分作成・読み込みは検証済、1時間はコールド書き込みのみ確認しており、ヒット率や1時間後の読み出し保証はありません。
+- モデル性能・利用可否・画像生成・長文文脈対応・フェイルオーバー・企業予算はそれぞれ別途検収が必須です。本ドキュメントやモデル名のみから保証内容を推測しないでください。
+
+## チーム・予算・運用セキュリティ
+
+- プロジェクト・部門単位で LiteLLM チームと制限付き仮想キーを作成し、モデル権限、予算、レートリミットを設定します。主キーは絶対に共有しないでください。
+- LiteLLM 公式要求に沿ってデータベース、認証、権限管理、永続化を設定してください。ローカルDB未使用の起動は推論チェーンのみを検証するもので、実際の予算適用を保証しません。バージョンごとの機能・認可要件を必ずご確認ください。
+- 本番化前に、権限外モデルの拒否、予算上限到達、キー失効、レート制限、監査の各ケースをそれぞれ検証してください。ログ内のプロンプト・個人情報は保護し、保存期間も明確に取り決めます。
+- 外部公開時は必ず HTTPS およびアクセスコントロールを施し、ローカルのデモ用サービスや管理画面を直接インターネットに公開しないでください。
+- 出力される価格はスナップショットです。価格や割引が変更された場合は再エクスポート・再インポート・再読み込みが必要です。自動で更新・反映されません。LiteLLM のコスト試算は Crazyrouter の最終請求額とは異なる場合がありますので、都度照合してください。
+
+## よくある質問
+
+| 現象 | 点検項目 |
+| --- | --- |
+| エクスポート時に 401 | Crazyrouter の推論キーを使用してください。LiteLLM の主キーやコンソールセッション認証情報は使用しません。 |
+| エクスポート時に 404 | モデル ID、および現在のキーでアクセス可能なモデルを確認してください。 |
+| エクスポート時に 422 | 使用プロバイダおよび価格が表現可能か確認してください。推測の固定価格は使わないでください。 |
+| LiteLLM で 401 | 下流は LiteLLM の主キー（ローカル管理テスト時のみ）または有効な仮想キーで呼び出してください。 |
+| モデル未登録・環境変数が存在しない | `config` が保存され、環境変数がプロキシプロセスやコンテナに渡り、再読み込みされているか確認してください。 |
+| 強制ツールで 400 | `auto` を明示的に選択、またはそのツール・thinking 設定に対応することが確認されたモデルを使用してください。 |
+| 予算制限が効かない | DB、チーム/仮想キー方針を点検し、実際に予算超過拒否テストも実施してください。 |
+
+## 公式参照
+
+- [LiteLLM プロキシ設定](https://docs.litellm.ai/docs/proxy/configs)
+- [LiteLLM 仮想キー](https://docs.litellm.ai/docs/proxy/virtual_keys)
+- [LiteLLM 予算管理](https://docs.litellm.ai/docs/proxy/users)

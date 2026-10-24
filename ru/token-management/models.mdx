@@ -1,31 +1,31 @@
 ---
-title: 'Get Token Models'
-description: 'Query the list of models available to a specific token'
+title: "Получение поддерживаемых моделей токена"
+description: "Запросить список моделей, доступных для использования с указанным токеном"
 api: 'GET /v1/models'
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-## Overview
+## Описание интерфейса
 
-Get the list of models that the current token (API Key) can access. If the token has no model restrictions, all enabled system models are returned.
+Позволяет получить список моделей, которые может вызывать текущий токен (API Key). Если для токена нет ограничений по моделям, возвращается список всех моделей, включённых в системе.
 
-The currently supported public endpoint is:
+На данный момент рекомендуемый и фактически поддерживаемый интерфейс:
 
 ```text
 GET /v1/models
 ```
 
-`GET /api/token/models` is not a currently exposed public endpoint. Use `/v1/models` instead.
+`GET /api/token/models` не является сейчас публично доступным интерфейсом, пожалуйста, используйте `/v1/models`.
 
-## Authentication
+## Метод аутентификации
 
-Authenticate using an API Key (sk-xxx):
+Используйте API Key (sk-xxx) для аутентификации:
 
 ```
 Authorization: Bearer sk-xxx
 ```
 
-## Response Format
+## Формат ответа
 
 ```json
 {
@@ -46,7 +46,7 @@ Authorization: Bearer sk-xxx
 }
 ```
 
-## Code Examples
+## Пример кода
 
 <CodeGroup>
 
@@ -58,7 +58,7 @@ client = OpenAI(
     base_url="https://api.crazyrouter.com/v1"
 )
 
-# Get model list via OpenAI SDK
+# 通过 OpenAI SDK 获取模型列表
 models = client.models.list()
 for model in models.data:
     print(model.id)
@@ -85,9 +85,9 @@ curl https://api.crazyrouter.com/v1/models \
 </CodeGroup>
 
 <Note>
-  If you use the OpenAI SDK, `client.models.list()` is effectively calling `GET /v1/models`.
+  Если вы используете OpenAI SDK, `client.models.list()` фактически вызывает `GET /v1/models`.
 </Note>
 
-Related pages:
+Связанные страницы:
 
-- [Official Model Pricing Methods](/ru/reference/official-pricing-methods)
+- [Официальное ценообразование моделей](/ru/reference/official-pricing-methods)

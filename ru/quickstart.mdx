@@ -1,16 +1,20 @@
 ---
-title: 'Быстрый старт'
-description: 'Сделайте первый API-вызов за 5 минут'
+title: "API быстрое руководство по началу работы"
+description: "Первый вызов API за 5 минут"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-16
 
-## Шаг 1. Получите API-ключ
+## Шаг 1: Получите API Key
 
-1. Откройте [Crazyrouter](https://crazyrouter.com) и создайте аккаунт
-2. После входа перейдите на страницу [Token Management](https://crazyrouter.com/console/token)
-3. Нажмите "Create Token", чтобы создать API-ключ
+1. Зарегистрируйте аккаунт на [Crazyrouter](https://crazyrouter.com)
+2. После входа откройте страницу [Управление токенами](https://crazyrouter.com/console/token)
+3. Нажмите «Создать токен», чтобы сгенерировать API Key
 
-## Шаг 2. Отправьте запрос
+## Шаг 2: Выполните запрос
+
+<Note>
+Для международного подключения в первую очередь используйте адрес `https://api.crazyrouter.com/v1`. Для Восточной Азии рекомендуется адрес `https://cn.crazyrouter.com/v1`. Если вы не уверены, должен ли клиент использовать корневой домен или `/v1`, обратитесь к [инструкциям по API Endpoint](https://docs.crazyrouter.com/ru/api-endpoint).
+</Note>
 
 <CodeGroup>
 ```bash cURL
@@ -20,7 +24,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   -d '{
     "model": "gpt-5.5",
     "messages": [
-      {"role": "user", "content": "Hello"}
+      {"role": "user", "content": "你好"}
     ]
   }'
 ```
@@ -35,7 +39,7 @@ client = OpenAI(
 
 response = client.chat.completions.create(
     model="gpt-5.5",
-    messages=[{"role": "user", "content": "Hello"}]
+    messages=[{"role": "user", "content": "你好"}]
 )
 print(response.choices[0].message.content)
 ```
@@ -50,13 +54,13 @@ const client = new OpenAI({
 
 const response = await client.chat.completions.create({
   model: 'gpt-5.5',
-  messages: [{ role: 'user', content: 'Hello' }]
+  messages: [{ role: 'user', content: '你好' }]
 });
 console.log(response.choices[0].message.content);
 ```
 </CodeGroup>
 
-## Шаг 3. Проверьте ответ
+## Шаг 3: Просмотрите результат
 
 Пример успешного ответа:
 
@@ -69,7 +73,7 @@ console.log(response.choices[0].message.content);
     "index": 0,
     "message": {
       "role": "assistant",
-      "content": "Hello! How can I help you today?"
+      "content": "你好！有什么可以帮助你的吗？"
     },
     "finish_reason": "stop"
   }],
@@ -82,9 +86,9 @@ console.log(response.choices[0].message.content);
 ```
 
 <Note>
-Пример с `gpt-5.5` на этой странице быстрого старта был успешно перепроверен в production-среде Crazyrouter 2026-03-23.
+Пример `gpt-5.5` на этой странице быстрого старта был обновлен согласно базовой версии документа от 2026-06-06.
 </Note>
 
 <Note>
-Все OpenAI-совместимые клиенты и фреймворки, например LangChain, LlamaIndex и Cursor, можно подключить простой заменой `base_url` и `api_key`.
+Все совместимые с OpenAI клиенты и фреймворки (например, LangChain, LlamaIndex, Cursor и др.) могут быть интегрированы просто путем изменения `base_url` и `api_key`.
 </Note>

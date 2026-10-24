@@ -1,0 +1,88 @@
+---
+title: "Funciones avanzadas de Kling"
+description: "Funciones avanzadas de Kling: prueba virtual de ropa"
+---
+> Contenido actualizado: 2026-06-09
+
+# Funciones avanzadas de Kling
+
+## Prueba virtual de ropa
+
+```
+POST /kling/v1/images/kolors-virtual-try-on
+```
+
+Actualmente, la única función avanzada de Kling disponible públicamente es la prueba virtual de ropa. Esta función ya ha pasado la validación bounded con éxito, y se ha completado el ciclo `Tarea completada -> archivo en R2 -> media.crazyrouter.com`.
+
+### Parámetros de solicitud
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `model_name` | string | No | Modelos comunes: `kolors-virtual-try-on-v1`, `kolors-virtual-try-on-v1-5` |
+| `human_image` | string | Sí | Imagen de la persona, admite URL o Base64 |
+| `cloth_image` | string | Sí | Imagen de la prenda, admite URL o Base64 |
+| `callback_url` | string | No | Dirección de callback |
+| `external_task_id` | string | No | ID de tarea personalizada en el negocio |
+
+### Ejemplo de solicitud
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/kling/v1/images/kolors-virtual-try-on \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model_name": "kolors-virtual-try-on-v1",
+    "human_image": "https://example.com/person.jpg",
+    "cloth_image": "https://example.com/jacket.jpg"
+  }'
+```
+
+### Ejemplo de respuesta al envío exitoso
+
+```json
+{
+  "created_at": 1774585120,
+  "id": "866361099762425934",
+  "model": "kolors-virtual-try-on-v1",
+  "object": "video",
+  "progress": 0,
+  "status": "",
+  "task_id": "866361099762425934"
+}
+```
+
+## Consultar tareas de prueba de ropa
+
+```
+GET /kling/v1/images/kolors-virtual-try-on/{task_id}
+```
+
+```bash cURL
+curl https://api.crazyrouter.com/kling/v1/images/kolors-virtual-try-on/866361099762425934 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Ejemplo de respuesta (completado)
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "status": "succeeded",
+    "task_id": "866361099762425934",
+    "url": "https://media.crazyrouter.com/task-artifacts/2026/03/27/50/tryOnGenerate/866361099762425934.png"
+  }
+}
+```
+
+<Note>
+  Actualmente no escribas otras capacidades avanzadas de Kling, como sincronización de labios, extensión de video, efectos de video, como interfaces abiertas. Aún no han sido incluidas en el contract público de Crazyrouter.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Página del modelo Kling 2.6: precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/kling/aigc-video-kling-2-6?utm_source=docs&utm_medium=related)
+- [Página del modelo Kling 3.0: precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/kling/aigc-video-kling-3-0?utm_source=docs&utm_medium=related)
+- [Todos los modelos y precios de Kling AI](https://crazyrouter.com/es/models/kling?utm_source=docs&utm_medium=related)

@@ -2,7 +2,7 @@
 title: "AIGC Kling VOD 호출 방법"
 description: "Crazyrouter의 AIGC Kling VOD 라인을 통해 Kling 비디오 모델을 호출합니다"
 ---
-> 업데이트: 2026-06-24
+> 내용 업데이트: 2026-08-07
 
 # AIGC Kling VOD 호출 방법
 
@@ -18,7 +18,7 @@ GET /v1/video/generations/{task_id}
 </Note>
 
 <Note>
-  이미지 모델 `aigc-image-kling-3.0`을 사용하려면 [AIGC Kling 3.0 이미지 생성](/images/aigc-kling)을 참고하십시오. 이 모델은 `POST /v1/images/generations`를 사용하며 이 페이지의 비디오 인터페이스를 사용하지 않습니다.
+  이미지 모델 `aigc-image-kling-3.0`을 사용하려면 [AIGC Kling 3.0 이미지 생성](/ko/images/aigc-kling)을 참고하십시오. 이 모델은 `POST /v1/images/generations`를 사용하며 이 페이지의 비디오 인터페이스를 사용하지 않습니다.
 </Note>
 
 ## 사용 가능한 모델
@@ -287,11 +287,11 @@ curl https://api.crazyrouter.com/v1/video/generations/TASK_ID \
 | 주요 필드 | `model`, `prompt`, `seconds`, `image`, `images`, `metadata` | `model_name`, `prompt`, `image_urls`, `duration` 등 |
 | 적합한 시나리오 | Tencent VOD 라인을 사용하며 VOD 가격 및 기능을 적용 | 네이티브 Kling 프로토콜 사용 |
 
-가격, 할인 및 사용 가능한 규격은 [Pricing 페이지](/pricing)를 기준으로 합니다.
+가격, 할인 및 사용 가능한 규격은 [Pricing 페이지](https://crazyrouter.com/ko/pricing)를 기준으로 합니다.
 
 {/* crazyrouter-model-links v2 */}
 ## 관련 페이지 (crazyrouter.com)
 
-- [Kling 3.0 모델 페이지: 실시간 가격, 샘플, 코드](https://crazyrouter.com/en/models/kling/aigc-video-kling-3-0?utm_source=docs&utm_medium=related)
-- [Kling 2.6 모델 페이지: 실시간 가격, 샘플, 코드](https://crazyrouter.com/en/models/kling/aigc-video-kling-2-6?utm_source=docs&utm_medium=related)
-- [Kling AI 전체 모델과 가격](https://crazyrouter.com/en/models/kling?utm_source=docs&utm_medium=related)
+- [Kling 3.0 모델 페이지: 실시간 가격, 샘플, 코드](https://crazyrouter.com/ko/models/kling/aigc-video-kling-3-0?utm_source=docs&utm_medium=related)
+- [Kling 2.6 모델 페이지: 실시간 가격, 샘플, 코드](https://crazyrouter.com/ko/models/kling/aigc-video-kling-2-6?utm_source=docs&utm_medium=related)
+- [Kling AI 전체 모델과 가격](https://crazyrouter.com/ko/models/kling?utm_source=docs&utm_medium=related)

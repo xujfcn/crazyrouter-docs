@@ -1,33 +1,36 @@
 ---
-title: '認証'
-description: 'API キーの取得方法と使い方'
+title: "認証方式"
+description: "API Key の取得と使用方法"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-16
 
 ## Bearer Token 認証
 
-すべての API リクエストでは、HTTP ヘッダーに API キーを指定します。
+すべての API リクエストでは、Header に API Key を含める必要があります：
 
-```text
+```
 Authorization: Bearer YOUR_API_KEY
 ```
 
-## API キーを取得する
+## API Key の取得方法
 
-1. [Crazyrouter](https://crazyrouter.com) にログインします。
-2. [Token Management](https://crazyrouter.com/console/token) ページを開きます。
-3. 「Create Token」をクリックします。
-4. トークン名、利用上限、利用可能モデルなどを設定します。
-5. `sk-` で始まる生成済みキーをコピーします。
+1. [Crazyrouter](https://crazyrouter.com) にログインする
+2. ログイン後、[Token 管理](https://crazyrouter.com/console/token) ページに移動する
+3. 「新規トークン」をクリックする
+4. トークン名、利用制限、利用可能モデルなどを設定する
+5. 生成された `sk-` で始まるキーをコピーする
 
 <Warning>
-  API キーは作成時に一度だけ表示されます。必ず安全な場所に保存してください。紛失した場合は、新しいキーを作成する必要があります。
+API Keyは作成時にのみ表示されますので、大切に保管してください。紛失した場合は新たに作成が必要です。
 </Warning>
 
 ## 利用例
 
-<CodeGroup>
+<Note>
+OpenAI 互換接続時のデフォルト国際アドレスには `https://api.crazyrouter.com/v1` をご利用ください。東アジア地域では `https://cn.crazyrouter.com/v1` を優先的にご利用ください。Claude Code、Hermes、OpenClaw など他ツールにアドレス設定を行う場合は、事前に [API Endpoint 説明](https://docs.crazyrouter.com/jp/api-endpoint) をご参照ください。
+</Note>
 
+<CodeGroup>
 ```bash cURL
 curl https://api.crazyrouter.com/v1/chat/completions \
   -H "Authorization: Bearer sk-xxxxxxxx" \
@@ -52,15 +55,14 @@ const client = new OpenAI({
   baseURL: 'https://api.crazyrouter.com/v1'
 });
 ```
-
 </CodeGroup>
 
-## トークン権限
+## Token 権限管理
 
-トークン作成時には、次の項目を設定できます。
+トークン作成時に以下を設定できます：
 
-- **Name**: 用途を識別するための名前
-- **Quota Limit**: 利用できる上限額
-- **Expiration Time**: 有効期限
-- **Available Models**: 呼び出し可能なモデル
-- **IP Whitelist**: 呼び出し元 IP の制限
+- **名称**：用途の識別に便利
+- **利用制限**：使用できる最大限度を設定
+- **有効期限**：有効期間を設定
+- **利用可能モデル**：利用を許可するモデルの範囲を制限
+- **IP ホワイトリスト**：呼び出し元 IP を制限

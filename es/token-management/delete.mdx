@@ -1,0 +1,72 @@
+---
+title: 'Eliminar token'
+description: 'Elimina el token de API especificado'
+api: 'DELETE /api/token/{id}'
+---
+> Contenido actualizado: 2026-07-20
+
+## Descripción de la interfaz
+
+Elimina permanentemente el token de API especificado. Después de eliminarlo, la clave API de ese token quedará inmediatamente inválida.
+
+<Note>
+  Este conjunto de interfaces `/api/token/*` se utiliza principalmente para la automatización de la gestión de claves API en la consola de Crazyrouter. Requieren que el usuario proporcione `access token` y `New-Api-User` en las cabeceras de la solicitud; no son interfaces diseñadas para el uso directo en el flujo de invocación de modelos `sk-xxx` comunes. La URL base de la solicitud debe usar `https://crazyrouter.com`; `https://api.crazyrouter.com` es la entrada exclusiva para la API de modelos, y usar la ruta de gestión devolverá `404 api_only_endpoint`.
+</Note>
+
+## Método de autenticación
+
+Utiliza autenticación a nivel de usuario, por favor incluye lo siguiente en la cabecera de la solicitud:
+
+```text
+Authorization: Bearer your_access_token
+New-Api-User: 1
+```
+
+## Parámetros de ruta
+
+<ParamField path="id" type="integer" required>
+  ID del token a eliminar
+</ParamField>
+
+## Formato de respuesta
+
+```json
+{
+  "success": true,
+  "message": "令牌删除成功"
+}
+```
+
+## Ejemplo de código
+
+<CodeGroup>
+
+```python Python
+import requests
+
+headers = {
+    "Authorization": "Bearer your_access_token",
+    "New-Api-User": "1",
+    "User-Agent": "Mozilla/5.0"
+}
+
+token_id = 10
+response = requests.delete(
+    f"https://crazyrouter.com/api/token/{token_id}",
+    headers=headers
+)
+
+print(response.json())
+```
+
+```bash cURL
+curl -X DELETE https://crazyrouter.com/api/token/10 \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 1"
+```
+
+</CodeGroup>
+
+<Warning>
+  La operación de eliminación es irreversible. Todas las aplicaciones que usen esa clave dejarán de poder invocar la API inmediatamente después de la eliminación.
+</Warning>

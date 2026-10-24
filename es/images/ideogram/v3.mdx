@@ -1,0 +1,182 @@
+---
+title: "Ideograma V3"
+description: "Utiliza la API de Ideograma V3 para generación, edición, mezcla, reconstrucción y reemplazo de fondo de imágenes"
+---
+> Contenido actualizado: 2026-06-09
+
+# Ideograma V3
+
+Ideograma V3 es la más reciente generación de modelos de texto a imagen, con mejoras notables en el renderizado de texto y la calidad de imagen.
+
+## Generar imágenes
+
+```
+POST /ideogram/v1/ideogram-v3/generate
+```
+
+### Parámetros de la solicitud
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `prompt` | string | Sí | Palabras clave descriptivas de la imagen |
+| `aspect_ratio` | string | No | Relación de aspecto, como `ASPECT_1_1`, `ASPECT_16_9`, `ASPECT_9_16` |
+| `model` | string | No | Versión del modelo, valor predeterminado `V_3` |
+| `magic_prompt_option` | string | No | Mejora del prompt: `AUTO`, `ON`, `OFF` |
+| `rendering_speed` | string | No | Velocidad de renderizado: `DEFAULT`, `TURBO`, `QUALITY` |
+| `style_type` | string | No | Tipo de estilo: `AUTO`, `GENERAL`, `REALISTIC`, `DESIGN` |
+| `negative_prompt` | string | No | Palabras clave negativas |
+
+### Ejemplo de solicitud
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/ideogram/v1/ideogram-v3/generate \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "A serene Japanese garden with cherry blossoms, text saying \"Hello World\" on a wooden sign",
+    "aspect_ratio": "ASPECT_16_9",
+    "rendering_speed": "DEFAULT",
+    "style_type": "REALISTIC"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/ideogram/v1/ideogram-v3/generate",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "prompt": "A serene Japanese garden with cherry blossoms",
+        "aspect_ratio": "ASPECT_16_9",
+        "style_type": "REALISTIC"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### Ejemplo de respuesta
+
+```json
+{
+  "created": 1709123456,
+  "data": [
+    {
+      "url": "https://ideogram.ai/assets/image/...",
+      "prompt": "A serene Japanese garden with cherry blossoms",
+      "resolution": "1344x768",
+      "is_image_safe": true,
+      "seed": 12345
+    }
+  ]
+}
+```
+
+---
+
+## Editar imagen
+
+```
+POST /ideogram/v1/ideogram-v3/edit
+```
+
+Editar y modificar imágenes existentes.
+
+### Parámetros de la solicitud
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `prompt` | string | Sí | Descripción de la edición |
+| `image` | string | Sí | URL o Base64 de la imagen original |
+| `mask` | string | No | Máscara de imagen, marca la zona que se editará |
+| `style_type` | string | No | Tipo de estilo |
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/ideogram/v1/ideogram-v3/edit \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "Replace the sky with a starry night",
+    "image": "https://example.com/photo.jpg",
+    "mask": "https://example.com/mask.png"
+  }'
+```
+
+---
+
+## Mezclar (Remix) imagen
+
+```
+POST /ideogram/v1/ideogram-v3/remix
+```
+
+Genera variantes basadas en una imagen de referencia y nuevos prompts.
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `prompt` | string | Sí | Nuevo prompt |
+| `image` | string | Sí | Imagen de referencia |
+| `image_weight` | number | No | Peso de la imagen de referencia, de 0 a 100 |
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/ideogram/v1/ideogram-v3/remix \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "Same scene but in watercolor painting style",
+    "image": "https://example.com/photo.jpg",
+    "image_weight": 50
+  }'
+```
+
+---
+
+## Reconstrucción (Reframe)
+
+```
+POST /ideogram/v1/ideogram-v3/reframe
+```
+
+Amplía el lienzo de la imagen, generando contenido más allá de los límites originales.
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `image` | string | Sí | Imagen original |
+| `resolution` | string | No | Resolución objetivo |
+
+---
+
+## Reemplazar fondo
+
+```
+POST /ideogram/v1/ideogram-v3/replace-background
+```
+
+Detecta automáticamente el sujeto principal y reemplaza el fondo.
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `prompt` | string | Sí | Descripción del nuevo fondo |
+| `image` | string | Sí | Imagen original |
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/ideogram/v1/ideogram-v3/replace-background \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "prompt": "A tropical beach at sunset",
+    "image": "https://example.com/portrait.jpg"
+  }'
+```
+
+<Note>
+  Ideograma V3 ofrece excelentes resultados en renderizado de texto, ideal para casos donde se necesita texto en la imagen.
+</Note>

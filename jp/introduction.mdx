@@ -1,63 +1,67 @@
 ---
-title: 'Crazyrouter ドキュメント'
-description: 'タスク別に Crazyrouter API、ツール連携、モデル機能、AI 向けドキュメントを探す'
+title: "Crazyrouter ドキュメント入口"
+description: "タスクごとに Crazyrouter API、ツール連携、モデル機能や AI 可読ドキュメントを素早く見つける"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-16
 
 <Note>
-  API ルート: OpenAI 互換クライアントは通常 `https://api.crazyrouter.com/v1` または `https://api.crazyrouter.com/v1` を使います。Claude Code / Anthropic ネイティブクライアントは `/v1` を付けずにルートドメインを使います。詳しくは [API エンドポイント](/jp/api-endpoint) を参照してください。
+  API 接続パス：デフォルトの国際エントリーは `https://api.crazyrouter.com`、東アジア地域では `https://cn.crazyrouter.com` を優先して使用してください。OpenAI 互換クライアントは通常、ルートドメインの後に `/v1` を追加します；Claude Code / Anthropic ネイティブクライアントはルートドメインのみ使用し、`/v1` を付けないでください。詳細は[API エンドポイント](/jp/api-endpoint)をご覧ください。
 </Note>
 
-Crazyrouter は統一 AI モデル API ゲートウェイです。1 つの API キーで、テキスト、画像、動画、音声、Embedding、Rerank、AI ツール連携に必要なモデルへアクセスできます。
+Crazyrouter は統合型 AI モデル API ゲートウェイです。1つの API Key で、テキスト・画像・動画・音声・埋め込み・リランクやサードパーティツール統合など多様なモデル機能を利用できます。
 
-## タスクを選択
+## タスクを選択してください
 
 <CardGroup cols={2}>
-  <Card title="クイックスタート" icon="rocket" href="/jp/quickstart">
-    API キーを取得し、Base URL を設定して、最初のリクエストを実行します。
+  <Card title="llms.txt の使い方" icon="bot" href="/jp/llms-guide">
+    AI ツールに `https://docs.crazyrouter.com/llms.txt` を読ませ、「Pricing」ページや実際のルーティングに従って正しい呼び出し方法を生成させます。
   </Card>
-  <Card title="ツール連携" icon="plug" href="/jp/integrations/claude-code">
-    Claude Code、Codex CLI、Cursor、Cline、Cherry Studio、OpenClaw などを接続します。
+  <Card title="クイックスタート" icon="rocket" href="/jp/quickstart">
+    API Key を取得し、Base URL を設定して、5分以内に初回リクエストを完了できます。
+  </Card>
+  <Card title="ツールの連携" icon="plug" href="/jp/integrations/claude-code">
+    Claude Code、Codex CLI、Cursor、Cline、Cherry Studio、OpenClaw など一般的な AI ツールと連携できます。
   </Card>
   <Card title="テキストモデル" icon="message" href="/jp/chat/openai/completions">
-    OpenAI Chat、Claude Messages、Gemini Native、Responses API を使います。
+    OpenAI Chat、Claude Messages、Gemini Native、Responses API を活用。
   </Card>
   <Card title="画像生成" icon="image" href="/jp/images/gpt-image">
-    GPT Image、Qwen Image、Midjourney、Nano Banana Pro、DALL-E などを呼び出します。
+    GPT Image、Qwen Image、Midjourney、Nano Banana Pro、DALL-E などの画像モデルを呼び出し。
   </Card>
-  <Card title="動画生成" icon="video" href="/jp/video/unified">
-    Veo、Kling、Seedance、Runway、Luma、Sora、Wan などの動画 API を接続します。
+  <Card title="動画" icon="video" href="/jp/video/unified">
+    Veo、Kling、Seedance、Runway、Luma、Sora、Wan などの動画生成インターフェースと連携。
   </Card>
-  <Card title="モデルと課金" icon="tag" href="https://crazyrouter.com/pricing">
-    料金、モデル availability、エラー、サービスステータス、コンソール管理を確認します。
+  <Card title="モデルと料金" icon="tag" href="https://crazyrouter.com/pricing">
+    モデル価格、利用可能なモデル、エラー処理、サービス状況、コンソール管理説明を確認。
   </Card>
 {/* crazyrouter-site-links */}
-  <Card title="モデル料金比較" icon="coins" href="https://crazyrouter.com/ja/pricing?utm_source=docs&utm_medium=card">
-    35 モデルの公式価格 / Azure / Bedrock / Vertex / OpenRouter と Crazyrouter のリアルタイム料金を毎日照合。価格履歴と月額見積もり付き。
+  <Card title="モデル価格比較" icon="coins" href="https://crazyrouter.com/ja/pricing?utm_source=docs&utm_medium=card">
+    35 モデルの公式価格 / Azure / Bedrock / Vertex / OpenRouter および Crazyrouter のリアルタイム価格を一覧比較、毎日検証、価格履歴・月額試算付き。
   </Card>
-  <Card title="ベンダー別モデル一覧" icon="layer-group" href="https://crazyrouter.com/en/models?utm_source=docs&utm_medium=card">
-    Anthropic、OpenAI、Google、DeepSeek など 14 社の全モデル、リアルタイム料金、実サンプルとコード。
+  <Card title="メーカー別モデル一覧" icon="layer-group" href="https://crazyrouter.com/ja/models?utm_source=docs&utm_medium=card">
+    Anthropic、OpenAI、Google、DeepSeek など 14 社の全販売中モデル、リアルタイム価格、具体的なサンプル・コールコード一覧。
   </Card>
 </CardGroup>
 
-## AI が読めるドキュメント
+## AI ツール向けドキュメント読込
 
 <CardGroup cols={2}>
-  <Card title="AI ツール入口" icon="bot" href="/jp/ai-tools">
-    Codex、Claude Code、ChatGPT、Cursor などが読むためのドキュメント入口です。
+  <Card title="AI が読めるエンドポイント" icon="bot" href="/jp/ai-tools">
+    Codex、Claude Code、ChatGPT、Cursor などの AI ツールで使うドキュメントインデックス。
   </Card>
-  <Card title="完全な文脈" icon="file-text" href="https://docs.crazyrouter.com/llms-full.txt">
-    AI ツールに渡しやすい単一ファイル版の全ドキュメントです。
+  <Card title="完全なドキュメントコンテキスト" icon="file-text" href="https://docs.crazyrouter.com/llms-full.txt">
+    単一ファイル集約版のドキュメント。コピペや URL 読込対応 AI ツールに最適です。
   </Card>
 </CardGroup>
 
-## よく使うページ
+## よく使うルート
 
-| 目的 | ドキュメント |
+| やりたいこと | 推奨ページ |
 | --- | --- |
-| Base URL とルートを確認する | [API エンドポイント](/jp/api-endpoint) |
-| API キーを使う | [認証](/jp/authentication) |
-| Claude Code を接続する | [Claude Code](/jp/integrations/claude-code) |
-| Codex CLI を接続する | [Codex CLI](/jp/integrations/codex) |
-| ローカル画像を参照画像として使う | [画像アップロード](/jp/upload) |
-| エラーを調べる | [エラーハンドリング](/jp/error-handling) |
+| Base URL とルート確認 | [API エンドポイント](/jp/api-endpoint) |
+| API Key の作成と利用 | [認証方法](/jp/authentication) |
+| 最初の OpenAI 互換リクエスト送信 | [クイックスタート](/jp/quickstart) |
+| Claude Code 接続 | [Claude Code 接続方法](/jp/integrations/claude-code) |
+| Codex CLI 連携 | [Codex CLI 接続](/jp/integrations/codex) |
+| ローカル画像を参照画像に利用 | [画像アップロードガイド](/jp/upload) |
+| リクエストエラーのトラブルシュート | [エラー処理](/jp/error-handling) |

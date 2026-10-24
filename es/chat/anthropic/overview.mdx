@@ -1,0 +1,169 @@
+---
+title: "Objeto de chat de Claude"
+description: "Basado en producción revisada el 23 de marzo de 2026, comprensión del objeto de mensaje de Anthropic y eventos SSE nativos"
+---
+> Contenido actualizado: 2026-06-09
+
+
+# Objeto de chat de Claude
+
+Crazyrouter soporta la API de mensajes nativos de Anthropic.
+
+Esta página solo documenta los objetos de mensaje `2026-03-23` y tipos de eventos de flujo que ya han sido revisados en producción.
+
+## Objeto de mensaje
+
+Solicitud mínima actual para producción:
+
+- `model: "claude-opus-4-8"`
+- `POST /v1/messages`
+
+Estructura típica de respuesta en producción:
+
+```json
+{
+  "id": "msg_xxx",
+  "type": "message",
+  "role": "assistant",
+  "content": [
+    {
+      "type": "text",
+      "text": "..."
+    }
+  ],
+  "model": "claude-opus-4-8",
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "usage": {
+    "input_tokens": 15,
+    "output_tokens": 20
+  }
+}
+```
+
+### Campos relevantes
+
+| Campo | Tipo | Descripción |
+|------|------|-------------|
+| `id` | string | Identificador único del mensaje |
+| `type` | string | Valor fijo: `message` |
+| `role` | string | Valor fijo: `assistant` |
+| `content` | array | Lista de bloques de contenido |
+| `model` | string | Modelo realmente usado |
+| `stop_reason` | string | Razón de parada, como `end_turn`, `tool_use`, `max_tokens` |
+| `usage` | object | Uso de tokens |
+
+### Tipos comunes de bloques de contenido
+
+Bloque de texto:
+
+```json
+{
+  "type": "text",
+  "text": "..."
+}
+```
+
+Bloque de llamada a herramienta:
+
+```json
+{
+  "type": "tool_use",
+  "id": "toolu_xxx",
+  "name": "get_time",
+  "input": {
+    "timezone": "Asia/Shanghai"
+  }
+}
+```
+
+Bloque de razonamiento:
+
+```json
+{
+  "type": "thinking",
+  "thinking": "..."
+}
+```
+
+---
+
+## Tipos de evento de flujo
+
+En la revisión de producción de `2026-03-23`, `claude-opus-4-8` retorna nativamente los siguientes eventos SSE:
+
+- `message_start`
+- `content_block_start`
+- `content_block_delta`
+- `content_block_stop`
+- `message_delta`
+- `message_stop`
+
+### Ejemplo de eventos
+
+`message_start`
+
+```text
+event: message_start
+data: {"type":"message_start","message":{...}}
+```
+
+`content_block_start`
+
+```text
+event: content_block_start
+data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}
+```
+
+`content_block_delta`
+
+```text
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Hello"}}
+```
+
+`content_block_stop`
+
+```text
+event: content_block_stop
+data: {"type":"content_block_stop","index":0}
+```
+
+`message_delta`
+
+```text
+event: message_delta
+data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"output_tokens":20}}
+```
+
+`message_stop`
+
+```text
+event: message_stop
+data: {"type":"message_stop"}
+```
+
+---
+
+## Un criterio práctico
+
+- Si en `content` solo aparece `text`, es una respuesta normal
+- Si `stop_reason = "tool_use"`, y en `content` aparece `tool_use`, es una llamada de herramienta
+- Si en `content` aparece `thinking`, indica que la forma de solicitud y el modelo actual han activado razonamiento extendido
+
+<Note>
+  El bloque `thinking` no es devuelto por defecto en todos los modelos Claude. Actualmente, `claude-opus-4-8` es el único caso que se ha revisado con éxito.
+</Note>
+
+Páginas relacionadas:
+
+- [Formato nativo de Claude](/es/chat/anthropic/messages)
+- [Capacidad principal: Tool Calling](/es/features/tool-calling)
+- [Capacidad principal: Reasoning](/es/features/reasoning)
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Comparación de precios de Claude Fable 5: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Página de modelos Claude Fable 5: precio en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Comparación de precios de Claude Haiku 4.5: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/claude-haiku-4-5?utm_source=docs&utm_medium=related)

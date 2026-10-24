@@ -1,262 +1,262 @@
 ---
-title: 'ChatBox Setup Guide'
-description: 'Connect Crazyrouter to ChatBox through the OpenAI-compatible provider flow, with verified model guidance, knowledge-base rollout advice, and troubleshooting'
+title: "ChatBox 設定チュートリアル"
+description: "ChatBox デスクトップアプリで OpenAI 互換方式により Crazyrouter を接続し、モデル・ナレッジベース・トラブルシュート・初回検証のアドバイスを補足します。"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-ChatBox is a widely used cross-platform AI client with Windows, macOS, Linux, and web availability. When you connect ChatBox to Crazyrouter, the safest approach is to use ChatBox's `OpenAI API Compatible` or `OpenAI API` provider flow instead of searching for a provider-specific preset.
+ChatBox は、Windows、macOS、Linux をサポートする一般的なクロスプラットフォームAIクライアントで、Web版もあります。Crazyrouter と接続する際は、特定ベンダーのプリセットに頼らず、まず ChatBox の `OpenAI API Compatible` または `OpenAI API` を利用した設定を推奨します。
 
-This setup is useful because it:
+このやり方のメリットは：
 
-- is simple for non-technical users
-- lets you switch between Crazyrouter-approved models inside one desktop client
-- works well for desktop chat, knowledge-base Q&A, file reading, and everyday writing tasks
+- 設定が簡単、一般ユーザーにも素早く導入できる
+- Crazyrouter で許可されたモデルを直接切り替え可能
+- デスクトップでのチャット、ナレッジベースQ&A、ファイル補助読書など様々な用途に適応
 
-## Start Here
+## 結論から
 
-Use this configuration first:
+まず下記の設定で始めることをおすすめします：
 
-- Provider / API Mode: `OpenAI API Compatible` or `OpenAI API`
-- API Host: `https://api.crazyrouter.com`
-- API Path: leave it blank or keep the default
-- API Key: `sk-xxx`
-- First validation model: `gpt-5.5`
+- Provider / APIモード：`OpenAI API Compatible` または `OpenAI API`
+- API Host：`https://api.crazyrouter.com`
+- API Path：デフォルトまたは空欄
+- API Key：`sk-xxx`
+- 最初の検証モデル：`gpt-5.5`
 
 <Note>
-According to ChatBox's current official provider documentation, the `API Path` usually does not need to be filled manually because ChatBox already has a default OpenAI-compatible chat path. For Crazyrouter docs, the safest starting point is to enter the root host `https://api.crazyrouter.com` and avoid manually forcing `/v1/chat/completions` at the beginning.
+ChatBox 公式ドキュメントによると、`API Path` は通常手動入力不要で、デフォルトは OpenAI 互換チャットパスです。したがって Crazyrouter のドキュメントでは、`API Host` はルートドメイン `https://api.crazyrouter.com` とします。`/v1/chat/completions` を手動で追加しないように推奨します。
 </Note>
 
-## Who This Guide Is For
+## 対象ユーザー
 
-- users who want a fast desktop setup for Crazyrouter
-- users who want multi-model daily chat, translation, summarization, or writing assistance
-- users who want to combine ChatBox knowledge-base or file-Q&A features with Crazyrouter
-- users who want a full GUI setup without writing code
+- デスクトップで Crazyrouter を素早く使いたい人
+- 複数モデルの日常チャットや翻訳・要約・執筆補助をしたい人
+- ローカルのナレッジベースやファイルQ&A能力を Crazyrouter と組み合わせたい人
+- コードを書くつもりがなく、GUIだけで設定を完了したい人
 
-## Prerequisites
+## 前提条件
 
-| Item | Notes |
+| 項目 | 説明 |
 |------|------|
-| Crazyrouter account | Register at [crazyrouter.com](https://crazyrouter.com) first |
-| Crazyrouter token | Create a dedicated token for ChatBox |
-| ChatBox client | Desktop is recommended because knowledge-base features are stronger there |
-| Allowed models | Start by allowing at least one chat model |
+| Crazyrouterアカウント | [crazyrouter.com](https://crazyrouter.com) で登録 |
+| Crazyrouterトークン | ChatBox 用の専用トークン作成を推奨 |
+| ChatBoxクライアント | デスクトップ版インストールを推奨、ナレッジベース等の機能が充実 |
+| 利用可能モデル | チャットモデルを最低1つ許可 |
 
-Suggested first-pass allowlist:
+初回は以下のみ許可することを推奨：
 
 - `gpt-5.5`
 - `claude-opus-4-8`
 - `gemini-3.1-pro`
 
-## Install ChatBox
+## ChatBox のインストール
 
 ### Windows
 
-1. Open the [ChatBox website](https://chatboxai.app/)
-2. Download the Windows installer
-3. Run the installer
-4. Launch ChatBox after setup
+1. [ChatBox公式サイト](https://chatboxai.app/)を開く
+2. Windowsインストーラーをダウンロード
+3. ダブルクリックでインストール
+4. 完了したら ChatBox を起動
 
 ### macOS
 
-1. Open the [ChatBox website](https://chatboxai.app/)
-2. Download the macOS build
-3. Move it into `Applications`
-4. If macOS shows a security prompt on first launch, complete the usual allow flow
+1. [ChatBox公式サイト](https://chatboxai.app/)を開く
+2. macOSインストーラーをダウンロード
+3. `Applications` にドラッグ
+4. 初回起動時にシステムセキュリティ警告が出た場合は、案内に従い許可
 
 ### Linux
 
-1. Open the [ChatBox website](https://chatboxai.app/)
-2. Download the package or desktop build for your distribution
-3. Install it and launch ChatBox
+1. [ChatBox公式サイト](https://chatboxai.app/)を開く
+2. お使いのディストリビューション用のインストーラーまたはデスクトップ版をダウンロード
+3. インストール後 ChatBox を起動
 
 <Tip>
-If your only goal is to verify that Crazyrouter works in ChatBox, start with the desktop app and postpone multi-device sync, knowledge-base imports, and large model lists until the basic chat path is stable.
+Crazyrouter が ChatBox 上で動作するか、まず検証したい場合はデスクトップ版の利用を優先し、いきなり多数端末での同期やナレッジベース、複雑なモデルリストも同時に試そうとしないこと。
 </Tip>
 
-## Recommended Provider Setup
+## 推奨設定方法
 
-The exact labels may vary slightly by ChatBox version. Common entry points include:
+ChatBox のバージョンによって画面名が多少異なる場合がありますが、主な入り口は：
 
 - `Settings`
 - `Model Provider`
 - `AI Provider`
 - `Add`
 
-If your current version already includes `OpenAI API`, select it directly. If not, add a new `OpenAI API Compatible` provider.
+もし現在のバージョンで `OpenAI API` プロバイダーが内蔵されていれば、そのまま選択してください。なければ `OpenAI API Compatible` プロバイダーを新規追加します。
 
-## Configuration Steps
+## 設定手順
 
 <Steps>
-  <Step title="Step 1: Create a dedicated Crazyrouter token for ChatBox">
-    On the first pass, only allow one or two models such as:
+  <Step title="ステップ 1：Crazyrouter で ChatBox 専用トークンを作成する">
+    初回はモデルを1～2個だけ許可するのがおすすめ：
 
     - `gpt-5.5`
     - `claude-opus-4-8`
 
-    A small model scope makes troubleshooting much easier.
+    モデルが多いとトラブルシュート範囲が広がるため、絞ると問題の特定が容易です。
   </Step>
 
-  <Step title="Step 2: Open ChatBox settings">
-    Launch ChatBox, then open the settings entry in the lower-left area and go to:
+  <Step title="ステップ 2：ChatBox の設定を開く">
+    ChatBox 起動後、左下の設定入口をクリックし、以下を開きます：
 
     - `Model Provider`
-    - or `AI Provider`
+    - または `AI Provider`
   </Step>
 
-  <Step title="Step 3: Select or add an OpenAI-compatible provider">
-    Use one of these routes:
+  <Step title="ステップ 3：OpenAI 互換プロバイダーを選択または新規追加する">
+    下記2つのケースをおすすめします：
 
-    - if `OpenAI API` already exists, select it
-    - if not, click `Add` and create an `OpenAI API Compatible` provider
+    - `OpenAI API` があれば選択
+    - なければ `Add` をクリックし、`OpenAI API Compatible` プロバイダーを新規追加
   </Step>
 
-  <Step title="Step 4: Enter the Crazyrouter connection values">
-    Recommended values:
+  <Step title="ステップ 4：Crazyrouter の接続情報を入力する">
+    推奨入力内容：
 
     - `API Host`: `https://api.crazyrouter.com`
-    - `API Path`: leave blank or keep the default
+    - `API Path`: デフォルトまたは空欄
     - `API Key`: `sk-xxx`
 
-    If ChatBox asks for a provider name, `Crazyrouter` is a clear choice.
+    プロバイダー名の入力欄があれば `Crazyrouter` としてもOKです。
   </Step>
 
-  <Step title="Step 5: Add the first model">
-    For the first test, add only:
+  <Step title="ステップ 5：最初のモデルを追加する">
+    初回は1モデルだけ追加を推奨：
 
     - `gpt-5.5`
 
-    After the minimal path works, you can add:
+    最小経路検証が通れば、順次追加：
 
     - `claude-opus-4-8`
     - `gemini-3.1-pro`
   </Step>
 
-  <Step title="Step 6: Use Check or Save for the first connectivity test">
-    If your ChatBox version includes a `Check` button, use it first.
+  <Step title="ステップ 6：Check または Save を使ってまず接続テストを行う">
+    ChatBox のバージョンに `Check` ボタンがあれば、まず `Check` を押してください。
 
-    If it only has `Save`, save the provider and then return to the main chat screen for validation.
+    `Save` しかなければ、一度保存し、メイン画面に戻って新規チャットでテストします。
   </Step>
 
-  <Step title="Step 7: Run the smallest possible chat validation">
-    Create a new chat, make sure the selected model is `gpt-5.5`, and send:
+  <Step title="ステップ 7：メイン画面で最初の最小限の検証を行う">
+    新しいチャットを作成し、現行モデルが `gpt-5.5` であることを確認し、次を入力：
 
     ```text
     Reply only OK
     ```
 
-    If you get `OK` or an equivalent short answer consistently, the main ChatBox-to-Crazyrouter path is working.
+    `OK` または近い結果が安定して返れば、ChatBox から Crazyrouter へのメイン経路は通っています。
   </Step>
 </Steps>
 
-## Recommended Validation Order
+## 推奨検証順序
 
-Follow this order instead of enabling everything at once:
+下記の流れで進めることを推奨、一度に多数モデルや機能を試さない：
 
-1. Start with one token
-2. Start with one model: `gpt-5.5`
-3. Validate plain text chat first
-4. Add a second model later
-5. Enable knowledge base, file Q&A, or more advanced settings only after chat is stable
+1. トークンはまず1つだけ設定
+2. モデルもまず1つ `gpt-5.5` のみ設定
+3. まずはテキストチャット検証
+4. 次に2つ目のモデルを追加
+5. 最後にナレッジベース、ファイルQ&A、複雑な会話パラメータを追加
 
-## Recommended Models
+## 推奨モデル
 
-| Scenario | Recommended model | Why |
+| シーン | 推奨モデル | 理由 |
 |------|----------|------|
-| First connectivity test | `gpt-5.5` | Verified successfully in production on March 23, 2026, and best suited for the OpenAI-compatible baseline |
-| Higher-quality writing and explanation | `claude-opus-4-8` | Better for detailed explanation, rewriting, and summaries |
-| Gemini fallback path | `gemini-3.1-pro` | Useful as a second vendor-compatible validation path inside the same client |
+| 初回接続性検証 | `gpt-5.5` | 当日動作実績あり、OpenAI互換ベースライン検証に最適 |
+| 高品質執筆・説明 | `claude-opus-4-8` | 複雑な説明・校正・要約に最適 |
+| Geminiバックアップ | `gemini-3.1-pro` | 同一クライアントでOpenAI系以外をクロス検証可能 |
 
-## How To Use ChatBox Features With Crazyrouter
+## ChatBox の主要機能と Crazyrouter の連携例
 
-### Basic chat
+### 通常チャット
 
-This is the best first test and should always come before advanced features.
+最も簡単なので、まず設定が正しいか検証に使う。
 
-### Knowledge base / file Q&A
+### ナレッジベース／ファイルQ&A
 
-Turn this on only after basic chat already works. For the first pass:
+通常チャットで問題ないことを確認してから開始。初回は：
 
-- keep files small
-- keep content simple
-- test with one file first
+- ファイルはできるだけ小さく
+- 内容はできるだけ明確に
+- まずは単一ファイルでQ&A検証
 
-Do not start with a large knowledge-base import before confirming the API configuration itself.
+API設定が正しいか未確定の状態では、多数ファイルや大規模ナレッジベースは避けてください。
 
-### Multi-model switching
+### 複数モデル切り替え
 
-Useful when you want different models for different tasks, for example:
+ChatBox でタスク分担等に活用可能：
 
-- default baseline chat: `gpt-5.5`
-- important summaries and writing: `claude-opus-4-8`
-- secondary vendor validation: `gemini-3.1-pro`
+- 基本チャット：`gpt-5.5`
+- 要約・執筆など重要タスク：`claude-opus-4-8`
+- 初回標準検証：`gpt-5.5`
 
-## Parameter Suggestions
+## パラメータ推奨値
 
-If your ChatBox version exposes common generation settings, keep the first run conservative:
+ChatBox が各種サンプリングパラメータをサポートする場合、初回は控えめ設定がおすすめ：
 
-| Parameter | Suggested value | Notes |
+| パラメータ | 推奨値 | 説明 |
 |------|--------|------|
-| Temperature | `0.2` to `0.7` | Keep it moderate during validation |
-| Max Tokens | default or moderate | Avoid very large outputs during troubleshooting |
-| Context Messages | default | Basic chat validation is enough at first |
+| Temperature | `0.2` から `0.7` | 初回検証では高め設定は避ける |
+| Max Tokens | デフォルトまたは中程度 | 出力が長すぎるとトラブルシュート困難に |
+| Context Messages | デフォルト維持 | まずは基本チャットの検証のみ |
 
-## Token Best Practices
+## トークン利用のベストプラクティス
 
-| Setting | Recommendation | Why |
+| 設定 | 推奨 | 説明 |
 |------|------|------|
-| Dedicated token | Required | Do not share it with IDEs or automation tools |
-| Model allowlist | Strongly recommended | Start with only one or two models |
-| Spending limit | Strongly recommended | Knowledge-base or repeated Q&A flows can amplify cost |
-| Environment separation | Recommended | Separate personal desktop usage from team-shared usage |
-| Leak response | Rotate immediately | Replace the key if it appears in screenshots, recordings, or screen sharing |
+| 専用トークン | 必須 | IDEや自動化フローと共有しない |
+| モデルホワイトリスト | 強く推奨 | まず1～2モデルのみ許可 |
+| クォータ上限 | 強く推奨 | ナレッジベース大量Q&Aで消費が急拡大するのを防ぐ |
+| 環境別トークン | 推奨 | 個人とチームで別トークンを分離 |
+| 流出時対応 | 即時ローテーション | スクリーンショット・録画・画面共有で漏れた場合、速やかにKey交換 |
 
-## Validation Checklist
+## 検証チェックリスト
 
-- [ ] ChatBox is installed and launches normally
-- [ ] A dedicated Crazyrouter token was created for ChatBox
-- [ ] `OpenAI API` or `OpenAI API Compatible` is selected
-- [ ] `API Host` is set to `https://api.crazyrouter.com`
-- [ ] `API Path` is left blank or kept at the default
-- [ ] `sk-xxx` was entered successfully
-- [ ] Only `gpt-5.5` was added for the first pass
-- [ ] Validation succeeded through `Check` or a minimal chat
-- [ ] The request appears in Crazyrouter logs
+- [ ] ChatBox をインストールし正常に起動できる
+- [ ] ChatBox 専用 Crazyrouter トークンを作成済み
+- [ ] `OpenAI API` または `OpenAI API Compatible` を選択済み
+- [ ] `API Host` を `https://api.crazyrouter.com` で入力済み
+- [ ] `API Path` をデフォルトまたは空欄に保持
+- [ ] `sk-xxx` を正しく入力済み
+- [ ] 最初に `gpt-5.5` のみ追加済み
+- [ ] `Check` または最小チャットで検証完了
+- [ ] Crazyrouter 管理画面で該当リクエストを確認できる
 
-## Common Errors And Fixes
+## よくあるエラーと修復方法
 
-| Symptom | Common cause | Fix |
+| 症状 | 主な原因 | 修復方法 |
 |------|----------|----------|
-| 401 unauthorized | Token is wrong, incomplete, or expired | Generate a new token and paste it again |
-| 404 | Host or path is wrong | Reset Host to `https://api.crazyrouter.com` and keep the path default |
-| 403 / model not allowed | The token does not allow the selected model | Allow that model in Crazyrouter token settings |
-| `model not found` | The model name is wrong | Switch back to `gpt-5.5` and revalidate |
-| Save succeeds but chat fails | Wrong provider type or the model was not actually added | Recheck the provider mode and model list |
-| Knowledge-base Q&A is slow or fails | Files are too large or the task is too complex | Fall back to smaller files and plain text chat |
-| Not sure whether `/v1` is required | Current ChatBox versions usually do not need a manually forced full path | Start with the root host and leave `API Path` blank or default |
+| 401 unauthorized | トークン不正・コピーミス・失効 | トークン再生成・再コピー |
+| 404 | Host・Path の入力ミス | Host を `https://api.crazyrouter.com` に戻し、Path はデフォルト維持 |
+| 403 / モデル未許可 | トークンで該当モデルを許可していない | Crazyrouterトークン設定でモデル許可 |
+| `model not found` | モデル名のスペルミス | まず `gpt-5.5` で最小検証へ戻す |
+| 保存成功だがチャット失敗 | Provider 選択ミス・モデル未追加 | Provider タイプ・モデルリスト再確認 |
+| ナレッジベースQ&A遅い・失敗 | ファイルサイズ過大・タスク複雑 | 小サイズファイル・テキストQ&Aへ戻す |
+| `/v1` を入力すべきかわからない | 現バージョンは通常手動入力不要 | Host はルートドメイン、Pathは空欄またはデフォルトを推奨 |
 
 ## FAQ
 
-### Which provider should I select in ChatBox?
+### ChatBoxではどのProviderを選べばよい？
 
-Prefer `OpenAI API` or `OpenAI API Compatible`.
+`OpenAI API` または `OpenAI API Compatible` を優先して選択してください。
 
-### What should I enter as the API Host?
+### API Host の入力値は？
 
-Use `https://api.crazyrouter.com`.
+`https://api.crazyrouter.com` を入力します。
 
-### Do I need to manually enter `/v1/chat/completions`?
+### `/v1/chat/completions` を手動入力すべきか？
 
-Usually no. Based on ChatBox's official provider documentation, `API Path` typically already has a default value, so leave it blank or unchanged first.
+通常不要。ChatBox公式ドキュメントでは`API Path` がデフォルト値として設定されているので、まずはデフォルトまたは空欄のままにしてください。
 
-### What should the first model be?
+### 最初のモデルには何を設定するのが推奨？
 
-Start with `gpt-5.5`.
+まず `gpt-5.5` を入力します。
 
-### When should I add more models or knowledge-base features?
+### どのタイミングでモデル・ナレッジベースを追加すべき？
 
-Only after the minimal chat path is already working.
+最小チャット経路が通ってから、段階的に追加します。
 
 <Note>
-If your goal is "make ChatBox work first", the best approach is not to configure many models and features at once. Start with `gpt-5.5` and validate the smallest possible chat path.
+「まず ChatBox を動くようにする」場合、一気に多くのモデルや機能を設定するより、`gpt-5.5` を使って最小チャット経路の検証を先に行うのがおすすめです。
 </Note>

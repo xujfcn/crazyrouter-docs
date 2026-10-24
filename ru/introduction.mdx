@@ -1,63 +1,67 @@
 ---
-title: 'Документация Crazyrouter'
-description: 'Быстро находите API, интеграции с инструментами, возможности моделей и AI-readable документацию Crazyrouter'
+title: "Crazyrouter Документация"
+description: "Быстро найдите Crazyrouter API, инструменты для интеграции, возможности моделей и читаемую AI документацию по задачам"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-16
 
 <Note>
-  API routes: OpenAI-compatible клиенты обычно используют `https://api.crazyrouter.com/v1` или `https://api.crazyrouter.com/v1`; Claude Code и Anthropic-native клиенты используют корневой домен без `/v1`. См. [API Endpoints](/ru/api-endpoint).
+  Путь подключения к API: Международный основной вход — `https://api.crazyrouter.com`, для региона Восточная Азия рекомендуется использовать `https://cn.crazyrouter.com`. OpenAI-совместимые клиенты обычно добавляют `/v1` к основному домену; оригинальные клиенты Claude Code / Anthropic используют основной домен, не добавляйте `/v1`. Подробнее смотрите [API-эндпойнты](/ru/api-endpoint).
 </Note>
 
-Crazyrouter - это единый API-шлюз для AI-моделей. Один API-ключ дает доступ к текстовым, image, video, audio, embedding, rerank и tool-integration сценариям.
+Crazyrouter — это единый шлюз API моделей искусственного интеллекта. Вы можете использовать один API Key для вызова моделей текста, изображений, видео, аудио, Embedding, Rerank и интеграции сторонних инструментов.
 
-## Выберите задачу
+## Выберите вашу задачу
 
 <CardGroup cols={2}>
-  <Card title="Быстрый старт" icon="rocket" href="/ru/quickstart">
-    Получите API-ключ, настройте base URL и выполните первый запрос за несколько минут.
+  <Card title="Как использовать llms.txt" icon="bot" href="/ru/llms-guide">
+    Позвольте AI-инструментам читать `https://docs.crazyrouter.com/llms.txt` и формировать правильный вызов согласно странице ценообразования и фактическому маршруту.
   </Card>
-  <Card title="Интеграции с инструментами" icon="plug" href="/ru/integrations/claude-code">
-    Подключите Claude Code, Codex CLI, Cursor, Cline, Cherry Studio, OpenClaw и другие AI tools.
+  <Card title="Быстрый старт" icon="rocket" href="/ru/quickstart">
+    Получите API Key, настройте Base URL и выполните первый запрос за 5 минут.
+  </Card>
+  <Card title="Интеграция инструментов" icon="plug" href="/ru/integrations/claude-code">
+    Интегрируйте такие популярные AI-инструменты, как Claude Code, Codex CLI, Cursor, Cline, Cherry Studio, OpenClaw и другие.
   </Card>
   <Card title="Текстовые модели" icon="message" href="/ru/chat/openai/completions">
     Используйте OpenAI Chat, Claude Messages, Gemini Native и Responses API.
   </Card>
   <Card title="Генерация изображений" icon="image" href="/ru/images/gpt-image">
-    Вызывайте GPT Image, Qwen Image, Midjourney, Nano Banana Pro, DALL-E и другие image models.
+    Вызывайте модели изображений: GPT Image, Qwen Image, Midjourney, Nano Banana Pro, DALL-E и другие.
   </Card>
-  <Card title="Генерация видео" icon="video" href="/ru/video/unified">
-    Интегрируйте Veo, Kling, Seedance, Runway, Luma, Sora, Wan и другие video APIs.
+  <Card title="Видео" icon="video" href="/ru/video/unified">
+    Подключитесь к видео-генераторам: Veo, Kling, Seedance, Runway, Luma, Sora, Wan и другим.
   </Card>
-  <Card title="Модели и биллинг" icon="tag" href="https://crazyrouter.com/pricing">
-    Проверьте цены, доступность моделей, ошибки, статус сервиса и управление консолью.
+  <Card title="Модели и тарификация" icon="tag" href="https://crazyrouter.com/pricing">
+    Смотрите цены моделей, доступные модели, обработку ошибок, статус сервиса и руководство по консоли.
   </Card>
 {/* crazyrouter-site-links */}
-  <Card title="Сравнение цен моделей" icon="coins" href="https://crazyrouter.com/ru/pricing?utm_source=docs&utm_medium=card">
-    35 моделей: официальная цена, Azure / Bedrock / Vertex / OpenRouter и актуальная цена Crazyrouter, проверяется ежедневно, с историей цен.
+  <Card title="Сравнение цен на модели" icon="coins" href="https://crazyrouter.com/ru/pricing?utm_source=docs&utm_medium=card">
+    Сравнение официальных, Azure, Bedrock, Vertex, OpenRouter и актуальных цен Crazyrouter для 35 моделей, ежедневно сверяется, включена история цен и расчет ежемесячной платы.
   </Card>
-  <Card title="Модели по вендорам" icon="layer-group" href="https://crazyrouter.com/en/models?utm_source=docs&utm_medium=card">
-    Все модели Anthropic, OpenAI, Google, DeepSeek и ещё 10 вендоров с актуальными ценами, примерами и кодом.
+  <Card title="Посмотреть модели по производителям" icon="layer-group" href="https://crazyrouter.com/ru/models?utm_source=docs&utm_medium=card">
+    Все модели 14 производителей (Anthropic, OpenAI, Google, DeepSeek и др.), их актуальные цены, реальные примеры и код для вызова.
   </Card>
 </CardGroup>
 
-## AI-readable docs
+## AI-инструменты читают документацию
 
 <CardGroup cols={2}>
-  <Card title="Вход для AI tools" icon="bot" href="/ru/ai-tools">
-    Точки входа для Codex, Claude Code, ChatGPT, Cursor и других AI tools.
+  <Card title="Вход для чтения ИИ" icon="bot" href="/ru/ai-tools">
+    Индекс документации для использования Codex, Claude Code, ChatGPT, Cursor и других AI-инструментов.
   </Card>
-  <Card title="Полный контекст" icon="file-text" href="https://docs.crazyrouter.com/llms-full.txt">
-    Единый файл со всей документацией для AI tools, которые умеют читать URL или вставленный текст.
+  <Card title="Полный контекст документации" icon="file-text" href="https://docs.crazyrouter.com/llms-full.txt">
+    Объединенная документация в одном файле — подходит для копирования или предоставления AI-инструментам с поддержкой чтения URL.
   </Card>
 </CardGroup>
 
-## Частые страницы
+## Популярные пути
 
-| Задача | Документация |
+| Ваша задача | Рекомендуем читать |
 | --- | --- |
-| Проверить base URL и маршруты | [API Endpoints](/ru/api-endpoint) |
-| Создать и использовать API key | [Authentication](/ru/authentication) |
-| Подключить Claude Code | [Claude Code](/ru/integrations/claude-code) |
-| Подключить Codex CLI | [Codex CLI](/ru/integrations/codex) |
-| Использовать локальные изображения | [Image Upload](/ru/upload) |
-| Разобрать ошибки запросов | [Error Handling](/ru/error-handling) |
+| Проверить Base URL и маршруты | [API-эндпойнты](/ru/api-endpoint) |
+| Создать и использовать API Key | [Способы аутентификации](/ru/authentication) |
+| Отправить первый OpenAI-совместимый запрос | [Быстрый старт](/ru/quickstart) |
+| Подключить Claude Code | [Интеграция Claude Code](/ru/integrations/claude-code) |
+| Подключить Codex CLI | [Интеграция Codex CLI](/ru/integrations/codex) |
+| Использовать локальное изображение как референс | [Инструкция по загрузке изображений](/ru/upload) |
+| Отладить ошибку запроса | [Обработка ошибок](/ru/error-handling) |

@@ -1,0 +1,192 @@
+---
+title: "LiteLLM Integration Guide"
+description: "Integrate Crazyrouter into the LiteLLM AI gateway: export model and pricing configuration, start the proxy, verify requests, and understand team budgets and compatibility boundaries"
+---
+> Content updated: 2026-10-24
+
+LiteLLM can serve as the unified AI gateway for your organization: applications connect to LiteLLM, which in turn calls Crazyrouter. Projects, departments, virtual keys, budgets, and audit policies must be configured within your own LiteLLM deployment, and will not be automatically enabled just by providing the Crazyrouter API Key.
+
+```text
+Application → LiteLLM Proxy → Crazyrouter → Model
+```
+
+## Integration Architecture and Preparation
+
+Prepare Python 3.11, a dedicated Crazyrouter inference key, and models accessible by this key. This document is validated against **LiteLLM 1.106.2**, but this does not guarantee it's the latest version. The four example models are `claude-opus-5-5`, `gpt-6-astra`, `glm-5.3`, `deepseek-v4.1-flash`; please adjust them according to your available models.
+
+<Warning>
+`CRAZYROUTER_API_KEY` is the credential for the LiteLLM server to call Crazyrouter; `LITELLM_MASTER_KEY` is your own LiteLLM administrator key. Do not mix them, and do not distribute the administrator key to departments or end users. Store real keys only on the server or in a key manager; do not commit them to Git, documentation, or the frontend.
+</Warning>
+
+## 1. Installation and Environment Variables
+
+Run the following commands in a new working directory. Environment variables are only effective in the current terminal session; if you already have a gateway, continue using the main key managed for security and do not regenerate one arbitrarily. For container deployment, variables must be passed into the container. If you cannot activate a virtual environment on Windows, call `.venv\Scripts`, `python.exe`, and `litellm.exe` directly.
+
+<CodeGroup>
+```bash macOS / Linux
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install "litellm[proxy]==1.106.2"
+read -rsp 'Crazyrouter API key: ' CRAZYROUTER_API_KEY; echo
+export CRAZYROUTER_API_KEY
+export LITELLM_MASTER_KEY="$(python -c 'import secrets; print("sk-" + secrets.token_hex(32))')"
+```
+
+```powershell Windows PowerShell
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install "litellm[proxy]==1.106.2"
+$secret = Read-Host 'Crazyrouter API key' -AsSecureString
+$env:CRAZYROUTER_API_KEY = [System.Net.NetworkCredential]::new('', $secret).Password
+$env:LITELLM_MASTER_KEY = python -c "import secrets; print('sk-' + secrets.token_hex(32))"
+```
+</CodeGroup>
+
+## 2. Export Configuration and Start
+
+It is recommended to use the authenticated `GET /v1/litellm/config` to obtain model and snapshot pricing applicable to the current credential. The response is a wrapper object: **only save the `config` inside it as the LiteLLM configuration**—do not directly write the whole response. Save the following script as `export_config.py`, use JSON (also valid YAML), preserve `model_info` pricing, and reference environment variables rather than writing actual keys.
+
+```python export_config.py
+import json
+import os
+from pathlib import Path
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode
+from urllib.request import HTTPRedirectHandler, Request, build_opener
+
+
+class NoRedirect(HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+key = os.environ["CRAZYROUTER_API_KEY"]
+if not key:
+    raise SystemExit("CRAZYROUTER_API_KEY is empty")
+query = urlencode({
+    "provider": "openai",
+    "models": "claude-opus-5-5,gpt-6-astra,glm-5.3,deepseek-v4.1-flash",
+})
+request = Request(
+    "https://api.crazyrouter.com/v1/litellm/config?" + query,
+    headers={"Authorization": "Bearer " + key,
+             "User-Agent": "Crazyrouter-LiteLLM-Setup/1.0"},
+)
+try:
+    with build_opener(NoRedirect).open(request, timeout=30) as response:
+        payload = json.load(response)
+except HTTPError as error:
+    raise SystemExit(f"Export failed (HTTP {error.code}); no file written.")
+except URLError:
+    raise SystemExit("Export connection failed; no file written.")
+
+config = payload["config"]
+if not config.get("model_list"):
+    raise SystemExit("Export contains no models")
+config.setdefault("litellm_settings", {})["drop_params"] = False
+config.setdefault("general_settings", {})["master_key"] = "os.environ/LITELLM_MASTER_KEY"
+output = json.dumps(config, ensure_ascii=False, indent=2)
+if key in output:
+    raise SystemExit("Refusing to write a secret")
+with Path("crazyrouter.config.json").open("x", encoding="utf-8") as handle:
+    handle.write(output + "\n")
+print("Saved configuration. Import/reload it in LiteLLM explicitly.")
+```
+
+```shell
+python export_config.py
+litellm --config ./crazyrouter.config.json --host 127.0.0.1 --port 4100
+```
+
+<Note>
+The script refuses to overwrite existing files; back up and compare the configuration before merging into an existing gateway and explicitly reloading. `4100` is just an example port; if it's already occupied, modify both the startup command and verification address accordingly. This command only listens on localhost and will not modify or restart existing services.
+</Note>
+
+## 3. Verify Local Gateway
+
+Keep the proxy terminal running, and in another terminal with the same environment installed, securely set **the same** `LITELLM_MASTER_KEY`; do not regenerate it. Save the following script as `verify_proxy.py`. This administrator smoke test will incur normal model usage; for daily applications, use a restricted virtual key instead.
+
+```python verify_proxy.py
+import json
+import os
+from urllib.request import Request, urlopen
+
+base = "http://127.0.0.1:4100/v1"
+headers = {"Authorization": "Bearer " + os.environ["LITELLM_MASTER_KEY"],
+           "Content-Type": "application/json"}
+
+with urlopen(Request(base + "/models", headers=headers), timeout=30) as response:
+    models = json.load(response)["data"]
+assert any(model["id"] == "gpt-6-astra" for model in models), "Model not registered"
+
+body = {"model": "gpt-6-astra", "max_tokens": 1024,
+        "messages": [{"role": "user", "content": "Reply with exactly OK."}]}
+with urlopen(Request(base + "/chat/completions", headers=headers,
+                     data=json.dumps(body).encode()), timeout=120) as response:
+    result = json.load(response)
+choice = result["choices"][0]
+assert choice["finish_reason"] == "stop", "Incomplete response"
+assert (choice["message"].get("content") or "").strip() == "OK", "Check final answer"
+assert result.get("usage", {}).get("total_tokens", 0) > 0, "Missing usage"
+print("PASS: model registration, final answer, finish reason, usage")
+```
+
+```shell
+python verify_proxy.py
+```
+
+This is a minimal smoke test, not a comprehensive compatibility certification. For each actual model, continue to verify both normal and streaming requests: check the final body, finish reason, SSE's `[DONE]`, and the final usage; tool testing should verify parameters and completion of tool result callback. Merely receiving HTTP 200, a thought text, or Markdown JSON code block does not indicate a pass.
+
+## 4. Claude Native Protocol (Optional)
+
+The default export uses `openai/<model>`, `api_base` as `https://api.crazyrouter.com/v1`. If you need Claude native cache, thinking, and other semantics, export separately with `provider=anthropic&models=claude-opus-5-5`, use `anthropic/<model>`, and root URL `https://api.crazyrouter.com`. Do not append `/v1` or `/chat/completions`.
+
+```yaml
+model_list:
+  - model_name: claude-native
+    litellm_params:
+      model: anthropic/claude-opus-5-5
+      api_base: https://api.crazyrouter.com
+      api_key: os.environ/CRAZYROUTER_API_KEY
+litellm_settings:
+  drop_params: false
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+```
+
+The above only shows the connection structure, not the pricing. When actually using it, merge the native export's `model_info`. If you register both the OpenAI adapter and the native one, use a unique `claude-native`-like `model_name` for the native item so clients can call it by this alias, preventing mixed routing for identical names.
+
+## Compatibility and Error Handling
+
+- Keep `drop_params: false` and do not silently drop unsupported parameters.
+- Claude's `json_schema` has been validated; `json_object` is explicitly unsupported, and there is no automatic conversion to another output guarantee.
+- In the tested Claude paths, forced tool / `required` requests are explicitly rejected: HTTP `400`, direct error code `unsupported_forced_tool_choice`. To enable automatic tool selection, clients must explicitly switch to `tool_choice: "auto"`; the gateway will not automatically downgrade and force a call.
+- For the above rejections, clients receive a fixed security English explanation, with no internal service configuration or credentials returned. LiteLLM 1.106.2's OpenAI adapter keeps the English message but wraps the error code as `"400"`; do not match only on the original error code.
+- Claude `cache_control`'s `5m` / `1h` TTL can be transparently transmitted; both 5m creation and read have been tested, for 1h only cold writes have been validated, and there is no guarantee for hit rate or reads after one hour.
+- Model capabilities, availability, vision, long context, failover, and enterprise budge must be separately validated; do not infer them from the model name or this integration document.
+
+## Teams, Budgets, and Production Security
+
+- For each project or department, create LiteLLM teams and restricted virtual keys, setting model permissions, budgets, and rate limits; do not share the main key.
+- Configure database, authentication, permissions, and persistence according to the LiteLLM official requirements. Running locally without a database only verifies the inference path and does not mean budgets are in effect; refer to your version for exact features and authorization.
+- Before going live, separately test unauthorized model rejection, budget exhaustion, key revocation, rate limiting, and auditing. Protect prompts and personal information in logs and clarify retention periods.
+- For external access, configure HTTPS and access control; do not expose local demo services or the admin console directly.
+- Exported pricing is a snapshot. If pricing or discounts change, export, import, and reload again; changes are not automatically pushed. LiteLLM cost estimates differ from Crazyrouter's final billing—do regular reconciliations.
+
+## Frequently Asked Questions
+
+| Phenomenon | Troubleshooting Direction |
+| --- | --- |
+| Export returns 401 | Use the Crazyrouter inference key, not the LiteLLM main key or console session credentials. |
+| Export returns 404 | Check the model ID and the models allowed by the current key. |
+| Export returns 422 | Check whether the selected provider and pricing can be represented; do not use a guessed fixed price. |
+| LiteLLM returns 401 | Downstream calls use LiteLLM's main key (local admin testing only) or a valid virtual key. |
+| Model not registered / environment variable missing | Ensure `config` is saved, the variable is set for the proxy process or container, and reloaded. |
+| Forced tool returns 400 | Explicitly select `auto`, or use a model confirmed to support the respective tool and thinking configuration. |
+| Budget does not restrict requests | Check database, team/virtual key policies, and run a real budget denial test. |
+
+## Official References
+
+- [LiteLLM Proxy configuration](https://docs.litellm.ai/docs/proxy/configs)
+- [LiteLLM virtual keys](https://docs.litellm.ai/docs/proxy/virtual_keys)
+- [LiteLLM budgets](https://docs.litellm.ai/docs/proxy/users)

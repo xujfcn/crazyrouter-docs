@@ -1,39 +1,39 @@
 ---
 title: "Responses API 概览"
-description: "基于生产环境复核，理解 Crazyrouter 中 Responses API 与 Chat Completions 的取舍"
+description: "经生产环境复核的在 Crazyrouter 上选择 Responses API 与 Chat Completions 的指导"
 ---
-> 更新日期：2026-06-06
+> 内容更新: 2026-06-09
 
 # Responses API 概览
 
-Responses API 是当前 Crazyrouter 上承载 GPT 新能力的主路由之一。
+Responses API 目前是 Crazyrouter 上较新 GPT 能力的主要接口之一。
 
-本文页只写入 `2026-03-22` 已在生产环境复核过的结论。
+本页面仅记录了在 `2026-03-22` 上与生产环境再次验证的结论。
 
 <Note>
-  当前生产验证范围内，Claude 仅支持 `POST /v1/messages` 和 `POST /v1/chat/completions`，不支持 `POST /v1/responses`。Responses 相关页面默认只应按 GPT 路径理解。
+  在当前经生产验证的适用范围内，Claude 仅支持 `POST /v1/messages` 和 `POST /v1/chat/completions`，不支持 `POST /v1/responses`。Responses 页面以 GPT 为主要指导对象。
 </Note>
 
-## 当前推荐理解
+## 当前适用场景
 
-- 需要可观察的 reasoning 输出：优先用 `/v1/responses`
-- 需要 OpenAI 风格 Web Search：优先用 `/v1/responses`
-- 只做普通聊天或历史项目延续：可继续用 `/v1/chat/completions`
+- 如需可检查的推理输出，优先选择 `/v1/responses`
+- 如需类似 OpenAI 的网页搜索，优先选择 `/v1/responses`
+- 如仅需普通聊天或希望保持现有集成，`/v1/chat/completions` 依然可用
 
-## Responses API vs Chat Completions API
+## Responses API 与 Chat Completions API 对比
 
 | 维度 | Responses API | Chat Completions API |
-|------|---------------|----------------------|
-| 端点 | `/v1/responses` | `/v1/chat/completions` |
-| 输入格式 | `input` | `messages` |
-| 输出形态 | `output[]` item 列表 | `choices[].message` |
-| GPT reasoning | 已复核 `reasoning` item | `reasoning_effort` 可用，但 `reasoning_content` 不稳定 |
-| OpenAI 风格 Web Search | 已复核 `web_search_preview` | 旧式 `web_search` 本轮未拿到稳定触发标志 |
-| 流式事件 | 事件类型更丰富 | 传统 delta SSE |
+|-----------|---------------|----------------------|
+| 接口终点 | `/v1/responses` | `/v1/chat/completions` |
+| 输入结构 | `input` | `messages` |
+| 输出结构 | `output[]` 项列表 | `choices[].message` |
+| GPT 推理 | 已验证 `reasoning` 项 | `reasoning_effort` 可用，但 `reasoning_content` 不稳定 |
+| OpenAI 风格网页搜索 | 已验证 `web_search_preview` 路径 | 旧版 `web_search` 结构在本轮测试中未产生稳定可验证触发 |
+| 流式输出 | 更丰富的事件类型 | 传统增量 SSE |
 
 ---
 
-## 一个最小可用示例
+## 最小有用示例
 
 ```python Python
 from openai import OpenAI
@@ -51,7 +51,7 @@ response = client.responses.create(
 print(response.output_text)
 ```
 
-当前生产复核中，这类最小请求返回：
+在本次生产环境复查中，这样的最简请求返回了：
 
 ```json
 {
@@ -66,31 +66,31 @@ print(response.output_text)
 
 ---
 
-## 什么时候优先选 Responses
+## 何时优先选择 Responses
 
-- 你要用 `gpt-5.5` 的 reasoning 摘要
-- 你要判断模型是否真的触发了 `web_search_call`
-- 你要消费更丰富的 SSE 事件
+- 你需要 `gpt-5.5` 推理摘要
+- 你需要验证模型实际是否触发了 `web_search_call`
+- 你想获取更丰富的 SSE 事件
 
-相关页：
+相关页面：
 
 - [GPT-5 思考模式](/chat/responses/gpt5-thinking)
-- [Responses Web 搜索](/chat/responses/web-search)
-- [Responses Function Calling](/chat/responses/function-calling)
+- [Responses 网页搜索](/chat/responses/web-search)
+- [Responses 函数调用](/chat/responses/function-calling)
 
 ---
 
-## 什么时候继续用 Chat Completions
+## 何时保留 Chat Completions
 
-- 你已有稳定的 Chat Completions 接入代码
-- 你只关心最终答案，不关心 `reasoning` item
-- 你在接 Claude、Gemini 等 OpenAI 兼容模型
+- 你已有稳定的 Chat Completions 集成
+- 你只关心最终答案，不关注 `reasoning` 项
+- 你在集成 Claude、Gemini 或其它 OpenAI 兼容模型
 
 <Note>
-  两种 API 可以在同一项目中并存。当前更合理的做法通常不是“全量迁移”，而是把需要新能力的请求切到 `/v1/responses`。
+  两个 API 可以在同一个项目中共存。实际应用中，更好的方式通常不是完全迁移，而是仅将需要新能力的请求迁移到 `/v1/responses`。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 相关页面
+## crazyrouter.com 相关内容
 
-- [OpenAI 全部模型与价格](https://crazyrouter.com/zh/models/openai?utm_source=docs&utm_medium=related)
+- [带实时价格的所有 OpenAI 模型](https://crazyrouter.com/zh/models/openai?utm_source=docs&utm_medium=related)

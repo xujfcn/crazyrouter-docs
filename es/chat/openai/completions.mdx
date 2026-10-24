@@ -1,0 +1,178 @@
+---
+title: "Crear complemento de chat"
+description: "Basado en el comportamiento actual de producción, utiliza POST /v1/chat/completions para crear un complemento de chat"
+---
+> Contenido actualizado: 2026-06-09
+
+# Crear complemento de chat
+
+```
+POST /v1/chat/completions
+```
+
+Genera una respuesta del modelo según la lista de mensajes de entrada, soportando respuestas tanto no stream como stream.
+
+Esta página solo escribe el comportamiento general de `2026-03-23` que ya ha sido revisado en el entorno de producción de Crazyrouter.
+
+## Autenticación
+
+```text
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Parámetros clave
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `model` | string | Sí | Nombre del modelo, como `gpt-5.5`, `claude-opus-4-8`, `gemini-3.1-pro` |
+| `messages` | array | Sí | Lista de mensajes |
+| `stream` | boolean | No | Si activar la salida por streaming |
+| `max_tokens` | integer | No | Número máximo de tokens de salida |
+| `temperature` | number | No | Temperatura de muestreo |
+| `response_format` | object | No | Restricción de formato de salida estructurada |
+| `tools` | array | No | Lista de herramientas |
+| `tool_choice` | string\|object | No | Estrategia de selección de herramienta |
+| `stream_options` | object | No | Opciones adicionales para streaming, por ejemplo `include_usage` |
+
+<Note>
+  El soporte de parámetros opcionales varía entre modelos. Al desarrollar el cliente, se debe priorizar el uso de campos generales y no asumir que todos los modelos admiten el mismo conjunto de parámetros avanzados.
+</Note>
+
+---
+
+## Solicitud no stream
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a helpful assistant."
+      },
+      {
+        "role": "user",
+        "content": "Explain artificial intelligence in one sentence."
+      }
+    ],
+    "max_tokens": 64
+  }'
+```
+
+La estructura típica actualmente devuelta en producción:
+
+```json
+{
+  "object": "chat.completion",
+  "model": "gpt-5.5",
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "...",
+        "reasoning_content": null,
+        "tool_calls": null
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}
+```
+
+### Presta especial atención
+
+- `message.content` es el campo de texto final más estable
+- `message.tool_calls` sólo aparece cuando se llama a herramientas
+- `message.reasoning_content` puede existir clave, pero actualmente no debe considerarse como contenido estable garantizado
+
+---
+
+## Solicitud stream
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Explain AI in one short sentence."
+      }
+    ],
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    },
+    "max_tokens": 64
+  }'
+```
+
+La revisión de producción de esta ronda confirmó:
+
+- El stream devuelve `chat.completion.chunk`
+- SSE envía los bloques gradualmente en formato `data: ...`
+- Al finalizar el stream sigue siendo `data: [DONE]`
+
+Los fragmentos SSE actualmente recibidos tienen forma similar a:
+
+```text
+data: {"object":"chat.completion.chunk","model":"gpt-5.5","choices":[{"delta":{"role":"assistant","content":"AI","reasoning_content":null,"tool_calls":null}}]}
+```
+
+```text
+data: [DONE]
+```
+
+---
+
+## Ejemplo en Python
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+stream = client.chat.completions.create(
+    model="gpt-5.5",
+    messages=[
+        {"role": "user", "content": "Explain AI in one short sentence."}
+    ],
+    stream=True,
+    stream_options={"include_usage": True},
+    max_tokens=64
+)
+
+for chunk in stream:
+    delta = chunk.choices[0].delta
+    if delta.content is not None:
+        print(delta.content, end="")
+```
+
+---
+
+## Recomendaciones actuales
+
+- Conversación textual simple: `/v1/chat/completions`
+- Para requerir resumen de razonamiento o búsqueda web estilo OpenAI: prioriza `/v1/responses`
+- Cuando se necesite una evaluación de capacidades más compleja, revisa primero la página correspondiente de capacidades y no solo esta página
+
+Páginas relacionadas:
+
+- [Objeto de completado de chat](/es/chat/openai/overview)
+- [Modelo de razonamiento](/es/chat/openai/reasoning)
+- [Búsqueda web](/es/chat/openai/web-search)
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Página de modelo GPT Image 1.5: precios en tiempo real, ejemplos reales, código de invocación](https://crazyrouter.com/es/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Página de modelo GPT Image 2: precios en tiempo real, ejemplos reales, código de invocación](https://crazyrouter.com/es/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Todos los modelos y precios de OpenAI](https://crazyrouter.com/es/models/openai?utm_source=docs&utm_medium=related)

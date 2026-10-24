@@ -1,34 +1,42 @@
 ---
-title: "Tool Calling"
-description: "Production-verified tool calling with the latest GPT, Claude, and Gemini models"
+title: "Вызов инструментов"
+description: "На основе испытаний в производственной среде, используется последний основной модели GPT, Claude, Gemini для вызова инструментов"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-23
 
-# Tool Calling
+# Вызов инструментов
 
-This page only documents Tool Calling flows that were **verified with real requests against Crazyrouter production**.
+В этой документации представлены только те способы вызова инструментов, которые **успешно проверены в производственной среде Crazyrouter на реальных запросах**.
 
-Verification date:
+Время проверки:
 
 - `2026-03-22`
 
-Verified models:
+Проверенные модели:
 
 - `gpt-5.5`
 - `claude-opus-4-8`
 - `gemini-3.1-pro`
 
-## Verified matrix
+---
 
-| Model | Protocol | Endpoint | Success marker |
-|------|------|------|----------|
-| `gpt-5.5` | OpenAI Chat Completions | `POST /v1/chat/completions` | Returns `tool_calls` |
-| `claude-opus-4-8` | Anthropic Messages | `POST /v1/messages` | Returns `tool_use` block |
-| `gemini-3.1-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | Returns `functionCall` |
+## Проверенная матрица возможностей
+
+| Модель | Протокол | Эндпоинт | Признак успешности |
+|--------|----------|----------|--------------------|
+| `gpt-5.5` | OpenAI Chat Completions | `POST /v1/chat/completions` | Ответ `tool_calls` |
+| `claude-opus-4-8` | Anthropic Messages | `POST /v1/messages` | Ответ `tool_use` block |
+| `gemini-3.1-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | Ответ `functionCall` |
+
+<Warning>
+На данный момент вызов инструментов Claude проверяется по протоколу Anthropic Messages, то есть `POST /v1/messages` возвращает `tool_use` block. Не распространяйте этот вывод на OpenAI-совместимый путь `/v1/chat/completions` для Claude; в таких сценариях, как Copilot, Continue, некоторые VS Code Agent или другие программные задачи, требующие вызова инструментов, OpenAI-совместимый эндпоинт может не запускать родной вызов инструментов Claude. Если вам нужна программная способность Agent Claude, в первую очередь используйте Claude Code или настрой Anthropic native client.
+</Warning>
+
+---
 
 ## GPT-5.4
 
-```bash
+```bash cURL
 curl https://api.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
@@ -49,7 +57,9 @@ curl https://api.crazyrouter.com/v1/chat/completions \
           "parameters": {
             "type": "object",
             "properties": {
-              "timezone": { "type": "string" }
+              "timezone": {
+                "type": "string"
+              }
             },
             "required": ["timezone"],
             "additionalProperties": false
@@ -61,7 +71,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-Verified response shape:
+Ключевые поля ответа в производственной проверке:
 
 ```json
 {
@@ -69,16 +79,19 @@ Verified response shape:
     {
       "type": "function",
       "function": {
-        "name": "get_time"
+        "name": "get_time",
+        "arguments": "{\"timezone\":\"Asia/Shanghai\"}"
       }
     }
   ]
 }
 ```
 
+---
+
 ## Claude Sonnet 4.6
 
-```bash
+```bash cURL
 curl https://api.crazyrouter.com/v1/messages \
   -H "Content-Type: application/json" \
   -H "x-api-key: YOUR_API_KEY" \
@@ -93,7 +106,9 @@ curl https://api.crazyrouter.com/v1/messages \
         "input_schema": {
           "type": "object",
           "properties": {
-            "timezone": { "type": "string" }
+            "timezone": {
+              "type": "string"
+            }
           },
           "required": ["timezone"]
         }
@@ -111,7 +126,7 @@ curl https://api.crazyrouter.com/v1/messages \
   }'
 ```
 
-Verified response shape:
+Ключевые поля ответа в производственной проверке:
 
 ```json
 {
@@ -119,17 +134,26 @@ Verified response shape:
   "content": [
     {
       "type": "tool_use",
-      "name": "get_time"
+      "name": "get_time",
+      "input": {
+        "timezone": "Asia/Shanghai"
+      }
     }
   ]
 }
 ```
 
-For first-pass validation, use an explicit `tool_choice` and clearly instruct Claude not to answer directly.
+Рекомендации для первой интеграции:
+
+- Для родного `/v1/messages` Claude, желательно явно добавить `tool_choice`
+- Укажите в prompt, что "необходимо вызывать инструмент, не отвечать напрямую"
+- Так легче стабильно воспроизводить `tool_use`
+
+---
 
 ## Gemini 3 Pro
 
-```bash
+```bash cURL
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -152,7 +176,9 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
             "parameters": {
               "type": "object",
               "properties": {
-                "timezone": { "type": "string" }
+                "timezone": {
+                  "type": "string"
+                }
               },
               "required": ["timezone"]
             }
@@ -163,7 +189,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Verified response shape:
+Ключевые поля ответа в производственной проверке:
 
 ```json
 {
@@ -173,7 +199,10 @@ Verified response shape:
         "parts": [
           {
             "functionCall": {
-              "name": "get_time"
+              "name": "get_time",
+              "args": {
+                "timezone": "Asia/Shanghai"
+              }
             }
           }
         ]
@@ -183,16 +212,26 @@ Verified response shape:
 }
 ```
 
-## See Also
+---
 
-- [OpenAI Function Calling](/ru/chat/openai/function-calling)
-- [Responses Function Calling](/ru/chat/responses/function-calling)
-- [Gemini Tools](/ru/chat/gemini/tools)
-- [Claude Native Messages](/ru/chat/anthropic/messages)
+## Когда использовать какой протокол
+
+- Если ваш проект уже использует OpenAI SDK, предпочтительно используйте OpenAI-совместимый способ `gpt-5.5`
+- Если вы внедряете родной Claude, предпочтительно используйте `/v1/messages` и на первом цикле проверки добавьте `tool_choice`
+- Если вы внедряете родные возможности Gemini, предпочтительно используйте Gemini Native API
+
+---
+
+## Связанные документы
+
+- [OpenAI вызов функций](/ru/chat/openai/function-calling)
+- [Responses вызов функций](/ru/chat/responses/function-calling)
+- [Gemini вызов инструментов](/ru/chat/gemini/tools)
+- [Родной формат Claude](/ru/chat/anthropic/messages)
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [Claude Sonnet 4.6: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/claude-sonnet-4-6?utm_source=docs&utm_medium=related)
-- [Claude Sonnet 4.6: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/anthropic/claude-sonnet-4-6?utm_source=docs&utm_medium=related)
-- [GPT-5.4: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/gpt-5-4?utm_source=docs&utm_medium=related)
+- [Сравнение цен Claude Sonnet 4.6: Официально / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/claude-sonnet-4-6?utm_source=docs&utm_medium=related)
+- [Страница модели Claude Sonnet 4.6: актуальные цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/anthropic/claude-sonnet-4-6?utm_source=docs&utm_medium=related)
+- [Сравнение цен GPT-5.4: Официально / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/gpt-5-4?utm_source=docs&utm_medium=related)

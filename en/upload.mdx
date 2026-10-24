@@ -1,38 +1,38 @@
 ---
-title: 'Image Upload Guidance'
-description: 'Upload local images and get 48-hour temporary public URLs for image-to-image, image-to-video, and vision APIs'
+title: "Image Upload Instructions"
+description: "Upload a local image and get a temporary public URL valid for 48 hours, used for image-to-image, image-to-video, and image recognition interfaces."
 ---
-> Last updated: 2026-08-18
+> Content updated: 2026-09-28
 
-Crazyrouter provides temporary public image upload endpoints for converting local reference images into model-readable public URLs. They are suitable for Kling, Veo, Seedance, Runway, Luma, MiniMax, Nano Banana Pro, Doubao Seedream, and other APIs that accept `image_url`, `image_urls`, `image_list`, `images`, or `image_input`.
+Crazyrouter provides a temporary public image upload interface, which allows you to convert a local reference image into a publicly accessible URL for models. It is suitable for interfaces such as Kling, Veo, Seedance, Runway, Luma, MiniMax, Nano Banana Pro, Doubao Seedream that require `image_url`, `image_urls`, `image_list`, `images`, or `image_input`.
 
 <Note>
-  Temporary images are kept for 48 hours by default and then cleaned up automatically. Storage during that period is not billed separately; current anti-abuse controls use per-user upload quota and rate limits.
+  Temporary images are kept for 48 hours by default and will be automatically deleted after expiration. No separate charges are incurred per day within the storage period; currently, abuse prevention is managed through user upload quota and rate limits.
 </Note>
 
 <Note>
-  The returned `id` is an internal file record ID. Use the returned `url` in `image_input`; do not pass the `id` directly. Nano Banana Pro Base64 and multipart editing are currently enabled only for designated gray accounts.
+  The returned `id` is the file record ID of this site. In the model request, `image_input` should use the returned `url` and cannot directly submit `id`. The Base64 / multipart upload option (`nano-banana-pro`) is restricted to specific accounts.
 </Note>
 
-## Endpoint Overview
+## Interface Overview
 
-| Scenario | Endpoint |
-|----------|----------|
-| Local file upload | `POST /v1/files/uploads` |
-| Base64 image upload | `POST /v1/files/uploads/base64` |
-| Remote image rehosting | `POST /v1/files/uploads/url` |
-| Presigned direct R2 upload | `POST /v1/files/uploads/presign` |
+| Scenario             | Interface         |
+|----------------------|------------------|
+| Local File Upload    | `POST /v1/files/uploads`  |
+| Base64 Image Upload  | `POST /v1/files/uploads/base64`  |
+| Remote Image Import  | `POST /v1/files/uploads/url`  |
+| Pre-signed Direct R2 Upload | `POST /v1/files/uploads/presign` |
 
-Common limits:
+General Restrictions:
 
-| Item | Current rule |
-|------|--------------|
-| Auth | `Authorization: Bearer YOUR_API_KEY` |
-| Supported formats | `image/png`, `image/jpeg`, `image/webp`, `image/gif` |
-| Single file size | 20MB |
-| User upload quota | 200MB / rolling 24-hour window |
-| Default expiration | 48 hours |
-| Returned URL | `https://media.crazyrouter.com/task-artifacts/tmp-inputs/...` |
+| Item                | Current Rule      |
+|---------------------|------------------|
+| Authentication      | `Authorization: Bearer YOUR_API_KEY`  |
+| Supported Formats   | `image/png`, `image/jpeg`, `image/webp`, `image/gif` |
+| Single File Size    | 20MB             |
+| User Upload Quota   | 200MB / rolling 24-hour window |
+| Default Valid Time  | 48 hours         |
+| Returned URL        | `https://media.crazyrouter.com/task-artifacts/tmp-inputs/...`  |
 
 ## Local File Upload
 
@@ -43,15 +43,15 @@ curl -X POST https://api.crazyrouter.com/v1/files/uploads \
   -F "purpose=model_input"
 ```
 
-Example response:
+Response Example:
 
 ```json
 {
   "id": "file_e5bbce820b5941409682a9c5e9ba79f1",
-  "url": "https://media.crazyrouter.com/task-artifacts/tmp-inputs/2026/06/07/user-1/file_e5bbce820b5941409682a9c5e9ba79f1.png",
+  "url": "https://media.crazyrouter.com/task-artifacts/tmp-inputs/2026/05/13/user-1/file_e5bbce820b5941409682a9c5e9ba79f1.png",
   "mime_type": "image/png",
   "size": 2025,
-  "expires_at": "2026-06-09T04:41:35Z"
+  "expires_at": "2026-05-16T04:41:35.0131789Z"
 }
 ```
 
@@ -68,7 +68,7 @@ curl -X POST https://api.crazyrouter.com/v1/files/uploads/base64 \
   }'
 ```
 
-## Remote URL Rehosting
+## Remote URL Import
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/files/uploads/url \
@@ -81,13 +81,13 @@ curl -X POST https://api.crazyrouter.com/v1/files/uploads/url \
   }'
 ```
 
-The remote URL must be an `http` or `https` image URL reachable by Crazyrouter servers. The system checks file size, MIME type, and SSRF protection rules.
+The remote URL must be an image address (`http` or `https`) that is accessible to the Crazyrouter server. The system performs checks on file size, MIME type, and SSRF protection.
 
-## Presigned Direct R2 Upload
+## Pre-signed Direct R2 Upload
 
-For high-upload-volume workflows, request a presigned upload URL first, then upload the image directly from your client to the storage endpoint with `PUT`. The image bytes do not pass through the Crazyrouter application server.
+For scenarios with high upload volumes, you can first request a pre-signed upload URL, then have the client directly `PUT` the image to the storage endpoint. Thus, the image binary does not pass through the Crazyrouter application server. This workflow is suitable for handling large numbers of image uploads every day.
 
-First, request a direct upload URL:
+Step 1: Request a direct upload URL:
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/files/uploads/presign \
@@ -101,7 +101,7 @@ curl -X POST https://api.crazyrouter.com/v1/files/uploads/presign \
   }'
 ```
 
-Example response:
+Response Example:
 
 ```json
 {
@@ -120,7 +120,7 @@ Example response:
 }
 ```
 
-Then upload the file directly to `upload_url`:
+Step 2: The client uploads directly to `upload_url`:
 
 ```bash cURL
 curl -X PUT "$UPLOAD_URL" \
@@ -129,15 +129,15 @@ curl -X PUT "$UPLOAD_URL" \
   --data-binary @./reference.jpg
 ```
 
-After the upload succeeds, use the returned `url` as the image URL in the model request.
+After uploading is complete, use the `url` returned as the image URL in the model request.
 
 <Warning>
-  The `upload_url` is a short-lived write URL, valid for about 15 minutes by default. `Content-Type` and `Content-Length` must match the presign request. Do not pass `upload_url` to the model; use the returned `url` instead.
+  `upload_url` is a short-lived write address, typically valid for about 15 minutes. `Content-Type` and `Content-Length` must match the ones from the application; do not send `upload_url` to the model, in model requests you should use the returned `url`.
 </Warning>
 
-## Example: Use a Local Reference Image for Kling Image-to-Video
+## Practical Example: Local Reference Image for Kling Image-to-Video
 
-First, upload the local reference image:
+Step 1: Upload the local reference image:
 
 ```bash cURL
 UPLOAD_RESPONSE=$(curl -sS -X POST https://api.crazyrouter.com/v1/files/uploads \
@@ -149,29 +149,23 @@ IMAGE_URL=$(python -c "import json,sys; print(json.load(sys.stdin)['url'])" <<< 
 echo "$IMAGE_URL"
 ```
 
-Then pass the returned `IMAGE_URL` to Kling image-to-video:
+Step 2: Submit the returned `IMAGE_URL` to Kling image-to-video:
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/kling/v1/videos/image2video \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "model_name": "kling-v3",
-    "prompt": "The person in the image slowly turns their head and smiles, cinematic lighting",
-    "image_urls": ["'"$IMAGE_URL"'"],
-    "duration": "5",
-    "mode": "std"
-  }'
+  -d "{
+    \"model_name\": \"kling-v3\",
+    \"prompt\": \"图片中的人物缓缓转头并微笑，镜头轻微推进，电影级光影\",
+    \"image_urls\": [\"$IMAGE_URL\"],
+    \"duration\": \"5\",
+    \"mode\": \"std\"
+  }"
 ```
 
-The submit request returns a task ID. Use the [Kling task query](/en/video/kling/query) endpoint to get the final video result.
+Upon successful submission, a task ID will be returned. Retrieve the final video result via [Kling Task Query](/en/video/kling/query).
 
 <Warning>
-  Temporary URLs are not a permanent asset library. Make sure the URL has not expired before submitting a generation task, and do not store it as a long-term business image URL.
+  The temporary URL is not a permanent asset library. Please ensure the URL has not expired before submitting the task and do not use it as a long-term business image address.
 </Warning>
-
-{/* crazyrouter-model-links v2 */}
-## Related on crazyrouter.com
-
-- [Nano Banana Pro model page: live price, real samples, code](https://crazyrouter.com/en/models/google/nano-banana-pro?utm_source=docs&utm_medium=related)
-- [All Google models with live prices](https://crazyrouter.com/en/models/google?utm_source=docs&utm_medium=related)

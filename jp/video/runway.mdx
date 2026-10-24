@@ -1,8 +1,8 @@
 ---
 title: "Runway"
-description: "Use the Runway API for image-to-video generation"
+description: "Runway API を使用して画像から動画を生成する"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
 # Runway
 
@@ -10,20 +10,20 @@ description: "Use the Runway API for image-to-video generation"
 POST /runwayml/v1/image_to_video
 ```
 
-Use the Runway Gen-3 model to convert images into videos.
+Runway Gen-3 モデルを利用して画像を動画へ変換します。
 
-## Request Parameters
+## リクエストパラメータ
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model` | string | No | Model name, e.g. `gen3a_turbo` |
-| `promptImage` | string | Yes | Input image URL |
-| `promptText` | string | No | Video description prompt |
-| `duration` | integer | No | Video duration (seconds), default 5 |
-| `ratio` | string | No | Aspect ratio: `16:9`, `9:16` |
-| `watermark` | boolean | No | Whether to add a watermark |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `model` | string | いいえ | モデル名（例: `gen3a_turbo`） |
+| `promptImage` | string | はい | 入力画像のURL |
+| `promptText` | string | いいえ | 動画の説明用プロンプト |
+| `duration` | integer | いいえ | 動画の長さ（秒）、デフォルトは5 |
+| `ratio` | string | いいえ | アスペクト比：`16:9`、`9:16` |
+| `watermark` | boolean | いいえ | 透かし（ウォーターマーク）を追加するかどうか |
 
-## Request Examples
+## リクエスト例
 
 <CodeGroup>
 
@@ -64,7 +64,7 @@ print(response.json())
 
 </CodeGroup>
 
-### Response Example
+### レスポンス例
 
 ```json
 {
@@ -75,7 +75,7 @@ print(response.json())
 
 ---
 
-## Query Task
+## タスクの照会
 
 ```
 GET /runwayml/v1/tasks/{task_id}
@@ -86,7 +86,7 @@ curl https://api.crazyrouter.com/runwayml/v1/tasks/runway_task_abc123 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-### Response Example (Completed)
+### レスポンス例（完了）
 
 ```json
 {
@@ -98,11 +98,11 @@ curl https://api.crazyrouter.com/runwayml/v1/tasks/runway_task_abc123 \
 }
 ```
 
-### Task Status
+### タスクステータス
 
-| Status | Description |
-|--------|-------------|
-| `PENDING` | Waiting to be processed |
-| `RUNNING` | Generating |
-| `SUCCEEDED` | Succeeded |
-| `FAILED` | Failed |
+| ステータス | 説明 |
+|------|------|
+| `PENDING` | 処理待ち |
+| `RUNNING` | 生成中 |
+| `SUCCEEDED` | 成功 |
+| `FAILED` | 失敗 |

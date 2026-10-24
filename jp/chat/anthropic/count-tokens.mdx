@@ -1,38 +1,39 @@
 ---
-title: "Claude Token Counting"
-description: "POST /v1/messages/count_tokens estimate the input token count for a Claude Messages request"
+title: "Claude トークン数の計測"
+description: "POST /v1/messages/count_tokens はClaude Messagesリクエストの入力トークン数を推定します"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Claude Token Counting
+
+# Claude トークン数の計測
 
 ```
 POST /v1/messages/count_tokens
 ```
 
-Use this endpoint to estimate input token usage before you send the real `POST /v1/messages` request. It is useful for Claude CLI, Claude Code, budget checks, and context-trimming logic.
+実際に `POST /v1/messages` を呼び出す前に、入力部分で消費されるトークン数をあらかじめ推定するためのものです。Claude CLI、Claude Code、予算管理やコンテキストのトリミングロジックに適しています。
 
-## Authentication
+## 認証
 
-The recommended headers follow Anthropic-style requests:
+Anthropicスタイルのリクエストヘッダーを推奨します：
 
 ```http
 x-api-key: YOUR_API_KEY
 anthropic-version: 2023-06-01
 ```
 
-Standard Bearer authentication also works, but Anthropic ecosystem clients usually send the headers above.
+また、標準的なBearer認証も使えますが、Anthropicエコシステムのクライアントは通常上記のヘッダーを使用します。
 
-## Request Body
+## リクエスト本文
 
-The body follows the Claude Messages shape. The smallest practical request usually includes:
+リクエスト本文はClaude Messagesスタイルに準じます。通常、最小限必要なフィールドは以下の通りです：
 
 - `model`
 - `messages`
 
-If your request also includes `system`, `tools`, tool results, or text content, those are included in the estimate too.
+リクエスト内に`system`、`tools`、ツールの結果やテキストが含まれる場合も、推定に含まれます。
 
-## Request Example
+## リクエスト例
 
 <CodeGroup>
 
@@ -68,7 +69,7 @@ print(resp.json())
 
 </CodeGroup>
 
-## Response Example
+## レスポンス例
 
 ```json
 {
@@ -76,32 +77,32 @@ print(resp.json())
 }
 ```
 
-## Response Fields
+## レスポンスフィールド
 
-| Field | Type | Description |
-|------|------|-------------|
-| `input_tokens` | integer | Estimated input tokens for the text portion of the request |
-| `warning` | string | Optional warning; may appear when images or files were not included in the estimate |
+| フィールド | 型 | 説明 |
+|------|------|------|
+| `input_tokens` | integer | 現在のリクエストテキスト部分の推定入力トークン数 |
+| `warning` | string | オプションの警告；リクエストに画像やファイルが含まれる場合、それらが推定に含まれていない旨を通知する場合があります |
 
-## Current Limits
+## 制限事項
 
-The current implementation mainly estimates:
+現在の実装で推定される主な項目：
 
 - `system`
-- text content in `messages`
-- text and JSON content in tool definitions and tool results
+- `messages` のテキスト部分
+- ツール定義およびツール結果に含まれるテキスト/JSON
 
 <Warning>
-If the request contains images or files, those image/file tokens are not included in `input_tokens`. In that case the response may include a `warning`, and real billing can be higher than this estimate.
+リクエスト内に画像やファイルが含まれている場合、このAPIはそれらの画像／ファイルのトークンを`input_tokens`に含めません。その場合はレスポンスに`warning`が現れることがあり、実際の課金は推定値より高くなる可能性があります。
 </Warning>
 
 <Note>
-This endpoint returns an estimate, not a final billing record. Actual usage is determined by the real model call.
+このAPIが返すのはあくまでも推定値であり、最終的な決済値ではありません。実際の利用量は、モデルの呼び出し結果に基づいて決定されます。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [Claude Fable 5 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
-- [Claude Fable 5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
-- [Claude Haiku 4.5 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/claude-haiku-4-5?utm_source=docs&utm_medium=related)
+- [Claude Fable 5 価格比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Claude Fable 5 モデルページ：リアルタイム価格、実例、呼び出しコード](https://crazyrouter.com/ja/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Claude Haiku 4.5 価格比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/claude-haiku-4-5?utm_source=docs&utm_medium=related)

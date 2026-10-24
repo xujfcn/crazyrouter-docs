@@ -1,0 +1,276 @@
+---
+title: "Nano Banana Pro"
+description: "Genera y edita imágenes basadas en referencia usando nano-banana-pro, compatible con la API de imágenes de OpenAI"
+---
+> Contenido actualizado: 2026-09-28
+
+<Tip>
+  ¿Necesitas enviar, recibir respuesta inmediata y luego consultar la URL de la imagen? Este modelo soporta [generación asíncrona de imágenes](/es/images/async): en el sistema Gemini cambia el sufijo de la ruta a `:asyncGenerateContent`, en OpenAI añade la cabecera `Prefer: respond-async`, el cuerpo de la petición no necesita ser modificado en lo absoluto.
+</Tip>
+
+# Nano Banana Pro
+
+```
+POST /v1/images/generations
+```
+
+Usa `nano-banana-pro` para la generación de imágenes y edición de referencias, siguiendo el protocolo público unificado estilo `OpenAI Images API`.
+
+<Warning>
+  Solicitudes como generación de imágenes, edición y múltiples referencias suelen tener tiempos de procesamiento largos. Para integración en producción, usa prioritariamente la vía principal `https://api.crazyrouter.com/v1`; el endpoint completo de generación es `https://api.crazyrouter.com/v1/images/generations`. El inicio de sesión de cuenta, recargas y la consola continúan usando `https://crazyrouter.com`.
+</Warning>
+
+## ¿Qué cubre esta página?
+
+- Esta página cubre únicamente `nano-banana-pro` / `nano-banana-pro`
+- El punto de entrada para las solicitudes de clientes es siempre `POST /v1/images/generations`
+- El campo para imágenes de entrada es siempre `image_input`
+- Se recomienda seguir usando la URL del protocolo público predeterminado `image_input`; las cuentas grises también soportan dataURL, Base64 bruto y edición de imágenes con multipart de tres imágenes
+- `data:` / Base64 / multipart es una extensión compatible de Crazyrouter, no implica que todos los carriers nativos lo soportan
+- El backend puede soportar Gemini / Vertex u otros proveedores, pero los detalles de estos proveedores no forman parte del protocolo para el cliente
+- No envíes desde el lado del usuario `generationConfig`, `imageConfig`, `imageOutputOptions`, `image_output_options`; estos campos son convertidos automáticamente por Crazyrouter desde parámetros unificados
+
+## Nombre del modelo
+
+| Nombre de modelo recomendado | Modelo subyacente equivalente |
+|------|------|
+| `nano-banana-pro` | `nano-banana-pro` |
+
+Se recomienda usar `nano-banana-pro` en el código del cliente. Si tu sistema ya está usando directamente `nano-banana-pro`, puedes seguir invocando utilizando el mismo punto de entrada `/v1/images/generations`.
+
+## Estado de las capacidades
+
+| Capacidad / Especificación | Estado | Descripción |
+|------|------|------|
+| `T2I` | `Beta` | Cubierto históricamente, pero actualmente el conjunto de artifacts públicos está enfocado en rutas de edición y referencia |
+| `I2I + 1K` | `Verified` | Edición de imagen individual live cerrada |
+| `I2I + 4K` | `Verified` | `4K + 21:9 + png/jpeg/jpg` live cerrada |
+| `Reference + 1..2 refs` | `Verified` | `2` imagen live cerrada |
+| `11257` gris: dataURL / Base64 bruto | `Verified` | Canal de producción 304 ha verificado edición de imagen individual y de tres imágenes `image_input` |
+| `11257` gris: multipart de tres imágenes | `Verified` | `/v1/images/edits` soporte para `image`, `image[]`, `image[n]` |
+| `2K` | `Beta` | Los artifacts públicos actuales todavía se están completando |
+| Límite superior de imágenes / precisión en el borde de `30 MiB` | `Beta` | No garantizado en el contrato público actual |
+
+<Note>
+  La página de precios usa la misma convención de estado que esta documentación: `Verified` indica el ciclo live mínimo disponible, `Beta` indica que la capacidad oficial existe pero la validación pública o los límites siguen en proceso de definición.
+</Note>
+
+## Capacidades actualmente validadas
+
+Las siguientes conclusiones se basan en validaciones live históricas y validación gris en producción `2026-08-18`:
+
+- Vertex oficial, conexión directa `channel 318 (vertexsophie)` validada:
+  - `2` imágenes de referencia disponibles
+- Puerto local `4000`, `channel 318` fijo validado:
+  - Una referencia de imagen única por URL `WEBP` disponible
+  - Una referencia de imagen única por URL `JPEG` disponible
+  - `2` imágenes de referencia por URL `PNG` disponibles
+  - `resolution: "1K"` disponible
+  - `resolution: "4K"` disponible
+  - `aspect_ratio: "1:1"` disponible
+  - `aspect_ratio: "21:9"` disponible
+  - `output_format: "png"` disponible
+  - `output_format: "jpg"` disponible
+- Se puede devolver directamente `data[].url` en la respuesta
+
+La cuenta gris `11257` ha sido validada en el canal de producción `304`:
+
+- `/v1/images/generations` de `image_input` soporta dataURL, Base64 bruto y entradas con múltiples imágenes
+- `/v1/images/edits` soporta multipart en `image`, `image[]`, `image[n]`
+- Imagen original, imagen anotada, imagen de referencia pueden componerse en una solicitud de edición de tres imágenes según orden de subida
+
+No se consideran completamente comprometidas las siguientes capacidades para los clientes:
+
+- Límite máximo de imágenes precisas sea `8` o superior
+- `2K`
+- Límite máximo de URL de archivo grande precisas
+- Precisión de borde de `30 MiB`
+- Otras combinaciones de `aspect_ratio`
+- Precisión semántica de los bordes en `output_compression`
+
+<Note>
+  Por defecto, la cuenta pública sigue procesando solo por URL. Edición de imágenes Base64, dataURL y multipart está abierta solo para cuentas grises específicas; para habilitar, asegúrate de que la cuenta forme parte de la lista gris.
+</Note>
+
+---
+
+## Parámetros de solicitud
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `model` | string | Sí | Se recomienda `nano-banana-pro`; también es compatible con `nano-banana-pro` |
+| `prompt` | string | Sí | Instrucción para generar o editar |
+| `image_input` | string o string[] | No | Por defecto envía URL de referencia; la cuenta gris puede enviar dataURL / Base64 bruto; validado actualmente con tres imágenes |
+| `resolution` | string | No | Compromiso público actual con `1K`, `4K` |
+| `aspect_ratio` | string | No | Compromiso público actual con `1:1`, `21:9` |
+| `output_format` | string | No | Compromiso público actual con `png`, `jpeg` / `jpg` |
+| `output_compression` | integer | No | `0-100`, calidad de compresión JPEG |
+| `n` | integer | No | Cantidad de imágenes generadas, predeterminado `1` |
+
+### Estado actual de múltiples imágenes
+
+- `2` imágenes: validado
+- `11257` gris de tres imágenes: validado
+- Mayor cantidad: el máximo exacto aún no ha sido probado, no comprometido por ahora
+
+### Descripción de enrutamiento
+
+- Solicitud de imagen individual puede ir por canal regular
+- Solicitud de varias imágenes solo será enrutada al carrier oficial `Gemini / Vertex`; la cuenta gris puede usar carriers grises validados
+- Esto es una estrategia interna de enrutamiento, el protocolo del cliente no se modifica
+
+### Multipart gris de tres imágenes
+
+La cuenta gris `11257` puede usar `/v1/images/edits`:
+
+```bash
+curl -X POST https://api.crazyrouter.com/v1/images/edits \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "model=nano-banana-pro" \
+  -F "prompt=以第一张为原图，第二张为批注图，第三张为参考图，仅修改批注区域" \
+  -F "image[]=@original.png" \
+  -F "image[]=@annotation.png" \
+  -F "image[]=@reference.png"
+```
+
+El orden de las imágenes depende del orden de envío desde el cliente. Imagen anotada se usa como referencia visual, no se garantiza bloqueo de región por máscara de pixel estilo GPT.
+
+---
+
+## Ejemplos de solicitud
+
+### Edición de una imagen
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "nano-banana-pro",
+    "prompt": "把这张商品图改成超宽横幅 KV，背景更简洁，保留主体结构",
+    "image_input": [
+      "https://help-static-aliyun-doc.aliyuncs.com/file-manage-files/zh-CN/20250925/fpakfo/image36.webp"
+    ],
+    "resolution": "4K",
+    "aspect_ratio": "21:9",
+    "output_format": "png"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/v1/images/generations",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "nano-banana-pro",
+        "prompt": "把这张商品图改成超宽横幅 KV，背景更简洁，保留主体结构",
+        "image_input": [
+            "https://help-static-aliyun-doc.aliyuncs.com/file-manage-files/zh-CN/20250925/fpakfo/image36.webp"
+        ],
+        "resolution": "4K",
+        "aspect_ratio": "21:9",
+        "output_format": "png"
+    }
+)
+
+data = response.json()
+print(data["data"][0]["url"])
+```
+
+</CodeGroup>
+
+### Generación de imagen por texto
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "nano-banana-pro",
+    "prompt": "A premium product poster for a red apple, studio lighting, clean background",
+    "resolution": "1K",
+    "aspect_ratio": "1:1",
+    "output_format": "jpeg",
+    "output_compression": 85
+  }'
+```
+
+### Referencia doble de imagen
+
+```json
+{
+  "model": "nano-banana-pro",
+  "prompt": "融合两张参考图的主体与构图，生成一张高质量主视觉图",
+  "image_input": [
+    "https://example.com/ref-1.png",
+    "https://example.com/ref-2.png"
+  ],
+  "resolution": "1K",
+  "aspect_ratio": "1:1"
+}
+```
+
+---
+
+## Ejemplos de respuesta
+
+Se recomienda consumir directamente `data[].url`:
+
+```json
+{
+  "created": 1774846705,
+  "data": [
+    {
+      "url": "https://media.crazyrouter.com/task-artifacts/2026/03/30/sync-image/20260331073825672515332JyP6hAcs-1.png"
+    }
+  ]
+}
+```
+
+Para obtener el resultado final de la imagen generada, solo lee `data[0].url`. Actualmente Crazyrouter archiva imágenes internas de upstream como URL accesible y la devuelve al cliente.
+
+---
+
+## Resumen de resultados validados
+
+| Proyecto | Estado actual |
+|------|----------|
+| Imagen única por URL de referencia | Validado |
+| `2` imágenes por URL de referencia | Validado |
+| `WEBP` URL | Validado |
+| `JPEG` URL | Validado |
+| `PNG` URL | Validado |
+| `1K` | Validado |
+| `4K` | Validado |
+| `1:1` | Validado |
+| `21:9` | Validado |
+| `output_format = png` | Validado |
+| `output_format = jpeg / jpg` | Validado |
+| Límite preciso de `8` imágenes | `Beta` |
+| Límite preciso de `30 MiB` URL | `Beta` |
+| `2K` | `Beta` |
+
+## Limitaciones actualmente conocidas
+
+- Las cuentas que no sean gris no aceptan `image`, `data:` / Base64 ni entrada de imagen multipart
+- La cuenta gris ha validado hasta tres imágenes, no se garantiza un límite superior
+- Este documento no promete el límite preciso para `30 MiB` URL
+- Este documento no asegura que todas las proporciones y parámetros mostrados en las capturas estén completamente cerrados
+
+<Note>
+  Si necesitas una descripción unificada de parámetros para generación y edición de imágenes Gemini / Nano Banana, consulta [Generación de imágenes Gemini](/es/chat/gemini/image-gen) y [Edición de imágenes Gemini](/es/chat/gemini/image-edit). Para otras opciones, revisa [Nano Banana](/es/images/nano-banana) y [Nano Banana 2](/es/images/nano-banana-2).
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Página del modelo Nano Banana Pro: precios en tiempo real, ejemplos reales, código de invocación](https://crazyrouter.com/es/models/google/nano-banana-pro?utm_source=docs&utm_medium=related)
+- [Página del modelo Nano Banana 2: precios en tiempo real, ejemplos reales, código de invocación](https://crazyrouter.com/es/models/google/nano-banana-2?utm_source=docs&utm_medium=related)
+- [Todos los modelos y precios de Google](https://crazyrouter.com/es/models/google?utm_source=docs&utm_medium=related)

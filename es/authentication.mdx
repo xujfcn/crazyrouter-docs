@@ -1,0 +1,68 @@
+---
+title: "Método de autenticación"
+description: "Cómo obtener y usar la API Key"
+---
+> Contenido actualizado: 2026-06-16
+
+## Autenticación Bearer Token
+
+Todas las solicitudes a la API deben incluir la API Key en el encabezado:
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Obtención de la API Key
+
+1. Inicia sesión en [Crazyrouter](https://crazyrouter.com)
+2. Después de iniciar sesión, ingresa a la página de [Gestión de Token](https://crazyrouter.com/console/token)
+3. Haz clic en "Crear nuevo Token"
+4. Establece el nombre del token, límite de crédito, modelos disponibles, etc.
+5. Copia la clave generada que comienza con `sk-`
+
+<Warning>
+La API Key solo se muestra una vez al momento de la creación, guárdala cuidadosamente. Si la pierdes, deberás crear una nueva.
+</Warning>
+
+## Ejemplo de uso
+
+<Note>
+La conexión compatible con OpenAI usa por defecto la dirección internacional `https://api.crazyrouter.com/v1`. En la región de Asia Oriental, se recomienda usar `https://cn.crazyrouter.com/v1`. Si necesitas configurar una dirección para Claude Code, Hermes, OpenClaw u otras herramientas, primero consulta la [descripción del Endpoint de API](https://docs.crazyrouter.com/es/api-endpoint).
+</Note>
+
+<CodeGroup>
+```bash cURL
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Authorization: Bearer sk-xxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "gpt-5.5", "messages": [{"role": "user", "content": "Hi"}]}'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxxxxxxx",
+    base_url="https://api.crazyrouter.com/v1"
+)
+```
+
+```javascript Node.js
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: 'sk-xxxxxxxx',
+  baseURL: 'https://api.crazyrouter.com/v1'
+});
+```
+</CodeGroup>
+
+## Control de permisos del Token
+
+Al crear un Token puedes configurar:
+
+- **Nombre**: Para identificar fácilmente su propósito
+- **Límite de crédito**: Establece la cantidad máxima disponible
+- **Tiempo de expiración**: Define el periodo de validez
+- **Modelos disponibles**: Restringe el alcance de los modelos que se pueden invocar
+- **Lista blanca de IP**: Restringe las IP de origen que pueden realizar llamadas

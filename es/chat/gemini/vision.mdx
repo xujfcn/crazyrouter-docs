@@ -1,0 +1,80 @@
+---
+title: "Gemini comprensión de imágenes"
+description: "Resumen de experiencias exitosas con solicitudes a Crazyrouter en este sitio basado en 2026-04-08 para la comprensión nativa de imágenes en Gemini"
+---
+> Contenido actualizado: 2026-06-09
+
+# Gemini comprensión de imágenes
+
+```
+POST /v1beta/models/{model}:generateContent
+```
+
+Hasta `2026-04-08`, pruebas repetidas en el puerto local `4000` y en este sitio Crazyrouter muestran:
+
+- `gemini-3.1-pro` puede leer imágenes de manera estable a través de `inlineData` y devolver una descripción en texto
+- Han ocurrido problemas como fallo en la captura o respuestas inusuales en el caso de `fileData.fileUri` en forma de URL de imágenes remotas en varios canales
+- Por lo tanto, para la comprensión de imágenes, en este documento se recomienda usar `inlineData` como el método principal
+
+---
+
+## Solicitud mínima validada
+
+```bash
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "inlineData": {
+              "mimeType": "image/png",
+              "data": "BASE64_PNG_DATA"
+            }
+          },
+          {
+            "text": "请用一句中文描述这张图片里有什么。"
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+Forma clave devuelta efectivamente en el entorno de producción:
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "这张图片展示了多种鲜艳色彩平滑过渡的渐变效果。"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+## Puntos clave de la solicitud
+
+- Para la comprensión de imágenes, se debe priorizar el uso de `inlineData`
+- `mimeType` debe ser coherente con el formato real de la imagen, por ejemplo, `image/png`, `image/jpeg`
+- `data` debe contener solo el contenido Base64, sin prefijos `data:image/...;base64,`
+- Si solo tienes URL de imágenes remotas, actualmente no las consideres la vía principal recomendada para la comprensión de imágenes Gemini
+
+<Note>
+  Si deseas realizar comprensión de video, consulta [Gemini comprensión de video](/es/chat/gemini/video). Si deseas realizar comprensión de audio, consulta [Gemini comprensión de audio](/es/chat/gemini/audio).
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Comparación de precios de Gemini 2.5 Flash: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Página del modelo Gemini 2.5 Flash: Precio en tiempo real, ejemplos reales, código de invocación](https://crazyrouter.com/es/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Comparación de precios de Gemini 2.5 Flash-Lite: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)

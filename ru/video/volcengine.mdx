@@ -1,30 +1,31 @@
 ---
 title: "Volcengine"
-description: "Use the Volcengine API to generate videos"
+description: "Используйте API Volcengine для генерации видео"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
+
 
 # Volcengine
 
-Volcengine provides video generation capabilities from ByteDance.
+Volcengine предоставляет возможности генерации видео от ByteDance.
 
-## Create Video Task
+## Создать задачу на видео
 
 ```
 POST /volc/v1/contents/generations/tasks
 ```
 
-### Request Parameters
+### Параметры запроса
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model` | string | Yes | Model name |
-| `content` | object | Yes | Content configuration |
-| `content.prompt` | string | Yes | Video description prompt |
-| `content.image_url` | string | No | Reference image URL |
-| `content.aspect_ratio` | string | No | Aspect ratio |
+| Параметр | Тип | Обязательный | Описание |
+|------|------|------|------|
+| `model` | string | да | Название модели |
+| `content` | object | да | Настройки контента |
+| `content.prompt` | string | да | Описание видео (prompt) |
+| `content.image_url` | string | нет | URL референсного изображения |
+| `content.aspect_ratio` | string | нет | Соотношение сторон |
 
-### Request Examples
+### Пример запроса
 
 <CodeGroup>
 
@@ -35,7 +36,7 @@ curl -X POST https://api.crazyrouter.com/volc/v1/contents/generations/tasks \
   -d '{
     "model": "doubao-video",
     "content": {
-      "prompt": "A butterfly fluttering among flowers, macro lens shot",
+      "prompt": "一只蝴蝶在花丛中飞舞，微距镜头",
       "aspect_ratio": "16:9"
     }
   }'
@@ -53,7 +54,7 @@ response = requests.post(
     json={
         "model": "doubao-video",
         "content": {
-            "prompt": "A butterfly fluttering among flowers, macro lens shot",
+            "prompt": "一只蝴蝶在花丛中飞舞，微距镜头",
             "aspect_ratio": "16:9"
         }
     }
@@ -64,7 +65,7 @@ print(response.json())
 
 </CodeGroup>
 
-### Response Example
+### Пример ответа
 
 ```json
 {
@@ -78,7 +79,7 @@ print(response.json())
 
 ---
 
-## Query Task
+## Проверить задачу
 
 ```
 GET /volc/v1/contents/generations/tasks/{task_id}
@@ -89,7 +90,7 @@ curl https://api.crazyrouter.com/volc/v1/contents/generations/tasks/volc_task_ab
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-### Response Example (Completed)
+### Пример ответа (завершено)
 
 ```json
 {
@@ -106,16 +107,16 @@ curl https://api.crazyrouter.com/volc/v1/contents/generations/tasks/volc_task_ab
 }
 ```
 
-### Task Status
+### Статусы задачи
 
-| Status | Description |
-|--------|-------------|
-| `SUBMITTED` | Submitted |
-| `PROCESSING` | Processing |
-| `SUCCESS` | Succeeded |
-| `FAILED` | Failed |
+| Статус | Описание |
+|------|------|
+| `SUBMITTED` | Отправлено |
+| `PROCESSING` | В процессе |
+| `SUCCESS` | Успешно |
+| `FAILED` | Ошибка |
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [Все модели ByteDance с актуальными ценами](https://crazyrouter.com/en/models/bytedance?utm_source=docs&utm_medium=related)
+- [Все модели и цены ByteDance](https://crazyrouter.com/ru/models/bytedance?utm_source=docs&utm_medium=related)

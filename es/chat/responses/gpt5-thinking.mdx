@@ -1,0 +1,220 @@
+---
+title: "Modo de Pensamiento GPT-5"
+description: "Razonamiento GPT-5.4 revalidado en producción mediante la API de Respuestas"
+---
+> Contenido actualizado: 2026-06-09
+
+# Modo de Pensamiento GPT-5
+
+Esta página solo documenta el comportamiento de razonamiento de GPT que fue revalidado contra Crazyrouter en producción en `2026-03-22`.
+
+El ejemplo principal actual utiliza:
+
+- `gpt-5.5`
+- `POST /v1/responses`
+
+<Note>
+  Claude actualmente no soporta `POST /v1/responses`. Si estás integrando Claude, utiliza `POST /v1/messages` o `POST /v1/chat/completions` en lugar de la forma de solicitud en esta página.
+</Note>
+
+```
+POST /v1/responses
+```
+
+---
+
+## Uso básico
+
+<CodeGroup>
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "input": "Which is larger, 9.11 or 9.9? Explain briefly.",
+    "reasoning": {
+      "effort": "high",
+      "summary": "detailed"
+    }
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+response = client.responses.create(
+    model="gpt-5.5",
+    input="Which is larger, 9.11 or 9.9? Explain briefly.",
+    reasoning={
+        "effort": "high",
+        "summary": "detailed"
+    }
+)
+
+print(response.output_text)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://api.crazyrouter.com/v1",
+});
+
+const response = await client.responses.create({
+  model: "gpt-5.5",
+  input: "Which is larger, 9.11 or 9.9? Explain briefly.",
+  reasoning: {
+    effort: "high",
+    summary: "detailed",
+  },
+});
+
+console.log(response.output_text);
+```
+
+</CodeGroup>
+
+---
+
+## Forma de respuesta verificada
+
+Valores verificados de `output.type`:
+
+```json
+["reasoning", "message"]
+```
+
+Forma típica de ítem `reasoning`:
+
+```json
+{
+  "id": "rs_xxx",
+  "type": "reasoning",
+  "encrypted_content": "...",
+  "summary": [
+    {
+      "type": "summary_text",
+      "text": "..."
+    }
+  ]
+}
+```
+
+La respuesta final se devuelve a través del ítem `message`:
+
+```json
+{
+  "type": "message",
+  "content": [
+    {
+      "type": "output_text",
+      "text": "..."
+    }
+  ]
+}
+```
+
+---
+
+## Parámetro `reasoning`
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `effort` | string | Intensidad de razonamiento. Los valores verificados incluyen `low`, `medium` y `high` |
+| `summary` | string | Granularidad del resumen. `concise` y `detailed` fueron revalidados |
+
+### Regla práctica
+
+- Si solo deseas razonamiento más fuerte, envía `effort`
+- Si necesitas un resumen de razonamiento inspeccionable, envía ambos `effort` y `summary`
+
+En la comprobación actual:
+
+- solo con `effort`, el ítem `reasoning` existía pero `summary` podría ser un arreglo vacío
+- con `summary: "detailed"`, `summary_text` se devolvía confiablemente
+
+---
+
+## Extraer el resumen del pensamiento
+
+```python Python
+response = client.responses.create(
+    model="gpt-5.5",
+    input="Design a high-concurrency message queue architecture.",
+    reasoning={
+        "effort": "high",
+        "summary": "detailed"
+    }
+)
+
+for item in response.output:
+    if item.type == "reasoning":
+        for part in item.summary:
+            if part.type == "summary_text":
+                print("Thinking summary:", part.text)
+    elif item.type == "message":
+        for content in item.content:
+            if content.type == "output_text":
+                print("Final answer:", content.text)
+```
+
+---
+
+## Pensamiento en streaming
+
+Los siguientes nombres de eventos SSE de Respuestas fueron revalidados en producción:
+
+- `response.reasoning_summary_part.added`
+- `response.reasoning_summary_text.delta`
+- `response.reasoning_summary_text.done`
+- `response.output_text.delta`
+- `response.output_text.done`
+- `response.completed`
+
+Ejemplo:
+
+```python Python
+stream = client.responses.create(
+    model="gpt-5.5",
+    input="Explain briefly why 9.9 is larger than 9.11.",
+    reasoning={
+        "effort": "high",
+        "summary": "detailed"
+    },
+    stream=True
+)
+
+for event in stream:
+    if event.type == "response.reasoning_summary_text.delta":
+        print(f"[Thinking summary] {event.delta}", end="")
+    elif event.type == "response.output_text.delta":
+        print(event.delta, end="")
+```
+
+---
+
+## Recomendación actual
+
+- Si necesitas un campo visible de razonamiento, prefiere `gpt-5.5` con la API de Respuestas
+- No trates `gpt-5.5` Chat Completions `reasoning_content` como el contrato principal actual
+- Si solo te importa la respuesta final, Chat Completions con `reasoning_effort` sigue siendo adecuado
+
+<Warning>
+  El modo de razonamiento aumenta tanto la latencia como el uso de tokens. Un `effort` más alto generalmente cuesta más.
+</Warning>
+
+{/* crazyrouter-model-links v2 */}
+## Relacionados en crazyrouter.com
+
+- [Comparación de precios GPT-5: lista vs Azure / Bedrock / Vertex vs Crazyrouter](https://crazyrouter.com/es/pricing/gpt-5?utm_source=docs&utm_medium=related)
+- [Página de modelo GPT-5: precio en vivo, muestras reales, código](https://crazyrouter.com/es/models/openai/gpt-5?utm_source=docs&utm_medium=related)
+- [Comparación de precios GPT-5.4: lista vs Azure / Bedrock / Vertex vs Crazyrouter](https://crazyrouter.com/es/pricing/gpt-5-4?utm_source=docs&utm_medium=related)

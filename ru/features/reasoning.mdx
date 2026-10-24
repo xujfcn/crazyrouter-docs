@@ -1,34 +1,38 @@
 ---
-title: "Reasoning"
-description: "Production-verified reasoning and thinking with the latest GPT, Claude, and Gemini models"
+title: "Логическое рассуждение"
+description: "На основе реальных испытаний в производственной среде используются новейшие основные модели GPT, Claude, Gemini для рассуждения и размышления"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Reasoning
+# Логическое рассуждение
 
-This page only documents reasoning flows that were **verified with real requests against Crazyrouter production**.
+В этой документации приводятся **только успешно проверенные в реальных запросах Crazyrouter** варианты использования для целей рассуждения / мышления.
 
-Verification date:
+Время проверки:
 
 - `2026-03-22`
 
-Verified models:
+Проверенные модели:
 
 - `gpt-5.5`
 - `claude-opus-4-8`
 - `gemini-3.1-pro`
 
-## Verified matrix
+---
 
-| Model | Protocol | Endpoint | Success marker |
-|------|------|------|----------|
-| `gpt-5.5` | OpenAI Responses | `POST /v1/responses` | `output` includes a `reasoning` item |
-| `claude-opus-4-8` | Anthropic Messages | `POST /v1/messages` | Returns `thinking` block |
-| `gemini-3.1-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | `usageMetadata` includes `thoughtsTokenCount` |
+## Проверенная матрица возможностей
+
+| Модель | Протокол | Эндпоинт | Признак успеха |
+|--------|----------|----------|----------------|
+| `gpt-5.5` | OpenAI Ответы | `POST /v1/responses` | Элемент `reasoning` обнаружен в `output` |
+| `claude-opus-4-8` | Anthropic Messages | `POST /v1/messages` | Возвращает блок `thinking` |
+| `gemini-3.1-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | Элемент `thoughtsTokenCount` обнаружен в `usageMetadata` |
+
+---
 
 ## GPT-5.4
 
-```bash
+```bash cURL
 curl https://api.crazyrouter.com/v1/responses \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
@@ -42,13 +46,13 @@ curl https://api.crazyrouter.com/v1/responses \
   }'
 ```
 
-Verified output types:
+Ключевой `output.type`, возвращённый в ходе проверки в реальной среде:
 
 ```json
 ["reasoning", "message"]
 ```
 
-Verified `reasoning` item shape:
+Ключевые поля элемета `reasoning` включают:
 
 ```json
 {
@@ -62,9 +66,13 @@ Verified `reasoning` item shape:
 }
 ```
 
+Это означает, что в текущей производственной среде Crazyrouter способность рассуждения `gpt-5.5` должна определяться элементом `reasoning` из Responses API, а не зависеть от `reasoning_content` Chat Completions.
+
+---
+
 ## Claude Opus 4.7 Thinking
 
-```bash
+```bash cURL
 curl https://api.crazyrouter.com/v1/messages \
   -H "Content-Type: application/json" \
   -H "x-api-key: YOUR_API_KEY" \
@@ -85,24 +93,35 @@ curl https://api.crazyrouter.com/v1/messages \
   }'
 ```
 
-Verified response shape:
+Ключевые поля, возвращённые при проверке в реальной среде:
 
 ```json
 {
   "content": [
     {
-      "type": "thinking"
+      "type": "thinking",
+      "thinking": "..."
     },
     {
-      "type": "text"
+      "type": "text",
+      "text": "..."
     }
   ]
 }
 ```
 
+Внимание:
+
+- Базовая модель `claude-opus-4-8` в том же тесте за тот же день выдала только обычный `text`
+- Только `claude-opus-4-8` дал однозначно подтверждённый thinking block
+
+Поэтому следует отдавать приоритет `claude-opus-4-8` как примеру рассуждения Claude 4.7 в этой документации.
+
+---
+
 ## Gemini 3 Pro
 
-```bash
+```bash cURL
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -125,26 +144,33 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Verified production field:
+Ключевые поля, возвращённые в ходе продвинутой верификации:
 
 - `usageMetadata.thoughtsTokenCount`
 
-## Current exclusions
+Это показывает, что в текущей производственной среде режим thinking для `gemini-3.1-pro` действительно работает.
 
-- In the current recheck, `gpt-5.5` via Chat Completions did not reliably surface `reasoning_content`, so this page uses the Responses API as the primary GPT example
-- Base `claude-opus-4-8` did not return a thinking block in this verification round
+---
 
-## See Also
+## Сочетания, не включённые в основное заключение
 
-- [OpenAI Reasoning](/ru/chat/openai/reasoning)
-- [GPT-5 Thinking](/ru/chat/responses/gpt5-thinking)
-- [Thinking Fields](/ru/reference/thinking)
-- [Claude Native Messages](/ru/chat/anthropic/messages)
-- [Gemini Native API](/ru/chat/gemini/native)
+- Маршрутизация Chat Completions для `gpt-5.5` не стабильно возвращала `reasoning_content` при текущей проверке, поэтому здесь он не приводится как основной пример GPT
+- Базовая модель `claude-opus-4-8` не возвращала thinking block при текущей верификации
+- Модель с однозначными возможностями thinking, аналогичными указанным выше, для `claude-opus-4-8` не обнаружена
+
+---
+
+## Связанные документы
+
+- [Модели рассуждения OpenAI](/ru/chat/openai/reasoning)
+- [Режим мышления GPT-5](/ru/chat/responses/gpt5-thinking)
+- [Поля AI-рассуждения](/ru/reference/thinking)
+- [Нативный формат Claude](/ru/chat/anthropic/messages)
+- [Нативный формат Gemini](/ru/chat/gemini/native)
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [Claude Opus 4.7: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/claude-opus-4-7?utm_source=docs&utm_medium=related)
-- [Claude Opus 4.7: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/anthropic/claude-opus-4-7?utm_source=docs&utm_medium=related)
-- [GPT-5.4: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/gpt-5-4?utm_source=docs&utm_medium=related)
+- [Сравнение цен Claude Opus 4.7: официальный / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/claude-opus-4-7?utm_source=docs&utm_medium=related)
+- [Страница модели Claude Opus 4.7: реальная цена, действительные примеры, коды вызова](https://crazyrouter.com/ru/models/anthropic/claude-opus-4-7?utm_source=docs&utm_medium=related)
+- [Сравнение цен GPT-5.4: официальный / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/gpt-5-4?utm_source=docs&utm_medium=related)

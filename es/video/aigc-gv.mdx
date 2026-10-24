@@ -1,0 +1,98 @@
+---
+title: "Método de llamada AIGC GV VOD"
+description: "Llama al modelo de video GV / Google Veo de Crazyrouter utilizando la ruta Tencent VOD"
+---
+> Contenido actualizado: 2026-06-29
+
+# Método de llamada AIGC GV VOD
+
+`aigc-video-gv-*` es el modelo de video GV / Google Veo integrado por Crazyrouter a través de la ruta Tencent VOD. El método de llamada es idéntico al de AIGC Kling VOD, usando la interfaz asíncrona de videos al estilo OpenAI:
+
+```http
+POST /v1/video/generations
+GET /v1/video/generations/{task_id}
+```
+
+<Note>
+  `aigc-video-gv-*` solo utiliza `/v1/video/generations` y la ruta de consulta correspondiente. No envíe estos modelos a `/v1/video/create`; un error de ruta aparecerá como `model_not_found` o un error similar en el sistema superior.
+</Note>
+
+## Modelos disponibles
+
+| Modelo | Versión upstream | Descripción |
+|------|------|------|
+| `aigc-video-gv-3.1` | GV 3.1 | Versión de alta calidad, soporta video con sonido |
+| `aigc-video-gv-3.1-fast` | GV 3.1 Fast | Versión más rápida, soporta video con sonido |
+| `aigc-video-gv-3.1-lite` | GV 3.1 Lite | Versión ligera, soporta video con sonido |
+
+<Note>
+  GV 3.1 de Tencent VOD utiliza la ruta Google Veo, no Kling. No use nombres de modelos como `aigc-video-kling-3.1`.
+</Note>
+
+## Crear tarea
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-gv-3.1-fast",
+    "prompt": "a cinematic product shot with natural camera movement",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "1080P",
+      "sound": true
+    }
+  }'
+```
+
+## Imagen a video y referencias múltiples
+
+Para una sola imagen, use `image`; para referencias múltiples de imágenes, se recomienda usar `metadata.image_list`:
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-gv-3.1",
+    "prompt": "combine the visual style of the references into one smooth shot",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "1080P",
+      "image_list": [
+        {
+          "url": "https://example.com/ref-1.png",
+          "reference_type": "asset"
+        },
+        {
+          "url": "https://example.com/ref-2.png",
+          "reference_type": "style"
+        }
+      ]
+    }
+  }'
+```
+
+<Warning>
+  Las entradas de múltiples imágenes en GV deben transferirse mediante `FileInfos`. El sitio convertirá `image_list` en `FileInfos`, y no utilizará `LastFrameUrl` para peticiones de múltiples imágenes en GV.
+</Warning>
+
+## Campos comunes de metadata
+
+| Campo | Descripción |
+|------|------|
+| `resolution` | `720P`, `1080P`, `2K`, `4K`. Las especificaciones disponibles dependen de la página de precios |
+| `sound` | Indica si se genera sonido, soporta `true` / `false`, `on` / `off` |
+| `audio_generation` | Transferir directamente `Enabled` / `Disabled` |
+| `image_list` | Array de referencias de imágenes múltiples |
+| `reference_type` / `ReferenceType` | Tipo de referencia GV, normalmente `asset` o `style` |
+
+Precios, descuentos y especificaciones disponibles según la [Página de precios](https://crazyrouter.com/es/pricing).
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Página modelo Google Veo 3.1: precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/google/aigc-video-gv-3-1?utm_source=docs&utm_medium=related)
+- [Página modelo Kling 2.6: precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/kling/aigc-video-kling-2-6?utm_source=docs&utm_medium=related)
+- [Todos los modelos y precios de Google](https://crazyrouter.com/es/models/google?utm_source=docs&utm_medium=related)

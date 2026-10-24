@@ -1,27 +1,25 @@
 ---
-title: "Special Models"
-description: "Historical special-model notes are hidden from public navigation"
+title: "Специальные модели (временно скрыто)"
+description: "Историческая страница специальных моделей была скрыта из публичной навигации"
 noindex: true
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Special Models
+# Специальные модели (временно скрыто)
 
-This historical special-models page is no longer shown as a public Crazyrouter integration path. Special-purpose and experimental models change quickly, so this page no longer includes copyable examples for delisted or non-public models.
+В настоящее время исторические страницы специальных моделей больше не демонстрируются как публичные примеры API. Для нового подключения используйте:
 
-For current availability, check:
+- [Примеры использования новейших моделей](/ru/latest-model-examples)
+- [Список моделей](/ru/chat/openai/models)
+- [Завершения чата](/ru/chat/openai/completions)
 
-- [Model list](/ru/chat/openai/models)
-- `/api/pricing`
-- the dashboard model picker for your token
-
-<Warning>
-  A model appearing in a historical note does not mean it is currently callable. Always verify with the same-day model list and one minimal live request before publishing examples.
-</Warning>
+<Note>
+  Перед использованием в производственной среде, пожалуйста, сначала вызовите `GET /v1/models` для подтверждения ID моделей, доступных вашему текущему токену. Модели, которые отсутствуют в публичном индексе или недоступны с текущим токеном, не следует добавлять в конфигурацию по умолчанию или в примеры.
+</Note>
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [GPT Image 1.5: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [Все модели OpenAI с актуальными ценами](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [Страница модели GPT Image 1.5: текущая цена, реальные примеры, код вызова](https://crazyrouter.com/ru/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Страница модели GPT Image 2: текущая цена, реальные примеры, код вызова](https://crazyrouter.com/ru/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Все модели и цены OpenAI](https://crazyrouter.com/ru/models/openai?utm_source=docs&utm_medium=related)

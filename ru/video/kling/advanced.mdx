@@ -1,30 +1,31 @@
 ---
-title: "Kling Advanced Features"
-description: "Kling advanced features: virtual try-on"
+title: "Kling продвинутые функции"
+description: "Kling продвинутые функции: виртуальная примерка"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Kling Advanced Features
 
-## Virtual Try-On
+# Kling продвинутые функции
+
+## Виртуальная примерка
 
 ```
 POST /kling/v1/images/kolors-virtual-try-on
 ```
 
-Virtual try-on is the only currently exposed Kling advanced capability. This path has completed bounded success verification, including the `task success -> R2 archive -> media.crazyrouter.com` flow.
+На данный момент единственной открытой продвинутой возможностью Kling является виртуальная примерка. Этот маршрут уже прошёл успешную ограниченную проверку и интегрирован в закрытый цикл `Задача выполнена -> R2 архивирование -> media.crazyrouter.com`.
 
-### Request Parameters
+### Параметры запроса
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model_name` | string | No | Common models: `kolors-virtual-try-on-v1`, `kolors-virtual-try-on-v1-5` |
-| `human_image` | string | Yes | Person image. URL or Base64 is supported |
-| `cloth_image` | string | Yes | Clothing image. URL or Base64 is supported |
-| `callback_url` | string | No | Callback URL |
-| `external_task_id` | string | No | Custom business task ID |
+| Параметр | Тип | Обязателен | Описание |
+|------|------|------|------|
+| `model_name` | string | Нет | Популярные модели: `kolors-virtual-try-on-v1`, `kolors-virtual-try-on-v1-5` |
+| `human_image` | string | Да | Фото человека, поддерживаются URL или Base64 |
+| `cloth_image` | string | Да | Фото одежды, поддерживаются URL или Base64 |
+| `callback_url` | string | Нет | Адрес для обратного вызова |
+| `external_task_id` | string | Нет | Пользовательский ID задачи на стороне бизнеса |
 
-### Request Example
+### Пример запроса
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/kling/v1/images/kolors-virtual-try-on \
@@ -37,7 +38,7 @@ curl -X POST https://api.crazyrouter.com/kling/v1/images/kolors-virtual-try-on \
   }'
 ```
 
-### Successful Submit Response
+### Пример успешного ответа при отправке
 
 ```json
 {
@@ -51,7 +52,7 @@ curl -X POST https://api.crazyrouter.com/kling/v1/images/kolors-virtual-try-on \
 }
 ```
 
-## Query Try-On Task
+## Запросить задачу примерки
 
 ```
 GET /kling/v1/images/kolors-virtual-try-on/{task_id}
@@ -62,7 +63,7 @@ curl https://api.crazyrouter.com/kling/v1/images/kolors-virtual-try-on/866361099
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-### Completed Response Example
+### Пример ответа (завершено)
 
 ```json
 {
@@ -77,12 +78,12 @@ curl https://api.crazyrouter.com/kling/v1/images/kolors-virtual-try-on/866361099
 ```
 
 <Note>
-  Do not document lip sync, video extension, or effects as publicly available Kling endpoints. They are still outside Crazyrouter's public contract.
+  На данный момент не указывайте функции синхронизации артикуляции, удлинения видео, спецэффектов для видео как открытые интерфейсы Kling. Они пока не включены в публичный контракт Crazyrouter.
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [Kling 2.6: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/kling/aigc-video-kling-2-6?utm_source=docs&utm_medium=related)
-- [Kling 3.0: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/kling/aigc-video-kling-3-0?utm_source=docs&utm_medium=related)
-- [Все модели Kling AI с актуальными ценами](https://crazyrouter.com/en/models/kling?utm_source=docs&utm_medium=related)
+- [Страница модели Kling 2.6: актуальная цена, реальные примеры, код вызова](https://crazyrouter.com/ru/models/kling/aigc-video-kling-2-6?utm_source=docs&utm_medium=related)
+- [Страница модели Kling 3.0: актуальная цена, реальные примеры, код вызова](https://crazyrouter.com/ru/models/kling/aigc-video-kling-3-0?utm_source=docs&utm_medium=related)
+- [Все модели и цены Kling AI](https://crazyrouter.com/ru/models/kling?utm_source=docs&utm_medium=related)

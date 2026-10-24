@@ -1,0 +1,142 @@
+---
+title: "Imagen 4"
+description: "Modelo de generación de imágenes Google Imagen 4, accesible mediante la API de Gemini"
+---
+> Contenido actualizado: 2026-06-09
+
+# Imagen 4
+
+Google Imagen 4 es un modelo profesional de generación de imágenes, que se invoca por medio del endpoint de la API Gemini.
+
+<Warning>
+  Imagen 4 actualmente está en fase de desarrollo, por lo que las funciones y disponibilidad pueden cambiar.
+</Warning>
+
+```
+POST /v1beta/models/imagen-4:generateContent
+```
+
+---
+
+## Uso básico
+
+<CodeGroup>
+
+```bash cURL
+curl "https://api.crazyrouter.com/v1beta/models/imagen-4:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "一只金色的拉布拉多犬在阳光明媚的草地上奔跑，摄影级画质，浅景深"}
+        ]
+      }
+    ],
+    "generationConfig": {
+      "responseModalities": ["IMAGE"],
+      "imageGenerationConfig": {
+        "numberOfImages": 1,
+        "aspectRatio": "16:9"
+      }
+    }
+  }'
+```
+
+```python Python
+import google.generativeai as genai
+import base64
+
+genai.configure(
+    api_key="YOUR_API_KEY",
+    transport="rest",
+    client_options={"api_endpoint": "https://api.crazyrouter.com"}
+)
+
+model = genai.GenerativeModel("imagen-4")
+
+response = model.generate_content(
+    "一只金色的拉布拉多犬在阳光明媚的草地上奔跑，摄影级画质",
+    generation_config=genai.GenerationConfig(
+        response_modalities=["IMAGE"],
+        image_generation_config={
+            "number_of_images": 1,
+            "aspect_ratio": "16:9"
+        }
+    )
+)
+
+for part in response.candidates[0].content.parts:
+    if hasattr(part, "inline_data"):
+        with open("imagen_output.png", "wb") as f:
+            f.write(base64.b64decode(part.inline_data.data))
+        print("图片已保存")
+```
+
+</CodeGroup>
+
+### Formato de respuesta
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "inlineData": {
+              "mimeType": "image/png",
+              "data": "iVBORw0KGgoAAAANSUhEUg..."
+            }
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP"
+    }
+  ]
+}
+```
+
+---
+
+## Explicación de parámetros
+
+### imageGenerationConfig
+
+| Parámetro | Tipo | Descripción |
+|------|------|------|
+| `numberOfImages` | integer | Cantidad de imágenes generadas, 1-4 |
+| `aspectRatio` | string | Relación de aspecto: `1:1`, `16:9`, `9:16`, `4:3`, `3:4` |
+
+---
+
+## Generación por lotes
+
+```json
+{
+  "generationConfig": {
+    "responseModalities": ["IMAGE"],
+    "imageGenerationConfig": {
+      "numberOfImages": 4,
+      "aspectRatio": "1:1"
+    }
+  }
+}
+```
+
+<Note>
+  Imagen 4 es un modelo exclusivamente para generación de imágenes; `responseModalities` debe configurarse como `["IMAGE"]`. Si se requiere la devolución de descripciones de texto, puede utilizar el modelo generador de imágenes de Gemini.
+</Note>
+
+<Note>
+  Se recomienda emplear un lenguaje descriptivo detallado en los prompts de Imagen 4, incluyendo información sobre estilo, iluminación, composición, etc., para obtener mejores resultados.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Comparación de precios de Gemini 2.5 Flash: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Página del modelo Gemini 2.5 Flash: precio en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Comparación de precios de Gemini 2.5 Flash-Lite: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)

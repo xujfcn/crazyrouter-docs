@@ -1,23 +1,24 @@
 ---
-title: "Claude Chat Object"
-description: "Production-revalidated Anthropic Message object and native SSE events as of 2026-03-23"
+title: "Claude チャットオブジェクト"
+description: "2026-03-23 の本番検証に基づき、Anthropic Message オブジェクトとネイティブ SSE イベントについて理解する"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Claude Chat Object
 
-Crazyrouter supports the Anthropic native Messages API.
+# Claude チャットオブジェクト
 
-This page only documents Message-object and streaming-event behavior that was revalidated in production on `2026-03-23`.
+Crazyrouter は Anthropic のネイティブ Messages API をサポートしています。
 
-## Message object
+このページでは、`2026-03-23` が本番環境で検証済みの Message オブジェクトとストリームイベントタイプのみ記載しています。
 
-The current minimal production request uses:
+## Message オブジェクト
+
+現在本番での最小リクエスト例：
 
 - `model: "claude-opus-4-8"`
 - `POST /v1/messages`
 
-Typical production response skeleton:
+本番で返される典型的なスケルトン：
 
 ```json
 {
@@ -40,21 +41,21 @@ Typical production response skeleton:
 }
 ```
 
-### Common fields
+### よく使うフィールド
 
-| Field | Type | Meaning |
-|-------|------|---------|
-| `id` | string | Unique message identifier |
-| `type` | string | Always `message` |
-| `role` | string | Always `assistant` |
-| `content` | array | Content block list |
-| `model` | string | Actual model used |
-| `stop_reason` | string | Stop reason such as `end_turn`, `tool_use`, or `max_tokens` |
-| `usage` | object | Token usage |
+| フィールド | 型 | 説明 |
+|------|------|------|
+| `id` | string | メッセージのユニークID |
+| `type` | string | 固定値：`message` |
+| `role` | string | 固定値：`assistant` |
+| `content` | array  | コンテンツブロックのリスト |
+| `model` | string | 実際に使用されたモデル名 |
+| `stop_reason` | string | 停止理由。例：`end_turn`、`tool_use`、`max_tokens` |
+| `usage` | object | Token 使用量 |
 
-### Common content block types
+### content のよくあるブロックタイプ
 
-Text block:
+テキストブロック：
 
 ```json
 {
@@ -63,7 +64,7 @@ Text block:
 }
 ```
 
-Tool-use block:
+ツールコールブロック：
 
 ```json
 {
@@ -76,7 +77,7 @@ Tool-use block:
 }
 ```
 
-Thinking block:
+思考ブロック：
 
 ```json
 {
@@ -87,9 +88,9 @@ Thinking block:
 
 ---
 
-## Streaming event types
+## ストリームイベントタイプ
 
-In the `2026-03-23` production recheck, native streaming for `claude-opus-4-8` returned these SSE events:
+`2026-03-23` の本番検証で、`claude-opus-4-8` のネイティブストリームで以下の SSE イベントが返されました：
 
 - `message_start`
 - `content_block_start`
@@ -98,7 +99,7 @@ In the `2026-03-23` production recheck, native streaming for `claude-opus-4-8` r
 - `message_delta`
 - `message_stop`
 
-### Event examples
+### イベント例
 
 `message_start`
 
@@ -144,25 +145,25 @@ data: {"type":"message_stop"}
 
 ---
 
-## Practical interpretation
+## 実用的な判定
 
-- If `content` only contains `text`, it is a normal answer
-- If `stop_reason = "tool_use"` and `content` contains `tool_use`, the model is making a tool call
-- If `content` contains `thinking`, the current model and request shape triggered extended thinking
+- `content` に `text` のみがあれば通常の回答です
+- `stop_reason = "tool_use"` で、`content` に `tool_use` が現れた場合はツール呼び出しです
+- `content` に `thinking` がある場合、現行モデルとリクエスト形式で拡張思考が発生しています
 
 <Note>
-  A `thinking` block is not returned by every Claude model by default. The currently revalidated explicit thinking path is `claude-opus-4-8`.
+  `thinking` ブロックはすべての Claude モデルでデフォルト返却されるわけではありません。現在検証済みなのは `claude-opus-4-8` です。
 </Note>
 
-Related pages:
+関連ページ：
 
-- [Claude Native Format](/jp/chat/anthropic/messages)
-- [Feature Hub: Tool Calling](/jp/features/tool-calling)
-- [Feature Hub: Reasoning](/jp/features/reasoning)
+- [Claude ネイティブ形式](/jp/chat/anthropic/messages)
+- [コア能力：Tool Calling](/jp/features/tool-calling)
+- [コア能力：Reasoning](/jp/features/reasoning)
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [Claude Fable 5 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
-- [Claude Fable 5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
-- [Claude Haiku 4.5 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/claude-haiku-4-5?utm_source=docs&utm_medium=related)
+- [Claude Fable 5 価格比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Claude Fable 5 モデルページ：リアルタイム価格、実例、呼び出しコード](https://crazyrouter.com/ja/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Claude Haiku 4.5 価格比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/claude-haiku-4-5?utm_source=docs&utm_medium=related)

@@ -1,42 +1,48 @@
 ---
-title: "Video Task Query Alias"
-description: "GET /v1/video/generations/{task_id} compatibility alias for querying video task status"
+title: "動画タスククエリアス"
+description: "GET /v1/video/generations/{task_id} 互換エイリアスインターフェースで、動画タスクの状態を確認します"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-30
 
-# Video Task Query Alias
+# 動画タスククエリアス
 
 ```
 GET /v1/video/generations/{task_id}
 ```
 
-Use this route to query tasks created through the compatibility video-generation path. It is the matching query alias for `/v1/video/generations`.
+互換動画ルートを通じて提出されたタスクの状態を確認するために使用します。これは `/v1/video/generations` の付随クエリルートです。
 
-## Authentication
+## 認証
 
 ```http
 Authorization: Bearer YOUR_API_KEY
 ```
 
-## Request Example
+## リクエスト例
 
 ```bash cURL
 curl https://api.crazyrouter.com/v1/video/generations/video_task_abc123   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-## Typical Success Response
+## 典型的な成功レスポンス
 
 ```json
 {
-  "id": "video_task_abc123",
-  "status": "SUCCESS",
-  "video_url": "https://example.com/video.mp4"
+  "code": "success",
+  "message": "",
+  "data": {
+    "id": "video_task_abc123",
+    "task_id": "video_task_abc123",
+    "status": "SUCCESS",
+    "result_url": "https://media.crazyrouter.com/task-artifacts/example.mp4",
+    "artifact_url": "https://media.crazyrouter.com/task-artifacts/example.mp4"
+  }
 }
 ```
 
-## Missing-Task Response Verified Locally
+## ローカル検証で存在しないタスクへのレスポンス
 
-On the local `http://127.0.0.1:4000` environment, querying a nonexistent task returns:
+ローカル `http://127.0.0.1:4000` 環境で存在しないタスクを確認すると、次のレスポンスが返されます：
 
 ```json
 {
@@ -46,21 +52,22 @@ On the local `http://127.0.0.1:4000` environment, querying a nonexistent task re
 }
 ```
 
-## Common Status Values
+## 一般的なステータス
 
-| Status | Description |
-|--------|-------------|
-| `processing` | Task is running |
-| `SUCCESS` | Task finished successfully |
-| `failed` | Task failed |
+| ステータス | 説明 |
+|------|------|
+| `queued` | タスクが提出済み、または待機中 |
+| `processing` | タスク処理中 |
+| `SUCCESS` | タスク完了 |
+| `failed` | タスク失敗 |
 
 <Note>
-Final result fields can vary slightly by video model and upstream provider. The safest operational pattern is to keep creation and query requests on the same compatibility path family.
+異なる動画モデルや上流元によって完了結果フィールドに若干の違いがある場合があります。最も安定した方法は、作成とクエリをできるだけ同じ互換ルートで行い、`data.artifact_url` または `data.result_url` を優先して読み込むことです。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [GPT Image 1.5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [OpenAI の全モデルと料金](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [GPT Image 1.5 モデルページ：リアルタイム価格、実例、呼び出しコード](https://crazyrouter.com/ja/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT Image 2 モデルページ：リアルタイム価格、実例、呼び出しコード](https://crazyrouter.com/ja/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [OpenAI 全モデルと価格](https://crazyrouter.com/ja/models/openai?utm_source=docs&utm_medium=related)

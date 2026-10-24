@@ -1,31 +1,31 @@
 ---
-title: "Chat Image Generation"
-description: "Chat-image behavior and stable alternatives verified against Crazyrouter production on 2026-03-23"
+title: "チャット画像生成"
+description: "2026年3月23日時点でCrazyrouter本番環境にて検証されたチャット画像挙動および安定した代替手段"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Chat Image Generation
+# チャット画像生成
 
 ```
 POST /v1/chat/completions
 ```
 
-As of March 23, 2026, production checks against Crazyrouter showed:
+2026年3月23日現在、Crazyrouter本番環境での検証結果は以下の通りです：
 
-- `gpt-4o` returns `200`, but `message.content` is plain text, not standard multipart image content
-- `gpt-image-2` also returns `200`, but the current response shape is still text or Markdown containing a parameter block, an ID, and a preview link, not the standard OpenAI `image_url` multipart structure
-- If you need stable, machine-readable image output, the current recommended path is [`/v1/images/generations`](/jp/images/gpt-image) with `gpt-image-2`; for Grok image models, see [`Grok Image Models`](/jp/images/grok)
-- If you need reference-image editing or multi-image input, do not keep treating the Nano Banana family as a stable `/v1/images/generations` entry point. Start with the native Gemini path documented on [`Nano Banana 2`](/jp/images/nano-banana-2); [`Nano Banana`](/jp/images/nano-banana) is currently controlled-testing only
+- `gpt-4o`は`200`を返しますが、`message.content`は標準のマルチパート画像コンテンツではなく、プレーンテキストです
+- `gpt-image-2`も`200`を返しますが、現状のレスポンス形式はまだ標準OpenAI `image_url`マルチパート構造ではなく、テキストやパラメータブロック・ID・プレビューリンクを含むMarkdownです
+- 機械読み取り可能な安定した画像出力が必要な場合、現在推奨されるパスは[`/v1/images/generations`](/jp/images/gpt-image)の`gpt-image-2`です。Grok画像モデルの場合は、[`Grok Image Models`](/jp/images/grok)をご参照ください
+- 参照画像編集や複数画像入力が必要な場合は、Nano Bananaファミリーの`/v1/images/generations`エントリポイントを安定ルートとして使い続けないでください。まずは[`Nano Banana 2`](/jp/images/nano-banana-2)に記載されたGeminiネイティブパスをお試しください。[`Nano Banana`](/jp/images/nano-banana)は現在コントロールテスト中です
 
 <Warning>
-  Do not parse the current Crazyrouter chat-image response as if it were standard OpenAI `content: [{type: "image_url", ...}]`.
+  現在のCrazyrouterのchat-imageレスポンスを標準OpenAI `content: [{type: "image_url", ...}]`としてパースしないでください。
 </Warning>
 
 ---
 
-## Currently Reproducible Chat Behavior
+## 現在再現可能なチャット挙動
 
-The following request hit `gpt-image-2` in production and returned `200`:
+以下のリクエストが本番環境の`gpt-image-2`を通り、`200`を返しました：
 
 ```bash
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -43,7 +43,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-The observed `message.content` was a string shaped roughly like:
+観察された`message.content`は、以下のようなおおよその形の文字列でした：
 
 ```text
 {
@@ -56,13 +56,13 @@ ID: ...
 Data Preview: https://...
 ```
 
-That means the current chat path behaves more like text-wrapped image-task output than a standardized multipart image message object.
+つまり、現行のチャットパスは標準化されたマルチパート画像メッセージオブジェクトというよりも、テキストにラップされた画像タスク出力のように振る舞っています。
 
 ---
 
-## Stable Path: Images API
+## 安定ルート: Images API
 
-If you need programmatic image retrieval, use:
+プログラム経由で画像取得が必要な場合には、次を利用してください：
 
 ```bash
 curl -X POST https://api.crazyrouter.com/v1/images/generations \
@@ -77,21 +77,21 @@ curl -X POST https://api.crazyrouter.com/v1/images/generations \
   }'
 ```
 
-The current `gpt-image-2` stable path uses the primary image route `https://api.crazyrouter.com/v1`. Responses usually include:
+現在の`gpt-image-2`の安定ルートは、主要な画像ルート`https://api.crazyrouter.com/v1`を使用しています。レスポンスには通常以下が含まれます：
 
 - `data[0].url`
 
-`gpt-image-2` does not support `response_format`; do not send `response_format="url"` or `response_format="b64_json"`. To choose the image file format, use `output_format="png"`, `"jpeg"`, or `"webp"`.
+`gpt-image-2`は、`response_format="url"`および`response_format="b64_json"`をレガシー互換フィールドとして受け付けますが、新規統合では`output_format="png"`、`"jpeg"`、または`"webp"`で画像ファイル形式を選択してください。
 
-So the stable automation path is still the Images API, not the chat-image compatibility path.
+したがって、安定した自動化ルートは引き続きImages APIであり、chat-image互換パスではありません。
 
 <Note>
-  If you are only testing manually, the `gpt-image-2` chat path is still useful for observation. If you need backend automation, storage, or post-processing, use the [`GPT Image docs`](/jp/images/gpt-image) or [`Grok Image Models`](/jp/images/grok). If your workload depends on reference-image editing or multi-image input, start with the native Gemini route documented on [`Nano Banana 2`](/jp/images/nano-banana-2). Do not keep treating Nano Banana-family `/v1/images/generations` as the stable recommendation.
+  手動テストのみ行う場合は`gpt-image-2`チャットパスも観察用として有効です。バックエンド自動化や保存、後処理が必要な場合は、[`GPT Image docs`](/jp/images/gpt-image)または[`Grok Image Models`](/jp/images/grok)をご利用ください。参照画像編集または複数画像入力依存のワークロードの場合は、まず[`Nano Banana 2`](/jp/images/nano-banana-2)に記載されたGeminiネイティブルートをご参照ください。Nano Bananaファミリーの`/v1/images/generations`を安定推奨ルートとして使い続けないでください。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## crazyrouter.comの関連情報
 
-- [GPT Image 1.5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [OpenAI の全モデルと料金](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [GPT Image 1.5 モデルページ：リアルタイム料金、実サンプル、コード](https://crazyrouter.com/ja/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT Image 2 モデルページ：リアルタイム料金、実サンプル、コード](https://crazyrouter.com/ja/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [全OpenAIモデル ライブ料金一覧](https://crazyrouter.com/ja/models/openai?utm_source=docs&utm_medium=related)

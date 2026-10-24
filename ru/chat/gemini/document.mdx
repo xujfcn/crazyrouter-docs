@@ -1,25 +1,26 @@
 ---
-title: "Gemini Document Understanding"
-description: "Gemini PDF understanding and structured extraction verified against Crazyrouter production on 2026-03-23"
+title: "Gemini Понимание документации"
+description: "Gemini PDF — понимание и структурированное извлечение на Crazyrouter в производственной среде, проверено 23.03.2026"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Gemini Document Understanding
+
+# Gemini Понимание документации
 
 ```
 POST /v1beta/models/{model}:generateContent
 ```
 
-As of March 23, 2026, Crazyrouter production has verified that `gemini-3.1-pro` supports:
+На 23 марта 2026 года в производственной среде Crazyrouter подтверждена поддержка `gemini-3.1-pro`:
 
-- Reading PDFs through `inlineData`
-- Returning parseable JSON when `responseMimeType` and `responseSchema` are provided
+- Чтение PDF через `inlineData`
+- Генерация разбираемого JSON с комбинацией `responseMimeType` + `responseSchema`
 
 ---
 
-## PDF Summary
+## PDF — краткое содержание
 
-The following request successfully read a PDF and returned a summary in production:
+Следующий запрос успешно прочитал PDF в производственной среде и вернул краткое содержание:
 
 ```bash
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
@@ -42,13 +43,13 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-In the production check, the model returned a one-sentence summary of the attached PDF.
+В ходе тестирования модель в производственной среде успешно вернула однострочное резюме содержимого PDF.
 
 ---
 
-## PDF + Structured Output
+## PDF + структурированный вывод
 
-The following request returned JSON text that could be parsed directly with `json.loads()` in production:
+Следующий запрос в производственной среде вернул пригодный для `json.loads()` JSON-текст:
 
 ```bash
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
@@ -82,7 +83,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Observed production response:
+Пример возврата в производственной среде:
 
 ```json
 {
@@ -100,7 +101,7 @@ Observed production response:
 }
 ```
 
-You can parse it directly:
+Соответствующий код уже позволяет непосредственный парсинг:
 
 ```python
 import json
@@ -110,16 +111,16 @@ data = json.loads(text)
 ```
 
 <Note>
-  This page only confirms the PDF-input path and JSON structured output path. For table extraction, long-document comparison, or other higher-variance workflows, revalidate with your own sample documents first.
+  На текущей странице подтверждена только цепочка PDF-входа и JSON-структурированного вывода. Для сложных сценариев извлечения таблиц и сравнения длинных документов рекомендуем протестировать конкретные ваши образцы в производственной среде.
 </Note>
 
 <Warning>
-  Large PDFs materially increase input-token usage. Validate prompts and schemas with small documents first, then scale up.
+  Для больших PDF количество входных токенов сильно увеличивается. Перед внедрением рекомендуется начать с маленьких документов для проверки полей и подсказок, затем постепенно увеличивать объем входных данных.
 </Warning>
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [Gemini 2.5 Flash: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash-Lite: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash — сравнение цен: официальная / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash — страница модели: текущие цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash-Lite — сравнение цен: официальная / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)

@@ -1,0 +1,179 @@
+---
+title: "Consulta de tareas Kling"
+description: "Consulta el estado y resultado de tareas de generación de video, imagen y prueba virtual de Kling"
+---
+> Contenido actualizado: 2026-06-30
+
+# Consulta de tareas Kling
+
+## Rutas de tareas disponibles para consulta
+
+| Ruta | Uso |
+|------|------|
+| `GET /kling/v1/videos/text2video/{task_id}` | Consultar tareas de generación de video a partir de texto |
+| `GET /kling/v1/videos/image2video/{task_id}` | Consultar tareas de generación de video a partir de imagen |
+| `GET /kling/v1/videos/multi-image2video/{task_id}` | Consultar tareas de generación de video con imagen de referencia |
+| `GET /kling/v1/videos/omni-video/{task_id}` | Consultar tareas de video Omni |
+| `GET /kling/v1/images/generations/{task_id}` | Consultar tareas de generación de imagen |
+| `GET /kling/v1/images/kolors-virtual-try-on/{task_id}` | Consultar tareas de prueba virtual |
+
+## Formato de respuesta
+
+Todas las interfaces de consulta de Kling devuelven la misma estructura de tarea:
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "error": null,
+    "format": "mp4",
+    "metadata": null,
+    "status": "SUCCESS",
+    "task_id": "866168216002236456",
+    "result_url": "https://media.crazyrouter.com/task-artifacts/2026/06/30/kling/866168216002236456.mp4",
+    "artifact_url": "https://media.crazyrouter.com/task-artifacts/2026/06/30/kling/866168216002236456.mp4"
+  }
+}
+```
+
+### En cola
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "error": null,
+    "format": "mp4",
+    "metadata": null,
+    "status": "queued",
+    "task_id": "task_abc123",
+    "result_url": "",
+    "artifact_url": ""
+  }
+}
+```
+
+### En proceso
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "error": null,
+    "format": "mp4",
+    "metadata": null,
+    "status": "processing",
+    "task_id": "task_abc123",
+    "result_url": "",
+    "artifact_url": ""
+  }
+}
+```
+
+### Completado
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "error": null,
+    "format": "mp4",
+    "metadata": null,
+    "status": "SUCCESS",
+    "task_id": "866168216002236456",
+    "result_url": "https://media.crazyrouter.com/task-artifacts/2026/06/30/kling/866168216002236456.mp4",
+    "artifact_url": "https://media.crazyrouter.com/task-artifacts/2026/06/30/kling/866168216002236456.mp4"
+  }
+}
+```
+
+### Fallido
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "error": {
+      "message": "content moderation failed",
+      "code": "task_failed"
+    },
+    "format": "mp4",
+    "metadata": null,
+    "status": "failed",
+    "task_id": "task_abc123",
+    "result_url": "",
+    "artifact_url": ""
+  }
+}
+```
+
+## Estados de tarea
+
+| Estado | Descripción |
+|------|------|
+| `queued` | Enviado o en cola |
+| `processing` | Generando |
+| `SUCCESS` | Completado, acceso directo disponible en `result_url` o `artifact_url` |
+| `failed` | Fallo terminal |
+
+---
+
+## Ejemplo de flujo completo
+
+```python Python
+import requests
+import time
+
+API_KEY = "YOUR_API_KEY"
+BASE_URL = "https://api.crazyrouter.com"
+headers = {
+    "Content-Type": "application/json",
+    "Authorization": f"Bearer {API_KEY}"
+}
+
+# 1. 提交文生视频任务
+resp = requests.post(
+    f"{BASE_URL}/kling/v1/videos/text2video",
+    headers=headers,
+    json={
+        "model_name": "kling-v2-5-turbo",
+        "prompt": "一只猫咪在花园里追蝴蝶",
+        "duration": "5",
+        "aspect_ratio": "16:9"
+    }
+)
+task_id = resp.json()["data"]["task_id"]
+
+# 2. 轮询查询
+while True:
+    resp = requests.get(
+        f"{BASE_URL}/kling/v1/videos/text2video/{task_id}",
+        headers=headers
+    )
+    data = resp.json()["data"]
+
+    if data["status"] == "SUCCESS":
+        print(f"视频地址: {data.get('artifact_url') or data.get('result_url')}")
+        break
+    if data["status"] == "failed":
+        print(f"失败: {data['error']}")
+        break
+
+    time.sleep(10)
+```
+
+<Note>
+  Los resultados de tareas estándar de video Kling, video Omni, imagen y prueba virtual pueden devolver la dirección de archivo interno `media.crazyrouter.com/...`. Para el cliente, basta con consumir prioritariamente `artifact_url` o `result_url`, sin necesidad de analizar el CDN original ascendente.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Página del modelo Kling 2.6: precio en tiempo real, ejemplos reales, código de invocación](https://crazyrouter.com/es/models/kling/aigc-video-kling-2-6?utm_source=docs&utm_medium=related)
+- [Página del modelo Kling 3.0: precio en tiempo real, ejemplos reales, código de invocación](https://crazyrouter.com/es/models/kling/aigc-video-kling-3-0?utm_source=docs&utm_medium=related)
+- [Todos los modelos y precios de Kling AI](https://crazyrouter.com/es/models/kling?utm_source=docs&utm_medium=related)

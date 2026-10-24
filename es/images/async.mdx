@@ -1,0 +1,253 @@
+---
+title: "Generación de imágenes asíncrona"
+description: "Devuelve el ID de la tarea inmediatamente después de la solicitud, recupera la URL de la imagen haciendo polling; aplicable a modelos de imágenes de procesamiento largo como gpt-image-2, nano-banana-2, nano-banana-pro, etc."
+---
+> Contenido actualizado: 2026-09-18
+
+# Generación de imágenes asíncrona
+
+Los modelos de imágenes suelen tardar entre 20 y 120 segundos en generar una imagen. La interfaz síncrona requiere que el cliente mantenga abierta la conexión HTTP mientras espera el resultado, lo cual puede dar lugar a tiempos de espera de lectura en el gateway/proxy, además de que el base64 devuelto es muy grande. El modo asíncrono divide este proceso en dos llamadas:
+
+1. **Enviar**: La solicitud responde inmediatamente con `202` y un ID de tarea (menos de 1 segundo).
+2. **Polling**: Con el ID de tarea se consulta `GET /v1/tasks/{id}`; cuando termina, se encuentra en `result` la **URL https** de la imagen (archivada permanentemente en `media.crazyrouter.com`); no se devuelve base64.
+
+```
+提交（三种触发方式，见下文）
+  POST /v1beta/models/{model}:asyncGenerateContent      # Gemini 系，路径别名
+  POST /v1/images/generations  + Prefer: respond-async   # OpenAI 系
+  POST /v1/images/edits        + Prefer: respond-async   # OpenAI 系（带参考图）
+
+查询
+  GET  /v1/tasks/{task_id}
+```
+
+<Note>
+  **El nombre del modelo, el cuerpo de la solicitud y la facturación son exactamente iguales al método síncrono.** Solo cambia el "momento en que obtienes el resultado"; con la misma API Key puedes enviar algunas solicitudes de forma síncrona y otras de forma asíncrona. Si la tarea falla no se cobra.
+</Note>
+
+## Modelos compatibles
+
+| Modelo | Forma de envío | Tiempo típico |
+|------|------|------|
+| `nano-banana-2` (Gemini 3.1 Flash Image) | `:asyncGenerateContent` | 15~30 segundos |
+| `nano-banana-pro` (Gemini 3 Pro Image) | `:asyncGenerateContent` | 30~60 segundos |
+| `gpt-image-2`, `gpt-image-1.5`, `gpt-image-2.5-*` | Encabezado `Prefer: respond-async`, o campo `async: true` | 60~120 segundos |
+| Otros modelos de generación de imágenes | Igual que arriba, según su endpoint original | — |
+
+## Método 1: Alias de ruta Gemini (recomendado para clientes Gemini)
+
+**No necesitas modificar ni un solo byte del cuerpo de la solicitud, los encabezados o los parámetros de consulta**, solo cambia el sufijo de la acción de `:generateContent` a `:asyncGenerateContent`.
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1beta/models/nano-banana-2:asyncGenerateContent \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [{"role": "user", "parts": [{"text": "draw a cat"}]}],
+    "generationConfig": {
+      "responseModalities": ["IMAGE"],
+      "imageConfig": {"aspectRatio": "16:9"}
+    }
+  }'
+```
+
+Respuesta `202`:
+
+```json
+{
+  "id": "task_17754fd677574c3fbfb178ace1ee7551",
+  "object": "task",
+  "kind": "image",
+  "model": "gemini-3.1-flash-image-preview",
+  "status": "queued",
+  "created_at": 1789716402
+}
+```
+
+<Note>
+  El `model` devuelto es el nombre del modelo subyacente resuelto (por ejemplo, `gemini-3.1-flash-image-preview`), coherente con el registro de consumo; esto no afecta a que envíes usando `nano-banana-2`. La referencia a la edición de imagen es igual a la del modo síncrono: coloca `inlineData` (base64) o `fileData` (URL) en `parts`.
+</Note>
+
+`:asyncGenerateContent` solo acepta modelos de generación de imágenes; si usas un modelo de texto devolverá `400 async mode is only available for image models`. La acción de streaming `:streamGenerateContent` no soporta el modo asíncrono.
+
+## Método 2: Endpoint OpenAI de imágenes agregando el encabezado `Prefer`
+
+Añade el encabezado HTTP `Prefer: respond-async` a la solicitud original de `/v1/images/generations` o `/v1/images/edits`, sin más cambios. También puedes usar el campo `"async": true` en el cuerpo de la solicitud (JSON) o el campo de formulario `async=true` (multipart), con el mismo efecto.
+
+<CodeGroup>
+
+```bash 文生图
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Prefer: respond-async" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-image-2",
+    "prompt": "a tiny cartoon cat sticker",
+    "size": "1024x1024",
+    "quality": "low",
+    "n": 1
+  }'
+```
+
+```bash 参考图编辑（multipart）
+curl -X POST https://api.crazyrouter.com/v1/images/edits \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Prefer: respond-async" \
+  -F model=gpt-image-2 \
+  -F prompt="turn this into a cartoon cat sticker" \
+  -F size=1024x1024 \
+  -F quality=low \
+  -F image=@reference.png
+```
+
+```python Python (requests)
+import requests, time
+
+BASE = "https://api.crazyrouter.com"
+H = {"Authorization": "Bearer YOUR_API_KEY"}
+
+r = requests.post(f"{BASE}/v1/images/edits",
+                  headers={**H, "Prefer": "respond-async"},
+                  data={"model": "gpt-image-2", "prompt": "turn this into a cartoon cat sticker",
+                        "size": "1024x1024", "quality": "low"},
+                  files={"image": open("reference.png", "rb")})
+task_id = r.json()["id"]
+
+while True:
+    env = requests.get(f"{BASE}/v1/tasks/{task_id}", headers=H).json()
+    if env["status"] in ("completed", "failed"):
+        break
+    time.sleep(3)
+
+if env["status"] == "completed":
+    print(env["result"]["data"][0]["url"])
+else:
+    print(env["error"])
+```
+
+</CodeGroup>
+
+El encabezado de la respuesta incluirá `Preference-Applied: respond-async`, y el cuerpo de la respuesta será igual al método uno (`202` + ID de tarea).
+
+## Consultar tarea
+
+```
+GET https://api.crazyrouter.com/v1/tasks/{task_id}
+Authorization: Bearer YOUR_API_KEY
+```
+
+Solo puedes consultar tareas enviadas por esta cuenta; cualquier ID de otra cuenta será `404`. Se recomienda hacer polling cada 2~3 segundos; si tras 10 minutos no termina, se considera fallo.
+
+### Estado
+
+| `status` | Significado |
+|------|------|
+| `queued` | Recibido, esperando ejecución |
+| `running` | Generando |
+| `completed` | Éxito, `result` está completo |
+| `failed` | Fallo, `error` está completo, **no se cobra** |
+
+### Respuesta al completarse (sistema Gemini)
+
+`result` es el `GenerateContentResponse` nativo de Gemini, solo que se ha sustituido `inlineData` por `fileData`, que apunta a la URL de la imagen:
+
+```json
+{
+  "id": "task_17754fd677574c3fbfb178ace1ee7551",
+  "object": "task",
+  "kind": "image",
+  "model": "gemini-3.1-flash-image-preview",
+  "status": "completed",
+  "progress": "100%",
+  "created_at": 1789716402,
+  "started_at": 1789716403,
+  "completed_at": 1789716419,
+  "result": {
+    "candidates": [{
+      "content": {
+        "role": "model",
+        "parts": [
+          {"fileData": {"mimeType": "image/png", "fileUri": "https://media.crazyrouter.com/task-artifacts/2026/09/18/sync-image/task_17754fd677574c3fbfb178ace1ee7551-0.png"}}
+        ]
+      },
+      "finishReason": "STOP"
+    }],
+    "usageMetadata": {"promptTokenCount": 15, "candidatesTokenCount": 1022, "totalTokenCount": 1037}
+  },
+  "error": null
+}
+```
+
+### Respuesta al completarse (sistema OpenAI)
+
+`result` tiene el mismo cuerpo que `/v1/images/*` síncrono, con la imagen en `data[].url`:
+
+```json
+{
+  "id": "task_b210db17cea14754818e9b965bd8a61c",
+  "object": "task",
+  "kind": "image",
+  "model": "gpt-image-2",
+  "status": "completed",
+  "result": {
+    "created": 1789716295,
+    "data": [
+      {"url": "https://media.crazyrouter.com/task-artifacts/2026/09/18/sync-image/task_b210db17cea14754818e9b965bd8a61c-0.png"}
+    ],
+    "usage": {"input_tokens": 77, "output_tokens": 196, "total_tokens": 273}
+  },
+  "error": null
+}
+```
+
+Si realmente necesitas base64, al hacer la consulta agrega `?inline=true`; el servidor leerá y restaurará la imagen archivada en `inlineData` / `b64_json` (no recomendado, las imágenes grandes son lentas).
+
+### Respuesta en caso de fallo
+
+```json
+{
+  "id": "task_…",
+  "status": "failed",
+  "result": null,
+  "error": {
+    "code": "provider_failed",
+    "message": "upstream returned 502",
+    "retryable": true
+  }
+}
+```
+
+| `error.code` | Significado | Reintento posible |
+|------|------|------|
+| `validation_failed` | Parámetros rechazados (4xx) | No |
+| `token_invalid` | API Key inválida o modelo no autorizado | No |
+| `insufficient_quota` | Saldo insuficiente | No |
+| `rate_limited` | Límite de canal/ruta alcanzado | Sí |
+| `provider_failed` | Error al generar en canal/ruta | Sí |
+| `timeout` | Una sola generación superó los 10 minutos | Sí |
+| `no_image` | El modelo devolvió contenido pero no imagen (p.ej., intercepción por seguridad); en ese caso, **se factura normalmente** según reglas síncronas | No |
+
+`retryable: true` indica que puedes crear y enviar una nueva tarea; el sistema no reintentará automáticamente.
+
+## Envíos idempotentes
+
+Un reintento de red puede enviar dos veces una misma tarea. Si incluyes el encabezado `Idempotency-Key: <ANY_STRING>` en el envío, la misma cuenta y la misma Key devolverán siempre el mismo ID de tarea (la segunda vez responderá `200` en lugar de `202`), no generará imágenes duplicadas ni facturará varias veces.
+
+## Diferencias con el método síncrono
+
+| | Síncrono | Asíncrono |
+|------|------|------|
+| Respuesta al enviar | Devuelve la imagen tras completarse (20~120 segundos) | Devuelve el ID de la tarea en menos de 1 segundo |
+| Formato de imagen | URL o base64 (según canal/ruta) | Siempre es URL |
+| Riesgo de timeout de conexión | Sí | No |
+| Facturación | Por modelo/tamaño | Igual; no se cobra si falla |
+| Enrutamiento | Enrutamiento de capacidades | Igual (repetición usa el mismo enrutamiento y failover) |
+| Límite | — | Máximo 50 tareas sin completar por cuenta; al exceder, responde `429` |
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Página del modelo GPT Image 2: precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Página del modelo Nano Banana 2: precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/google/nano-banana-2?utm_source=docs&utm_medium=related)
+- [Todos los modelos y precios de OpenAI](https://crazyrouter.com/es/models/openai?utm_source=docs&utm_medium=related)

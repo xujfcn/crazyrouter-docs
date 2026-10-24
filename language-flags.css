@@ -3,7 +3,7 @@
  * Flags are decorative: the original visible language names stay accessible.
  */
 [data-component-part="localization-select-trigger"][data-docs-flag]::before,
-:is(#localization-select-item-cn, #localization-select-item-en, #localization-select-item-jp, #localization-select-item-ru, #localization-select-item-ko)::before {
+:is(#localization-select-item-cn, #localization-select-item-en, #localization-select-item-jp, #localization-select-item-ru, #localization-select-item-ko, #localization-select-item-es)::before {
   content: "";
   display: inline-block;
   width: 20px;
@@ -14,6 +14,11 @@
   background-size: cover;
   background-position: center;
   box-shadow: 0 0 0 1px rgb(128 128 128 / 20%);
+}
+
+[data-component-part="localization-select-trigger"][data-docs-flag="es"],
+#localization-select-item-es {
+  --docs-language-flag: linear-gradient(to bottom, #aa151b 0% 25%, #f1bf00 25% 75%, #aa151b 75% 100%);
 }
 
 [data-component-part="localization-select-trigger"][data-docs-flag="cn"],

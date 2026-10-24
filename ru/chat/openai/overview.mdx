@@ -1,18 +1,18 @@
 ---
-title: "Chat Completion Object"
-description: "Core production-oriented structure of Chat Completion and Chat Completion Chunk objects"
+title: "Объект Chat Completion"
+description: "Основная структура, ориентированная на производство, для объектов Chat Completion и Chat Completion Chunk"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Chat Completion Object
+# Объект Chat Completion
 
-`/v1/chat/completions` returns `chat.completion` for non-streaming requests and `chat.completion.chunk` for streaming requests.
+`/v1/chat/completions` возвращает `chat.completion` для нестриминговых запросов и `chat.completion.chunk` для стриминговых запросов.
 
-This page focuses on the most stable, broadly useful OpenAI-compatible response structure on Crazyrouter today.
+На этой странице представлен самый стабильный и широко используемый совместимый с OpenAI формат ответа Crazyrouter на сегодняшний день.
 
-## Non-streaming object
+## Нестриминговый объект
 
-Minimal production request:
+Минимальный рабочий запрос:
 
 ```bash cURL
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -30,7 +30,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-Typical production response skeleton:
+Типовой скелет производственного ответа:
 
 ```json
 {
@@ -53,17 +53,17 @@ Typical production response skeleton:
 }
 ```
 
-### How to read it
+### Как читать
 
-- `message.content` is the final text answer
-- `message.tool_calls` only appears when the model is requesting tool execution
-- `message.reasoning_content` may appear for some models or routes, but should not currently be treated as a guaranteed field
+- `message.content` — это финальный текстовый ответ
+- `message.tool_calls` появляется только когда модель запрашивает выполнение инструмента
+- `message.reasoning_content` может появляться у некоторых моделей или маршрутов, но пока не стоит рассматривать это как гарантированное поле
 
 ---
 
-## Streaming object
+## Стриминговый объект
 
-For streaming requests, the server returns `chat.completion.chunk` SSE events:
+Для стриминговых запросов сервер возвращает события SSE `chat.completion.chunk`:
 
 ```json
 {
@@ -84,7 +84,7 @@ For streaming requests, the server returns `chat.completion.chunk` SSE events:
 }
 ```
 
-Common SSE shape:
+Общая форма SSE:
 
 ```text
 data: {"object":"chat.completion.chunk",...}
@@ -94,24 +94,24 @@ data: [DONE]
 
 ---
 
-## Fields you will usually care about
+## Поля, которые обычно важны
 
-| Field | Meaning |
-|-------|---------|
-| `object` | `chat.completion` for non-streaming, `chat.completion.chunk` for streaming |
-| `model` | The actual model used for the response |
-| `choices[].message.content` | Final non-streaming text |
-| `choices[].message.tool_calls` | Non-streaming tool requests |
-| `choices[].delta.content` | Streaming text delta |
-| `choices[].finish_reason` | Stop reason such as `stop`, `length`, or `tool_calls` |
+| Поле | Значение |
+|-------|----------|
+| `object` | `chat.completion` для нестриминговых, `chat.completion.chunk` для стриминговых |
+| `model` | Используемая модель для ответа |
+| `choices[].message.content` | Финальный нестриминговый текст |
+| `choices[].message.tool_calls` | Нестриминговые запросы инструментов |
+| `choices[].delta.content` | Дельта стримингового текста |
+| `choices[].finish_reason` | Причина остановки, такая как `stop`, `length` или `tool_calls` |
 
 <Note>
-  Upstream models may pass through extra fields. Client code should rely on the stable common fields first rather than assuming every model exposes the same extensions.
+  Входные модели могут передавать дополнительные поля. Клиентский код должен ориентироваться на стабильные общие поля, а не предполагать, что каждая модель поддерживает одинаковые расширения.
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы на crazyrouter.com
 
-- [GPT Image 1.5: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [Все модели OpenAI с актуальными ценами](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [Страница модели GPT Image 1.5: текущая цена, реальные примеры, код](https://crazyrouter.com/ru/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Страница модели GPT Image 2: текущая цена, реальные примеры, код](https://crazyrouter.com/ru/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Все модели OpenAI с актуальными ценами](https://crazyrouter.com/ru/models/openai?utm_source=docs&utm_medium=related)

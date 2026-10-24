@@ -1,8 +1,8 @@
 ---
 title: "结构化输出"
-description: "基于 2026-03-23 Crazyrouter 生产环境验证的 OpenAI 风格结构化输出"
+description: "已根据 2026-03-23 Crazyrouter 生产环境验证的 OpenAI 风格结构化输出"
 ---
-> 更新日期：2026-06-06
+> 内容更新: 2026-06-09
 
 # 结构化输出
 
@@ -10,7 +10,7 @@ description: "基于 2026-03-23 Crazyrouter 生产环境验证的 OpenAI 风格�
 POST /v1/chat/completions
 ```
 
-截至 2026 年 3 月 23 日，Crazyrouter 生产环境已验证 `gpt-5.5` + `response_format.type = "json_schema"` 可以返回可直接解析的 JSON。
+截至 2026 年 3 月 23 日，Crazyrouter 生产环境已验证 `gpt-5.5` 与 `response_format.type = "json_schema"` 可直接返回可解析的 JSON。
 
 ---
 
@@ -57,7 +57,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-生产环境实际返回的 `message.content` 可直接解析为：
+在实际生产环境中观察到的 `message.content` 直接被解析为：
 
 ```json
 {
@@ -76,7 +76,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
 
 ---
 
-## 代码侧处理
+## 消费端处理
 
 ```python
 import json
@@ -86,12 +86,12 @@ data = json.loads(content)
 ```
 
 <Note>
-  本轮生产验证只确认了 `json_schema` 这条严格结构化输出路径。旧式 `json_object` 模式没有在本轮单独复测，因此不再作为当前主示例保留。
+  此次生产发布仅重新验证了严格的 `json_schema` 路径。旧的 `json_object` 模式未单独重新检查，因此不再作为此处的主要示例保留。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 相关页面
+## crazyrouter.com 相关内容
 
-- [GPT Image 1.5 模型页：实时价格、真实样例、调用代码](https://crazyrouter.com/zh/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2 模型页：实时价格、真实样例、调用代码](https://crazyrouter.com/zh/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [OpenAI 全部模型与价格](https://crazyrouter.com/zh/models/openai?utm_source=docs&utm_medium=related)
+- [GPT Image 1.5 模型页面：实时价格，真实示例，代码](https://crazyrouter.com/zh/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT Image 2 模型页面：实时价格，真实示例，代码](https://crazyrouter.com/zh/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [所有 OpenAI 模型及实时价格](https://crazyrouter.com/zh/models/openai?utm_source=docs&utm_medium=related)

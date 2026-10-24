@@ -1,34 +1,34 @@
 ---
-title: "Gemini OpenAI-Compatible Format"
-description: "Production-revalidated Gemini 3 Pro via /v1/chat/completions"
+title: "Gemini OpenAI 互換フォーマット"
+description: "本番環境での再検証に基づき、/v1/chat/completions を通じて Gemini 3 Pro を呼び出します"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Gemini OpenAI-Compatible Format
+# Gemini OpenAI 互換フォーマット
 
-You can call Gemini through the OpenAI Chat Completions compatible route.
+OpenAI Chat Completions 互換フォーマットを使用して Gemini を呼び出すことができます。
 
 ```
 POST /v1/chat/completions
 ```
 
-This page only documents compatibility-layer behavior that was revalidated against Crazyrouter production on `2026-03-22`.
+このページには、`2026-03-22` が Crazyrouter の本番環境で再検証された互換レイヤーの挙動のみが記載されています。
 
-Current primary example model:
+現在の主なサンプルモデル：
 
 - `gemini-3.1-pro`
 
-## Current conclusion
+## 現時点での主な結論
 
-This production recheck confirmed that:
+今回の本番再検証で確認できた内容：
 
-- `gemini-3.1-pro` works through `/v1/chat/completions` for normal text chat
-- streaming returns standard `chat.completion.chunk` SSE objects
-- for Gemini-specific capabilities such as structured outputs, Google Search, and thinking, you should still prefer [Gemini Native Format](/jp/chat/gemini/native)
+- `gemini-3.1-pro` は `/v1/chat/completions` との正常な会話が可能です
+- ストリーミング応答は `chat.completion.chunk` の SSE 構造に対応しています
+- Gemini の構造化出力、Google Search、thinking 等の機能が必要な場合は、引き続き [Gemini ネイティブフォーマット](/jp/chat/gemini/native) を優先して参照してください
 
 ---
 
-## Basic conversation
+## 基本的な会話
 
 ```bash cURL
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -50,7 +50,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-Verified response shape:
+現在本番で検証された返却の重要な構造：
 
 ```json
 {
@@ -69,7 +69,7 @@ Verified response shape:
 
 ---
 
-## Python example
+## Python サンプル
 
 ```python Python
 from openai import OpenAI
@@ -93,9 +93,9 @@ print(response.choices[0].message.content)
 
 ---
 
-## Streaming output
+## ストリーミング出力
 
-This production recheck also confirmed streaming compatibility:
+今回本番でもストリーミング互換応答を再検証しました：
 
 ```python Python
 stream = client.chat.completions.create(
@@ -113,7 +113,7 @@ for chunk in stream:
         print(delta.content, end="")
 ```
 
-Observed SSE shape:
+本番で受信したSSEフラグメントの形態例：
 
 ```text
 data: {"object":"chat.completion.chunk","model":"gemini-3.1-pro",...}
@@ -123,20 +123,18 @@ data: [DONE]
 
 ---
 
-## When to use compatible vs native
+## 互換フォーマットとネイティブフォーマット、どちらを使うべきか
 
-- If you already have OpenAI SDK code and only need standard chat, use the compatible route
-- If you need Gemini-native structured outputs, Google Search, thinking, or native metadata, use [Gemini Native Format](/jp/chat/gemini/native)
+- すでにOpenAI SDKの実装があり、標準的な会話機能だけが必要な場合：互換フォーマットを優先的に使用してください
+- Geminiの構造化出力、Google Search、thinking、ネイティブフィールドなどが必要な場合：[Gemini ネイティブフォーマット](/jp/chat/gemini/native) を優先してください
 
 <Note>
-  This page still only covers the `/v1/chat/completions` compatibility layer and does not fold Gemini-backed image behavior into it. For image workloads, do not keep documenting the Nano Banana family as a stable `/v1/images/generations` contract.
-  The currently preferred entry point is [Nano Banana 2](/jp/images/nano-banana-2), which now points to native Gemini `POST /v1beta/models/nano-banana-2:generateContent`.
-  [Nano Banana](/jp/images/nano-banana) remains controlled-testing only.
+　このページは `/v1/chat/completions` 互換レイヤーのみを扱います。Gemini の画像ワークロードについては、統合 Images API：`POST https://api.crazyrouter.com/v1/images/generations` をご利用いただき、[Nano Banana](/jp/images/nano-banana)、[Nano Banana Pro](/jp/images/nano-banana-pro)、[Nano Banana 2](/jp/images/nano-banana-2) もご参照ください。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [GPT Image 1.5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [Google の全モデルと料金](https://crazyrouter.com/en/models/google?utm_source=docs&utm_medium=related)
+- [GPT Image 1.5 モデルページ：リアルタイム価格、実例、呼び出しコード](https://crazyrouter.com/ja/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT Image 2 モデルページ：リアルタイム価格、実例、呼び出しコード](https://crazyrouter.com/ja/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Google モデル一覧・価格表](https://crazyrouter.com/ja/models/google?utm_source=docs&utm_medium=related)

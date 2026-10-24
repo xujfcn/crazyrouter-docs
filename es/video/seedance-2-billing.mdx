@@ -1,0 +1,367 @@
+---
+title: "Seedance 2.0 Explicación de tarifas"
+description: "Explicación basada en código local y casos prácticos sobre el método real de liquidación de Seedance 2.0 / 2.0 Fast, fórmulas de cuota, y la relación entre tokens y segundos"
+---
+> Contenido actualizado: 2026-06-23
+
+# Explicación de tarifas de Seedance 2.0
+
+Este documento solo explica **la lógica real de liquidación en el código actual de Crazyrouter**, no es una explicación genérica de la página de precios oficial.
+
+Modelos aplicables:
+
+- `doubao-seedance-2-0`
+- `doubao-seedance-2-0-fast`
+
+La dirección de integración debe utilizar `https://api.crazyrouter.com`; para configuraciones básicas, consulta [API Endpoint](https://docs.crazyrouter.com/es/api-endpoint).
+
+## Primero, el resumen
+
+1. `Seedance 2.0` y `Seedance 2.0 Fast` en el código local se liquidan según `per_output_token`, no según segundos.
+2. Al enviar una tarea, la **pre-deducción de estas tareas es por defecto 0**.
+3. Después de completar la tarea, el sistema efectuará la deducción final según la respuesta del upstream: `TotalTokens` o `CompletionTokens`.
+4. `duration` se registra como característica de la tarea, pero **no participa en la fórmula de liquidación final de Seedance 2.0**.
+5. Por lo tanto, en el código **no existe una fórmula global fija de “tantos tokens = tantos segundos”**.
+6. Si hace falta responder “aproximadamente cuánto cuesta un segundo”, solo se puede usar `tokens de salida reales / segundos reales` como referencia después de completar la tarea, no como regla fija de tarifas.
+
+## Reglas de tarifas en el código local
+
+### 1. Qué regla de tarifas aplica
+
+Las reglas de tarifas de la serie Seedance 2.0 dependen de “si hay entrada de video o no”:
+
+| Modelo | Condición | Billing Key | Precio unitario |
+|------|------|------|------|
+| `doubao-seedance-2-0` | Sin entrada de video | `doubao-seedance-2-0:video0` | `46 / 7 USD / 1M tokens` |
+| `doubao-seedance-2-0` | Con entrada de video | `doubao-seedance-2-0:video1` | `28 / 7 USD / 1M tokens` |
+| `doubao-seedance-2-0-fast` | Sin entrada de video | `doubao-seedance-2-0-fast:video0` | `37 / 7 USD / 1M tokens` |
+| `doubao-seedance-2-0-fast` | Con entrada de video | `doubao-seedance-2-0-fast:video1` | `22 / 7 USD / 1M tokens` |
+
+Aquí `video0` / `video1` no son segundos, sino:
+
+- `video0`: la solicitud no contiene entrada de referencia de video
+- `video1`: la solicitud contiene entrada de referencia de video
+
+Código correspondiente:
+
+- `model/video_billing_seedance.go`
+- `relay/video_billing_runtime.go`
+
+### 2. Por qué usualmente no se deduce al enviar tareas
+
+En tiempo de ejecución, el modo de tarifas de plataforma que aplica en Seedance 2.0 es `per_output_token`. En este tipo de tareas al enviar:
+
+- `BasePrice` se registra
+- `Ratio` se establece como `0`
+- Por eso en la etapa de envío, el resultado de `quota = int(ratio * QuotaPerUnit)` es `0`
+
+Código correspondiente:
+
+- `relay/video_billing_runtime.go`
+- `relay/relay_task.go`
+
+Por eso Seedance 2.0 se comporta así comúnmente:
+
+- Envío de tarea exitoso
+- No se deduce al principio, o la pre-deducción es 0
+- Después de completar la tarea, se deduce según tokens reales
+
+## Fórmula de deducción final
+
+Después de completar la tarea, el sistema sigue primero `settlePerOutputTokenTaskBilling`.
+
+Para la serie Seedance, la prioridad para obtener tokens en el código es:
+
+1. `taskResult.TotalTokens`
+2. Si no está disponible arriba, se obtiene `taskResult.CompletionTokens`
+
+Código correspondiente:
+
+- `controller/task_video.go`
+
+Fórmula de precio final:
+
+```text
+actualPriceUSD =
+  unitPriceUSDPer1MTokens
+  * (billedTokens / 1_000_000)
+  * quantityMultiplier
+  * groupRatio
+  * discount
+```
+
+Fórmula final de cuota:
+
+```text
+actualQuota = int(actualPriceUSD * QuotaPerUnit)
+```
+
+En el código actual:
+
+```text
+QuotaPerUnit = 500000
+```
+
+Código correspondiente:
+
+- `controller/task_video.go`
+- `common/constants.go`
+
+## Qué papel juegan los segundos en el código
+
+### 1. `duration` se identifica y registra
+
+El código analiza los segundos desde estas posiciones:
+
+- `req.Duration`
+- `req.Seconds`
+- `metadata.durationSeconds`
+- `metadata.duration_seconds`
+- `metadata.duration`
+- `metadata.seconds`
+
+Código correspondiente:
+
+- `relay/video_billing_runtime.go`
+
+### 2. Pero Seedance 2.0 no liquida por segundos
+
+Aunque `duration` queda en el perfil de la tarea y en los logs, los modos relevantes de Seedance 2.0 / 2.0 Fast son `per_output_token`, por lo tanto:
+
+- `match.BilledSeconds` no participa en la liquidación
+- La deducción final solo considera los tokens reportados por el upstream
+
+Esto es diferente de modelos de video como Veo, Wan, esa clase de `per_second`.
+
+## Cómo comparar tokens y segundos
+
+### Método de liquidación
+
+**No se pueden convertir directamente.**
+
+Es decir, en el código actual no existe una regla de este tipo:
+
+```text
+1 秒 = 固定 N tokens
+```
+
+La razón es simple:
+
+- El precio de venta de Seedance 2.0 no está configurado como `per_second`
+- El código tampoco mapea `duration` a una franja fija de tokens
+- Solo considera el uso real de tokens después de completar la tarea
+
+### Método de observación
+
+Si solo quieres analizar “cuántos tokens consume en promedio por segundo esta tarea”, puedes calcular un **valor observado** al finalizar la tarea:
+
+```text
+平均每秒 tokens = billedTokens / requestedDurationSeconds
+```
+
+Al revés:
+
+```text
+估算秒数 = billedTokens / 平均每秒 tokens
+```
+
+Pero esto es solo análisis posterior, no la fórmula de liquidación.
+
+## Caso real: video simple 4 segundos en 720p
+
+A continuación se muestra el resultado de una llamada real a Seedance 2.0, para demostrar cómo deducir “el precio promedio por segundo para esta tarea” según la `usage` real.
+
+<Warning>
+  Este caso es `720p`, no es `1080p`. La documentación actual de Crazyrouter sobre Seedance 2.0 / 2.0 Fast limita la capacidad pública a `480p`, `720p`; `1080p` no está en el rango de soporte actual.
+</Warning>
+
+### Caso 1: Generación de video desde texto más simple
+
+Características de la solicitud:
+
+- Modelo: `doubao-seedance-2-0`
+- Entrada: solo texto, sin imagen ni referencia de video
+- Resolución: `720p`
+- Duración: `4s`
+- ID de tarea: `cgt-20260617212928-5s755`
+- Respuesta real del upstream: `completion_tokens = 87300`, `total_tokens = 87300`
+
+Como la solicitud no incluyó entrada de referencia de video, se aplica:
+
+```text
+billing_key = doubao-seedance-2-0:video0
+unitPrice = 46 / 7 = 6.571428 USD / 100万Tokens
+```
+
+Proceso de cálculo:
+
+```text
+tokensPerSecond = 87300 / 4 = 21825 tokens/s
+actualPrice = 87300 / 1000000 * 6.571428 = 0.5736 USD
+pricePerSecond = 0.5736 / 4 = 0.1434 USD/s
+```
+
+Por eso, este sencillo `4s 720p` video generado desde texto tiene un precio observado aproximado de:
+
+```text
+约 0.14 USD / 秒
+```
+
+### Caso 2: Generación de video de referencia basado en un video anterior
+
+Características de la solicitud:
+
+- Modelo: `doubao-seedance-2-0`
+- Entrada: texto + el video generado en la tarea anterior como `reference_video`
+- Resolución: `720p`
+- Duración: `4s`
+- ID de tarea: `cgt-20260617214300-rsnsx`
+- Respuesta real del upstream: `completion_tokens = 173700`, `total_tokens = 173700`
+
+Como la solicitud incluyó entrada de referencia de video, se aplica:
+
+```text
+billing_key = doubao-seedance-2-0:video1
+unitPrice = 28 / 7 = 4.000000 USD / 100万Tokens
+```
+
+Proceso de cálculo:
+
+```text
+tokensPerSecond = 173700 / 4 = 43425 tokens/s
+actualPrice = 173700 / 1000000 * 4.000000 = 0.6948 USD
+pricePerSecond = 0.6948 / 4 = 0.1737 USD/s
+```
+
+Por eso, este `4s 720p` video generado por referencia tiene un precio observado aproximado de:
+
+```text
+约 0.17 USD / 秒
+```
+
+### Cómo explicar este valor comprobado al cliente
+
+Puede explicarse de esta manera:
+
+```text
+Seedance 2.0 does not have a fixed per-second price. It is billed by actual output tokens after the task completes.
+
+In one simple 4-second 720p text-to-video test, the task used 87,300 output tokens, which equals about 21,825 tokens/sec and about $0.14/sec.
+
+In another 4-second 720p reference-video test, the task used 173,700 output tokens, which equals about 43,425 tokens/sec and about $0.17/sec.
+
+These are observed examples, not fixed rates. More complex prompts, reference media, audio, and future resolution support may change the actual output tokens.
+```
+
+Por eso no se puede suponer “típicamente 1 segundo son 100,000 tokens”. Para una estimación fiable al cliente, se debe usar preferentemente `usage.total_tokens` o `usage.completion_tokens` de tareas reales.
+
+## Dos ejemplos listos para aplicar
+
+### Ejemplo 1: `doubao-seedance-2-0-fast`, con entrada de video
+
+Suponga:
+
+- Aplica `doubao-seedance-2-0-fast:video1`
+- El upstream retorna `TotalTokens = 1,200,000`
+- `quantityMultiplier = 1`
+- `groupRatio = 1`
+- `discount = 1`
+
+Entonces:
+
+```text
+unitPrice = 22 / 7 = 3.142857 USD / 100万Tokens
+actualPrice = 3.142857 * 1.2 = 3.771428 USD
+actualQuota = int(3.771428 * 500000) = 1885714
+```
+
+Si la solicitud contiene `duration = 12`, solo puedes obtener un valor observado:
+
+```text
+平均每秒 tokens = 1,200,000 / 12 = 100,000
+```
+
+Este `100,000 tokens/s` solo es válido para esta tarea.
+
+### Ejemplo 2: `doubao-seedance-2-0`, sin entrada de video
+
+Suponga:
+
+- Aplica `doubao-seedance-2-0:video0`
+- El upstream retorna `CompletionTokens = 800,000`
+- `quantityMultiplier = 1`
+- `groupRatio = 1`
+- `discount = 1`
+
+Entonces:
+
+```text
+unitPrice = 46 / 7 = 6.571428 USD / 100万Tokens
+actualPrice = 6.571428 * 0.8 = 5.257142 USD
+actualQuota = int(5.257142 * 500000) = 2628571
+```
+
+Si se llenó `duration = 8` al solicitar, solo sirve para observación:
+
+```text
+平均每秒 tokens = 800,000 / 8 = 100,000
+```
+
+Todavía no se puede concluir “una tarea de 8 segundos siempre son 800,000 tokens”.
+
+## Qué campos son importantes revisar
+
+Si necesitas analizar el costo de una tarea de Seedance 2.0, prioriza estos datos:
+
+- Si la solicitud contiene entrada de video
+- `billing_key` aplicado
+- El valor de `TotalTokens` / `CompletionTokens` retornado por el upstream al completar la tarea
+- `groupRatio` para dicha tarea
+- El descuento del modelo `discount`
+- El valor final `task.Quota`
+
+Los logs y snapshots del código también registran:
+
+- `billing_mode`
+- `billing_key`
+- `billing_total_price`
+- `billing_output_tokens`
+- `billing_billed_tokens`
+- `billing_token_kind`
+- `billing_settled`
+
+Código correspondiente:
+
+- `relay/relay_task.go`
+- `model/task.go`
+- `controller/task_video.go`
+
+## Resumen en una frase
+
+Para Seedance 2.0:
+
+- `Número de segundos` es característica de solicitud
+- `token` es el criterio de liquidación
+- `quota` es la cuota interna calculada tras liquidar `token`
+
+Por tanto, el orden correcto es:
+
+```text
+请求 duration -> 生成完成 -> 上游返回 tokens -> 按 token 算 USD -> 按 USD 算 quota
+```
+
+No:
+
+```text
+duration -> 直接扣 quota
+```
+
+<Note>
+  Si más adelante la plataforma añade SKU de venta por segundos para Seedance 2.0, entonces aparecerá el mapeo estable de “segundos a precio”. Pero hasta el 2026-06-06, el código local no lo implementa.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Página de modelo Seedance 2.0: precios en tiempo real, muestras reales, código de llamada](https://crazyrouter.com/es/models/bytedance/doubao-seedance-2-0?utm_source=docs&utm_medium=related)
+- [Todos los modelos y precios de ByteDance](https://crazyrouter.com/es/models/bytedance?utm_source=docs&utm_medium=related)

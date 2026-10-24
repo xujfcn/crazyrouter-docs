@@ -1,111 +1,152 @@
 ---
 title: "Nano Banana 2"
-description: "As of 2026-04-14, nano-banana-2 should use native Gemini generateContent; /v1/images/generations is no longer recommended"
+description: "OpenAI Images API を使って nano-banana-2 で Gemini 3.1 Flash Image を呼び出す"
 ---
-> 更新日: 2026-09-18
+> 内容更新日: 2026-09-18
 
 <Tip>
-  送信後すぐに戻り、あとで画像 URL を取得したい場合は[非同期画像生成](/jp/images/async)を使えます。Gemini 系はパス接尾辞を `:asyncGenerateContent` に、OpenAI 系は `Prefer: respond-async` ヘッダーを付けるだけで、リクエストボディは 1 バイトも変えません。
+  画像URLを取得するために、リクエスト後すぐ返却し、その後ポーリングする必要がありますか？このモデルは[非同期画像生成](/jp/images/async)をサポートしています：Gemini 系ではパスの末尾を`:asyncGenerateContent`に置き換え、OpenAI 系では`Prefer: respond-async`ヘッダーを追加し、リクエスト本文は一切変更不要です。
 </Tip>
 
 # Nano Banana 2
 
 ```
-Recommended path
-POST /v1beta/models/nano-banana-2:generateContent
+POST /v1/images/generations
 ```
 
-As of `2026-04-14`, the latest Crazyrouter production retest for `nano-banana-2` showed:
-
-- `nano-banana-2` currently maps to `nano-banana-2`
-- the recommended route is now native Gemini `generateContent`
-- `POST /v1/images/generations` is no longer recommended for `nano-banana-2`
-- the same-day production retest on the native path succeeded and billing looked normal
+`nano-banana-2` は `nano-banana-2` の公開別名です。ユーザー側ではOpenAI Images互換プロトコルを統一して使用します；サーバ側は`output_format`、`output_compression`、`resolution`、`aspect_ratio` などの共通パラメーターをGemini／Vertexネイティブリクエストへ自動変換します。
 
 <Warning>
-  Do not keep documenting `nano-banana-2` as a stable `/v1/images/generations` model. The recommended entry point is now native Gemini `POST /v1beta/models/nano-banana-2:generateContent`.
+  `nano-banana-2` は長時間処理が必要な画像モデルです。商用接続では主線経`https://api.crazyrouter.com/v1`を優先的に利用し、完全な生成エンドポイントは`https://api.crazyrouter.com/v1/images/generations`です。アカウントログイン、チャージ、コンソール操作は引き続き`https://crazyrouter.com`を使用します。
 </Warning>
 
-## Current Status
+## モデル名
 
-| Item | Status | Notes |
-|------|------|------|
-| Alias mapping | confirmed | `nano-banana-2 -> nano-banana-2` |
-| Native Gemini `generateContent` | recommended | succeeded in the `2026-04-14` production retest |
-| Native-path billing | currently normal | billing and consumption looked aligned in the same-day probe |
-| OpenAI Images `POST /v1/images/generations` | not recommended | failed in both production and local `4000` retests |
+| 推奨モデル名 | 同等の基礎モデル |
+|------|------|
+| `nano-banana-2` | `nano-banana-2` |
 
-## Current Risks
+クライアントコードでは`nano-banana-2`を推奨します。もし既存システムで`nano-banana-2`を直接記述している場合も、同じ`/v1/images/generations`エントリから引き続き呼び出すことができます。
 
-### 1. The public Images-compatible route is currently unhealthy
+## リクエストパラメーター
 
-When `nano-banana-2` is sent through `POST /v1/images/generations`, the `2026-04-14` production and local `4000` retests both reproduced these failures:
+| パラメーター | タイプ | 必須 | 説明 |
+|------|------|------|------|
+| `model` | string | 是 | 推奨は`nano-banana-2`；`nano-banana-2`も対応 |
+| `prompt` | string | 是 | 生成または編集指示 |
+| `image_input` | string または string[] | 否 | 参考画像URL；指定しない場合はテキスト画像生成 |
+| `resolution` | string | 否 | `1K`、`2K`、`4K` |
+| `aspect_ratio` | string | 否 | `1:1`、`16:9`、`9:16`、`21:9`、`auto`のように |
+| `output_format` | string | 否 | `png`、`jpeg` ／ `jpg` |
+| `output_compression` | integer | 否 | `0-100`、JPEG圧縮品質指定 |
+| `n` | integer | 否 | 生成数、デフォルトは`1` |
 
-- `Unknown name "imageOutputOptions" at 'generation_config.image_config'`
-- `not supported model for image generation`
-- `get_channel_failed`
+<Note>
+  Geminiネイティブフィールド（`generationConfig`、`imageConfig`、`imageOutputOptions`、`image_output_options`など）はクライアントリクエストで送信しないでください。これらのフィールドはCrazyrouterがサーバで現在の上流プロトコルに従って自動生成します。
+</Note>
 
-That is why `/v1/images/generations` should no longer be documented as the stable public path for this model alias.
+## テキスト画像生成例
 
-### 2. The native response must still be parsed as Gemini-native output
+<CodeGroup>
 
-Even on the recommended route, the client should parse Gemini-native output:
-
-1. Read `candidates[].content.parts[].inlineData` first
-2. Do not assume an OpenAI Images-style `data[].url` payload
-3. If you later expand to other Gemini image models, also handle `text`-wrapped `data:image/...` payloads or hosted URLs
-
-## Current Recommendation
-
-1. For production use of `nano-banana-2`, switch directly to `nano-banana-2:generateContent`
-2. Do not use `POST /v1/images/generations` with `model: "nano-banana-2"`
-3. For automation, parse `inlineData` first
-
-## Recommended Request Template
-
-```bash
-curl "https://api.crazyrouter.com/v1beta/models/nano-banana-2:generateContent?key=YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "contents": [
-      {
-        "role": "user",
-        "parts": [
-          {
-            "text": "Generate an IMAGE of a clean ecommerce hero shot on a white background. Return image output."
-          }
-        ]
-      }
-    ],
-    "generationConfig": {
-      "responseModalities": ["IMAGE"]
-    }
-  }'
-```
-
-## Legacy Route
-
-The following legacy pattern is no longer recommended:
-
-```bash
+```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "nano-banana-2",
-    "prompt": "..."
+    "prompt": "A clean ecommerce hero shot of a red apple on a white background",
+    "resolution": "1K",
+    "aspect_ratio": "16:9",
+    "output_format": "jpeg",
+    "output_compression": 85
   }'
 ```
 
-This is not a one-off outage. The same failure pattern reproduced in both production and local `4000` retests.
+```python Python
+from openai import OpenAI
 
-<Note>
-  For more details on native Gemini image requests, see [Gemini Image Generation](/jp/chat/gemini/image-gen). If you still have older code using the Nano Banana-family Images API, migrate `nano-banana-2` to the native Gemini path documented here.
-</Note>
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://api.crazyrouter.com/v1",
+)
+
+response = client.images.generate(
+    model="nano-banana-2",
+    prompt="A clean ecommerce hero shot of a red apple on a white background",
+    n=1,
+    extra_body={
+        "resolution": "1K",
+        "aspect_ratio": "16:9",
+        "output_format": "jpeg",
+        "output_compression": 85,
+    },
+)
+
+print(response.data[0].url or response.data[0].b64_json)
+```
+
+</CodeGroup>
+
+## 参考画像編集例
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "nano-banana-2",
+    "prompt": "把参考图改成横幅广告图，保留主体，背景更干净",
+    "image_input": [
+      "https://example.com/reference.png"
+    ],
+    "resolution": "1K",
+    "aspect_ratio": "16:9",
+    "output_format": "png"
+  }'
+```
+
+## レスポンス
+
+レスポンスはOpenAI Imagesスタイルを維持します。デフォルトで`data[0].url`を優先的に読み込みます；一部互換チャネルでは`data[0].b64_json`が返される場合もあります。
+
+```json
+{
+  "created": 1778990000,
+  "data": [
+    {
+      "url": "https://media.crazyrouter.com/task-artifacts/2026/05/17/sync-image/request-id-1.png"
+    }
+  ]
+}
+```
+
+## 移行について
+
+既存コードが直接以下を呼び出している場合：
+
+```text
+POST /v1beta/models/nano-banana-2:generateContent
+```
+
+次への移行を推奨します：
+
+```text
+POST https://api.crazyrouter.com/v1/images/generations
+```
+
+なお、Geminiネイティブパラメーターは統一パラメーターに置き換えてください：
+
+| Gemini ネイティブ概念 | Crazyrouter 統一パラメーター |
+|------|------|
+| `imageConfig.aspectRatio` | `aspect_ratio` |
+| `imageConfig.imageSize` | `resolution` |
+| `imageOutputOptions.mimeType` | `output_format` |
+| `imageOutputOptions.compressionQuality` | `output_compression` |
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [Nano Banana 2 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/google/nano-banana-2?utm_source=docs&utm_medium=related)
-- [Nano Banana Pro モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/google/nano-banana-pro?utm_source=docs&utm_medium=related)
-- [Google の全モデルと料金](https://crazyrouter.com/en/models/google?utm_source=docs&utm_medium=related)
+- [Nano Banana 2 モデルページ：リアルタイム価格、実例、呼び出しコード](https://crazyrouter.com/ja/models/google/nano-banana-2?utm_source=docs&utm_medium=related)
+- [Nano Banana Pro モデルページ：リアルタイム価格、実例、呼び出しコード](https://crazyrouter.com/ja/models/google/nano-banana-pro?utm_source=docs&utm_medium=related)
+- [Google 全モデル・価格情報](https://crazyrouter.com/ja/models/google?utm_source=docs&utm_medium=related)

@@ -1,0 +1,156 @@
+---
+title: "Ejecutar operación"
+description: "Ejecuta operaciones posteriores de Midjourney: ampliar, variación, mezclar, describir, etc."
+---
+> Contenido actualizado: 2026-06-09
+
+# Ejecutar operación
+
+## Acción - Ampliar / Variación
+
+```
+POST /mj/submit/action
+```
+
+Ejecuta operaciones posteriores en una tarea Imagine ya completada, como ampliar (Upscale), variación (Variation), etc.
+
+### Parámetros de solicitud
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `taskId` | string | Sí | ID de la tarea original |
+| `customId` | string | Sí | `customId` del botón de operación, obtenido del campo `buttons` de la tarea |
+| `notifyHook` | string | No | Dirección de callback |
+| `state` | string | No | Estado personalizado |
+
+### Ejemplo de solicitud
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/mj/submit/action \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "taskId": "task_1234567890",
+    "customId": "MJ::JOB::upsample::1::abc123"
+  }'
+```
+
+### Ejemplo de respuesta
+
+```json
+{
+  "code": 1,
+  "description": "提交成功",
+  "result": "task_action_001",
+  "properties": {}
+}
+```
+
+---
+
+## Blend - Mezclar imágenes
+
+```
+POST /mj/submit/blend
+```
+
+Mezcla múltiples imágenes para generar una nueva imagen.
+
+### Parámetros de solicitud
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `botType` | string | No | `MID_JOURNEY` (predeterminado) o `NIJI_JOURNEY` |
+| `base64Array` | array | Sí | Arreglo de imágenes codificadas en Base64, de 2 a 5 imágenes |
+| `dimensions` | string | No | Tamaño de salida: `PORTRAIT`, `SQUARE`, `LANDSCAPE` |
+| `notifyHook` | string | No | Dirección de callback |
+| `state` | string | No | Estado personalizado |
+
+### Ejemplo de solicitud
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/mj/submit/blend \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "base64Array": [
+      "data:image/png;base64,iVBORw0KGgo...",
+      "data:image/png;base64,iVBORw0KGgo..."
+    ],
+    "dimensions": "SQUARE"
+  }'
+```
+
+### Ejemplo de respuesta
+
+```json
+{
+  "code": 1,
+  "description": "提交成功",
+  "result": "task_blend_001"
+}
+```
+
+---
+
+## Describe - Describir imagen
+
+```
+POST /mj/submit/describe
+```
+
+Sube una imagen para que Midjourney genere palabras clave descriptivas correspondientes.
+
+### Parámetros de solicitud
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `botType` | string | No | `MID_JOURNEY` (predeterminado) o `NIJI_JOURNEY` |
+| `base64` | string | Sí | Imagen codificada en Base64 |
+| `notifyHook` | string | No | Dirección de callback |
+| `state` | string | No | Estado personalizado |
+
+### Ejemplo de solicitud
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/mj/submit/describe \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "base64": "data:image/png;base64,iVBORw0KGgo..."
+  }'
+```
+
+---
+
+## Modal - Confirmación en ventana emergente
+
+```
+POST /mj/submit/modal
+```
+
+Envía una operación de confirmación en ventana emergente de Midjourney (como Region Vary u otras acciones que requieren confirmación secundaria).
+
+### Parámetros de solicitud
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `taskId` | string | Sí | ID de la tarea original |
+| `prompt` | string | No | Palabras clave en la ventana emergente |
+| `maskBase64` | string | No | Imagen de máscara codificada en Base64 |
+
+### Ejemplo de solicitud
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/mj/submit/modal \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "taskId": "task_1234567890",
+    "prompt": "add a rainbow in the sky"
+  }'
+```
+
+<Note>
+  Tras enviar cualquier operación, se devolverá un nuevo ID de tarea; es necesario utilizar la interfaz [consultar estado de la tarea](/es/images/midjourney/query) para obtener el resultado.
+</Note>

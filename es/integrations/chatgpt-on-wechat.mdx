@@ -1,0 +1,83 @@
+---
+title: "ChatGPT en WeChat tutorial de configuración"
+description: "Configura la API de Crazyrouter en el proyecto ChatGPT en WeChat y utiliza el modelo más reciente que ha sido comprobado en producción"
+---
+> Contenido actualizado: 2026-06-09
+
+## Resumen
+
+ChatGPT en WeChat es un proyecto común de robot para WeChat que permite conectar las capacidades del modelo de Crazyrouter a chats privados y de grupo. Se recomienda continuar usando la configuración compatible con OpenAI que viene por defecto, y primero usar un modelo que ya haya sido comprobado con éxito para completar el flujo mínimo de respuesta.
+
+## Configuración recomendada para la primera ronda
+
+- `open_ai_api_base`: `https://api.crazyrouter.com/v1`
+- Primer modelo de validación: `gpt-5.5`
+- En la primera ronda, abre solo unos pocos modelos para evitar ampliar demasiado el rango de problemas
+
+## Método de configuración
+
+### Modificar el archivo de configuración
+
+Edita `config.json`:
+
+```json
+{
+  "open_ai_api_key": "sk-xxx",
+  "open_ai_api_base": "https://api.crazyrouter.com/v1",
+  "model": "gpt-5.5",
+  "proxy": "",
+  "single_chat_prefix": [""],
+  "single_chat_reply_prefix": "",
+  "group_chat_prefix": ["@bot"],
+  "group_name_white_list": ["AI交流群"]
+}
+```
+
+### Método mediante variable de entorno
+
+```bash
+export OPEN_AI_API_KEY=sk-xxx
+export OPEN_AI_API_BASE=https://api.crazyrouter.com/v1
+export MODEL=gpt-5.5
+```
+
+### Despliegue con Docker
+
+```yaml
+services:
+  chatgpt-on-wechat:
+    image: zhayujie/chatgpt-on-wechat
+    environment:
+      - OPEN_AI_API_KEY=sk-xxx
+      - OPEN_AI_API_BASE=https://api.crazyrouter.com/v1
+      - MODEL=gpt-5.5
+    volumes:
+      - ./config.json:/app/config.json
+```
+
+## Modelos recomendados
+
+| Escenario | Modelo | Descripción |
+|-----------|--------|-------------|
+| Validación del flujo inicial | `gpt-5.5` | Probado con éxito en producción el 23 de marzo de 2026, ideal para confirmar primero el flujo compatible con OpenAI |
+| Respuestas largas y de alta calidad | `claude-opus-4-8` | Más adecuado para explicaciones complejas, resúmenes y textos extensos |
+| Alternativa Gemini | `gemini-3.1-pro` | Adecuado para comprobar otra vía de compatibilidad del segundo proveedor |
+
+## Orden recomendado para la validación
+
+1. Configura primero solo un token
+2. Configura primero solo un modelo `gpt-5.5`
+3. Envía primero en chat privado `Reply only OK`
+4. Verifica que el registro de Crazyrouter en el backend muestre la solicitud correspondiente
+5. Luego, abre gradualmente chats de grupo, más reglas de prefijo y otros modelos
+
+<Warning>
+  Los proyectos de robots para WeChat deben seguir las normas de uso de WeChat, evitando enviar mensajes frecuentes que puedan limitar la cuenta.
+</Warning>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Página de modelo GPT Image 1.5: precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Página de modelo GPT Image 2: precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Todos los modelos y precios de OpenAI](https://crazyrouter.com/es/models/openai?utm_source=docs&utm_medium=related)

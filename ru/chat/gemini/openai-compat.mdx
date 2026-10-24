@@ -1,34 +1,34 @@
 ---
-title: "Gemini OpenAI-Compatible Format"
-description: "Production-revalidated Gemini 3 Pro via /v1/chat/completions"
+title: "Gemini OpenAI совместимый формат"
+description: "Проверено в производственной среде, вызов Gemini 3 Pro через /v1/chat/completions"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Gemini OpenAI-Compatible Format
+# Gemini OpenAI совместимый формат
 
-You can call Gemini through the OpenAI Chat Completions compatible route.
+Вы можете вызвать Gemini в формате, совместимом с OpenAI Chat Completions.
 
 ```
 POST /v1/chat/completions
 ```
 
-This page only documents compatibility-layer behavior that was revalidated against Crazyrouter production on `2026-03-22`.
+На этой странице указано только поведение совместимого слоя `2026-03-22`, которое уже проверено в производственной среде Crazyrouter.
 
-Current primary example model:
+Текущая основная модель:
 
 - `gemini-3.1-pro`
 
-## Current conclusion
+## Основные выводы на данный момент
 
-This production recheck confirmed that:
+Последняя производственная ревизия подтвердила:
 
-- `gemini-3.1-pro` works through `/v1/chat/completions` for normal text chat
-- streaming returns standard `chat.completion.chunk` SSE objects
-- for Gemini-specific capabilities such as structured outputs, Google Search, and thinking, you should still prefer [Gemini Native Format](/ru/chat/gemini/native)
+- `gemini-3.1-pro` может нормально вести диалог через `/v1/chat/completions`
+- Потоковая передача совместима со структурой SSE `chat.completion.chunk`
+- Если вам нужны структурированный вывод Gemini, Google Search, thinking и другие возможности, пока рекомендуется использовать [родной формат Gemini](/ru/chat/gemini/native)
 
 ---
 
-## Basic conversation
+## Базовый диалог
 
 ```bash cURL
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -50,7 +50,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-Verified response shape:
+Ключевая структура ответа, проверенная в текущей продакшн-верификации:
 
 ```json
 {
@@ -69,7 +69,7 @@ Verified response shape:
 
 ---
 
-## Python example
+## Пример на Python
 
 ```python Python
 from openai import OpenAI
@@ -93,9 +93,9 @@ print(response.choices[0].message.content)
 
 ---
 
-## Streaming output
+## Потоковая передача
 
-This production recheck also confirmed streaming compatibility:
+В этом производственном цикле также проверена потоковая совместимая отдача:
 
 ```python Python
 stream = client.chat.completions.create(
@@ -113,7 +113,7 @@ for chunk in stream:
         print(delta.content, end="")
 ```
 
-Observed SSE shape:
+SSE-фрагменты, полученные в производственной среде, выглядят примерно так:
 
 ```text
 data: {"object":"chat.completion.chunk","model":"gemini-3.1-pro",...}
@@ -123,20 +123,18 @@ data: [DONE]
 
 ---
 
-## When to use compatible vs native
+## Когда использовать совместимый формат, а когда — родной формат
 
-- If you already have OpenAI SDK code and only need standard chat, use the compatible route
-- If you need Gemini-native structured outputs, Google Search, thinking, or native metadata, use [Gemini Native Format](/ru/chat/gemini/native)
+- Уже есть код с использованием SDK OpenAI и нужны только стандартные диалоги: в первую очередь используйте совместимый формат
+- Если требуется структурированный вывод Gemini, Google Search, thinking или родные поля: приоритет — [родной формат Gemini](/ru/chat/gemini/native)
 
 <Note>
-  This page still only covers the `/v1/chat/completions` compatibility layer and does not fold Gemini-backed image behavior into it. For image workloads, do not keep documenting the Nano Banana family as a stable `/v1/images/generations` contract.
-  The currently preferred entry point is [Nano Banana 2](/ru/images/nano-banana-2), which now points to native Gemini `POST /v1beta/models/nano-banana-2:generateContent`.
-  [Nano Banana](/ru/images/nano-banana) remains controlled-testing only.
+  Эта страница охватывает только совместимый слой `/v1/chat/completions`. Для работы с изображениями Gemini используйте унифицированный Images API: `POST https://api.crazyrouter.com/v1/images/generations`, а также посмотрите [Nano Banana](/ru/images/nano-banana), [Nano Banana Pro](/ru/images/nano-banana-pro), [Nano Banana 2](/ru/images/nano-banana-2).
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [GPT Image 1.5: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [Все модели Google с актуальными ценами](https://crazyrouter.com/en/models/google?utm_source=docs&utm_medium=related)
+- [Страница модели GPT Image 1.5: текущая цена, реальные примеры, код вызова](https://crazyrouter.com/ru/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Страница модели GPT Image 2: текущая цена, реальные примеры, код вызова](https://crazyrouter.com/ru/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Все модели и цены Google](https://crazyrouter.com/ru/models/google?utm_source=docs&utm_medium=related)

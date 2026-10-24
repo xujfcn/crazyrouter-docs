@@ -1,34 +1,34 @@
 ---
-title: 'AI Thinking Fields'
-description: 'Production-revalidated guide to the thinking and reasoning fields exposed by different Crazyrouter protocols'
+title: "AI思考フィールド"
+description: "本番環境での再検証に基づき、Crazyrouterで各プロトコルが公開するthinking/reasoningフィールドの理解について説明します"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# AI Thinking Fields
+# AI思考フィールド
 
-This page only lists thinking and reasoning surfaces that were revalidated against Crazyrouter production on `2026-03-22`.
+このページでは、`2026-03-22` がCrazyrouter本番環境で再検証済みのthinking / reasoning公開方法のみをリストします。
 
-The key point is that different protocols expose "thinking" differently:
+重要な前提条件として：異なるプロトコルは「思考」公開方法が異なります。
 
-- OpenAI Responses returns a standalone `reasoning` item
-- Claude native Messages returns a `thinking` block
-- Gemini Native is most reliably observed through `usageMetadata.thoughtsTokenCount`
+- OpenAIのレスポンスは、独立した`reasoning`項目の返却傾向が強い
+- ClaudeのネイティブMessagesは`thinking`ブロックとして返却します
+- Gemini Nativeは現状`usageMetadata.thoughtsTokenCount`によって思考動作の有無が最も判断しやすいです
 
-## Currently verified fields
+## 現時点で検証済みのフィールド
 
-| Model | Protocol | Verified field or marker | Notes |
-|-------|----------|--------------------------|-------|
-| `gpt-5.5` | Responses | `output[].type = "reasoning"` | Can return displayable summaries when `summary` is requested |
-| `claude-opus-4-8` | Anthropic Messages | `content[].type = "thinking"` | Returned alongside a `text` block |
-| `gemini-3.1-pro` | Gemini Native | `usageMetadata.thoughtsTokenCount` | Confirms thinking tokens were actually used |
+| モデル | プロトコル | 検証済みフィールドまたはフラグ | 説明 |
+|------|------|------------------|------|
+| `gpt-5.5` | Responses | `output[].type = "reasoning"` | `summary`と組み合わせて、表示可能な要約を取得可能 |
+| `claude-opus-4-8` | Anthropic Messages | `content[].type = "thinking"` | `text`ブロックと並立で返却される |
+| `gemini-3.1-pro` | Gemini Native | `usageMetadata.thoughtsTokenCount` | thinking budgetが実際に消費されたことを示す |
 
 <Note>
-  In the current recheck, `gpt-5.5` Chat Completions did not reliably return usable `message.reasoning_content`, so it is not treated as the primary observable field here.
+  今回の再検証では、`gpt-5.5` Chat Completionsの`message.reasoning_content`は安定して信頼できる内容を返していないため、主要な観測フィールドとしてここでは取り上げません。
 </Note>
 
 ---
 
-## GPT: Responses `reasoning` item
+## GPT: Responses `reasoning`項目
 
 ```json
 {
@@ -49,7 +49,7 @@ The key point is that different protocols expose "thinking" differently:
       "content": [
         {
           "type": "output_text",
-          "text": "Final answer"
+          "text": "最终回答"
         }
       ]
     }
@@ -57,7 +57,7 @@ The key point is that different protocols expose "thinking" differently:
 }
 ```
 
-Extraction example:
+抽出方法：
 
 ```python
 response = client.responses.create(
@@ -70,12 +70,12 @@ for item in response.output:
     if item.type == "reasoning":
         for part in item.summary:
             if part.type == "summary_text":
-                print("Thinking summary:", part.text)
+                print("思考摘要:", part.text)
 ```
 
 ---
 
-## Claude: `thinking` block
+## Claude: `thinking`ブロック
 
 ```json
 {
@@ -86,13 +86,13 @@ for item in response.output:
     },
     {
       "type": "text",
-      "text": "Final answer"
+      "text": "最终回答"
     }
   ]
 }
 ```
 
-Extraction example:
+抽出方法：
 
 ```python
 message = client.messages.create(
@@ -109,16 +109,16 @@ message = client.messages.create(
 
 for block in message.content:
     if block.type == "thinking":
-        print("Thinking:", block.thinking)
+        print("思考内容:", block.thinking)
     elif block.type == "text":
-        print("Answer:", block.text)
+        print("回答:", block.text)
 ```
 
 ---
 
 ## Gemini: `thoughtsTokenCount`
 
-In the current production recheck, the most reliable observable signal was not a visible reasoning paragraph in the body, but a usage field:
+Gemini Nativeにおける現状最も安定した観測ポイントは、本文中の見えやすい思考テキスト自体ではなく、利用量フィールドです：
 
 ```json
 {
@@ -128,29 +128,29 @@ In the current production recheck, the most reliable observable signal was not a
 }
 ```
 
-This indicates that:
+これは次のことを意味しています：
 
-- the thinking budget was actually used
-- the request consumed thinking tokens during generation
+- thinking budgetが実際に生成へ利用された
+- 現在のリクエストで思考用Token消費が確かに発生した
 
-Extraction example:
+抽出方法：
 
 ```python
 data = response.json()
 thoughts = data.get("usageMetadata", {}).get("thoughtsTokenCount", 0)
-print("Thinking tokens:", thoughts)
+print("思考 Token:", thoughts)
 ```
 
 ---
 
-## Usage notes
+## 使用時の注意点
 
-- Do not assume every model returns raw chain-of-thought text
-- Do not mix thinking fields across protocols
-- For logging, auditing, or UI display, decide per protocol whether to read `reasoning`, `thinking`, or `thoughtsTokenCount`
+- すべてのモデルが思考過程を明示的に返すとは限りません
+- 異なるプロトコルのthinkingフィールドを混同しないでください
+- 監査・ログ・フロントエンド表示をする場合、必ずプロトコルごとに`reasoning`・`thinking`・`thoughtsTokenCount`のどれを読むべきか判断してください
 
-Related pages:
+関連ページ：
 
-- [GPT-5 Thinking Mode](/jp/chat/responses/gpt5-thinking)
-- [Claude Native Messages](/jp/chat/anthropic/messages)
-- [Gemini Native API](/jp/chat/gemini/native)
+- [GPT-5思考モード](/jp/chat/responses/gpt5-thinking)
+- [Claudeネイティブフォーマット](/jp/chat/anthropic/messages)
+- [Geminiネイティブフォーマット](/jp/chat/gemini/native)

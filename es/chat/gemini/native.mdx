@@ -1,0 +1,246 @@
+---
+title: "Formato nativo de Gemini"
+description: "Basado en la verificación del entorno de producción, utilizando la capacidad API nativa de Gemini 3 Pro"
+---
+> Contenido actualizado: 2026-06-09
+
+# Formato nativo de Gemini
+
+Esta página solo recoge el uso de Gemini Native que `2026-03-22` ha verificado en producción de Crazyrouter.
+
+Modelo principal de ejemplo actual:
+
+- `gemini-3.1-pro`
+
+Páginas multimodales organizadas según experiencias de solicitud exitosa:
+
+- [Comprensión de imágenes de Gemini](/es/chat/gemini/vision)
+- [Comprensión de vídeos de Gemini](/es/chat/gemini/video)
+- [Comprensión de audio de Gemini](/es/chat/gemini/audio)
+
+## Endpoints
+
+```text
+POST /v1beta/models/{model}:generateContent
+POST /v1beta/models/{model}:streamGenerateContent
+```
+
+## Autenticación
+
+Pasar la clave API como parámetro de URL:
+
+```text
+?key=YOUR_API_KEY
+```
+
+---
+
+## Generación básica de texto
+
+```bash cURL
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Explain machine learning in one sentence."
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "maxOutputTokens": 128
+    }
+  }'
+```
+
+Estructura clave devuelta actualmente en producción:
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "...",
+            "thoughtSignature": "..."
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Generación en flujo
+
+En esta ronda, se ha verificado que `streamGenerateContent` puede devolver contenido incremental mediante SSE.
+
+```bash cURL
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:streamGenerateContent?key=YOUR_API_KEY&alt=sse" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Write one short sentence about AI."
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+La forma de los fragmentos SSE actualmente recibidos en producción es similar a:
+
+```text
+data: {"candidates":[{"content":{"parts":[{"text":"...","thoughtSignature":"..."}]}}]}
+```
+
+---
+
+## Salida estructurada
+
+Actualmente se ha verificado que `responseMimeType + responseSchema` está disponible en producción:
+
+```bash cURL
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Return a JSON object with keys city and country for Tokyo."
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "responseMimeType": "application/json",
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "city": {"type": "string"},
+          "country": {"type": "string"}
+        },
+        "required": ["city", "country"]
+      }
+    }
+  }'
+```
+
+Respuesta validada actualmente en producción:
+
+```json
+{"city":"Tokyo","country":"Japan"}
+```
+
+---
+
+## Búsqueda de Google
+
+Actualmente se ha verificado en producción que la herramienta `googleSearch` está disponible:
+
+```bash cURL
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Use Google Search to find one recent headline from a major technology news site."
+          }
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "googleSearch": {}
+      }
+    ]
+  }'
+```
+
+Los campos clave devueltos actualmente en producción incluyen:
+
+- `groundingMetadata.webSearchQueries`
+- `groundingMetadata.groundingChunks`
+- `groundingMetadata.groundingSupports`
+
+---
+
+## Razonamiento
+
+Actualmente se ha verificado en producción que `thinkingConfig` está disponible:
+
+```bash cURL
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Which is larger, 9.11 or 9.9? Explain briefly."
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "thinkingConfig": {
+        "thinkingBudget": 256
+      },
+      "maxOutputTokens": 512
+    }
+  }'
+```
+
+Indicadores clave validados actualmente en producción:
+
+```json
+{
+  "usageMetadata": {
+    "thoughtsTokenCount": 120
+  }
+}
+```
+
+---
+
+## Campos comunes de generationConfig
+
+| Campo | Tipo | Descripción |
+|------|------|-------------|
+| `maxOutputTokens` | integer | Número máximo de tokens de salida |
+| `temperature` | number | Temperatura de muestreo |
+| `responseMimeType` | string | Tipo MIME cuando la salida es estructurada |
+| `responseSchema` | object | Restricción de salida estructurada |
+| `thinkingConfig` | object | Configuración del modo de razonamiento |
+
+<Note>
+  Gemini Native utiliza la estructura `contents[].parts[]`, no la estructura `messages` de OpenAI. Si prefieres el estilo de OpenAI, por favor utiliza el [formato compatible con OpenAI de Gemini](/es/chat/gemini/openai-compat).
+</Note>
+
+Páginas relacionadas:
+
+- [Método oficial de precios de modelos](/es/reference/official-pricing-methods)
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Comparación de precios de Gemini 2.5 Flash: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Página del modelo Gemini 2.5 Flash: Precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Comparación de precios de Gemini 2.5 Flash-Lite: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)

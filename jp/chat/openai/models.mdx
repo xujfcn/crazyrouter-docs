@@ -1,26 +1,27 @@
 ---
-title: "List Models"
-description: "Production-revalidated GET /v1/models usage for listing models available to the current token"
+title: "モデル一覧"
+description: "本番環境によるレビューに基づき、GET /v1/models を使用して現在のトークンで利用可能なモデルの一覧を取得します"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-30
 
-# List Models
+
+# モデル一覧
 
 ```
 GET /v1/models
 ```
 
-Returns the list of models available to the current API key.
+現在の API Key で利用可能なモデルの一覧を返します。
 
-This page only documents behavior that was revalidated against Crazyrouter production on `2026-04-14`.
+このページには `2026-04-14` が Crazyrouter 本番環境でレビュー済みの動作のみを記載しています。
 
-## Authentication
+## 認証
 
 ```text
 Authorization: Bearer YOUR_API_KEY
 ```
 
-## Request example
+## リクエスト例
 
 <CodeGroup>
 
@@ -62,27 +63,27 @@ for (const model of models.data) {
 
 ---
 
-## Current production findings
+## 現在の本番検証結果
 
-In the `2026-04-14` production recheck:
+`2026-04-14` の本番レビューでは：
 
-- the endpoint returned `200`
-- the top-level `success` field was `true`
-- the top-level `object` was `list`
-- the current model count was `605`
-- the following models were confirmed present:
+- エンドポイントは `200` を返します
+- トップレベルの `success` は `true` です
+- トップレベルの `object` は `list` です
+- 現在返却されるモデル数は `605` です
+- 以下のモデルが返却リストに含まれていることを確認しました：
   - `gpt-5.5`
   - `claude-opus-4-8`
   - `claude-opus-4-8`
   - `gemini-3.1-pro`
 
 <Note>
-  The exact count and model set can change with upstream configuration, token permissions, and platform updates. Treat the examples here as current examples, not a fixed complete inventory.
+  モデル数と具体的なリストは、チャンネル設定、トークン権限、プラットフォームの更新により変動するため、ドキュメントのサンプルは固定の全集として扱わないでください。
 </Note>
 
 ---
 
-## Response example
+## 応答例
 
 ```json
 {
@@ -117,34 +118,34 @@ In the `2026-04-14` production recheck:
 }
 ```
 
-## Common fields
+## よく見るフィールド
 
-| Field | Type | Meaning |
-|-------|------|---------|
-| `success` | boolean | Whether the request succeeded |
-| `id` | string | Model identifier used in API calls |
-| `object` | string | Always `model` |
-| `created` | integer | Timestamp |
-| `owned_by` | string | Owning organization or source label |
+| フィールド | 型 | 説明 |
+|------|------|------|
+| `success` | boolean | リクエストが成功したかどうか |
+| `id` | string | API 呼び出し時に渡されたモデル識別子 |
+| `object` | string | `model` で固定 |
+| `created` | integer | タイムスタンプ |
+| `owned_by` | string | モデルの所属組織または出所識別子 |
 
 ---
 
-## Pricing information
+## 価格情報
 
-If you also need public pricing data, use the Pricing page. For programmatic confirmation of currently visible models, keep using `GET /v1/models`.
+公共の価格情報については、[Pricing ページ](https://crazyrouter.com/ja/pricing) をご参照ください。プログラム側で現在のトークンで表示可能なモデルを確認する場合は、本ページの `GET /v1/models` を引き続きご利用ください。
 
 <Note>
-  `GET /v1/models` returns `supported_endpoint_types`, which only describe the interface styles the current model supports. `openai` maps to `POST /v1/chat/completions`, `anthropic` maps to `POST /v1/messages`, and only `openai-response` maps to `POST /v1/responses`. Claude currently exposes `openai` + `anthropic`, not `openai-response`.
+  `GET /v1/models` の返す `supported_endpoint_types` は、現在のモデルがサポートするインターフェース様式を示すだけです。このうち `openai` が `POST /v1/chat/completions` に、`anthropic` が `POST /v1/messages` に対応し、`openai-response` のみが `POST /v1/responses` に対応します。Claude は現在公開されているものとしては `openai` + `anthropic` をサポートし、`openai-response` はサポートしていません。
 </Note>
 
-Related page:
+関連ページ：
 
-- [Gemini-Compatible OpenAI Model List](/jp/chat/gemini/openai-models)
-- [公式モデル課金方式](/jp/reference/official-pricing-methods)
+- [Gemini OpenAI 互換モデル一覧](/jp/chat/gemini/openai-models)
+- [モデル公式の価格体系](/jp/reference/official-pricing-methods)
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [GPT Image 1.5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [OpenAI の全モデルと料金](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [GPT Image 1.5 モデルページ：リアルタイム価格、実際の例、呼び出しコード](https://crazyrouter.com/ja/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT Image 2 モデルページ：リアルタイム価格、実際の例、呼び出しコード](https://crazyrouter.com/ja/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [OpenAI 全モデルと価格](https://crazyrouter.com/ja/models/openai?utm_source=docs&utm_medium=related)

@@ -1,0 +1,392 @@
+---
+title: "Guía completa de uso del Crazyrouter SDK"
+description: "Utiliza el SDK oficial de OpenAI para conectarse a Crazyrouter y realizar validaciones de extremo a extremo en chat, salida en streaming, lista de modelos, embeddings y tareas asíncronas nativas"
+---
+> Contenido actualizado: 2026-10-22
+
+## Escenarios de uso
+
+Crazyrouter proporciona una integración unificada para las interfaces compatibles con el SDK de OpenAI. El chat, API de Responses, imágenes, audio, embeddings y lista de modelos utilizan preferentemente el SDK oficial de OpenAI. Interfaces asíncronas o nativas del proveedor como video, Kling, Luma, Midjourney, etc., utilizan la misma clave API y llaman a la ruta nativa de Crazyrouter usando `fetch`.
+
+Entrada API internacional predeterminada:
+
+```text
+https://api.crazyrouter.com
+```
+
+El SDK de OpenAI requiere que se configure la dirección con `/v1`:
+
+```text
+https://api.crazyrouter.com/v1
+```
+
+<Warning>
+No escribas la `baseURL` del SDK de OpenAI como `https://api.crazyrouter.com`, de lo contrario el SDK omitirá `/v1`. Tampoco uses `https://api.crazyrouter.com/v1/chat/completions`, ya que el SDK duplicará la ruta.
+</Warning>
+
+## Instalación del SDK
+
+```bash
+npm install openai
+```
+
+Se recomienda usar Node.js versión 18 o superior. Node.js 18+ ya incluye `fetch`, `FormData` y `Blob`.
+
+## Configuración de variables de entorno
+
+macOS / Linux:
+
+```bash
+export CRAZYROUTER_API_KEY="sk-your-api-key"
+export CRAZYROUTER_BASE_URL="https://api.crazyrouter.com"
+```
+
+Windows PowerShell:
+
+```powershell
+$env:CRAZYROUTER_API_KEY = "sk-your-api-key"
+$env:CRAZYROUTER_BASE_URL = "https://api.crazyrouter.com"
+```
+
+## Crear el cliente SDK
+
+```ts
+import OpenAI from 'openai';
+
+const apiKey = process.env.CRAZYROUTER_API_KEY;
+
+if (!apiKey) {
+  throw new Error('Missing CRAZYROUTER_API_KEY');
+}
+
+const baseURL = process.env.CRAZYROUTER_BASE_URL ?? 'https://api.crazyrouter.com';
+
+export const client = new OpenAI({
+  apiKey,
+  baseURL: `${baseURL}/v1`,
+  timeout: 180_000,
+});
+```
+
+## Completados de chat
+
+```ts
+const response = await client.chat.completions.create({
+  model: 'gpt-5.5',
+  messages: [
+    { role: 'system', content: 'You are concise.' },
+    { role: 'user', content: 'Say sdk-ok and nothing else.' },
+  ],
+  max_tokens: 16,
+});
+
+console.log(response.choices[0]?.message?.content);
+```
+
+## Salida en streaming
+
+```ts
+const stream = await client.chat.completions.create({
+  model: 'gpt-5.5',
+  messages: [{ role: 'user', content: 'Count from 1 to 3.' }],
+  max_tokens: 32,
+  stream: true,
+});
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content ?? '');
+}
+```
+
+## Lista de modelos
+
+```ts
+const models = await client.models.list();
+
+for (const model of models.data.slice(0, 10)) {
+  console.log(model.id);
+}
+```
+
+## Embeddings
+
+```ts
+const embedding = await client.embeddings.create({
+  model: 'text-embedding-3-small',
+  input: 'Crazyrouter SDK test',
+});
+
+console.log(embedding.data[0].embedding.length);
+```
+
+## API de Responses
+
+La API de Responses es adecuada para modelos GPT de la serie que soportan `/v1/responses`.
+
+```ts
+const response = await client.responses.create({
+  model: 'gpt-5.5',
+  input: 'Return only: responses-ok',
+  max_output_tokens: 16,
+});
+
+console.log(response.output_text);
+```
+
+<Note>
+No pruebes modelos Claude mediante la ruta de la API de Responses. Para Claude, se recomienda usar `/v1/messages` o una ruta OpenAI-compatible `/v1/chat/completions`.
+</Note>
+
+## Imágenes, audio y transcripción
+
+Las interfaces de imagen y audio compatibles con OpenAI también utilizan el mismo cliente SDK.
+
+```ts
+const image = await client.images.generate({
+  model: 'gpt-image-2',
+  prompt: 'A simple white mug on a clean table',
+  size: '1024x1024',
+  output_format: 'png',
+});
+
+console.log(image.data[0]?.url);
+```
+
+```ts
+const speech = await client.audio.speech.create({
+  model: 'tts-1',
+  voice: 'alloy',
+  input: 'Hello from Crazyrouter.',
+});
+
+const audio = Buffer.from(await speech.arrayBuffer());
+console.log(audio.length);
+```
+
+## Interfaces nativas de tareas asíncronas
+
+Las tareas asíncronas como video, Kling, Luma, Midjourney, etc., generalmente no son métodos del SDK de OpenAI, sino rutas HTTP nativas de Crazyrouter. Se sigue utilizando la misma clave API.
+
+```ts
+async function crazyrouterFetch<T>(
+  path: string,
+  options: RequestInit & { json?: Record<string, unknown> } = {},
+): Promise<T> {
+  const response = await fetch(`${baseURL}${path}`, {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      ...(options.json ? { 'Content-Type': 'application/json' } : {}),
+      ...options.headers,
+    },
+    body: options.json ? JSON.stringify(options.json) : options.body,
+  });
+
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(`Crazyrouter API error ${response.status}: ${JSON.stringify(body)}`);
+  }
+
+  return body as T;
+}
+```
+
+Enviar una tarea de video unificada:
+
+```ts
+const task = await crazyrouterFetch<{
+  id?: string;
+  task_id?: string;
+  data?: { task_id?: string };
+}>('/v1/video/create', {
+  method: 'POST',
+  json: {
+    model: 'veo-3.1-fast',
+    prompt: 'A quiet city street after rain, cinematic lighting',
+    aspect_ratio: '16:9',
+    size: '1080P',
+  },
+});
+
+const taskId = task.data?.task_id ?? task.task_id ?? task.id;
+console.log(taskId);
+```
+
+Consultar tarea:
+
+```ts
+const result = await crazyrouterFetch(
+  `/v1/video/query?task_id=${encodeURIComponent(taskId!)}`,
+);
+
+console.log(result);
+```
+
+## Subir imagen local
+
+Cuando se necesita enviar una imagen de referencia local a las interfaces image-to-video, vision, o de edición de imágenes, primero se debe subir al almacenamiento temporal de Crazyrouter.
+
+```ts
+import { readFile } from 'node:fs/promises';
+import { basename } from 'node:path';
+
+async function uploadImage(filePath: string) {
+  const bytes = await readFile(filePath);
+  const form = new FormData();
+
+  form.append(
+    'file',
+    new Blob([bytes], { type: 'image/png' }),
+    basename(filePath),
+  );
+  form.append('purpose', 'model_input');
+
+  const response = await fetch(`${baseURL}/v1/files/uploads`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: form,
+  });
+
+  const body = await response.json();
+  if (!response.ok) {
+    throw new Error(`Upload failed: ${JSON.stringify(body)}`);
+  }
+
+  return body as {
+    id: string;
+    url: string;
+    mime_type: string;
+    size: number;
+    expires_at: string;
+  };
+}
+
+const uploaded = await uploadImage('./reference.png');
+console.log(uploaded.url);
+```
+
+<Warning>
+La URL de carga temporal se utiliza por defecto como entrada del modelo y no como almacenamiento de imágenes permanente. Para activos empresariales a largo plazo, utiliza tu propio almacenamiento.
+</Warning>
+
+## Guión de prueba completo del SDK
+
+Guarda como `crazyrouter-sdk-smoke.mjs`:
+
+```js
+import OpenAI from 'openai';
+
+const apiKey = process.env.CRAZYROUTER_API_KEY;
+const rootBaseURL = process.env.CRAZYROUTER_BASE_URL ?? 'https://api.crazyrouter.com';
+
+if (!apiKey) {
+  throw new Error('Set CRAZYROUTER_API_KEY before running this test.');
+}
+
+const client = new OpenAI({
+  apiKey,
+  baseURL: `${rootBaseURL}/v1`,
+  timeout: 180_000,
+});
+
+const checks = [];
+
+async function check(name, fn) {
+  const started = Date.now();
+  try {
+    const detail = await fn();
+    checks.push({ name, ok: true, ms: Date.now() - started, detail });
+    console.log(`ok ${name}: ${detail}`);
+  } catch (error) {
+    checks.push({ name, ok: false, ms: Date.now() - started, detail: error.message });
+    console.error(`fail ${name}: ${error.message}`);
+  }
+}
+
+await check('models.list', async () => {
+  const models = await client.models.list();
+  return `${models.data.length} models`;
+});
+
+await check('chat.completions.create', async () => {
+  const response = await client.chat.completions.create({
+    model: 'gpt-5.5',
+    messages: [{ role: 'user', content: 'Return exactly sdk-ok' }],
+    max_tokens: 16,
+  });
+  return response.choices[0]?.message?.content?.trim() ?? '(empty)';
+});
+
+await check('chat.completions.stream', async () => {
+  const stream = await client.chat.completions.create({
+    model: 'gpt-5.5',
+    messages: [{ role: 'user', content: 'Return exactly stream-ok' }],
+    max_tokens: 16,
+    stream: true,
+  });
+
+  let text = '';
+  for await (const chunk of stream) {
+    text += chunk.choices[0]?.delta?.content ?? '';
+  }
+  return text.trim() || '(empty stream)';
+});
+
+await check('embeddings.create', async () => {
+  const response = await client.embeddings.create({
+    model: 'text-embedding-3-small',
+    input: 'Crazyrouter SDK smoke test',
+  });
+  return `${response.data[0].embedding.length} dimensions`;
+});
+
+await check('raw /v1/video/query route shape', async () => {
+  const response = await fetch(`${rootBaseURL}/v1/video/query?task_id=doc-smoke-test`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+    },
+  });
+
+  const text = await response.text();
+  if (response.status === 404 && text.toLowerCase().includes('not found')) {
+    throw new Error('route returned a path-level 404');
+  }
+
+  return `route reachable, status ${response.status}`;
+});
+
+const failed = checks.filter((item) => !item.ok);
+console.log(JSON.stringify({ total: checks.length, failed: failed.length, checks }, null, 2));
+
+if (failed.length > 0) {
+  process.exit(1);
+}
+```
+
+Ejecuta:
+
+```bash
+npm install openai
+node crazyrouter-sdk-smoke.mjs
+```
+
+Si la prueba es exitosa, deberías ver al menos:
+
+- `models.list` retorna la cantidad de modelos
+- `chat.completions.create` retorna texto
+- `chat.completions.stream` recibe texto en streaming
+- `embeddings.create` retorna la dimensión vectorial
+- `/v1/video/query` retorna que la tarea no existe u otro estado de negocio, indicando que la ruta de consulta de tareas nativas asíncronas es accesible
+
+## Errores comunes
+
+| Problema | Solución |
+|------|----------|
+| `401 Unauthorized` | Verifica si `CRAZYROUTER_API_KEY` está configurado y si el formato es `Authorization: Bearer sk-...` |
+| `404` o `/v1/v1/...` | El SDK de OpenAI utiliza `https://api.crazyrouter.com/v1`, HTTP nativo usa `https://api.crazyrouter.com` con la ruta completa |
+| Chat disponible pero Responses no disponible | Verifica si el modelo soporta `/v1/responses`, no uses Claude con la API de Responses |
+| Imágenes o videos demoran mucho | Aumenta el timeout del SDK, para tareas de video usa preferentemente la consulta de tareas asíncronas |
+| 403 Forbidden | El token no tiene permisos para el modelo correspondiente, o el modelo no está disponible para ese token |

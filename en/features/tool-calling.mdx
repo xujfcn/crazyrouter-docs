@@ -1,34 +1,42 @@
 ---
 title: "Tool Calling"
-description: "Production-verified tool calling with the latest GPT, Claude, and Gemini models"
+description: "Based on practical production environment testing, this uses the latest main models of GPT, Claude, and Gemini for tool calling."
 ---
-> Last updated: 2026-06-06
+> Content updated: 2026-06-23
 
 # Tool Calling
 
-This page only documents Tool Calling flows that were **verified with real requests against Crazyrouter production**.
+This document only includes **Tool Calling usages that have been successfully validated with actual requests in the Crazyrouter production environment**.
 
-Verification date:
+Validation time:
 
 - `2026-03-22`
 
-Verified models:
+Validated models:
 
 - `gpt-5.5`
 - `claude-opus-4-8`
 - `gemini-3.1-pro`
 
-## Verified matrix
+---
 
-| Model | Protocol | Endpoint | Success marker |
-|------|------|------|----------|
+## Validated Capability Matrix
+
+| Model | Protocol | Endpoint | Success Indicator |
+|-------|----------|----------|------------------|
 | `gpt-5.5` | OpenAI Chat Completions | `POST /v1/chat/completions` | Returns `tool_calls` |
 | `claude-opus-4-8` | Anthropic Messages | `POST /v1/messages` | Returns `tool_use` block |
 | `gemini-3.1-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | Returns `functionCall` |
 
+<Warning>
+Claude tool calling is currently validated according to the Anthropic Messages protocol, which means `POST /v1/messages` will return a `tool_use` block. Do not extrapolate this conclusion to Claude's OpenAI-compatible `/v1/chat/completions` path; in Copilot, Continue, some VS Code Agent, or other programming scenarios that rely on tool calling, the OpenAI-compatible endpoint may not be able to trigger native Claude tool calling. If you need Claude programming Agent capability, prioritize the use of Claude Code or configuration through the Anthropic native client.
+</Warning>
+
+---
+
 ## GPT-5.4
 
-```bash
+```bash cURL
 curl https://api.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
@@ -49,7 +57,9 @@ curl https://api.crazyrouter.com/v1/chat/completions \
           "parameters": {
             "type": "object",
             "properties": {
-              "timezone": { "type": "string" }
+              "timezone": {
+                "type": "string"
+              }
             },
             "required": ["timezone"],
             "additionalProperties": false
@@ -61,7 +71,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-Verified response shape:
+Key fields returned from production validation:
 
 ```json
 {
@@ -69,16 +79,19 @@ Verified response shape:
     {
       "type": "function",
       "function": {
-        "name": "get_time"
+        "name": "get_time",
+        "arguments": "{\"timezone\":\"Asia/Shanghai\"}"
       }
     }
   ]
 }
 ```
 
+---
+
 ## Claude Sonnet 4.6
 
-```bash
+```bash cURL
 curl https://api.crazyrouter.com/v1/messages \
   -H "Content-Type: application/json" \
   -H "x-api-key: YOUR_API_KEY" \
@@ -93,7 +106,9 @@ curl https://api.crazyrouter.com/v1/messages \
         "input_schema": {
           "type": "object",
           "properties": {
-            "timezone": { "type": "string" }
+            "timezone": {
+              "type": "string"
+            }
           },
           "required": ["timezone"]
         }
@@ -111,7 +126,7 @@ curl https://api.crazyrouter.com/v1/messages \
   }'
 ```
 
-Verified response shape:
+Key fields returned from production validation:
 
 ```json
 {
@@ -119,17 +134,26 @@ Verified response shape:
   "content": [
     {
       "type": "tool_use",
-      "name": "get_time"
+      "name": "get_time",
+      "input": {
+        "timezone": "Asia/Shanghai"
+      }
     }
   ]
 }
 ```
 
-For first-pass validation, use an explicit `tool_choice` and clearly instruct Claude not to answer directly.
+First round integration recommendations:
+
+- For Claude native `/v1/messages`, it is recommended to explicitly add `tool_choice`
+- In the prompt, clearly require "must call the tool, do not answer directly"
+- This makes it easier to stably reproduce `tool_use`
+
+---
 
 ## Gemini 3 Pro
 
-```bash
+```bash cURL
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -152,7 +176,9 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
             "parameters": {
               "type": "object",
               "properties": {
-                "timezone": { "type": "string" }
+                "timezone": {
+                  "type": "string"
+                }
               },
               "required": ["timezone"]
             }
@@ -163,7 +189,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Verified response shape:
+Key fields returned from production validation:
 
 ```json
 {
@@ -173,7 +199,10 @@ Verified response shape:
         "parts": [
           {
             "functionCall": {
-              "name": "get_time"
+              "name": "get_time",
+              "args": {
+                "timezone": "Asia/Shanghai"
+              }
             }
           }
         ]
@@ -183,16 +212,26 @@ Verified response shape:
 }
 ```
 
-## See Also
+---
+
+## When to Use Which Protocol
+
+- If your project is already using the OpenAI SDK, give priority to the OpenAI-compatible approach of `gpt-5.5`
+- If you are integrating Claude natively, prioritize `/v1/messages`, and add `tool_choice` during the first validation round
+- If you are integrating Gemini's native capability, opt for Gemini Native API
+
+---
+
+## Related Documents
 
 - [OpenAI Function Calling](/en/chat/openai/function-calling)
 - [Responses Function Calling](/en/chat/responses/function-calling)
-- [Gemini Tools](/en/chat/gemini/tools)
-- [Claude Native Messages](/en/chat/anthropic/messages)
+- [Gemini Tool Calling](/en/chat/gemini/tools)
+- [Claude Native Format](/en/chat/anthropic/messages)
 
 {/* crazyrouter-model-links v2 */}
-## Related on crazyrouter.com
+## Related Pages
 
-- [Claude Sonnet 4.6 price comparison: list vs Azure / Bedrock / Vertex vs Crazyrouter](https://crazyrouter.com/en/pricing/claude-sonnet-4-6?utm_source=docs&utm_medium=related)
-- [Claude Sonnet 4.6 model page: live price, real samples, code](https://crazyrouter.com/en/models/anthropic/claude-sonnet-4-6?utm_source=docs&utm_medium=related)
-- [GPT-5.4 price comparison: list vs Azure / Bedrock / Vertex vs Crazyrouter](https://crazyrouter.com/en/pricing/gpt-5-4?utm_source=docs&utm_medium=related)
+- [Claude Sonnet 4.6 Price Comparison: Official / Azure / Bedrock / Vertex and Crazyrouter](https://crazyrouter.com/en/pricing/claude-sonnet-4-6?utm_source=docs&utm_medium=related)
+- [Claude Sonnet 4.6 Model Page: Real-time prices, real examples, calling code](https://crazyrouter.com/en/models/anthropic/claude-sonnet-4-6?utm_source=docs&utm_medium=related)
+- [GPT-5.4 Price Comparison: Official / Azure / Bedrock / Vertex and Crazyrouter](https://crazyrouter.com/en/pricing/gpt-5-4?utm_source=docs&utm_medium=related)

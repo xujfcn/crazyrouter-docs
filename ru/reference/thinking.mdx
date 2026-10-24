@@ -1,34 +1,34 @@
 ---
-title: 'AI Thinking Fields'
-description: 'Production-revalidated guide to the thinking and reasoning fields exposed by different Crazyrouter protocols'
+title: "AI поле мышления"
+description: "На основе проверки в производственной среде, понимание того, как в Crazyrouter различные протоколы раскрывают поля thinking/reasoning"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# AI Thinking Fields
+# AI поле мышления
 
-This page only lists thinking and reasoning surfaces that were revalidated against Crazyrouter production on `2026-03-22`.
+На этой странице приведены только те способы раскрытия thinking / reasoning, которые `2026-03-22` уже прошел проверку в производственной среде Crazyrouter.
 
-The key point is that different protocols expose "thinking" differently:
+Ключевой момент: различные протоколы раскрывают "мышление" по-разному.
 
-- OpenAI Responses returns a standalone `reasoning` item
-- Claude native Messages returns a `thinking` block
-- Gemini Native is most reliably observed through `usageMetadata.thoughtsTokenCount`
+- Ответы OpenAI скорее возвращают отдельный элемент `reasoning`
+- Сообщения Claude нативно возвращают блок `thinking`
+- В Gemini Native сейчас проще судить об активности мышления через `usageMetadata.thoughtsTokenCount`
 
-## Currently verified fields
+## Проверенные поля
 
-| Model | Protocol | Verified field or marker | Notes |
-|-------|----------|--------------------------|-------|
-| `gpt-5.5` | Responses | `output[].type = "reasoning"` | Can return displayable summaries when `summary` is requested |
-| `claude-opus-4-8` | Anthropic Messages | `content[].type = "thinking"` | Returned alongside a `text` block |
-| `gemini-3.1-pro` | Gemini Native | `usageMetadata.thoughtsTokenCount` | Confirms thinking tokens were actually used |
+| Модель | Протокол | Проверенное поле или признак | Описание |
+|--------|----------|-----------------------------|----------|
+| `gpt-5.5` | Ответы | `output[].type = "reasoning"` | Можно использовать вместе с `summary` для получения показываемого резюме |
+| `claude-opus-4-8` | Anthropic Messages | `content[].type = "thinking"` | Возвращается совместно с блоком `text` |
+| `gemini-3.1-pro` | Gemini Native | `usageMetadata.thoughtsTokenCount` | Означает, что thinking budget реально израсходован |
 
 <Note>
-  In the current recheck, `gpt-5.5` Chat Completions did not reliably return usable `message.reasoning_content`, so it is not treated as the primary observable field here.
+  В ходе текущей проверки, `gpt-5.5` Chat Completions с `message.reasoning_content` не возвращал стабильное и надежное содержимое, поэтому это поле не считается наблюдаемым в данном списке.
 </Note>
 
 ---
 
-## GPT: Responses `reasoning` item
+## GPT: Ответы, элемент `reasoning`
 
 ```json
 {
@@ -49,7 +49,7 @@ The key point is that different protocols expose "thinking" differently:
       "content": [
         {
           "type": "output_text",
-          "text": "Final answer"
+          "text": "最终回答"
         }
       ]
     }
@@ -57,7 +57,7 @@ The key point is that different protocols expose "thinking" differently:
 }
 ```
 
-Extraction example:
+Способ извлечения:
 
 ```python
 response = client.responses.create(
@@ -70,12 +70,12 @@ for item in response.output:
     if item.type == "reasoning":
         for part in item.summary:
             if part.type == "summary_text":
-                print("Thinking summary:", part.text)
+                print("思考摘要:", part.text)
 ```
 
 ---
 
-## Claude: `thinking` block
+## Claude: блок `thinking`
 
 ```json
 {
@@ -86,13 +86,13 @@ for item in response.output:
     },
     {
       "type": "text",
-      "text": "Final answer"
+      "text": "最终回答"
     }
   ]
 }
 ```
 
-Extraction example:
+Способ извлечения:
 
 ```python
 message = client.messages.create(
@@ -109,16 +109,16 @@ message = client.messages.create(
 
 for block in message.content:
     if block.type == "thinking":
-        print("Thinking:", block.thinking)
+        print("思考内容:", block.thinking)
     elif block.type == "text":
-        print("Answer:", block.text)
+        print("回答:", block.text)
 ```
 
 ---
 
 ## Gemini: `thoughtsTokenCount`
 
-In the current production recheck, the most reliable observable signal was not a visible reasoning paragraph in the body, but a usage field:
+В текущей проверке для Gemini Native наиболее стабильной точкой наблюдения является не видимый текст мышления в основном ответе, а поле расхода:
 
 ```json
 {
@@ -128,29 +128,29 @@ In the current production recheck, the most reliable observable signal was not a
 }
 ```
 
-This indicates that:
+Это показывает:
 
-- the thinking budget was actually used
-- the request consumed thinking tokens during generation
+- Thinking budget действительно участвовал в генерации
+- Запрос действительно привел к расходу thinking Token
 
-Extraction example:
+Способ извлечения:
 
 ```python
 data = response.json()
 thoughts = data.get("usageMetadata", {}).get("thoughtsTokenCount", 0)
-print("Thinking tokens:", thoughts)
+print("思考 Token:", thoughts)
 ```
 
 ---
 
-## Usage notes
+## Важно при использовании
 
-- Do not assume every model returns raw chain-of-thought text
-- Do not mix thinking fields across protocols
-- For logging, auditing, or UI display, decide per protocol whether to read `reasoning`, `thinking`, or `thoughtsTokenCount`
+- Не предполагайте, что все модели возвращают весь процесс мышления в явном виде
+- Не смешивайте поля thinking из разных протоколов
+- Если требуется аудит, логирование или фронтэнд отображение, первоначально определите, следует ли читать `reasoning`, `thinking` или `thoughtsTokenCount` в зависимости от протокола
 
-Related pages:
+Связанные страницы:
 
-- [GPT-5 Thinking Mode](/ru/chat/responses/gpt5-thinking)
-- [Claude Native Messages](/ru/chat/anthropic/messages)
-- [Gemini Native API](/ru/chat/gemini/native)
+- [Режим мышления GPT-5](/ru/chat/responses/gpt5-thinking)
+- [Нативный формат Claude](/ru/chat/anthropic/messages)
+- [Нативный формат Gemini](/ru/chat/gemini/native)

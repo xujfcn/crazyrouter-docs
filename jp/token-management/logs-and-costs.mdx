@@ -1,50 +1,50 @@
 ---
-title: 'Usage Logs and Cost Monitoring'
-description: 'Use management APIs to list API keys, query usage logs, summarize quota, and calculate USD cost'
+title: '呼び出しログと費用モニタリング'
+description: '管理インターフェースを使ってAPI Key一覧、呼び出しログ、合計使用量と米ドル費用を照会'
 ---
-> 更新日: 2026-07-20
+> 内容更新日: 2026-07-20
 
-## Use Cases
+## 適用シーン
 
-If a customer needs monitoring per API key, use the Crazyrouter management APIs instead of trying to query with a business `sk-xxx` token directly:
+お客様が各API Keyごとにモニタリングしたい場合は、業務側の`sk-xxx`を直接照会するのではなく、Crazyrouterの管理インターフェースの組み合わせを使うことをおすすめします：
 
-- List all API keys under the current account
-- Query usage logs by time range, key name, or model name
-- Get summarized quota consumption for a specific key
-- Convert quota into USD cost using system pricing metadata
+- 現アカウント配下のAPI Key一覧を取得
+- 時間範囲、Key名称、モデル名称で呼び出しログを照会
+- 特定のKeyの合計消費量を集計
+- システムの為替パラメータに基づき米ドル費用に換算
 
 <Note>
-  Management APIs use user-level authentication, not the business token used for model inference calls.
+  管理インターフェースはユーザー認証を使っており、モデル呼び出しで使う業務トークンとは異なります。
 </Note>
 
 <Warning>
-  All account and management endpoints on this page, including `/api/token/*`, `/api/log/*`, and `/api/user/self`, must use `https://crazyrouter.com`. `https://api.crazyrouter.com` is reserved for model and media APIs and returns `404 api_only_endpoint` for management routes.
+  このページのすべてのアカウントや管理インターフェース（`/api/token/*`、`/api/log/*`、`/api/user/self`含む）は、必ず`https://crazyrouter.com`へのリクエストが必要です。`https://api.crazyrouter.com`はモデル/メディアAPI専用で、間違って使うと`404 api_only_endpoint`が返ります。
 </Warning>
 
-## Authentication
+## 認証方法
 
-Management APIs require both headers:
+管理インターフェースのリクエスト時は、次の2つのリクエストヘッダーが必須です：
 
 ```text
 Authorization: Bearer {access_token}
 New-Api-User: {user_id}
 ```
 
-- `access_token`: user access token used for dashboard or management API authentication
-- `New-Api-User`: current user ID, and it must match the user bound to the `access_token`
-- `sk-xxx`: business token for model calls only, not for `/api/token/*` or `/api/log/*` management APIs
+- `access_token`：ユーザーログイン後発行されるアクセストークン（コンソール/管理インターフェース認証用）
+- `New-Api-User`：現ユーザーID、`access_token`に対応したユーザーであること
+- `sk-xxx`：業務呼び出し用トークン、モデル呼び出しにのみ使い、`/api/token/*`・`/api/log/*`など管理インターフェースでは使用不可
 
-## Recommended Integration Flow
+## 推奨利用フロー
 
-Recommended sequence:
+下記の順序で利用することをおすすめします：
 
-1. Call `/api/token/` to get the current account's API key list
-2. Call `/api/log/self` with `token_name` to fetch detailed logs for one key
-3. Call `/api/log/self/stat` to fetch the summarized quota for the same filter
-4. Call `/api/status` to get `quota_per_unit`
-5. Convert quota into USD with `quota / quota_per_unit`
+1. `/api/token/`を呼び出して現アカウント配下のKey一覧を取得
+2. `token_name`に従い`/api/log/self`を呼び出し、特定Keyの明細ログを取得
+3. `/api/log/self/stat`を呼び出して同条件での合計使用量を取得
+4. `/api/status`を呼び出して`quota_per_unit`を取得
+5. `quota / quota_per_unit`を使って米ドル費用を換算
 
-## 1. List API Keys
+## 1. API Key一覧の取得
 
 ```bash cURL
 curl "https://crazyrouter.com/api/token/?p=1&page_size=100" \
@@ -52,7 +52,7 @@ curl "https://crazyrouter.com/api/token/?p=1&page_size=100" \
   -H "New-Api-User: 485"
 ```
 
-Example response:
+レスポンス例：
 
 ```json
 {
@@ -77,7 +77,7 @@ Example response:
 }
 ```
 
-Recommended fields to persist for monitoring:
+お客様側では以下の項目を保存し、モニタリングに使うことをおすすめします：
 
 - `id`
 - `name`
@@ -86,9 +86,9 @@ Recommended fields to persist for monitoring:
 - `model_limits_enabled`
 - `model_limits`
 
-## 2. Query Usage Logs for a Specific Key
+## 2. Keyごとの呼び出しログ照会
 
-Use `/api/log/self` to query the current user's own consumption logs. At minimum, send:
+`/api/log/self`を通じて現ユーザーの消費ログを照会できます。最低でも以下の項目を指定することを推奨します：
 
 - `type`
 - `token_name`
@@ -97,7 +97,7 @@ Use `/api/log/self` to query the current user's own consumption logs. At minimum
 - `p`
 - `page_size`
 
-Example:
+例：
 
 ```bash cURL
 curl "https://crazyrouter.com/api/log/self?type=2&token_name=gptai&start_timestamp=1771334901&end_timestamp=1772309095&p=1&page_size=5" \
@@ -105,7 +105,7 @@ curl "https://crazyrouter.com/api/log/self?type=2&token_name=gptai&start_timesta
   -H "New-Api-User: 485"
 ```
 
-Example response:
+レスポンス例：
 
 ```json
 {
@@ -119,7 +119,7 @@ Example response:
       {
         "created_at": 1772308747,
         "token_name": "gptai",
-        "model_name": "deepseek-v4-pro",
+        "model_name": "deepseek-chat",
         "quota": 3188,
         "cost_usd": 0.006376,
         "prompt_tokens": 884,
@@ -141,29 +141,33 @@ Example response:
 }
 ```
 
-### Key Fields
+### 主要項目の説明
 
-| Field | Description |
+| 項目 | 説明 |
 |------|------|
-| `token_name` | Which business key handled the request |
-| `model_name` | The actual billed model |
-| `quota` | System quota consumed by this request |
-| `cost_usd` | USD cost converted from quota |
-| `prompt_tokens` | Input tokens |
-| `completion_tokens` | Output tokens |
-| `use_time` | Request latency in seconds |
-| `other.request_id` | Request ID for tracing |
-| `other.client` | Client identifier |
-| `other.request_path` | Upstream endpoint path |
-| `other.http_status` | Upstream HTTP status code |
+| `token_name` | ヒットした業務Key |
+| `model_name` | 実際に課金されたモデル |
+| `quota` | 今回のリクエストで減算されたシステム使用量 |
+| `cost_usd` | 今回のリクエストで換算した米ドル費用 |
+| `prompt_tokens` | 入力トークン数 |
+| `completion_tokens` | 出力トークン数 |
+| `use_time` | リクエストの所要時間（秒単位） |
+| `other.request_id` | リクエストID（追跡用） |
+| `other.client` | クライアント識別子 |
+| `other.request_path` | 実際にヒットしたAPIパス |
+| `other.http_status` | アップストリーム応答ステータスコード |
 
 <Note>
-  `cost_usd` is derived with `quota / quota_per_unit`. If your production environment has not yet been upgraded to a version that returns this field, you can still calculate cost from the summary quota.
+  `cost_usd`はシステムの換算基準による米ドル費用を返します。計算方法は`quota / quota_per_unit`です。ご利用環境でまだこの項目が無い場合は、とりあえず合計使用量で換算してください。
 </Note>
 
-## 3. Query Summary Consumption
+<Warning>
+失敗した単一リクエストは課金されません。ログ上の`quota`／`cost_usd`は0であるべきです。ただし、Agentモードやワークフロー、チェーン呼び出しやIDE自動プログラミングなど、1回の操作が複数モデルリクエストに分割される場合、前段が正常終了済みで後続で失敗した場合は、前段分は実際のトークン消費通り課金されます。異常消費の確認時は、最終タスクの成否だけでなく、ログに載っている全リクエストを個別に突合してください。
+</Warning>
 
-If you only need a dashboard, report, or alerting input, use the summary endpoint:
+## 3. 合計消費量の照会
+
+個別のログが不要で監視パネルや日報に使いたい場合は、合計集計インターフェースの呼び出しをおすすめします：
 
 ```bash cURL
 curl "https://crazyrouter.com/api/log/self/stat?type=2&token_name=gptai&start_timestamp=1771334901&end_timestamp=1772309095" \
@@ -171,7 +175,7 @@ curl "https://crazyrouter.com/api/log/self/stat?type=2&token_name=gptai&start_ti
   -H "New-Api-User: 485"
 ```
 
-Example response:
+レスポンス例：
 
 ```json
 {
@@ -185,16 +189,16 @@ Example response:
 }
 ```
 
-Where:
+内容：
 
-- `quota`: total consumed quota under the current filter
-- `rpm` and `tpm`: reserved fields for extended monitoring
+- `quota`：指定条件下での総消費量
+- `rpm`、`tpm`：現インターフェースの予備項目（拡張モニタリング用）
 
-## 4. Query Current Account Balance
+## 4. 現アカウントの残高照会
 
-If the customer does not only want per-key monitoring, but also wants to display the current Crazyrouter account balance directly in their own admin panel, call `/api/user/self`.
+特定の業務Key単位での監視だけでなく、Crazyrouterアカウントの残高をお客様側の管理画面に直接表示したい場合は`/api/user/self`を呼び出します。
 
-Use the same management-auth headers:
+リクエストヘッダは他の管理系インターフェースと同じです：
 
 ```bash cURL
 curl "https://crazyrouter.com/api/user/self" \
@@ -202,7 +206,7 @@ curl "https://crazyrouter.com/api/user/self" \
   -H "New-Api-User: 4004"
 ```
 
-Example response:
+レスポンス例：
 
 ```json
 {
@@ -219,23 +223,23 @@ Example response:
 }
 ```
 
-Key fields:
+主要項目：
 
-| Field | Description |
+| 項目 | 説明 |
 |------|------|
-| `quota` | Current remaining balance in internal quota units |
-| `used_quota` | Historical used amount in internal quota units |
-| `request_count` | Historical request count |
-| `group` | Current account group |
+| `quota` | 現在の残り残高（システム内部quota単位） |
+| `used_quota` | 過去利用済み量（システム内部quota単位） |
+| `request_count` | 過去のリクエスト回数 |
+| `group` | 現アカウントグループ |
 
-Conversion:
+換算方法：
 
 ```text
 balance_usd = quota / quota_per_unit
 used_usd = used_quota / quota_per_unit
 ```
 
-Example:
+例：
 
 ```text
 quota = 11000000
@@ -244,25 +248,25 @@ quota_per_unit = 500000
 balance_usd = 11000000 / 500000 = 22
 ```
 
-So the example above means:
+つまり上記例の残高は：
 
 ```text
 $22.00
 ```
 
 <Note>
-  `/api/user/self` is better for displaying the current total account balance. `/api/log/self` and `/api/log/self/stat` are better for analyzing usage by time range, business key, or model.
+  `/api/user/self`は「現在アカウント合計残高表示」に最適です。`/api/log/self`／`/api/log/self/stat`は「期間指定・Key別・モデル別」の消費分析向きです。
 </Note>
 
-## 5. Convert Quota to USD Cost
+## 5. 米ドル費用の換算
 
-System conversion metadata is available from the public `/api/status` endpoint:
+システム換算パラメータは公開インターフェース`/api/status`から取得可能です：
 
 ```bash cURL
 curl "https://api.crazyrouter.com/api/status"
 ```
 
-Relevant fields:
+レスポンス側で注目する点：
 
 ```json
 {
@@ -276,19 +280,19 @@ Relevant fields:
 }
 ```
 
-Formula:
+換算式：
 
 ```text
 cost_usd = quota / quota_per_unit
 ```
 
-Example:
+例：
 
 ```text
 16605808 / 500000 = 33.211616 USD
 ```
 
-## Python Example
+## Python利用例
 
 ```python
 import requests
@@ -338,26 +342,26 @@ print("quota:", quota)
 print("cost_usd:", round(cost_usd, 6))
 ```
 
-## Monitoring Recommendations
+## モニタリングのポイント
 
-Recommended dimensions for customer-side monitoring:
+お客様側の監視モニタリングでは、最低限次の軸で集計することを推奨：
 
-- Aggregate request count, total quota, and total cost by `token_name`
-- Aggregate consumption distribution by `model_name`
-- Split traffic by `other.request_path`, such as `/v1/chat/completions` and `/v1/responses`
-- Track success and failure rates by `other.http_status`
-- Keep `other.request_id` for incident investigation
+- `token_name`別に利用回数、総消費量、総費用を集計
+- `model_name`別でモデル消費割合を集計
+- `other.request_path`別で`/v1/chat/completions`や`/v1/responses`などのインターフェースを区別
+- `other.http_status`別で成功/失敗率を集計
+- `other.request_id`でトラブルシュートのための追跡を確保
 
-## FAQ
+## よくある質問
 
-### Why can't management APIs use `sk-xxx` directly?
+### なぜ管理インターフェースは`sk-xxx`を直接使えないのですか？
 
-Because `sk-xxx` is validated by the token-auth flow for business requests, while `/api/token/*` and `/api/log/self*` are user-authenticated management APIs that require `access_token` plus `New-Api-User`.
+`sk-xxx`は業務呼び出し用認証情報で、`TokenAuth`ミドルウェアがチェックします。一方、`/api/token/*`・`/api/log/self*`など管理インターフェースはユーザー認証が必要で、`access_token`と`New-Api-User`が必要になります。
 
-### Can I query my logs for a single key?
+### 特定Keyで自分のログを照会できますか？
 
-Yes. The recommended approach is filtering `/api/log/self` and `/api/log/self/stat` by `token_name`.
+はい。`token_name`で`/api/log/self`と`/api/log/self/stat`を絞り込む方法を推奨します。
 
-### Can I get cost directly via API?
+### APIで直接費用金額を取得できますか？
 
-If your server version already exposes `cost_usd`, you can read per-request USD cost directly from log items. For summary-level monitoring, use `quota / quota_per_unit`; this matches the dashboard calculation method.
+サーバー側で`cost_usd`項目に対応済みなら、ログ明細で1リクエストごとに米ドル費用を直接取得できます。合計集計時は`quota / quota_per_unit`で換算する方法を推奨します（コンソール表示と一致）。

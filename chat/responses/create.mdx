@@ -1,28 +1,29 @@
 ---
-title: "创建模型响应"
-description: "基于 2026-03-23 Crazyrouter 生产环境验证的 Responses API 基础调用方式"
+title: "创建响应"
+description: "2026年3月23日已针对Crazyrouter生产验证Responses API基础功能"
 ---
-> 更新日期：2026-06-06
+> 内容更新: 2026-06-09
 
-# 创建模型响应
+
+# 创建响应
 
 ```
 POST /v1/responses
 ```
 
-截至 2026 年 3 月 23 日，Crazyrouter 生产环境已验证：
+截至2026年3月23日，Crazyrouter生产环境已验证：
 
-- `gpt-5.5` 可以正常返回 `object: "response"`
-- 基础文本请求的 `output` 当前可稳定拿到 `message`
-- 流式请求可稳定观察到 `response.created`、`response.in_progress`、`response.output_item.added`、`response.content_part.added`、`response.output_text.delta`
+- `gpt-5.5` 返回 `object: "response"`
+- 基本文本请求当前返回类型为`message`的`output`项目
+- 流式请求一致地暴露`response.created`、`response.in_progress`、`response.output_item.added`、`response.content_part.added`和`response.output_text.delta`
 
 <Note>
-  Claude 当前不支持 `POST /v1/responses`。如果你在接 Claude，请改用 `POST /v1/messages` 或 `POST /v1/chat/completions`。
+  Claude目前不支持`POST /v1/responses`。请改用`POST /v1/messages`或`POST /v1/chat/completions`来使用Claude。
 </Note>
 
 ---
 
-## 基本请求
+## 基础请求
 
 ```bash
 curl https://api.crazyrouter.com/v1/responses \
@@ -30,11 +31,11 @@ curl https://api.crazyrouter.com/v1/responses \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "gpt-5.5",
-    "input": "用一句话解释什么是 API"
+    "input": "Explain what an API is in one sentence."
   }'
 ```
 
-生产环境实际响应的关键形态：
+观察到的生产环境响应结构：
 
 ```json
 {
@@ -63,7 +64,7 @@ curl https://api.crazyrouter.com/v1/responses \
   }'
 ```
 
-2026-03-23 的生产环境流式探针观察到的事件顺序开头如下：
+2026年3月23日生产环境流式探测观察到以下开场事件序列：
 
 ```text
 event: response.created
@@ -73,21 +74,21 @@ event: response.content_part.added
 event: response.output_text.delta
 ```
 
-因此当前最稳妥的处理方式是：
+因此当前最安全的使用策略是：
 
-1. 用 `response.output_text.delta` 逐步拼接文本
-2. 用 `response.completed` 或连接结束作为收尾信号
+1. 从`response.output_text.delta`中积累文本
+2. 将`response.completed`或流终止视为完成信号
 
 ---
 
-## 当前建议
+## 当前推荐
 
-- 新的 GPT 文本调用，优先从 `gpt-5.5` + `/v1/responses` 起步
-- 如果你需要工具调用，继续看 [Responses Function Calling](/chat/responses/function-calling)
-- 如果你需要联网搜索，继续看 [Responses Web 搜索](/chat/responses/web-search)
-- 如果你需要可见推理标记，继续看 [GPT-5 Thinking](/chat/responses/gpt5-thinking)
+- 在`/v1/responses`上用`gpt-5.5`开启新的GPT文本集成
+- 工具使用请继续参考[Responses函数调用](/chat/responses/function-calling)
+- 实时网页访问请继续参考[Responses网页搜索](/chat/responses/web-search)
+- 可见推理标记请继续参考[GPT-5思考](/chat/responses/gpt5-thinking)
 
 {/* crazyrouter-model-links v2 */}
-## 相关页面
+## crazyrouter.com相关内容
 
-- [OpenAI 全部模型与价格](https://crazyrouter.com/zh/models/openai?utm_source=docs&utm_medium=related)
+- [所有OpenAI模型与实时价格](https://crazyrouter.com/zh/models/openai?utm_source=docs&utm_medium=related)

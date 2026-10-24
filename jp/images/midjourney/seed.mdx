@@ -1,18 +1,18 @@
 ---
-title: "Get Seed"
-description: "Get the image seed value of a Midjourney task"
+title: "シード値の取得"
+description: "Midjourneyタスクの画像シード値を取得する"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Get Seed
+# シード値の取得
 
 ```
 GET /mj/task/{id}/image-seed
 ```
 
-Get the image seed value of a completed task. The seed can be used to reproduce similar generation results.
+完了したタスクの画像シード値を取得します。シード値は、類似した生成結果を再現するために利用できます。
 
-## Request Examples
+## リクエスト例
 
 <CodeGroup>
 
@@ -34,25 +34,25 @@ print(response.json())
 
 </CodeGroup>
 
-## Response Example
+## レスポンス例
 
 ```json
 {
   "code": 1,
-  "description": "Success",
+  "description": "成功",
   "result": "1234567890"
 }
 ```
 
-| Field | Description |
-|-------|-------------|
-| `result` | Seed value, can be used in Imagine prompts with `--seed 1234567890` to reproduce results |
+| フィールド | 説明 |
+|------|------|
+| `result` | シード値。Imagineのプロンプトで`--seed 1234567890`を使うことで再現が可能 |
 
 ---
 
-## Using the Seed
+## Seedの利用方法
 
-Add the `--seed` parameter to the prompt in an Imagine request:
+Imagineリクエストのプロンプトに`--seed`パラメータを追加します：
 
 ```json
 {
@@ -61,5 +61,5 @@ Add the `--seed` parameter to the prompt in an Imagine request:
 ```
 
 <Note>
-  The seed can only be retrieved after a task has completed successfully. The same seed + same prompt will generate very similar (but not identical) images.
+  シード値はタスクが正常に完了した後のみ取得可能です。同じシード値＋同じプロンプトで、非常に似ている（しかし完全に同じではない）画像を生成できます。
 </Note>

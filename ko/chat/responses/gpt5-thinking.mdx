@@ -1,20 +1,20 @@
 ---
 title: "GPT-5 사고 모드"
-description: "프로덕션 환경 재검증을 기반으로, Responses API를 통해 GPT-5.4의 reasoning 모드를 사용합니다"
+description: "Responses API를 통한 프로덕션 재검증된 GPT-5.4 추론"
 ---
-> 업데이트: 2026-06-06
+> 내용 업데이트: 2026-06-09
 
 # GPT-5 사고 모드
 
-이 문서 페이지에는 `2026-03-22`에 Crazyrouter 프로덕션 환경에서 재검증된 GPT reasoning 동작만 기재되어 있습니다.
+이 페이지는 `2026-03-22`에서 Crazyrouter 프로덕션과 재검증된 GPT 추론 동작만 문서화합니다.
 
-현재 주요 예시에서는 다음을 사용합니다.
+현재 주요 예시는 다음을 사용합니다:
 
 - `gpt-5.5`
 - `POST /v1/responses`
 
 <Note>
-  Claude는 현재 `POST /v1/responses`를 지원하지 않습니다. Claude를 연동하는 경우 `POST /v1/messages` 또는 `POST /v1/chat/completions`를 사용하시고, 이 페이지의 Responses 요청 형태를 그대로 적용하지 마십시오.
+  Claude는 현재 `POST /v1/responses`를 지원하지 않습니다. Claude를 통합하신다면, 이 페이지의 요청 형태 대신 `POST /v1/messages` 또는 `POST /v1/chat/completions`를 사용하세요.
 </Note>
 
 ```
@@ -85,15 +85,15 @@ console.log(response.output_text);
 
 ---
 
-## 프로덕션에서 검증된 응답 구조
+## 검증된 응답 형태
 
-현재 프로덕션에서 반환되는 주요 `output.type`은 다음과 같습니다.
+검증된 `output.type` 값:
 
 ```json
 ["reasoning", "message"]
 ```
 
-`reasoning` item의 일반적인 구조는 다음과 같습니다.
+일반적인 `reasoning` 항목 형태:
 
 ```json
 {
@@ -109,7 +109,7 @@ console.log(response.output_text);
 }
 ```
 
-`message` item에는 최종 출력 텍스트가 포함됩니다.
+최종 답변은 `message` 항목을 통해 반환됩니다:
 
 ```json
 {
@@ -128,19 +128,19 @@ console.log(response.output_text);
 ## `reasoning` 파라미터
 
 | 필드 | 타입 | 설명 |
-|------|------|------|
-| `effort` | string | 추론 강도, 현재 실측으로 사용 가능한 값은 `low`, `medium`, `high` |
-| `summary` | string | 사고 요약의 세분화 정도, 현재 실측으로 `concise`, `detailed` 사용 가능 |
+|-------|------|-------------|
+| `effort` | string | 추론 강도. 검증된 값은 `low`, `medium`, 그리고 `high` 포함 |
+| `summary` | string | 요약 세분성. `concise` 및 `detailed`이 재검증됨 |
 
-### 실용적인 판단 기준
+### 실용 규칙
 
-- 더 강한 추론만 필요하고 요약은 신경 쓰지 않는 경우: `effort`만 전달
-- 표시 가능한 reasoning 요약이 필요한 경우: `summary`도 함께 전달
+- 더 강한 추론만 원한다면 `effort`을 보내세요
+- 검사 가능한 추론 요약이 필요하다면 `effort`와 `summary` 모두를 보내세요
 
-현재 재검증에서:
+현재 재검증에서는:
 
-- `effort`만 전달할 경우, `reasoning` item은 존재하지만 `summary`가 빈 배열일 수 있습니다
-- `summary: "detailed"`를 전달하면 안정적으로 `summary_text`를 받을 수 있습니다
+- `effort`만 사용하면 `reasoning` 항목이 존재하지만 `summary`는 빈 배열일 수 있습니다
+- `summary: "detailed"` 사용 시, `summary_text`가 신뢰성 있게 반환됨
 
 ---
 
@@ -160,18 +160,18 @@ for item in response.output:
     if item.type == "reasoning":
         for part in item.summary:
             if part.type == "summary_text":
-                print("사고 요약:", part.text)
+                print("Thinking summary:", part.text)
     elif item.type == "message":
         for content in item.content:
             if content.type == "output_text":
-                print("최종 답변:", content.text)
+                print("Final answer:", content.text)
 ```
 
 ---
 
-## 스트리밍 사고
+## 사고 스트리밍
 
-현재 프로덕션 환경에서 다음 Responses SSE 이벤트명이 재검증되었습니다.
+다음 Responses SSE 이벤트 명칭이 프로덕션에서 재검증되었습니다:
 
 - `response.reasoning_summary_part.added`
 - `response.reasoning_summary_text.delta`
@@ -195,7 +195,7 @@ stream = client.responses.create(
 
 for event in stream:
     if event.type == "response.reasoning_summary_text.delta":
-        print(f"[사고 요약] {event.delta}", end="")
+        print(f"[Thinking summary] {event.delta}", end="")
     elif event.type == "response.output_text.delta":
         print(event.delta, end="")
 ```
@@ -204,17 +204,17 @@ for event in stream:
 
 ## 현재 권장 사항
 
-- 표시 가능한 reasoning 필드가 필요하다면 `gpt-5.5` + Responses API를 우선 선택하십시오
-- `gpt-5.5` Chat Completions의 `reasoning_content`를 현재 주요 의존 필드로 사용하지 마십시오
-- 최종 답변만 필요하다면 Chat Completions에서 계속 `reasoning_effort`를 사용할 수 있습니다
+- 표시 가능한 추론 필드가 필요하다면 Responses API에서 `gpt-5.5`를 선호하세요
+- `gpt-5.5` Chat Completions `reasoning_content`를 현재 기본 계약으로 간주하지 마세요
+- 결과 답변만 중요하다면, `reasoning_effort`와 함께하는 Chat Completions도 여전히 괜찮습니다
 
 <Warning>
-  reasoning 모드는 지연 시간과 토큰 소비를 증가시킵니다. `effort`가 높을수록 일반적으로 비용도 높아집니다.
+  추론 모드는 지연 시간과 토큰 사용량을 모두 증가시킵니다. 더 높은 `effort`는 일반적으로 비용이 더 듭니다.
 </Warning>
 
 {/* crazyrouter-model-links v2 */}
-## 관련 페이지 (crazyrouter.com)
+## crazyrouter.com 관련 문서
 
-- [GPT-5 가격 비교: 공식 / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ko/pricing/gpt-5?utm_source=docs&utm_medium=related)
-- [GPT-5 모델 페이지: 실시간 가격, 샘플, 코드](https://crazyrouter.com/en/models/openai/gpt-5?utm_source=docs&utm_medium=related)
-- [GPT-5.4 가격 비교: 공식 / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ko/pricing/gpt-5-4?utm_source=docs&utm_medium=related)
+- [GPT-5 가격 비교: 리스트 vs Azure / Bedrock / Vertex vs Crazyrouter](https://crazyrouter.com/ko/pricing/gpt-5?utm_source=docs&utm_medium=related)
+- [GPT-5 모델 페이지: 실시간 가격, 실제 샘플, 코드](https://crazyrouter.com/ko/models/openai/gpt-5?utm_source=docs&utm_medium=related)
+- [GPT-5.4 가격 비교: 리스트 vs Azure / Bedrock / Vertex vs Crazyrouter](https://crazyrouter.com/ko/pricing/gpt-5-4?utm_source=docs&utm_medium=related)

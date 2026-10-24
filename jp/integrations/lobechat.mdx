@@ -1,95 +1,95 @@
 ---
-title: 'LobeChat Setup Guide'
-description: 'Connect Crazyrouter to LobeChat through the OpenAI-compatible path, then finish chat validation, self-host setup, model management, and troubleshooting'
+title: 'LobeChat 設定チュートリアル'
+description: 'LobeChat で Crazyrouter を通じて OpenAI 互換モデルに接続し、チャット、自社運用、モデル管理とトラブルシュート設定を完了する方法'
 ---
-> 更新日: 2026-06-23
+> 内容更新日: 2026-06-09
 
-LobeChat works well as a self-hosted chat frontend, a personal multi-model workspace, or a shared team chat surface. When connecting it to Crazyrouter, the most reliable route is LobeChat's `OpenAI` path with the proxy URL pointed at Crazyrouter's OpenAI-compatible base.
+LobeChat は、チームチャットの入り口、個人で複数モデルを扱う作業用デスク、自社運用用AIチャットフロントエンドに最適です。Crazyrouter との連携時には、LobeChat の `OpenAI` パスを使用し、プロキシアドレスを Crazyrouter の OpenAI 互換ベースURLに向けるのが最も安定します。
 
-## Overview
+## 概要
 
-Using LobeChat's OpenAI settings, you can route chat traffic through Crazyrouter:
+LobeChat の OpenAI 設定項目から対話リクエストを Crazyrouter に転送できます：
 
-- Recommended protocol: `OpenAI-compatible API`
-- Recommended route: the LobeChat `OpenAI` provider
-- Base URL: `https://api.crazyrouter.com/v1`
-- Auth method: `sk-...` token
-- Recommended first validation model: `gpt-5.5`
+- 推奨プロトコル：`OpenAI-compatible API`
+- 推奨接続方法：LobeChat `OpenAI` provider
+- Base URL：`https://api.crazyrouter.com/v1`
+- 認証方法：`sk-...` token
+- 推奨初回検証モデル：`gpt-5.5`
 
-If you self-host LobeChat, you can also preconfigure Crazyrouter as the default OpenAI upstream through environment variables.
+自社運用する場合は、環境変数経由で OpenAI のデフォルトパスを Crazyrouter にプリセットすることも可能です。
 
-## Best For
+## 対象者
 
-- teams or individuals who want a stable chat frontend
-- self-hosted AI chat workspaces
-- users who want conversation history with multiple model choices
-- admins who want to ship a default model configuration to internal users
+- 安定したチャットフロントエンドを自分で運用したい方
+- Crazyrouter を個人またはチームのチャットワークベンチとして利用したい方
+- 複数モデル一括管理＆会話履歴保持したい方
+- 社内メンバーに固定モデルやデフォルト設定を展開したい方
 
-## Protocol Used
+## 利用プロトコル
 
-Recommended protocol: `OpenAI-compatible API`
+推奨プロトコル：`OpenAI-compatible API`
 
-When connecting Crazyrouter in LobeChat, use this OpenAI-compatible base URL:
+LobeChat で Crazyrouter 連携時には OpenAI 互換ベースURLを使用します：
 
 ```text
 https://api.crazyrouter.com/v1
 ```
 
-Do not enter:
+以下のようにしてはいけません：
 
 - `https://api.crazyrouter.com`
 - `https://api.crazyrouter.com/v1/chat/completions`
 
 <Note>
-LobeChat documents `OPENAI_PROXY_URL` as the OpenAI API request base URL, and its common defaults and examples are `/v1`-style. The local `http://127.0.0.1:4000/api/status` payload also exposes an official example using `{address}/v1`. So for Crazyrouter, `https://api.crazyrouter.com/v1` is the correct first-pass setup. If your own reverse proxy already adds `/v1`, adjust that layer to avoid a duplicated suffix.
+LobeChat ドキュメントの `OPENAI_PROXY_URL` の説明は「OpenAI API リクエストアドレス」で、標準のデフォルト例・サンプルも `/v1` 形式です。またローカル `http://127.0.0.1:4000/api/status` の公式サンプルリンクも `{address}/v1` になっています。したがって Crazyrouter 連携時はまず `https://api.crazyrouter.com/v1` を入力してください。独自のリバースプロキシが追加で `/v1` を付加している場合は個別で調整し、サフィックスの重複を避けましょう。
 </Note>
 
-## Prerequisites
+## 前提条件
 
-| Item | Details |
-|------|---------|
-| Crazyrouter account | Register first at [crazyrouter.com](https://crazyrouter.com) |
-| Crazyrouter token | Create a dedicated `sk-...` token for LobeChat |
-| LobeChat | Hosted or self-hosted is fine; use a current stable build |
-| Available models | Allow at least one verified OpenAI-compatible chat model such as `gpt-5.5` |
+| 項目 | 説明 |
+|------|------|
+| Crazyrouter アカウント | まず [crazyrouter.com](https://crazyrouter.com) で登録 |
+| Crazyrouter token | LobeChat 用に新規 `sk-...` token を作成推奨 |
+| LobeChat | オンライン版・自社運用版どちらも可、安定最新版推奨 |
+| 利用可能モデル | 当日動作確認済みの OpenAI 互換チャットモデルを最低1つ許可：例 `gpt-5.5` |
 
-Recommended starting whitelist:
+推奨初期ホワイトリスト：
 
 - `gpt-5.5`
 - `claude-opus-4-8`
 - `gemini-3.1-pro`
 
 <Tip>
-If you also plan to connect Crazyrouter to Cursor, Codex, or Claude Code, keep LobeChat on its own token. It makes cost tracking much easier.
+Cursor・Codex・Claude Code も Crazyrouter に接続予定なら、LobeChat は別tokenで管理したほうがエンド側消費量を把握しやすくなります。
 </Tip>
 
-## 5-Minute Quick Start
+## 5分クイックスタート
 
 <Steps>
-  <Step title="Create a dedicated LobeChat token">
-    In the Crazyrouter dashboard, create a token named `lobechat`. For the first rollout, allow only the models you actually need, such as `gpt-5.5` and `claude-opus-4-8`.
+  <Step title="LobeChat専用トークンを作成する">
+    Crazyrouter 管理画面で `lobechat` という token を新規作成し、最初は `gpt-5.5`、`claude-opus-4-8` のような当日確認済みモデルだけ許可します。
   </Step>
-  <Step title="Open the language model settings">
-    In LobeChat, open `Settings` → `Language Model` from the avatar menu or settings entry.
+  <Step title="言語モデル設定を開く">
+    LobeChat に入り左下のアイコンもしくは設定から `設定` → `言語モデル` を開きます。
   </Step>
-  <Step title="Configure the OpenAI path">
-    In the `OpenAI` configuration, enter:
-    - `API Key`: your `sk-...`
-    - `API Proxy URL`: `https://api.crazyrouter.com/v1`
+  <Step title="OpenAI パスを設定する">
+    `OpenAI` 関連設定で以下を記入：
+    - `API Key`: あなたの `sk-...`
+    - `API プロキシ アドレス / API Proxy URL`: `https://api.crazyrouter.com/v1`
 
-    Also enable the custom proxy URL option if your version exposes it.
+    また `カスタム API プロキシ アドレスを使用する` または同等の項目を ON にします。
   </Step>
-  <Step title="Pick one baseline model">
-    Save the settings and choose `gpt-5.5` as the default model first. Do not start with a large model list.
+  <Step title="ベースラインモデルを選択する">
+    保存後、まず `gpt-5.5` をデフォルトモデルにし、初めから複数モデルは投入しないでください。
   </Step>
-  <Step title="Run the first validation prompt">
-    Start a new conversation and send `Reply only OK`. If it returns successfully and appears in the Crazyrouter logs, the integration is working.
+  <Step title="初回認証を行う">
+    新規チャットを作成し「`Reply only OK`」を送信。正常応答があり、Crazyrouter 管理画面で該当ログ確認できれば接続成功です。
   </Step>
 </Steps>
 
-## Self-Hosted Quick Config
+## 自社運用クイック設定
 
-If you deploy LobeChat with Docker, you can preconfigure the default OpenAI path like this:
+Docker 自社運用の場合は、OpenAI のデフォルト設定を環境変数に書き込めます：
 
 ```yaml
 services:
@@ -103,88 +103,88 @@ services:
       - OPENAI_MODEL_LIST=gpt-5.5,claude-opus-4-8,gemini-3.1-pro
 ```
 
-If you do not want end users to replace the key freely, combine this with the config controls your deployed LobeChat version supports for hosted defaults or restricted client-side customization.
+フロントエンドユーザーが自由に Key を変えられないようにしたい場合は、現在のバージョンの隠し／管理項目も活用し、デフォルトKeyをサーバー側の環境変数で固定しましょう。
 
-## Recommended Model Setup
+## 推奨モデル設定
 
-| Use case | Recommended model | Why |
-|----------|-------------------|-----|
-| Default main chat model | `gpt-5.5` | Verified successfully in production on March 23, 2026, and suited for the main LobeChat baseline |
-| Higher-quality writing / code help | `claude-opus-4-8` | Strong long-form writing and reasoning |
-| Gemini fallback path | `gemini-3.1-pro` | Useful as a second vendor-compatible validation path |
+| 利用シーン | 推奨モデル | 理由 |
+|----------|----------|------|
+| デフォルトメインチャットモデル | `gpt-5.5` | 当日動作確認済み、LobeChat のメイン基準に適合 |
+| 高品質 文章/コード | `claude-opus-4-8` | 長文・ライティングやコーディング支援に最適 |
+| Gemini 予備確認 | `gemini-3.1-pro` | 2つ目の互換性検証ルートに最適 |
 
-Recommended order: get `gpt-5.5` working first, then expand to `claude-opus-4-8` and `gemini-3.1-pro`.
+推奨手順：まず `gpt-5.5` で動作を確かめ、次に `claude-opus-4-8` と `gemini-3.1-pro` に拡張します。
 
-## Token Setup Best Practices
+## Token 設定ベストプラクティス
 
-| Setting | Recommendation | Notes |
-|---------|----------------|-------|
-| Dedicated token | Required | Do not share the same token with IDE or CLI tools |
-| Model whitelist | Strongly recommended | Allow only the models the chat frontend should use |
-| IP restriction | Recommended for fixed self-hosted egress | Use carefully on changing home or mobile networks |
-| Quota cap | Strongly recommended | Team chat frontends can burn through a shared token quickly |
-| Environment separation | Recommended | Use different tokens for staging and production |
-| Default model control | Recommended | Keep premium models out of the default path unless needed |
+| 設定 | 推奨 | 説明 |
+|------|------|------|
+| 専用token | 必須 | LobeChat用tokenは IDE／CLI用と共用しないこと |
+| モデルホワイトリスト | 強く推奨 | 利用端末から必要なモデルのみ解放 |
+| IP 制限 | 固定出口で自社運用なら有効化推薦 | 公開網や頻繁に変動する家ネット環境では慎重に使う |
+| クォータ上限 | 強く推奨 | チームチャット用フロントは1トークンを複数人で利用しやすい |
+| 環境分離 | 推奨 | テスト/本番環境でtokenを分ける |
+| デフォルトモデル管理 | 推奨 | まず高コストモデルをデフォルトから除外し、必要時に開放 |
 
-## Verification Checklist
+## 検証チェックリスト
 
-- [ ] `API Key` is saved correctly
-- [ ] `API Proxy URL` is set to `https://api.crazyrouter.com/v1`
-- [ ] the custom proxy URL option is enabled if required by your version
-- [ ] the first model is selected successfully
-- [ ] the first chat request succeeds
-- [ ] streaming works normally
-- [ ] the request appears in the Crazyrouter logs
-- [ ] token quota and model whitelist match your plan
+- [ ] `API Key` 正常保存済み
+- [ ] `API プロキシ アドレス / API Proxy URL` を `https://api.crazyrouter.com/v1` に設定
+- [ ] 独自プロキシアドレス項目を有効化済み
+- [ ] 最初のモデルが正しく選択済み
+- [ ] 1件目の対話リクエストが正常応答
+- [ ] ストリーム出力が正常
+- [ ] Crazyrouter 管理画面に該当リクエストが記録
+- [ ] token のクォータおよびモデルホワイトリストが期待通り
 
-## Common Errors and Fixes
+## 主なエラーと修正
 
-| Symptom | Likely cause | Fix |
-|---------|--------------|-----|
-| settings cannot be saved or validation fails | wrong API key or wrong proxy URL | recheck the `sk-...` value and `https://api.crazyrouter.com/v1` |
-| 401 unauthorized | token expired, was removed, or is invalid | generate a new token and replace it |
-| 403 / model not allowed | selected model is missing from the token whitelist | allow that model in Crazyrouter |
-| 404 | proxy URL was entered as the root domain or a full endpoint path | change it to `https://api.crazyrouter.com/v1` |
-| settings look correct but you still get 404s | your own gateway, reverse proxy, or deployment layer already appends `/v1` once | inspect the upstream chain and remove the duplicated suffix from one layer |
-| model looks selectable but requests fail | LobeChat cached an old model list or the default model is not valid | switch back to `gpt-5.5`, refresh, and reselect |
-| chat works but streaming is unstable | client-version or model compatibility issue | use `gpt-5.5` as the baseline and upgrade LobeChat |
-| usage spikes when multiple users share the app | one shared token has no quota cap | set a quota cap for the team frontend or split tokens |
-| users can still switch away from Crazyrouter after self-hosting | you only set defaults, not restrictions | add deployment-side controls or disable client customization where supported |
+| 症状 | 主な原因 | 修正方法 |
+|------|----------|----------|
+| 保存不可または検証失敗 | API Keyミスまたはプロキシアドレスの記入誤り | `sk-...` や `https://api.crazyrouter.com/v1` を再確認 |
+| 401 unauthorized | token 無効・期限切れ・誤消去 | tokenを再発行し差し替え |
+| 403 / 該当モデル利用不可 | 現在モデルがtokenホワイトリスト未登録 | Crazyrouter 管理画面でモデル許可 |
+| 404 | プロキシアドレスがルートドメイン、または具体エンドポイント記入 | `https://api.crazyrouter.com/v1` に修正 |
+| 設定一見正しいが404 | 独自ゲートウェイや逆プロキシ、配備層で自動的に`/v1` を追加している | サフィックス重複が無いか確認、上流路で `/v1` 自動追加時は再度追加しない |
+| モデル選択可だが実エラー | LobeChatフロントキャッシュが旧モデル or デフォルトモデル不在 | `gpt-5.5` に戻し、ページ更新後再選択 |
+| 会話送信できるがストリーム異常 | クライアントバージョンやモデル互換性問題 | まず `gpt-5.5` で基本動作検証し、LobeChat更新 |
+| 共同利用で消費が速い | 単一tokenを複数人共有かつクォータ設定なし | チームフロントで個別クォータ設定、必要ならtoken分割 |
+| 自社運用でもユーザーが上流変更可 | デフォルト値設定のみでフロントのカスタム項目制限せず | 配備層で管理設定追加、カスタマイズ権限を制限 |
 
-## Performance and Cost Tips
+## パフォーマンス・コスト対策
 
-- Keep only `gpt-5.5` in the first rollout
-- Use a cheaper default model for team chat only if you have separately validated that route in your own deployment
-- If you also enable knowledge features, plugins, or long-context sessions, give LobeChat its own quota cap
-- Separate staging and production tokens so internal testing does not affect real usage budgets
-- If usage looks suspicious, check the Crazyrouter logs first for long sessions or multiple users sharing one token
+- 初期段階では `gpt-5.5` のみ許可
+- チーム用途のデフォルトモデルは低コスト優先、高コストモデルは上級者や特定目的時のみ解放
+- 知識ベースやプラグイン、長い文脈での会話機能を使う場合、LobeChat 側でクォータを明示的に設定
+- 自社運用時は本番用tokenとテスト用tokenを分け、社内検証が本番予算に影響しないよう配慮
+- 異常な高コスト時は、Crazyrouterログで多人数長会話が発生していないか確認
 
 ## FAQ
 
-### Which Base URL should I use in LobeChat?
+### LobeChat の Base URL には何を記入すべきですか？
 
-Use `https://api.crazyrouter.com/v1`.
+`https://api.crazyrouter.com/v1` を入力してください。
 
-### Why should I not enter only the root domain here?
+### ここでルートドメインだけを入力してはいけない理由は？
 
-Because LobeChat's OpenAI proxy settings work best when you give it the OpenAI-compatible base directly, not just the root domain.
+LobeChat の OpenAI プロキシ設定は、OpenAI 互換ベースURLを直接記載した方が適しているため、ルートドメインでは不十分です。
 
-### What if my own reverse proxy already appends `/v1`?
+### 独自のリバースプロキシで自動的に `/v1` を加えている場合は？
 
-Then do not add another `/v1` in the final URL you expose to LobeChat. Check the proxy chain first so you do not end up with a duplicated suffix.
+LobeChat の最終アドレスには`/v1`を重ねて書かないでください。代理チェーン全体でサフィックス重複が無いか事前に確認しましょう。
 
-### Which model should I test first?
+### 最初に推奨されるモデルは？
 
-Start with `gpt-5.5`.
+まず `gpt-5.5` を利用します。
 
-### Can LobeChat use multiple models with Crazyrouter?
+### LobeChatは複数モデルを同時利用できますか？
 
-Yes, but it is better to validate one model first and expand after that.
+はい、ただし最初は1モデルで検証し徐々に拡張推奨です。
 
-### Should I hardcode the token in environment variables for self-hosting?
+### 運用時、tokenは環境変数に固定すべきですか？
 
-If you want tighter control over upstream routing and cost, yes. If you want each user to bring their own key, keep the client-side entry open.
+上流/コストを集中管理したい場合は推奨します。各利用者ごとにKeyを持ちたいときはフロントカスタムを解放しましょう。
 
 <Note>
-If your goal is a stable chat frontend and a shared workspace, LobeChat is a strong choice. If your goal is agentic coding and automated edits, Cursor, Claude Code, Codex, and Cline should still take priority.
+安定したチャットフロントやチーム共用作業台を求めるならLobeChatが最適です。コード用プロキシや自動実行ユースには Cursor・Claude Code・Codex・Cline 等の優先検討が無難です。
 </Note>

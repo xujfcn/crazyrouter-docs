@@ -1,41 +1,41 @@
 ---
-title: 'Create Embeddings'
-description: 'Convert text into vector representations'
-api: 'POST /v1/embeddings'
+title: "埋め込みの作成"
+description: "テキストをベクトル表現へ変換する"
+api: "POST /v1/embeddings"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-06
 
-## Overview
+## インターフェース説明
 
-Convert input text into high-dimensional vectors for use in semantic search, clustering, recommendations, and more. Fully compatible with the OpenAI Embeddings API format.
+入力されたテキストを高次元ベクトルに変換し、セマンティック検索、クラスタリング、レコメンドなどの用途で利用します。OpenAI Embeddings API のフォーマットと完全互換です。
 
-## Supported Models
+## 対応モデル
 
-| Model | Dimensions | Description |
-|-------|-----------|-------------|
-| `text-embedding-3-large` | 3072 | High accuracy, recommended for production |
-| `text-embedding-3-small` | 1536 | Cost-effective |
-| `text-embedding-ada-002` | 1536 | Classic model |
+| モデル | 次元数 | 説明 |
+|------|------|------|
+| `text-embedding-3-large` | 3072 | 高精度で、本番環境への使用が推奨されます |
+| `text-embedding-3-small` | 1536 | コストパフォーマンスが高いです |
+| `text-embedding-ada-002` | 1536 | クラシックモデル |
 
-## Request Parameters
+## リクエストパラメータ
 
 <ParamField body="model" type="string" required>
-  Embedding model name, e.g. `text-embedding-3-large`
+  埋め込みモデル名（例：`text-embedding-3-large`）
 </ParamField>
 
 <ParamField body="input" type="string | string[]" required>
-  Text to embed. Supports a single string or an array of strings
+  埋め込むテキスト。単一文字列または文字列配列に対応
 </ParamField>
 
 <ParamField body="encoding_format" type="string" default="float">
-  Return format: `float` or `base64`
+  返却形式：`float` または `base64`
 </ParamField>
 
 <ParamField body="dimensions" type="integer">
-  Output vector dimensions (only supported by `text-embedding-3-*` models)
+  出力ベクトルの次元数（`text-embedding-3-*` のみ対応）
 </ParamField>
 
-## Response Format
+## レスポンス形式
 
 ```json
 {
@@ -55,7 +55,7 @@ Convert input text into high-dimensional vectors for use in semantic search, clu
 }
 ```
 
-## Code Examples
+## コード例
 
 <CodeGroup>
 
@@ -69,26 +69,26 @@ client = OpenAI(
 
 response = client.embeddings.create(
     model="text-embedding-3-large",
-    input="Crazyrouter is an AI model gateway"
+    input="Crazyrouter 是一个 AI 模型网关"
 )
 
 embedding = response.data[0].embedding
-print(f"Vector dimensions: {len(embedding)}")
-print(f"First 5 values: {embedding[:5]}")
+print(f"向量维度: {len(embedding)}")
+print(f"前5个值: {embedding[:5]}")
 ```
 
-```python Python (Batch)
+```python Python (批量)
 response = client.embeddings.create(
     model="text-embedding-3-large",
     input=[
-        "First text",
-        "Second text",
-        "Third text"
+        "第一段文本",
+        "第二段文本",
+        "第三段文本"
     ]
 )
 
 for item in response.data:
-    print(f"Index {item.index}: dimensions {len(item.embedding)}")
+    print(f"索引 {item.index}: 维度 {len(item.embedding)}")
 ```
 
 ```bash cURL
@@ -97,12 +97,12 @@ curl -X POST https://api.crazyrouter.com/v1/embeddings \
   -H "Content-Type: application/json" \
   -d '{
     "model": "text-embedding-3-large",
-    "input": "Crazyrouter is an AI model gateway"
+    "input": "Crazyrouter 是一个 AI 模型网关"
   }'
 ```
 
 </CodeGroup>
 
 <Note>
-  Batch requests support up to 2048 texts per call. Each text should not exceed 8191 tokens.
+  バッチリクエスト時、1 回あたり最大 2048 テキストまで対応。各テキストは 8191 トークン以内を推奨。
 </Note>

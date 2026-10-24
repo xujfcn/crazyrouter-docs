@@ -1,0 +1,111 @@
+---
+title: "Qwen Image"
+description: "Utiliza los modelos de la serie Qwen Image para generación de imágenes a partir de texto; el cliente continúa usando el protocolo compatible con OpenAI Images"
+---
+> Contenido actualizado: 2026-06-06
+
+# Qwen Image
+
+```
+POST /v1/images/generations
+```
+
+Crazyrouter actualmente ofrece los modelos generativos de primera tanda `Qwen Image` al público externo mediante el protocolo compatible con OpenAI Images. Los clientes continúan usando `/v1/images/generations` unificado; los proveedores oficiales y de terceros de Alibaba sólo sirven internamente y no exponen el protocolo del cliente por separado.
+
+## Modelos disponibles actualmente
+
+| Modelo | Forma de ejecución upstream | Capacidades actuales al cliente | Estado de validación |
+|--------|-----------------------------|---------------------------------|----------------------|
+| `qwen-image-plus` | Generación asíncrona | Generación de imagen a partir de texto | Validado |
+| `qwen-image-max` | Generación síncrona | Generación de imagen a partir de texto | Validado |
+| `qwen-image-2.0` | Generación síncrona | Generación de imagen a partir de texto | Validado |
+| `qwen-image-2.0` | Generación síncrona | Generación de imagen a partir de texto | Beta |
+
+<Note>
+  Actualmente `qwen-image-2.0` ya completó la alineación de protocolo y código, pero aún se están recopilando evidencias de producción, así que por ahora se marca como Beta.
+</Note>
+
+## Protocolo de cliente
+
+### Parámetros de solicitud
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|-----------|------|-------------|-------------|
+| `model` | string | Sí | `qwen-image-plus`, `qwen-image-max`, `qwen-image-2.0`, `qwen-image-2.0` |
+| `prompt` | string | Sí | Prompt para generar imagen desde texto |
+| `size` | string | No | Tamaño de salida. Se recomienda usar los tamaños soportados proporcionados en la página del modelo o en el playground |
+| `n` | integer | No | Cantidad de imágenes a generar; por defecto `1` |
+| `response_format` | string | No | `url` o `b64_json` |
+
+### Ejemplo de solicitud
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "qwen-image-max",
+    "prompt": "一张具有高级感的产品海报，主体是一瓶玻璃香水，柔和棚拍光线，中文标题“晨雾”",
+    "size": "1024x1024",
+    "n": 1,
+    "response_format": "url"
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+response = client.images.generate(
+    model="qwen-image-max",
+    prompt="一张具有高级感的产品海报，主体是一瓶玻璃香水，柔和棚拍光线，中文标题“晨雾”",
+    size="1024x1024",
+    n=1
+)
+
+print(response.data[0].url)
+```
+
+</CodeGroup>
+
+### Ejemplo de respuesta
+
+```json
+{
+  "created": 1709123456,
+  "data": [
+    {
+      "url": "https://crazyrouter.com/files/qwen_image_abc123.png"
+    }
+  ]
+}
+```
+
+## Facturación oficial
+
+Actualmente, el valor real oficial de Qwen Image se calcula en base al número de imágenes generadas con éxito, sin mostrar el consumo de tokens de entrada/salida.
+
+| Modelo | Método de facturación oficial | Precio unitario oficial | Estado actual de la documentación |
+|--------|-------------------------------|------------------------|-----------------------------------|
+| `qwen-image-plus` | Por imagen | `¥0.20 / imagen` | Validado |
+| `qwen-image-max` | Por imagen | `¥0.50 / imagen` | Validado |
+| `qwen-image-2.0` | Por imagen | `¥0.20 / imagen` | Validado |
+| `qwen-image-2.0` | Por imagen | `¥0.50 / imagen` | Beta |
+
+## Notas sobre el alcance
+
+- Esta primera tanda sólo promete la capacidad de `Texto a imagen` para el cliente, sin revelar capacidades multimodales adicionales del upstream directamente en el protocolo del cliente.
+- Del lado del proveedor de `Qwen Image` pueden existir diferencias entre asíncrono y síncrono, pero el cliente sigue usando el formato unificado de solicitud/respuesta de OpenAI Images.
+- El modelo de edición de imágenes `qwen-image-plus` no está incluido en este lote de "modelos generativos integrados"; si se requiere capacidad de edición, debe evaluarse por separado según el estado de apertura actual del modelo de edición.
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Página del modelo Qwen Image 2.0: Precio en tiempo real, ejemplos reales, código de invocación](https://crazyrouter.com/es/models/alibaba/qwen-image-2-0?utm_source=docs&utm_medium=related)
+- [Todos los modelos y precios de Alibaba Cloud](https://crazyrouter.com/es/models/alibaba?utm_source=docs&utm_medium=related)

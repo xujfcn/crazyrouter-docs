@@ -1,8 +1,8 @@
 ---
 title: "チャット画像認識"
-description: "OpenAI 形式の画像入力。base64 とリモート URL の両方をカバー"
+description: "OpenAIスタイルの画像入力、base64とリモートURLの2つの使い方を網羅"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
 # チャット画像認識
 
@@ -10,17 +10,17 @@ description: "OpenAI 形式の画像入力。base64 とリモート URL の両�
 POST /v1/chat/completions
 ```
 
-Crazyrouter 本番環境では、OpenAI 形式の `image_url` 入力をサポートする主要な視覚モデルを検証済みです：
+Crazyrouter本番環境では、OpenAIスタイルの`image_url`入力を用いた以下の主要モデルが検証済みです：
 
-- `gpt-4o`、`gpt-4o-mini`、`gpt-4.1`、`gpt-5.5` などの OpenAI 視覚モデル
-- `data:image/...;base64,...` data URL と公開 `https://` URL の両方が利用可能
-- `message.content` は現在プレーン文字列で返却されます
+- `gpt-4o`、`gpt-4o-mini`、`gpt-5.5`、`gpt-5.5` などのOpenAIビジョンモデル
+- 入力は`data:image/...;base64,...` data URLと公開`https://` URLの2つの形式をサポート
+- 返却される`message.content`は現状、普通の文字列です
 
-> 推奨手順：ローカル画像はまず [画像アップロード API](/jp/upload) で `media.crazyrouter.com` の一時 URL に変換してから `image_url` に渡す、あるいは base64 data URL を直接送る。リモート公開 URL も使えますが、後述の「リモート URL の制約」を満たす必要があります。
+> 推奨手順：ローカル画像はまず[画像アップロードAPI](/jp/upload)で`media.crazyrouter.com`の一時URLに変換してから`image_url`へ渡してください。または直接base64 data URLを送信することも可能です。リモートの公開URLも利用できますが、以下の「リモートURL制限」を満たす必要があります。
 
 ---
 
-## base64 data URL を使う（最も確実）
+## base64 data URLを使う（最も安定）
 
 ```bash
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -46,7 +46,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-レスポンス例：
+返却例：
 
 ```json
 {
@@ -64,7 +64,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
 
 ---
 
-## リモート https URL を使う
+## リモートhttps URLを使う
 
 ```bash
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -90,30 +90,30 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-### リモート URL の制約
+### リモートURL制限
 
-URL は **Crazyrouter サーバーから到達可能** である必要があります。「ブラウザで開ける」だけでは不十分です。よくある失敗パターン：
+URLは**Crazyrouterサーバーがアクセスできる**画像アドレスである必要があり、「ブラウザで開ける」だけでは十分ではありません。よくある失敗パターンは以下の通りです：
 
-| 失敗 | 原因 | 対処 |
-|------|------|------|
-| ドメインが解決できない | プライベートアドレス、誤入力 | 公開 https URL に変更 |
-| 403 Forbidden | 一部 CDN（wikimedia、プライベート S3 など）がサーバー UA / Referer を拒否 | [アップロード API](/jp/upload) または base64 を使用 |
-| Content-Type が `image/*` ではない | URL が HTML やログインページにリダイレクトしている | 画像直リンクであることを確認 |
-| ファイル 20MB 超 | 単一ファイルサイズ上限 | 圧縮・トリミング |
+| 失敗パターン | 原因 | 解決方法 |
+|--------------|-------|-----------|
+| ドメイン解決不可 | プライベートネットワークアドレス、綴り間違い | 公開https URLに変更 |
+| 403 Forbidden | 一部CDN（例：wikimedia、プライベートS3）がサーバーのUA/Refererを制限 | [画像アップロードAPI](/jp/upload)かbase64利用 |
+| Content-Typeが`image/*`ではない | URLがHTMLページやログインページへのリダイレクト | 直リンクでダウンロード可能なURLを確認 |
+| ファイルサイズ20MB超 | 単体ファイルサイズ上限 | 圧縮またはトリミングして再アップロード |
 
-エラー `Unable to process the image you provided. Please verify the image URL is publicly accessible, or upload it as base64.` が表示された場合、URL がサーバーから到達不能ということなので、上表に沿って切り分けてください。
+もし`Unable to process the image you provided. Please verify the image URL is publicly accessible, or upload it as base64.`というエラーが表示された場合は、URLがサーバー側で到達不能な状態です。上記表を参照してご確認ください。
 
 ---
 
 ## 推奨運用
 
-- 社内素材、プライベート画像、到達性が不確かな画像：先に [`POST /v1/files/uploads`](/jp/upload) で 72 時間有効な `media.crazyrouter.com/...` URL を取得し、それを `image_url` に渡す
-- 小さい（< 1MB）画像、使い捨ての画像：base64 data URL を直接送り、追加リクエストを省く
-- 複数画像入力、`detail` パラメータなどの高度な使い方：OpenAI 上流で対応済みなので、OpenAI 公式仕様どおりに送れば動作します
+- 内部素材・非公開画像・到達性が不明な画像：まず[`POST /v1/files/uploads`](/jp/upload)を呼び出して`media.crazyrouter.com/...`の72時間限定URLを取得し、それを`image_url`に渡してください
+- 小さい画像（< 1MB）や一時利用画像：直接base64 data URLを使い、追加のアップロードリクエストを省略
+- 複数画像や`detail`パラメータなど上級用途：現在、OpenAI公式でも対応しているため、OpenAIの公式プロトコルに従って送信してください
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [GPT Image 1.5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [OpenAI の全モデルと料金](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [GPT Image 1.5 モデルページ：リアルタイム料金、実例、APIコード](https://crazyrouter.com/ja/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT Image 2 モデルページ：リアルタイム料金、実例、APIコード](https://crazyrouter.com/ja/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [OpenAI全モデルと料金表](https://crazyrouter.com/ja/models/openai?utm_source=docs&utm_medium=related)

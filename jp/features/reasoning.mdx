@@ -1,34 +1,38 @@
 ---
-title: "Reasoning"
-description: "Production-verified reasoning and thinking with the latest GPT, Claude, and Gemini models"
+title: "推論"
+description: "本番環境での実測に基づき、GPT、Claude、Gemini の最新主力モデルを用いて推論と思考を行う"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Reasoning
+# 推論
 
-This page only documents reasoning flows that were **verified with real requests against Crazyrouter production**.
+本ドキュメントでは、**Crazyrouter 本番環境で実際にリクエスト検証が成功した**推論／思考用途のみを収録しています。
 
-Verification date:
+検証日時：
 
 - `2026-03-22`
 
-Verified models:
+検証済みモデル：
 
 - `gpt-5.5`
 - `claude-opus-4-8`
 - `gemini-3.1-pro`
 
-## Verified matrix
+---
 
-| Model | Protocol | Endpoint | Success marker |
+## 検証済み能力マトリクス
+
+| モデル | プロトコル | エンドポイント | 成功の目印 |
 |------|------|------|----------|
-| `gpt-5.5` | OpenAI Responses | `POST /v1/responses` | `output` includes a `reasoning` item |
-| `claude-opus-4-8` | Anthropic Messages | `POST /v1/messages` | Returns `thinking` block |
-| `gemini-3.1-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | `usageMetadata` includes `thoughtsTokenCount` |
+| `gpt-5.5` | OpenAI Responses | `POST /v1/responses` | `output` 内に `reasoning` item が出現 |
+| `claude-opus-4-8` | Anthropic Messages | `POST /v1/messages` | `thinking` block を返す |
+| `gemini-3.1-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | `usageMetadata` 内に `thoughtsTokenCount` が出現 |
+
+---
 
 ## GPT-5.4
 
-```bash
+```bash cURL
 curl https://api.crazyrouter.com/v1/responses \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
@@ -42,13 +46,13 @@ curl https://api.crazyrouter.com/v1/responses \
   }'
 ```
 
-Verified output types:
+本番環境検証で返却された主要な `output.type`：
 
 ```json
 ["reasoning", "message"]
 ```
 
-Verified `reasoning` item shape:
+その中で `reasoning` item の重要フィールドには以下が含まれる：
 
 ```json
 {
@@ -62,9 +66,13 @@ Verified `reasoning` item shape:
 }
 ```
 
-## Claude Opus 4.7 Thinking
+これは Crazyrouter 現行本番環境において、`gpt-5.5` の推論能力は Responses API の `reasoning` item を基準とし、Chat Completions の `reasoning_content` には依存しないことを示しています。
 
-```bash
+---
+
+## Claude Opus 4.7 推論
+
+```bash cURL
 curl https://api.crazyrouter.com/v1/messages \
   -H "Content-Type: application/json" \
   -H "x-api-key: YOUR_API_KEY" \
@@ -85,24 +93,35 @@ curl https://api.crazyrouter.com/v1/messages \
   }'
 ```
 
-Verified response shape:
+本番検証で返却された重要なフィールド：
 
 ```json
 {
   "content": [
     {
-      "type": "thinking"
+      "type": "thinking",
+      "thinking": "..."
     },
     {
-      "type": "text"
+      "type": "text",
+      "text": "..."
     }
   ]
 }
 ```
 
+注意：
+
+- `claude-opus-4-8` の基本モデルは同日にテストした際、通常の `text` のみ返されました
+- `claude-opus-4-8` でのみ明確な thinking block を確認できました
+
+したがって、本ドキュメントでは Claude 4.7 推論サンプルとして `claude-opus-4-8` の使用を優先します。
+
+---
+
 ## Gemini 3 Pro
 
-```bash
+```bash cURL
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -125,26 +144,33 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Verified production field:
+本番検証で返却された重要なフィールド：
 
 - `usageMetadata.thoughtsTokenCount`
 
-## Current exclusions
+これにより現行本番環境において `gemini-3.1-pro` の thinking モードが実際に有効であることが確認されます。
 
-- In the current recheck, `gpt-5.5` via Chat Completions did not reliably surface `reasoning_content`, so this page uses the Responses API as the primary GPT example
-- Base `claude-opus-4-8` did not return a thinking block in this verification round
+---
 
-## See Also
+## 現時点で主結論に記載しない組み合わせ
 
-- [OpenAI Reasoning](/jp/chat/openai/reasoning)
-- [GPT-5 Thinking](/jp/chat/responses/gpt5-thinking)
-- [Thinking Fields](/jp/reference/thinking)
-- [Claude Native Messages](/jp/chat/anthropic/messages)
-- [Gemini Native API](/jp/chat/gemini/native)
+- `gpt-5.5` の Chat Completions ルートは本検証サイクル中に `reasoning_content` を安定して返さなかったため、本ページで GPT 主サンプルから除外します
+- `claude-opus-4-8` のベースモデルでは本検証サイクル中に thinking block が返却されませんでした
+- `claude-opus-4-8` では同等の明確な thinking 能力を持つモデルは確認できませんでした
+
+---
+
+## 関連ドキュメント
+
+- [OpenAI 推論モデル](/jp/chat/openai/reasoning)
+- [GPT-5 思考モード](/jp/chat/responses/gpt5-thinking)
+- [AI 思考フィールド](/jp/reference/thinking)
+- [Claude ネイティブフォーマット](/jp/chat/anthropic/messages)
+- [Gemini ネイティブフォーマット](/jp/chat/gemini/native)
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [Claude Opus 4.7 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/claude-opus-4-7?utm_source=docs&utm_medium=related)
-- [Claude Opus 4.7 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/anthropic/claude-opus-4-7?utm_source=docs&utm_medium=related)
-- [GPT-5.4 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gpt-5-4?utm_source=docs&utm_medium=related)
+- [Claude Opus 4.7 価格比較：公式／Azure／Bedrock／Vertex および Crazyrouter](https://crazyrouter.com/ja/pricing/claude-opus-4-7?utm_source=docs&utm_medium=related)
+- [Claude Opus 4.7 モデルページ：リアルタイム価格・本物のサンプル・呼び出しコード](https://crazyrouter.com/ja/models/anthropic/claude-opus-4-7?utm_source=docs&utm_medium=related)
+- [GPT-5.4 価格比較：公式／Azure／Bedrock／Vertex および Crazyrouter](https://crazyrouter.com/ja/pricing/gpt-5-4?utm_source=docs&utm_medium=related)

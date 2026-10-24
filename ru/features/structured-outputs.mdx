@@ -1,43 +1,47 @@
 ---
-title: "Structured Outputs"
-description: "Production-verified structured JSON output with the latest GPT and Gemini models"
+ title: "Структурированные выводы"
+ description: "По фактическим тестам в производственной среде: использование последних основных моделей GPT и Gemini для вывода структурированного JSON"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Structured Outputs
+# Структурированные выводы
 
-This page only documents Structured Output flows that were **verified with real requests against Crazyrouter production**.
+В этой документации приведены **только те способы использования Structured Outputs, которые подтверждены успешными фактическими запросами в производственной среде Crazyrouter**.
 
-Verification date:
+Время валидации:
 
 - `2026-03-22`
 
-Strictly verified models:
+Модели, прошедшие строгую валидацию:
 
 - `gpt-5.5`
 - `gemini-3.1-pro`
 
-Not included as a strict-success example:
+Модели, которые в настоящий момент не включены в список строго успешных примеров:
 
 - `claude-opus-4-8`
 
-Reason:
+Причина:
 
-- Under the current OpenAI-compatible `response_format=json_schema` request shape, `claude-opus-4-8` did not show stable strict-JSON behavior across production checks
-- Earlier testing produced JSON wrapped in Markdown code fences
-- The `2026-03-22` recheck returned empty `content`
-- Because the result is not stable or strictly parseable, it is not treated as a verified strict structured-output success example
+- В ходе проверки в производственной среде `claude-opus-4-8` в текущей совместимой с OpenAI форме запроса `response_format=json_schema` не проявил стабильного поведения «строго чистого JSON»
+- В предыдущих тестах появлялась fenced code block
+- В ходе повторной проверки `2026-03-22` снова обнаружился пустой `content`
+- Поэтому на данный момент его не относят к категории «строго структурированных выводов, валидация успешна»
 
-## Verified matrix
+---
 
-| Model | Protocol | Endpoint | Success marker |
+## Проверенная матрица возможностей
+
+| Модель | Протокол | Эндпоинт | Признак успеха |
 |------|------|------|----------|
-| `gpt-5.5` | OpenAI Chat Completions | `POST /v1/chat/completions` | Response can be parsed directly as JSON |
-| `gemini-3.1-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | Returns JSON text matching schema |
+| `gpt-5.5` | OpenAI Chat Completions | `POST /v1/chat/completions` | Содержимое ответа можно непосредственно `JSON.parse` |
+| `gemini-3.1-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | Возвращает текст в стиле `application/json`, подходит для прямого парсинга |
+
+---
 
 ## GPT-5.4
 
-```bash
+```bash cURL
 curl https://api.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
@@ -57,8 +61,8 @@ curl https://api.crazyrouter.com/v1/chat/completions \
         "schema": {
           "type": "object",
           "properties": {
-            "city": { "type": "string" },
-            "country": { "type": "string" }
+            "city": {"type": "string"},
+            "country": {"type": "string"}
           },
           "required": ["city", "country"],
           "additionalProperties": false
@@ -68,15 +72,17 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-Verified production output:
+Результат производственной проверки:
 
 ```json
 {"city":"Tokyo","country":"Japan"}
 ```
 
+---
+
 ## Gemini 3 Pro
 
-```bash
+```bash cURL
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -95,8 +101,8 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
       "responseSchema": {
         "type": "object",
         "properties": {
-          "city": { "type": "string" },
-          "country": { "type": "string" }
+          "city": {"type": "string"},
+          "country": {"type": "string"}
         },
         "required": ["city", "country"]
       }
@@ -104,20 +110,38 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Verified production output:
+Результат производственной проверки:
 
 ```json
 {"city":"Tokyo","country":"Japan"}
 ```
 
-## See Also
+---
 
-- [OpenAI Structured Output](/ru/chat/openai/structured-output)
-- [Gemini Document Understanding](/ru/chat/gemini/document)
+## Claude 4.6 — текущий вывод
+
+В производственных тестах `2026-03-22`:
+
+- `claude-opus-4-8` в этом формате запроса не дал стабильного, воспроизводимого вывода строго в формате JSON
+- В разных циклах тестирования появлялись как fenced code block, так и пустой `content`
+- Поэтому в данный момент не рекомендуется считать Claude 4.6 «строго схематичным выводом, валидация успешна»
+
+Если впоследствии планируется добавить Claude 4.6 в данный список, рекомендуется сначала провести дополнительную, более детальную производственную валидацию и убедиться, что:
+
+- Существует ли более подходящий вариант нативного протокола
+- Необходим ли дополнительный system prompt
+- Возможно ли стабильно избежать code fence
+
+---
+
+## Связанные документы
+
+- [OpenAI Структурированный вывод](/ru/chat/openai/structured-output)
+- [Понимание документов Gemini](/ru/chat/gemini/document)
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [GPT-5.4: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/gpt-5-4?utm_source=docs&utm_medium=related)
-- [GPT-5.4: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-5-4?utm_source=docs&utm_medium=related)
-- [Все модели OpenAI с актуальными ценами](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [Сравнение цен GPT-5.4: официальный / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/gpt-5-4?utm_source=docs&utm_medium=related)
+- [Страница модели GPT-5.4: текущие цены, реальные примеры, код для вызова](https://crazyrouter.com/ru/models/openai/gpt-5-4?utm_source=docs&utm_medium=related)
+- [Все модели и цены OpenAI](https://crazyrouter.com/ru/models/openai?utm_source=docs&utm_medium=related)

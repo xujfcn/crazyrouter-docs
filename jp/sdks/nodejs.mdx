@@ -1,16 +1,16 @@
 ---
-title: 'Node.js Basic Chat'
-description: 'Node.js integration with Crazyrouter using the openai package'
+title: "Node.js 基礎対話"
+description: "Node.js で openai パッケージを使用して Crazyrouter を接続する"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-## Installation
+## インストール
 
 ```bash
 npm install openai
 ```
 
-## Basic Chat
+## 基礎対話
 
 ```javascript
 import OpenAI from 'openai';
@@ -24,8 +24,8 @@ async function main() {
   const response = await client.chat.completions.create({
     model: 'gpt-5.5',
     messages: [
-      { role: 'system', content: 'You are a helpful assistant.' },
-      { role: 'user', content: 'Explain what Node.js is in one sentence' },
+      { role: 'system', content: '你是一个有帮助的助手。' },
+      { role: 'user', content: '用一句话解释什么是 Node.js' },
     ],
   });
 
@@ -35,13 +35,13 @@ async function main() {
 main();
 ```
 
-## Streaming Output
+## ストリーム出力
 
 ```javascript
 async function streamChat() {
   const stream = await client.chat.completions.create({
     model: 'gpt-5.5',
-    messages: [{ role: 'user', content: 'Write a poem about programming' }],
+    messages: [{ role: 'user', content: '写一首关于编程的诗' }],
     stream: true,
   });
 
@@ -55,11 +55,11 @@ async function streamChat() {
 streamChat();
 ```
 
-## Multi-turn Conversation
+## 連続対話
 
 ```javascript
 const messages = [
-  { role: 'system', content: 'You are a JavaScript expert.' },
+  { role: 'system', content: '你是一个 JavaScript 专家。' },
 ];
 
 async function chat(userInput) {
@@ -76,14 +76,14 @@ async function chat(userInput) {
 }
 
 async function main() {
-  console.log(await chat('What is a Promise?'));
-  console.log(await chat('How is it different from async/await?'));
+  console.log(await chat('什么是 Promise？'));
+  console.log(await chat('和 async/await 有什么区别？'));
 }
 
 main();
 ```
 
-## CommonJS Usage
+## CommonJS の使い方
 
 ```javascript
 const OpenAI = require('openai');
@@ -96,11 +96,11 @@ const client = new OpenAI({
 client.chat.completions
   .create({
     model: 'gpt-5.5',
-    messages: [{ role: 'user', content: 'Hello' }],
+    messages: [{ role: 'user', content: '你好' }],
   })
   .then((res) => console.log(res.choices[0].message.content));
 ```
 
 <Note>
-  These examples default to `gpt-5.5`, which was verified successfully in Crazyrouter production on March 23, 2026. If you need to swap models, prefer other verified options such as `claude-opus-4-8` or `gemini-3.1-pro`.
+  上記のサンプルは、2026 年 3 月 23 日に本番環境で実証済みの `gpt-5.5` をデフォルトで使用しています。モデルを切り替える必要がある場合は、同じく検証済みの `claude-opus-4-8` または `gemini-3.1-pro` に優先的に変更し、その上で用途に合わせて拡張してください。
 </Note>

@@ -1,105 +1,105 @@
 ---
-title: 'Coze Setup Guide'
-description: 'Use Crazyrouter in Coze through API plugins or workflow HTTP nodes, and clearly separate the public setup path from enterprise custom-model capabilities'
+title: "Coze Настройка"
+description: "В Coze (Коуцзы) вызывайте Crazyrouter через HTTP/API плагин или рабочий узел в workflow, чётко разделяя открытые варианты и кастомные корпоративные модели"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-Coze is ByteDance's bot and workflow platform. It is useful for building bots, chaining workflow steps, calling plugins, and publishing to different channels. When connecting Coze to Crazyrouter, the most stable and public-doc-friendly path is not to assume every Coze plan supports direct custom-model integration. The recommended public path is to use an HTTP / API plugin or a workflow HTTP request node first.
+Coze (Коуцзы) — платформа ByteDance для ботов и workflow, подходит для бота, оркестрации процессов, вызова плагинов и мультиканального размещения. Для интеграции с Crazyrouter наиболее безопасный и публично документируемый путь — не предполагать, что "все версии поддерживают кастомные модели", а использовать HTTP/API плагин или HTTP-запрос workflow.
 
-## Start Here
+## Сразу к выводам
 
-For most Crazyrouter users, these are the two recommended Coze integration paths:
+Для большинства пользователей Crazyrouter Coze сейчас рекомендует два подхода:
 
-- Option 1: call Crazyrouter through a `Create from API` plugin
-- Option 2: call Crazyrouter through a workflow HTTP request node
+- Вариант 1: вызвать Crazyrouter через плагин `Создание на основе API`
+- Вариант 2: вызвать Crazyrouter через HTTP-запросный узел в workflow
 
-Do not present "attach Crazyrouter directly as a custom model in Coze model management" as the default public guide, because:
+Не стоит публиковать руководство по прямому подключению кастомных моделей Crazyrouter в менеджер моделей Coze, поскольку:
 
-- Coze features differ across editions, regions, and plans
-- Coze's published plan FAQ explicitly lists `custom model` as an enterprise flagship capability
-- For public documentation, the safer baseline is the HTTP / API plugin route
+- В разных версиях/регионах/тарифах Coze функционал сильно отличается
+- В официальной документации тарифов Coze упоминается, что способность `Пользовательская модель` относится к корпоративному флагманскому варианту
+- Поэтому для публичных документов более надёжной основной веткой будет HTTP/API-плагин
 
 <Warning>
-The most important accuracy rule for this page is: document Coze's public baseline as "call Crazyrouter through HTTP / API plugins or workflow HTTP requests", not "every user can directly mount a custom upstream model".
+Главный принцип точности на этой странице: писать в публичной документации Coze "HTTP/API-плагин вызывает Crazyrouter" — не считать, что все могут сразу подключать кастомные upstream в управлении моделями.
 </Warning>
 
-## Who This Guide Is For
+## Кому подходит
 
-- Users who want to call Crazyrouter inside a Coze bot or workflow
-- Users who want Crazyrouter to act as an external model endpoint
-- Users who want the smallest reproducible setup before touching enterprise-only capabilities
-- Teams that want plugin- or workflow-based access to multiple models
+- Пользователям, которые хотят интегрировать Crazyrouter в Coze Bot или workflow
+- Тем, кто хочет использовать Crazyrouter как внешний вызов модели
+- Тем, кто хочет сначала собрать минимально верифицируемую цепочку, а не сразу использовать кастомную корпоративную модель
+- Тем, кто хочет, чтобы Bot через плагин или workflow обращался к нескольким моделям
 
-## Recommended Public Setup
+## Рекомендованный способ подключения
 
-### Public baseline: HTTP / API plugin route
+### Основная ветка: HTTP/API-плагин
 
-Recommended parameters:
+Рекомендуем параметры:
 
-- Request method: `POST`
+- Метод запроса: `POST`
 - URL: `https://api.crazyrouter.com/v1/chat/completions`
-- Headers:
+- Header:
   - `Authorization: Bearer sk-xxx`
   - `Content-Type: application/json`
-- First validation model: `gpt-5.5`
+- Первая модель для проверки: `gpt-5.5`
 
-### Why this route comes first
+### Почему это рекомендуем сначала
 
-Because it:
+Потому что:
 
-- depends less on Coze plan differences
-- makes it easier to tell whether the issue is Coze setup or Crazyrouter token / model scope
-- is the most stable route to document publicly
+- Минимально зависит от различий в тарифах Coze
+- Легко понять — "проблема конфигурации Coze" или "проблема Crazyrouter token/model"
+- Наиболее стабильно описывать в публичной документации
 
-## Requirements And Prerequisites
+## Системные требования и условия
 
-| Item | Notes |
+| Пункт | Описание |
 |------|------|
-| Crazyrouter account | Register at [crazyrouter.com](https://crazyrouter.com) first |
-| Crazyrouter token | Create a dedicated token for Coze |
-| Coze account | You need access to create bots, workflows, or plugins |
-| Publish or debug access | At minimum, you should be able to debug a bot or workflow |
-| Allowed models | Allow at least one chat model first |
+| Аккаунт Crazyrouter | Предварительно зарегистрируйтесь на [crazyrouter.com](https://crazyrouter.com) |
+| Crazyrouter token | Рекомендуется создать отдельный token для Coze |
+| Аккаунт Coze | Должен позволять создавать Bot/workflow/plugin |
+| Возможность публикации | Как минимум возможность тестировать Bot или workflow |
+| Доступные модели | Как минимум разрешите 1 чат-модель |
 
-Suggested initial allowlist:
+Рекомендуется начальный whitelist:
 
 - `gpt-5.5`
 - `claude-opus-4-8`
 - `gemini-3.1-pro`
 
-## Option 1: Connect Crazyrouter Through An API Plugin
+## Вариант 1: подключение Crazyrouter через API-плагин
 
 <Steps>
-  <Step title="Step 1: Create a dedicated Crazyrouter token for Coze">
-    For the first pass, only allow:
+  <Step title="Шаг 1: Создайте специальный токен Coze в Crazyrouter">
+    Первый раз рекомендуется разрешить только:
 
     - `gpt-5.5`
     - `claude-opus-4-8`
 
-    Do not enable too many models on day one. Troubleshooting is easier when the scope is small.
+    Не открывайте много моделей сразу, так легче диагностировать ошибки.
   </Step>
 
-  <Step title="Step 2: Create an API plugin in Coze">
-    In the Coze workspace, open the area that matches your current version, usually something like:
+  <Step title="Шаг 2: Создайте API-плагин в Coze">
+    После входа в рабочий стол Coze, переходите к:
 
-    - `Plugins`
-    - `Create Plugin`
-    - `Create from API` or a similarly named entry
+    - `Плагин`
+    - `Создать плагин`
+    - Выберите `Создание на основе API` или похожее название
 
     <Note>
-    Exact menu names may vary by Coze version, region, or product line, but the core idea is the same: create a plugin that calls an external HTTP API.
+    Названия элементов интерфейса Coze могут варьироваться в зависимости от версии/региона/продуктовой линии, но принцип одинаковый: создать внешний HTTP API плагин.
     </Note>
   </Step>
 
-  <Step title="Step 3: Set the request method and URL">
-    Enter:
+  <Step title="Шаг 3: Настройте метод запроса и URL">
+    Заполните:
 
     - `Method`: `POST`
     - `URL`: `https://api.crazyrouter.com/v1/chat/completions`
   </Step>
 
-  <Step title="Step 4: Configure headers">
-    Enter:
+  <Step title="Шаг 4: Настройте заголовки запроса">
+    Заполните:
 
     ```text
     Authorization: Bearer sk-xxx
@@ -107,8 +107,8 @@ Suggested initial allowlist:
     ```
   </Step>
 
-  <Step title="Step 5: Start with the smallest request body">
-    For the first test, use:
+  <Step title="Шаг 5: Настройте минимальное тело запроса">
+    Сначала используйте минимальное тело запроса:
 
     ```json
     {
@@ -122,36 +122,36 @@ Suggested initial allowlist:
     }
     ```
 
-    If your plugin UI supports parameter mapping, map user input into a placeholder such as `{{input}}`.
+    Если в интерфейсе плагина доступны сопоставление параметров, можно назначить ввод пользователя на такие placeholder переменные, как `{{input}}`.
   </Step>
 
-  <Step title="Step 6: Validate the plugin connection first">
-    If your version supports plugin debugging, send:
+  <Step title="Шаг 6: Сначала выполните проверку соединения в плагине">
+    Если текущая версия поддерживает тестирование плагинов, передайте одну строку:
 
     ```text
     Reply only OK
     ```
 
-    Make sure the API returns successfully before attaching the plugin to a bot or workflow.
+    Убедитесь, что интерфейс стабильно возвращает ответ. После этого добавляйте плагин в Bot или workflow.
   </Step>
 
-  <Step title="Step 7: Add the plugin to a bot or workflow">
-    After the plugin passes standalone testing, attach it to:
+  <Step title="Шаг 7: Вызовите плагин в боте или в рабочем процессе">
+    Когда плагин прошёл самостоятельную проверку, добавьте его:
 
-    - a bot plugin capability
-    - or a workflow node
+    - К Bot как плагин
+    - Или к workflow как узел
 
-    For the first rollout, keep the task simple, such as summarization, rewrite, or a fixed Q&A step.
+    В первый раз пусть плагин решает одну простую задачу, например, реферат, переписывание или фиксированный вопрос-ответ.
   </Step>
 </Steps>
 
-## Option 2: Connect Crazyrouter Through A Workflow HTTP Request Node
+## Вариант 2: подключение Crazyrouter через HTTP-запрос workflow
 
-If you do not want to maintain a separate plugin, you can call Crazyrouter directly from a workflow HTTP request node.
+Если не хотите обслуживать отдельный плагин, можно вызывать HTTP-запрос непосредственно из workflow.
 
-### Recommended configuration
+### Рекомендуемые настройки
 
-- Request method: `POST`
+- Метод запроса: `POST`
 - URL: `https://api.crazyrouter.com/v1/chat/completions`
 - Headers:
   - `Authorization: Bearer sk-xxx`
@@ -170,86 +170,86 @@ If you do not want to maintain a separate plugin, you can call Crazyrouter direc
 }
 ```
 
-### Recommended validation order
+### Рекомендованная последовательность проверки
 
-1. Send a fixed string such as `Reply only OK`
-2. Replace the fixed string with a variable input
-3. Map the result into downstream nodes only after the HTTP node is stable
+1. Сначала передайте фиксированную строку `Reply only OK` в узел
+2. Затем меняйте на переменный ввод
+3. В конце сопоставьте вывод с последующими workflow-узлами
 
-## How To Think About "Custom Model Integration"
+## Как относиться к "интеграции кастомной модели"
 
-Some Coze versions or plans may support custom-model integration, but that should not be the default public Crazyrouter guide.
+Некоторые версии или тарифы Coze действительно поддерживают подключение кастомных моделей — но это не должно быть основной линией публичной документации Crazyrouter.
 
-Reasons:
+Причины:
 
-- Coze's own plan FAQ currently lists `custom model` as an enterprise flagship capability
-- For most ordinary users, the most reproducible and lowest-friction route is still HTTP / API plugins
-- This page therefore treats custom-model support as background context, not as the default public setup path
+- В FAQ официальных тарифов Coze функция `Пользовательская модель` относится к корпоративному флагманскому пакету
+- Для большинства обычных пользователей наиболее публично воспроизводимый и лёгкий путь — HTTP/API-плагин
+- Поэтому кастомные модели здесь только фон — не основное руководство
 
-## Recommended Models
+## Рекомендуемые модели для конфигурации
 
-| Use case | Recommended model | Why |
+| Сценарий | Рекомендуемая модель | Обоснование |
 |----------|----------|------|
-| First connection test | `gpt-5.5` | Verified successfully in production on March 23, 2026, and best for validating the Coze-to-Crazyrouter path |
-| Higher-quality output | `claude-opus-4-8` | Better for stronger explanation and content generation |
-| Gemini fallback path | `gemini-3.1-pro` | Useful as a second compatibility-validation path |
+| Первая проверка цепочки | `gpt-5.5` | 23 марта 2026 успешный прод-тест; лучше всего для проверки связки Coze -> Crazyrouter |
+| Качественный вывод | `claude-opus-4-8` | Подходит для сильного объяснения и генерации контента |
+| Gemini резерв | `gemini-3.1-pro` | Вторая резервная совместимая цепочка |
 
-## Token Best Practices
+## Лучшие практики настройки token
 
-| Setting | Recommendation | Why |
+| Настройка | Рекомендация | Описание |
 |------|------|------|
-| Dedicated token | Required | Do not share a Coze token with desktop apps or IDE tools |
-| Model allowlist | Strongly recommended | Start with only one or two models |
-| Spending limit | Strongly recommended | Workflow loops and retries can multiply usage |
-| Environment isolation | Recommended | Use separate tokens for dev / test / production |
-| Leak handling | Rotate immediately | Replace the key if it appears in screenshots or shared workspaces |
+| Специализированный token | Обязательно | Coze не должен использовать token совместно с десктоп-клиентом или IDE |
+| Whitelist моделей | Очень рекомендуется | Сначала разрешайте 1-2 модели |
+| Лимит квоты | Очень рекомендуется | workflow-циклы, повторные вызовы плагинов расходуют quota |
+| Изоляция по окружениям | Рекомендуется | dev/test/prod — разные token |
+| Лечение утечек | Немедленная замена | Если плагин и workspace "утекли", сразу меняйте ключ |
 
-## Validation Checklist
+## Чек-лист проверки
 
-- [ ] Created a dedicated Crazyrouter token for Coze
-- [ ] Chosen the HTTP / API plugin route or workflow HTTP request route first
-- [ ] Set the request URL to `https://api.crazyrouter.com/v1/chat/completions`
-- [ ] Filled the `Authorization` header as `Bearer sk-xxx`
-- [ ] Set `Content-Type` to `application/json`
-- [ ] Validated the smallest request body with `gpt-5.5`
-- [ ] Confirmed the plugin or HTTP node works in standalone debugging
-- [ ] Confirmed it still works after attaching to the bot or workflow
-- [ ] Confirmed the request appears in Crazyrouter logs
+- [ ] Создан отдельный Crazyrouter token для Coze
+- [ ] Выбрана HTTP/API-плагин или workflow HTTP-запросная линия
+- [ ] В URL запроса установлен `https://api.crazyrouter.com/v1/chat/completions`
+- [ ] Заголовок `Authorization` правильно заполнен `Bearer sk-xxx`
+- [ ] `Content-Type` — установлен `application/json`
+- [ ] Минимальное тело запроса успешно проверено через `gpt-5.5`
+- [ ] Плагин или workflow node успешно протестированы по отдельности
+- [ ] После подключения к Bot/workflow также успешно работают
+- [ ] В логах Crazyrouter видны соответствующие запросы
 
-## Common Errors And Fixes
+## Частые ошибки и решения
 
-| Symptom | Common cause | Fix |
-|------|------|------|
-| 401 unauthorized | Token is wrong, expired, or copied incompletely | Generate a new token and re-enter the `Authorization` header |
-| 404 | URL is wrong or missing `/v1/chat/completions` | Change it to the full URL |
-| 403 / model not allowed | The token does not allow that model | Allow the model in Crazyrouter token settings |
-| `model not found` | Model name is wrong | Switch back to `gpt-5.5` and revalidate |
-| Plugin can be created but fails inside the bot | Input / output mapping is inconsistent | Fall back to a fixed-string test first |
-| Workflow node fails intermittently | Input is too large, retries are too aggressive, or concurrency is too high | Shrink the input and return to a minimal test |
-| You cannot find a "model management" custom-upstream entry from another tutorial | Your version or plan is different | Go back to the HTTP / API plugin route instead of relying on enterprise-only capabilities |
+| Симптом | Возможная причина | Решение |
+|------|----------|----------|
+| 401 unauthorized | Token неверный, истёк или некорректно скопирован | Сгенерируйте новый token и снова впишите в заголовок `Authorization` |
+| 404 | Неправильный URL или отсутствует `/v1/chat/completions` | Используйте полный URL |
+| 403 / model not allowed | Token не разрешил текущую модель | Разрешите модель в настройках Crazyrouter token |
+| `model not found` | Неправильное имя модели | Сначала проверьте с `gpt-5.5` |
+| Плагин можно создать, но Bot не вызывает | Несовпадение input/output в плагине | Для проверки используйте фиксированную строку |
+| Сбой workflow узла | Длинный input, слишком много retry или высокая concurrency | Сначала уменьшите input и упростите задачу |
+| В чужом руководстве нет "менеджера моделей" | Версия или тариф другой | Возвращайтесь к HTTP/API-плагину, не используйте корпоративные функции сразу |
 
 ## FAQ
 
-### What is the best Coze-to-Crazyrouter route?
+### Какой вариант подключения Crazyrouter в Coze самый рекомендованный?
 
-In public docs, prefer the HTTP / API plugin route or the workflow HTTP request node route.
+В публичной документации рекомендуем HTTP/API-плагин или HTTP-запрос workflow.
 
-### Why is "custom model integration" not the main path here?
+### Почему не делать кастомные модели основной веткой?
 
-Because Coze capabilities vary a lot by version and plan, and Coze's plan FAQ also places `custom model` under enterprise flagship capabilities. Public docs should lead with the most reproducible lower-threshold HTTP path.
+Поскольку функционал Coze очень зависит от версии и тарифа, а FAQ официальных тарифов относит `Пользовательская модель` к корпоративным опциям. Для публичной документации лучше воспроизводимая и более простая HTTP-ветка.
 
-### What URL should I enter?
+### Какой URL указывается?
 
-Use `https://api.crazyrouter.com/v1/chat/completions`.
+`https://api.crazyrouter.com/v1/chat/completions`.
 
-### What should the first model be?
+### С чего начинать — какая модель?
 
-Start with `gpt-5.5`.
+`gpt-5.5`.
 
-### When should I add Claude or more models?
+### Когда расширять whitelist и подключать Claude/другие модели?
 
-Only after the single-model, single-node, single-task path is already stable.
+Пройдите минимум: одна модель, один workflow node, одна задача, затем постепенно расширяйте whitelist.
 
 <Note>
-If your goal is "make Coze call Crazyrouter reliably first", the most important thing is not choosing the fanciest integration path. It is getting the smallest HTTP / API flow working end to end.
+Если ваша цель — "чтобы Coze стабильно вызывал Crazyrouter", важно не усложнять конфигурацию, а сначала провести минимальную проверку через HTTP/API-плагин.
 </Note>

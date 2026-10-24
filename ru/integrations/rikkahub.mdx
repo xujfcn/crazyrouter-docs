@@ -1,39 +1,41 @@
 ---
-title: 'RikkaHub Setup Guide'
-description: 'Configure Crazyrouter API in RikkaHub'
+title: "Учебник по настройке RikkaHub"
+description: "Настройка Crazyrouter API в RikkaHub"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-## Overview
+## Обзор
 
-RikkaHub is an AI model aggregation client that supports unified management of multiple model providers.
+RikkaHub — это клиент для агрегации ИИ-моделей, поддерживающий централизованное управление различными поставщиками моделей.
 
-## Configuration Steps
+## Шаги настройки
 
 <Steps>
-  <Step title="Open Settings">
-    Go to the RikkaHub settings page and find the `Model Services` or `API Configuration` option.
+  <Step title="Открыть настройки">
+    Перейдите на страницу настроек RikkaHub, найдите опцию `Сервис моделей` или `Настройка API`.
   </Step>
-  <Step title="Add Provider">
-    Click to add a new provider:
-    - **Type**: OpenAI Compatible
-    - **Name**: Crazyrouter
-    - **API Base URL**: `https://api.crazyrouter.com/v1`
+  <Step title="Добавить провайдера услуг">
+    Нажмите, чтобы добавить нового поставщика услуг:
+    - **Тип**: OpenAI Compatible
+    - **Название**: Crazyrouter
+    - **Базовый URL API**: `https://api.crazyrouter.com/v1`
     - **API Key**: `sk-xxx`
   </Step>
-  <Step title="Select Models">
-    After configuration, select the models you want to use from the model list.
+  <Step title="Выбрать модель">
+    После настройки выберите нужную модель в списке моделей.
   </Step>
 </Steps>
 
-## Available Models
+## Доступные модели
 
-After configuration, you can use all models supported by Crazyrouter, including:
-- GPT-4o, GPT-4o-mini
-- Claude Sonnet, Claude Opus
-- Gemini Pro, Gemini Flash
-- And 300+ other models
+После настройки сначала рекомендуется добавить текущие проверенные основные модели:
+
+- `gpt-5.5`
+- `claude-opus-4-8`
+- `gemini-3.1-pro`
+
+Сначала проведите первичную проверку соединения через `gpt-5.5`, затем при необходимости добавьте Claude, Gemini или другие модели, которые уже доступны в списке моделей на нашем сайте.
 
 <Note>
-  RikkaHub supports configuring multiple providers simultaneously, allowing flexible switching during conversations.
+  RikkaHub поддерживает одновременную настройку нескольких провайдеров, что позволяет гибко переключаться между ними в беседе.
 </Note>

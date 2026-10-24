@@ -1,95 +1,95 @@
 ---
-title: 'LobeChat Setup Guide'
-description: 'Connect Crazyrouter to LobeChat through the OpenAI-compatible path, then finish chat validation, self-host setup, model management, and troubleshooting'
+title: "Учебник по настройке LobeChat"
+description: "Подключение OpenAI-совместимых моделей через Crazyrouter в LobeChat и завершение настройки чата, самостоятельного развертывания, управления моделями и устранения неполадок"
 ---
-> Дата обновления: 2026-06-23
+> Обновление содержания: 2026-06-09
 
-LobeChat works well as a self-hosted chat frontend, a personal multi-model workspace, or a shared team chat surface. When connecting it to Crazyrouter, the most reliable route is LobeChat's `OpenAI` path with the proxy URL pointed at Crazyrouter's OpenAI-compatible base.
+LobeChat подходит в качестве точки входа для корпоративного чата, персональной мульти-модельной рабочей панели и фронта для AI-диалогов при самостоятельном размещении. Для интеграции с Crazyrouter наиболее надежным способом является использование пути LobeChat `OpenAI` и указание адреса прокси на базовый адрес OpenAI-совместимого интерфейса Crazyrouter.
 
-## Overview
+## Обзор
 
-Using LobeChat's OpenAI settings, you can route chat traffic through Crazyrouter:
+В настройках OpenAI LobeChat вы можете направить запросы для диалога в Crazyrouter:
 
-- Recommended protocol: `OpenAI-compatible API`
-- Recommended route: the LobeChat `OpenAI` provider
+- Рекомендуемый протокол: `OpenAI-compatible API`
+- Рекомендуемый способ подключения: поставщик LobeChat `OpenAI`
 - Base URL: `https://api.crazyrouter.com/v1`
-- Auth method: `sk-...` token
-- Recommended first validation model: `gpt-5.5`
+- Способ аутентификации: токен `sk-...`
+- Рекомендуемая модель для первой проверки: `gpt-5.5`
 
-If you self-host LobeChat, you can also preconfigure Crazyrouter as the default OpenAI upstream through environment variables.
+Если вы самостоятельно размещаете LobeChat, можно через переменные среды заранее задать путь по умолчанию для OpenAI на Crazyrouter.
 
-## Best For
+## Для кого подойдёт
 
-- teams or individuals who want a stable chat frontend
-- self-hosted AI chat workspaces
-- users who want conversation history with multiple model choices
-- admins who want to ship a default model configuration to internal users
+- Тем, кто хочет развернуть стабильный чат-фронт
+- Тем, кто хочет использовать Crazyrouter в персональной или командной чат-панели
+- Тем, кто хочет централизованно управлять несколькими моделями и сохранять историю диалогов
+- Тем, кто хочет выдавать фиксированную модель и настройки для внутренних пользователей
 
-## Protocol Used
+## Используемый протокол
 
-Recommended protocol: `OpenAI-compatible API`
+Рекомендуемый протокол: `OpenAI-compatible API`
 
-When connecting Crazyrouter in LobeChat, use this OpenAI-compatible base URL:
+В LobeChat при подключении к Crazyrouter следует использовать OpenAI-совместимый базовый адрес:
 
 ```text
 https://api.crazyrouter.com/v1
 ```
 
-Do not enter:
+Не используйте:
 
 - `https://api.crazyrouter.com`
 - `https://api.crazyrouter.com/v1/chat/completions`
 
 <Note>
-LobeChat documents `OPENAI_PROXY_URL` as the OpenAI API request base URL, and its common defaults and examples are `/v1`-style. The local `http://127.0.0.1:4000/api/status` payload also exposes an official example using `{address}/v1`. So for Crazyrouter, `https://api.crazyrouter.com/v1` is the correct first-pass setup. If your own reverse proxy already adds `/v1`, adjust that layer to avoid a duplicated suffix.
+Документация LobeChat описывает `OPENAI_PROXY_URL` как "адрес запроса к OpenAI API", а типичные значения по умолчанию и примеры имеют стиль `/v1`; кроме того, локальная `http://127.0.0.1:4000/api/status` приводит официальный пример ссылки, тоже в стиле `{address}/v1`. Поэтому при подключении к Crazyrouter приоритетно заполняйте как `https://api.crazyrouter.com/v1`. Если ваш обратный прокси дополнительно добавил слой `/v1`, скорректируйте адрес, чтобы избежать дублирующихся суффиксов.
 </Note>
 
-## Prerequisites
+## Предварительные условия
 
-| Item | Details |
-|------|---------|
-| Crazyrouter account | Register first at [crazyrouter.com](https://crazyrouter.com) |
-| Crazyrouter token | Create a dedicated `sk-...` token for LobeChat |
-| LobeChat | Hosted or self-hosted is fine; use a current stable build |
-| Available models | Allow at least one verified OpenAI-compatible chat model such as `gpt-5.5` |
+| Проект | Описание |
+|------|------|
+| Аккаунт Crazyrouter | Сначала зарегистрируйтесь на [crazyrouter.com](https://crazyrouter.com) |
+| Токен Crazyrouter | Для LobeChat рекомендуется создать отдельный токен `sk-...` |
+| LobeChat | Подходит онлайн-версия или самостоятельная установка, рекомендована актуальная стабильная версия |
+| Доступная модель | Минимум одна чат-модель OpenAI, успешно протестированная сегодня, например `gpt-5.5` |
 
-Recommended starting whitelist:
+Рекомендуемый первый белый список моделей:
 
 - `gpt-5.5`
 - `claude-opus-4-8`
 - `gemini-3.1-pro`
 
 <Tip>
-If you also plan to connect Crazyrouter to Cursor, Codex, or Claude Code, keep LobeChat on its own token. It makes cost tracking much easier.
+Если вы также хотите подключить Cursor, Codex, Claude Code через Crazyrouter, для LobeChat лучше выделить отдельный токен – так легче отслеживать расход на чат-клиент.
 </Tip>
 
-## 5-Minute Quick Start
+## Быстрый старт за 5 минут
 
 <Steps>
-  <Step title="Create a dedicated LobeChat token">
-    In the Crazyrouter dashboard, create a token named `lobechat`. For the first rollout, allow only the models you actually need, such as `gpt-5.5` and `claude-opus-4-8`.
+  <Step title="Создать специальный токен для LobeChat">
+    В панели Crazyrouter создайте токен с именем `lobechat`, на первый раз пропустите только `gpt-5.5`, `claude-opus-4-8` и другие успешно протестированные сегодня модели.
   </Step>
-  <Step title="Open the language model settings">
-    In LobeChat, open `Settings` → `Language Model` from the avatar menu or settings entry.
+  <Step title="Открыть настройки языковой модели">
+    Войдите в LobeChat, нажмите на аватарку или кнопку настроек в левом нижнем углу, откройте `Настройки` → `Языковая модель`.
   </Step>
-  <Step title="Configure the OpenAI path">
-    In the `OpenAI` configuration, enter:
-    - `API Key`: your `sk-...`
-    - `API Proxy URL`: `https://api.crazyrouter.com/v1`
+  <Step title="Настроить путь OpenAI">
+    В настройках `OpenAI` заполните:
+    - `API Key`: ваш `sk-...`
+    - `API-адрес прокси / API Proxy URL`: `https://api.crazyrouter.com/v1`
 
-    Also enable the custom proxy URL option if your version exposes it.
+    Также включите `Использовать пользовательский API-адрес прокси` или аналогичную опцию.
   </Step>
-  <Step title="Pick one baseline model">
-    Save the settings and choose `gpt-5.5` as the default model first. Do not start with a large model list.
+  <Step title="Выберите базовую модель">
+    После сохранения сначала выберите `gpt-5.5` как основную модель, не подключайте много моделей сразу.
   </Step>
-  <Step title="Run the first validation prompt">
-    Start a new conversation and send `Reply only OK`. If it returns successfully and appears in the Crazyrouter logs, the integration is working.
+  <Step title="Выполнить первичную проверку">
+    Создайте новый диалог, отправьте: `Reply only OK`. Если ответ получен и в панели Crazyrouter виден лог, интеграция успешна.
   </Step>
 </Steps>
 
-## Self-Hosted Quick Config
+## Быстрая конфигурация самостоятельного размещения
 
-If you deploy LobeChat with Docker, you can preconfigure the default OpenAI path like this:
+Если вы развернули LobeChat через Docker, можно предварительно прописать настройки OpenAI в переменные среды:
 
 ```yaml
 services:
@@ -103,88 +103,88 @@ services:
       - OPENAI_MODEL_LIST=gpt-5.5,claude-opus-4-8,gemini-3.1-pro
 ```
 
-If you do not want end users to replace the key freely, combine this with the config controls your deployed LobeChat version supports for hosted defaults or restricted client-side customization.
+Если не хотите предоставлять пользователям возможность менять Key, закрепите его в переменной среды на сервере, используя актуальные возможности скрытия или размещения конфигурации.
 
-## Recommended Model Setup
+## Рекомендуемые настройки моделей
 
-| Use case | Recommended model | Why |
-|----------|-------------------|-----|
-| Default main chat model | `gpt-5.5` | Verified successfully in production on March 23, 2026, and suited for the main LobeChat baseline |
-| Higher-quality writing / code help | `claude-opus-4-8` | Strong long-form writing and reasoning |
-| Gemini fallback path | `gemini-3.1-pro` | Useful as a second vendor-compatible validation path |
+| Сценарий использования | Рекомендуемая модель | Причина |
+|----------|----------|------|
+| Основная чат-модель | `gpt-5.5` | Проверена сегодня, подходит для главной модели LobeChat |
+| Качественная работа с текстом / кодом | `claude-opus-4-8` | Лучший опыт с длинным текстом, писательством и кодом |
+| Gemini в запасе | `gemini-3.1-pro` | Хороший вариант для дополнительного теста совместимости |
 
-Recommended order: get `gpt-5.5` working first, then expand to `claude-opus-4-8` and `gemini-3.1-pro`.
+Рекомендуем последовательность: сначала используйте `gpt-5.5`, затем расширяйтесь до `claude-opus-4-8` и `gemini-3.1-pro`.
 
-## Token Setup Best Practices
+## Лучшие практики настройки токенов
 
-| Setting | Recommendation | Notes |
-|---------|----------------|-------|
-| Dedicated token | Required | Do not share the same token with IDE or CLI tools |
-| Model whitelist | Strongly recommended | Allow only the models the chat frontend should use |
-| IP restriction | Recommended for fixed self-hosted egress | Use carefully on changing home or mobile networks |
-| Quota cap | Strongly recommended | Team chat frontends can burn through a shared token quickly |
-| Environment separation | Recommended | Use different tokens for staging and production |
-| Default model control | Recommended | Keep premium models out of the default path unless needed |
+| Настройка | Рекомендация | Описание |
+|------|------|------|
+| Специальный токен | Обязательно | Не делайте общий токен для LobeChat и IDE / CLI |
+| Белый список моделей | Очень рекомендуется | Откройте только те модели, которые используются в чате |
+| Ограничение по IP | Если фиксированный выход при самостоятельном размещении — включить; при частых изменениях – быть осторожным |
+| Лимит квоты | Очень рекомендуется | В командном чате один токен часто используют многие |
+| Изоляция сред | Рекомендуется | Используйте разные токены для тестовой и рабочей среды |
+| Контроль модели по умолчанию | Рекомендуется | Уберите дорогие модели из списка по умолчанию — включайте по необходимости |
 
-## Verification Checklist
+## Проверочный чек-лист
 
-- [ ] `API Key` is saved correctly
-- [ ] `API Proxy URL` is set to `https://api.crazyrouter.com/v1`
-- [ ] the custom proxy URL option is enabled if required by your version
-- [ ] the first model is selected successfully
-- [ ] the first chat request succeeds
-- [ ] streaming works normally
-- [ ] the request appears in the Crazyrouter logs
-- [ ] token quota and model whitelist match your plan
+- [ ] `API Key` верно сохранён
+- [ ] `API-адрес прокси / API Proxy URL` установлен как `https://api.crazyrouter.com/v1`
+- [ ] Включен переключатель пользовательского прокси-адреса
+- [ ] Первая модель успешно выбрана
+- [ ] Первый запрос диалога успешно возвращён
+- [ ] Потоковая выдача работает корректно
+- [ ] Логи в Crazyrouter отражают соответствующий запрос
+- [ ] Квота токена и белый список моделей соответствуют ожиданиям
 
-## Common Errors and Fixes
+## Частые ошибки и их исправление
 
-| Symptom | Likely cause | Fix |
-|---------|--------------|-----|
-| settings cannot be saved or validation fails | wrong API key or wrong proxy URL | recheck the `sk-...` value and `https://api.crazyrouter.com/v1` |
-| 401 unauthorized | token expired, was removed, or is invalid | generate a new token and replace it |
-| 403 / model not allowed | selected model is missing from the token whitelist | allow that model in Crazyrouter |
-| 404 | proxy URL was entered as the root domain or a full endpoint path | change it to `https://api.crazyrouter.com/v1` |
-| settings look correct but you still get 404s | your own gateway, reverse proxy, or deployment layer already appends `/v1` once | inspect the upstream chain and remove the duplicated suffix from one layer |
-| model looks selectable but requests fail | LobeChat cached an old model list or the default model is not valid | switch back to `gpt-5.5`, refresh, and reselect |
-| chat works but streaming is unstable | client-version or model compatibility issue | use `gpt-5.5` as the baseline and upgrade LobeChat |
-| usage spikes when multiple users share the app | one shared token has no quota cap | set a quota cap for the team frontend or split tokens |
-| users can still switch away from Crazyrouter after self-hosting | you only set defaults, not restrictions | add deployment-side controls or disable client customization where supported |
+| Явление | Частые причины | Способ исправления |
+|------|----------|----------|
+| Не удаётся сохранить или проверка не проходит | Неправильный API Key или ошибочный адрес прокси | Проверьте `sk-...` и `https://api.crazyrouter.com/v1` |
+| 401 unauthorized | Токен не действителен, истёк или удалён | Сгенерируйте новый токен и замените |
+| 403 / model not allowed | Модель не добавлена в белый список токена | Разрешите модель в панели Crazyrouter |
+| 404 | Адрес прокси - корневой домен или конкретный путь | Измените на `https://api.crazyrouter.com/v1` |
+| Настройки правильные, но всё равно 404 | Ваш шлюз или обратный прокси уже автоматически добавил `/v1` | Проверьте, не появились ли двойные суффиксы; если верхний уровень уже добавил `/v1`, не дублируйте |
+| Модель видна, но выдаёт ошибку | Фронт LobeChat сохранил старые модели или несуществующую по умолчанию | Вернитесь к `gpt-5.5`, обновите страницу и выберите заново |
+| Диалог отправляется, но выдаёт ошибку потока | Версия клиента или несоответствие модели | Сначала используйте `gpt-5.5` для теста и обновите LobeChat |
+| Быстро расходуется лимит при командном использовании | Несколько пользователей используют один токен без лимита | Задайте лимит для командного чата; при необходимости разделите на несколько токенов |
+| Пользователи могут подключать других провайдеров после самостоятельного размещения | Просто задано значение по умолчанию, не ограничена пользовательская настройка | Закрепите в настройке или отключите возможность изменения пользователями |
 
-## Performance and Cost Tips
+## Рекомендации по производительности и затратам
 
-- Keep only `gpt-5.5` in the first rollout
-- Use a cheaper default model for team chat only if you have separately validated that route in your own deployment
-- If you also enable knowledge features, plugins, or long-context sessions, give LobeChat its own quota cap
-- Separate staging and production tokens so internal testing does not affect real usage budgets
-- If usage looks suspicious, check the Crazyrouter logs first for long sessions or multiple users sharing one token
+- На первом этапе оставьте только `gpt-5.5`
+- Для командного чата по умолчанию выбирайте недорогие модели, дорогие модели пусть используют продвинутые пользователи или под особые задачи
+- Если используете базы знаний, плагины или длинные диалоги, обязательно настройте квоту LobeChat отдельно
+- При самостоятельном размещении разделите токены для рабочей и тестовой среды, чтобы внутренние тесты не расходовали официальный лимит
+- При необычно высоком расходе сначала проверьте логи Crazyrouter — часто причиной служит многопользовательский длинный диалог
 
-## FAQ
+## ЧАВО
 
-### Which Base URL should I use in LobeChat?
+### Какой Base URL следует указать в LobeChat?
 
-Use `https://api.crazyrouter.com/v1`.
+Укажите `https://api.crazyrouter.com/v1`.
 
-### Why should I not enter only the root domain here?
+### Почему нельзя просто указать корневой домен?
 
-Because LobeChat's OpenAI proxy settings work best when you give it the OpenAI-compatible base directly, not just the root domain.
+Потому что конфигурация OpenAI-прокси LobeChat лучше работает при указании OpenAI-совместимого базового адреса, а не только корневого домена.
 
-### What if my own reverse proxy already appends `/v1`?
+### Что делать, если мой обратный прокси уже автоматически проставляет `/v1`?
 
-Then do not add another `/v1` in the final URL you expose to LobeChat. Check the proxy chain first so you do not end up with a duplicated suffix.
+Не дублируйте `/v1` в конечном адресе для LobeChat. Проверьте цепочку прокси — избегайте двойных суффиксов.
 
-### Which model should I test first?
+### Какая первая модель рекомендуется?
 
-Start with `gpt-5.5`.
+Сначала используйте `gpt-5.5`.
 
-### Can LobeChat use multiple models with Crazyrouter?
+### Можно ли подключить несколько моделей одновременно к LobeChat?
 
-Yes, but it is better to validate one model first and expand after that.
+Можно, но сперва протестируйте одну модель, затем расширяйте список.
 
-### Should I hardcode the token in environment variables for self-hosting?
+### Нужно ли фиксировать токен в переменной среды при самостоятельном размещении?
 
-If you want tighter control over upstream routing and cost, yes. If you want each user to bring their own key, keep the client-side entry open.
+Если хотите централизовано управлять расходом и верхним провайдером — рекомендуется; если планируете, чтобы каждый пользователь задавал свой Key — тогда разрешите пользовательское редактирование.
 
 <Note>
-If your goal is a stable chat frontend and a shared workspace, LobeChat is a strong choice. If your goal is agentic coding and automated edits, Cursor, Claude Code, Codex, and Cline should still take priority.
+Если вы хотите стабильный чат-фронт и командную рабочую панель — LobeChat отличный выбор; если важна прокси для кода и автоматизация, приоритет отдайте инструментам типа Cursor, Claude Code, Codex, Cline.
 </Note>

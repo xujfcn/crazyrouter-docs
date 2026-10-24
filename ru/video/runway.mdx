@@ -1,8 +1,8 @@
 ---
 title: "Runway"
-description: "Use the Runway API for image-to-video generation"
+description: "Используйте Runway API для генерации видео из изображений"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
 # Runway
 
@@ -10,20 +10,20 @@ description: "Use the Runway API for image-to-video generation"
 POST /runwayml/v1/image_to_video
 ```
 
-Use the Runway Gen-3 model to convert images into videos.
+Используйте модель Runway Gen-3 для преобразования изображений в видео.
 
-## Request Parameters
+## Параметры запроса
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model` | string | No | Model name, e.g. `gen3a_turbo` |
-| `promptImage` | string | Yes | Input image URL |
-| `promptText` | string | No | Video description prompt |
-| `duration` | integer | No | Video duration (seconds), default 5 |
-| `ratio` | string | No | Aspect ratio: `16:9`, `9:16` |
-| `watermark` | boolean | No | Whether to add a watermark |
+| Параметр | Тип | Обязательный | Описание |
+|------|------|------|------|
+| `model` | string | Нет | Название модели, например `gen3a_turbo` |
+| `promptImage` | string | Да | URL входного изображения |
+| `promptText` | string | Нет | Текстовый запрос-описание для видео |
+| `duration` | integer | Нет | Длительность видео (сек), по умолчанию 5 |
+| `ratio` | string | Нет | Соотношение сторон: `16:9`, `9:16` |
+| `watermark` | boolean | Нет | Добавлять ли водяной знак |
 
-## Request Examples
+## Пример запроса
 
 <CodeGroup>
 
@@ -64,7 +64,7 @@ print(response.json())
 
 </CodeGroup>
 
-### Response Example
+### Пример ответа
 
 ```json
 {
@@ -75,7 +75,7 @@ print(response.json())
 
 ---
 
-## Query Task
+## Проверить задачу
 
 ```
 GET /runwayml/v1/tasks/{task_id}
@@ -86,7 +86,7 @@ curl https://api.crazyrouter.com/runwayml/v1/tasks/runway_task_abc123 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-### Response Example (Completed)
+### Пример ответа (готово)
 
 ```json
 {
@@ -98,11 +98,11 @@ curl https://api.crazyrouter.com/runwayml/v1/tasks/runway_task_abc123 \
 }
 ```
 
-### Task Status
+### Статус задачи
 
-| Status | Description |
-|--------|-------------|
-| `PENDING` | Waiting to be processed |
-| `RUNNING` | Generating |
-| `SUCCEEDED` | Succeeded |
-| `FAILED` | Failed |
+| Статус | Описание |
+|------|------|
+| `PENDING` | Ожидание обработки |
+| `RUNNING` | Генерация |
+| `SUCCEEDED` | Успех |
+| `FAILED` | Ошибка |

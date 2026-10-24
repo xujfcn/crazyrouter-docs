@@ -1,46 +1,52 @@
 ---
-title: 'Claude Dev Setup Guide'
-description: 'Configure Crazyrouter API in the Claude Dev VS Code extension with the latest verified Claude models'
+title: "Claude Dev セットアップガイド"
+description: "最新の検証済みClaudeモデルでCrazyrouter APIをClaude Dev VS Code拡張機能に設定する"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-16
 
-## Overview
+## 概要
 
-Claude Dev is a VS Code AI coding extension suited for Claude-style code explanation, refactoring suggestions, and multi-turn collaboration through Crazyrouter. For public docs, prefer the OpenAI Compatible route first because it is more consistent with the rest of the Crazyrouter integration stack and easier to troubleshoot.
+Claude Devは、Claudeスタイルのコード説明、リファクタリング提案、およびCrazyrouterによるマルチターン協調のためのVS CodeのAIコーディング拡張機能です。公開ドキュメントでは、Crazyrouter統合スタックの他の部分とより一貫性があり、トラブルシューティングしやすいため、まずOpenAI互換ルートを推奨します。
 
-## Recommended Configuration
+<Warning>
+このページの`https://api.crazyrouter.com/v1` URLはClaude Devの`OpenAI Compatible`プロバイダー専用です。Claude Codeの`ANTHROPIC_BASE_URL`にはコピーしないでください。Claude Codeではルートドメイン`https://api.crazyrouter.com`を使用してください。
+</Warning>
+
+## 推奨構成
 
 <Steps>
-  <Step title="Install Extension">
-    Search for `Claude Dev` in the VS Code extension marketplace and install it.
+  <Step title="拡張機能をインストールする">
+    VS Code拡張マーケットプレイスで`Claude Dev`を検索してインストールします。
   </Step>
-  <Step title="Open Settings">
-    Click the Claude Dev icon in the sidebar to enter settings.
+  <Step title="設定を開く">
+    サイドバーのClaude Devアイコンをクリックして設定画面に入ります。
   </Step>
-  <Step title="Select Provider">
-    Prefer `OpenAI Compatible` as the API provider.
+  <Step title="プロバイダーを選択">
+    APIプロバイダーとして`OpenAI Compatible`を推奨します。
   </Step>
-  <Step title="Enter Configuration">
+  <Step title="設定を入力">
     - **Base URL**: `https://api.crazyrouter.com/v1`
     - **API Key**: `sk-xxx`
     - **Model**: `claude-opus-4-8`
   </Step>
 </Steps>
 
-## Recommended Models
+デフォルトの国際API入口の場合は、Claude Devの`OpenAI Compatible` Base URLを`https://api.crazyrouter.com/v1`に設定します。
 
-| Scenario | Model |
+## 推奨モデル
+
+| シナリオ | モデル |
 |----------|-------|
-| Daily coding | `claude-opus-4-8` |
-| Heavier reasoning and planning | `claude-opus-4-8` |
+| 日常のコーディング | `claude-opus-4-8` |
+| より重い推論・計画 | `claude-opus-4-8` |
 
 <Note>
-  `claude-opus-4-8` and `claude-opus-4-8` match the latest verified Claude model guidance in this doc set. For the smallest first-pass VS Code validation, start with `claude-opus-4-8`.
+  `claude-opus-4-8`と`claude-opus-4-8`は、このドキュメントセットの最新検証済みClaudeモデルガイダンスに合致しています。最小規模の初回VS Code検証には`claude-opus-4-8`を使ってください。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## crazyrouter.com 関連
 
-- [Cline 連携ガイド](https://crazyrouter.com/en/integrations/cline?utm_source=docs&utm_medium=related)
-- [Claude Fable 5 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
-- [Claude Fable 5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Cline統合ガイド（ワンクリックスクリプト、ベースURL、推奨モデル）](https://crazyrouter.com/en/integrations/cline?utm_source=docs&utm_medium=related)
+- [Claude Fable 5 価格比較：リスト vs Azure / Bedrock / Vertex vs Crazyrouter](https://crazyrouter.com/ja/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Claude Fable 5 モデルページ：ライブ価格、実際のサンプル、コード](https://crazyrouter.com/ja/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)

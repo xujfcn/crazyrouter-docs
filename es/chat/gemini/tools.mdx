@@ -1,0 +1,212 @@
+---
+title: "Llamada de herramientas Gemini"
+description: "Capacidades nativas de herramientas Gemini validadas en producción de Crazyrouter el 2026-03-23"
+---
+> Contenido actualizado: 2026-06-09
+
+# Llamada de herramientas Gemini
+
+```
+POST /v1beta/models/{model}:generateContent
+```
+
+Hasta el 23 de marzo de 2026, en el entorno de producción de Crazyrouter se ha verificado que `gemini-3.1-pro` puede activar de forma estable las siguientes capacidades nativas de herramientas Gemini:
+
+- `codeExecution`
+- `googleSearch`
+- `urlContext`
+- `functionDeclarations`
+
+<Note>
+  En esta página solo se mantienen los modos de solicitud y marcas de respuesta que se han activado con éxito en producción.
+</Note>
+
+---
+
+## Ejecución de código
+
+La siguiente solicitud devolvió en producción los dos bloques clave de respuesta `executableCode` y `codeExecutionResult`:
+
+```bash
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "Use code execution. Compute the sum of the first 20 prime numbers and state the result."}
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "codeExecution": {}
+      }
+    ]
+  }'
+```
+
+Formas clave de respuesta observadas en producción:
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "executableCode": {
+              "language": "PYTHON",
+              "code": "..."
+            }
+          },
+          {
+            "codeExecutionResult": {
+              "outcome": "OUTCOME_OK",
+              "output": "639\n"
+            }
+          },
+          {
+            "text": "The sum is 639."
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Búsqueda en Google
+
+La siguiente solicitud devolvió `groundingMetadata` en producción, lo que indica que el modelo realmente activó Google Search:
+
+```bash
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "Use Google Search. What are two AI news items from March 2026?"}
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "googleSearch": {}
+      }
+    ]
+  }'
+```
+
+Actualmente se puede comprobar lo siguiente:
+
+- `candidates[0].groundingMetadata`
+- Las respuestas de texto normales aún se encuentran en `candidates[0].content.parts[*].text`
+
+---
+
+## Contexto de URL
+
+La siguiente solicitud devolvió `urlContextMetadata` en producción e incluyó `groundingMetadata`:
+
+```bash
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "Use URL context to summarize https://example.com/ in one sentence."}
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "urlContext": {}
+      }
+    ]
+  }'
+```
+
+Actualmente se puede comprobar lo siguiente:
+
+- `candidates[0].urlContextMetadata`
+- `candidates[0].groundingMetadata`
+
+---
+
+## Llamada de función personalizada
+
+La siguiente solicitud devolvió `functionCall` en producción:
+
+```bash
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "What is the weather in Beijing? Use the provided function."}
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "functionDeclarations": [
+          {
+            "name": "get_weather",
+            "description": "Get weather info for a city",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "city": {
+                  "type": "string"
+                }
+              },
+              "required": ["city"]
+            }
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+Forma clave de respuesta:
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "functionCall": {
+              "name": "get_weather",
+              "args": {
+                "city": "Beijing"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+Cuando se retornan los resultados de la función, se puede seguir usando la estructura nativa de Gemini `functionResponse`.
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Comparativa de precios de Gemini 2.5 Flash: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Página del modelo Gemini 2.5 Flash: Precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Comparativa de precios de Gemini 2.5 Flash-Lite: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)

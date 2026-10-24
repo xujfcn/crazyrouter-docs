@@ -1,43 +1,47 @@
 ---
 title: "Structured Outputs"
-description: "Production-verified structured JSON output with the latest GPT and Gemini models"
+description: "Based on real-world production environment tests, generate structured JSON outputs using the latest mainstream GPT and Gemini models."
 ---
-> Last updated: 2026-06-06
+> Content updated: 2026-06-09
 
 # Structured Outputs
 
-This page only documents Structured Output flows that were **verified with real requests against Crazyrouter production**.
+This documentation only includes **Structured Outputs usage verified successfully through actual requests in the Crazyrouter production environment**.
 
 Verification date:
 
 - `2026-03-22`
 
-Strictly verified models:
+Models that have been strictly verified successfully:
 
 - `gpt-5.5`
 - `gemini-3.1-pro`
 
-Not included as a strict-success example:
+Models currently not included as strictly successful examples:
 
 - `claude-opus-4-8`
 
 Reason:
 
-- Under the current OpenAI-compatible `response_format=json_schema` request shape, `claude-opus-4-8` did not show stable strict-JSON behavior across production checks
-- Earlier testing produced JSON wrapped in Markdown code fences
-- The `2026-03-22` recheck returned empty `content`
-- Because the result is not stable or strictly parseable, it is not treated as a verified strict structured-output success example
+- In the production revalidation, `claude-opus-4-8` did not display stable "strict pure JSON" behavior with the current OpenAI compatible `response_format=json_schema` request format
+- Previous tests have resulted in fenced code blocks
+- During the revalidation of `2026-03-22`, there was empty `content`
+- Therefore, it is currently not marked as "strictly structured output verified successfully"
 
-## Verified matrix
+---
 
-| Model | Protocol | Endpoint | Success marker |
+## Verified Capability Matrix
+
+| Model | Protocol | Endpoint | Success Indicator |
 |------|------|------|----------|
-| `gpt-5.5` | OpenAI Chat Completions | `POST /v1/chat/completions` | Response can be parsed directly as JSON |
-| `gemini-3.1-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | Returns JSON text matching schema |
+| `gpt-5.5` | OpenAI Chat Completions | `POST /v1/chat/completions` | The response can be directly `JSON.parse` |
+| `gemini-3.1-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | Returns `application/json` style text, which can be parsed directly |
+
+---
 
 ## GPT-5.4
 
-```bash
+```bash cURL
 curl https://api.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
@@ -57,8 +61,8 @@ curl https://api.crazyrouter.com/v1/chat/completions \
         "schema": {
           "type": "object",
           "properties": {
-            "city": { "type": "string" },
-            "country": { "type": "string" }
+            "city": {"type": "string"},
+            "country": {"type": "string"}
           },
           "required": ["city", "country"],
           "additionalProperties": false
@@ -68,15 +72,17 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-Verified production output:
+Production validation return:
 
 ```json
 {"city":"Tokyo","country":"Japan"}
 ```
 
+---
+
 ## Gemini 3 Pro
 
-```bash
+```bash cURL
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -95,8 +101,8 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
       "responseSchema": {
         "type": "object",
         "properties": {
-          "city": { "type": "string" },
-          "country": { "type": "string" }
+          "city": {"type": "string"},
+          "country": {"type": "string"}
         },
         "required": ["city", "country"]
       }
@@ -104,20 +110,38 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Verified production output:
+Production validation return:
 
 ```json
 {"city":"Tokyo","country":"Japan"}
 ```
 
-## See Also
+---
+
+## Claude 4.6 Current Conclusion
+
+In the production test of `2026-03-22`:
+
+- `claude-opus-4-8` did not produce stable, reproducible, strict JSON output with this request format
+- Across different test runs, there have been both fenced code blocks and empty `content`
+- Therefore, it is currently not recommended to mark Claude 4.6 as "strict schema output successfully verified"
+
+If Claude 4.6 is to be included here in the future, it is recommended to perform another, more detailed round of production validation and confirm:
+
+- Whether there is a more suitable native protocol approach
+- Whether extra system prompts are needed
+- Whether code fences can be stably removed
+
+---
+
+## Related Documentation
 
 - [OpenAI Structured Output](/en/chat/openai/structured-output)
 - [Gemini Document Understanding](/en/chat/gemini/document)
 
 {/* crazyrouter-model-links v2 */}
-## Related on crazyrouter.com
+## Related Pages
 
-- [GPT-5.4 price comparison: list vs Azure / Bedrock / Vertex vs Crazyrouter](https://crazyrouter.com/en/pricing/gpt-5-4?utm_source=docs&utm_medium=related)
-- [GPT-5.4 model page: live price, real samples, code](https://crazyrouter.com/en/models/openai/gpt-5-4?utm_source=docs&utm_medium=related)
-- [All OpenAI models with live prices](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [GPT-5.4 Price Comparison: Official / Azure / Bedrock / Vertex and Crazyrouter](https://crazyrouter.com/en/pricing/gpt-5-4?utm_source=docs&utm_medium=related)
+- [GPT-5.4 Model Page: Real-time Prices, Real Examples, Call Code](https://crazyrouter.com/en/models/openai/gpt-5-4?utm_source=docs&utm_medium=related)
+- [All OpenAI Models and Prices](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)

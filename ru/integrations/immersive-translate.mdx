@@ -1,199 +1,199 @@
 ---
-title: 'Immersive Translate Setup Guide'
-description: 'Connect Crazyrouter to the Immersive Translate browser extension through the OpenAI service path, with custom API URL, model, rate, validation, and troubleshooting guidance'
+title: "Инструкция по настройке Immersive Translate"
+description: "Подключение Crazyrouter через OpenAI-сервис в расширении Immersive Translate для браузера, а также заполнение кастомного API-адреса, модели, ограничений по частоте, инструкции по валидации и устранению неполадок"
 ---
-> Дата обновления: 2026-06-23
+> Обновление содержания: 2026-06-09
 
-Immersive Translate is a strong browser extension for webpage translation, bilingual reading, text-selection translation, and document translation. For Crazyrouter, the most reliable route is the extension's officially supported `OpenAI` service path, using the `More Settings` section to enter a custom API address.
+Immersive Translate — это очень удобное расширение для браузера для повседневного перевода веб-страниц, двуязычного чтения, перевода выделенного текста и документов. Для интеграции с Crazyrouter наиболее надёжный способ — использовать официально поддерживаемую `OpenAI`-конфигурацию сервиса и вписать свой кастомный API-адрес в `Больше настроек`.
 
-## Overview
+## Обзор
 
-With Immersive Translate's OpenAI service setup, you can send requests to Crazyrouter with:
+Через настройку OpenAI-сервиса Immersive Translate вы можете отправлять запросы на Crazyrouter:
 
-- recommended protocol: `OpenAI-compatible API`
-- service type: `OpenAI`
-- API key: your `sk-...`
-- custom API URL: `https://api.crazyrouter.com/v1/chat/completions`
-- recommended first validation model: `gpt-5.5`
+- Рекомендованный протокол: `OpenAI-compatible API`
+- Тип сервиса: `OpenAI`
+- API Key: ваш `sk-...`
+- Кастомный API-адрес: `https://api.crazyrouter.com/v1/chat/completions`
+- Рекомендуемая первая модель для проверки: `gpt-5.5`
 
 <Tip>
-The most important difference between Immersive Translate and ChatBox is this: here you should usually start with the full endpoint path, not just the root domain.
+Главное отличие Immersive Translate от ChatBox: здесь обычно нужно указывать полный путь к API, а не просто корневой домен.
 </Tip>
 
-## Why This Guide Uses The Full Endpoint Path
+## Почему нужен полный путь
 
-According to Immersive Translate's official OpenAI service docs, the extension supports customizing the OpenAI API address in `More Settings`. For Crazyrouter, the safer first-pass value is therefore:
+Согласно официальной документации OpenAI-сервисов Immersive Translate, в `Больше настроек` можно задать свой OpenAI API-адрес. Поэтому в Crazyrouter обычно безопаснее указывать полный адрес:
 
 ```text
 https://api.crazyrouter.com/v1/chat/completions
 ```
 
 <Warning>
-Do not start by entering only the root domain such as `https://api.crazyrouter.com`, and do not stop at `/v1`. For Immersive Translate's OpenAI-style path, the safest first validation is the full `/v1/chat/completions` endpoint.
+Не указывайте здесь только корневой домен `https://api.crazyrouter.com` и не пишите только до `/v1`. Для Immersive Translate при первой проверке предпочтительнее полный путь `/v1/chat/completions`.
 </Warning>
 
-## Best For
+## Кому подойдёт
 
-- users who want high-quality AI webpage translation
-- users who want Crazyrouter-based control over translation costs
-- users who want separate budgets by browser or device
-- users who prefer an OpenAI-compatible route for a browser translation extension
+- Тем, кто хочет делать качественный AI-перевод прямо на страницах сайтов
+- Тем, кто хочет управлять расходами на перевод через собственный токен Crazyrouter
+- Тем, кто хочет раздельно регулировать лимиты для разных браузеров или устройств
+- Тем, кому важнее использовать совместимый с OpenAI способ интеграции расширения для браузера
 
-## Prerequisites
+## Системные требования и предварительные условия
 
-| Item | Notes |
-|------|-------|
-| Crazyrouter account | Create one at [crazyrouter.com](https://crazyrouter.com) |
-| Crazyrouter token | Create a dedicated token for Immersive Translate |
-| Browser | Chrome, Edge, Firefox, or another supported browser |
-| Immersive Translate extension | Use a current stable release |
-| Allowed models | Allow at least one translation-friendly model |
+| Пункт | Описание |
+|------|------|
+| Аккаунт Crazyrouter | Зарегистрируйтесь на [crazyrouter.com](https://crazyrouter.com) |
+| Токен Crazyrouter | Рекомендуется создать отдельный токен для Immersive Translate |
+| Браузер | Chrome, Edge, Firefox и другие, поддерживающие данное расширение |
+| Расширение Immersive Translate | Желательно использовать текущую стабильную версию |
+| Доступные модели | Минимум одна разрешённая модель перевода |
 
-Suggested starter allowlist:
+Рекомендуемый начальный белый список:
 
 - `gpt-5.5`
 - `claude-opus-4-8`
 
-## Install And Setup Path
+## Установка и путь настройки
 
-### Chrome / Edge Path
+### Вариант для Chrome / Edge
 
-1. install Immersive Translate from the extension store
-2. open the extension settings
-3. go to `Translation Services`
-4. choose `OpenAI`
-5. open `More Settings`
-6. enter the Crazyrouter key and full custom API URL
+1. Установите Immersive Translate из магазина расширений
+2. Откройте настройки расширения
+3. Зайдите в `Служба перевода`
+4. Выберите `OpenAI`
+5. Откройте `Больше настроек`
+6. Введите ключ Crazyrouter и полный кастомный адрес
 
-### Firefox Path
+### Вариант для Firefox
 
-1. install Immersive Translate from Firefox Add-ons
-2. open the settings page
-3. go to `Translation Services`
-4. choose `OpenAI`
-5. open `More Settings`
-6. enter the Crazyrouter settings
+1. Установите Immersive Translate из каталога дополнений Firefox
+2. Откройте страницу настроек
+3. Зайдите в `Служба перевода`
+4. Выберите `OpenAI`
+5. Перейдите в `Больше настроек`
+6. Заполните параметры Crazyrouter
 
-## Detailed Setup
+## Полная настройка с нуля
 
 <Steps>
-  <Step title="Step 1: Install the extension">
-    Install Immersive Translate from the official extension store for your browser.
+  <Step title="Шаг 1: Установите расширение">
+    Установите официальный "Immersive Translate" из магазина расширений.
   </Step>
 
-  <Step title="Step 2: Create a dedicated Crazyrouter token">
-    For the first pass, allow only:
+  <Step title="Шаг 2: Создайте специальный токен в Crazyrouter">
+    При первой настройке рекомендуется разрешить:
 
     - `gpt-5.5`
     - `claude-opus-4-8`
 
-    Do not start by allowing a wide model set in a translation scenario.
+    Не добавляйте сразу слишком много моделей в переводимые сценарии.
   </Step>
 
-  <Step title="Step 3: Open the OpenAI service configuration">
-    In the extension UI, go to:
+  <Step title="Шаг 3: Откройте конфигурацию сервиса OpenAI">
+    После клика по иконке расширения перейдите:
 
-    - `Settings`
-    - `Translation Services`
-    - choose `OpenAI`
+    - `Настройки`
+    - `Служба перевода`
+    - Выберите `OpenAI`
   </Step>
 
-  <Step title="Step 4: Enter the API key and custom URL">
-    Fill in:
+  <Step title="Шаг 4: Заполните API Key и пользовательский адрес">
+    Заполните:
 
-    - `API Key`: your `sk-...`
-    - `Custom API URL`: `https://api.crazyrouter.com/v1/chat/completions`
-    - `Model`: start with `gpt-5.5`
+    - `API Key`: ваш `sk-...`
+    - `Пользовательский адрес API интерфейса`: `https://api.crazyrouter.com/v1/chat/completions`
+    - `Модель`: сначала заполните `gpt-5.5`
 
-    If some fields are hidden by default, expand `More Settings` first.
+    Если некоторые параметры по умолчанию свернуты, обязательно разверните `Больше настроек`, чтобы увидеть все поля.
   </Step>
 
-  <Step title="Step 5: Lower the request rate for the first pass">
-    Immersive Translate's official OpenAI docs explicitly warn about rate limits. On the first Crazyrouter validation, keep the request rate conservative, especially for long webpages or ebooks.
+  <Step title="Шаг 5: Сначала уменьшите частоту запросов">
+    В официальной документации Immersive Translate по интеграции OpenAI отдельно отмечен вопрос лимитов по частоте запросов. При первом подключении Crazyrouter советуем снизить частоту — особенно для длинных текстов или электронных книг.
 
-    Safe starter pattern:
+    Первая проба — осторожные параметры, например:
 
-    - keep requests-per-second low
-    - validate with a small page or selected text first
-    - only raise the rate after the setup is already stable
+    - Не ставьте большие значения запросов в секунду
+    - Проверьте сначала на маленькой странице или по выделенному тексту
+    - После успешной настройки постепенно увеличивайте лимиты
   </Step>
 
-  <Step title="Step 6: Run the smallest practical validation">
-    Recommended order:
+  <Step title="Шаг 6: Завершите первую минимальную проверку">
+    Рекомендуемый порядок:
 
-    1. translate a short selected paragraph
-    2. translate a short webpage
-    3. only then try full-page or longer-document translation
+    1. Сначала переведите небольшой выделенный фрагмент
+    2. Затем попробуйте короткую веб-страницу
+    3. После этого протестируйте перевод целой страницы или более длинных документов
 
-    That makes it much easier to tell whether the issue is config-related or simply request-volume-related.
+    Так будет проще всего определить: ошибка в настройках API или просто слишком большая нагрузка.
   </Step>
 </Steps>
 
-## Recommended Model Setup
+## Рекомендации по моделям
 
-| Use case | Recommended model | Why |
-|----------|-------------------|-----|
-| first-pass minimal validation | `gpt-5.5` | verified successfully in production on March 23, 2026, and best for proving the OpenAI-compatible route works |
-| higher-quality translation | `claude-opus-4-8` | better for long-form explanation, refinement, and more quality-sensitive content |
-| Gemini fallback path | `gemini-3.1-pro` | useful as a second compatibility-validation path after the baseline is already stable |
+| Сценарий использования | Рекомендуемая модель | Причина |
+|---------------------|--------------------|--------|
+| Минимальная проверка | `gpt-5.5` | Успешно протестировано в продуктиве 23 марта 2026, подходит для проверки канала OpenAI-совместимых переводов |
+| Перевод с высоким качеством | `claude-opus-4-8` | Лучше для длинных текстов, редакции и случаев с высокими требованиями к качеству |
+| Резерв Gemini | `gemini-3.1-pro` | Может выступать альтернативным каналом проверки, но советуем сначала настроить основной канал |
 
-## Token Setup Best Practices
+## Рекомендации по настройке токенов
 
-| Setting | Recommendation | Notes |
-|---------|----------------|-------|
-| dedicated token | Required | do not share browser translation tokens with IDE or CLI tools |
-| model allowlist | Strongly recommended | start with only 1 to 2 translation models |
-| quota cap | Strongly recommended | full-page and ebook translation can spend much faster than normal chat |
-| device split | Recommended | separate tokens by browser or machine if needed |
-| leak response | Rotate immediately | recordings, screenshots, or browser sync leaks should trigger a key rotation |
+| Параметр | Рекомендация | Описание |
+|------|------|------|
+| Отдельный токен | Обязательно | Для расширения перевода в браузере используйте отдельный токен, не общий с IDE или CLI |
+| Белый список моделей | Настоятельно рекомендуется | Разрешите только 1–2 переводных моделей на первое время |
+| Лимиты | Настоятельно рекомендуется | Перевод целых страниц или электронных книг расходует лимит гораздо быстрее, чем обычный чат |
+| Изоляция устройств | Рекомендуется | Для разных браузеров или устройств используйте разные токены |
+| Утечка | Сразу менять | После утечки на видео, скрине или через браузерную синхронизацию немедленно заменяйте ключ |
 
-## Verification Checklist
+## Чек-лист валидации
 
-- [ ] the extension is installed correctly
-- [ ] `OpenAI` is selected as the translation service
-- [ ] `API Key` is entered correctly
-- [ ] `Custom API URL` is `https://api.crazyrouter.com/v1/chat/completions`
-- [ ] the first model is `gpt-5.5` or another allowed model
-- [ ] a short selected paragraph translates successfully
-- [ ] a short webpage translates successfully
-- [ ] Crazyrouter logs show the matching request
+- [ ] Расширение установлено корректно
+- [ ] Выбран сервис перевода `OpenAI`
+- [ ] `API Key` заполнен корректно
+- [ ] `Пользовательский адрес API интерфейса` выставлен как `https://api.crazyrouter.com/v1/chat/completions`
+- [ ] Первый разрешённый модель `gpt-5.5` или другая доступна
+- [ ] Удалось перевести небольшой выделенный фрагмент
+- [ ] Полностью переведена короткая страница
+- [ ] В логах Crazyrouter виден соответствующий запрос
 
-## Common Errors And Fixes
+## Типичные ошибки и их решение
 
-| Symptom | Likely cause | Fix |
-|---------|--------------|-----|
-| `404` | the API URL is missing `/chat/completions`, or only the root domain was entered | switch to the full `https://api.crazyrouter.com/v1/chat/completions` URL |
-| `401 unauthorized` | wrong, expired, or incomplete API key | generate a new token and paste it again |
-| `403` or `model not allowed` | the token does not allow the selected model | allow that model in Crazyrouter token settings |
-| `429` or unstable behavior | the request rate is too high | lower the request rate and validate on smaller text first |
-| long pages fail more often | concurrency or rate is too high | reduce scope first, then increase gradually |
-| cost rises too fast | you started with full-page or full-document translation immediately | begin with `gpt-5.5` on a smaller scope first |
+| Симптом | Распространённая причина | Как исправить |
+|----------|-----------------------|--------------|
+| 404 | В API-адресе не хватает `/chat/completions` или адрес — только домен | Исправьте на полный адрес `https://api.crazyrouter.com/v1/chat/completions` |
+| 401 unauthorized | Неправильный, устаревший или не полностью скопированный API Key | Пересоздайте токен и введите заново |
+| 403 / model not allowed | Модель не добавлена к токену | В настройках токена Crazyrouter разрешите данную модель |
+| 429 / нестабильно | Слишком высокая частота запросов | Уменьшите лимиты, сначала тестируйте на малых текстах |
+| Сбои при переводе длинных текстов | Слишком высокая частота или параллелизм | Сначала уменьшите объём перевода, потом повышайте |
+| Растёт стоимость | Сразу переводят полные страницы/сайты/книги | Сначала проверьте частичным переводом `gpt-5.5` и ограничьте масштабы |
 
-## Cost Tips
+## Советы по экономии
 
-- default to `gpt-5.5`
-- translate selected text first instead of full pages immediately
-- sample long content first before translating all of it
-- if you install the extension on multiple browsers, separate the tokens for cleaner cost tracking
+- По умолчанию используйте `gpt-5.5`
+- В первую очередь переводите выделенную область, а не сразу всю страницу
+- Для длинных текстов сперва проверьте качество выборочно, потом полностью
+- Если расширение стоит в нескольких браузерах — заводите отдельные токены для учёта стоимости
 
 ## FAQ
 
-### What API URL should I enter in Immersive Translate?
+### Какой API-адрес нужно указывать в Immersive Translate?
 
-Use the full path: `https://api.crazyrouter.com/v1/chat/completions`.
+Указывайте полный путь: `https://api.crazyrouter.com/v1/chat/completions`.
 
-### Why is this different from ChatBox, where the guide starts from the root domain?
+### Почему здесь, в отличие от ChatBox, не рекомендуют только домен?
 
-Because Immersive Translate's official OpenAI custom-address path is better aligned with a full endpoint URL, which makes the first validation more reliable.
+Потому что в Immersive Translate для OpenAI кастомный адрес предпочтительнее вписывать целиком — так первая проверка получится стабильнее.
 
-### Which model should I try first?
+### Какая первая рекомендуемая модель?
 
-Start with `gpt-5.5`.
+Сначала используйте `gpt-5.5`.
 
-### Why not translate full pages or ebooks immediately?
+### Почему не стоит сразу переводить целую страницу или книжку?
 
-Because that amplifies configuration mistakes, rate-limit issues, and cost at the same time. Small text first is the fastest debugging pattern.
+Потому что это одновременно усилит проблемы с конфигурацией, лимиты по частоте и вопрос стоимости. Проще начать с маленького фрагмента — проще отлавливать неполадки.
 
 <Note>
-If your goal is to manage browser AI translation cost through Crazyrouter, Immersive Translate is one of the most important browser-extension guides to keep detailed and accurate.
+Если цель — "управлять затратами на AI-перевод страниц через Crazyrouter", Immersive Translate — отличный пример расширения, для которого важно оформить подробную инструкцию.
 </Note>

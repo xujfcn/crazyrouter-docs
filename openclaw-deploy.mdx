@@ -3,7 +3,8 @@ title: '一键部署 OpenClaw'
 description: '在 Linux 或 macOS 上使用 Crazyrouter 快速部署 OpenClaw，并完成 WebUI、Telegram 与日常运维配置'
 icon: 'rocket'
 ---
-> 更新日期：2026-06-06
+> 内容更新: 2026-06-09
+
 
 通过一键脚本在 Linux 或 macOS 上部署 [OpenClaw](https://github.com/open-claw/open-claw) AI 网关，使用 Crazyrouter 作为默认后端。安装器会写入可直接运行的 `~/.openclaw/openclaw.json`、注册系统服务，并预配置一组适合聊天、编码和长上下文任务的模型。
 
@@ -32,7 +33,7 @@ OpenClaw 适合把 Crazyrouter 变成一个你自己可控的本地 AI 入口：
 - OpenClaw 自身对外暴露的是本地网关和 WebUI，认证依赖安装时生成的 `gateway.auth.token`
 
 <Note>
-如果你后续要手动调整 OpenClaw 的 provider 地址，先参考 [API Endpoint 说明](https://docs.crazyrouter.com/en/api-endpoint)，确认当前客户端应该填写根域名还是 `/v1`。
+如果你后续要手动调整 OpenClaw 的 provider 地址，先参考 [API Endpoint 说明](https://docs.crazyrouter.com/api-endpoint)，确认当前客户端应该填写根域名还是 `/v1`。
 </Note>
 
 ## 前置条件

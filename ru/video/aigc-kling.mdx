@@ -1,12 +1,12 @@
 ---
-title: "AIGC Kling VOD: руководство"
-description: "Как вызывать видео-модели Kling через маршрут AIGC Kling VOD в Crazyrouter"
+title: "Метод вызова AIGC Kling VOD"
+description: "Вызов видеомодели Kling через линию AIGC Kling VOD от Crazyrouter"
 ---
-> Дата обновления: 2026-06-24
+> Обновление содержания: 2026-08-07
 
-# AIGC Kling VOD: руководство
+# Метод вызова AIGC Kling VOD
 
-Модели `aigc-video-kling-*` — это видео-модели Kling, опубликованные в Crazyrouter через маршрут Tencent VOD. Они не используют нативный контракт Kling `/kling/v1/videos/*`. Для них применяется OpenAI-совместимый асинхронный видео-маршрут:
+`aigc-video-kling-*` — это видеомодель Kling, интегрированная Crazyrouter через линию Tencent VOD. Её путь отличается от `/kling/v1/videos/*`, приведённого в оригинальной документации Kling; вызовы для клиентов осуществляются через асинхронный видеоинтерфейс в стиле OpenAI:
 
 ```http
 POST /v1/video/generations
@@ -14,28 +14,32 @@ GET /v1/video/generations/{task_id}
 ```
 
 <Note>
-  Для VOD-маршрута используйте имена моделей `aigc-video-kling-*`. Не отправляйте сюда `kling-v2-5-turbo`, `kling-v2-6` или `kling-v3`: эти имена могут быть направлены в нативный провайдер Kling.
+  Для вызова по линии VOD обязательно используйте имя модели `aigc-video-kling-*`. Не отправляйте `kling-v2-5-turbo`, `kling-v2-6`, `kling-v3` напрямую на интерфейс этой страницы, иначе вы можете попасть на исходную линию Kling.
+</Note>
+
+<Note>
+  Если вам нужна модель изображений `aigc-image-kling-3.0`, пожалуйста, перейдите к [Генерация изображений AIGC Kling 3.0](/ru/images/aigc-kling). Эта модель использует `POST /v1/images/generations` и не поддерживает видеособинтерфейс данной страницы.
 </Note>
 
 ## Доступные модели
 
-| Модель | Версия upstream | Типичные возможности |
+| Модель | Вершняя версия | Поддерживаемые функции |
 |------|------|------|
-| `aigc-video-kling-1.6` | Kling 1.6 | текст-в-видео, изображение-в-видео, первый/последний кадр, референсы |
-| `aigc-video-kling-2.0` | Kling 2.0 | текст-в-видео, изображение-в-видео, первый/последний кадр, референсы |
-| `aigc-video-kling-2.1` | Kling 2.1 | текст-в-видео, изображение-в-видео, первый/последний кадр, референсы |
-| `aigc-video-kling-2.5-turbo` | Kling 2.5 Turbo | текст-в-видео, изображение-в-видео, первый/последний кадр, референсы |
-| `aigc-video-kling-2.6` | Kling 2.6 | текст-в-видео, изображение-в-видео, первый/последний кадр, референсы, video input |
-| `aigc-video-kling-2.6-motion-control` | Kling 2.6 Motion Control | управление движением |
-| `aigc-video-kling-3.0` | Kling 3.0 | текст-в-видео, изображение-в-видео, первый/последний кадр, референсы |
-| `aigc-video-kling-3.0-turbo` | Kling 3.0 Turbo | текст-в-видео, изображение-в-видео, референсы |
-| `aigc-video-kling-3.0-motion-control` | Kling 3.0 Motion Control | управление движением |
-| `aigc-video-kling-o1` | Kling O1 | текст-в-видео, изображение-в-видео, референсы, video input |
-| `aigc-video-kling-avatar` | Kling Avatar | аватар / цифровой человек |
-| `aigc-video-kling-identifyface` | Kling Identifyface | lip sync |
+| `aigc-video-kling-1.6` | Kling 1.6 | Текст-видео, изображение-видео, первая/последняя кадр, референс-изображение |
+| `aigc-video-kling-2.0` | Kling 2.0 | Текст-видео, изображение-видео, первая/последняя кадр, референс-изображение |
+| `aigc-video-kling-2.1` | Kling 2.1 | Текст-видео, изображение-видео, первая/последняя кадр, референс-изображение |
+| `aigc-video-kling-2.5-turbo` | Kling 2.5 Turbo | Текст-видео, изображение-видео, первая/последняя кадр, референс-изображение |
+| `aigc-video-kling-2.6` | Kling 2.6 | Текст-видео, изображение-видео, первая/последняя кадр, референс-изображение, видео-вход |
+| `aigc-video-kling-2.6-motion-control` | Kling 2.6 Motion Control | Контроль движений |
+| `aigc-video-kling-3.0` | Kling 3.0 | Текст-видео, изображение-видео, первая/последняя кадр, референс-изображение |
+| `aigc-video-kling-3.0-turbo` | Kling 3.0 Turbo | Текст-видео, изображение-видео, референс-изображение |
+| `aigc-video-kling-3.0-motion-control` | Kling 3.0 Motion Control | Контроль движений |
+| `aigc-video-kling-o1` | Kling O1 | Текст-видео, изображение-видео, референс-изображение, видео-ввод |
+| `aigc-video-kling-avatar` | Kling Avatar | Цифровой человек / Аватар |
+| `aigc-video-kling-identifyface` | Kling Identifyface | Синхронизация губ |
 
 <Note>
-  `GV 3.1`, `3.1-fast` и `3.1-lite` в Tencent VOD — это модели Google Veo, а не Kling 3.1. Используйте отдельные модели `aigc-video-gv-*`.
+  `GV 3.1`, `3.1-fast`, `3.1-lite` в документации Tencent VOD используют линию Google Veo и не являются Kling 3.1. Пожалуйста, используйте отдельную модель `aigc-video-gv-*`.
 </Note>
 
 ## Создание задачи
@@ -48,37 +52,37 @@ Content-Type: application/json
 
 ### Общие параметры
 
-| Параметр | Тип | Обязателен | Описание |
+| Параметр | Тип | Обязательный | Описание |
 |------|------|------|------|
-| `model` | string | Да | Имя модели `aigc-video-kling-*` из таблицы выше |
-| `prompt` | string | Условно | Обязателен для text-to-video; в некоторых multi-shot или image workflow детали можно передавать через metadata |
-| `seconds` / `duration` | string / number | Нет | Длительность, обычно `5` или `10`; по умолчанию 5 секунд |
-| `size` | string | Нет | Например `1280x720` или `720x1280`; используется для определения aspect ratio |
-| `image` | string | Нет | URL первого кадра для image-to-video |
-| `images` | array[string] | Нет | Первый элемент — первый кадр; второй может быть последним кадром или референсом |
-| `metadata` | object | Нет | Расширенные поля VOD Kling |
+| `model` | string | Да | Имя модели `aigc-video-kling-*`, используемой на этой странице |
+| `prompt` | string | Обязательно при определённых условиях | Обязательный для текст-видео; для многокадрового или некоторых сцен изображение-видео можно использовать в расширенных параметрах |
+| `seconds` / `duration` | string / number | Нет | Длительность видео, обычно `5` или `10`, по умолчанию `5` секунд |
+| `size` | string | Нет | Например `1280x720`, `720x1280`, определяется соотношение сторон вывода |
+| `image` | string | Нет | URL первого кадра для задачи изображение-видео |
+| `images` | array[string] | Нет | Первый элемент — первый кадр, второй — последний кадр или референс-изображение |
+| `metadata` | object | Нет | Расширенные параметры VOD Kling, см. таблицу ниже |
 
-### Часто используемые поля `metadata`
+### Часто используемые поля metadata
 
 | Поле | Описание |
 |------|------|
-| `resolution` | Качество вывода: `720P`, `1080P`, `2K`, `4K` |
-| `aspect_ratio` | Соотношение сторон: `16:9`, `9:16`, `1:1` |
-| `sound` | Генерация звука: `true` / `false`, `on` / `off` |
-| `image_urls` | URL первого / последнего кадра, максимум 2 URL |
-| `image_tail` / `last_frame_url` | URL последнего кадра; имеет приоритет над `image_urls[1]` |
-| `image_list` | Несколько референс-изображений, максимум 9 |
-| `multi_shots` / `multi_shot` | Включение multi-shot |
-| `shot_type` | Тип сцены / шота |
-| `multi_prompt` | Массив prompt для multi-shot |
-| `kling_elements` / `element_list` | Управление элементами Kling |
-| `camera_control` | Управление камерой |
-| `motion_brush` / `dynamic_masks` | Данные для motion control |
-| `video_list` | Видео-референсы, часто используются в O1 или video-input workflow |
-| `voice_list` | Голосовые референсы |
-| `session_id` / `face_choose` | Параметры выбора лица для lip sync |
+| `resolution` | Формат вывода, например `720P`, `1080P`, `2K`, `4K` |
+| `aspect_ratio` | Соотношение сторон вывода, например `16:9`, `9:16`, `1:1` |
+| `sound` | Генерировать звук или нет, поддерживает `true` / `false`, `on` / `off` |
+| `image_urls` | Массив первого/последнего кадров, максимум 2 изображения |
+| `image_tail` / `last_frame_url` | URL последнего кадра, имеет более высокий приоритет, чем `image_urls[1]` |
+| `image_list` | Список референс-изображений, максимум 9 изображений |
+| `multi_shots` / `multi_shot` | Переключатель многокадрового режима |
+| `shot_type` | Тип раскадровки |
+| `multi_prompt` | Массив промптов для многокадрового режима |
+| `kling_elements` / `element_list` | Контроль Kling-элементов |
+| `camera_control` | Контроль камеры (движения) |
+| `motion_brush` / `dynamic_masks` | Параметры контроля движений |
+| `video_list` | Видеореференс, обычно для O1 или схожих функций с видео-входом |
+| `voice_list` | Аудиореференс |
+| `session_id` / `face_choose` | Параметры, связанные с синхронизацией губ |
 
-## Text-to-Video
+## Текст-видео
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/video/generations \
@@ -96,7 +100,7 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
   }'
 ```
 
-## Image-to-Video
+## Изображение-видео
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/video/generations \
@@ -114,7 +118,7 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
   }'
 ```
 
-## Видео с первым и последним кадром
+## Видео по первым и последним кадрам
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/video/generations \
@@ -136,10 +140,10 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
 ```
 
 <Note>
-  Для first-last frame запросов в Kling 2.6 рекомендуется явно указывать `metadata.sound=false`.
+  Для Kling 2.6 рекомендуется явно передавать `metadata.sound=false` при создании видео по первым и последним кадрам.
 </Note>
 
-## Несколько референс-изображений
+## Много референс-изображений
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/video/generations \
@@ -159,9 +163,9 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
   }'
 ```
 
-## Motion Control
+## Контроль движений
 
-Для управления движением используйте отдельную модель, например `aigc-video-kling-2.6-motion-control` или `aigc-video-kling-3.0-motion-control`.
+Возможности по контролю движений используют отдельные имена моделей, такие как `aigc-video-kling-2.6-motion-control` или `aigc-video-kling-3.0-motion-control`.
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/video/generations \
@@ -187,9 +191,9 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
   }'
 ```
 
-## O1 с видео-входом
+## Видео-вход O1
 
-`aigc-video-kling-o1` принимает видео-референсы через `metadata.video_list`. Наличие видео-входа может влиять на тарификацию.
+`aigc-video-kling-o1` можно передать через `metadata.video_list` в качестве видеореференса. Наличие видео-входа влияет на тариф.
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/video/generations \
@@ -208,7 +212,7 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
   }'
 ```
 
-## Avatar и Lip Sync
+## Avatar и синхронизация губ
 
 Для Avatar используйте `aigc-video-kling-avatar`:
 
@@ -227,7 +231,7 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
 }
 ```
 
-Для lip sync используйте `aigc-video-kling-identifyface`. Если в вашем workflow уже есть `session_id` и `face_choose`, полученные на этапе идентификации лица, передайте их в `metadata`:
+Для синхронизации губ используйте `aigc-video-kling-identifyface`. Если на стороне пользователя уже определены `session_id` и `face_choose`, их можно поместить в `metadata`:
 
 ```json
 {
@@ -247,46 +251,47 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
 ```
 
 <Note>
-  Полный lip-sync workflow обычно требует идентификации лица до генерации видео. Без `session_id` / `face_choose` upstream может вернуть ошибку параметров.
+  Полный процесс синхронизации губ обычно требует сначала выполнить распознавание лица, затем отправить задачу на генерацию видео. Если нет `session_id` / `face_choose`, может возникнуть ошибка параметров на стороне сервера.
 </Note>
 
-## Запрос статуса задачи
+## Запрос состояния задачи
 
-После создания используйте `id` или `task_id` и тот же compatibility route:
+После получения `id` или `task_id` при создании задачи используйте тот же универсальный путь для запроса статуса:
 
 ```bash cURL
 curl https://api.crazyrouter.com/v1/video/generations/TASK_ID \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-После завершения обычно возвращается архивированный URL видео:
+После выполнения обычно возвращается URL архивированного видео:
 
 ```json
 {
   "code": "success",
   "data": {
-    "status": "succeeded",
+    "status": "SUCCESS",
     "task_id": "vod_task_abc123",
-    "url": "https://media.crazyrouter.com/task-artifacts/example.mp4"
+    "result_url": "https://media.crazyrouter.com/task-artifacts/example.mp4",
+    "artifact_url": "https://media.crazyrouter.com/task-artifacts/example.mp4"
   }
 }
 ```
 
-## Отличия от нативного Kling
+## Отличия от оригинального Kling
 
-| Пункт | AIGC Kling VOD | Нативный Kling |
+| Проект | AIGC Kling VOD | Оригинальный Kling |
 |------|------|------|
-| Имена моделей | `aigc-video-kling-*` | `kling-v2-5-turbo`, `kling-v2-6`, `kling-v3` |
-| Создание | `POST /v1/video/generations` | `POST /kling/v1/videos/text2video` и похожие маршруты |
-| Запрос статуса | `GET /v1/video/generations/{task_id}` | `GET /kling/v1/videos/{type}/{task_id}` |
-| Основные поля | `model`, `prompt`, `seconds`, `image`, `images`, `metadata` | `model_name`, `prompt`, `image_urls`, `duration` и другие |
-| Лучше подходит для | Tencent VOD route, VOD pricing and capabilities | Нативный протокол Kling |
+| Имя модели | `aigc-video-kling-*` | `kling-v2-5-turbo`, `kling-v2-6`, `kling-v3` |
+| Путь для создания | `POST /v1/video/generations` | `POST /kling/v1/videos/text2video` и др. |
+| Путь для запроса | `GET /v1/video/generations/{task_id}` | `GET /kling/v1/videos/{type}/{task_id}` |
+| Основные поля | `model`, `prompt`, `seconds`, `image`, `images`, `metadata` | `model_name`, `prompt`, `image_urls`, `duration` и др. |
+| Подходящие сценарии | Линия Tencent VOD, цены и возможности VOD | Оригинальный протокол Kling |
 
-Цены, скидки и доступные спецификации смотрите на актуальной странице [Pricing](/pricing).
+Тарифы, скидки и доступные форматы смотрите на [странице с ценами](https://crazyrouter.com/ru/pricing).
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [Kling 2.6: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/kling/aigc-video-kling-2-6?utm_source=docs&utm_medium=related)
-- [Kling 3.0: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/kling/aigc-video-kling-3-0?utm_source=docs&utm_medium=related)
-- [Все модели Kling AI с актуальными ценами](https://crazyrouter.com/en/models/kling?utm_source=docs&utm_medium=related)
+- [Страница модели Kling 3.0: текущие цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/kling/aigc-video-kling-3-0?utm_source=docs&utm_medium=related)
+- [Страница модели Kling 2.6: текущие цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/kling/aigc-video-kling-2-6?utm_source=docs&utm_medium=related)
+- [Все модели и цены Kling AI](https://crazyrouter.com/ru/models/kling?utm_source=docs&utm_medium=related)

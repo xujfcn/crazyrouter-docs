@@ -1,27 +1,27 @@
 ---
-title: "Gemini Image Understanding"
-description: "Gemini native image understanding documented from successful Crazyrouter request patterns on 2026-04-08"
+title: "Gemini 画像理解"
+description: "2026-04-08 Crazyrouter 当サイトの成功リクエスト経験に基づく Gemini ネイティブ画像理解の整理"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Gemini Image Understanding
+# Gemini 画像理解
 
 ```
 POST /v1beta/models/{model}:generateContent
 ```
 
-As of `2026-04-08`, successful Crazyrouter and local `:4000` retests show:
+`2026-04-08` 時点で、Crazyrouter 当サイトとローカル `4000` ポート再検証の結果：
 
-- `gemini-2.5-pro` can reliably read images through `inlineData`
-- remote image URLs through `fileData.fileUri` have shown repeated fetch and upstream-body failures
-- the primary recommended request shape for image understanding is therefore `inlineData`
+- `gemini-3.1-pro` は `inlineData` を通じて画像を安定して読み込んでテキスト説明を返すことができます
+- リモート画像URL型の `fileData.fileUri` は複数の経路で取得失敗や上流のレスポンス異常などの問題が頻発しています
+- そのため、画像理解では現時点で `inlineData` を推奨方式としています
 
 ---
 
-## Verified Minimal Request
+## 検証済みの最小リクエスト
 
 ```bash
-curl "https://api.crazyrouter.com/v1beta/models/gemini-2.5-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -35,7 +35,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-2.5-pro:generateContent?k
             }
           },
           {
-            "text": "Describe this image in one short sentence."
+            "text": "请用一句中文描述这张图片里有什么。"
           }
         ]
       }
@@ -43,7 +43,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-2.5-pro:generateContent?k
   }'
 ```
 
-Observed production response shape:
+本番環境で実際に返される主要な形式：
 
 ```json
 {
@@ -52,7 +52,7 @@ Observed production response shape:
       "content": {
         "parts": [
           {
-            "text": "This image shows a smooth multi-color gradient background."
+            "text": "这张图片展示了多种鲜艳色彩平滑过渡的渐变效果。"
           }
         ]
       }
@@ -61,20 +61,20 @@ Observed production response shape:
 }
 ```
 
-## Request Notes
+## リクエスト要点
 
-- Prefer `inlineData` for image understanding
-- Keep `mimeType` aligned with the actual file format, such as `image/png` or `image/jpeg`
-- Put raw Base64 into `data` without the `data:image/...;base64,` prefix
-- If you only have a remote image URL, do not treat it as the current primary Gemini image-understanding path on Crazyrouter
+- 画像理解には `inlineData` を優先して用いてください
+- `mimeType` は実際の画像フォーマットに合わせて、例えば `image/png` や `image/jpeg` のように設定しましょう
+- `data` にはBase64の内容のみ入力し、`data:image/...;base64,` プレフィックスは含めないでください
+- 手元にリモート画像URLしかない場合、現在はそれをGemini画像理解のメイン方式として選ばないでください
 
 <Note>
-  For video understanding, see [Gemini Video Understanding](/jp/chat/gemini/video). For audio understanding, see [Gemini Audio Understanding](/jp/chat/gemini/audio).
+  動画理解をしたい方は [Gemini 動画理解](/jp/chat/gemini/video) へ。音声理解をしたい方は [Gemini 音声理解](/jp/chat/gemini/audio) をご覧ください。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [Gemini 2.5 Flash 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash-Lite 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash 価格比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash モデルページ：リアルタイム価格・実例・利用コード](https://crazyrouter.com/ja/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash-Lite 価格比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)

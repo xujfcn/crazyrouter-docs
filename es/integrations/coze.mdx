@@ -1,0 +1,255 @@
+---
+title: "Guía de configuración de Coze"
+description: "En Coze (Kouzi), llama a Crazyrouter mediante el complemento HTTP/API o un nodo de flujo de trabajo, y distingue claramente entre los planes públicos y la solución de modelos personalizados para empresas"
+---
+> Contenido actualizado: 2026-06-09
+
+Coze (Kouzi) es una plataforma de agentes inteligentes y flujos de trabajo lanzada por ByteDance, adecuada para la creación de bots, orquestación de flujos de trabajo, invocación de complementos y publicación en múltiples canales. Al integrar Crazyrouter, el camino más estable y adecuado para la documentación pública no es asumir directamente que "todas las versiones pueden personalizar modelos", sino priorizar el complemento HTTP/API o el nodo de solicitud HTTP del flujo de trabajo.
+
+## Resumiendo primero
+
+Para la gran mayoría de los usuarios de Crazyrouter, actualmente se recomiendan más estos dos caminos en Coze:
+
+- Opción 1: Utilizar el complemento `Crear a partir de una API` para llamar a Crazyrouter
+- Opción 2: Llamar a Crazyrouter mediante un nodo de solicitud HTTP en el flujo de trabajo
+
+No se recomienda redactar la guía principal pública como "conectar el modelo personalizado de Crazyrouter directamente en el gestor de modelos de Coze", por las siguientes razones:
+
+- Las capacidades de Coze varían bastante según la versión, la región y el plan
+- La documentación oficial de planes de Coze menciona explícitamente que `Modelo personalizado` es una capacidad del plan Enterprise Flagship
+- Por lo tanto, para la documentación pública, la opción más estable es el camino del complemento HTTP / API
+
+<Warning>
+El principio más importante en esta página es: la guía principal pública de Coze debe ser "invocar Crazyrouter mediante complemento HTTP / API" y NO asumir que todos los usuarios pueden conectar modelos personalizados directamente en el gestor de modelos.
+</Warning>
+
+## ¿A quién va dirigido?
+
+- Usuarios que quieren integrar Crazyrouter en su Bot o flujo de trabajo en Coze
+- Aquellos que quieren usar Crazyrouter como un nodo de modelo externo
+- Personas que prefieren primero construir la cadena mínima comprobable, en vez de ir directo a la capacidad de modelo personalizado de empresa
+- Usuarios que buscan que el Bot acceda a la capacidad multimodelo mediante complemento o flujo de trabajo
+
+## Método recomendado de integración
+
+### Ruta principal pública: Complemento HTTP / API
+
+Parámetros recomendados:
+
+- Método de solicitud: `POST`
+- URL: `https://api.crazyrouter.com/v1/chat/completions`
+- Encabezados:
+  - `Authorization: Bearer sk-xxx`
+  - `Content-Type: application/json`
+- Primer modelo de validación: `gpt-5.5`
+
+### ¿Por qué se recomienda esta ruta primero?
+
+Porque:
+
+- Depende menos de las diferencias de planes de Coze
+- Es más fácil identificar si el problema es de configuración de Coze o del token/modelo de Crazyrouter
+- Es el más adecuado para explicaciones estables en documentación pública
+
+## Requisitos del sistema y condiciones previas
+
+| Elemento | Descripción |
+|------|------|
+| Cuenta de Crazyrouter | Primero regístrate en [crazyrouter.com](https://crazyrouter.com) |
+| Token de Crazyrouter | Se recomienda crear un token separado solo para Coze |
+| Cuenta de Coze | Necesario para crear Bot / flujo de trabajo / complemento |
+| Capacidad de publicación | Al menos poder depurar Bot o flujo de trabajo |
+| Modelos disponibles | Al menos 1 modelo de chat habilitado |
+
+Lista blanca inicial recomendada:
+
+- `gpt-5.5`
+- `claude-opus-4-8`
+- `gemini-3.1-pro`
+
+## Opción 1: Integrar Crazyrouter mediante complemento API
+
+<Steps>
+  <Step title="Paso 1: Crear un token dedicado de Coze en Crazyrouter">
+    Para el primer intento, se recomienda habilitar solo:
+
+    - `gpt-5.5`
+    - `claude-opus-4-8`
+
+    No habilites muchos modelos al inicio, para facilitar la solución de problemas.
+  </Step>
+
+  <Step title="Paso 2: Crear un complemento de API en Coze">
+    Tras ingresar al panel de Coze, según tu versión accede a:
+
+    - `Complementos`
+    - `Crear complemento`
+    - Escoge `Crear a partir de una API` o una entrada de nombre similar
+
+    <Note>
+    Los nombres en la interfaz de Coze pueden variar según versión, región o línea de producto, pero la idea principal es: crear un complemento HTTP API externo.
+    </Note>
+  </Step>
+
+  <Step title="Paso 3: Configurar el método de solicitud y la URL">
+    Completa:
+
+    - `Method`: `POST`
+    - `URL`: `https://api.crazyrouter.com/v1/chat/completions`
+  </Step>
+
+  <Step title="Paso 4: Configurar los encabezados de la solicitud">
+    Completa:
+
+    ```text
+    Authorization: Bearer sk-xxx
+    Content-Type: application/json
+    ```
+  </Step>
+
+  <Step title="Paso 5: Configurar el cuerpo mínimo de la solicitud">
+    Para el primer intento, usa el cuerpo de solicitud mínimo:
+
+    ```json
+    {
+      "model": "gpt-5.5",
+      "messages": [
+        {
+          "role": "user",
+          "content": "{{input}}"
+        }
+      ]
+    }
+    ```
+
+    Si la interfaz de tu complemento lo permite, mapea la entrada del usuario a variables como `{{input}}`.
+  </Step>
+
+  <Step title="Paso 6: Realizar la verificación de conexión primero en el complemento">
+    Si la versión actual permite depurar complementos, primero envía:
+
+    ```text
+    Reply only OK
+    ```
+
+    Asegúrate de que la API responde de manera estable, luego intégralo al Bot o flujo de trabajo.
+  </Step>
+
+  <Step title="Paso 7: Llamar al complemento en el Bot o en el flujo de trabajo">
+    Cuando la prueba individual del complemento pase, añádelo a:
+
+    - Capacidad de complemento del Bot
+    - O nodo de flujo de trabajo
+
+    La primera vez, haz que el complemento realice solo una tarea simple, como resumen, reescritura o preguntas y respuestas fijas.
+  </Step>
+</Steps>
+
+## Opción 2: Integrar Crazyrouter mediante nodo de solicitud HTTP del flujo de trabajo
+
+Si no deseas mantener un complemento por separado, puedes llamar directamente al nodo de solicitud HTTP dentro del flujo de trabajo.
+
+### Configuración recomendada
+
+- Método de solicitud: `POST`
+- URL: `https://api.crazyrouter.com/v1/chat/completions`
+- Encabezados:
+  - `Authorization: Bearer sk-xxx`
+  - `Content-Type: application/json`
+- Cuerpo:
+
+```json
+{
+  "model": "gpt-5.5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{{input}}"
+    }
+  ]
+}
+```
+
+### Orden de validación recomendado
+
+1. Primero envía la cadena fija `Reply only OK` en el nodo
+2. Luego sustituye por entrada variable
+3. Finalmente, mapea la salida al siguiente nodo
+
+## ¿Cómo entender “integración de modelo personalizado”?
+
+Algunas versiones o planes de Coze pueden admitir integración de modelos personalizados, pero esto NO debería ser la línea principal en la documentación pública de Crazyrouter.
+
+Razones:
+
+- El FAQ oficial de planes de Coze actualmente enumera `Modelo personalizado` como una capacidad solo de la versión Enterprise Flagship
+- Para la mayoría de los usuarios, la ruta pública replicable y más fácil de verificar sigue siendo el complemento o el nodo HTTP / API
+- Por eso, en esta página la integración de modelos personalizados solo es contexto extra, no el tutorial principal
+
+## Configuración de modelo recomendada
+
+| Escenario de uso | Modelo recomendado | Razón |
+|---------|-------------------|-------------------------------------------------------------------------------|
+| Verificación inicial de cadena | `gpt-5.5` | Probado con éxito en entorno productivo el 23 de marzo de 2026, ideal para comprobar la integración de Coze con Crazyrouter |
+| Salida de alta calidad | `claude-opus-4-8` | Adecuado para generación de contenido y explicaciones más avanzadas |
+| Gemini de respaldo | `gemini-3.1-pro` | Útil como segunda vía para verificar compatibilidad |
+
+## Mejores Prácticas para ajustes de Token
+
+| Ajuste | Recomendación | Descripción |
+|-----|------|----------------------------------------------------------------------------------|
+| Token dedicado | Obligatorio | No compartas el token de Coze con el cliente de escritorio ni herramientas de IDE |
+| Lista blanca de modelos | Muy recomendado | Al inicio habilita solo 1 a 2 modelos |
+| Límite de cuota | Muy recomendado | Los flujos bucle y reintentos de complementos aumentarán el consumo |
+| Aislamiento de entorno | Recomendado | Usa tokens separados para desarrollo/pruebas/producción |
+| Manejo de filtraciones | Rotar inmediatamente | Si se expone en capturas o áreas compartidas, cambia la clave de inmediato |
+
+## Lista de comprobación de validación
+
+- [ ] Token de Crazyrouter dedicado para Coze creado
+- [ ] Prioridad de ruta: complemento HTTP / API o nodo HTTP del flujo de trabajo
+- [ ] La URL de solicitud está configurada en `https://api.crazyrouter.com/v1/chat/completions`
+- [ ] El encabezado `Authorization` está correctamente establecido en `Bearer sk-xxx`
+- [ ] `Content-Type` configurado en `application/json`
+- [ ] El cuerpo mínimo de solicitud pasa el test con `gpt-5.5`
+- [ ] Prueba individual del complemento o nodo exitosa
+- [ ] También funciona tras agregarse al Bot/flujo de trabajo
+- [ ] Solicitudes visibles en los logs de Crazyrouter
+
+## Errores comunes y cómo corregirlos
+
+| Síntoma | Causa común | Solución |
+|----------------------------|------------------------------------------|--------------------------------------------------------------------------|
+| 401 unauthorized | Token incorrecto, expirado o incompleto | Genera un nuevo token y completa de nuevo el encabezado `Authorization` |
+| 404 | URL incorrecta o falta `/v1/chat/completions` | Corrige y pon la URL completa |
+| 403 / model not allowed | Token no habilita el modelo actual | Habilita el modelo en la configuración del token de Crazyrouter |
+| `model not found` | Nombre del modelo incorrecto | Vuelve a `gpt-5.5` y valida |
+| Puede crear complemento pero falla en el Bot | Mapeo de entrada/salida no coincide | Vuelve a depurar con cadenas fijas |
+| Fallos esporádicos en el nodo flujo | Entrada demasiado larga, demasiados reintentos o alta concurrencia | Reduce la entrada y la complejidad para una validación mínima |
+| No encuentras “gestión de modelos” siguiendo otros tutoriales | Diferencia de versión o plan | Vuelve a la ruta principal HTTP / API, no dependas primero de la edición empresarial |
+
+## Preguntas Frecuentes (FAQ)
+
+### ¿Cuál es el camino más recomendado para conectar Coze con Crazyrouter?
+
+En la documentación pública, prioriza el complemento HTTP / API o el nodo de solicitud HTTP del flujo de trabajo.
+
+### ¿Por qué no se pone “integración de modelo personalizado” como guía principal?
+
+Porque las capacidades de Coze varían mucho entre versiones y planes, y el FAQ oficial de planes enumera `Modelo personalizado` solo como capacidad empresarial. La documentación pública debe priorizar rutas reproducibles y accesibles.
+
+### ¿Qué URL se debe poner?
+
+Coloca `https://api.crazyrouter.com/v1/chat/completions`.
+
+### ¿Cuál es el primer modelo recomendado?
+
+Empieza con `gpt-5.5`.
+
+### ¿Cuándo sumar Claude u otros modelos?
+
+Solo después de que pase la prueba con un modelo, un nodo y una tarea simple. Luego amplía la lista blanca progresivamente.
+
+<Note>
+Si tu objetivo es “que Coze pueda llamar a Crazyrouter de manera estable primero”, lo prioritario no es perseguir la integración más compleja, sino asegurarte de que la ruta mínima funciona con el complemento HTTP / API.
+</Note>

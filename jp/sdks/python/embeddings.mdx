@@ -1,10 +1,10 @@
 ---
-title: 'Python Embeddings'
-description: 'Python text embedding API usage'
+title: "Python 埋め込み"
+description: "Python でテキスト埋め込み API を呼び出す"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-06
 
-## Basic Usage
+## 基本的な使い方
 
 ```python
 from openai import OpenAI
@@ -13,20 +13,20 @@ client = OpenAI(api_key="sk-xxx", base_url="https://api.crazyrouter.com/v1")
 
 response = client.embeddings.create(
     model="text-embedding-3-large",
-    input="Crazyrouter is an AI model gateway"
+    input="Crazyrouter 是一个 AI 模型网关"
 )
 
 embedding = response.data[0].embedding
-print(f"Dimensions: {len(embedding)}")
+print(f"维度: {len(embedding)}")
 ```
 
-## Batch Embeddings
+## バッチ埋め込み
 
 ```python
 texts = [
-    "The history of artificial intelligence",
-    "Differences between machine learning and deep learning",
-    "Applications of natural language processing"
+    "人工智能的发展历史",
+    "机器学习与深度学习的区别",
+    "自然语言处理的应用场景"
 ]
 
 response = client.embeddings.create(
@@ -35,24 +35,24 @@ response = client.embeddings.create(
 )
 
 for i, item in enumerate(response.data):
-    print(f"Text {i}: dimensions {len(item.embedding)}")
+    print(f"文本 {i}: 维度 {len(item.embedding)}")
 ```
 
-## Custom Dimensions
+## 次元指定
 
-The `text-embedding-3-*` series supports custom output dimensions:
+`text-embedding-3-*` シリーズは、出力次元をカスタマイズできます：
 
 ```python
 response = client.embeddings.create(
     model="text-embedding-3-large",
-    input="Test text",
-    dimensions=256  # Reduce to 256 dimensions
+    input="测试文本",
+    dimensions=256  # 降维到 256
 )
 
-print(f"Dimensions: {len(response.data[0].embedding)}")  # 256
+print(f"维度: {len(response.data[0].embedding)}")  # 256
 ```
 
-## Compute Similarity
+## 類似度計算
 
 ```python
 import numpy as np
@@ -62,15 +62,15 @@ def cosine_similarity(a, b):
 
 response = client.embeddings.create(
     model="text-embedding-3-large",
-    input=["Cats are pets", "Dogs are also common pets", "Quantum mechanics is a branch of physics"]
+    input=["猫是一种宠物", "狗也是常见的宠物", "量子力学是物理学分支"]
 )
 
 vectors = [item.embedding for item in response.data]
 
-print(f"Cat vs Dog: {cosine_similarity(vectors[0], vectors[1]):.4f}")
-print(f"Cat vs Quantum mechanics: {cosine_similarity(vectors[0], vectors[2]):.4f}")
+print(f"猫 vs 狗: {cosine_similarity(vectors[0], vectors[1]):.4f}")
+print(f"猫 vs 量子力学: {cosine_similarity(vectors[0], vectors[2]):.4f}")
 ```
 
 <Note>
-  Reducing dimensions can lower storage and computation costs but may sacrifice some accuracy. Test with your specific use case to find the right dimension.
+  次元を減らすことで、ストレージと計算コストを削減できますが、一部の精度が失われます。実際の用途に合わせて、適切な次元数をテストして選択することを推奨します。
 </Note>

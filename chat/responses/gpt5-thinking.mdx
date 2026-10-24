@@ -1,20 +1,20 @@
 ---
 title: "GPT-5 思考模式"
-description: "基于生产环境复核，通过 Responses API 使用 GPT-5.4 的 reasoning 模式"
+description: "通过 Responses API 生产环境重新验证的 GPT-5.4 推理"
 ---
-> 更新日期：2026-06-06
+> 内容更新: 2026-06-09
 
 # GPT-5 思考模式
 
-本文页只写入 `2026-03-22` 已在 Crazyrouter 生产环境复核过的 GPT reasoning 行为。
+本页面仅记录了在 `2026-03-22` 上经过 Crazyrouter 生产环境重新验证的 GPT 推理行为。
 
-当前主示例使用：
+当前主要示例使用：
 
 - `gpt-5.5`
 - `POST /v1/responses`
 
 <Note>
-  Claude 当前不支持 `POST /v1/responses`。如果你在接 Claude，请使用 `POST /v1/messages` 或 `POST /v1/chat/completions`，不要套用本页的 Responses 请求形态。
+  Claude 当前不支持 `POST /v1/responses`。如果您正在集成 Claude，请使用 `POST /v1/messages` 或 `POST /v1/chat/completions`，而不是本页面的请求结构。
 </Note>
 
 ```
@@ -85,15 +85,15 @@ console.log(response.output_text);
 
 ---
 
-## 生产验证到的响应结构
+## 验证回应结构
 
-当前生产返回的关键 `output.type`：
+已验证的 `output.type` 值：
 
 ```json
 ["reasoning", "message"]
 ```
 
-其中 `reasoning` item 的典型结构为：
+典型的 `reasoning` 项结构：
 
 ```json
 {
@@ -109,7 +109,7 @@ console.log(response.output_text);
 }
 ```
 
-`message` item 中则包含最终输出文本：
+最终答案通过 `message` 项返回：
 
 ```json
 {
@@ -127,20 +127,20 @@ console.log(response.output_text);
 
 ## `reasoning` 参数
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `effort` | string | 推理力度，当前实测可用值包括 `low`、`medium`、`high` |
-| `summary` | string | 思考摘要粒度，当前实测 `concise`、`detailed` 可用 |
+| 字段 | 类型 | 描述 |
+|-------|------|-------------|
+| `effort` | 字符串 | 推理强度。已验证的值包括 `low`、`medium` 和 `high` |
+| `summary` | 字符串 | 摘要粒度。`concise` 和 `detailed` 已重新验证 |
 
-### 一个实用判断
+### 实用规则
 
-- 只要更强推理，不关心摘要：只传 `effort`
-- 需要拿到可展示的 reasoning 摘要：同时传 `summary`
+- 如果您只需要更强的推理，请发送 `effort`
+- 如果需要可检查的推理摘要，请同时发送 `effort` 和 `summary`
 
-在当前复核中：
+在当前重新检查中：
 
-- 只传 `effort` 时，`reasoning` item 存在，但 `summary` 可能为空数组
-- 传 `summary: "detailed"` 时，可以稳定拿到 `summary_text`
+- 仅使用 `effort` 时，`reasoning` 项存在，但 `summary` 可能是空数组
+- 使用 `summary: "detailed"` 时，`summary_text` 返回稳定
 
 ---
 
@@ -160,18 +160,18 @@ for item in response.output:
     if item.type == "reasoning":
         for part in item.summary:
             if part.type == "summary_text":
-                print("思考摘要:", part.text)
+                print("Thinking summary:", part.text)
     elif item.type == "message":
         for content in item.content:
             if content.type == "output_text":
-                print("最终回答:", content.text)
+                print("Final answer:", content.text)
 ```
 
 ---
 
-## 流式思考
+## 思考流式输出
 
-当前生产环境已复核到以下 Responses SSE 事件名：
+以下 Responses SSE 事件名称已在生产环境重新验证：
 
 - `response.reasoning_summary_part.added`
 - `response.reasoning_summary_text.delta`
@@ -195,26 +195,26 @@ stream = client.responses.create(
 
 for event in stream:
     if event.type == "response.reasoning_summary_text.delta":
-        print(f"[思考摘要] {event.delta}", end="")
+        print(f"[Thinking summary] {event.delta}", end="")
     elif event.type == "response.output_text.delta":
         print(event.delta, end="")
 ```
 
 ---
 
-## 当前建议
+## 当前推荐
 
-- 需要可见 reasoning 字段时，优先选 `gpt-5.5` + Responses API
-- 不要把 `gpt-5.5` Chat Completions 的 `reasoning_content` 当成当前主依赖字段
-- 如果你只关心最终答案，可在 Chat Completions 继续使用 `reasoning_effort`
+- 如果需要可见的推理字段，优先选择 `gpt-5.5` 与 Responses API
+- 不要将 `gpt-5.5` Chat Completions `reasoning_content` 作为当前主要协议
+- 如果您只关心最终答案，Chat Completions 搭配 `reasoning_effort` 仍可用
 
 <Warning>
-  reasoning 模式会提高延迟与 Token 消耗。`effort` 越高，成本通常越高。
+  推理模式会增加延迟和 token 用量。更高的 `effort` 通常费用更高。
 </Warning>
 
 {/* crazyrouter-model-links v2 */}
-## 相关页面
+## crazyrouter.com 相关
 
-- [GPT-5 价格对比：官方 / Azure / Bedrock / Vertex 与 Crazyrouter](https://crazyrouter.com/zh/pricing/gpt-5?utm_source=docs&utm_medium=related)
-- [GPT-5 模型页：实时价格、真实样例、调用代码](https://crazyrouter.com/zh/models/openai/gpt-5?utm_source=docs&utm_medium=related)
-- [GPT-5.4 价格对比：官方 / Azure / Bedrock / Vertex 与 Crazyrouter](https://crazyrouter.com/zh/pricing/gpt-5-4?utm_source=docs&utm_medium=related)
+- [GPT-5 价格对比：官方列表与 Azure / Bedrock / Vertex 及 Crazyrouter](https://crazyrouter.com/zh/pricing/gpt-5?utm_source=docs&utm_medium=related)
+- [GPT-5 模型页面：实时价格、真实样例、代码](https://crazyrouter.com/zh/models/openai/gpt-5?utm_source=docs&utm_medium=related)
+- [GPT-5.4 价格对比：官方列表与 Azure / Bedrock / Vertex 及 Crazyrouter](https://crazyrouter.com/zh/pricing/gpt-5-4?utm_source=docs&utm_medium=related)

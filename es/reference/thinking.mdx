@@ -1,0 +1,156 @@
+---
+title: "Campo de pensamiento de IA"
+description: "Basado en la revisión del entorno de producción, entender los diferentes campos thinking/reasoning expuestos por los distintos protocolos en Crazyrouter"
+---
+> Contenido actualizado: 2026-06-09
+
+# Campo de pensamiento de IA
+
+Esta página solo enumera la forma en la que `2026-03-22` ha sido revisado en el entorno de producción de Crazyrouter para la exposición de los campos thinking / reasoning.
+
+Una premisa clave es: Los distintos protocolos exponen el “pensamiento” de manera diferente.
+
+- Las respuestas de OpenAI tienden a devolver un item `reasoning` independiente
+- Los mensajes nativos de Claude devuelven un bloque `thinking`
+- Gemini Native actualmente permite determinar más fácilmente si el pensamiento es efectivo a través de `usageMetadata.thoughtsTokenCount`
+
+## Campos actualmente validados
+
+| Modelo | Protocolo | Campo o indicador validado | Descripción |
+|------|------|------------------|------|
+| `gpt-5.5` | Responses | `output[].type = "reasoning"` | Puede combinarse con `summary` para obtener un resumen presentable |
+| `claude-opus-4-8` | Mensajes Anthropic | `content[].type = "thinking"` | Devuelto junto al bloque `text` |
+| `gemini-3.1-pro` | Gemini Native | `usageMetadata.thoughtsTokenCount` | Indica que el presupuesto de pensamiento ha sido realmente consumido |
+
+<Note>
+  En esta ronda de revisión, `gpt-5.5` Chat Completions de `message.reasoning_content` no devolvió contenidos confiables de manera estable, por lo tanto aquí no se incluye como campo principal de observación.
+</Note>
+
+---
+
+## GPT: Responses `reasoning` item
+
+```json
+{
+  "output": [
+    {
+      "id": "rs_xxx",
+      "type": "reasoning",
+      "encrypted_content": "...",
+      "summary": [
+        {
+          "type": "summary_text",
+          "text": "..."
+        }
+      ]
+    },
+    {
+      "type": "message",
+      "content": [
+        {
+          "type": "output_text",
+          "text": "最终回答"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Forma de extracción:
+
+```python
+response = client.responses.create(
+    model="gpt-5.5",
+    input="Which is larger, 9.11 or 9.9?",
+    reasoning={"effort": "high", "summary": "detailed"}
+)
+
+for item in response.output:
+    if item.type == "reasoning":
+        for part in item.summary:
+            if part.type == "summary_text":
+                print("思考摘要:", part.text)
+```
+
+---
+
+## Claude: `thinking` block
+
+```json
+{
+  "content": [
+    {
+      "type": "thinking",
+      "thinking": "..."
+    },
+    {
+      "type": "text",
+      "text": "最终回答"
+    }
+  ]
+}
+```
+
+Forma de extracción:
+
+```python
+message = client.messages.create(
+    model="claude-opus-4-8",
+    max_tokens=320,
+    thinking={
+        "type": "enabled",
+        "budget_tokens": 128
+    },
+    messages=[
+        {"role": "user", "content": "Which is larger, 9.11 or 9.9?"}
+    ]
+)
+
+for block in message.content:
+    if block.type == "thinking":
+        print("思考内容:", block.thinking)
+    elif block.type == "text":
+        print("回答:", block.text)
+```
+
+---
+
+## Gemini: `thoughtsTokenCount`
+
+En Gemini Native, durante la revisión actual, el punto de observación más estable no es el texto visible de pensamiento en el cuerpo principal, sino el campo de uso:
+
+```json
+{
+  "usageMetadata": {
+    "thoughtsTokenCount": 120
+  }
+}
+```
+
+Esto significa:
+
+- El presupuesto de pensamiento ha participado realmente en la generación
+- El consumo de tokens de pensamiento ocurrió en la solicitud actual
+
+Forma de extracción:
+
+```python
+data = response.json()
+thoughts = data.get("usageMetadata", {}).get("thoughtsTokenCount", 0)
+print("思考 Token:", thoughts)
+```
+
+---
+
+## Consideraciones al utilizar
+
+- No asumas que todos los modelos retornan el proceso de pensamiento completo en texto legible
+- No mezcles los campos de pensamiento de distintos protocolos
+- Si necesitas realizar auditoría, registrar logs o mostrar en el frontend, primero determina según el protocolo si debes leer `reasoning`, `thinking` o `thoughtsTokenCount`
+
+Página relacionada:
+
+- [Modo de pensamiento GPT-5](/es/chat/responses/gpt5-thinking)
+- [Formato nativo de Claude](/es/chat/anthropic/messages)
+- [Formato nativo de Gemini](/es/chat/gemini/native)

@@ -1,187 +1,187 @@
 ---
-title: 'Cherry Studio Setup Guide'
-description: 'Connect Crazyrouter to Cherry Studio through its OpenAI-compatible provider flow, then finish first-run validation, model setup, MCP usage, and troubleshooting'
+title: "Cherry Studio руководство по настройке"
+description: "Интеграция моделей, совместимых с OpenAI, через Crazyrouter в Cherry Studio и выполнение первичной проверки, управление моделями, использование MCP и устранение неполадок"
 ---
-> Дата обновления: 2026-06-23
+> Обновление содержания: 2026-06-09
 
-Cherry Studio is a desktop AI client that works well for multi-model chat, research notes, and MCP-assisted workflows. When connecting it to Crazyrouter, the most reliable path is Cherry Studio's custom `OpenAI` provider mode, because it usually gives you the cleanest model management, streaming, and general chat compatibility.
+Cherry Studio — это AI-клиент для настольного мульти-модельного чата, организации знаний и интеграции инструментов MCP. При подключении к Crazyrouter рекомендуется использовать в Cherry Studio режим `OpenAI` пользовательского провайдера, так легче всего обеспечить совместимость списка моделей, потоковый вывод и стандартные функции чата.
 
-## Overview
+## Общий обзор
 
-Using Cherry Studio's custom provider support, you can add Crazyrouter as an OpenAI-compatible upstream:
+С помощью пользовательского режима Cherry Studio вы можете подключить Crazyrouter в качестве совместимого с OpenAI upstream:
 
-- Recommended protocol: `OpenAI-compatible API`
-- Recommended provider type: `OpenAI`
-- API URL: `https://api.crazyrouter.com`
-- Auth method: `sk-...` token
-- Recommended first validation model: `gpt-5.5`
+- Рекомендуемый протокол: `OpenAI-compatible API`
+- Рекомендуемый тип провайдера: `OpenAI`
+- API-адрес: `https://api.crazyrouter.com`
+- Способ авторизации: `sk-...` token
+- Рекомендуемая модель для первой проверки: `gpt-5.5`
 
 <Note>
-Cherry Studio's official docs explain that if the upstream endpoint is something like `https://xxx.com/v1/chat/completions`, you usually enter only the root URL in `API URL`. For Crazyrouter, start with `https://api.crazyrouter.com`, not `https://api.crazyrouter.com/v1`.
+Официальная документация Cherry Studio: если API upstream имеет формат `https://xxx.com/v1/chat/completions`, обычно в `Адрес API` нужно вводить только корневой адрес. То есть, при подключении Crazyrouter первоначально заполняйте `https://api.crazyrouter.com`, а не `https://api.crazyrouter.com/v1`.
 </Note>
 
 <Tip>
-Cherry Studio appends the standard remaining path automatically. You only need to enter a full custom path ending with `#` when the upstream is not using the normal `.../v1/chat/completions` route shape. Normal Crazyrouter chat setup does not need that.
+Cherry Studio автоматически добавит стандартный остаточный путь; только если ваш upstream не использует обычный `.../v1/chat/completions` роутинг, требуется вручную указать полный адрес с окончанием на `#` в `Адрес API`. Для стандартного чата Crazyrouter этого делать не нужно.
 </Tip>
 
-## Best For
+## Кому подходит
 
-- desktop users who want one place for multiple models
-- teams or individuals doing daily chat, writing, translation, and research
-- users who want to combine Crazyrouter with MCP tools
-- users who want fast switching between cheap and strong models
+- Тем, кто хочет централизованно управлять несколькими моделями на десктопе
+- Тем, кто хочет использовать Crazyrouter для ежедневного чата, письма, перевода и работы с материалами
+- Тем, кто хочет интегрировать инструменты MCP в локальный чат-клиент
+- Тем, кто хочет быстро переключать экономичные и высокопроизводительные модели из одного интерфейса
 
-## Protocol Used
+## Используемый протокол
 
-Recommended protocol: `OpenAI-compatible API`
+Рекомендуемый протокол: `OpenAI-compatible API`
 
-The recommended setup is to add a custom `OpenAI` provider and enter the Crazyrouter root domain in `API URL`:
+Рекомендуется добавить новый пользовательский провайдер типа `OpenAI` и указать корневой домен Crazyrouter в `Адрес API`:
 
 ```text
 https://api.crazyrouter.com
 ```
 
-Do not start with:
+Не заполняйте сразу:
 
 - `https://api.crazyrouter.com/v1/chat/completions`
 - `https://api.crazyrouter.com/v1/models`
 
-Cherry Studio only needs a full custom path with a trailing `#` in special non-standard routing scenarios. Normal Crazyrouter chat setup does not need that.
+Если вы используете нестандартный роутинг, то в Cherry Studio требуется вручную прописать полный адрес с окончанием на `#`; для стандартного чата Crazyrouter этого не надо.
 
-## Prerequisites
+## Предварительные условия
 
-| Item | Details |
-|------|---------|
-| Crazyrouter account | Register first at [crazyrouter.com](https://crazyrouter.com) |
-| Crazyrouter token | Create a dedicated `sk-...` token for Cherry Studio |
-| Cherry Studio | Use a current stable desktop build |
-| Available models | Allow at least one verified chat model such as `gpt-5.5` |
+| Элемент | Описание |
+|------|------|
+| Аккаунт Crazyrouter | Зарегистрируйтесь на [crazyrouter.com](https://crazyrouter.com) |
+| Crazyrouter token | Рекомендуется создать отдельный токен `sk-...` специально для Cherry Studio |
+| Cherry Studio | Используйте актуальную стабильную версию десктопного клиента |
+| Доступная модель | Разрешите хотя бы одну модель для чата, которую успешно протестировали сегодня, например `gpt-5.5` |
 
-Recommended starting whitelist:
+Рекомендуемый whitelist моделей:
 
 - `gpt-5.5`
 - `claude-opus-4-8`
 - `gemini-3.1-pro`
 
-## 5-Minute Quick Start
+## Быстрый старт за 5 минут
 
 <Steps>
-  <Step title="Create a dedicated Cherry Studio token">
-    In the Crazyrouter dashboard, create a new token named `cherry-studio`. For the first pass, allow only 2 to 4 models you know you actually need.
+  <Step title="Создать специальный токен для Cherry Studio">
+    В админке Crazyrouter создайте новый токен, рекомендуем назвать его `cherry-studio`. Сначала разрешите 2–4 нужные модели, не открывайте все сразу.
   </Step>
-  <Step title="Add a custom provider">
-    Open Cherry Studio, go to `Settings` → `Model Services`, then click `Add` or `+ Add`. Choose the provider type `OpenAI` and name it `Crazyrouter`.
+  <Step title="Добавить пользовательского провайдера">
+    Откройте Cherry Studio, перейдите в `Настройки` → `Служба моделей`, нажмите внизу `Добавить` или `+ Add`. Тип провайдера выберите `OpenAI`, имя рекомендуем `Crazyrouter`.
   </Step>
-  <Step title="Enter the connection settings">
-    In the provider settings, enter:
-    - `API Key`: your `sk-...`
-    - `API URL`: `https://api.crazyrouter.com`
+  <Step title="Введите информацию для подключения">
+    На странице настройки провайдера заполните:
+    - `API Key`: ваш `sk-...`
+    - `Адрес API`: `https://api.crazyrouter.com`
 
-    Then click `Check` to validate the token and URL.
+    После заполнения нажмите `Проверить` для проверки токена и адреса.
   </Step>
-  <Step title="Fetch and add models">
-    Open `Manage`, fetch the model list, and add the models you want to use. Seeing a model in the popup does not always mean it is already enabled in the provider list, so you may still need to click `+` to add it. For first-run validation, start with only one baseline model: `gpt-5.5`.
+  <Step title="Импортировать и добавить модель">
+    Нажмите `Управление` или `Manage` для загрузки списка моделей, затем вручную добавьте нужные модели в провайдер. Важно: появление модели во всплывающем окне не значит, что она добавлена в доступный список — обычно надо еще раз нажать `+`. В первый раз добавьте только одну базовую модель: `gpt-5.5`.
   </Step>
-  <Step title="Enable the provider and send the first prompt">
-    Turn on the provider toggle, go back to the chat screen, pick `gpt-5.5`, and send a simple prompt such as `Reply only OK`. If you get a normal reply, the setup is working.
+  <Step title="Включить провайдера и начать первый диалог">
+    Включите переключатель в правом верхнем углу, вернитесь в чат и выберите `gpt-5.5`, отправьте простой запрос, например: `Reply only OK`. После получения ответа добавляйте остальные модели.
   </Step>
 </Steps>
 
-## Recommended Model Setup
+## Рекомендации по настройке моделей
 
-| Use case | Recommended model | Why |
-|----------|-------------------|-----|
-| Default chat model | `gpt-5.5` | Verified successfully in production on March 23, 2026, and suited for the OpenAI-compatible baseline |
-| Higher-quality code / long-form help | `claude-opus-4-8` | Strong reasoning, writing, and code explanation |
-| Gemini fallback path | `gemini-3.1-pro` | Useful as a second vendor-compatible validation path |
+| Сценарий | Рекомендуемая модель | Причина |
+|----------|----------|------|
+| Основной чат по умолчанию | `gpt-5.5` | Успешно протестирована сегодня, подходит как основная модель совместимая с OpenAI |
+| Качественный код / длинные тексты | `claude-opus-4-8` | Подходит для сложных задач, письма и интерпретации кода |
+| Резерв Gemini | `gemini-3.1-pro` | Используется для дополнительной проверки совместимости второго провайдера |
 
-Recommended order: get `gpt-5.5` working first, then add `claude-opus-4-8` and `gemini-3.1-pro`.
+Рекомендуемый порядок: сначала запуск `gpt-5.5`, затем поочередно добавление `claude-opus-4-8` и `gemini-3.1-pro`.
 
-## Token Setup Best Practices
+## Лучшие практики настройки токена
 
-| Setting | Recommendation | Notes |
-|---------|----------------|-------|
-| Dedicated token | Required | Do not share the same token with Cursor, Claude Code, or Codex |
-| Model whitelist | Strongly recommended | Allow only the models Cherry Studio will actually use |
-| IP restriction | Depends on your environment | Fine for fixed office networks; risky on laptops that change networks often |
-| Quota cap | Strongly recommended | Desktop chat apps can generate lots of multi-turn traffic |
-| Dev / shared machine separation | Recommended | Use separate tokens for personal, shared, and demo devices |
-| Multi-key rotation | Use carefully | Cherry Studio supports multiple keys, but debugging is easier with a single key first |
+| Опция | Рекомендация | Описание |
+|------|------|------|
+| Специализированный токен | Обязательно | Не используйте общий токен для Cherry Studio и Cursor, Claude Code, Codex |
+| Белый список моделей | Очень рекомендуется | Разрешайте только те модели, которые будет использовать Cherry Studio |
+| Ограничение IP | По необходимости | Для стационарной сети включайте; при частой смене сетей будьте осторожны |
+| Лимит квоты | Очень рекомендуется | Десктопный чат часто вызывает много запросов, выделите отдельно лимит |
+| Разделение dev/prod | Рекомендуется | Создавайте отдельные токены для личных, общих и демонстрационных машин |
+| Многоключевой polling | Используйте осторожно | Cherry Studio поддерживает polling по нескольким ключам, но диагностика сложнее — сначала настройте работу с одним ключом |
 
-## Verification Checklist
+## Чек-лист проверки
 
-- [ ] `Check` succeeds in the provider settings
-- [ ] `API URL` is set to `https://api.crazyrouter.com`
-- [ ] the provider toggle is enabled
-- [ ] at least one model was added from `Manage`
-- [ ] the first chat request succeeds
-- [ ] streaming output renders normally
-- [ ] MCP services work if you enabled them
-- [ ] the request appears in the Crazyrouter logs
+- [ ] Кнопка `Проверить` работает
+- [ ] `Адрес API` установлен как `https://api.crazyrouter.com`
+- [ ] Включен переключатель в правом верхнем углу провайдера
+- [ ] Хотя бы одна модель добавлена через страницу `Управление / Manage`
+- [ ] Первый запрос к диалогу успешно выполнен
+- [ ] Потоковый вывод отображается корректно
+- [ ] MCP при необходимости активируется
+- [ ] В логах Crazyrouter видны соответствующие запросы
 
-## MCP Usage Tips
+## Рекомендации по использованию MCP
 
-Cherry Studio supports MCP services, but the cleanest rollout is a two-step process:
+Cherry Studio поддерживает MCP, но рекомендуем делать это поэтапно:
 
-1. verify the Crazyrouter chat model first
-2. add MCP services only after the model path is stable
+1. Сначала проверьте устойчивую работу чат-модели Crazyrouter
+2. Затем добавьте MCP-сервис и протестируйте инструменты по отдельности
 
-That keeps model-routing issues separate from MCP tool issues.
+Так проще разделить вопросы моделей и инструментария MCP.
 
-If you enable MCP:
+Если MCP включен:
 
-- start with a model that handles tool use reliably
-- attach only one MCP service for the first test
-- use a simple read-only tool call before trying more complex actions
+- Выберите стабильную модель с поддержкой инструментов
+- Сначала добавьте один MCP-сервис для проверки
+- При первом вызове инструмента протестируйте самые простые операции чтения или поиска
 
-## Common Errors and Fixes
+## Частые ошибки и решения
 
-| Symptom | Likely cause | Fix |
-|---------|--------------|-----|
-| `Check` fails | wrong API key or pasted value contains spaces | regenerate the token and paste a clean `sk-...` value |
-| 401 unauthorized | token expired, was deleted, or is invalid | create a new token in Crazyrouter and replace it |
-| 403 / model not allowed | the selected model is not in the token whitelist | allow that model in the token settings |
-| 404 | `API URL` was entered as a full endpoint path, or the provider type is wrong | switch back to the `OpenAI` provider type and set the URL to `https://api.crazyrouter.com` |
-| `Check` still fails even though the URL and key look right | Cherry Studio often validates against the last conversational model currently present in the provider list, and that model may be invalid | keep only `gpt-5.5`, remove suspicious models, and run `Check` again |
-| model list does not load | wrong URL, network problem, or provider not enabled | run `Check`, then confirm the provider toggle and network connectivity |
-| connection works but chat still fails | the added model is incompatible or unavailable | keep only `gpt-5.5` for baseline testing |
-| streaming behaves oddly | model-level or client-version compatibility issue | switch back to `gpt-5.5` and upgrade Cherry Studio |
-| MCP tool calls fail | the issue is in the MCP service, not the model route | disable MCP, confirm the model works, then fix MCP separately |
+| Симптом | Причина | Решение |
+|------|----------|----------|
+| `Проверить` — ошибка | Ошибка `API Key` или копирование с пробелами | Создайте новый токен и вставьте чистый `sk-...` |
+| 401 unauthorized | Токен неактивен, истек или удален | Создайте и замените токен в Crazyrouter |
+| 403 / model not allowed | Модель не разрешена токеном | Разрешите соответствующую модель в настройках токена |
+| 404 | `Адрес API` указан полный путь к API или неверный тип провайдера | Измените на тип `OpenAI` и пропишите адрес как `https://api.crazyrouter.com` |
+| `Проверить` — ошибка, но адрес и ключ верны | Cherry Studio проверяет работоспособность через последнюю модель списке, а она может быть невалидной | Оставьте только `gpt-5.5`, удалите сомнительные модели и перезапустите `Проверить` |
+| Список моделей не загружается | Ошибка адреса, проблемы с сетью или провайдер не активирован | Сначала нажмите `Проверить`, проверьте включенный переключатель и интернет |
+| Подключение есть, но чат ошибка | Добавлена несовместимая или нерабочая модель | Оставьте только `gpt-5.5` и проверьте базовую работу |
+| Ошибки потокового вывода | Проблемы совместимости модели или клиента | Переключитесь на `gpt-5.5` и обновите Cherry Studio |
+| MCP-инструменты не вызываются | Причина в настройках MCP, не в модели | Отключите MCP и проверьте модели; отдельно настройте MCP |
 
-## Performance and Cost Tips
+## Рекомендации по производительности и стоимости
 
-- Start with only 1 to 2 models so the first rollout stays easy to debug
-- Default to `gpt-5.5`, then switch to `claude-opus-4-8` for harder long-form and code tasks
-- If you keep long conversations open, give Cherry Studio its own quota cap
-- Since Cherry Studio makes model switching easy, reserve expensive models for heavier work only
-- If usage looks abnormal, check the Crazyrouter logs first for retries or long multi-turn sessions
+- Для первого подключения включайте только 1–2 модели, чтобы не запутаться в выборе
+- Используйте сначала `gpt-5.5`; для длинных текстов и кода переходите на `claude-opus-4-8`
+- Часто ведёте длинные диалоги — выделите отдельную квоту для Cherry Studio
+- Cherry Studio поддерживает переключение моделей — дорогие оставляйте только для сложных задач
+- При обнаружении необычного расхода проверьте логи Crazyrouter на предмет повторных попыток, длинных диалогов
 
-## FAQ
+## Частые вопросы
 
-### Which URL should I enter in Cherry Studio?
+### Какой адрес в Cherry Studio нужно указать?
 
-Start with `https://api.crazyrouter.com`.
+Заполняйте сначала `https://api.crazyrouter.com`.
 
-### Why is `/v1` not the recommended first setting here?
+### Почему не советуют сразу вводить `/v1`?
 
-Because Cherry Studio's own docs explain that many OpenAI-compatible upstreams only need the root URL, and the client appends the standard path itself. Crazyrouter should be set up that way first.
+Cherry Studio рекомендует — для большинства upstream, совместимых с OpenAI, достаточно корневого адреса, клиент допишет путь автоматически. Для Crazyrouter тоже действует такой подход.
 
-### When would I need a full endpoint path ending with `#`?
+### Когда указывать полный адрес с окончанием на `#`?
 
-Only when your upstream is not using a standard OpenAI route pattern. For normal Crazyrouter chat setup, do not use that mode first.
+Только если upstream не стандартный роутинг OpenAI. Для стандартного подключения Crazyrouter используйте корневой домен.
 
-### Which model should I test first?
+### Какой первый рекомендуемый модель?
 
-Start with `gpt-5.5`.
+Используйте сначала `gpt-5.5`.
 
-### Can I configure many models right away?
+### Можно ли сразу добавить много моделей?
 
-Yes, but it is better not to do that on day one. Get one baseline model working first, then expand.
+Можно, но не советуем так делать сразу. Сначала настройте одну — постепенно добавляйте остальные.
 
-### Can Cherry Studio use MCP together with Crazyrouter?
+### Cherry Studio совместим с MCP при работе с Crazyrouter?
 
-Yes, but validate the chat model first and enable MCP after that. It makes troubleshooting much easier.
+Да, но сначала проверьте работу чат-модели, затем активируйте MCP, так легче выявить проблемы.
 
 <Note>
-If your main goal is desktop multi-model chat and light MCP workflows, Cherry Studio is a strong option. If your main goal is agentic coding inside an IDE or terminal, Cursor, Claude Code, Codex, or Cline should still be the higher priority tools.
+Если вам нужен десктопный мульти-модельный чат и лёгкая совместная работа с MCP, то Cherry Studio отлично подойдёт для старта; если важнее опыт кодового агента в IDE, рекомендуем отдать предпочтение Cursor, Claude Code, Codex, Cline и другим подобным инструментам.
 </Note>

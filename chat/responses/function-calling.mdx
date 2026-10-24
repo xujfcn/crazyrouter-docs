@@ -1,24 +1,24 @@
 ---
-title: "Responses Function Calling"
-description: "基于 2026-03-23 Crazyrouter 生产环境验证的 Responses 工具调用"
+title: "响应函数调用"
+description: "响应工具调用已于2026-03-23通过Crazyrouter生产环境验证"
 ---
-> 更新日期：2026-06-06
+> 内容更新: 2026-06-09
 
-# Responses Function Calling
+# 响应函数调用
 
 ```
 POST /v1/responses
 ```
 
-截至 2026 年 3 月 23 日，Crazyrouter 生产环境已验证 `gpt-5.5` 在 Responses API 下可稳定返回 `function_call`。
+截至2026年3月23日，Crazyrouter生产环境已验证Responses API中的`gpt-5.5`可以可靠地返回`function_call`。
 
 <Note>
-  Claude 当前不支持 `POST /v1/responses`。如果你需要 Claude 的工具调用，请改用 `POST /v1/messages` 或 `POST /v1/chat/completions`。
+  Claude目前不支持`POST /v1/responses`。如果你需要Claude工具调用，请使用`POST /v1/messages`或`POST /v1/chat/completions`。
 </Note>
 
 ---
 
-## 第一步：让模型产出函数调用
+## 第一步：让模型生成函数调用
 
 ```bash
 curl https://api.crazyrouter.com/v1/responses \
@@ -45,7 +45,7 @@ curl https://api.crazyrouter.com/v1/responses \
   }'
 ```
 
-生产环境实际响应的关键形态：
+观察到的生产环境返回结构：
 
 ```json
 {
@@ -61,9 +61,9 @@ curl https://api.crazyrouter.com/v1/responses \
 
 ---
 
-## 第二步：回传函数结果
+## 第二步：返回工具结果
 
-拿到 `function_call` 之后，把你自己执行函数得到的结果作为 `function_call_output` 再发回去：
+当你收到`function_call`时，请将你的实际工具结果作为`function_call_output`返回：
 
 ```json
 {
@@ -100,10 +100,10 @@ curl https://api.crazyrouter.com/v1/responses \
 ```
 
 <Note>
-  当前页面只保留了生产环境已验证成功的 `function_call` 路径。更复杂的多工具串联或流式参数增量，请在接入前自行再做一次当日生产验证。
+  本页面仅保留在生产环境中复现的`function_call`路径。对于更复杂的多工具链或流式参数变化，请在依赖之前当天重新验证。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 相关页面
+## 在crazyrouter.com相关内容
 
-- [OpenAI 全部模型与价格](https://crazyrouter.com/zh/models/openai?utm_source=docs&utm_medium=related)
+- [所有带实时价格的OpenAI模型](https://crazyrouter.com/zh/models/openai?utm_source=docs&utm_medium=related)

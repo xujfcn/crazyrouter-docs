@@ -8,6 +8,7 @@
     ['日本語', 'jp'],
     ['Русский', 'ru'],
     ['한국어', 'ko'],
+    ['Español', 'es'],
   ]);
   const selector = '[data-component-part="localization-select-trigger"]';
   let scheduled = false;

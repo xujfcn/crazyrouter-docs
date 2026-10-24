@@ -1,0 +1,154 @@
+---
+title: "Búsqueda web"
+description: "Basado en pruebas reales en entorno de producción, utiliza los modelos principales más recientes de GPT, Claude y Gemini para búsquedas conectadas a Internet"
+---
+> Contenido actualizado: 2026-06-09
+
+# Búsqueda web
+
+Este documento solo incluye los métodos de Búsqueda web que **han sido verificados con éxito en solicitudes reales en el entorno de producción de Crazyrouter**.
+
+Tiempo de verificación:
+
+- `2026-03-22`
+
+Modelos validados:
+
+- `gpt-5.5`
+- `claude-opus-4-8`
+- `gemini-3.1-pro`
+
+---
+
+## Matriz de capacidades verificadas
+
+| Modelo | Protocolo | Endpoint | Marca de éxito |
+|--------|-----------|----------|----------------|
+| `gpt-5.5` | OpenAI Responses | `POST /v1/responses` | `output` contiene `web_search_call` |
+| `claude-opus-4-8` | Chat compatible con OpenAI | `POST /v1/chat/completions` | Devuelve llamada de herramienta `remote_web_search` |
+| `gemini-3.1-pro` | Gemini nativo | `POST /v1beta/models/{model}:generateContent` | Devuelve `groundingMetadata` |
+
+---
+
+## GPT-5.4
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "input": "Use web search to find one current headline from a major technology news site published recently.",
+    "tools": [
+      {
+        "type": "web_search_preview"
+      }
+    ]
+  }'
+```
+
+Clave `output.type` retornada en validación de producción:
+
+```json
+["web_search_call", "web_search_call", "message"]
+```
+
+---
+
+## Claude Sonnet 4.6
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "claude-opus-4-8",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Find one recent technology headline. Use web search and do not answer from memory."
+      }
+    ],
+    "web_search_options": {
+      "search_context_size": "medium",
+      "user_location": {
+        "approximate": {
+          "timezone": "Asia/Shanghai",
+          "country": "CN"
+        }
+      }
+    },
+    "max_tokens": 200
+  }'
+```
+
+Campo clave devuelto en validación de producción:
+
+```json
+{
+  "tool_calls": [
+    {
+      "type": "function",
+      "function": {
+        "name": "remote_web_search"
+      }
+    }
+  ],
+  "finish_reason": "tool_calls"
+}
+```
+
+Esto indica que en la ruta compatible con OpenAI de Crazyrouter, la búsqueda conectada de Claude 4.6 se expone en forma de llamada a herramienta.
+
+Recomendaciones para la primera ronda de integración:
+
+- Escribir explícitamente `Use web search` en el prompt
+- Al mismo tiempo, agregar una frase adicional `do not answer from memory`
+- Si el prompt es demasiado débil, el modelo podría dar una respuesta textual directamente y no necesariamente activar explícitamente `remote_web_search`
+
+---
+
+## Gemini 3 Pro
+
+```bash cURL
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Use Google Search to find one recent headline from a major technology news site."
+          }
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "googleSearch": {}
+      }
+    ]
+  }'
+```
+
+En la verificación de producción se devolvieron los siguientes campos clave:
+
+- `groundingMetadata.webSearchQueries`
+- `groundingMetadata.groundingChunks`
+- `groundingMetadata.groundingSupports`
+
+---
+
+## Documentos relacionados
+
+- [Búsqueda web Responses](/es/chat/responses/web-search)
+- [Búsqueda web OpenAI](/es/chat/openai/web-search)
+- [Llamada de herramienta Gemini](/es/chat/gemini/tools)
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Comparación de precios Claude Sonnet 4.6: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/claude-sonnet-4-6?utm_source=docs&utm_medium=related)
+- [Página de modelo Claude Sonnet 4.6: precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/anthropic/claude-sonnet-4-6?utm_source=docs&utm_medium=related)
+- [Comparación de precios GPT-5.4: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/gpt-5-4?utm_source=docs&utm_medium=related)

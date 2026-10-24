@@ -1,42 +1,48 @@
 ---
-title: "Video Task Query Alias"
-description: "GET /v1/video/generations/{task_id} compatibility alias for querying video task status"
+title: "Псевдоним для запроса видео-задачи"
+description: "GET /v1/video/generations/{task_id} — совместимый псевдоним интерфейса для запроса статуса видео-задачи"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-30
 
-# Video Task Query Alias
+# Псевдоним для запроса видео-задачи
 
 ```
 GET /v1/video/generations/{task_id}
 ```
 
-Use this route to query tasks created through the compatibility video-generation path. It is the matching query alias for `/v1/video/generations`.
+Используется для запроса статуса задачи, отправленной через совместимый видео-маршрут. Это сопряжённый маршрут для запроса к `/v1/video/generations`.
 
-## Authentication
+## Аутентификация
 
 ```http
 Authorization: Bearer YOUR_API_KEY
 ```
 
-## Request Example
+## Пример запроса
 
 ```bash cURL
 curl https://api.crazyrouter.com/v1/video/generations/video_task_abc123   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-## Typical Success Response
+## Типичный успешный ответ
 
 ```json
 {
-  "id": "video_task_abc123",
-  "status": "SUCCESS",
-  "video_url": "https://example.com/video.mp4"
+  "code": "success",
+  "message": "",
+  "data": {
+    "id": "video_task_abc123",
+    "task_id": "video_task_abc123",
+    "status": "SUCCESS",
+    "result_url": "https://media.crazyrouter.com/task-artifacts/example.mp4",
+    "artifact_url": "https://media.crazyrouter.com/task-artifacts/example.mp4"
+  }
 }
 ```
 
-## Missing-Task Response Verified Locally
+## Ответ о несуществующей задаче, проверенный локально
 
-On the local `http://127.0.0.1:4000` environment, querying a nonexistent task returns:
+В локальной среде `http://127.0.0.1:4000` при запросе несуществующей задачи будет возвращено:
 
 ```json
 {
@@ -46,21 +52,22 @@ On the local `http://127.0.0.1:4000` environment, querying a nonexistent task re
 }
 ```
 
-## Common Status Values
+## Часто встречающиеся статусы
 
-| Status | Description |
-|--------|-------------|
-| `processing` | Task is running |
-| `SUCCESS` | Task finished successfully |
-| `failed` | Task failed |
+| Статус | Описание |
+|--------|----------|
+| `queued` | Задача отправлена или находится в очереди |
+| `processing` | Задача в обработке |
+| `SUCCESS` | Задача выполнена |
+| `failed` | Задача не выполнена |
 
 <Note>
-Final result fields can vary slightly by video model and upstream provider. The safest operational pattern is to keep creation and query requests on the same compatibility path family.
+Поля результата окончательного выполнения могут немного отличаться для разных видео-моделей и разных источников. Самый надёжный способ: создание и запрос лучше всего держать в одном совместимом маршруте и по возможности сначала читать `data.artifact_url` или `data.result_url`.
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [GPT Image 1.5: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [Все модели OpenAI с актуальными ценами](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [Страница модели GPT Image 1.5: актуальные цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Страница модели GPT Image 2: актуальные цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Все модели и цены OpenAI](https://crazyrouter.com/ru/models/openai?utm_source=docs&utm_medium=related)

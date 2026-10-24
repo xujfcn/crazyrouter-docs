@@ -1,70 +1,70 @@
 ---
-title: 'Python Audio'
-description: 'Python text-to-speech (TTS) and speech-to-text (STT)'
+title: "Python 音声"
+description: "Python でテキストを音声に変換（TTS）、音声をテキストに変換（STT）"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-06
 
-## Text-to-Speech (TTS)
+## テキストから音声へ（TTS）
 
 ```python
 from openai import OpenAI
 
 client = OpenAI(api_key="sk-xxx", base_url="https://api.crazyrouter.com/v1")
 
-# Generate speech
+# 生成语音
 response = client.audio.speech.create(
     model="tts-1",
     voice="alloy",
-    input="Hello, welcome to the Crazyrouter API service."
+    input="你好，欢迎使用 Crazyrouter API 服务。"
 )
 
-# Save as MP3 file
+# 保存为 MP3 文件
 response.stream_to_file("output.mp3")
-print("Audio saved to output.mp3")
+print("语音已保存到 output.mp3")
 ```
 
-### Available Voices
+### 利用可能な音声
 
-| Voice | Characteristics |
-|-------|----------------|
-| `alloy` | Neutral, balanced |
-| `echo` | Male, calm |
-| `fable` | Male, warm |
-| `onyx` | Male, deep |
-| `nova` | Female, lively |
-| `shimmer` | Female, soft |
+| 音声 | 特徴 |
+|------|------|
+| `alloy` | 中立的、バランスが良い |
+| `echo` | 男性、落ち着いた |
+| `fable` | 男性、温かみがある |
+| `onyx` | 男性、深みがある |
+| `nova` | 女性、活発 |
+| `shimmer` | 女性、柔らかい |
 
-### High Quality TTS
+### 高品質 TTS
 
 ```python
-# Use tts-1-hd for higher audio quality
+# 使用 tts-1-hd 获得更高音质
 response = client.audio.speech.create(
     model="tts-1-hd-1106",
     voice="nova",
-    input="High quality speech synthesis example",
-    response_format="opus",  # Supports mp3, opus, aac, flac
-    speed=1.0  # 0.25 to 4.0
+    input="高质量语音合成示例",
+    response_format="opus",  # 支持 mp3, opus, aac, flac
+    speed=1.0  # 0.25 到 4.0
 )
 
 response.stream_to_file("output_hd.opus")
 ```
 
-## Speech-to-Text (STT)
+## 音声からテキストへ（STT）
 
 ```python
-# Whisper speech recognition
+# Whisper 语音识别
 audio_file = open("recording.mp3", "rb")
 
 transcript = client.audio.transcriptions.create(
     model="whisper-1",
     file=audio_file,
-    language="en"  # Optional, specifying language improves accuracy
+    language="zh"  # 可选，指定语言提高准确率
 )
 
 print(transcript.text)
 ```
 
-### Transcription with Timestamps
+### タイムスタンプ付き文字起こし
 
 ```python
 transcript = client.audio.transcriptions.create(
@@ -78,21 +78,21 @@ for segment in transcript.segments:
     print(f"[{segment['start']:.1f}s - {segment['end']:.1f}s] {segment['text']}")
 ```
 
-## Audio Translation
+## 音声翻訳
 
-Translate non-English audio to English text:
+英語以外の音声を英語テキストへ翻訳します：
 
 ```python
-audio_file = open("foreign_audio.mp3", "rb")
+audio_file = open("chinese_audio.mp3", "rb")
 
 translation = client.audio.translations.create(
     model="whisper-1",
     file=audio_file
 )
 
-print(translation.text)  # English output
+print(translation.text)  # 英文输出
 ```
 
 <Note>
-  TTS supported models include `tts-1`, `tts-1-hd-1106`, and `tts-1`. STT uses the `whisper-1` model.
+  TTS が対応するモデルは `tts-1`、`tts-1-hd-1106`、`tts-1` です。STT は `whisper-1` モデルを使用します。
 </Note>

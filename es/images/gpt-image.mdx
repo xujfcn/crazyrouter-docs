@@ -1,0 +1,232 @@
+---
+title: "GPT Imagen"
+description: "Utiliza gpt-image-2 para generar y editar imágenes, compatible con la API de Imágenes de OpenAI"
+---
+> Contenido actualizado: 2026-09-18
+
+<Tip>
+  ¿Necesitas que la respuesta se devuelva inmediatamente después de enviar y más tarde obtener la URL de la imagen mediante polling? Este modelo soporta [generación de imágenes asíncrona](/es/images/async): para el sistema Gemini cambia el sufijo de la ruta por `:asyncGenerateContent`, para el sistema OpenAI añade la cabecera `Prefer: respond-async`, sin necesidad de modificar ni un solo byte del cuerpo de la solicitud.
+</Tip>
+
+# GPT Imagen
+
+`gpt-image-2` es compatible a través de rutas de la API de Imágenes de OpenAI:
+
+```text
+POST /v1/images/generations
+POST /v1/images/edits
+```
+
+<Warning>
+  Para solicitudes de generación de imágenes con `gpt-image-2`, por favor usa preferiblemente la línea principal de acceso `https://api.crazyrouter.com/v1`. El endpoint completo de generación es `https://api.crazyrouter.com/v1/images/generations`. El inicio de sesión, recarga y consola de la cuenta siguen utilizándose en `https://crazyrouter.com`.
+</Warning>
+
+## Generar imágenes
+
+### Parámetros de la solicitud
+
+| Parámetro | Tipo | Requerido | Descripción |
+|------|------|------|------|
+| `model` | string | Sí | Fijo en `gpt-image-2` |
+| `prompt` | string | Sí | Prompt descriptivo de la imagen |
+| `n` | integer | No | Cantidad a generar, por defecto `1`, rango `1-10` |
+| `size` | string | No | `auto` o `ancho x alto`. El ancho y alto deben ser múltiplos de 16, con lados individuales que no superen los 3840, y un total de píxeles entre 655360 y 8294400; la proporción entre el lado largo y corto no debe exceder 3:1. Valores comunes: `1024x1024`, `1536x1024`, `1024x1536` |
+| `quality` | string | No | `auto`, `low`, `medium`, `high`. Compatible con `hd`, el servidor lo normalizará a `high`; compatible con `standard`, el servidor lo normalizará a `auto` |
+| `background` | string | No | `auto` o `opaque`. `gpt-image-2` no soporta `transparent` |
+| `output_format` | string | No | `png`, `jpeg`, `webp` |
+| `output_compression` | integer | No | `0-100`, solo disponible cuando `output_format` es `jpeg` o `webp` |
+| `moderation` | string | No | `auto` o `low` |
+| `stream` | boolean | No | Indica si se debe usar respuesta SSE en streaming |
+| `partial_images` | integer | No | `0-3`, solo disponible cuando `stream=true` aplica |
+| `user` | string | No | Identificador del usuario final |
+
+Para ser compatible con clientes antiguos de DALL-E / OpenAI Images, `gpt-image-2` aceptará `response_format=url`, `response_format=b64_json`, `quality=standard` y `style=vivid/natural`. De estos, `response_format` y `style` no se transmitirán aguas arriba, `quality=standard` se normalizará a `auto`.
+
+<Warning>
+  `response_format` es únicamente un campo heredado de Crazyrouter para compatibilidad con clientes antiguos, no es un parámetro upstream de `gpt-image-2`. Para nuevas integraciones, por favor usa preferiblemente `output_format="png"`, `"jpeg"` o `"webp"` para controlar el formato del archivo de imagen, y lee por defecto `data[0].url` de la respuesta. Si un cliente antiguo envía `response_format="b64_json"`, el servidor intentará mantener la semántica base64 en la respuesta.
+</Warning>
+
+Aún serán rechazadas las combinaciones de parámetros como: `input_fidelity`, `background=transparent`, `output_format=png` combinadas con `output_compression`.
+
+### Ejemplo de solicitud
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-image-2",
+    "prompt": "一只穿着宇航服的猫咪在月球上行走，背景是地球",
+    "n": 1,
+    "size": "1024x1024",
+    "quality": "low",
+    "output_format": "png"
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://api.crazyrouter.com/v1",
+)
+
+response = client.images.generate(
+    model="gpt-image-2",
+    prompt="一只穿着宇航服的猫咪在月球上行走，背景是地球",
+    n=1,
+    size="1024x1024",
+    quality="low",
+    output_format="png",
+)
+
+print(response.data[0].url)
+```
+
+</CodeGroup>
+
+### Generación en streaming
+
+`gpt-image-2` soporta `stream=true`. Si la solicitud incluye `partial_images`, también debes activar `stream`, y el valor debe estar en el rango `0-3`.
+
+```bash cURL
+curl -N -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-image-2",
+    "prompt": "一个蓝色极简验证图标，白色背景",
+    "size": "1024x1024",
+    "quality": "high",
+    "stream": true,
+    "partial_images": 2
+  }'
+```
+
+<Note>
+  Solicitudes síncronas con `quality=high` o la forma compatible `quality=hd` pueden tardar mucho tiempo. Para generación de imágenes, usa preferiblemente `https://api.crazyrouter.com/v1`; para solicitudes de alta calidad se recomienda `stream=true`, o asegúrate de que el timeout en el cliente sea mayor a 180 segundos.
+</Note>
+
+### Ejemplo de respuesta
+
+```json
+{
+  "created": 1778990000,
+  "data": [
+    {
+      "url": "https://media.crazyrouter.com/task-artifacts/2026/05/17/sync-image/request-id-1.png"
+    }
+  ],
+  "output_format": "png",
+  "quality": "low",
+  "size": "1024x1024"
+}
+```
+
+---
+
+## Editar imagen
+
+```
+POST /v1/images/edits
+```
+
+Edición de imágenes basadas en una existente, permite editar utilizando un área de máscara, así como pasar múltiples imágenes de referencia para fusión, transferencia de estilo o composición parcial.
+
+### Parámetros de la solicitud
+
+| Parámetro | Tipo | Requerido | Descripción |
+|------|------|------|------|
+| `model` | string | Sí | Fijo en `gpt-image-2` |
+| `image` / `image[]` | file o file[] | Sí | Archivo de imagen original o imágenes de referencia (multipart); `gpt-image-2` soporta hasta `16` imágenes de referencia |
+| `prompt` | string | Sí | Descripción de la edición |
+| `mask` | file | No | Imagen de máscara, las áreas transparentes son las partes a editar |
+| `n` | integer | No | Cantidad a generar, por defecto `1`, rango `1-10` |
+| `size` | string | No | Igual que en la interfaz de generación |
+| `quality` | string | No | `auto`, `low`, `medium`, `high`; `hd` se normalizará a `high` |
+| `background` | string | No | `auto` o `opaque` |
+| `output_format` | string | No | `png`, `jpeg`, `webp` |
+| `output_compression` | integer | No | `0-100`, solo disponible cuando `output_format` es `jpeg` o `webp` |
+| `stream` | boolean | No | Indica si se debe usar respuesta SSE en streaming |
+| `partial_images` | integer | No | `0-3`, solo disponible cuando `stream=true` aplica |
+
+### Ejemplo de edición de una sola imagen
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://api.crazyrouter.com/v1",
+)
+
+response = client.images.edit(
+    model="gpt-image-2",
+    image=open("original.png", "rb"),
+    mask=open("mask.png", "rb"),
+    prompt="在天空中添加一道彩虹",
+    n=1,
+    size="1024x1024",
+    quality="low",
+)
+
+print(response.data[0].url)
+```
+
+### Ejemplo de edición con múltiples referencias
+
+Las solicitudes de edición múltiple deben usar `multipart/form-data`. Se recomienda pasar las imágenes de referencia con varios campos `image[]`; el servidor también es compatible con múltiples campos `image` repetidos.
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/images/edits \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "model=gpt-image-2" \
+  -F "prompt=把第一张图的人物与第二张图的背景融合成一张自然的宣传图" \
+  -F "size=1024x1024" \
+  -F "quality=low" \
+  -F "n=1" \
+  -F "image[]=@person.png" \
+  -F "image[]=@background.png"
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/v1/images/edits",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    data={
+        "model": "gpt-image-2",
+        "prompt": "把第一张图的人物与第二张图的背景融合成一张自然的宣传图",
+        "size": "1024x1024",
+        "quality": "low",
+        "n": "1",
+    },
+    files=[
+        ("image[]", ("person.png", open("person.png", "rb"), "image/png")),
+        ("image[]", ("background.png", open("background.png", "rb"), "image/png")),
+    ],
+    timeout=240,
+)
+
+response.raise_for_status()
+print(response.json()["data"][0]["url"])
+```
+
+</CodeGroup>
+
+<Note>
+  `gpt-image-2` en edición con múltiples referencias soporta hasta 16 imágenes. Las solicitudes con múltiples imágenes se enrutarán preferiblemente por los canales oficiales de OpenAI que soportan referencias múltiples.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Página del modelo GPT Image 2: precios en tiempo real, ejemplos reales, código de uso](https://crazyrouter.com/es/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Página del modelo GPT Image 1.5: precios en tiempo real, ejemplos reales, código de uso](https://crazyrouter.com/es/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Todos los modelos y precios de OpenAI](https://crazyrouter.com/es/models/openai?utm_source=docs&utm_medium=related)

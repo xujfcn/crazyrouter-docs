@@ -1,20 +1,20 @@
 ---
-title: "Function Calling"
-description: "2026-03-23 Crazyrouter 프로덕션 환경 검증을 기반으로 한 Chat Completions 툴 호출"
+title: "함수 호출"
+description: "Chat Completions 도구 호출이 2026-03-23에 Crazyrouter 프로덕션에서 검증됨"
 ---
-> 업데이트: 2026-06-06
+> 내용 업데이트: 2026-06-09
 
-# Function Calling
+# 함수 호출
 
 ```
 POST /v1/chat/completions
 ```
 
-2026년 3월 23일 기준, Crazyrouter 프로덕션 환경에서 `gpt-5.5`가 Chat Completions 경로에서 `tool_calls`를 반환함을 검증했습니다.
+2026년 3월 23일 기준으로, Crazyrouter 프로덕션에서 Chat Completions 경로의 `gpt-5.5`가 `tool_calls`를 반환하는 것을 확인했습니다.
 
 ---
 
-## 1단계: 툴 정의
+## 1단계: 도구 정의
 
 ```bash
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -45,7 +45,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-프로덕션 환경에서 실제로 반환된 핵심 형태:
+프로덕션 응답 형태:
 
 ```json
 {
@@ -74,9 +74,9 @@ curl https://api.crazyrouter.com/v1/chat/completions \
 
 ---
 
-## 2단계: 툴 결과 회신
+## 2단계: 도구 결과 반환
 
-`tool_calls`를 받은 후, 실행한 툴 결과를 `role: "tool"` 메시지로 다시 전송하세요.
+`tool_calls`를 받으면, 도구 결과를 `role: "tool"` 메시지로 다시 보내세요:
 
 ```json
 {
@@ -124,12 +124,12 @@ curl https://api.crazyrouter.com/v1/chat/completions \
 ```
 
 <Note>
-  이번 프로덕션 검증에서는 `tool_calls`라는 주 링크를 확인했으며, `message.reasoning_content`라는 키가 나타날 수 있음도 관찰했습니다. 다만 이는 현재 툴 호출 흐름에서 안정적으로 의존할 필드로 취급해서는 안 됩니다.
+  이번 프로덕션 패스에서는 주요 `tool_calls` 경로가 확인되었습니다. 또한 `message.reasoning_content`가 키로 나타날 수 있음이 관찰되었으나, 도구 호출 흐름에서 안정적인 의존성으로 간주해서는 안 됩니다.
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 관련 페이지 (crazyrouter.com)
+## crazyrouter.com 관련 페이지
 
-- [GPT Image 1.5 모델 페이지: 실시간 가격, 샘플, 코드](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2 모델 페이지: 실시간 가격, 샘플, 코드](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [OpenAI 전체 모델과 가격](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [GPT Image 1.5 모델 페이지: 실시간 가격, 실제 샘플, 코드](https://crazyrouter.com/ko/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT Image 2 모델 페이지: 실시간 가격, 실제 샘플, 코드](https://crazyrouter.com/ko/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [모든 OpenAI 모델의 실시간 가격](https://crazyrouter.com/ko/models/openai?utm_source=docs&utm_medium=related)

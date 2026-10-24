@@ -1,0 +1,96 @@
+---
+title: "Descripción general de la API de Respuestas"
+description: "Guía revalidada en producción para elegir entre la API de Respuestas y Chat Completions en Crazyrouter"
+---
+> Contenido actualizado: 2026-06-09
+
+# Descripción general de la API de Respuestas
+
+Actualmente, la API de Respuestas es una de las rutas principales para acceder a las nuevas capacidades de GPT en Crazyrouter.
+
+Esta página solo documenta las conclusiones que fueron revalidadas en producción en `2026-03-22`.
+
+<Note>
+  En el alcance verificado en producción actual, Claude solo soporta `POST /v1/messages` y `POST /v1/chat/completions`, no `POST /v1/responses`. Trate las páginas de Respuestas como orientación prioritaria para GPT.
+</Note>
+
+## Enfoque actual
+
+- Si necesita una salida de razonamiento inspeccionable, prefiera `/v1/responses`
+- Si necesita búsqueda web al estilo OpenAI, prefiera `/v1/responses`
+- Si solo necesita chat ordinario o desea mantener una integración existente, `/v1/chat/completions` sigue siendo adecuado
+
+## API de Respuestas vs API de Completaciones de Chat
+
+| Dimensión | API de Respuestas | API de Completaciones de Chat |
+|-----------|-------------------|------------------------------|
+| Endpoint | `/v1/responses` | `/v1/chat/completions` |
+| Forma de entrada | `input` | `messages` |
+| Forma de salida | Lista de elementos `output[]` | `choices[].message` |
+| Razonamiento GPT | Elemento `reasoning` verificado | `reasoning_effort` funciona, pero `reasoning_content` no es estable |
+| Búsqueda web al estilo OpenAI | Ruta `web_search_preview` verificada | La estructura anterior `web_search` no produjo un disparador verificable estable en esta ronda |
+| Streaming | Tipos de eventos más ricos | Delta SSE tradicional |
+
+---
+
+## El ejemplo útil más pequeño
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+response = client.responses.create(
+    model="gpt-5.5",
+    input="Explain what a REST API is in one sentence."
+)
+
+print(response.output_text)
+```
+
+En la revalidación de producción actual, este tipo de solicitud mínima devolvió:
+
+```json
+{
+  "object": "response",
+  "output": [
+    {
+      "type": "message"
+    }
+  ]
+}
+```
+
+---
+
+## Cuándo preferir Respuestas
+
+- Necesita resúmenes de razonamiento `gpt-5.5`
+- Necesita verificar si el modelo realmente activó `web_search_call`
+- Desea eventos SSE más ricos
+
+Páginas relacionadas:
+
+- [Modo de Pensamiento GPT-5](/es/chat/responses/gpt5-thinking)
+- [Búsqueda Web de Respuestas](/es/chat/responses/web-search)
+- [Llamadas a Funciones en Respuestas](/es/chat/responses/function-calling)
+
+---
+
+## Cuándo mantener Completaciones de Chat
+
+- Ya tiene una integración estable de Completaciones de Chat
+- Solo le importa la respuesta final, no el elemento `reasoning`
+- Está integrando Claude, Gemini u otros modelos compatibles con OpenAI
+
+<Note>
+  Ambas APIs pueden coexistir en el mismo proyecto. En la práctica, el mejor patrón suele no ser una migración completa, sino mover solo las solicitudes que necesitan las capacidades más nuevas a `/v1/responses`.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Relacionado en crazyrouter.com
+
+- [Todos los modelos de OpenAI con precios en vivo](https://crazyrouter.com/es/models/openai?utm_source=docs&utm_medium=related)

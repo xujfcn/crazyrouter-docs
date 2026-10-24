@@ -1,50 +1,53 @@
 ---
-title: "Grok Image Models"
-description: "Generate images with grok-4-image and grok-4-image, including supported parameters and differences"
+title: "Модель Grok для изображений"
+description: "Используйте grok-4-image и grok-4-image для генерации изображений и ознакомьтесь с различиями в параметрах"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-06
 
-# Grok Image Models
+
+# Модель Grok для изображений
 
 ```
 POST /v1/images/generations
 ```
 
-Grok image models use the OpenAI-compatible Images path. There are two names you should treat differently:
+Модель Grok для изображений вызывается через совместимый с OpenAI Images endpoint. В настоящее время следует различать два имени моделей:
 
-| Model | Description | Recommendation |
-|-------|-------------|----------------|
-| `grok-4-image` | Official xAI image model name, billed at the official `$0.02 / image` price | Recommended for new integrations |
-| `grok-4-image` | Historical / compatibility model name on third-party compatible channels | Use only the safe subset of parameters |
+| Модель | Описание | Рекомендация |
+|--------|----------|--------------|
+| `grok-4-image` | Официальное имя модели изображений xAI, тарификация по официальной цене `$0.02 / image` | Рекомендуется для новых подключений |
+| `grok-4-image` | Историческое/совместимое имя в сторонних каналах | Рекомендуется только для использования с подмножеством параметров |
 
 <Warning>
-  `grok-4-image` is not the official xAI model name. Do not assume it is fully equivalent to `grok-4-image`. New integrations should prefer `grok-4-image`.
+  `grok-4-image` не является официальным именем модели xAI, нельзя считать его полностью эквивалентным `grok-4-image`. Для новых интеграций отдавайте предпочтение `grok-4-image`.
 </Warning>
 
-## grok-4-image Parameters
+## Параметры grok-4-image
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model` | string | Yes | Use `grok-4-image` |
-| `prompt` | string | Yes | Image prompt |
-| `n` | integer | No | Number of images, official range `1` to `10`. Use `1` first for stable cost control |
-| `response_format` | string | No | `url` or `b64_json`. The live Crazyrouter path is stable with `url` |
-| `aspect_ratio` | string | No | Examples: `1:1`, `16:9`, `9:16`, `3:2`, `auto` |
-| `resolution` | string | No | `1k` or `2k` |
+`grok-4-image` используется в соответствии с официальным интерфейсом для изображений:
+
+| Параметр | Тип | Обязательный | Описание |
+|----------|-----|--------------|----------|
+| `model` | string | да | Использовать `grok-4-image` |
+| `prompt` | string | да | Текстовый промпт с описанием изображения |
+| `n` | integer | нет | Количество создаваемых изображений, официальный диапазон от `1` до `10`. Для стабильного контроля затрат рекомендуем сначала использовать `1` |
+| `response_format` | string | нет | `url` или `b64_json`. На практике `url` стабильно работает |
+| `aspect_ratio` | string | нет | Как `1:1`, `16:9`, `9:16`, `3:2`, `auto` |
+| `resolution` | string | нет | `1k` или `2k` |
 
 <Note>
-  `aspect_ratio` and `resolution` are xAI image endpoint extensions. With the OpenAI Python SDK, pass them through `extra_body`; with cURL or the Node.js SDK, put them directly in the JSON body.
+  `aspect_ratio` и `resolution` — это расширенные параметры интерфейса изображений xAI. При использовании OpenAI Python SDK передавайте через `extra_body`, при использовании cURL или Node.js SDK помещайте прямо в JSON body.
 </Note>
 
-Do not pass these parameters:
+Не следует передавать следующие параметры:
 
-| Parameter | Reason |
-|-----------|--------|
-| `size` | Not supported by xAI; it returns `Argument not supported: size` |
-| `quality` | Not supported by the xAI image endpoint |
-| `style` | Not supported by the xAI image endpoint |
+| Параметр | Причина |
+|----------|---------|
+| `size` | Не поддерживается официальным API xAI, при передаче вернёт `Argument not supported: size` |
+| `quality` | Не поддерживается официальным API xAI |
+| `style` | Не поддерживается официальным API xAI |
 
-## grok-4-image Example
+## Пример grok-4-image
 
 <CodeGroup>
 
@@ -84,10 +87,6 @@ response = client.images.generate(
 print(response.data[0].url)
 ```
 
-<Note>
-  Image URLs returned with `response_format: "url"` are temporary. Download or store the image after generation if you need durable access.
-</Note>
-
 ```javascript Node.js
 import OpenAI from "openai";
 
@@ -110,9 +109,9 @@ console.log(response.data[0].url);
 
 </CodeGroup>
 
-## Response Example
+## Пример ответа
 
-The live response may include `url`, `mime_type`, and `revised_prompt`:
+Фактический ответ может содержать поля `url`, `mime_type`, `revised_prompt` и др.:
 
 ```json
 {
@@ -127,29 +126,33 @@ The live response may include `url`, `mime_type`, and `revised_prompt`:
 }
 ```
 
-## grok-4-image Differences
+<Note>
+  Ссылки на изображения, возвращаемые `response_format: "url"`, являются временными — пожалуйста, скачайте или сохраните сразу после генерации.
+</Note>
 
-Use only this safe subset for `grok-4-image`:
+## Отличия параметров grok-4-image
 
-| Parameter | Support |
-|-----------|---------|
-| `model` | Use `grok-4-image` |
-| `prompt` | Supported |
-| `n` | Use `1` only. A live `n=2` test returned 1 image but billed 2 images; the gateway has been narrowed to `1` |
-| `response_format` | `url` is stable. `b64_json` may be accepted but the live route still returned `url` |
-| `aspect_ratio` | Accepted by the request path, but third-party enforcement should be verified per output |
-| `resolution` | Accepted by the request path, but third-party enforcement should be verified per output |
+`grok-4-image` рекомендует использовать только безопасное подмножество ниже:
 
-Do not promise these for `grok-4-image`:
+| Параметр | Поддержка |
+|----------|-----------|
+| `model` | Используйте `grok-4-image` |
+| `prompt` | Поддерживается |
+| `n` | Рекомендуется только `1`. На практике `n=2` часто возвращает только 1 изображение, но тарифицируется как за 2; шлюз уже ограничивает только до `1` |
+| `response_format` | `url` стабильно. Запрос `b64_json` допустим, но на практике возвращается только `url` |
+| `aspect_ratio` | Запрос допустим, но выполнение на сторонних каналах зависит от фактического ответа |
+| `resolution` | Запрос допустим, но выполнение на сторонних каналах зависит от фактического ответа |
 
-- multi-image `n > 1`
-- guaranteed `b64_json` output
+Не давайте гарантий по `grok-4-image` относительно:
+
+- создание нескольких изображений `n > 1`
+- обязательной выдачи base64 `b64_json`
 - `size`
 - `quality`
 - `style`
-- image editing
+- редактирования изображений
 
-## grok-4-image Example
+## Примеры grok-4-image
 
 ```bash
 curl -X POST https://api.crazyrouter.com/v1/images/generations \
@@ -163,28 +166,28 @@ curl -X POST https://api.crazyrouter.com/v1/images/generations \
   }'
 ```
 
-## Billing
+## Информация о тарификации
 
-| Model | Current Billing |
-|-------|-----------------|
-| `grok-4-image` | `$0.02 / image`, no discount |
-| `grok-4-image` | Current pricing is `$0.08 * 0.55 = $0.044 / image` |
+| Модель | Текущая тарификация |
+|--------|--------------------|
+| `grok-4-image` | `$0.02 / image`, скидки не действуют |
+| `grok-4-image` | Текущий pricing: `$0.08 * 0.55 = $0.044 / image` |
 
 <Note>
-  The live pricing page and usage logs are the source of truth. Grok image models are billed per image, not by input/output tokens.
+  Ориентируйтесь на актуальные страницы с тарифами и логи расходов. Модель для изображений тарифицируется за каждое изображение, не по количеству токенов на вход/выход.
 </Note>
 
-## Common Errors
+## Частые ошибки
 
-| Error | Fix |
-|-------|-----|
-| `Argument not supported: size` | Do not send `size`; use `aspect_ratio` and `resolution` |
-| `model_price_error` | The model is missing pricing or the token cannot use it |
-| `model_not_found` | Check the model name, token permissions, and channel availability with `GET /v1/models` |
+| Ошибка | Как исправить |
+|--------|--------------|
+| `Argument not supported: size` | Не передавайте `size` в модель Grok для изображений, используйте `aspect_ratio` и `resolution` |
+| `model_price_error` | Для целевой модели не настроена цена либо недостаточно прав у токена — сначала проверьте тарифы и список моделей |
+| `model_not_found` | Имя модели, права токена или доступность канала не совпадают — используйте `GET /v1/models` для проверки |
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [Grok 4.6: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/grok-4-6?utm_source=docs&utm_medium=related)
-- [Grok 4.6: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/xai/grok-4-6?utm_source=docs&utm_medium=related)
-- [Все модели xAI с актуальными ценами](https://crazyrouter.com/en/models/xai?utm_source=docs&utm_medium=related)
+- [Сравнение цен Grok 4.6: официальные / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/grok-4-6?utm_source=docs&utm_medium=related)
+- [Страница модели Grok 4.6: актуальные цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/xai/grok-4-6?utm_source=docs&utm_medium=related)
+- [Все модели и тарифы xAI](https://crazyrouter.com/ru/models/xai?utm_source=docs&utm_medium=related)

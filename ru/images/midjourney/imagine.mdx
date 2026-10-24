@@ -1,30 +1,30 @@
 ---
 title: "Submit Imagine Task"
-description: "Use POST /mj/submit/imagine to submit a Midjourney image generation task"
+description: "Используйте POST /mj/submit/imagine для подачи задачи генерации изображения в Midjourney"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Submit Imagine Task
+# Подать задачу Imagine
 
 ```
 POST /mj/submit/imagine
 ```
 
-Submit a Midjourney Imagine task to generate images based on a prompt.
+Подайте задачу Midjourney Imagine для генерации изображения по заданному промпту.
 
-## Request Parameters
+## Параметры запроса
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `botType` | string | No | Bot type: `MID_JOURNEY` (default) or `NIJI_JOURNEY` |
-| `prompt` | string | Yes | Prompt, supports native Midjourney syntax (e.g. `--ar 16:9 --v 6`) |
-| `base64Array` | array | No | Array of Base64-encoded reference images for image-guided generation |
-| `notifyHook` | string | No | Callback URL for task status changes |
-| `state` | string | No | Custom state information, returned as-is in callbacks |
+| Параметр | Тип | Обязательный | Описание |
+|------|------|------|------|
+| `botType` | string | Нет | Тип бота: `MID_JOURNEY` (по умолчанию) или `NIJI_JOURNEY` |
+| `prompt` | string | Да | Промпт, поддерживается оригинальный синтаксис Midjourney (например, `--ar 16:9 --v 6`) |
+| `base64Array` | array | Нет | Массив изображений-референсов в формате Base64, используется для подсказки |
+| `notifyHook` | string | Нет | Адрес для обратного вызова при изменении статуса задачи |
+| `state` | string | Нет | Пользовательская информация о статусе, будет возвращена без изменений в колбэке |
 
 ---
 
-## Request Examples
+## Пример запроса
 
 <CodeGroup>
 
@@ -60,28 +60,28 @@ print(response.json())
 
 </CodeGroup>
 
-### Response Example
+### Пример ответа
 
 ```json
 {
   "code": 1,
-  "description": "Submitted successfully",
+  "description": "提交成功",
   "result": "task_1234567890",
   "properties": {}
 }
 ```
 
-| Field | Description |
-|-------|-------------|
-| `code` | Status code, `1` means success, `22` means queued |
-| `description` | Status description |
-| `result` | Task ID, used for subsequent queries |
+| Поле | Описание |
+|------|------|
+| `code` | Код статуса, `1` — успех, `22` — в очереди |
+| `description` | Описание статуса |
+| `result` | ID задачи, используется для последующего запроса |
 
 ---
 
-## Request with Reference Images
+## Запрос с референс-изображением
 
-Use `base64Array` to pass reference images:
+Используйте `base64Array` для передачи референса:
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/mj/submit/imagine \
@@ -98,9 +98,9 @@ curl -X POST https://api.crazyrouter.com/mj/submit/imagine \
 
 ---
 
-## Using Niji Journey
+## Использование Niji Journey
 
-Set `botType` to `NIJI_JOURNEY` to use the Niji model for anime-style images:
+Установите `botType` в `NIJI_JOURNEY`, чтобы использовать модель Niji для генерации изображений в стиле аниме:
 
 ```json
 {
@@ -110,9 +110,9 @@ Set `botType` to `NIJI_JOURNEY` to use the Niji model for anime-style images:
 ```
 
 <Note>
-  After successful submission, a task ID is returned. Use the [Query Task Status](/ru/images/midjourney/query) endpoint to get the generation result.
+  После успешной отправки возвращается ID задачи — результат генерации нужно получить через интерфейс [запроса статуса задачи](/ru/images/midjourney/query).
 </Note>
 
 <Warning>
-  Images in `base64Array` increase the request payload size. It is recommended to keep each image under 4MB.
+  Изображения из `base64Array` увеличивают размер тела запроса, рекомендуется размер одной картинки не более 4 МБ.
 </Warning>

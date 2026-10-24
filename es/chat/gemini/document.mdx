@@ -1,0 +1,125 @@
+---
+title: "Comprensión de documentos Gemini"
+description: "Comprensión y extracción estructurada de PDF Gemini validada en el entorno de producción de Crazyrouter a fecha 2026-03-23"
+---
+> Contenido actualizado: 2026-06-09
+
+# Comprensión de documentos Gemini
+
+```
+POST /v1beta/models/{model}:generateContent
+```
+
+Hasta el 23 de marzo de 2026, el entorno de producción de Crazyrouter ha validado que `gemini-3.1-pro` admite:
+
+- Lectura de PDF mediante `inlineData`
+- Salida de JSON analizable combinando `responseMimeType` + `responseSchema`
+
+---
+
+## Resumen de PDF
+
+La siguiente petición ha leído correctamente el PDF en producción y ha devuelto el texto resumen:
+
+```bash
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "Summarize the attached PDF in one sentence."},
+          {
+            "inlineData": {
+              "mimeType": "application/pdf",
+              "data": "JVBERi0xLjQK..."
+            }
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+En esta prueba de entorno de producción, el modelo devolvió con éxito un resumen de una sola frase sobre el contenido del PDF.
+
+---
+
+## PDF + Salida estructurada
+
+La siguiente petición ha devuelto correctamente en producción un texto JSON que se puede `json.loads()` directamente:
+
+```bash
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "Extract the key topic and whether the document mentions gamma."},
+          {
+            "inlineData": {
+              "mimeType": "application/pdf",
+              "data": "JVBERi0xLjQK..."
+            }
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "responseMimeType": "application/json",
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "topic": {"type": "string"},
+          "mentions_gamma": {"type": "boolean"}
+        },
+        "required": ["topic", "mentions_gamma"]
+      }
+    }
+  }'
+```
+
+Ejemplo de respuesta real en producción:
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\n  \"topic\": \"Crazyrouter PDF test document\",\n  \"mentions_gamma\": false\n}"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+Se puede analizar directamente en el código correspondiente:
+
+```python
+import json
+
+text = response["candidates"][0]["content"]["parts"][0]["text"]
+data = json.loads(text)
+```
+
+<Note>
+  En esta página solo se ha verificado la cadena de entrada de PDF y salida estructurada en JSON. Para escenarios más complejos como extracción de tablas o comparación de documentos extensos, se recomienda realizar una validación con tus propias muestras reales en el entorno de producción.
+</Note>
+
+<Warning>
+  Los PDF grandes incrementan significativamente los tokens de entrada. Antes de la integración oficial, se recomienda validar los campos y prompts con documentos pequeños y luego aumentar progresivamente el tamaño de las entradas.
+</Warning>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Comparativa de precios de Gemini 2.5 Flash: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Página del modelo Gemini 2.5 Flash: precio en tiempo real, ejemplos reales, código de invocación](https://crazyrouter.com/es/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Comparativa de precios de Gemini 2.5 Flash-Lite: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)

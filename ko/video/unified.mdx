@@ -1,15 +1,15 @@
 ---
 title: "통합 비디오 API"
-description: "Crazyrouter의 통합 비디오 생성 인터페이스로, 여러 모델을 통합된 형식으로 호출할 수 있습니다"
+description: "Crazyrouter 통합 비디오 생성 인터페이스, 여러 모델을 동일한 형식으로 호출할 수 있습니다"
 ---
-> 업데이트: 2026-06-06
+> 내용 업데이트: 2026-06-30
 
 # 통합 비디오 API
 
-Crazyrouter는 통합된 비디오 생성 인터페이스를 제공하며, 여러 비디오 모델을 동일한 API 형식으로 호출할 수 있습니다.
+Crazyrouter는 통합 비디오 생성 인터페이스를 제공하며, 여러 비디오 모델을 동일한 API 형식으로 호출할 수 있습니다.
 
 <Note>
-  `Seedance`는 현재 통합 `/v1/video/*` 프로토콜 사용을 더 이상 권장하지 않습니다. 네이티브 `/volc/v1/contents/generations/tasks`를 사용하세요. [Seedance](/ko/video/seedance)를 참고하세요.
+  `Seedance` 현재 통합 `/v1/video/*` 프로토콜은 권장되지 않습니다; 원본 `/volc/v1/contents/generations/tasks`를 사용하세요. [Seedance](/ko/video/seedance)를 참조하세요.
 </Note>
 
 ## 지원 모델
@@ -18,8 +18,8 @@ Crazyrouter는 통합된 비디오 생성 인터페이스를 제공하며, 여�
 |------|------|
 | `veo-3.1-fast` | Google Veo 3.1 Fast |
 | `veo-3.1-quality` | Google Veo 3.1 Quality |
-| `wan2.2-t2v-plus` | Wan 텍스트→비디오 |
-| `wan2.5-t2v-preview` | Wan 텍스트→비디오 |
+| `wan2.2-t2v-plus` | Wan 텍스트-비디오 |
+| `wan2.5-t2v-preview` | Wan 텍스트-비디오 |
 
 ---
 
@@ -35,9 +35,9 @@ POST /v1/video/create
 |------|------|------|------|
 | `model` | string | 예 | 모델 이름 |
 | `prompt` | string | 예 | 비디오 설명 프롬프트 |
-| `aspect_ratio` | string | 아니오 | 화면 비율: `16:9`, `9:16`, `1:1` |
+| `aspect_ratio` | string | 아니오 | 가로세로 비율: `16:9`, `9:16`, `1:1` |
 | `size` | string | 아니오 | 비디오 크기, 예: `1280x720` |
-| `images` | array | 아니오 | 현재 공개된 이미지→비디오 기능은 일반적으로 이미지 URL 1개를 전달 |
+| `images` | array | 아니오 | 현재 공개된 이미지-비디오 기능에는 `1` 장의 이미지 URL을 주로 전달합니다 |
 | `duration` | integer | 아니오 | 비디오 길이(초) |
 
 ### 요청 예시
@@ -50,7 +50,7 @@ curl -X POST https://api.crazyrouter.com/v1/video/create \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "veo-3.1-quality",
-    "prompt": "황금빛 리트리버가 해변에서 뛰어다니는 모습, 슬로우 모션, 영화 같은 화질",
+    "prompt": "一只金毛犬在海滩上奔跑，慢动作，电影级画质",
     "aspect_ratio": "16:9"
   }'
 ```
@@ -66,14 +66,14 @@ response = requests.post(
     },
     json={
         "model": "veo-3.1-quality",
-        "prompt": "황금빛 리트리버가 해변에서 뛰어다니는 모습, 슬로우 모션, 영화 같은 화질",
+        "prompt": "一只金毛犬在海滩上奔跑，慢动作，电影级画质",
         "aspect_ratio": "16:9"
     }
 )
 
 data = response.json()
 task_id = data["task_id"]
-print(f"작업 ID: {task_id}")
+print(f"任务 ID: {task_id}")
 ```
 
 </CodeGroup>
@@ -89,9 +89,9 @@ print(f"작업 ID: {task_id}")
 
 ---
 
-## 이미지→비디오
+## 이미지-비디오
 
-`images` 파라미터에 참조 이미지를 전달합니다.
+`images` 파라미터에 참고 이미지를 입력하세요:
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/video/create \
@@ -99,7 +99,7 @@ curl -X POST https://api.crazyrouter.com/v1/video/create \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "wan-ai/wan2.1-i2v-14b-720p",
-    "prompt": "사진 속 인물이 미소를 짓고 손을 흔들기 시작함",
+    "prompt": "图片中的人物开始微笑并挥手",
     "images": ["https://example.com/portrait.jpg"],
     "aspect_ratio": "16:9"
   }'
@@ -134,7 +134,7 @@ curl "https://api.crazyrouter.com/v1/video/query?id=video_task_abc123" \
 }
 ```
 
-### 조회 응답(완료됨)
+### 조회 응답(완료)
 
 ```json
 {
@@ -155,12 +155,12 @@ curl "https://api.crazyrouter.com/v1/video/query?id=video_task_abc123" \
 |------|------|
 | `queued` | 대기 중 |
 | `processing` | 처리 중 |
-| `SUCCESS` | 완료됨 |
+| `SUCCESS` | 완료 |
 | `failed` | 실패 |
 
 ---
 
-## 전체 프로세스 예시
+## 전체 과정 예시
 
 ```python Python
 import requests
@@ -173,38 +173,38 @@ headers = {
     "Authorization": f"Bearer {API_KEY}"
 }
 
-# 1. 비디오 작업 생성
+# 1. 创建视频任务
 resp = requests.post(f"{BASE_URL}/v1/video/create", headers=headers, json={
     "model": "veo-3.1-quality",
-    "prompt": "황금빛 리트리버가 해변에서 뛰어다니는 모습, 슬로우 모션",
+    "prompt": "一只金毛犬在海滩上奔跑，慢动作",
     "aspect_ratio": "16:9"
 })
 task_id = resp.json()["task_id"]
-print(f"작업 생성됨: {task_id}")
+print(f"任务已创建: {task_id}")
 
-# 2. 상태 폴링 조회
+# 2. 轮询查询状态
 while True:
     resp = requests.get(f"{BASE_URL}/v1/video/query?id={task_id}", headers=headers)
     result = resp.json().get("data", resp.json())
     status = result["status"]
-    print(f"상태: {status}")
+    print(f"状态: {status}")
 
     if status == "SUCCESS":
-        print(f"비디오 주소: {result.get('artifact_url') or result.get('url')}")
+        print(f"视频地址: {result.get('artifact_url') or result.get('url')}")
         break
     elif status == "failed":
-        print("비디오 생성 실패")
+        print("视频生成失败")
         break
 
     time.sleep(10)
 ```
 
 <Note>
-  비디오 생성은 일반적으로 1~5분이 소요되며, 폴링 간격은 10초를 권장합니다.
+  비디오 생성에는 보통 1-5분이 소요되며, 10초 간격으로 폴링을 권장합니다.
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 관련 페이지 (crazyrouter.com)
+## 관련 페이지
 
-- [Google Veo 3.1 모델 페이지: 실시간 가격, 샘플, 코드](https://crazyrouter.com/en/models/google/aigc-video-gv-3-1?utm_source=docs&utm_medium=related)
-- [Google 전체 모델과 가격](https://crazyrouter.com/en/models/google?utm_source=docs&utm_medium=related)
+- [Google Veo 3.1 모델 페이지: 실시간 가격, 실제 예시, 호출 코드](https://crazyrouter.com/ko/models/google/aigc-video-gv-3-1?utm_source=docs&utm_medium=related)
+- [Google 전체 모델 및 가격](https://crazyrouter.com/ko/models/google?utm_source=docs&utm_medium=related)

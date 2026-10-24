@@ -1,10 +1,11 @@
 ---
-title: 'Python Image Generation'
-description: 'Python image generation and editing with DALL-E and GPT-Image-2'
+title: "Генерация изображений на Python"
+description: "Генерация и редактирование изображений на Python с помощью DALL-E и GPT-Image-2"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-06
 
-## DALL-E 3 Image Generation
+
+## Генерация изображений DALL-E 3
 
 ```python
 from openai import OpenAI
@@ -13,30 +14,30 @@ client = OpenAI(api_key="sk-xxx", base_url="https://api.crazyrouter.com/v1")
 
 response = client.images.generate(
     model="dall-e-3",
-    prompt="A cat wearing a spacesuit walking on the moon, digital art style",
+    prompt="一只穿着宇航服的猫在月球上散步，数字艺术风格",
     size="1024x1024",
     quality="hd",
     n=1
 )
 
 image_url = response.data[0].url
-print(f"Image URL: {image_url}")
+print(f"图片地址: {image_url}")
 ```
 
-### DALL-E Parameters
+### Параметры DALL-E
 
-| Parameter | Options | Description |
-|-----------|---------|-------------|
-| `size` | `1024x1024`, `1792x1024`, `1024x1792` | Image dimensions |
-| `quality` | `standard`, `hd` | Image quality |
-| `style` | `vivid`, `natural` | Style |
+| Параметр | Возможные значения | Описание |
+|----------|--------------------|----------|
+| `size` | `1024x1024`, `1792x1024`, `1024x1792` | Размер изображения |
+| `quality` | `standard`, `hd` | Качество изображения |
+| `style` | `vivid`, `natural` | Стиль |
 
-## GPT-Image-2 Image Generation
+## Генерация изображений GPT-Image-2
 
 ```python
 response = client.images.generate(
     model="gpt-image-2",
-    prompt="A modern minimalist logo with an artificial intelligence theme",
+    prompt="一个现代简约风格的 Logo，主题是人工智能",
     size="1024x1024",
     quality="low",
     output_format="png",
@@ -46,14 +47,14 @@ response = client.images.generate(
 print(response.data[0].url)
 ```
 
-## GPT-Image-2 Image Editing
+## Редактирование изображений GPT-Image-2
 
 ```python
-# Image editing (requires original image)
+# 图像编辑（需要原图）
 response = client.images.edit(
     model="gpt-image-2",
     image=open("original.png", "rb"),
-    prompt="Change the background to a beach sunset",
+    prompt="把背景改成海滩日落",
     size="1024x1024",
     quality="low"
 )
@@ -61,35 +62,35 @@ response = client.images.edit(
 print(response.data[0].url)
 ```
 
-## Download and Save Images
+## Скачивание и сохранение изображения
 
 ```python
 import requests
 
 response = client.images.generate(
     model="dall-e-3",
-    prompt="Cyberpunk city nightscape",
+    prompt="赛博朋克风格的城市夜景",
     size="1792x1024"
 )
 
-# Download image
+# 下载图片
 image_url = response.data[0].url
 img_data = requests.get(image_url).content
 with open("cyberpunk_city.png", "wb") as f:
     f.write(img_data)
-print("Image saved")
+print("图片已保存")
 ```
 
 <Note>
-  `gpt-image-2` usually returns `data[0].url`. Do not send `response_format` with `gpt-image-2`; use `output_format="png"`, `"jpeg"`, or `"webp"` to choose the image file format. For production image requests, use the primary route `https://api.crazyrouter.com/v1`.
+  `gpt-image-2` обычно возвращает `data[0].url`. Не передавайте `response_format` в `gpt-image-2`; для управления форматом файла изображения используйте `output_format="png"`, `"jpeg"` или `"webp"`. Для производственных запросов создания изображений рекомендуется использовать главную магистраль `https://api.crazyrouter.com/v1`.
 </Note>
 
 <Warning>
-  Image generation costs are relatively high. Test your prompt with smaller sizes first, then generate high-quality large images once satisfied.
+  Генерация изображений требует существенных расходов, рекомендуется сначала тестировать prompt на малом размере, а после удовлетворяющих результатов создавать более качественные и большие изображения.
 </Warning>
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [GPT Image 2: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [Все модели OpenAI с актуальными ценами](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [Страница модели GPT Image 2: актуальные цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Все модели и цены OpenAI](https://crazyrouter.com/ru/models/openai?utm_source=docs&utm_medium=related)

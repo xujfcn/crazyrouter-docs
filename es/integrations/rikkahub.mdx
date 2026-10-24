@@ -1,0 +1,41 @@
+---
+title: "Tutorial de configuración de RikkaHub"
+description: "Cómo configurar la Crazyrouter API en RikkaHub"
+---
+> Contenido actualizado: 2026-06-09
+
+## Descripción general
+
+RikkaHub es un cliente de agregación de modelos de IA que permite la gestión unificada de diversos proveedores de servicios de modelos.
+
+## Pasos de configuración
+
+<Steps>
+  <Step title="Abrir configuración">
+    Ingresa a la página de configuración de RikkaHub y busca la opción `Servicio de modelos` o `Configuración de la API`.
+  </Step>
+  <Step title="Agregar proveedor de servicios">
+    Haz clic en "Agregar nuevo proveedor":
+    - **Tipo**: Compatible con OpenAI
+    - **Nombre**: Crazyrouter
+    - **API Base URL**: `https://api.crazyrouter.com/v1`
+    - **API Key**: `sk-xxx`
+  </Step>
+  <Step title="Seleccionar modelo">
+    Una vez completada la configuración, selecciona el modelo que deseas utilizar desde la lista de modelos.
+  </Step>
+</Steps>
+
+## Modelos disponibles
+
+Después de la configuración, se recomienda añadir primero los modelos principales ya validados:
+
+- `gpt-5.5`
+- `claude-opus-4-8`
+- `gemini-3.1-pro`
+
+Utiliza primero `gpt-5.5` para realizar la primera verificación de conectividad, y después añade Claude, Gemini u otros modelos abiertos en la lista de modelos del sitio según sea necesario.
+
+<Note>
+  RikkaHub admite la configuración simultánea de múltiples proveedores y permite cambiar entre ellos de manera flexible durante la conversación.
+</Note>

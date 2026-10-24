@@ -1,0 +1,137 @@
+---
+title: 'Modificar token'
+description: 'Actualizar la configuración de un token existente'
+api: 'PUT /api/token/'
+---
+> Contenido actualizado: 2026-07-20
+
+## Descripción de la API
+
+Modificar la configuración de un token existente, incluyendo nombre, límite, fecha de expiración, permisos de modelo y otros ajustes.
+
+<Note>
+  Este grupo de interfaces `/api/token/*` está diseñado principalmente para la automatización de la gestión de claves API en la consola de Crazyrouter. Requieren los encabezados de solicitud `access token` y `New-Api-User` del usuario, y no son interfaces destinadas al flujo de llamadas normales del modelo `sk-xxx`. La dirección base de las solicitudes debe ser `https://crazyrouter.com`; `https://api.crazyrouter.com` es la entrada exclusiva para API de modelos, y llamar la ruta de gestión devolverá `404 api_only_endpoint`.
+</Note>
+
+## Método de autenticación
+
+Utiliza autenticación del lado del usuario; por favor incluye en el encabezado de la solicitud:
+
+```text
+Authorization: Bearer your_access_token
+New-Api-User: 1
+```
+
+## Parámetros de la solicitud
+
+<ParamField body="id" type="integer" required>
+  ID del token
+</ParamField>
+
+<ParamField body="name" type="string">
+  Nombre del token
+</ParamField>
+
+<ParamField body="remain_quota" type="integer">
+  Límite restante
+</ParamField>
+
+<ParamField body="unlimited_quota" type="boolean">
+  ¿Límite ilimitado?
+</ParamField>
+
+<ParamField body="expired_time" type="integer">
+  Marca de tiempo de expiración, `-1` significa que nunca expira
+</ParamField>
+
+<ParamField body="model_limits_enabled" type="boolean">
+  ¿Habilitar lista blanca de modelos?
+</ParamField>
+
+<ParamField body="model_limits" type="string">
+  Cadena de configuración de restricciones de modelos, por ejemplo `["gpt-5.5","claude-opus-4-8"]`
+</ParamField>
+
+<ParamField body="status" type="integer">
+  Estado: 1=habilitado, 2=deshabilitado
+</ParamField>
+
+<ParamField body="allow_ips" type="string">
+  Cadena de lista blanca de IP
+</ParamField>
+
+<ParamField body="group" type="string">
+  Grupo
+</ParamField>
+
+## Formato de respuesta
+
+Esta API devolverá el objeto token actualizado:
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "id": 10,
+    "name": "生产环境-已更新",
+    "status": 1,
+    "remain_quota": 200000,
+    "unlimited_quota": false,
+    "model_limits_enabled": true,
+    "model_limits": "[\"gpt-5.5\",\"claude-opus-4-8\"]",
+    "allow_ips": "203.0.113.10",
+    "group": "default"
+  }
+}
+```
+
+## Ejemplo de código
+
+<CodeGroup>
+
+```python Python
+import json
+import requests
+
+headers = {
+    "Authorization": "Bearer your_access_token",
+    "New-Api-User": "1",
+    "Content-Type": "application/json",
+    "User-Agent": "Mozilla/5.0"
+}
+
+response = requests.put(
+    "https://crazyrouter.com/api/token/",
+    headers=headers,
+    json={
+        "id": 10,
+        "name": "生产环境-已更新",
+        "remain_quota": 200000,
+        "model_limits_enabled": True,
+        "model_limits": json.dumps(["gpt-5.5", "claude-opus-4-8"])
+    }
+)
+
+print(response.json())
+```
+
+```bash cURL
+curl -X PUT https://crazyrouter.com/api/token/ \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 1" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": 10,
+    "name": "生产环境-已更新",
+    "remain_quota": 200000,
+    "model_limits_enabled": true,
+    "model_limits": "[\"gpt-5.5\"]"
+  }'
+```
+
+</CodeGroup>
+
+<Warning>
+  Modificar el token no generará una nueva clave API. Si necesitas cambiar la clave, elimínalo y créalo de nuevo.
+</Warning>

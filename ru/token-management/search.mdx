@@ -1,38 +1,38 @@
 ---
-title: 'Search Tokens'
-description: 'Search tokens by keyword'
+title: "Поиск токенов"
+description: "Поиск токенов по ключевым словам"
 api: 'GET /api/token/search'
 ---
-> Дата обновления: 2026-07-20
+> Обновление содержания: 2026-07-20
 
-## Overview
+## Описание интерфейса
 
-Search for tokens by keyword with fuzzy matching on token names. You can also filter by token fragments.
+Поиск токенов по ключевым словам, поддерживается нечеткое совпадение по названию, а также фильтрация по частям строки токена.
 
 <Note>
-  The `/api/token/*` endpoints are mainly for Crazyrouter dashboard automation around API key management. They require a user `access token` plus the `New-Api-User` header, and are not the normal interface for `sk-xxx` model calls. Use `https://crazyrouter.com` as the base URL; `https://api.crazyrouter.com` is reserved for model APIs and returns `404 api_only_endpoint` for management paths.
+  Эта группа интерфейсов `/api/token/*` в первую очередь используется для автоматизации управления API Key в консоли Crazyrouter. Для работы требуется заголовки `access token` и `New-Api-User` пользователя, интерфейс не предназначен для прямого использования стандартными процессами вызова модели `sk-xxx`. Базовый адрес запроса должен быть `https://crazyrouter.com`; `https://api.crazyrouter.com` — это специализированная точка доступа для Model API, при вызове путей управления возвращается `404 api_only_endpoint`.
 </Note>
 
-## Authentication
+## Способ аутентификации
 
-Use user-side authentication with these headers:
+Используйте пользовательскую аутентификацию, передайте в заголовке запроса:
 
 ```text
 Authorization: Bearer your_access_token
 New-Api-User: 1
 ```
 
-## Request Parameters
+## Параметры запроса
 
 <ParamField query="keyword" type="string" required>
-  Search keyword, matches against token names
+  Ключевое слово поиска, совпадение по названию токена
 </ParamField>
 
 <ParamField query="token" type="string">
-  Optional. Filter by token string fragment
+  Необязательно. Фильтрация по строковому фрагменту токена
 </ParamField>
 
-## Response Format
+## Формат ответа
 
 ```json
 {
@@ -41,7 +41,7 @@ New-Api-User: 1
   "data": [
     {
       "id": 5,
-      "name": "Production",
+      "name": "生产环境",
       "key": "sk-xxxxxxxx",
       "status": 1,
       "remain_quota": 50000,
@@ -56,7 +56,7 @@ New-Api-User: 1
 }
 ```
 
-## Code Examples
+## Пример кода
 
 <CodeGroup>
 
@@ -70,17 +70,17 @@ headers = {
 }
 
 response = requests.get(
-    "https://crazyrouter.com/api/token/search?keyword=production&token=sk-",
+    "https://crazyrouter.com/api/token/search?keyword=生产&token=sk-",
     headers=headers
 )
 
 tokens = response.json()["data"]
 for token in tokens:
-    print(f"[{token['id']}] {token['name']} - Remaining quota: {token['remain_quota']}")
+    print(f"[{token['id']}] {token['name']} - 剩余额度: {token['remain_quota']}")
 ```
 
 ```bash cURL
-curl "https://crazyrouter.com/api/token/search?keyword=production&token=sk-" \
+curl "https://crazyrouter.com/api/token/search?keyword=生产&token=sk-" \
   -H "Authorization: Bearer your_access_token" \
   -H "New-Api-User: 1"
 ```

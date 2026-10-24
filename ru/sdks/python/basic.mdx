@@ -1,16 +1,16 @@
 ---
-title: 'Python Basic Chat'
-description: 'Python basic chat, multi-turn conversation, and streaming output'
+title: "Основы диалога на Python"
+description: "Реализация базового чата, последовательного диалога и потокового вывода на Python"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-## Install Dependencies
+## Установка зависимостей
 
 ```bash
 pip install openai requests
 ```
 
-## Basic Chat
+## Базовый диалог
 
 <CodeGroup>
 
@@ -25,8 +25,8 @@ client = OpenAI(
 response = client.chat.completions.create(
     model="gpt-5.5",
     messages=[
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "Explain artificial intelligence in one sentence"}
+        {"role": "system", "content": "你是一个有帮助的助手。"},
+        {"role": "user", "content": "用一句话解释什么是人工智能"}
     ]
 )
 
@@ -45,7 +45,7 @@ response = requests.post(
     json={
         "model": "gpt-5.5",
         "messages": [
-            {"role": "user", "content": "Explain artificial intelligence in one sentence"}
+            {"role": "user", "content": "用一句话解释什么是人工智能"}
         ]
     }
 )
@@ -56,9 +56,9 @@ print(data["choices"][0]["message"]["content"])
 
 </CodeGroup>
 
-## Multi-turn Conversation
+## Последовательный диалог
 
-Maintain a `messages` list to implement multi-turn dialogue:
+Многократный диалог реализуется с помощью списка `messages`:
 
 ```python
 from openai import OpenAI
@@ -66,7 +66,7 @@ from openai import OpenAI
 client = OpenAI(api_key="sk-xxx", base_url="https://api.crazyrouter.com/v1")
 
 messages = [
-    {"role": "system", "content": "You are a Python programming assistant."}
+    {"role": "system", "content": "你是一个 Python 编程助手。"}
 ]
 
 def chat(user_input):
@@ -81,13 +81,13 @@ def chat(user_input):
     messages.append({"role": "assistant", "content": reply})
     return reply
 
-# Multi-turn dialogue
-print(chat("How do I read a CSV file?"))
-print(chat("What if the file is very large?"))
-print(chat("Can I use pandas for this?"))
+# 多轮对话
+print(chat("如何读取 CSV 文件？"))
+print(chat("如果文件很大怎么办？"))
+print(chat("能用 pandas 实现吗？"))
 ```
 
-## Streaming Output
+## Потоковый вывод
 
 ```python
 from openai import OpenAI
@@ -96,7 +96,7 @@ client = OpenAI(api_key="sk-xxx", base_url="https://api.crazyrouter.com/v1")
 
 stream = client.chat.completions.create(
     model="gpt-5.5",
-    messages=[{"role": "user", "content": "Write a poem about programming"}],
+    messages=[{"role": "user", "content": "写一首关于编程的诗"}],
     stream=True
 )
 
@@ -106,7 +106,7 @@ for chunk in stream:
 print()
 ```
 
-## Streaming with requests
+## Реализация потокового вывода с помощью requests
 
 ```python
 import requests
@@ -120,7 +120,7 @@ response = requests.post(
     },
     json={
         "model": "gpt-5.5",
-        "messages": [{"role": "user", "content": "Hello"}],
+        "messages": [{"role": "user", "content": "你好"}],
         "stream": True
     },
     stream=True
@@ -137,5 +137,5 @@ print()
 ```
 
 <Note>
-  All examples default to `gpt-5.5`, which was verified successfully in Crazyrouter production on March 23, 2026. If you need to swap models, prefer other verified options such as `claude-opus-4-8` or `gemini-3.1-pro`.
+  Все примеры по умолчанию используют `gpt-5.5`, успешно протестированный в производственной среде 23 марта 2026 года. Если вы хотите переключить модель, сначала используйте также проверенную `claude-opus-4-8` или `gemini-3.1-pro`.
 </Note>

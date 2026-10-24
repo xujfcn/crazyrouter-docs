@@ -1,12 +1,12 @@
 ---
-title: "AIGC Kling VOD 呼び出しガイド"
-description: "Crazyrouter の AIGC Kling VOD ルートで Kling 動画モデルを呼び出す方法"
+title: "AIGC Kling VOD 利用方法"
+description: "Crazyrouter の AIGC Kling VOD 経由で Kling 動画モデルを利用する方法"
 ---
-> 更新日: 2026-06-24
+> 内容更新日: 2026-08-07
 
-# AIGC Kling VOD 呼び出しガイド
+# AIGC Kling VOD 利用方法
 
-`aigc-video-kling-*` は Crazyrouter が Tencent VOD ルートで公開している Kling 動画モデルです。ネイティブ Kling の `/kling/v1/videos/*` とは呼び出し方式が異なり、OpenAI 風の非同期動画 API を使います。
+`aigc-video-kling-*` は Crazyrouter が Tencent VOD 経由で提供する Kling 動画モデルです。これはネイティブ Kling ドキュメントの `/kling/v1/videos/*` パスとは異なり、OpenAI スタイルの動画非同期インターフェースで利用します：
 
 ```http
 POST /v1/video/generations
@@ -14,28 +14,32 @@ GET /v1/video/generations/{task_id}
 ```
 
 <Note>
-  VOD ルートを使う場合は、必ず `aigc-video-kling-*` のモデル名を指定してください。`kling-v2-5-turbo`、`kling-v2-6`、`kling-v3` をこのページの用途で直接指定すると、ネイティブ Kling ルートに流れる可能性があります。
+  VOD 経由の場合、必ず `aigc-video-kling-*` モデル名を利用してください。`kling-v2-5-turbo`、`kling-v2-6`、`kling-v3` をこのページのインターフェースへ直接送信しないでください。そうするとネイティブ Kling 回線で処理されることがあります。
+</Note>
+
+<Note>
+  画像モデル `aigc-image-kling-3.0` を使いたい場合は、[AIGC Kling 3.0 画像生成](/jp/images/aigc-kling) をご参照ください。このモデルは `POST /v1/images/generations` を利用し、本ページの動画インターフェースは使用しません。
 </Note>
 
 ## 利用可能なモデル
 
-| モデル | 上流バージョン | 主な用途 |
+| モデル | 上流バージョン | 対応機能 |
 |------|------|------|
-| `aigc-video-kling-1.6` | Kling 1.6 | テキストから動画、画像から動画、始終フレーム、参照画像 |
-| `aigc-video-kling-2.0` | Kling 2.0 | テキストから動画、画像から動画、始終フレーム、参照画像 |
-| `aigc-video-kling-2.1` | Kling 2.1 | テキストから動画、画像から動画、始終フレーム、参照画像 |
-| `aigc-video-kling-2.5-turbo` | Kling 2.5 Turbo | テキストから動画、画像から動画、始終フレーム、参照画像 |
-| `aigc-video-kling-2.6` | Kling 2.6 | テキストから動画、画像から動画、始終フレーム、参照画像、動画入力 |
-| `aigc-video-kling-2.6-motion-control` | Kling 2.6 Motion Control | モーション制御 |
-| `aigc-video-kling-3.0` | Kling 3.0 | テキストから動画、画像から動画、始終フレーム、参照画像 |
-| `aigc-video-kling-3.0-turbo` | Kling 3.0 Turbo | テキストから動画、画像から動画、参照画像 |
-| `aigc-video-kling-3.0-motion-control` | Kling 3.0 Motion Control | モーション制御 |
-| `aigc-video-kling-o1` | Kling O1 | テキストから動画、画像から動画、参照画像、動画入力 |
-| `aigc-video-kling-avatar` | Kling Avatar | アバター / デジタルヒューマン |
+| `aigc-video-kling-1.6` | Kling 1.6 | テキスト生成、画像生成、始終フレーム、参照画像 |
+| `aigc-video-kling-2.0` | Kling 2.0 | テキスト生成、画像生成、始終フレーム、参照画像 |
+| `aigc-video-kling-2.1` | Kling 2.1 | テキスト生成、画像生成、始終フレーム、参照画像 |
+| `aigc-video-kling-2.5-turbo` | Kling 2.5 Turbo | テキスト生成、画像生成、始終フレーム、参照画像 |
+| `aigc-video-kling-2.6` | Kling 2.6 | テキスト生成、画像生成、始終フレーム、参照画像、動画入力 |
+| `aigc-video-kling-2.6-motion-control` | Kling 2.6 Motion Control | 動作制御 |
+| `aigc-video-kling-3.0` | Kling 3.0 | テキスト生成、画像生成、始終フレーム、参照画像 |
+| `aigc-video-kling-3.0-turbo` | Kling 3.0 Turbo | テキスト生成、画像生成、参照画像 |
+| `aigc-video-kling-3.0-motion-control` | Kling 3.0 Motion Control | 動作制御 |
+| `aigc-video-kling-o1` | Kling O1 | テキスト生成、画像生成、参照画像、動画入力 |
+| `aigc-video-kling-avatar` | Kling Avatar | デジタルヒューマン / Avatar |
 | `aigc-video-kling-identifyface` | Kling Identifyface | リップシンク |
 
 <Note>
-  Tencent VOD の `GV 3.1`、`3.1-fast`、`3.1-lite` は Google Veo モデルであり、Kling 3.1 ではありません。別の `aigc-video-gv-*` モデルを使ってください。
+  Tencent VOD ドキュメント中の `GV 3.1`、`3.1-fast`、`3.1-lite` は Google Veo 回線であり、Kling 3.1 ではありません。必ず専用の `aigc-video-gv-*` モデルをご利用ください。
 </Note>
 
 ## タスク作成
@@ -50,35 +54,35 @@ Content-Type: application/json
 
 | パラメータ | 型 | 必須 | 説明 |
 |------|------|------|------|
-| `model` | string | 必須 | このページの `aigc-video-kling-*` モデル名 |
-| `prompt` | string | 条件付き | テキストから動画では必須。マルチショットなどでは metadata に詳細を置けます |
-| `seconds` / `duration` | string / number | 任意 | 動画秒数。通常は `5` または `10`。未指定時は 5 秒扱い |
-| `size` | string | 任意 | `1280x720`、`720x1280` など。アスペクト比の推定に使われます |
-| `image` | string | 任意 | 単一画像から動画を作るときの先頭フレーム URL |
-| `images` | array[string] | 任意 | 1 枚目は先頭フレーム、2 枚目は終端フレームまたは参照画像として扱われます |
-| `metadata` | object | 任意 | VOD Kling 拡張パラメータ |
+| `model` | string | 必須 | 本ページの `aigc-video-kling-*` モデル名を入力 |
+| `prompt` | string | 条件付き必須 | テキスト生成は必須。マルチショットや一部画像生成ケースは拡張パラメータで代用可能 |
+| `seconds` / `duration` | string / number | 任意 | 動画長。よく使われるのは `5` または `10`。デフォルトは `5` 秒 |
+| `size` | string | 任意 | `1280x720`、`720x1280` などを元に出力比率を推論 |
+| `image` | string | 任意 | 単一画像生成動画の初フレーム URL |
+| `images` | array[string] | 任意 | 最初の画像は初フレーム、2枚目は終フレームまたは参照画像として利用可能 |
+| `metadata` | object | 任意 | VOD Kling 拡張パラメータ。下記のフィールド表を参照 |
 
-### よく使う `metadata` フィールド
+### よく使う metadata フィールド
 
 | フィールド | 説明 |
 |------|------|
-| `resolution` | 出力品質。例: `720P`、`1080P`、`2K`、`4K` |
-| `aspect_ratio` | 出力比率。例: `16:9`、`9:16`、`1:1` |
-| `sound` | 音声生成の有無。`true` / `false`、`on` / `off` |
-| `image_urls` | 先頭 / 終端フレーム URL。最大 2 枚 |
-| `image_tail` / `last_frame_url` | 終端フレーム URL。`image_urls[1]` より優先されます |
-| `image_list` | 複数参照画像。最大 9 枚 |
-| `multi_shots` / `multi_shot` | マルチショットの有効化 |
-| `shot_type` | ショット種別 |
+| `resolution` | 出力仕様（例：`720P`、`1080P`、`2K`、`4K`） |
+| `aspect_ratio` | 出力比率（例：`16:9`、`9:16`、`1:1`） |
+| `sound` | 音声生成の有無。`true` / `false`、`on` / `off` をサポート |
+| `image_urls` | 始終フレーム配列。最大2枚まで |
+| `image_tail` / `last_frame_url` | 終了フレーム URL。`image_urls[1]` より優先されます |
+| `image_list` | 参照画像リスト。最大9枚まで対応 |
+| `multi_shots` / `multi_shot` | マルチショット切替 |
+| `shot_type` | ショット分割タイプ |
 | `multi_prompt` | マルチショット用プロンプト配列 |
 | `kling_elements` / `element_list` | Kling 要素制御 |
-| `camera_control` | カメラ制御 |
-| `motion_brush` / `dynamic_masks` | モーション制御入力 |
-| `video_list` | O1 や動画入力ワークフロー用の動画参照 |
-| `voice_list` | 音声参照 |
-| `session_id` / `face_choose` | リップシンク用の顔選択パラメータ |
+| `camera_control` | カメラワーク制御 |
+| `motion_brush` / `dynamic_masks` | 動作制御パラメータ |
+| `video_list` | 動画参照入力。O1や動画インプット系の能力で活用 |
+| `voice_list` | 音声参照入力 |
+| `session_id` / `face_choose` | リップシンク関連パラメータ |
 
-## テキストから動画
+## テキスト生成動画
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/video/generations \
@@ -96,7 +100,7 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
   }'
 ```
 
-## 画像から動画
+## 画像生成動画
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/video/generations \
@@ -136,7 +140,7 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
 ```
 
 <Note>
-  Kling 2.6 の始終フレーム動画では、`metadata.sound=false` を明示することを推奨します。
+  Kling 2.6 の始終フレームでは `metadata.sound=false` を明示的に入力することを推奨します。
 </Note>
 
 ## 複数参照画像
@@ -159,9 +163,9 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
   }'
 ```
 
-## モーション制御
+## 動作制御
 
-モーション制御には `aigc-video-kling-2.6-motion-control` または `aigc-video-kling-3.0-motion-control` を使います。
+動作制御機能は専用モデル名（例：`aigc-video-kling-2.6-motion-control`、`aigc-video-kling-3.0-motion-control`）を使用します。
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/video/generations \
@@ -189,7 +193,7 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
 
 ## O1 動画入力
 
-`aigc-video-kling-o1` は `metadata.video_list` で動画参照を渡せます。動画入力の有無により課金仕様が変わる場合があります。
+`aigc-video-kling-o1` で `metadata.video_list` 経由の動画参考を受け付けます。動画入力の有無で課金仕様が異なります。
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/video/generations \
@@ -208,9 +212,9 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
   }'
 ```
 
-## Avatar とリップシンク
+## Avatar およびリップシンク
 
-Avatar は `aigc-video-kling-avatar` を使います。
+Avatar は `aigc-video-kling-avatar` で利用：
 
 ```json
 {
@@ -227,7 +231,7 @@ Avatar は `aigc-video-kling-avatar` を使います。
 }
 ```
 
-リップシンクは `aigc-video-kling-identifyface` を使います。上流の顔識別で得た `session_id` と `face_choose` がある場合は `metadata` に渡します。
+リップシンクは `aigc-video-kling-identifyface` を利用します。上流から `session_id` と `face_choose` を取得している場合は `metadata` に格納可能：
 
 ```json
 {
@@ -247,46 +251,47 @@ Avatar は `aigc-video-kling-avatar` を使います。
 ```
 
 <Note>
-  リップシンクの完全なフローでは、通常、動画生成の前に顔識別が必要です。`session_id` / `face_choose` がない場合、上流でパラメータエラーになることがあります。
+  リップシンクの完全な流れでは、まず顔認識を行いそれから動画生成タスクを送信します。`session_id` / `face_choose` が無い場合は、上流でパラメータエラーになることがあります。
 </Note>
 
 ## タスク照会
 
-作成レスポンスの `id` または `task_id` を使い、同じ互換パスで照会します。
+タスク作成で `id` または `task_id` が返されたら、同じ一連の互換パスで照会：
 
 ```bash cURL
 curl https://api.crazyrouter.com/v1/video/generations/TASK_ID \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-完了後は通常、アーカイブ済み動画 URL が返ります。
+完了後はアーカイブされた動画の URL を取得できます：
 
 ```json
 {
   "code": "success",
   "data": {
-    "status": "succeeded",
+    "status": "SUCCESS",
     "task_id": "vod_task_abc123",
-    "url": "https://media.crazyrouter.com/task-artifacts/example.mp4"
+    "result_url": "https://media.crazyrouter.com/task-artifacts/example.mp4",
+    "artifact_url": "https://media.crazyrouter.com/task-artifacts/example.mp4"
   }
 }
 ```
 
-## ネイティブ Kling との違い
+## ネイティブKlingとの違い
 
 | 項目 | AIGC Kling VOD | ネイティブ Kling |
 |------|------|------|
 | モデル名 | `aigc-video-kling-*` | `kling-v2-5-turbo`、`kling-v2-6`、`kling-v3` |
-| 作成パス | `POST /v1/video/generations` | `POST /kling/v1/videos/text2video` など |
+| 作成パス | `POST /v1/video/generations` | `POST /kling/v1/videos/text2video` 等 |
 | 照会パス | `GET /v1/video/generations/{task_id}` | `GET /kling/v1/videos/{type}/{task_id}` |
-| 主なフィールド | `model`、`prompt`、`seconds`、`image`、`images`、`metadata` | `model_name`、`prompt`、`image_urls`、`duration` など |
-| 適した用途 | Tencent VOD ルート、VOD の価格と機能 | ネイティブ Kling プロトコル |
+| 主なフィールド | `model`、`prompt`、`seconds`、`image`、`images`、`metadata` | `model_name`、`prompt`、`image_urls`、`duration` 等 |
+| 対応シーン | Tencent VOD 設定でのルート、VOD の料金・機能を利用 | ネイティブ Kling プロトコル利用 |
 
-価格、割引、有効な仕様はリアルタイムの [Pricing ページ](/pricing) を基準にしてください。
+価格、割引、利用可能な仕様は [Pricing ページ](https://crazyrouter.com/ja/pricing) を必ず確認してください。
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [Kling 2.6 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/kling/aigc-video-kling-2-6?utm_source=docs&utm_medium=related)
-- [Kling 3.0 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/kling/aigc-video-kling-3-0?utm_source=docs&utm_medium=related)
-- [Kling AI の全モデルと料金](https://crazyrouter.com/en/models/kling?utm_source=docs&utm_medium=related)
+- [Kling 3.0 モデルページ：リアルタイム価格、実サンプル、呼び出しコード](https://crazyrouter.com/ja/models/kling/aigc-video-kling-3-0?utm_source=docs&utm_medium=related)
+- [Kling 2.6 モデルページ：リアルタイム価格、実サンプル、呼び出しコード](https://crazyrouter.com/ja/models/kling/aigc-video-kling-2-6?utm_source=docs&utm_medium=related)
+- [Kling AI 全モデル・価格](https://crazyrouter.com/ja/models/kling?utm_source=docs&utm_medium=related)

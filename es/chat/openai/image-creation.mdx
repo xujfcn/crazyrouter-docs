@@ -1,0 +1,97 @@
+---
+title: "Generación de Imágenes en Chat"
+description: "Comportamiento del chat-imagen y alternativas estables verificadas contra Crazyrouter en producción el 2026-03-23"
+---
+> Contenido actualizado: 2026-06-09
+
+# Generación de Imágenes en Chat
+
+```
+POST /v1/chat/completions
+```
+
+A partir del 23 de marzo de 2026, las verificaciones de producción contra Crazyrouter mostraron:
+
+- `gpt-4o` devuelve `200`, pero `message.content` es texto plano, no contenido de imagen multipart estándar
+- `gpt-image-2` también devuelve `200`, pero la forma actual de la respuesta sigue siendo texto o Markdown que contiene un bloque de parámetros, un ID y un enlace de vista previa, no la estructura multipart estándar OpenAI `image_url`
+- Si necesita una salida de imagen estable y legible por máquina, la ruta recomendada actualmente es [`/v1/images/generations`](/es/images/gpt-image) con `gpt-image-2`; para modelos de imagen Grok, consulte [`Grok Image Models`](/es/images/grok)
+- Si necesita edición de imágenes de referencia o entrada de múltiples imágenes, no siga utilizando la familia Nano Banana como un punto de entrada estable de `/v1/images/generations`. Comience con la ruta nativa de Gemini documentada en [`Nano Banana 2`](/es/images/nano-banana-2); [`Nano Banana`](/es/images/nano-banana) está actualmente solo en pruebas controladas
+
+<Warning>
+  No analice la respuesta actual de chat-imagen de Crazyrouter como si fuera `content: [{type: "image_url", ...}]` estándar de OpenAI.
+</Warning>
+
+---
+
+## Comportamiento Actual Reproducible del Chat
+
+La siguiente petición alcanzó `gpt-image-2` en producción y devolvió `200`:
+
+```bash
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-image-2",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Generate an image of a red square on a white background."
+      }
+    ],
+    "max_tokens": 512
+  }'
+```
+
+El `message.content` observado era una cadena aproximadamente con la forma:
+
+```text
+{
+  "prompt": "Generate an image of a red square on a white background.",
+  "ratio": "1:1",
+  "n": 1
+}
+
+ID: ...
+Data Preview: https://...
+```
+
+Eso significa que la ruta actual de chat se comporta más como una salida de tarea de imagen envuelta en texto que como un objeto de mensaje de imagen multipart estandarizado.
+
+---
+
+## Ruta Estable: API de Imágenes
+
+Si necesita recuperación programática de imágenes, utilice:
+
+```bash
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-image-2",
+    "prompt": "A red square on a white background",
+    "size": "1024x1024",
+    "quality": "low",
+    "output_format": "png"
+  }'
+```
+
+La ruta estable actual de `gpt-image-2` utiliza la vía principal de imágenes `https://api.crazyrouter.com/v1`. Las respuestas suelen incluir:
+
+- `data[0].url`
+
+`gpt-image-2` acepta `response_format="url"` y `response_format="b64_json"` como campos de compatibilidad heredada, pero para nuevas integraciones se recomienda usar `output_format="png"`, `"jpeg"` o `"webp"` para elegir el formato del archivo de imagen.
+
+Así que la ruta de automatización estable sigue siendo la API de Imágenes, y no la ruta de compatibilidad chat-imagen.
+
+<Note>
+  Si solo está probando manualmente, la ruta de chat `gpt-image-2` sigue siendo útil para observación. Si necesita automatización backend, almacenamiento o post-procesamiento, utilice [`GPT Image docs`](/es/images/gpt-image) o [`Grok Image Models`](/es/images/grok). Si su flujo de trabajo depende de edición de imágenes de referencia o entrada de múltiples imágenes, comience con la vía nativa Gemini documentada en [`Nano Banana 2`](/es/images/nano-banana-2). No continúe tratando la familia Nano Banana `/v1/images/generations` como la recomendación estable.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Relacionado en crazyrouter.com
+
+- [Página del modelo GPT Image 1.5: precio en vivo, muestras reales, código](https://crazyrouter.com/es/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Página del modelo GPT Image 2: precio en vivo, muestras reales, código](https://crazyrouter.com/es/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Todos los modelos de OpenAI con precios en vivo](https://crazyrouter.com/es/models/openai?utm_source=docs&utm_medium=related)

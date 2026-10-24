@@ -1,0 +1,297 @@
+---
+title: "Método de llamada AIGC Kling VOD"
+description: "Llamar al modelo de video Kling a través de la línea AIGC Kling VOD de Crazyrouter"
+---
+> Contenido actualizado: 2026-08-07
+
+# Método de llamada AIGC Kling VOD
+
+`aigc-video-kling-*` es el modelo de video Kling accesible por Crazyrouter a través de la línea Tencent VOD. Su ruta es diferente de `/kling/v1/videos/*` en la documentación original de Kling; la llamada cliente utiliza la interfaz asíncrona de video al estilo OpenAI:
+
+```http
+POST /v1/video/generations
+GET /v1/video/generations/{task_id}
+```
+
+<Note>
+  Al llamar la línea VOD debe usar el nombre de modelo `aigc-video-kling-*`. No envíe `kling-v2-5-turbo`, `kling-v2-6`, `kling-v3` directamente a la interfaz de esta página, de lo contrario podría activar la línea original de Kling.
+</Note>
+
+<Note>
+  Si quiere usar el modelo de imagen `aigc-image-kling-3.0`, consulte [Generación de imágenes AIGC Kling 3.0](/es/images/aigc-kling). Ese modelo utiliza `POST /v1/images/generations`, y no esta interfaz de video.
+</Note>
+
+## Modelos disponibles
+
+| Modelo | Versión upstream | Capacidades adecuadas |
+|------|------|------|
+| `aigc-video-kling-1.6` | Kling 1.6 | Generación por texto, generación por imagen, fotogramas inicial/final, imagen de referencia |
+| `aigc-video-kling-2.0` | Kling 2.0 | Generación por texto, generación por imagen, fotogramas inicial/final, imagen de referencia |
+| `aigc-video-kling-2.1` | Kling 2.1 | Generación por texto, generación por imagen, fotogramas inicial/final, imagen de referencia |
+| `aigc-video-kling-2.5-turbo` | Kling 2.5 Turbo | Generación por texto, generación por imagen, fotogramas inicial/final, imagen de referencia |
+| `aigc-video-kling-2.6` | Kling 2.6 | Generación por texto, generación por imagen, fotogramas inicial/final, imagen de referencia, entrada de video |
+| `aigc-video-kling-2.6-motion-control` | Kling 2.6 Motion Control | Control de movimiento |
+| `aigc-video-kling-3.0` | Kling 3.0 | Generación por texto, generación por imagen, fotogramas inicial/final, imagen de referencia |
+| `aigc-video-kling-3.0-turbo` | Kling 3.0 Turbo | Generación por texto, generación por imagen, imagen de referencia |
+| `aigc-video-kling-3.0-motion-control` | Kling 3.0 Motion Control | Control de movimiento |
+| `aigc-video-kling-o1` | Kling O1 | Generación por texto, generación por imagen, imagen de referencia, entrada de video |
+| `aigc-video-kling-avatar` | Kling Avatar | Persona digital / Avatar |
+| `aigc-video-kling-identifyface` | Kling Identifyface | Sincronización labial |
+
+<Note>
+  `GV 3.1`, `3.1-fast`, `3.1-lite` en la documentación de Tencent VOD corresponden a la línea Google Veo, no a Kling 3.1. Por favor, utilice el modelo independiente `aigc-video-gv-*`.
+</Note>
+
+## Creación de tareas
+
+```http
+POST https://api.crazyrouter.com/v1/video/generations
+Authorization: Bearer YOUR_API_KEY
+Content-Type: application/json
+```
+
+### Parámetros comunes
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `model` | string | Sí | Nombre del modelo `aigc-video-kling-*` de esta página |
+| `prompt` | string | Obligatorio bajo condiciones | Obligatorio para generación de video por texto; multishot o escenarios de generación por imagen pueden ir en parámetros extendidos |
+| `seconds` / `duration` | string / number | No | Duración del video, típicamente `5` o `10`, por defecto se procesa por `5` segundos |
+| `size` | string | No | Si `1280x720` o `720x1280`, se inferirá el ratio de salida |
+| `image` | string | No | URL del primer fotograma para video de imagen única |
+| `images` | array[string] | No | Primera imagen para primer fotograma; segunda puede ser fotograma final o imagen de referencia |
+| `metadata` | object | No | Parámetros extendidos de VOD Kling, consulte la tabla de campos abajo |
+
+### Campos habituales de metadata
+
+| Campo | Descripción |
+|------|------|
+| `resolution` | Especificaciones de salida como `720P`, `1080P`, `2K`, `4K` |
+| `aspect_ratio` | Ratio de salida como `16:9`, `9:16`, `1:1` |
+| `sound` | Si se genera sonido, admite `true` / `false`, `on` / `off` |
+| `image_urls` | Array de fotogramas inicial/final, máximo 2 imágenes |
+| `image_tail` / `last_frame_url` | URL de fotograma final, prioridad sobre `image_urls[1]` |
+| `image_list` | Lista de imágenes de referencia, máximo 9 |
+| `multi_shots` / `multi_shot` | Interruptores multishot |
+| `shot_type` | Tipo de storyboard |
+| `multi_prompt` | Array de prompts multishot |
+| `kling_elements` / `element_list` | Control de elementos Kling |
+| `camera_control` | Control de cámara |
+| `motion_brush` / `dynamic_masks` | Parámetros de control de movimiento |
+| `video_list` | Entrada de video de referencia, suele usarse para O1 o capacidades de entrada de video |
+| `voice_list` | Entrada de audio de referencia |
+| `session_id` / `face_choose` | Parámetros relacionados con sincronización labial |
+
+## Video por texto
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-kling-2.6",
+    "prompt": "a red square logo slowly rotating on a clean white background",
+    "size": "1280x720",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "720P",
+      "sound": false
+    }
+  }'
+```
+
+## Video por imagen
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-kling-2.5-turbo",
+    "prompt": "make the picture gently move with a slow camera push in",
+    "image": "https://example.com/input.png",
+    "size": "1280x720",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "720P"
+    }
+  }'
+```
+
+## Video de fotogramas inicial y final
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-kling-2.6",
+    "prompt": "transition naturally from the first frame to the last frame",
+    "images": [
+      "https://example.com/first.png",
+      "https://example.com/last.png"
+    ],
+    "seconds": "5",
+    "metadata": {
+      "resolution": "720P",
+      "sound": false
+    }
+  }'
+```
+
+<Note>
+  Se recomienda pasar `metadata.sound=false` explícitamente para video de fotogramas inicial/final con Kling 2.6.
+</Note>
+
+## Múltiples imágenes de referencia
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-kling-3.0",
+    "prompt": "keep the same character identity and create a cinematic walking shot",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "720P",
+      "image_list": [
+        "https://example.com/ref-1.png",
+        "https://example.com/ref-2.png"
+      ]
+    }
+  }'
+```
+
+## Control de movimiento
+
+La capacidad de control de movimiento utiliza el nombre de modelo especializado, como `aigc-video-kling-2.6-motion-control` o `aigc-video-kling-3.0-motion-control`.
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-kling-3.0-motion-control",
+    "prompt": "animate the selected subject moving from left to right",
+    "image": "https://example.com/input.png",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "720P",
+      "dynamic_masks": [
+        {
+          "mask_url": "https://example.com/mask.png",
+          "trajectories": [
+            { "x": 220, "y": 380 },
+            { "x": 620, "y": 380 }
+          ]
+        }
+      ]
+    }
+  }'
+```
+
+## Entrada de video O1
+
+`aigc-video-kling-o1` puede recibir video de referencia a través de `metadata.video_list`. Si se incluye entrada de video, afecta a las especificaciones de facturación.
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "aigc-video-kling-o1",
+    "prompt": "use the reference video motion style and generate a new cinematic shot",
+    "seconds": "5",
+    "metadata": {
+      "resolution": "720P",
+      "video_list": [
+        { "url": "https://example.com/reference.mp4" }
+      ]
+    }
+  }'
+```
+
+## Avatar y sincronización labial
+
+Avatar utiliza `aigc-video-kling-avatar`:
+
+```json
+{
+  "model": "aigc-video-kling-avatar",
+  "prompt": "a presenter speaks naturally to the camera",
+  "image": "https://example.com/avatar.png",
+  "seconds": "5",
+  "metadata": {
+    "resolution": "720P",
+    "voice_list": [
+      { "url": "https://example.com/voice.wav" }
+    ]
+  }
+}
+```
+
+Sincronización labial utiliza `aigc-video-kling-identifyface`. Si el negocio ya obtiene `session_id` y `face_choose` por upstream, puede colocarlos en `metadata`:
+
+```json
+{
+  "model": "aigc-video-kling-identifyface",
+  "prompt": "lip sync the face with the provided voice",
+  "image": "https://example.com/face.png",
+  "seconds": "5",
+  "metadata": {
+    "resolution": "720P",
+    "session_id": "SESSION_ID",
+    "face_choose": "FACE_ID",
+    "voice_list": [
+      { "url": "https://example.com/voice.wav" }
+    ]
+  }
+}
+```
+
+<Note>
+  El flujo completo de sincronización labial normalmente requiere reconocimiento facial previo antes de enviar la tarea de generación de video. Si falta `session_id` / `face_choose`, upstream puede devolver error de parámetros.
+</Note>
+
+## Consultar tareas
+
+Al crear una tarea se retorna `id` o `task_id` y luego se consulta usando la misma ruta compatible:
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/video/generations/TASK_ID \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+Al completarse normalmente se retorna la URL del video archivado:
+
+```json
+{
+  "code": "success",
+  "data": {
+    "status": "SUCCESS",
+    "task_id": "vod_task_abc123",
+    "result_url": "https://media.crazyrouter.com/task-artifacts/example.mp4",
+    "artifact_url": "https://media.crazyrouter.com/task-artifacts/example.mp4"
+  }
+}
+```
+
+## Diferencias con Kling original
+
+| Ítem | AIGC Kling VOD | Kling original |
+|------|------|------|
+| Nombre de modelo | `aigc-video-kling-*` | `kling-v2-5-turbo`, `kling-v2-6`, `kling-v3` |
+| Ruta de creación | `POST /v1/video/generations` | `POST /kling/v1/videos/text2video` y otros |
+| Ruta de consulta | `GET /v1/video/generations/{task_id}` | `GET /kling/v1/videos/{type}/{task_id}` |
+| Campos principales | `model`, `prompt`, `seconds`, `image`, `images`, `metadata` | `model_name`, `prompt`, `image_urls`, `duration` y otros |
+| Escenarios adecuados | Utiliza la ruta Tencent VOD, precios y capacidades VOD | Utiliza el protocolo Kling original |
+
+Precios, descuentos y especificaciones disponibles según la [página de precios](https://crazyrouter.com/es/pricing).
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Página Kling 3.0: precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/kling/aigc-video-kling-3-0?utm_source=docs&utm_medium=related)
+- [Página Kling 2.6: precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/kling/aigc-video-kling-2-6?utm_source=docs&utm_medium=related)
+- [Todos los modelos y precios de Kling AI](https://crazyrouter.com/es/models/kling?utm_source=docs&utm_medium=related)

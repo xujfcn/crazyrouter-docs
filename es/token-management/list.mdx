@@ -1,0 +1,114 @@
+---
+title: 'Obtener lista de tokens'
+description: 'Obtener la lista de tokens API del usuario actual con paginación'
+api: 'GET /api/token/'
+---
+> Contenido actualizado: 2026-07-20
+
+## Descripción de la interfaz
+
+Obtiene todos los tokens API (Token) creados por el usuario actual, con soporte para paginación.
+
+<Note>
+  Este conjunto de interfaces `/api/token/*` se utiliza principalmente para la automatización de gestión de claves API en la consola Crazyrouter. Requieren el `access token` y el `New-Api-User` en la cabecera de la solicitud por parte del usuario, y no están diseñadas para ser utilizadas directamente en los flujos de invocación modelo `sk-xxx` comunes. La base de la ruta para la solicitud debe utilizar `https://crazyrouter.com`; `https://api.crazyrouter.com` es la entrada exclusiva para el API modelo, y la invocación de la ruta de gestión devolverá `404 api_only_endpoint`.
+</Note>
+
+## Método de autenticación
+
+Utilizá el Access Token del usuario para autenticación, se debe incluir en la cabecera de la solicitud:
+
+```text
+Authorization: Bearer {access_token}
+New-Api-User: {user_id}
+```
+
+## Parámetros de solicitud
+
+<ParamField query="p" type="integer" default="1">
+  Número de página. El código es compatible con la forma antigua, pero se recomienda comenzar desde `1`
+</ParamField>
+
+<ParamField query="size" type="integer" default="10">
+  Cantidad por página, máximo 100
+</ParamField>
+
+## Formato de respuesta
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "page": 1,
+    "page_size": 10,
+    "total": 1,
+    "items": [
+      {
+        "id": 1,
+        "user_id": 1,
+        "key": "sk-xxxxxxxxxxxxxxxx",
+        "status": 1,
+        "name": "我的令牌",
+        "created_time": 1706000000,
+        "accessed_time": 1706100000,
+        "expired_time": -1,
+        "remain_quota": 500000,
+        "unlimited_quota": false,
+        "model_limits_enabled": true,
+        "model_limits": "[\"gpt-5.5\",\"claude-opus-4-8\"]",
+        "allow_ips": "203.0.113.10",
+        "used_quota": 12345,
+        "group": "default"
+      }
+    ]
+  }
+}
+```
+
+## Descripción de campos
+
+| Campo | Tipo | Descripción |
+|------|------|------|
+| `id` | int | ID del token |
+| `key` | string | API Key (formato sk-xxx) |
+| `status` | int | Estado: 1=habilitado, 2=deshabilitado |
+| `name` | string | Nombre del token |
+| `expired_time` | int | Marca de tiempo de expiración, `-1` indica nunca expira |
+| `remain_quota` | int | Cuota restante |
+| `unlimited_quota` | bool | ¿Cuota ilimitada? |
+| `used_quota` | int | Cuota utilizada |
+| `model_limits_enabled` | bool | ¿Lista blanca de modelos habilitada? |
+| `model_limits` | string | Cadena de configuración de restricción de modelos |
+| `allow_ips` | string | Cadena de lista blanca de IP |
+| `group` | string | Grupo |
+
+## Ejemplo de código
+
+<CodeGroup>
+
+```python Python
+import requests
+
+headers = {
+    "Authorization": "Bearer your_access_token",
+    "New-Api-User": "1",
+    "User-Agent": "Mozilla/5.0"
+}
+
+response = requests.get(
+    "https://crazyrouter.com/api/token/?p=1&size=100",
+    headers=headers
+)
+
+page = response.json()["data"]
+for token in page["items"]:
+    print(f"[{token['name']}] {token['key'][:10]}... 额度: {token['remain_quota']}")
+```
+
+```bash cURL
+curl "https://crazyrouter.com/api/token/?p=1&size=100" \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 1"
+```
+
+</CodeGroup>

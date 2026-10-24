@@ -1,22 +1,22 @@
 ---
-title: "Midjourney Overview"
-description: "Midjourney image generation API overview, including task objects, status descriptions, and response fields"
+title: "Обзор Midjourney"
+description: "Обзор API генерации изображений Midjourney, включая объект задачи, описание статусов и поля ответа"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Midjourney Overview
+# Обзор Midjourney
 
-Crazyrouter provides a complete Midjourney API proxy, supporting all operations including Imagine, Blend, Describe, Upscale, Variation, and more. All requests are processed asynchronously via tasks.
+Crazyrouter предоставляет полный прокси API Midjourney, поддерживающий все операции: Imagine, Blend, Describe, Upscale, Variation и другие. Все запросы обрабатываются в виде асинхронных задач.
 
-## Base Path
+## Базовый путь
 
 ```
 https://api.crazyrouter.com/mj
 ```
 
-## Authentication
+## Аутентификация
 
-Pass your API Key in the request header:
+Передайте API Key в заголовке запроса:
 
 ```
 Authorization: Bearer YOUR_API_KEY
@@ -24,44 +24,44 @@ Authorization: Bearer YOUR_API_KEY
 
 ---
 
-## Task Object
+## Объект задачи
 
-Each Midjourney request submission returns a task object. The task object contains the following fields:
+После отправки каждого запроса Midjourney система возвращает объект задачи. Объект задачи содержит следующие поля:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | string | Unique task identifier |
-| `action` | string | Task type: `IMAGINE`, `UPSCALE`, `VARIATION`, `BLEND`, `DESCRIBE`, etc. |
-| `status` | string | Task status |
-| `prompt` | string | Submitted prompt |
-| `promptEn` | string | Translated English prompt |
-| `description` | string | Task description |
-| `submitTime` | number | Submission time (millisecond timestamp) |
-| `startTime` | number | Processing start time |
-| `finishTime` | number | Completion time |
-| `progress` | string | Progress percentage, e.g. `"100%"` |
-| `imageUrl` | string | Generated image URL |
-| `failReason` | string | Failure reason (only present on failure) |
-| `properties` | object | Additional properties |
-| `buttons` | array | List of available action buttons |
-
----
-
-## Task Status
-
-| Status | Description |
-|--------|-------------|
-| `NOT_START` | Task submitted, waiting to be processed |
-| `SUBMITTED` | Task submitted to Midjourney |
-| `IN_PROGRESS` | Task is being processed |
-| `SUCCESS` | Task completed |
-| `FAILURE` | Task failed |
+| Поле | Тип | Описание |
+|------|------|------|
+| `id` | string | Уникальный идентификатор задачи |
+| `action` | string | Тип задачи: `IMAGINE`, `UPSCALE`, `VARIATION`, `BLEND`, `DESCRIBE` и др. |
+| `status` | string | Статус задачи |
+| `prompt` | string | Переданный промпт |
+| `promptEn` | string | Переведённый на английский промпт |
+| `description` | string | Описание задачи |
+| `submitTime` | number | Время отправки (метка времени в миллисекундах) |
+| `startTime` | number | Время начала обработки |
+| `finishTime` | number | Время завершения |
+| `progress` | string | Процент выполнения, например `"100%"` |
+| `imageUrl` | string | URL сгенерированного изображения |
+| `failReason` | string | Причина ошибки (указывается только при неудаче) |
+| `properties` | object | Дополнительные параметры |
+| `buttons` | array | Список доступных действий (кнопок) |
 
 ---
 
-## Action Buttons
+## Статусы задач
 
-After a task completes, the `buttons` field contains available follow-up actions:
+| Статус | Описание |
+|------|------|
+| `NOT_START` | Задача отправлена, ожидает обработки |
+| `SUBMITTED` | Задача отправлена в Midjourney |
+| `IN_PROGRESS` | Задача в обработке |
+| `SUCCESS` | Задача выполнена |
+| `FAILURE` | Ошибка выполнения задачи |
+
+---
+
+## Действия (кнопки)
+
+После завершения задачи поле `buttons` будет содержать доступные последующие действия:
 
 ```json
 {
@@ -78,24 +78,24 @@ After a task completes, the `buttons` field contains available follow-up actions
 }
 ```
 
-Use the `customId` to call the Action endpoint to perform the corresponding operation (upscale, variation, etc.).
+Используя `customId`, можно вызвать интерфейс Action для выполнения соответствующего действия (увеличение, вариация и др.).
 
 ---
 
-## API Endpoints Overview
+## Обзор API-эндпоинтов
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/mj/submit/imagine` | Submit an Imagine task |
-| POST | `/mj/submit/action` | Execute an action (upscale, variation, etc.) |
-| POST | `/mj/submit/blend` | Blend images |
-| POST | `/mj/submit/describe` | Describe an image |
-| POST | `/mj/submit/modal` | Submit modal confirmation |
-| POST | `/mj/submit/shorten` | Shorten a prompt |
-| GET | `/mj/task/{id}/fetch` | Query a single task |
-| POST | `/mj/task/list-by-condition` | Batch query tasks |
-| GET | `/mj/task/{id}/image-seed` | Get image seed |
+| Метод | Эндпоинт | Описание |
+|------|------|------|
+| POST | `/mj/submit/imagine` | Отправить задачу Imagine |
+| POST | `/mj/submit/action` | Выполнить действие (увеличение, вариация и пр.) |
+| POST | `/mj/submit/blend` | Смешать изображения |
+| POST | `/mj/submit/describe` | Описать изображение |
+| POST | `/mj/submit/modal` | Отправить подтверждение во всплывающем окне |
+| POST | `/mj/submit/shorten` | Укоротить промпт |
+| GET | `/mj/task/{id}/fetch` | Получить информацию о задаче |
+| POST | `/mj/task/list-by-condition` | Массово запросить задачи |
+| GET | `/mj/task/{id}/image-seed` | Получить Seed изображения |
 
 <Note>
-  Midjourney tasks are processed asynchronously. After submission, you need to poll the task status. It is recommended to query every 3-5 seconds until the status becomes `SUCCESS` or `FAILURE`.
+  Задачи Midjourney обрабатываются асинхронно; после отправки заявки необходимо опрашивать статус задачи. Рекомендуется запрашивать каждые 3–5 секунд, пока статус не изменится на `SUCCESS` или `FAILURE`.
 </Note>

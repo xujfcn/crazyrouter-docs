@@ -1,0 +1,112 @@
+---
+title: "Modelos de razonamiento"
+description: "Guía revalidada en producción para usar las funciones de razonamiento de Crazyrouter y elegir el protocolo adecuado"
+---
+> Contenido actualizado: 2026-06-09
+
+# Modelos de razonamiento
+
+Esta página solo documenta el comportamiento de razonamiento que fue revalidado contra la producción de Crazyrouter en `2026-03-22`.
+
+Para integraciones compatibles con OpenAI, la guía actual es:
+
+- Si solo deseas un razonamiento más sólido y solo necesitas la respuesta final, usa Chat Completions con `reasoning_effort`
+- Si necesitas una salida de razonamiento estable e inspeccionable, prefiere la API de Responses y consulta [Modo de Pensamiento de GPT-5](/es/chat/responses/gpt5-thinking)
+
+## Combinaciones verificadas
+
+| Ruta | Modelo | Parámetro de solicitud | Comportamiento actual en producción |
+|-------|-------|-------------------|-----------------------------|
+| Chat Completions | `gpt-5.5` | `reasoning_effort` | La solicitud tiene éxito y devuelve una respuesta final |
+| Responses | `gpt-5.5` | `reasoning.effort` / `reasoning.summary` | `output` incluye elementos `reasoning` y `message` |
+
+---
+
+## Chat Completions: `reasoning_effort`
+
+La siguiente forma de solicitud actualmente funciona en producción:
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Which is larger, 9.11 or 9.9? Explain briefly."
+      }
+    ],
+    "reasoning_effort": "high",
+    "max_tokens": 120
+  }'
+```
+
+Valores disponibles de `reasoning_effort`:
+
+| Valor | Significado |
+|-------|------------|
+| `low` | Respuesta más rápida para tareas simples |
+| `medium` | Ajuste equilibrado de estilo predeterminado |
+| `high` | Mayor razonamiento para tareas complejas |
+
+### Comportamiento actual de respuesta
+
+En la revalidación de producción `2026-03-22`:
+
+- la solicitud tuvo éxito
+- la respuesta final se devolvió en `message.content`
+- `message.reasoning_content` no contenía de forma fiable contenido útil
+
+Así que si solo quieres razonamiento más sólido, Chat Completions con `reasoning_effort` sigue siendo utilizable. Si necesitas un campo visible de resumen de razonamiento, no trates Chat Completions como la ruta principal.
+
+---
+
+## Cuando necesitas salida de razonamiento inspeccionable
+
+La ruta de producción más confiable es la API de Responses:
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "input": "Which is larger, 9.11 or 9.9? Explain briefly.",
+    "reasoning": {
+      "effort": "high",
+      "summary": "detailed"
+    }
+  }'
+```
+
+Valores verificados de `output.type`:
+
+```json
+["reasoning", "message"]
+```
+
+Para formas de respuesta concretas, campos de resumen y nombres de eventos de streaming, consulta:
+
+- [Modo de Pensamiento de GPT-5](/es/chat/responses/gpt5-thinking)
+- [Campos de Pensamiento de IA](/es/reference/thinking)
+
+---
+
+## Recomendación actual
+
+- Para nuevos desarrollos que necesiten registrar o mostrar resúmenes de razonamiento, comienza con la API de Responses
+- Para integraciones existentes de Chat Completions que solo requieren la respuesta final, `reasoning_effort` sigue siendo una ruta válida
+- No asumas que todos los modelos de razonamiento compatibles con OpenAI expondrán de forma confiable `reasoning_content`
+
+<Warning>
+  Las solicitudes de razonamiento usualmente incrementan tanto la latencia como el uso de tokens. Un `reasoning_effort` más alto generalmente cuesta más.
+</Warning>
+
+{/* crazyrouter-model-links v2 */}
+## Relacionado en crazyrouter.com
+
+- [Comparativa de precios de GPT-5: lista vs Azure / Bedrock / Vertex vs Crazyrouter](https://crazyrouter.com/es/pricing/gpt-5?utm_source=docs&utm_medium=related)
+- [Página del modelo GPT-5: precio en vivo, ejemplos reales, código](https://crazyrouter.com/es/models/openai/gpt-5?utm_source=docs&utm_medium=related)
+- [Página del modelo GPT Image 1.5: precio en vivo, ejemplos reales, código](https://crazyrouter.com/es/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)

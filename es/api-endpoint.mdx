@@ -1,0 +1,122 @@
+---
+title: "Dirección de llamada a la interfaz del proxy"
+description: "Descripción de la dirección del endpoint de la API"
+---
+> Contenido actualizado: 2026-08-13
+
+## URL Base de la API
+
+```
+https://api.crazyrouter.com
+```
+
+`https://api.crazyrouter.com` ya está habilitada como la entrada predeterminada internacional para el acceso a la API. El inicio de sesión de la cuenta, recarga y la consola siguen utilizando:
+
+```
+https://crazyrouter.com
+```
+
+<Warning>
+Las interfaces de cuenta y gestión deben utilizar el dominio principal `https://crazyrouter.com`, incluyendo `/api/user/self`, `/api/token/*` y `/api/log/*`. No envíes estas rutas a `https://api.crazyrouter.com` o `https://cn.crazyrouter.com`; estos dominios solo se usan para la API de modelos y multimedia, si se usan incorrectamente devolverán `404 api_only_endpoint`. Las interfaces de inferencia de modelos (como `/v1/chat/completions`, `/v1/messages`, `/v1/models`) siguen usando el dominio específico de API.
+</Warning>
+
+La región de Asia Oriental debe dar prioridad al siguiente punto de acceso de API:
+
+```
+https://cn.crazyrouter.com
+```
+
+Si estás configurando un cliente de terceros, SDK, IDE o Agent, primero confirma si esta herramienta debe ingresar el dominio raíz o `/v1`:
+
+<Card title="Ver explicación de la dirección de acceso" icon="book" href="https://docs.crazyrouter.com/es/api-endpoint">
+  Primero confirma en este capítulo si se debe usar el dominio raíz o `/v1`, luego vuelve a la documentación de la herramienta para configurar.
+</Card>
+
+## Dirección de acceso recomendada
+
+Por defecto se recomienda usar la entrada internacional de la API `https://api.crazyrouter.com`. Los usuarios de Asia Oriental priorizan `https://cn.crazyrouter.com`. Estas dos direcciones sólo se utilizan para solicitudes de API; el inicio de sesión web, recarga, consola y página de precios deben seguir usando `https://crazyrouter.com`.
+
+## Dirección que debe rellenar cada cliente
+
+| Forma de uso | Entrada Internacional por defecto | Entrada Prioritaria Asia Oriental | Descripción |
+|----------|----------------|----------------|------|
+| SDK / cliente compatible con OpenAI | `https://api.crazyrouter.com/v1` | `https://cn.crazyrouter.com/v1` | El cliente continuará concatenando `/chat/completions`, `/models` y otras rutas tras esta dirección |
+| Cliente nativo Claude Code / Anthropic | `https://api.crazyrouter.com` | `https://cn.crazyrouter.com` | El cliente concatenará `/v1/messages` por sí mismo, no añadas manualmente `/v1` |
+| curl / Solicitud HTTP manual | Usa endpoint completo, por ejemplo `https://api.crazyrouter.com/v1/chat/completions` | Usa endpoint completo, por ejemplo `https://cn.crazyrouter.com/v1/chat/completions` | Al escribir la solicitud manualmente, es necesario escribir la ruta completa de la API |
+| Interfaces de gestión de cuenta, saldo, Token y registros | `https://crazyrouter.com` | `https://crazyrouter.com` | Se utiliza para `/api/user/self`, `/api/token/*`, `/api/log/*`; no utilices sólo dominios de API |
+
+<Warning>
+Si el registro muestra `/v1/v1/models`, `/v1/v1/messages` o `/v1/messages/v1/messages`, significa que la configuración del cliente está concatenando rutas de API de forma duplicada. El cliente nativo Claude Code / Anthropic debe volver al dominio raíz; el cliente compatible OpenAI debe quedarse sólo hasta `/v1`.
+</Warning>
+
+<Warning>
+Para escenarios como la `tool_use` nativa de Claude, la capacidad de programación Claude Code y algunos agentes IDE, se debe priorizar la ruta Anthropic Messages, es decir, `POST /v1/messages`. El endpoint compatible con OpenAI `/v1/chat/completions` es más adecuado para conversaciones generales y acceso básico, no es equivalente a la API Messages nativa de Claude; si usas modelos Claude en el endpoint compatible OpenAI para llamadas a herramientas, puede que no funcione de manera estable.
+</Warning>
+
+## Endpoints principales
+
+### API de Chat
+
+| Endpoint | Método | Descripción |
+|------|------|------|
+| `/v1/chat/completions` | POST | Formato OpenAI Chat |
+| `/v1/messages` | POST | Formato Anthropic Claude |
+| `/v1/responses` | POST | API de Respuestas OpenAI |
+| `/v1/completions` | POST | Completados Legacy |
+
+### Formato nativo Gemini
+
+| Endpoint | Método | Descripción |
+|------|------|------|
+| `/v1beta/models/{model}:generateContent` | POST | Generación de texto |
+| `/v1beta/models/{model}:streamGenerateContent` | POST | Generación por streaming |
+
+### API de Imagen
+
+| Endpoint | Método | Descripción |
+|------|------|------|
+| `/v1/images/generations` | POST | Generación de imagen OpenAI |
+| `/v1/images/edits` | POST | Edición de imagen |
+| `/mj/submit/imagine` | POST | Dibujo Midjourney |
+| `/ideogram/v1/ideogram-v3/generate` | POST | Ideogram V3 |
+| `/kling/v1/images/generations` | POST | Generación de imagen Kling |
+| `/kling/v1/images/kolors-virtual-try-on` | POST | Prueba virtual Kling |
+
+### API de Vídeo
+
+| Endpoint | Método | Descripción |
+|------|------|------|
+| `/v1/video/create` | POST | Creación unificada de vídeo |
+| `/v1/video/query` | GET | Consulta unificada de vídeo |
+| `/kling/v1/videos/text2video` | POST | Generación de vídeo Kling a partir de texto |
+| `/kling/v1/videos/image2video` | POST | Generación de vídeo Kling a partir de imagen |
+| `/kling/v1/videos/multi-image2video` | POST | Video Kling a partir de imagen de referencia |
+| `/kling/v1/videos/omni-video` | POST | Video Kling Omni |
+| `/jimeng/submit/videos` | POST | Envío de video Jimeng |
+| `/jimeng/fetch/{task_id}` | GET | Consulta de tarea Jimeng |
+| `/luma/generations` | POST | Generación de vídeo Luma |
+| `/runwayml/v1/image_to_video` | POST | Generación de vídeo Runway a partir de imagen |
+| `/runwayml/v1/tasks/{task_id}` | GET | Consulta de tarea Runway |
+
+### API de audio
+
+| Endpoint | Método | Descripción |
+|------|------|------|
+| `/v1/audio/speech` | POST | Texto a voz (TTS) |
+| `/v1/audio/transcriptions` | POST | Voz a texto (STT) |
+
+### Otras APIs
+
+| Endpoint | Método | Descripción |
+|------|------|------|
+| `/v1/embeddings` | POST | Vectores de embedding |
+| `/v1/rerank` | POST | Reordenar |
+| `/v1/models` | GET | Lista de modelos |
+| `/v1/files/uploads` | POST | Subida temporal de imágenes locales |
+| `/v1/files/uploads/base64` | POST | Subida temporal de imágenes en Base64 |
+| `/v1/files/uploads/url` | POST | Guardar imagen remota como URL temporal |
+| `/v1/files/uploads/presign` | POST | Subida directa prefirmada R2 |
+
+<Note>
+Todos los endpoints soportan HTTPS. La entrada internacional predeterminada a la API es `https://api.crazyrouter.com`; los usuarios de Asia Oriental deben priorizar `https://cn.crazyrouter.com`; el inicio de sesión en cuenta, recarga y consola siguen usando `https://crazyrouter.com`.
+</Note>

@@ -1,0 +1,239 @@
+---
+title: "Realizar una solicitud"
+description: "Aprende cómo realizar correctamente solicitudes a la API"
+---
+> Contenido actualizado: 2026-06-16
+
+## Formato de la solicitud
+
+Todas las solicitudes a la API utilizan el protocolo HTTPS y el cuerpo de la solicitud está en formato JSON.
+
+<Note>
+Por defecto, se recomienda utilizar `https://api.crazyrouter.com/v1`. Si no tienes claro si deberías ingresar el dominio raíz o `/v1` en alguna herramienta, consulta primero la [Descripción del Endpoint de API](https://docs.crazyrouter.com/es/api-endpoint).
+</Note>
+
+### Encabezados obligatorios de la solicitud
+
+| Header | Valor | Descripción |
+|--------|-----|------|
+| `Authorization` | `Bearer YOUR_API_KEY` | Clave de autenticación de la API |
+| `Content-Type` | `application/json` | Formato del cuerpo de la solicitud |
+
+### Encabezados opcionales de la solicitud
+
+| Header | Valor | Descripción |
+|--------|-----|------|
+| `Accept` | `application/json` | Formato de la respuesta |
+| `Content-Encoding` | `gzip` | Opcional. Establecer cuando el cuerpo de la solicitud usa compresión gzip |
+
+## Ejemplo de solicitud
+
+```bash
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer sk-xxxxxxxx" \
+  -d '{
+    "model": "gpt-5.5",
+    "messages": [{"role": "user", "content": "Hello"}],
+    "stream": false
+  }'
+```
+
+## Enviar el cuerpo de la solicitud usando gzip
+
+Si el cuerpo de tu solicitud es grande, por ejemplo cuando subes contextos largos, documentos extensos o un historial de mensajes amplio en cada solicitud, puedes comprimir el cuerpo JSON original con gzip antes de enviarlo.
+
+Habilitar gzip solo cambia la forma de transmisión y no la semántica de la solicitud. El servidor descomprimirá automáticamente antes de analizar el JSON.
+
+Se requiere añadir el siguiente encabezado a la solicitud:
+
+```http
+Content-Type: application/json
+Content-Encoding: gzip
+```
+
+<Note>
+  `Content-Encoding: gzip` indica que "el cuerpo de la solicitud ya fue comprimido con gzip". Esto es diferente de `Accept-Encoding: gzip`, que normalmente se utiliza para la compresión de la respuesta.
+</Note>
+
+### Python
+
+```python
+import gzip
+import json
+import requests
+
+payload = {
+    "model": "gpt-5.5",
+    "messages": [
+        {"role": "user", "content": "这里放很长的上下文或文档内容..."}
+    ],
+    "stream": False
+}
+
+raw = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+compressed = gzip.compress(raw)
+
+resp = requests.post(
+    "https://api.crazyrouter.com/v1/chat/completions",
+    headers={
+        "Authorization": "Bearer sk-xxxxxxxx",
+        "Content-Type": "application/json",
+        "Content-Encoding": "gzip",
+    },
+    data=compressed,
+    timeout=120,
+)
+
+print(resp.status_code, resp.text)
+```
+
+### Node.js
+
+```js
+import zlib from "node:zlib";
+
+const payload = {
+  model: "gpt-5.5",
+  messages: [
+    { role: "user", content: "这里放很长的上下文或文档内容..." },
+  ],
+  stream: false,
+};
+
+const raw = Buffer.from(JSON.stringify(payload));
+const compressed = zlib.gzipSync(raw);
+
+const resp = await fetch("https://api.crazyrouter.com/v1/chat/completions", {
+  method: "POST",
+  headers: {
+    Authorization: "Bearer sk-xxxxxxxx",
+    "Content-Type": "application/json",
+    "Content-Encoding": "gzip",
+  },
+  body: compressed,
+});
+
+console.log(resp.status, await resp.text());
+```
+
+### cURL
+
+```bash
+cat > body.json <<'JSON'
+{
+  "model": "gpt-5.5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "这里放很长的上下文或文档内容..."
+    }
+  ],
+  "stream": false
+}
+JSON
+
+gzip -c body.json > body.json.gz
+
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Authorization: Bearer sk-xxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -H "Content-Encoding: gzip" \
+  --data-binary @body.json.gz
+```
+
+### Habilitar automáticamente gzip según el tamaño
+
+Si tu sistema es un flujo de trabajo, normalmente no necesitas distinguir manualmente en tu lógica de negocio "qué solicitudes se comprimen y cuáles no". Se recomienda implementar la lógica en una capa centralizada del cliente HTTP, que evalúe el tamaño del cuerpo JSON y realice compresión gzip automáticamente si supera el umbral.
+
+Umbral recomendado:
+
+```text
+body >= 128KB：启用 gzip
+body < 128KB：保持原样发送
+```
+
+Si tus solicitudes suelen tener un tamaño de varios MB, también puedes ajustar el umbral a `256KB`. No se recomienda comprimir archivos pequeños ya que la sobrecarga de compresión y los encabezados gzip podrían hacer que el tamaño final aumente.
+
+Ejemplo de empaquetado en Python:
+
+```python
+import gzip
+import json
+import requests
+
+def post_json(url, payload, api_key, gzip_threshold=128 * 1024):
+    raw = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+
+    if len(raw) >= gzip_threshold:
+        body = gzip.compress(raw)
+        headers["Content-Encoding"] = "gzip"
+    else:
+        body = raw
+
+    return requests.post(url, headers=headers, data=body, timeout=120)
+```
+
+Ejemplo de empaquetado en Node.js:
+
+```js
+import zlib from "node:zlib";
+
+async function postJson(url, payload, apiKey, gzipThreshold = 128 * 1024) {
+  const raw = Buffer.from(JSON.stringify(payload));
+  const headers = {
+    Authorization: `Bearer ${apiKey}`,
+    "Content-Type": "application/json",
+  };
+
+  const body =
+    raw.length >= gzipThreshold
+      ? (() => {
+          headers["Content-Encoding"] = "gzip";
+          return zlib.gzipSync(raw);
+        })()
+      : raw;
+
+  return fetch(url, {
+    method: "POST",
+    headers,
+    body,
+  });
+}
+```
+
+Casos de uso recomendados:
+
+- El cuerpo de la solicitud supera normalmente 1 MB
+- Subida repetida de contextos largos o documentos extensos
+- El cliente puede controlar directamente el cuerpo HTTP y los encabezados de la solicitud
+
+## Solicitudes en streaming
+
+Configura `stream: true` para habilitar salida en streaming SSE:
+
+```bash
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer sk-xxxxxxxx" \
+  -d '{
+    "model": "gpt-5.5",
+    "messages": [{"role": "user", "content": "Hello"}],
+    "stream": true
+  }'
+```
+
+El formato de la respuesta en streaming es Server-Sent Events (SSE): cada evento comienza con `data: ` y finaliza con `data: [DONE]`.
+
+## Depuración en línea
+
+Puedes probar la API en línea de las siguientes formas:
+
+1. **Crazyrouter Playground** - Inicia sesión y accede a [crazyrouter.com/console/playground](https://crazyrouter.com/console/playground) para probar la API directamente desde el navegador
+2. **cURL** - Utiliza la línea de comandos para enviar solicitudes
+3. **Postman / Apifox** - Usa herramientas de depuración de API

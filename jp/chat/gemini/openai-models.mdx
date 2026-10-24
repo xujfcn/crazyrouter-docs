@@ -1,33 +1,33 @@
 ---
-title: "Gemini-Compatible OpenAI Model List"
-description: "Production-revalidated GET /v1beta/openai/models usage for retrieving an OpenAI-style model list"
+title: "Gemini と OpenAI 互換モデル一覧"
+description: "本番環境での再確認に基づき、GET /v1beta/openai/models で OpenAI スタイルのモデル一覧を取得します"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-30
 
-# Gemini-Compatible OpenAI Model List
+# Gemini と OpenAI 互換モデル一覧
 
 ```
 GET /v1beta/openai/models
 ```
 
-This endpoint is a compatibility bridge:
+このエンドポイントは互換ブリッジです：
 
-- the auth style can be Gemini-like
-- the response shape is still OpenAI-style model-list JSON
+- 認証方式は Gemini スタイルでも利用可能です
+- レスポンス構造は OpenAI スタイルのモデル一覧です
 
-This page only documents behavior that was revalidated against Crazyrouter production on `2026-03-23`.
+このページでは `2026-03-23` が Crazyrouter の本番環境で確認済みの動作のみを記載します。
 
-## When to use it
+## 利用するシーン
 
-- your client prefers `?key=`
-- your middleware already uses `x-goog-api-key`
-- you want an OpenAI-style `list + data[]` response rather than native Gemini model metadata
+- あなたのクライアントが `?key=` の利用に慣れている場合
+- あなたのミドルウェアがすでに `x-goog-api-key` を使用している場合
+- Gemini ネイティブのモデルメタデータではなく、OpenAI スタイルの `list + data[]` 構造が欲しい場合
 
-If you are using a normal OpenAI-compatible client, prefer [GET /v1/models](/jp/chat/openai/models).
+もしあなたが標準的な OpenAI クライアントの場合は、[GET /v1/models](/jp/chat/openai/models) の利用を優先してください。
 
-## Authentication
+## 認証方式
 
-This recheck confirmed that all three of the following work:
+今回の確認では以下3つの方式の利用が可能でした：
 
 ```http
 Authorization: Bearer YOUR_API_KEY
@@ -41,7 +41,7 @@ x-goog-api-key: YOUR_API_KEY
 GET /v1beta/openai/models?key=YOUR_API_KEY
 ```
 
-## Request examples
+## リクエスト例
 
 <CodeGroup>
 
@@ -58,16 +58,16 @@ curl https://api.crazyrouter.com/v1beta/openai/models \
 
 ---
 
-## Current production findings
+## 現在の本番検証結果
 
-In the `2026-03-23` production recheck:
+`2026-03-23` の本番環境での確認では：
 
-- the `?key=` request returned `200`
-- the `x-goog-api-key` request returned `200`
-- the top-level `object` was `list`
-- the top-level `success` was `true`
-- the current model count was `541`
-- common fields inside `data[]` included:
+- `?key=` のリクエストで `200` が返ります
+- `x-goog-api-key` のリクエストで `200` が返ります
+- トップレベルの `object` は `list` となります
+- トップレベルの `success` は `true` となります
+- 現在返されるモデル数は `541` です
+- `data[]` 内の要素にはよく使われるフィールドが含まれます：
   - `id`
   - `object`
   - `created`
@@ -76,7 +76,7 @@ In the `2026-03-23` production recheck:
 
 ---
 
-## Response example
+## レスポンス例
 
 ```json
 {
@@ -108,32 +108,32 @@ In the `2026-03-23` production recheck:
 }
 ```
 
-## Field notes
+## 各フィールド説明
 
-| Field | Type | Meaning |
-|------|------|---------|
-| `data[]` | array | Models available to the current token |
-| `id` | string | Model identifier |
-| `owned_by` | string | Upstream source or owner label |
-| `supported_endpoint_types` | array | Supported API styles for the model |
-| `object` | string | Always `list` |
-| `success` | boolean | Whether the request succeeded |
+| フィールド | 型 | 説明 |
+|------|------|------|
+| `data[]` | array | 現在のトークンで利用可能なモデル一覧 |
+| `id` | string | モデル識別子 |
+| `owned_by` | string | モデルの提供元または所属組織 |
+| `supported_endpoint_types` | array | 現在のモデルがサポートしているインターフェーススタイル |
+| `object` | string | `list` で固定 |
+| `success` | boolean | リクエストが成功したかどうか |
 
 <Note>
-  Read the path meaning of `supported_endpoint_types` from `supported_endpoint` in `GET /api/pricing`. At the moment, `openai` maps to `POST /v1/chat/completions`, `anthropic` maps to `POST /v1/messages`, and only `openai-response` maps to `POST /v1/responses`. Claude currently exposes `openai` + `anthropic`, not `openai-response`.
+  `supported_endpoint_types` は、現在のモデルがサポートしているインターフェーススタイルのみを示します。現状では `openai` は `POST /v1/chat/completions`、`anthropic` は `POST /v1/messages`、`openai-response` のみが `POST /v1/responses` に該当します。Claude は、現時点で公開サポートしているのは `openai` + `anthropic` であり、`openai-response` には対応していません。
 </Note>
 
 <Note>
-  This endpoint does not return only Gemini models. It returns the OpenAI-style model list visible to the current token, but exposes it through a Gemini-friendly access path.
+  このエンドポイントは「Gemini モデルだけを返す」ものではありません。現在のトークンで見えるモデルの OpenAI スタイル一覧を返しますが、エントリーポイントと認証方式が Gemini スタイルのクライアントにより適しているだけです。
 </Note>
 
-関連ページ:
+関連ページ：
 
-- [公式モデル課金方式](/jp/reference/official-pricing-methods)
+- [モデル公式価格体系](/jp/reference/official-pricing-methods)
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [GPT Image 1.5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [Google の全モデルと料金](https://crazyrouter.com/en/models/google?utm_source=docs&utm_medium=related)
+- [GPT Image 1.5 モデルページ：リアルタイム価格・実例・呼び出しコード](https://crazyrouter.com/ja/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT Image 2 モデルページ：リアルタイム価格・実例・呼び出しコード](https://crazyrouter.com/ja/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Google すべてのモデルと価格](https://crazyrouter.com/ja/models/google?utm_source=docs&utm_medium=related)

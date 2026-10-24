@@ -1,0 +1,140 @@
+---
+title: "Formato compatible con Gemini OpenAI"
+description: "Basado en verificación en entorno de producción, llama a Gemini 3 Pro mediante /v1/chat/completions"
+---
+> Contenido actualizado: 2026-06-09
+
+# Formato compatible con Gemini OpenAI
+
+Puedes llamar a Gemini usando el formato compatible con OpenAI Chat Completions.
+
+```
+POST /v1/chat/completions
+```
+
+En esta página solo se documentan comportamientos de la capa compatible `2026-03-22` que ya han sido verificados en producción en Crazyrouter.
+
+Modelo principal usado actualmente:
+
+- `gemini-3.1-pro`
+
+## Conclusiones principales actuales
+
+La verificación de esta ronda productiva confirma:
+
+- `gemini-3.1-pro` puede mantener diálogos normalmente mediante `/v1/chat/completions`
+- La respuesta por flujo es compatible con la estructura SSE de `chat.completion.chunk`
+- Si necesitas salida estructurada de Gemini, Google Search, pensamiento y otras capacidades, deberías priorizar aún [el formato nativo de Gemini](/es/chat/gemini/native)
+
+---
+
+## Diálogo básico
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gemini-3.1-pro",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a concise assistant."
+      },
+      {
+        "role": "user",
+        "content": "Explain quantum entanglement in one sentence."
+      }
+    ],
+    "max_tokens": 128
+  }'
+```
+
+Estructura clave devuelta según la verificación de producción actual:
+
+```json
+{
+  "object": "chat.completion",
+  "model": "gemini-3.1-pro",
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "..."
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Ejemplo en Python
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="gemini-3.1-pro",
+    messages=[
+        {"role": "system", "content": "You are a concise assistant."},
+        {"role": "user", "content": "Explain quantum entanglement in one sentence."}
+    ],
+    max_tokens=128
+)
+
+print(response.choices[0].message.content)
+```
+
+---
+
+## Salida por flujo
+
+Esta ronda de producción también verificó la compatibilidad de respuesta por flujo:
+
+```python Python
+stream = client.chat.completions.create(
+    model="gemini-3.1-pro",
+    messages=[
+        {"role": "user", "content": "Write one short sentence about AI."}
+    ],
+    max_tokens=64,
+    stream=True
+)
+
+for chunk in stream:
+    delta = chunk.choices[0].delta
+    if delta.content is not None:
+        print(delta.content, end="")
+```
+
+La forma de los fragmentos SSE recibidos en producción actualmente es similar a:
+
+```text
+data: {"object":"chat.completion.chunk","model":"gemini-3.1-pro",...}
+data: {"choices":[{"delta":{"content":"..."}}],...}
+data: [DONE]
+```
+
+---
+
+## Cuándo usar el formato compatible y cuándo el formato nativo
+
+- Si ya tienes código SDK para OpenAI y solo necesitas diálogo estándar: prioriza el formato compatible
+- Si necesitas salida estructurada de Gemini, Google Search, pensamiento, campos nativos: prioriza [el formato nativo de Gemini](/es/chat/gemini/native)
+
+<Note>
+  Esta página solo cubre la capa compatible `/v1/chat/completions`. Para cargas de trabajo con imágenes de Gemini, usa la API unificada de Imágenes: `POST https://api.crazyrouter.com/v1/images/generations`, y revisa también [Nano Banana](/es/images/nano-banana), [Nano Banana Pro](/es/images/nano-banana-pro), [Nano Banana 2](/es/images/nano-banana-2).
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Página del modelo GPT Image 1.5: precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Página del modelo GPT Image 2: precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Todos los modelos y precios de Google](https://crazyrouter.com/es/models/google?utm_source=docs&utm_medium=related)

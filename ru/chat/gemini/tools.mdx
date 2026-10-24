@@ -1,16 +1,17 @@
 ---
-title: "Gemini Tools"
-description: "Gemini native tool capabilities verified against Crazyrouter production on 2026-03-23"
+title: "Gemini вызов инструментов"
+description: "Встроенные возможности инструментов Gemini, подтверждённые в промышленной среде Crazyrouter по состоянию на 23 марта 2026 года"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Gemini Tools
+
+# Gemini вызов инструментов
 
 ```
 POST /v1beta/models/{model}:generateContent
 ```
 
-As of March 23, 2026, Crazyrouter production has verified that `gemini-3.1-pro` can reliably trigger these Gemini-native tool capabilities:
+На 23 марта 2026 года в промышленной среде Crazyrouter подтверждено, что `gemini-3.1-pro` стабильно инициирует следующие встроенные возможности инструментов Gemini:
 
 - `codeExecution`
 - `googleSearch`
@@ -18,14 +19,14 @@ As of March 23, 2026, Crazyrouter production has verified that `gemini-3.1-pro` 
 - `functionDeclarations`
 
 <Note>
-  This page keeps only request patterns and response markers that were reproduced against production.
+  На этой странице представлены только те шаблоны запросов и отметки в ответах, которые реально сработали в промышленной среде.
 </Note>
 
 ---
 
-## Code Execution
+## Исполнение кода
 
-The following request returned both `executableCode` and `codeExecutionResult` in production:
+Запросы ниже в промышленной среде возвращали два ключевых блокa ответа: `executableCode` и `codeExecutionResult`.
 
 ```bash
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
@@ -47,7 +48,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Observed response shape:
+Типы ключевых ответов, подтверждённых промышленной средой:
 
 ```json
 {
@@ -79,9 +80,9 @@ Observed response shape:
 
 ---
 
-## Google Search
+## Google Поиск
 
-The following request returned `groundingMetadata` in production, confirming that Google Search was actually used:
+Запросы ниже в промышленной среде возвращали `groundingMetadata`, что подтверждает реальное срабатывание Google Search:
 
 ```bash
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
@@ -103,16 +104,16 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Current markers to check:
+Текущий перечень для проверки:
 
 - `candidates[0].groundingMetadata`
-- Normal text output in `candidates[0].content.parts[*].text`
+- Обычный текстовый ответ по-прежнему находится в `candidates[0].content.parts[*].text`
 
 ---
 
-## URL Context
+## Контекст по URL
 
-The following request returned `urlContextMetadata` in production, along with `groundingMetadata`:
+Запросы ниже в промышленной среде возвращали `urlContextMetadata`, и также содержали `groundingMetadata`:
 
 ```bash
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
@@ -134,16 +135,16 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Current markers to check:
+Текущий перечень для проверки:
 
 - `candidates[0].urlContextMetadata`
 - `candidates[0].groundingMetadata`
 
 ---
 
-## Custom Function Calling
+## Вызов пользовательских функций
 
-The following request returned `functionCall` in production:
+Запросы ниже в промышленной среде возвращали `functionCall`:
 
 ```bash
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
@@ -179,7 +180,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Observed response shape:
+Ключевые типы ответов:
 
 ```json
 {
@@ -202,11 +203,11 @@ Observed response shape:
 }
 ```
 
-To continue the tool loop, send the tool result back with Gemini-native `functionResponse`.
+Когда результаты функции возвращаются обратно, можно и дальше использовать родную для Gemini структуру `functionResponse`.
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [Gemini 2.5 Flash: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash-Lite: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)
+- [Сравнение стоимости Gemini 2.5 Flash: Официально / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Страница модели Gemini 2.5 Flash: актуальная цена, реальные примеры, код вызова](https://crazyrouter.com/ru/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Сравнение стоимости Gemini 2.5 Flash-Lite: Официально / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)

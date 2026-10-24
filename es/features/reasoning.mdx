@@ -1,0 +1,176 @@
+---
+title: "Razonamiento"
+description: "Basado en pruebas reales en entorno de producción, utilizando los modelos principales más recientes de GPT, Claude y Gemini para razonamiento y pensamiento"
+---
+> Contenido actualizado: 2026-06-09
+
+# Razonamiento
+
+Este documento solo incluye métodos de Razonamiento / Pensamiento **que han sido verificados satisfactoriamente mediante solicitudes reales en el entorno de producción de Crazyrouter**.
+
+Tiempo de verificación:
+
+- `2026-03-22`
+
+Modelos verificados:
+
+- `gpt-5.5`
+- `claude-opus-4-8`
+- `gemini-3.1-pro`
+
+---
+
+## Matriz de capacidades verificadas
+
+| Modelo | Protocolo | Punto final | Indicador de éxito |
+|------|------|------|----------|
+| `gpt-5.5` | Respuestas OpenAI | `POST /v1/responses` | Se encuentra el item `reasoning` en `output` |
+| `claude-opus-4-8` | Mensajes Anthropic | `POST /v1/messages` | Devuelve el bloque `thinking` |
+| `gemini-3.1-pro` | Gemini Nativo | `POST /v1beta/models/{model}:generateContent` | Se encuentra `thoughtsTokenCount` en `usageMetadata` |
+
+---
+
+## GPT-5.4
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "input": "Which is larger, 9.11 or 9.9? Explain briefly.",
+    "reasoning": {
+      "effort": "high",
+      "summary": "detailed"
+    }
+  }'
+```
+
+`output.type` clave devuelta por la verificación en producción:
+
+```json
+["reasoning", "message"]
+```
+
+Los campos clave del item `reasoning` incluyen:
+
+```json
+{
+  "type": "reasoning",
+  "summary": [
+    {
+      "type": "summary_text",
+      "text": "..."
+    }
+  ]
+}
+```
+
+Esto indica que, en el entorno de producción actual de Crazyrouter, la capacidad de razonamiento de `gpt-5.5` debe tomarse según el item `reasoning` del API de Responses, y no depender de `reasoning_content` de Chat Completions.
+
+---
+
+## Claude Opus 4.7 Pensamiento
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-opus-4-8",
+    "max_tokens": 320,
+    "thinking": {
+      "type": "enabled",
+      "budget_tokens": 128
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Which is larger, 9.11 or 9.9? Explain briefly."
+      }
+    ]
+  }'
+```
+
+Campos clave devueltos en la verificación en producción:
+
+```json
+{
+  "content": [
+    {
+      "type": "thinking",
+      "thinking": "..."
+    },
+    {
+      "type": "text",
+      "text": "..."
+    }
+  ]
+}
+```
+
+Atención:
+
+- El modelo base `claude-opus-4-8` solo devolvió `text` normal en las pruebas del mismo día
+- Solo en `claude-opus-4-8` se verificó un bloque de thinking explícito
+
+Por lo tanto, este documento debe priorizar usar `claude-opus-4-8` como ejemplo de razonamiento de Claude 4.7.
+
+---
+
+## Gemini 3 Pro
+
+```bash cURL
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Which is larger, 9.11 or 9.9? Explain briefly."
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "thinkingConfig": {
+        "thinkingBudget": 256
+      },
+      "maxOutputTokens": 512
+    }
+  }'
+```
+
+Campos clave devueltos en la verificación en producción:
+
+- `usageMetadata.thoughtsTokenCount`
+
+Esto indica que, en el entorno de producción actual, el modo thinking de `gemini-3.1-pro` ya está funcionando realmente.
+
+---
+
+## Combinaciones que actualmente no escriben resultado principal
+
+- El enrutamiento de Chat Completions de `gpt-5.5` no devolvió de forma estable `reasoning_content` en la revisión actual, por lo que ya no se incluye como ejemplo principal de GPT en esta página
+- El modelo base `claude-opus-4-8` no devolvió ningún bloque thinking en la verificación actual
+- No se ha detectado en `claude-opus-4-8` ningún modelo con capacidades de thinking tan claras
+
+---
+
+## Documentos relacionados
+
+- [Modelo de razonamiento OpenAI](/es/chat/openai/reasoning)
+- [Modo de pensamiento de GPT-5](/es/chat/responses/gpt5-thinking)
+- [Campos de pensamiento de IA](/es/reference/thinking)
+- [Formato nativo de Claude](/es/chat/anthropic/messages)
+- [Formato nativo de Gemini](/es/chat/gemini/native)
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Comparativa de precios Claude Opus 4.7: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/claude-opus-4-7?utm_source=docs&utm_medium=related)
+- [Página de modelo Claude Opus 4.7: Precio en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/anthropic/claude-opus-4-7?utm_source=docs&utm_medium=related)
+- [Comparativa de precios GPT-5.4: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/gpt-5-4?utm_source=docs&utm_medium=related)

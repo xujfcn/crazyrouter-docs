@@ -1,30 +1,30 @@
 ---
-title: "Reasoning Models"
-description: "Production-revalidated guidance for using Crazyrouter reasoning features and choosing the right protocol"
+title: "推論モデル"
+description: "Crazyrouter の推論機能を使用する際の本番再検証済みガイダンスおよび適切なプロトコル選択について"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Reasoning Models
+# 推論モデル
 
-This page only documents reasoning behavior that was revalidated against Crazyrouter production on `2026-03-22`.
+このページでは、`2026-03-22` 上の Crazyrouter 本番環境で再検証された推論挙動のみを記載しています。
 
-For OpenAI-compatible integrations, the current guidance is:
+OpenAI 互換統合の場合、現在のガイダンスは以下の通りです：
 
-- If you only want stronger reasoning and only need the final answer, use Chat Completions with `reasoning_effort`
-- If you need a stable, inspectable reasoning output, prefer the Responses API and see [GPT-5 Thinking Mode](/jp/chat/responses/gpt5-thinking)
+- より強力な推論だけを求め、最終的な回答だけが必要な場合は、`reasoning_effort` で Chat Completions を使用してください。
+- 安定した検証可能な推論出力が必要な場合は、Responses API を推奨し、[GPT-5 思考モード](/jp/chat/responses/gpt5-thinking)を参照してください。
 
-## Verified combinations
+## 検証済みの組み合わせ
 
-| Route | Model | Request parameter | Current production behavior |
+| ルート | モデル | リクエストパラメータ | 現在の本番挙動 |
 |-------|-------|-------------------|-----------------------------|
-| Chat Completions | `gpt-5.5` | `reasoning_effort` | Request succeeds and returns a final answer |
-| Responses | `gpt-5.5` | `reasoning.effort` / `reasoning.summary` | `output` includes `reasoning` and `message` items |
+| Chat Completions | `gpt-5.5` | `reasoning_effort` | リクエストが成功し、最終回答が返されます |
+| Responses | `gpt-5.5` | `reasoning.effort` / `reasoning.summary` | `output` に `reasoning` および `message` が含まれます |
 
 ---
 
 ## Chat Completions: `reasoning_effort`
 
-The following request shape currently works in production:
+現在本番環境で動作するリクエスト形式：
 
 ```bash cURL
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -43,29 +43,29 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-Available `reasoning_effort` values:
+利用可能な `reasoning_effort` の値：
 
-| Value | Meaning |
+| 値 | 意味 |
 |-------|---------|
-| `low` | Faster response for simpler tasks |
-| `medium` | Balanced default-style setting |
-| `high` | More reasoning for harder tasks |
+| `low` | 単純なタスク向けに素早い応答 |
+| `medium` | バランスのとれたデフォルト設定 |
+| `high` | 難しいタスク向けに推論を強化 |
 
-### Current response behavior
+### 現在の応答挙動
 
-In the `2026-03-22` production recheck:
+`2026-03-22` 本番再検証では：
 
-- the request succeeded
-- the final answer was returned in `message.content`
-- `message.reasoning_content` did not reliably contain usable content
+- リクエストが成功しました
+- 最終回答が `message.content` に返されました
+- `message.reasoning_content` には有用な内容が確実に含まれていませんでした
 
-So if you only want stronger reasoning, Chat Completions with `reasoning_effort` is still usable. If you need a visible reasoning summary field, do not treat Chat Completions as the primary path.
+そのため、より強力な推論だけを求める場合は、`reasoning_effort` の Chat Completions でも利用可能です。推論サマリーフィールドが必要な場合は、Chat Completions を主な方法として使わないでください。
 
 ---
 
-## When you need inspectable reasoning output
+## 検証可能な推論出力が必要な場合
 
-The more reliable production path is the Responses API:
+より信頼性の高い本番経路は Responses API です：
 
 ```bash cURL
 curl https://api.crazyrouter.com/v1/responses \
@@ -81,32 +81,32 @@ curl https://api.crazyrouter.com/v1/responses \
   }'
 ```
 
-Verified `output.type` values:
+検証済み `output.type` 値：
 
 ```json
 ["reasoning", "message"]
 ```
 
-For concrete response shapes, summary fields, and streaming event names, see:
+具体的な応答形式、サマリーフィールド、ストリーミングイベント名については、以下を参照してください：
 
-- [GPT-5 Thinking Mode](/jp/chat/responses/gpt5-thinking)
-- [AI Thinking Fields](/jp/reference/thinking)
+- [GPT-5 思考モード](/jp/chat/responses/gpt5-thinking)
+- [AI 思考フィールド](/jp/reference/thinking)
 
 ---
 
-## Current recommendation
+## 現在の推奨
 
-- For new builds that need to log or display reasoning summaries, start with the Responses API
-- For existing Chat Completions integrations that only care about the final answer, `reasoning_effort` is still a valid path
-- Do not assume all OpenAI-compatible reasoning models will reliably expose `reasoning_content`
+- 推論サマリーの記録や表示が必要な新しいビルドには、Responses API から始めてください
+- 最終回答だけが必要な既存 Chat Completions 統合には、`reasoning_effort` も依然として有効な経路です
+- すべての OpenAI 互換推論モデルが必ずしも `reasoning_content` を確実に出力するとは限らないことに注意してください
 
 <Warning>
-  Reasoning requests usually increase both latency and token usage. Higher `reasoning_effort` generally costs more.
+  推論リクエストは通常、レイテンシーとトークン使用量の両方が増加します。高い `reasoning_effort` は通常コストも高くなります。
 </Warning>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## crazyrouter.com 関連
 
-- [GPT-5 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gpt-5?utm_source=docs&utm_medium=related)
-- [GPT-5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-5?utm_source=docs&utm_medium=related)
-- [GPT Image 1.5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT-5 価格比較：リスト vs Azure / Bedrock / Vertex vs Crazyrouter](https://crazyrouter.com/ja/pricing/gpt-5?utm_source=docs&utm_medium=related)
+- [GPT-5 モデルページ：ライブ価格、実サンプル、コード](https://crazyrouter.com/ja/models/openai/gpt-5?utm_source=docs&utm_medium=related)
+- [GPT Image 1.5 モデルページ：ライブ価格、実サンプル、コード](https://crazyrouter.com/ja/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)

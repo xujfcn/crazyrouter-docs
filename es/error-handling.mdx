@@ -1,0 +1,80 @@
+---
+title: "Códigos de estado HTTP y manejo de errores"
+description: "Conoce los códigos de estado y mensajes de error devueltos por la API"
+---
+> Contenido actualizado: 2026-10-12
+
+## Códigos de estado HTTP
+
+| Código de estado | Descripción |
+|------------------|-------------|
+| 200 | Solicitud exitosa |
+| 400 | Error en los parámetros de la solicitud |
+| 401 | Autenticación fallida, API Key no válida o ausente |
+| 403 | Permisos insuficientes, el Token no tiene acceso a este modelo |
+| 429 | Límite de frecuencia de solicitudes excedido |
+| 500 | Error interno del servidor |
+| 502 | Servicio upstream no disponible |
+| 503 | Servicio temporalmente no disponible |
+
+## Formato de respuesta de error
+
+```json
+{
+  "error": {
+    "message": "错误描述信息",
+    "type": "error_type",
+    "code": "error_code"
+  }
+}
+```
+
+## Errores comunes
+
+### 401 - Autenticación fallida
+
+```json
+{
+  "error": {
+    "message": "Invalid API key",
+    "type": "authentication_error",
+    "code": "invalid_api_key"
+  }
+}
+```
+
+**Solución**: Verifica que el API Key sea correcto y que comience con `sk-`.
+
+### 429 - Límite de frecuencia
+
+```json
+{
+  "error": {
+    "message": "Rate limit exceeded",
+    "type": "rate_limit_error",
+    "code": "rate_limit_exceeded"
+  }
+}
+```
+
+**Solución**: Reduce la frecuencia de solicitudes, o contacta al soporte para aumentar el límite.
+
+### 403 - Fondos insuficientes
+
+```json
+{
+  "error": {
+    "message": "Insufficient quota",
+    "type": "insufficient_quota",
+    "code": "insufficient_quota"
+  }
+}
+```
+
+**Solución**: Dirígete a la [página de recarga](https://crazyrouter.com/console/topup) para añadir saldo.
+
+## Sugerencias para reintentos
+
+- Para errores 429, se recomienda reintentar usando retroceso exponencial
+- Para errores 500/502/503, se recomienda esperar unos segundos antes de volver a intentar
+- Para errores 400/401/403, revisa los parámetros de la solicitud y la información de autenticación

@@ -1,39 +1,39 @@
 ---
-title: "Text-to-Speech (TTS)"
-description: "Use POST /v1/audio/speech to convert text to speech"
+title: "Преобразование текста в речь (TTS)"
+description: "Используйте POST /v1/audio/speech для преобразования текста в речь"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-06
 
-# Text-to-Speech (TTS)
+# Преобразование текста в речь (TTS)
 
 ```
 POST /v1/audio/speech
 ```
 
-Convert text to natural speech, compatible with the OpenAI TTS API format.
+Преобразуйте текст в естественную речь, совместим с форматом OpenAI TTS API.
 
-## Request Parameters
+## Параметры запроса
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model` | string | Yes | Model name: `tts-1`, `tts-1`, `tts-1-hd-1106` |
-| `input` | string | Yes | Text to convert, max 4096 characters |
-| `voice` | string | Yes | Voice character |
-| `response_format` | string | No | Output format: `mp3` (default), `opus`, `aac`, `flac`, `wav`, `pcm` |
-| `speed` | number | No | Speed, 0.25-4.0, default 1.0 |
+| Параметр | Тип | Обязательный | Описание |
+|------|------|------|------|
+| `model` | string | Да | Название модели: `tts-1`, `tts-1`, `tts-1-hd-1106` |
+| `input` | string | Да | Текст для преобразования, максимум 4096 символов |
+| `voice` | string | Да | Роль голоса |
+| `response_format` | string | Нет | Формат вывода: `mp3` (по умолчанию), `opus`, `aac`, `flac`, `wav`, `pcm` |
+| `speed` | number | Нет | Скорость речи, 0.25-4.0, по умолчанию 1.0 |
 
-### Available Voices
+### Доступные голоса
 
-| Voice | Characteristics |
-|-------|----------------|
-| `alloy` | Neutral, balanced |
-| `echo` | Male, steady |
-| `fable` | Male, warm |
-| `onyx` | Male, deep |
-| `nova` | Female, lively |
-| `shimmer` | Female, soft |
+| Голос | Особенности |
+|------|------|
+| `alloy` | Нейтральный, сбалансированный |
+| `echo` | Мужской, уверенный |
+| `fable` | Мужской, тёплый |
+| `onyx` | Мужской, глубокий |
+| `nova` | Женский, живой |
+| `shimmer` | Женский, мягкий |
 
-## Request Examples
+## Пример запроса
 
 <CodeGroup>
 
@@ -43,7 +43,7 @@ curl -X POST https://api.crazyrouter.com/v1/audio/speech \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "tts-1",
-    "input": "Hello, welcome to the Crazyrouter API. What a beautiful day!",
+    "input": "你好，欢迎使用 Crazyrouter API。今天天气真不错！",
     "voice": "nova",
     "response_format": "mp3",
     "speed": 1.0
@@ -61,7 +61,7 @@ client = OpenAI(
 
 response = client.audio.speech.create(
     model="tts-1",
-    input="Hello, welcome to the Crazyrouter API. What a beautiful day!",
+    input="你好，欢迎使用 Crazyrouter API。今天天气真不错！",
     voice="nova",
     response_format="mp3",
     speed=1.0
@@ -81,7 +81,7 @@ const client = new OpenAI({
 
 const response = await client.audio.speech.create({
   model: "tts-1",
-  input: "Hello, welcome to the Crazyrouter API.",
+  input: "你好，欢迎使用 Crazyrouter API。",
   voice: "nova",
 });
 
@@ -91,22 +91,22 @@ fs.writeFileSync("speech.mp3", buffer);
 
 </CodeGroup>
 
-The response is a binary audio stream. Save it directly to a file.
+Ответом является бинарный поток аудиофайла, который можно сразу сохранять.
 
 ---
 
-## Model Comparison
+## Сравнение моделей
 
-| Model | Quality | Latency | Description |
-|-------|---------|---------|-------------|
-| `tts-1` | Standard | Low | Suitable for real-time scenarios |
-| `tts-1-hd-1106` | HD | Medium | More natural speech |
-| `tts-1` | Highest | Medium | Latest model, supports more languages and emotions |
+| Модель | Качество | Задержка | Описание |
+|------|------|------|------|
+| `tts-1` | Стандартное | Низкая | Подходит для работы в реальном времени |
+| `tts-1-hd-1106` | HD | Средняя | Более естественная речь |
+| `tts-1` | Максимальное | Средняя | Новейшая модель, поддерживает больше языков и эмоций |
 
 <Note>
-  `tts-1` supports multiple languages and automatically detects the input text language to use the corresponding pronunciation.
+  `tts-1` поддерживает многоязычность: язык текста определяется автоматически, и используется соответствующее произношение.
 </Note>
 
 <Warning>
-  The response is a binary audio stream, not JSON. Use `--output` or stream-write to a file.
+  Ответ — это бинарный аудиопоток, не JSON. Используйте `--output` или осуществляйте потоковую запись в файл.
 </Warning>

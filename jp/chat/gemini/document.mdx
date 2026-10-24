@@ -1,25 +1,26 @@
 ---
-title: "Gemini Document Understanding"
-description: "Gemini PDF understanding and structured extraction verified against Crazyrouter production on 2026-03-23"
+title: "Gemini ドキュメント理解"
+description: "2026年3月23日時点の Crazyrouter 本番環境検証に基づく Gemini PDF 理解と構造化抽出"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Gemini Document Understanding
+
+# Gemini ドキュメント理解
 
 ```
 POST /v1beta/models/{model}:generateContent
 ```
 
-As of March 23, 2026, Crazyrouter production has verified that `gemini-3.1-pro` supports:
+2026年3月23日現在、Crazyrouterの本番環境では `gemini-3.1-pro` に対応していることが確認されています：
 
-- Reading PDFs through `inlineData`
-- Returning parseable JSON when `responseMimeType` and `responseSchema` are provided
+- `inlineData` でPDFを読み込み
+- `responseMimeType` + `responseSchema` の組み合わせで解析可能なJSONを出力
 
 ---
 
-## PDF Summary
+## PDF 要約
 
-The following request successfully read a PDF and returned a summary in production:
+以下のリクエストでは、本番環境でPDFの読み取りと要約テキストの返却に成功しています：
 
 ```bash
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
@@ -42,13 +43,13 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-In the production check, the model returned a one-sentence summary of the attached PDF.
+本番でのテストでは、モデルがPDFの内容について一文要約を正常に返しました。
 
 ---
 
-## PDF + Structured Output
+## PDF + 構造化出力
 
-The following request returned JSON text that could be parsed directly with `json.loads()` in production:
+以下のリクエストでは、本番環境で`json.loads()`できるJSONテキストが直接返されます：
 
 ```bash
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
@@ -82,7 +83,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Observed production response:
+本番環境で実際に返された例：
 
 ```json
 {
@@ -100,7 +101,7 @@ Observed production response:
 }
 ```
 
-You can parse it directly:
+対応するコードではそのまま解析可能です：
 
 ```python
 import json
@@ -110,16 +111,16 @@ data = json.loads(text)
 ```
 
 <Note>
-  This page only confirms the PDF-input path and JSON structured output path. For table extraction, long-document comparison, or other higher-variance workflows, revalidate with your own sample documents first.
+  このページでは、PDF入力とJSON構造化出力の2つの流れのみを確認しています。より複雑な表抽出や長文比較などの用途については、ご自身の実サンプルで本番検証されることをお勧めします。
 </Note>
 
 <Warning>
-  Large PDFs materially increase input-token usage. Validate prompts and schemas with small documents first, then scale up.
+  大きなPDFは入力Token数が大幅に増加します。本格導入の前に、小さなドキュメントで項目やプロンプトを検証し、徐々に入力規模を拡大することを推奨します。
 </Warning>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [Gemini 2.5 Flash 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash-Lite 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash 価格比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash モデルページ：リアルタイム価格・実例・コールコード](https://crazyrouter.com/ja/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash-Lite 価格比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)

@@ -1,0 +1,154 @@
+---
+title: "API de video de Alibaba Bailian"
+description: "API de video compatible con Alibaba Bailian. El uso externo es a través de la ruta compatible /alibailian/api/v1/*. Crazyrouter ya está conectado internamente al upstream oficial DashScope /api/v1/*."
+---
+> Contenido actualizado: 2026-06-09
+
+# API de video de Alibaba Bailian
+
+Crazyrouter ofrece rutas compatibles con el formato de video de Alibaba Bailian, adecuado para aplicaciones que ya han integrado el formato de DashScope / Alibaba Bailian y quieren migrar directamente.
+
+## ¿Qué cubre esta página?
+
+- Esta página describe los alias compatibles de Alibaba que Crazyrouter expone al público, adecuado para flujos de trabajo integrados con el formato DashScope / Alibaba Bailian para seguir siendo utilizados `/alibailian/api/v1/*`
+- El upstream oficial conectado internamente en Crazyrouter ya está unificado bajo la ruta DashScope `/api/v1/*`
+- Si deseas utilizar la interfaz de video unificada de Crazyrouter y no la ruta de migración compatible de Alibaba, utiliza `/v1/video/generations`
+- Wan Video Generador actualmente usa `/v1/video/generations`. Especialmente `wan2.2-t2v-plus` no es compatible con la ruta de envío `/alibailian/...video-synthesis` de esta página.
+- Si un modelo se puede utilizar sigue dependiendo de tu lista de modelos permitidos de token, precios de modelo y estado de montaje actual en producción; no asumas que todos los modelos del upstream de Alibaba están habilitados por defecto
+
+## Endpoints soportados
+
+- `POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis`
+- `GET /alibailian/api/v1/tasks/{task_id}`
+
+## Descripción de rutas de upstream interno
+
+- Ruta de envío compatible externa: `POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis`
+- Ruta de consulta compatible externa: `GET /alibailian/api/v1/tasks/{task_id}`
+- Envío interno de Crazyrouter al upstream: `POST /api/v1/services/aigc/video-generation/video-synthesis`
+- Consulta interna de Crazyrouter al upstream: `GET /api/v1/tasks/{task_id}`
+
+## Autenticación
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## POST Generar video
+
+```
+POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis
+```
+
+### Estructura del cuerpo de la solicitud
+
+| Campo | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `model` | string | Sí | Nombre del modelo, como `wan2.5-i2v-preview` |
+| `input` | object | Sí | Parámetros de entrada básicos |
+| `input.prompt` | string | No | Prompt positivo |
+| `input.negative_prompt` | string | No | Prompt negativo |
+| `input.img_url` | string | No | URL de imagen inicial o Base64 |
+| `input.audio_url` | string | No | URL del archivo de audio |
+| `input.template` | string | No | Plantilla de efectos especiales de video |
+| `parameters` | object | No | Parámetros avanzados de procesamiento |
+| `parameters.resolution` | string | No | Perfil de resolución, como `480P` |
+| `parameters.duration` | integer | No | Duración del video (segundos) |
+| `parameters.prompt_extend` | boolean | No | ¿Habilitar reescritura inteligente? |
+| `parameters.watermark` | boolean | No | ¿Agregar marca de agua AI? |
+| `parameters.audio` | boolean | No | ¿Añadir audio de forma automática? |
+| `parameters.seed` | integer | No | Semilla aleatoria |
+
+<Warning>
+  `wan2.2-t2v-plus` enviado a la ruta de esta página devolverá `invalid_request`, el prompt de producción debe usar `/v1/video/generations`. Para Wan Generador de Video consulta [Wan Video](/es/video/wan) o [Alias de generación de video](/es/video/openai-video-alias-create).
+</Warning>
+
+### Ejemplo de solicitud
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/alibailian/api/v1/services/aigc/video-generation/video-synthesis \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "wan2.5-i2v-preview",
+    "input": {
+      "prompt": "改变一下光线",
+      "img_url": "https://example.com/first-frame.png"
+    },
+    "parameters": {
+      "resolution": "480P",
+      "prompt_extend": true,
+      "audio": true
+    }
+  }'
+```
+
+### Ejemplo de respuesta
+
+```json
+{
+  "request_id": "ccffb21f-c21e-4eba-861a-6c80e6db6e4d",
+  "output": {
+    "task_id": "a55bfe14-6e78-4b9d-b97d-128420399ed1",
+    "task_status": "PENDING"
+  }
+}
+```
+
+## GET Consultar tarea
+
+```
+GET /alibailian/api/v1/tasks/{task_id}
+```
+
+### Ejemplo de solicitud
+
+```bash cURL
+curl https://api.crazyrouter.com/alibailian/api/v1/tasks/a55bfe14-6e78-4b9d-b97d-128420399ed1 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Ejemplo de respuesta
+
+```json
+{
+  "usage": {
+    "SR": 480,
+    "duration": 5,
+    "video_count": 1
+  },
+  "output": {
+    "task_id": "a55bfe14-6e78-4b9d-b97d-128420399ed1",
+    "end_time": "2025-10-11 19:02:27.297",
+    "video_url": "https://dashscope-result.example.com/video.mp4",
+    "orig_prompt": "改变一下光线",
+    "submit_time": "2025-10-11 18:55:56.952",
+    "task_status": "SUCCEEDED",
+    "actual_prompt": "橙衣男性骑着扫帚从画面右侧向左侧高速飞过……",
+    "scheduled_time": "2025-10-11 18:55:57.908"
+  },
+  "request_id": "ec8f059e-f2e5-4887-bb43-3306cd38f403"
+}
+```
+
+## Respuestas de error verificadas localmente
+
+- Se ha verificado localmente la existencia de rutas de creación; cuando el modelo no está disponible se devuelve un error de negocio tipo `model_not_found`, no `404`
+- Se ha verificado localmente la existencia de rutas de consulta; si la tarea no existe se devolverá:
+
+```json
+{
+  "code": "task_not_exist",
+  "message": "task_not_exist",
+  "data": null
+}
+```
+
+<Note>
+Este conjunto de rutas de Alibaba Bailian es más adecuado para una “migración compatible por protocolo”. El cuerpo de la solicitud y de la respuesta están más cerca del estilo original de DashScope / BaiLian, y no del formato de video unificado de Crazyrouter. No equivale a que “Crazyrouter haya expuesto todos los modelos de video de Alibaba”, la disponibilidad depende de la lista de precios vigente, lista de modelos permitidos de modelos y estado real de carga.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Todos los modelos y precios de Alibaba Cloud](https://crazyrouter.com/es/models/alibaba?utm_source=docs&utm_medium=related)

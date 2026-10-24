@@ -1,18 +1,18 @@
 ---
-title: "Chat Completion Object"
-description: "Core production-oriented structure of Chat Completion and Chat Completion Chunk objects"
+title: "チャット完了オブジェクト"
+description: "Chat Completion および Chat Completion Chunk オブジェクトの、コアとなる本番運用向け構造"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Chat Completion Object
+# チャット完了オブジェクト
 
-`/v1/chat/completions` returns `chat.completion` for non-streaming requests and `chat.completion.chunk` for streaming requests.
+`/v1/chat/completions`はストリーミングされないリクエストの場合は`chat.completion`、ストリーミングされるリクエストの場合は`chat.completion.chunk`を返します。
 
-This page focuses on the most stable, broadly useful OpenAI-compatible response structure on Crazyrouter today.
+このページでは、Crazyrouterで最も安定して幅広く利用されている、OpenAI互換のレスポンス構造に注目しています。
 
-## Non-streaming object
+## ストリーミングされないオブジェクト
 
-Minimal production request:
+最小限の本番用リクエスト例:
 
 ```bash cURL
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -30,7 +30,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-Typical production response skeleton:
+一般的な本番用レスポンススケルトン:
 
 ```json
 {
@@ -53,17 +53,17 @@ Typical production response skeleton:
 }
 ```
 
-### How to read it
+### 読み方について
 
-- `message.content` is the final text answer
-- `message.tool_calls` only appears when the model is requesting tool execution
-- `message.reasoning_content` may appear for some models or routes, but should not currently be treated as a guaranteed field
+- `message.content`は最終的なテキスト回答です
+- `message.tool_calls`はモデルがツール実行を要求する場合にのみ現れます
+- `message.reasoning_content`は一部のモデルやルートで出現する可能性がありますが、現時点では必須項目として扱うべきではありません
 
 ---
 
-## Streaming object
+## ストリーミングオブジェクト
 
-For streaming requests, the server returns `chat.completion.chunk` SSE events:
+ストリーミングリクエストの場合、サーバーは`chat.completion.chunk` SSEイベントを返します:
 
 ```json
 {
@@ -84,7 +84,7 @@ For streaming requests, the server returns `chat.completion.chunk` SSE events:
 }
 ```
 
-Common SSE shape:
+一般的なSSEの構造:
 
 ```text
 data: {"object":"chat.completion.chunk",...}
@@ -94,24 +94,24 @@ data: [DONE]
 
 ---
 
-## Fields you will usually care about
+## よく使われる項目
 
-| Field | Meaning |
+| フィールド | 意味 |
 |-------|---------|
-| `object` | `chat.completion` for non-streaming, `chat.completion.chunk` for streaming |
-| `model` | The actual model used for the response |
-| `choices[].message.content` | Final non-streaming text |
-| `choices[].message.tool_calls` | Non-streaming tool requests |
-| `choices[].delta.content` | Streaming text delta |
-| `choices[].finish_reason` | Stop reason such as `stop`, `length`, or `tool_calls` |
+| `object` | 非ストリーミング時は`chat.completion`、ストリーミング時は`chat.completion.chunk` |
+| `model` | レスポンスに使用された実際のモデル |
+| `choices[].message.content` | ストリーミングされない最終テキスト |
+| `choices[].message.tool_calls` | ストリーミングされないツール要求 |
+| `choices[].delta.content` | ストリーミングテキストの差分 |
+| `choices[].finish_reason` | `stop`、`length`、`tool_calls`などの停止理由 |
 
 <Note>
-  Upstream models may pass through extra fields. Client code should rely on the stable common fields first rather than assuming every model exposes the same extensions.
+  上流のモデルによって追加のフィールドが流されることがあります。クライアントコードでは、安定した共通フィールドを最優先に利用し、すべてのモデルが同じ拡張を提供していると仮定しないようにしてください。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## crazyrouter.com の関連情報
 
-- [GPT Image 1.5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [OpenAI の全モデルと料金](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [GPT Image 1.5モデルページ：ライブ価格、実例、コード](https://crazyrouter.com/ja/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT Image 2モデルページ：ライブ価格、実例、コード](https://crazyrouter.com/ja/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [ライブ価格付きの全OpenAIモデル一覧](https://crazyrouter.com/ja/models/openai?utm_source=docs&utm_medium=related)

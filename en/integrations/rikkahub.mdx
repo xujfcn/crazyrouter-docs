@@ -1,18 +1,18 @@
 ---
-title: 'RikkaHub Setup Guide'
-description: 'Configure Crazyrouter API in RikkaHub'
+title: "RikkaHub Configuration Guide"
+description: "Configure Crazyrouter API in RikkaHub"
 ---
-> Last updated: 2026-06-06
+> Content updated: 2026-06-09
 
 ## Overview
 
-RikkaHub is an AI model aggregation client that supports unified management of multiple model providers.
+RikkaHub is an AI model aggregation client, supporting unified management for various model providers.
 
 ## Configuration Steps
 
 <Steps>
   <Step title="Open Settings">
-    Go to the RikkaHub settings page and find the `Model Services` or `API Configuration` option.
+    Go to the RikkaHub settings page and find the `Model Service` or `API Configuration` option.
   </Step>
   <Step title="Add Provider">
     Click to add a new provider:
@@ -21,19 +21,21 @@ RikkaHub is an AI model aggregation client that supports unified management of m
     - **API Base URL**: `https://api.crazyrouter.com/v1`
     - **API Key**: `sk-xxx`
   </Step>
-  <Step title="Select Models">
-    After configuration, select the models you want to use from the model list.
+  <Step title="Select Model">
+    After completing the configuration, select the desired model from the model list.
   </Step>
 </Steps>
 
 ## Available Models
 
-After configuration, you can use all models supported by Crazyrouter, including:
-- GPT-4o, GPT-4o-mini
-- Claude Sonnet, Claude Opus
-- Gemini Pro, Gemini Flash
-- And 300+ other models
+Once configured, it is recommended to first add the currently validated main models:
+
+- `gpt-5.5`
+- `claude-opus-4-8`
+- `gemini-3.1-pro`
+
+First use `gpt-5.5` to complete the initial connectivity test; then add Claude, Gemini, or any other model already enabled in the site's model list as needed.
 
 <Note>
-  RikkaHub supports configuring multiple providers simultaneously, allowing flexible switching during conversations.
+  RikkaHub supports configuring multiple providers at the same time and allows flexible switching in conversations.
 </Note>

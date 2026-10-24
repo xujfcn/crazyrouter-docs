@@ -1,64 +1,64 @@
 ---
-title: 'Create Token'
-description: 'Create a new API token'
-api: 'POST /api/token/'
+title: "Добавить токен"
+description: "Создать новый API токен"
+api: "POST /api/token/"
 ---
-> Дата обновления: 2026-07-20
+> Обновление содержания: 2026-07-20
 
-## Overview
+## Описание интерфейса
 
-Create a new API token for calling AI model APIs.
+Создаёт новый API токен (Token), который используется для обращения к API моделей искусственного интеллекта.
 
 <Note>
-  The `/api/token/*` endpoints are mainly for Crazyrouter dashboard automation around API key management. They require a user `access token` plus the `New-Api-User` header, and are not the normal interface for `sk-xxx` model calls. Use `https://crazyrouter.com` as the base URL; `https://api.crazyrouter.com` is reserved for model APIs and returns `404 api_only_endpoint` for management paths.
+  Эта группа интерфейсов `/api/token/*` предназначена главным образом для автоматизации управления API-ключами в консоли Crazyrouter. Для работы требуется наличие в заголовке запроса `access token` и `New-Api-User` пользователя и не предназначена для прямого использования в обычных сценариях вызова моделей `sk-xxx`. При обращении необходимо использовать базовый адрес `https://crazyrouter.com`; `https://api.crazyrouter.com` используется только как вход для доступа к моделям API, при этом при вызове управляющих путей будет возвращён `404 api_only_endpoint`.
 </Note>
 
-## Authentication
+## Способ аутентификации
 
-This endpoint requires user-side authentication:
+Данный интерфейс требует аутентификации пользователя:
 
 ```text
 Authorization: Bearer your_access_token
 New-Api-User: 1
 ```
 
-## Request Parameters
+## Параметры запроса
 
 <ParamField body="name" type="string" required>
-  Token name for easy identification
+  Имя токена, для облегчения распознавания его назначения
 </ParamField>
 
 <ParamField body="remain_quota" type="integer" default="0">
-  Initial quota in internal quota units. If set to 0, use it together with `unlimited_quota`
+  Начальный лимит (единицы: внутреннее значение лимита). Если установлено в 0, требуется совместное использование с `unlimited_quota`
 </ParamField>
 
 <ParamField body="unlimited_quota" type="boolean" default="false">
-  Whether the token has unlimited quota
+  Установить как неограниченный лимит
 </ParamField>
 
 <ParamField body="expired_time" type="integer" default="-1">
-  Expiration timestamp. `-1` means never expires
+  Время истечения (Unix-метка времени), `-1` означает, что срок действия не ограничен
 </ParamField>
 
 <ParamField body="model_limits_enabled" type="boolean" default="false">
-  Whether to enable a model whitelist
+  Включить ограничение по белому списку моделей
 </ParamField>
 
 <ParamField body="model_limits" type="string">
-  Model restriction config as a string, usually a JSON string such as `["gpt-5.5","claude-opus-4-8"]`
+  Конфигурация ограничений моделей; на данный момент это строка, обычно хранящаяся в виде JSON, например `["gpt-5.5","claude-opus-4-8"]`
 </ParamField>
 
 <ParamField body="allow_ips" type="string">
-  IP whitelist string. You can pass a single IP or multiple IPs separated by newlines
+  Строка белого списка IP-адресов. Можно указать один IP или несколько, разделённых переводом строки
 </ParamField>
 
 <ParamField body="group" type="string">
-  Token group. It must be a group the current user is allowed to use
+  Группа, к которой относится токен. Можно выбрать только те группы, к которым у текущего пользователя есть доступ
 </ParamField>
 
-## Response Format
+## Формат ответа
 
-The current implementation only returns a success state after creation:
+После успешного выполнения запроса этот интерфейс возвращает только статус успешного выполнения:
 
 ```json
 {
@@ -67,7 +67,7 @@ The current implementation only returns a success state after creation:
 }
 ```
 
-## Code Examples
+## Пример кода
 
 <CodeGroup>
 
@@ -86,7 +86,7 @@ response = requests.post(
     "https://crazyrouter.com/api/token/",
     headers=headers,
     json={
-        "name": "Production",
+        "name": "生产环境",
         "remain_quota": 100000,
         "unlimited_quota": False,
         "expired_time": -1,
@@ -105,7 +105,7 @@ curl -X POST https://crazyrouter.com/api/token/ \
   -H "New-Api-User: 1" \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "Production",
+    "name": "生产环境",
     "remain_quota": 100000,
     "expired_time": -1,
     "model_limits_enabled": true,
@@ -116,5 +116,5 @@ curl -X POST https://crazyrouter.com/api/token/ \
 </CodeGroup>
 
 <Warning>
-  The current create endpoint does not return the full generated `key` in the response. If your workflow requires copying the full token immediately, prefer creating it from the console UI and saving it there.
+  При создании токена данный интерфейс не возвращает полный, только что сгенерированный `key` в ответе. Если вашему процессу необходимо немедленно скопировать полный ключ, создавайте и сохраняйте его через страницу консоли.
 </Warning>

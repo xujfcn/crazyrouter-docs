@@ -1,29 +1,29 @@
 ---
-title: 'Getting Started'
-description: 'Production-revalidated starter paths for connecting to Crazyrouter from OpenAI, Anthropic, and Gemini'
+title: "接入チュートリアル"
+description: "本番環境の審査に基づき、OpenAI、Anthropic、Gemini から Crazyrouter への導入ステップ"
 ---
-> 更新日: 2026-06-23
+> 内容更新日: 2026-06-09
 
-# Getting Started
+# 接入チュートリアル
 
-This page only documents starter paths that were revalidated against Crazyrouter production on `2026-03-23`.
+このページには`2026-03-23`がCrazyrouter本番環境で審査済みの導入パスのみを記載しています。
 
-For the fastest start, separate the integration styles first:
+最速で始めるには、まず3種類の接続方法を区別してください：
 
-- OpenAI-compatible: `https://api.crazyrouter.com/v1`
-- Anthropic native: `https://api.crazyrouter.com`
-- Gemini native: `https://api.crazyrouter.com/v1beta/models/...`
+- OpenAI互換：`https://api.crazyrouter.com/v1`
+- Anthropicネイティブ：`https://api.crazyrouter.com`
+- Geminiネイティブ：`https://api.crazyrouter.com/v1beta/models/...`
 
-## Shortest migration rule
+## 最小限の移行原則
 
-When migrating from an OpenAI-compatible client, you usually only change two things:
+OpenAI互換クライアントからCrazyrouterへの移行では、通常2箇所だけ変更すれば済みます：
 
-1. set `base_url` to `https://api.crazyrouter.com/v1`
-2. replace the key with your Crazyrouter `sk-xxx`
+1. `base_url`を`https://api.crazyrouter.com/v1`に変更
+2. `api_key`をCrazyrouterの`sk-xxx`に変更
 
 ---
 
-## Migrating from OpenAI
+## OpenAIからの移行
 
 ```python
 from openai import OpenAI
@@ -40,21 +40,21 @@ response = client.chat.completions.create(
 )
 ```
 
-This production recheck confirmed that:
+この審査期間での確認内容：
 
-- `gpt-5.5` works through `/v1/chat/completions`
-- if you need reasoning summaries or OpenAI-style web search, you should prefer `/v1/responses`
+- `gpt-5.5`が`/v1/chat/completions`を通じて正常に返却されます
+- reasoningの要約やOpenAIスタイルのウェブ検索が必要な場合は、まず`/v1/responses`への切替を優先してください
 
-Related pages:
+関連ページ：
 
-- [Responses API Overview](/jp/chat/responses/overview)
-- [GPT-5 Thinking Mode](/jp/chat/responses/gpt5-thinking)
+- [Responses API概要](/jp/chat/responses/overview)
+- [GPT-5思考モード](/jp/chat/responses/gpt5-thinking)
 
 ---
 
-## Migrating from Anthropic
+## Anthropicからの移行
 
-### Option A: stay on the OpenAI-compatible layer
+### パターンA：OpenAI互換レイヤーの継続利用
 
 ```python
 from openai import OpenAI
@@ -71,7 +71,7 @@ response = client.chat.completions.create(
 )
 ```
 
-### Option B: use native Anthropic Messages
+### パターンB：AnthropicネイティブMessages
 
 ```python
 import anthropic
@@ -88,20 +88,20 @@ response = client.messages.create(
 )
 ```
 
-If you need:
+次のケースでは：
 
-- standard Claude chat: prefer `claude-opus-4-8`
-- an explicit thinking block: prefer `claude-opus-4-8`
+- 通常のClaude対話：まず`claude-opus-4-8`を推奨
+- thinking blockが必要な場合：`claude-opus-4-8`を推奨
 
-Related page:
+関連ページ：
 
-- [Claude Native Format](/jp/chat/anthropic/messages)
+- [Claudeネイティブフォーマット](/jp/chat/anthropic/messages)
 
 ---
 
-## Migrating from Gemini
+## Geminiからの移行
 
-### Option A: OpenAI-compatible layer
+### パターンA：OpenAI互換レイヤー
 
 ```python
 from openai import OpenAI
@@ -118,7 +118,7 @@ response = client.chat.completions.create(
 )
 ```
 
-### Option B: Gemini native
+### パターンB：Geminiネイティブ
 
 ```bash
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
@@ -135,21 +135,21 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-If you need:
+次のケースでは：
 
-- simple reuse of existing OpenAI SDK code: start with the compatibility layer
-- structured outputs, Google Search, or thinking: prefer Gemini native
+- 既存のOpenAI SDKコードだけを使いたい場合：まず互換レイヤー経由で
+- 構造化出力・Google Search・thinkingが必要な場合：Geminiネイティブを優先
 
-Related pages:
+関連ページ：
 
-- [Gemini OpenAI-Compatible Format](/jp/chat/gemini/openai-compat)
-- [Gemini Native Format](/jp/chat/gemini/native)
+- [Gemini OpenAI互換フォーマット](/jp/chat/gemini/openai-compat)
+- [Geminiネイティブフォーマット](/jp/chat/gemini/native)
 
 ---
 
-## Environment variables
+## 環境変数方式
 
-If you use the OpenAI-compatible route, a good default is:
+OpenAI互換レイヤーを使う場合、先に次を設定するのがおすすめです：
 
 <Tabs>
   <Tab title="Linux / macOS">
@@ -166,7 +166,7 @@ If you use the OpenAI-compatible route, a good default is:
   </Tab>
 </Tabs>
 
-Then your code can be:
+その後、コード内で直接：
 
 ```python
 from openai import OpenAI
@@ -175,17 +175,17 @@ client = OpenAI()
 
 ---
 
-## Starter recommendations
+## 導入のアドバイス
 
-| Goal | Recommended starting path |
-|------|---------------------------|
-| Fastest GPT integration | OpenAI-compatible + `gpt-5.5` |
-| Fastest Claude integration | Anthropic native + `claude-opus-4-8` |
-| Fastest Gemini integration | OpenAI-compatible or Gemini native + `gemini-3.1-pro` |
-| Need reasoning summaries | Responses API |
-| Need a Claude thinking block | `claude-opus-4-8` |
-| Need Gemini Google Search / thinking / responseSchema | Gemini native |
+| 目的 | 推奨開始方法 |
+|------|--------------|
+| GPT最速導入 | OpenAI互換 ＋ `gpt-5.5` |
+| Claude最速導入 | Anthropicネイティブ ＋ `claude-opus-4-8` |
+| Gemini最速導入 | OpenAI互換 または Geminiネイティブ ＋ `gemini-3.1-pro` |
+| reasoning要約が必要 | Responses API |
+| Claude thinking blockが必要 | `claude-opus-4-8` |
+| Gemini Google Search / thinking / responseSchemaが必要 | Geminiネイティブ |
 
 <Note>
-  Crazyrouter supports OpenAI, Anthropic, and Gemini protocols at the same time. In practice, the more reliable approach is usually not forcing every model through one protocol, but choosing the route that best matches the capability you need.
+  CrazyrouterはOpenAI、Anthropic、Geminiの三種プロトコルに同時対応しています。より安定して利用するには“全モデルを同じプロトコルに無理に統一する”のではなく、機能に合わせて最適なエンドポイントを選択するのが一般的です。
 </Note>

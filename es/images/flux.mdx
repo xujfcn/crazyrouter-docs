@@ -1,0 +1,27 @@
+---
+title: "Flux"
+description: "Actualmente los modelos Flux no están disponibles en la página de precios de Crazyrouter"
+---
+> Contenido actualizado: 2026-10-12
+
+# Flux
+
+<Warning>
+  La página actual de precios de Crazyrouter no muestra un Flux `model_name` que se pueda llamar directamente. Esta página ya no proporciona ejemplos de solicitudes Flux, y no se deben usar los antiguos IDs de modelo `flux-*` en configuraciones de producción.
+</Warning>
+
+## Alternativas Actuales
+
+Para generación o edición de imágenes, se recomienda utilizar modelos que estén actualmente disponibles en la página de precios:
+
+| Caso de uso | Modelos sugeridos |
+|-------------|------------------|
+| Imágenes de OpenAI | `gpt-image-2` |
+| Imágenes de Gemini | `nano-banana`, `nano-banana-2`, `nano-banana-pro` |
+| Imágenes de Grok | `grok-4-image` |
+| Imágenes de Qwen | `qwen-image-2.0`, `qwen-image-plus`, `qwen-image-max` |
+| Imágenes de Doubao | `doubao-seedream-4-5`, `doubao-seedream-5-0` |
+
+## Cómo Confirmar
+
+Utiliza `https://crazyrouter.com/pricing` y la lista de modelos actuales devuelta por `GET /v1/models` como fuente confiable. Sólo los modelos públicos y visibles que puedan enviarse exitosamente deben usarse como ejemplos en la documentación o como valores predeterminados para clientes.

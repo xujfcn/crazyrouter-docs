@@ -1,29 +1,29 @@
 ---
-title: "Web Search"
-description: "Production-revalidated OpenAI-style web search on Crazyrouter"
+title: "Веб-поиск"
+description: "Проверенный в production OpenAI-стиль веб-поиска на Crazyrouter"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Web Search
+# Веб-поиск
 
-This page only documents OpenAI-style web search behavior that was revalidated against Crazyrouter production on `2026-03-22`.
+На этой странице документируется только поведение веб-поиска в стиле OpenAI, проверенное на Crazyrouter production для `2026-03-22`.
 
-The current primary path is:
+Текущий основной путь:
 
 - `gpt-5.5`
 - `POST /v1/responses`
 - `tools: [{ "type": "web_search_preview" }]`
 
-## Current conclusion
+## Текущий вывод
 
-In today's production recheck:
+В сегодняшней проверке в production:
 
-- `gpt-5.5` via the Responses API reliably returned `web_search_call`
-- the older Chat Completions probe using `tools: [{ "type": "web_search" }]` returned `200`, but did not provide a stable, verifiable search trigger signal, so it is not used as the primary documented pattern
+- `gpt-5.5` через API Responses устойчиво возвращал `web_search_call`
+- более старый тест Chat Completions с использованием `tools: [{ "type": "web_search" }]` возвращал `200`, но не предоставлял стабильный, проверяемый сигнал запуска поиска, поэтому он не используется как основная документированная схема
 
 ---
 
-## Verified request
+## Проверенный запрос
 
 ```bash cURL
 curl https://api.crazyrouter.com/v1/responses \
@@ -40,17 +40,17 @@ curl https://api.crazyrouter.com/v1/responses \
   }'
 ```
 
-Verified `output.type` values:
+Проверенные значения `output.type`:
 
 ```json
 ["web_search_call", "message"]
 ```
 
-This shows that the search step and the final answer are returned separately.
+Это показывает, что шаг поиска и окончательный ответ возвращаются отдельно.
 
 ---
 
-## Python example
+## Пример на Python
 
 ```python Python
 from openai import OpenAI
@@ -73,29 +73,29 @@ print(response.output_text)
 
 ---
 
-## How to confirm search actually ran
+## Как подтвердить, что поиск действительно выполнялся
 
-Inspect `response.output` directly:
+Проверьте непосредственно `response.output`:
 
 ```python Python
 for item in response.output:
     print(item.type)
 ```
 
-If you see:
+Если вы видите:
 
 ```text
 web_search_call
 message
 ```
 
-then the model searched first and answered second.
+то модель сначала выполняла поиск, а затем отвечала.
 
 ---
 
-## Older pattern not recommended as primary
+## Старая схема, не рекомендуемая в качестве основной
 
-This production recheck also probed the older Chat Completions shape:
+В этой проверке production также был протестирован более старый формат Chat Completions:
 
 ```json
 {
@@ -107,21 +107,21 @@ This production recheck also probed the older Chat Completions shape:
 }
 ```
 
-Result:
+Результат:
 
-- the request returned `200`
-- but no stable, verifiable search trigger marker was observed
+- запрос вернул `200`
+- но не был обнаружен стабильный, проверяемый маркер запуска поиска
 
-So for Crazyrouter docs, OpenAI-style web search should currently be documented through the Responses API first.
+Поэтому для документации Crazyrouter веб-поиск в стиле OpenAI в настоящее время следует описывать через API Responses в первую очередь.
 
-Related pages:
+Связанные страницы:
 
 - [Responses Web Search](/ru/chat/responses/web-search)
 - [Feature Hub: Web Search](/ru/features/web-search)
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанное на crazyrouter.com
 
-- [GPT Image 1.5: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [Все модели OpenAI с актуальными ценами](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [Страница модели GPT Image 1.5: живая цена, реальные примеры, код](https://crazyrouter.com/ru/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Страница модели GPT Image 2: живая цена, реальные примеры, код](https://crazyrouter.com/ru/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Все OpenAI модели с актуальными ценами](https://crazyrouter.com/ru/models/openai?utm_source=docs&utm_medium=related)

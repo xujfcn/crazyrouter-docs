@@ -1,35 +1,36 @@
 ---
-title: "Kling Image Generation"
-description: "Use the Kling API to generate images"
+title: "Генерация изображений Kling"
+description: "Использование API Kling для генерации изображений"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Kling Image Generation
+
+# Генерация изображений Kling
 
 ```
 POST /kling/v1/images/generations
 ```
 
-The current public docs only commit to the main Kling image-generation path. Do not document undocumented image-side extensions as if they were already a stable public contract.
+Текущая открытая документация гарантирует только основной путь генерации изображений Kling. Не следует ошибочно считать не опубликованные поля расширения image-side стабильным контрактом для клиентов.
 
-## Currently Verified Scope
+## Текущий подтверждённый спектр
 
-- `kling-v2-5-turbo` image generation has completed bounded verification
-- successful results prefer Crazyrouter archived URLs such as `https://media.crazyrouter.com/...png`
+- `kling-v2-5-turbo` Генерация изображений прошла bounded верификацию
+- В успешном результате приоритетно возвращается адрес архива Crazyrouter, например `https://media.crazyrouter.com/...png`
 
-## Request Parameters
+## Параметры запроса
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model` | string | No | Common validated example: `kling-v2-5-turbo` |
-| `prompt` | string | Yes | Image prompt |
-| `negative_prompt` | string | No | Negative prompt |
-| `aspect_ratio` | string | No | Such as `1:1`, `16:9`, `9:16` |
-| `n` | integer | No | Number of images, default `1` |
-| `callback_url` | string | No | Callback URL |
-| `external_task_id` | string | No | Custom business task ID |
+| Параметр | Тип | Обязательный | Описание |
+|------|------|------|------|
+| `model` | string | Нет | Обычно используется пример `kling-v2-5-turbo` |
+| `prompt` | string | Да | Описывающее изображение слово-подсказка |
+| `negative_prompt` | string | Нет | Отрицательное слово-подсказка |
+| `aspect_ratio` | string | Нет | Например `1:1`, `16:9`, `9:16` |
+| `n` | integer | Нет | Количество генераций, по умолчанию `1` |
+| `callback_url` | string | Нет | Адрес callback |
+| `external_task_id` | string | Нет | Пользовательский ID задачи бизнес-стороны |
 
-## Request Example
+## Пример запроса
 
 <CodeGroup>
 
@@ -39,7 +40,7 @@ curl -X POST https://api.crazyrouter.com/kling/v1/images/generations \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "kling-v2-5-turbo",
-    "prompt": "A realistic shiba inu wearing sunglasses",
+    "prompt": "一只戴着墨镜的柴犬，写实摄影风格",
     "negative_prompt": "blurry, low quality",
     "aspect_ratio": "1:1",
     "n": 1
@@ -57,7 +58,7 @@ response = requests.post(
     },
     json={
         "model": "kling-v2-5-turbo",
-        "prompt": "A realistic shiba inu wearing sunglasses",
+        "prompt": "一只戴着墨镜的柴犬，写实摄影风格",
         "negative_prompt": "blurry, low quality",
         "aspect_ratio": "1:1",
         "n": 1
@@ -69,7 +70,7 @@ print(response.json())
 
 </CodeGroup>
 
-## Successful Submit Response
+## Пример успешного ответа при отправке
 
 ```json
 {
@@ -85,7 +86,7 @@ print(response.json())
 
 ---
 
-## Query Image Task
+## Запрос задач генерации изображений
 
 ```
 GET /kling/v1/images/generations/{task_id}
@@ -96,7 +97,7 @@ curl https://api.crazyrouter.com/kling/v1/images/generations/2037177945839673344
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-### Completed Response Example
+### Пример ответа (завершён)
 
 ```json
 {
@@ -114,12 +115,12 @@ curl https://api.crazyrouter.com/kling/v1/images/generations/2037177945839673344
 ```
 
 <Note>
-  Kling image generation is asynchronous. Query the task for terminal output. This page intentionally does not document image-to-image, `image_fidelity`, or other image-side extension parameters as a public hard contract.
+  Генерация изображений Kling — это асинхронная задача. После отправки используйте интерфейс запроса для получения финального результата. На этой странице такие параметры расширения image-side, как генерация из изображений и `image_fidelity`, не считаются публичными жёсткими контрактами.
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [Kling 2.6: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/kling/aigc-video-kling-2-6?utm_source=docs&utm_medium=related)
-- [Kling 3.0: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/kling/aigc-video-kling-3-0?utm_source=docs&utm_medium=related)
-- [Все модели Kling AI с актуальными ценами](https://crazyrouter.com/en/models/kling?utm_source=docs&utm_medium=related)
+- [Страница модели Kling 2.6: актуальные цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/kling/aigc-video-kling-2-6?utm_source=docs&utm_medium=related)
+- [Страница модели Kling 3.0: актуальные цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/kling/aigc-video-kling-3-0?utm_source=docs&utm_medium=related)
+- [Все модели Kling AI и цены](https://crazyrouter.com/ru/models/kling?utm_source=docs&utm_medium=related)

@@ -1,0 +1,70 @@
+---
+title: "Creación de finalización (Legacy)"
+description: "Estado actual de producción del endpoint de compatibilidad POST /v1/completions"
+---
+> Contenido actualizado: 2026-06-09
+
+# Creación de finalización (Legacy)
+
+```
+POST /v1/completions
+```
+
+<Warning>
+  Este es un endpoint de compatibilidad, no es la ruta principal recomendada actualmente. Para nuevas integraciones, se recomienda utilizar primero `/v1/chat/completions` o `/v1/responses`.
+</Warning>
+
+## Estado actual de producción
+
+Hasta el 23 de marzo de 2026, Crazyrouter ha confirmado en el entorno de producción:
+
+- La ruta sigue existiendo
+- Al realizar una solicitud usando el modelo clásico de ejemplo `gpt-5-mini`, retorna `503`
+- El código de error es `model_not_found`
+- El mensaje de error es "temporarily unavailable"
+
+Es decir, en este momento este endpoint es más adecuado para "pruebas bajo demanda para clientes antiguos" que como la opción por defecto para nuevas integraciones.
+
+---
+
+## Recomendaciones actuales
+
+1. Para nuevos proyectos, utiliza directamente [`Chat Completions`](/es/chat/openai/completions)
+2. Cuando necesites nuevas capacidades como inferencia GPT-5, Web Search, etc., prioriza [`Responses`](/es/chat/responses/overview)
+3. Solo continúa intentando con `/v1/completions` si ya tienes clientes antiguos y has confirmado que tu modelo legacy funciona en el entorno actual
+
+---
+
+## Plantilla para Retest
+
+Si necesitas verificar si un modelo antiguo aún puede utilizar este endpoint, se recomienda primero confirmar el ID del modelo con [`/v1/models`](/es/chat/openai/models) y luego realizar una solicitud mínima:
+
+```bash
+curl https://api.crazyrouter.com/v1/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "YOUR_LEGACY_MODEL",
+    "prompt": "Say hello in three words.",
+    "max_tokens": 16
+  }'
+```
+
+Ejemplo real del error en el entorno de producción:
+
+```json
+{
+  "error": {
+    "code": "model_not_found",
+    "message": "Model gpt-5-mini is temporarily unavailable",
+    "type": "new_api_error"
+  }
+}
+```
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Comparación de precios GPT-5: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/gpt-5?utm_source=docs&utm_medium=related)
+- [Página del modelo GPT-5: precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/openai/gpt-5?utm_source=docs&utm_medium=related)
+- [Página del modelo GPT Image 1.5: precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)

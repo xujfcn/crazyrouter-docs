@@ -1,74 +1,76 @@
 ---
 title: "Seedance"
-description: "Use the native Seedance API for video generation"
+description: "Use the native Seedance API to generate video"
 ---
-> Last updated: 2026-06-06
+> Content updated: 2026-06-30
 
 # Seedance
 
-Seedance is ByteDance / Doubao's video generation family. On Crazyrouter, the public contract stays on the native `/volc/v1/*` surface. The old unified-video `doubao-seedance-2-0-fast` alias is no longer the primary customer-facing protocol.
+Seedance is a video generation model family from ByteDance / Doubao. Crazyrouter currently retains the native Volcano `/volc/v1/*` protocol for end users and no longer uses `doubao-seedance-2-0-fast` from the legacy unified video interface as the main public protocol.
 
-## Current Public Models
+If you want to see the **actual settlement logic for Seedance 2.0 / 2.0 Fast in Crazyrouter**, including "why tokens are deducted after task completion" and "whether tokens can be directly converted from seconds", just visit the dedicated page: [Seedance 2.0 Billing Instructions](/en/video/seedance-2-billing).
 
-| Model | Current public positioning |
-|-------|----------------------------|
-| `doubao-seedance-1-0-lite-t2v` | text-to-video |
-| `doubao-seedance-1-0-lite-i2v` | single-image image-to-video |
-| `doubao-seedance-1-0-pro` | general higher-quality generation |
-| `doubao-seedance-1-0-pro-fast` | general faster generation |
-| `doubao-seedance-1-5-pro` | higher-end version with room for later official capability expansion |
-| `doubao-seedance-2-0` | official Seedance 2.0 multimodal video generation |
-| `doubao-seedance-2-0-fast` | official Seedance 2.0 Fast multimodal video generation |
+## Currently Public Models
 
-## Submit a Video Task
+| Model | Current Public Position |
+|------|------|
+| `doubao-seedance-1-0-lite-t2v` | Text-to-video |
+| `doubao-seedance-1-0-lite-i2v` | Single-image-to-video |
+| `doubao-seedance-1-0-pro` | General high-quality video generation |
+| `doubao-seedance-1-0-pro-fast` | General fast video generation |
+| `doubao-seedance-1-5-pro` | More advanced versions, will continue to expand official capability parameters in the future |
+| `doubao-seedance-2-0` | Seedance 2.0 Official Multimodal Video Generation |
+| `doubao-seedance-2-0-fast` | Seedance 2.0 Fast Official Multimodal Video Generation |
+
+## Submit Video Tasks
 
 ```
 POST /volc/v1/contents/generations/tasks
 ```
 
-### Current Public Request Parameters
+### Currently Public Request Parameters
 
 | Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model` | string | Yes | Public model name. Use one of the canonical model names above |
-| `content` | array | Yes | Input content array |
-| `content[].type` | string | Yes | Supported values are `text`, `image_url`, `video_url`, `audio_url`, and `draft_task` |
-| `content[].text` | string | Conditionally | Required when `type=text` |
-| `content[].image_url.url` | string | Conditionally | Required when `type=image_url` |
-| `content[].video_url.url` | string | Conditionally | Required when `type=video_url` |
-| `content[].audio_url.url` | string | Conditionally | Required when `type=audio_url` |
-| `content[].role` | string | Optional | Seedance 2.0 supports `first_frame`, `last_frame`, `reference_image`, `reference_video`, and `reference_audio` |
-| `generate_audio` | boolean | Optional | Whether to generate audio on Seedance 2.0 |
-| `ratio` | string | Optional | Output aspect ratio such as `16:9` |
-| `resolution` | string | Optional | Seedance 2.0 / 2.0 fast currently supports only `480p` and `720p` |
-| `duration` | integer | Optional | Seedance 2.0 / 2.0 fast supports `4-15` or `-1` |
+|------|------|------|------|
+| `model` | string | Yes | Model name for end users; use canonical model names from the table above |
+| `content` | array | Yes | Array of input content |
+| `content[].type` | string | Yes | Currently supports `text`, `image_url`, `video_url`, `audio_url`, `draft_task` |
+| `content[].text` | string | Condition Required | Enter prompt when using `type=text` |
+| `content[].image_url.url` | string | Condition Required | Enter image URL when using `type=image_url` |
+| `content[].video_url.url` | string | Condition Required | Enter reference video URL when using `type=video_url` |
+| `content[].audio_url.url` | string | Condition Required | Enter reference audio URL when using `type=audio_url` |
+| `content[].role` | string | Optional | Seedance 2.0 supports `first_frame`, `last_frame`, `reference_image`, `reference_video`, `reference_audio` |
+| `generate_audio` | boolean | Optional | Seedance 2.0 supports whether to generate audio |
+| `ratio` | string | Optional | Output aspect ratio, such as `16:9` |
+| `resolution` | string | Optional | Seedance 2.0 / 2.0 fast currently only support `480p`, `720p` |
+| `duration` | integer | Optional | Seedance 2.0 / 2.0 fast support `4-15` or `-1` |
 | `watermark` | boolean | Optional | Whether to add watermark |
 | `seed` | integer | Optional | Random seed |
 
-### Seedance 2.0 Official Capability Boundary
+### Official Capability Limits for Seedance 2.0
 
-- Supports four input modalities: text, image, video, and audio.
-- Supports multimodal references: up to `9` images, `3` videos, and `3` audios, with a mixed file limit of `12`.
-- Image formats: `jpeg`, `png`, `webp`, `bmp`, `tiff`, `gif`; each image must stay under `30MB`.
-- Video formats: `mp4`, `mov`; up to `3` video references, recommended combined duration in `[2, 15]s`, total file size under `50MB`.
-- Audio formats: `mp3`, `wav`; up to `3` audio references, combined duration `<= 15s`, total file size under `15MB`.
-- Audio cannot be provided alone. At least `1` image or video reference is required with it.
-- Output duration supports `4-15s`, and `-1` can be passed through to let the upstream use its default behavior.
-- Supports `480p` and `720p`; `1080p` is currently unsupported on Seedance 2.0 / 2.0 fast.
-- `frames` is currently unsupported for Seedance 2.0 / 2.0 fast.
-- `camera_fixed` is currently unsupported for Seedance 2.0 / 2.0 fast.
-- In the product UI, Seedance 2.0 is currently exposed mainly as “first/last frame” and “omni reference” entry points; on the API side those semantics map to `content[].role` and `content[].type`.
-- Upstream compliance currently blocks clearly realistic human-face image or video uploads.
+- Supports four input modalities: text, image, video, audio.
+- Supports multimodal references: a maximum of `9` images, `3` videos, `3` audios, and total number of mixed files up to `12`.
+- Image formats: `jpeg`, `png`, `webp`, `bmp`, `tiff`, `gif`; single image size `< 30MB`.
+- Video formats: `mp4`, `mov`; up to `3` video references, total duration is recommended within `[2, 15]s`, total file size `< 50MB`.
+- Audio formats: `mp3`, `wav`; up to `3` audio references, total duration `<= 15s`, total file size `< 15MB`.
+- Audio cannot be input alone; at least `1` image or video references must be provided at the same time.
+- Supported generation duration `4-15s`, and supports letting upstream set default duration with `-1`.
+- Supports `480p`, `720p`; `1080p` is currently not applicable to Seedance 2.0 / 2.0 fast.
+- `frames` is currently not applicable to Seedance 2.0 / 2.0 fast.
+- `camera_fixed` is currently not applicable to Seedance 2.0 / 2.0 fast.
+- In terms of product forms, Seedance 2.0 is mainly divided into "first and last frame" and "all-purpose reference" entry points; for API, this is unified as `content[].role` and `content[].type`.
+- Upstream currently has compliance restrictions for uploading realistic human face materials. Images or video references containing clear realistic faces may be intercepted by upstream directly.
 
-### Official Seedance 2.0 Pricing Truth
+### Official Billing Values for Seedance 2.0
 
-| Model | Official billing mode | Official price |
+| Model | Official Billing Method | Official Price |
 |------|------|------|
-| `doubao-seedance-2-0` | per output token | `28 CNY / 1M output tokens` with video input; `46 CNY / 1M output tokens` without video input |
-| `doubao-seedance-2-0-fast` | per output token | `22 CNY / 1M output tokens` with video input; `37 CNY / 1M output tokens` without video input |
+| `doubao-seedance-2-0` | Charged by output tokens | Includes video input `28 yuan / million output Tokens`; excludes video input `46 yuan / million output Tokens` |
+| `doubao-seedance-2-0-fast` | Charged by output tokens | Includes video input `22 yuan / million output Tokens`; excludes video input `37 yuan / million output Tokens` |
 
 <Note>
-  MIME, duration, and file-size enforcement for remote URL assets is ultimately handled by the upstream. Crazyrouter currently pre-validates count limits, duration parameter boundaries, the no-audio-only rule, and explicit unsupported fields such as `frames`, `camera_fixed`, and non-480p/720p output requests.
+  MIME, duration, and file size of remote URL materials are finally checked by the upstream; Crazyrouter currently checks count, duration parameters, audio must not be input alone, and explicit boundaries such as 480p/720p / `frames` / `camera_fixed` before submission.
 </Note>
 
 ### Text-to-Video Example
@@ -84,7 +86,7 @@ curl -X POST https://api.crazyrouter.com/volc/v1/contents/generations/tasks \
     "content": [
       {
         "type": "text",
-        "text": "A slow push-in shot of a white seagull skimming over the ocean with golden sunset reflections on the waves"
+        "text": "镜头缓慢推进，一只白色海鸥从海面掠过，日落金光反射在海浪上"
       }
     ]
   }'
@@ -104,7 +106,7 @@ response = requests.post(
         "content": [
             {
                 "type": "text",
-                "text": "A slow push-in shot of a white seagull skimming over the ocean with golden sunset reflections on the waves"
+                "text": "镜头缓慢推进，一只白色海鸥从海面掠过，日落金光反射在海浪上"
             }
         ]
     }
@@ -115,7 +117,7 @@ print(response.json())
 
 </CodeGroup>
 
-### Single-Image Image-to-Video Example
+### Single-Image-to-Video Example
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/volc/v1/contents/generations/tasks \
@@ -126,7 +128,7 @@ curl -X POST https://api.crazyrouter.com/volc/v1/contents/generations/tasks \
     "content": [
       {
         "type": "text",
-        "text": "The subject turns naturally while wind lightly moves the hair"
+        "text": "人物自然转身，头发被风轻轻吹起"
       },
       {
         "type": "image_url",
@@ -149,7 +151,7 @@ curl -X POST https://api.crazyrouter.com/volc/v1/contents/generations/tasks \
     "content": [
       {
         "type": "text",
-        "text": "A girl turns back on the beach at sunset, with more cinematic motion and natural ambient sound"
+        "text": "海边女孩在日落时回头，镜头更有电影感，环境声自然"
       },
       {
         "type": "image_url",
@@ -180,7 +182,7 @@ curl -X POST https://api.crazyrouter.com/volc/v1/contents/generations/tasks \
   }'
 ```
 
-### Successful Submit Response
+### Successful Task Submission Response Example
 
 ```json
 {
@@ -202,7 +204,7 @@ curl https://api.crazyrouter.com/volc/v1/contents/generations/tasks/cgt_task_abc
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-### Completed Response Example
+### Response Example (Completed)
 
 ```json
 {
@@ -225,22 +227,22 @@ curl https://api.crazyrouter.com/volc/v1/contents/generations/tasks/cgt_task_abc
 ### Task Status
 
 | Status | Description |
-|--------|-------------|
-| `NOT_START` | submitted and waiting for upstream handling |
-| `IN_PROGRESS` | generation in progress |
-| `SUCCESS` | completed and ready from `result_url`, `artifact_url`, or `content.video_url` |
-| `FAILURE` | terminal failure |
+|------|------|
+| `NOT_START` | Submitted, waiting for upstream processing |
+| `IN_PROGRESS` | Generating |
+| `SUCCESS` | Completed, results can be retrieved from `result_url`, `artifact_url`, or `content.video_url` |
+| `FAILURE` | Final failure |
 
 <Note>
-  The public docs now only commit to the native `/volc/v1/*` route family and canonical model names. The old `doubao-seedance-2-0-fast` label is retained only as historical context, not as the primary contract for new integrations.
+  The currently public documentation only guarantees the native `/volc/v1/*` path and canonical model names. The old `doubao-seedance-2-0-fast` is only retained for historical reference and is no longer used as the new main public protocol.
 </Note>
 
 <Note>
-  The official Seedance pricing truth is currently tracked as `per_output_token`, not per-second. If the pricing page later shows a normalized platform billing unit, that should be treated as the platform sell-side view rather than the native official unit.
+  The official Seedance price value is currently maintained according to `per_output_token`, not by seconds; if the pricing page later does platform normalization display, it should be clarified that this is the platform's selling reference, not the official native unit.
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## Related on crazyrouter.com
+## Related Pages
 
-- [Seedance 2.0 model page: live price, real samples, code](https://crazyrouter.com/en/models/bytedance/doubao-seedance-2-0?utm_source=docs&utm_medium=related)
-- [All ByteDance models with live prices](https://crazyrouter.com/en/models/bytedance?utm_source=docs&utm_medium=related)
+- [Seedance 2.0 Model Page: Real-time Prices, Real Examples, Call Code](https://crazyrouter.com/en/models/bytedance/doubao-seedance-2-0?utm_source=docs&utm_medium=related)
+- [ByteDance's All Models and Prices](https://crazyrouter.com/en/models/bytedance?utm_source=docs&utm_medium=related)

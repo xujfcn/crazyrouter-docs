@@ -1,0 +1,207 @@
+---
+title: "Formato nativo de Claude"
+description: "Basado en la verificación en entorno de producción, utilizando la API de Mensajes de Anthropic para invocar Claude"
+---
+> Contenido actualizado: 2026-06-09
+
+# Formato nativo de Claude
+
+```
+POST /v1/messages
+```
+
+En esta página solo se documenta el uso de Claude Messages que `2026-03-22` ha verificado en el entorno de producción de Crazyrouter.
+
+Modelos principales de ejemplo actuales:
+
+- `claude-opus-4-8`
+- `claude-opus-4-8`
+
+## Autenticación
+
+En esta ronda se ha verificado que son válidas ambas formas de escribirlo:
+
+```text
+x-api-key: YOUR_API_KEY
+```
+
+```text
+Authorization: Bearer YOUR_API_KEY
+```
+
+Al mismo tiempo se conserva:
+
+```text
+anthropic-version: 2023-06-01
+```
+
+---
+
+## Diálogo básico
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-opus-4-8",
+    "max_tokens": 128,
+    "messages": [
+      {
+        "role": "user",
+        "content": "Explain quantum computing in one sentence."
+      }
+    ]
+  }'
+```
+
+Estructura clave de la respuesta actual en producción:
+
+```json
+{
+  "type": "message",
+  "content": [
+    {
+      "type": "text",
+      "text": "..."
+    }
+  ]
+}
+```
+
+---
+
+## Function Calling
+
+En el entorno de producción actual, la invocación de herramientas de Claude se devuelve de forma estable a través de `/v1/messages` con `tool_use`.
+
+Sugerencias para la primera integración:
+
+- Pasar explícitamente `tool_choice`
+- Especificar claramente en el prompt: “Debes invocar la herramienta, no responder directamente”
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-opus-4-8",
+    "max_tokens": 256,
+    "tools": [
+      {
+        "name": "get_time",
+        "description": "Get the current time for a timezone",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "timezone": {
+              "type": "string"
+            }
+          },
+          "required": ["timezone"]
+        }
+      }
+    ],
+    "tool_choice": {
+      "type": "any"
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Use the get_time tool for Asia/Shanghai. Do not answer directly."
+      }
+    ]
+  }'
+```
+
+Campos clave verificados en producción:
+
+```json
+{
+  "stop_reason": "tool_use",
+  "content": [
+    {
+      "type": "tool_use",
+      "name": "get_time",
+      "input": {
+        "timezone": "Asia/Shanghai"
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Extended Thinking
+
+En la verificación de producción de esta ronda, se confirma que la combinación que devuelve el bloque `thinking` es:
+
+- `claude-opus-4-8`
+
+En la versión básica `claude-opus-4-8`, no se obtuvo un bloque de pensamiento (thinking block) igual de claro en esta ronda, por lo que aquí se prioriza la capacidad de pensamiento (thinking).
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-opus-4-8",
+    "max_tokens": 320,
+    "thinking": {
+      "type": "enabled",
+      "budget_tokens": 128
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Which is larger, 9.11 or 9.9? Explain briefly."
+      }
+    ]
+  }'
+```
+
+Campos clave verificados en producción:
+
+```json
+{
+  "content": [
+    {
+      "type": "thinking",
+      "thinking": "..."
+    },
+    {
+      "type": "text",
+      "text": "..."
+    }
+  ]
+}
+```
+
+<Warning>
+  Al utilizar `thinking`, `max_tokens` debe ser mayor que `budget_tokens`. Los tokens de pensamiento también se contabilizan en el coste.
+</Warning>
+
+---
+
+## Recomendaciones actuales
+
+- Para diálogos de texto normales: priorizar `claude-opus-4-8`
+- Para invocación de herramientas: priorizar `claude-opus-4-8`, y añadir `tool_choice` en la verificación inicial
+- Cuando se requiere claramente un bloque de pensamiento: priorizar `claude-opus-4-8`
+
+Páginas relacionadas:
+
+- [Capacidad central: Invocación de herramientas](/es/features/tool-calling)
+- [Capacidad central: Razonamiento](/es/features/reasoning)
+- [Método oficial de fijación de precios del modelo](/es/reference/official-pricing-methods)
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Comparativa de precios Claude Fable 5: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Página del modelo Claude Fable 5: Precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Comparativa de precios Claude Haiku 4.5: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/claude-haiku-4-5?utm_source=docs&utm_medium=related)

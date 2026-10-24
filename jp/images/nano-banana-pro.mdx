@@ -1,11 +1,11 @@
 ---
 title: "Nano Banana Pro"
-description: "Use nano-banana-pro for reference-image generation and editing through the OpenAI Images API"
+description: "nano-banana-pro を使用したリファレンス画像に基づく生成および編集、OpenAI Images API と互換性あり"
 ---
-> 更新日: 2026-09-18
+> 内容更新日: 2026-09-28
 
 <Tip>
-  送信後すぐに戻り、あとで画像 URL を取得したい場合は[非同期画像生成](/jp/images/async)を使えます。Gemini 系はパス接尾辞を `:asyncGenerateContent` に、OpenAI 系は `Prefer: respond-async` ヘッダーを付けるだけで、リクエストボディは 1 バイトも変えません。
+  提出後すぐに応答し、後から画像URLをポーリングで取得したい場合？このモデルは[非同期画像生成](/jp/images/async)をサポートしています：Gemini 系ではパスのサフィックスを `:asyncGenerateContent` に変更、OpenAI 系では `Prefer: respond-async` ヘッダーを追加し、リクエストボディは一切変更しなくてOKです。
 </Tip>
 
 # Nano Banana Pro
@@ -14,93 +14,132 @@ description: "Use nano-banana-pro for reference-image generation and editing thr
 POST /v1/images/generations
 ```
 
-Use `nano-banana-pro` for image generation and reference-image editing through one public `OpenAI Images API` style contract.
-
-## What This Page Covers
-
-- This page only covers `nano-banana-pro`
-- The customer-facing entry point is `POST /v1/images/generations`
-- The input image field is `image_input`
-- The default public contract remains URL-based `image_input`; designated gray accounts also support data URLs, raw Base64, and three-image multipart editing
-- Gemini / Vertex and other providers may sit behind this route, but those provider details are not part of the customer contract
-
-## Capability Status
-
-| Capability / Spec | Status | Notes |
-|-----------|--------|-------|
-| `T2I` | `Beta` | Historical coverage exists, but the current public artifact bundle is still centered on edit/reference flows |
-| `I2I + 1K` | `Verified` | The single-image edit live path is closed |
-| `I2I + 4K` | `Verified` | `4K + 21:9 + png/jpg` has a live artifact |
-| `Reference + 1..2 refs` | `Verified` | `2`-reference live verification is closed |
-| `2K` | `Beta` | The current public artifact is still pending |
-| higher multi-reference limits / exact `30 MiB` boundary | `Beta` | Not committed in the current public contract |
-
-<Note>
-  The Pricing page and this doc use the same status language: `Verified` means there is a current minimal live artifact, while `Beta` means the official capability exists but the public validation set or edge coverage is still being completed.
-</Note>
-
-## Currently Validated Capabilities
-
-The following conclusions come from live validation on March 31, 2026:
-
-- official Vertex `channel 318 (vertexsophie)` direct truth:
-  - `2` reference images work
-- local relay on `localhost:4000`, pinned to `channel 318`, verified:
-  - single `WEBP` URL reference works
-  - single `JPEG` URL reference works
-  - `2` `PNG` URL references work
-  - `resolution: "1K"` works
-  - `resolution: "4K"` works
-  - `aspect_ratio: "1:1"` works
-  - `aspect_ratio: "21:9"` works
-  - `output_format: "png"` works
-  - `output_format: "jpg"` works
-  - the response returns `data[].url`
-
-Do not present the following as fully promised customer-facing capability yet:
-
-- whether the exact multi-image limit is `8` or higher
-- `2K`
-- exact large-file URL limit
-- exact `30 MiB` boundary
-- additional `aspect_ratio` combinations
-- exact `output_compression` semantics
+`nano-banana-pro` を使用して画像生成およびリファレンス画像編集を行い、`OpenAI Images API` スタイルの公開プロトコルに統一されています。
 
 <Warning>
-  Non-gray accounts remain URL-only. Base64, data URLs, and multipart editing are currently enabled only for designated gray accounts.
+  画像生成、画像編集、多参考画像などのリクエストは一般的に処理時間が長くなります。プロダクション利用時はメインの受け入れライン `https://api.crazyrouter.com/v1` を最優先してご利用ください。完全な生成エンドポイントは `https://api.crazyrouter.com/v1/images/generations` です。アカウントのログイン、チャージ、コンソールは引き続き `https://crazyrouter.com` をご利用ください。
 </Warning>
 
+## このページの対象範囲
+
+- 本ページは `nano-banana-pro` / `nano-banana-pro` のみが対象です。
+- クライアントからのリクエスト入口は統一して `POST /v1/images/generations` です。
+- 入力画像フィールドは統一して `image_input` です。
+- デフォルトの公開プロトコルは `image_input` URL の使用を推奨します。指定グレースケールアカウントのみ追加で dataURL、raw Base64、三画像 multipart による画像編集に対応しています。
+- `data:` / Base64 / multipart はCrazyrouterの拡張互換機能であり、すべての上流 carrier がネイティブにサポートするわけではありません。
+- バックエンドには Gemini / Vertex などの provider が利用されることがありますが、これら provider の詳細はクライアントプロトコルの一部ではありません。
+- ユーザー側から `generationConfig`、`imageConfig`、`imageOutputOptions`、`image_output_options` を送信しないでください。これらフィールドは Crazyrouter が統一パラメータから自動変換します。
+
+## モデル名
+
+| 推奨モデル名 | 同等の基盤モデル |
+|------|------|
+| `nano-banana-pro` | `nano-banana-pro` |
+
+クライアントコード上では `nano-banana-pro` の利用を推奨します。もし既に `nano-banana-pro` を直接記述しているシステムの場合も、そのまま同じ `/v1/images/generations` エントリポイントから呼び出せます。
+
+## 機能ステータス
+
+| 機能 / スペック | ステータス | 説明 |
+|------|------|------|
+| `T2I` | `Beta` | 過去にカバーされていますが、現在公開されている artifact セットは編集／リファレンス画像パスが主軸です |
+| `I2I + 1K` | `Verified` | 単一画像編集の live はクローズドループ済み |
+| `I2I + 4K` | `Verified` | `4K + 21:9 + png/jpeg/jpg` の live はクローズドループ済み |
+| `Reference + 1..2 refs` | `Verified` | `2` 画像の live はクローズドループ済み |
+| `11257` グレースケール：dataURL / raw Base64 | `Verified` | プロダクションチャンネル304で単一画像および三画像の `image_input` 検証済み |
+| `11257` グレースケール：三画像 multipart | `Verified` | `/v1/images/edits`、`image`、`image[]`、`image[n]` サポート |
+| `2K` | `Beta` | 現在公開されている artifact は今後補足予定 |
+| より高い多画像上限／精確な `30 MiB` 境界 | `Beta` | 公開されている contract では現在保証していません |
+
+<Note>
+  Pricing ページと本ドキュメントは同じステータス基準を使用します：`Verified` が現在存在する最小 live クローズドループを表し、`Beta` は公式機能があるものの公開検証や境界条件の補足が続いていることを意味します。
+</Note>
+
+## 現在検証済みの機能
+
+以下の結論は、過去の live 検証および `2026-08-18` のプロダクショングレースケール検証に基づきます：
+
+- 公式 Vertex `channel 318 (vertexsophie)` 直結で検証済み：
+  - `2` 枚のリファレンス画像が利用可能
+- ローカル `4000` ポート、固定 `channel 318` で検証済み：
+  - 単一 `WEBP` URL リファレンス画像利用可能
+  - 単一 `JPEG` URL リファレンス画像利用可能
+  - `2` 枚の `PNG` URL リファレンス画像利用可能
+  - `resolution: "1K"` 利用可能
+  - `resolution: "4K"` 利用可能
+  - `aspect_ratio: "1:1"` 利用可能
+  - `aspect_ratio: "21:9"` 利用可能
+  - `output_format: "png"` 利用可能
+  - `output_format: "jpg"` 利用可能
+- 応答で `data[].url` を直接返すことが可能
+
+指定グレースケールアカウント `11257` はプロダクションチャネル `304` で検証済み：
+
+- `/v1/images/generations` の `image_input` は dataURL、raw Base64、複数画像入力に対応
+- `/v1/images/edits` の multipart 対応 `image`、`image[]`、`image[n]`
+- オリジナル・アノテーション画像・リファレンス画像をアップロード順で三画像編集リクエストとして構成可能
+
+下記の機能については、現時点ではお客様向けに完全に保証されているわけではありません：
+
+- 精確な複数画像上限が `8` またはそれ以上かどうか
+- `2K`
+- 精確な大ファイル URL 上限
+- 精確な `30 MiB` 境界
+- その他 `aspect_ratio` 組み合わせ
+- `output_compression` の精確な意味的境界
+
+<Note>
+  デフォルトアカウントは引き続き URL のみの公開基準で取り扱われます。Base64、dataURL、multipart 画像編集は現時点では特定グレースケールアカウントのみ対応です。ご利用を希望される場合は、あらかじめアカウントがグレースケールリストへ追加されていることをご確認ください。
+</Note>
+
 ---
 
-## Request Parameters
+## リクエストパラメータ
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model` | string | Yes | Fixed as `nano-banana-pro` |
-| `prompt` | string | Yes | Generation or edit instruction |
-| `image_input` | string or string[] | No | URLs by default; designated gray accounts may also send data URLs/raw Base64, with three images verified |
-| `resolution` | string | No | Current public promise is `1K` and `4K` |
-| `aspect_ratio` | string | No | Current public promise is `1:1` and `21:9` |
-| `output_format` | string | No | Current public promise is `png` and `jpg` |
-| `n` | integer | No | Number of images, default `1` |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `model` | string | 必須 | `nano-banana-pro` を推奨。`nano-banana-pro` もサポートしています |
+| `prompt` | string | 必須 | 生成または編集の指示 |
+| `image_input` | string または string[] | 任意 | デフォルトはリファレンス画像URL。グレースケールアカウントなら dataURL/raw Base64 も使用可。現在三画像検証済み |
+| `resolution` | string | 任意 | 現在公開されている `1K` および `4K` を保証 |
+| `aspect_ratio` | string | 任意 | 現在公開されている `1:1` および `21:9` を保証 |
+| `output_format` | string | 任意 | 現在公開されている `png`、`jpeg`/`jpg` を保証 |
+| `output_compression` | integer | 任意 | `0-100`、JPEG 圧縮品質用 |
+| `n` | integer | 任意 | 生成枚数。デフォルトは `1` |
 
-### Current Multi-Image Status
+### 複数画像の現況
 
-- `2` references: verified
-- gray user `11257` with three references: verified
-- higher counts: exact upstream max is still pending, so do not promise it publicly yet
+- `2` 枚：検証済み
+- `11257` グレースケール三画像：検証済み
+- さらに多い枚数：上流の厳密な最大値は未検証のため現時点では保証しません
 
-### Routing Note
+### ルーティングの説明
 
-- single-image requests can use normal available carriers
-- multi-image requests normally use official `Gemini / Vertex` carriers; designated gray accounts may use an explicitly verified gray carrier
-- that is a server-side routing rule; the customer contract stays the same
+- 単一画像リクエストは一般的なバックエンドに命中可能
+- デフォルトでは複数画像リクエストは公式 `Gemini / Vertex` carrier のみをルートします。指定グレースケールアカウントなら検証済みのグレーキャリア利用可
+- これはサーバ側の内部ルーティング戦略であり、クライアントプロトコルには変更ありません
+
+### グレースケール三画像 multipart
+
+`11257` グレースケールアカウントは `/v1/images/edits` を利用可能：
+
+```bash
+curl -X POST https://api.crazyrouter.com/v1/images/edits \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "model=nano-banana-pro" \
+  -F "prompt=以第一张为原图，第二张为批注图，第三张为参考图，仅修改批注区域" \
+  -F "image[]=@original.png" \
+  -F "image[]=@annotation.png" \
+  -F "image[]=@reference.png"
+```
+
+画像の順序はクライアントの送信順に従います。アノテーション画像は現状、視覚的参考としてのみ利用され、GPTマスクのようなピクセル単位の領域ロックは保証していません。
 
 ---
 
-## Request Examples
+## リクエスト例
 
-### Single-Image Edit
+### 単一画像編集
 
 <CodeGroup>
 
@@ -110,7 +149,7 @@ curl -X POST https://api.crazyrouter.com/v1/images/generations \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "nano-banana-pro",
-    "prompt": "Turn this product image into an ultra-wide hero KV with a cleaner background while preserving the subject",
+    "prompt": "把这张商品图改成超宽横幅 KV，背景更简洁，保留主体结构",
     "image_input": [
       "https://help-static-aliyun-doc.aliyuncs.com/file-manage-files/zh-CN/20250925/fpakfo/image36.webp"
     ],
@@ -131,7 +170,7 @@ response = requests.post(
     },
     json={
         "model": "nano-banana-pro",
-        "prompt": "Turn this product image into an ultra-wide hero KV with a cleaner background while preserving the subject",
+        "prompt": "把这张商品图改成超宽横幅 KV，背景更简洁，保留主体结构",
         "image_input": [
             "https://help-static-aliyun-doc.aliyuncs.com/file-manage-files/zh-CN/20250925/fpakfo/image36.webp"
         ],
@@ -147,12 +186,28 @@ print(data["data"][0]["url"])
 
 </CodeGroup>
 
-### Two-Reference Input
+### テキストから画像生成
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "nano-banana-pro",
+    "prompt": "A premium product poster for a red apple, studio lighting, clean background",
+    "resolution": "1K",
+    "aspect_ratio": "1:1",
+    "output_format": "jpeg",
+    "output_compression": 85
+  }'
+```
+
+### 二画像リファレンス
 
 ```json
 {
   "model": "nano-banana-pro",
-  "prompt": "Blend the subject and composition from these two references into one high-quality hero visual",
+  "prompt": "融合两张参考图的主体与构图，生成一张高质量主视觉图",
   "image_input": [
     "https://example.com/ref-1.png",
     "https://example.com/ref-2.png"
@@ -164,9 +219,9 @@ print(data["data"][0]["url"])
 
 ---
 
-## Response Example
+## レスポンス例
 
-The recommended automation path is to consume `data[].url`:
+デフォルトでは `data[].url` の直接利用を推奨します：
 
 ```json
 {
@@ -179,44 +234,43 @@ The recommended automation path is to consume `data[].url`:
 }
 ```
 
-To retrieve the generated image, read `data[0].url`. Crazyrouter currently archives upstream inline image output and returns a public URL to the client.
+最終生成画像結果が必要な場合は `data[0].url` を直接参照してください。現在Crazyrouterは上流インライン画像をアーカイブしアクセス可能なURLとして返します。
 
 ---
 
-## Validation Snapshot
+## 検証済み結果の概要
 
-| Item | Current Status |
-|------|----------------|
-| single URL reference | verified |
-| `2` URL references | verified |
-| `WEBP` URL | verified |
-| `JPEG` URL | verified |
-| `PNG` URL | verified |
-| `1K` | verified |
-| `4K` | verified |
-| `1:1` | verified |
-| `21:9` | verified |
-| `output_format = png` | verified |
-| `output_format = jpg` | verified |
-| exact `8`-image ceiling | `Beta` |
-| exact `30 MiB` URL boundary | `Beta` |
+| 項目 | 現況 |
+|------|----------|
+| 単一URLリファレンス画像 | 検証済み |
+| `2` 枚URLリファレンス画像 | 検証済み |
+| `WEBP` URL | 検証済み |
+| `JPEG` URL | 検証済み |
+| `PNG` URL | 検証済み |
+| `1K` | 検証済み |
+| `4K` | 検証済み |
+| `1:1` | 検証済み |
+| `21:9` | 検証済み |
+| `output_format = png` | 検証済み |
+| `output_format = jpeg / jpg` | 検証済み |
+| 精確な`8` 画像上限 | `Beta` |
+| 精確な`30 MiB` URL境界 | `Beta` |
 | `2K` | `Beta` |
 
-## Current Known Limits
+## 現在判明している制限事項
 
-- `image` is not accepted
-- `data:` / Base64 is available only for designated gray accounts; other accounts remain URL-only
-- the docs do not promise more than `2` references yet
-- the docs do not promise the exact `30 MiB` URL boundary yet
-- the docs do not promise full closure on every screenshot-listed ratio or parameter yet
+- 非グレースケールアカウントは `image`、`data:` / Base64 または multipart 画像入力は受け付けません
+- グレースケールアカウントは現在3画像まで検証済みで、さらに多い枚数上限は保証しません
+- 本ドキュメントは`30 MiB` URL境界を厳密に保証するものではありません
+- 本ページに掲載の全ての比率とパラメータが完全クローズドで運用中であると保証するものではありません
 
 <Note>
-  If you need Gemini native `generateContent` image endpoints, see [Gemini Image Generation](/jp/chat/gemini/image-gen) and [Gemini Image Editing](/jp/chat/gemini/image-edit). If you care more about reference-count breadth, also see [Nano Banana](/jp/images/nano-banana) and [Nano Banana 2](/jp/images/nano-banana-2).
+  Gemini / Nano Banana 画像生成または編集の統一パラメータ仕様をご希望の場合、[Gemini 画像生成](/jp/chat/gemini/image-gen)および[Gemini 画像編集](/jp/chat/gemini/image-edit)をご覧ください。他のランクをご希望の場合は [Nano Banana](/jp/images/nano-banana) および [Nano Banana 2](/jp/images/nano-banana-2) もご参照いただけます。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [Nano Banana Pro モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/google/nano-banana-pro?utm_source=docs&utm_medium=related)
-- [Nano Banana 2 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/google/nano-banana-2?utm_source=docs&utm_medium=related)
-- [Google の全モデルと料金](https://crazyrouter.com/en/models/google?utm_source=docs&utm_medium=related)
+- [Nano Banana Pro モデルページ：リアルタイム価格・実例・呼び出しコード](https://crazyrouter.com/ja/models/google/nano-banana-pro?utm_source=docs&utm_medium=related)
+- [Nano Banana 2 モデルページ：リアルタイム価格・実例・呼び出しコード](https://crazyrouter.com/ja/models/google/nano-banana-2?utm_source=docs&utm_medium=related)
+- [Google 全モデル・価格一覧](https://crazyrouter.com/ja/models/google?utm_source=docs&utm_medium=related)

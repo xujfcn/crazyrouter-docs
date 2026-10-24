@@ -1,20 +1,20 @@
 ---
-title: "Function Calling"
-description: "Chat Completions tool calling verified against Crazyrouter production on 2026-03-23"
+title: "ファンクションコール"
+description: "チャット補完ツール呼び出しは2026-03-23にCrazyrouter本番環境で検証済み"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Function Calling
+# ファンクションコール
 
 ```
 POST /v1/chat/completions
 ```
 
-As of March 23, 2026, Crazyrouter production has verified that `gpt-5.5` on the Chat Completions path returns `tool_calls`.
+2026年3月23日現在、Crazyrouter本番環境ではChat Completionsパスにおける`gpt-5.5`の返却が`tool_calls`であることが検証されました。
 
 ---
 
-## Step 1: Define the Tool
+## ステップ1：ツールの定義
 
 ```bash
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -45,7 +45,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-Observed production response shape:
+本番環境で観測されたレスポンスの形状：
 
 ```json
 {
@@ -74,9 +74,9 @@ Observed production response shape:
 
 ---
 
-## Step 2: Return the Tool Result
+## ステップ2：ツール結果の返却
 
-Once you receive `tool_calls`, send your tool result back as a `role: "tool"` message:
+`tool_calls`を受け取ったら、ツールの結果を`role: "tool"`メッセージとして返送してください：
 
 ```json
 {
@@ -124,12 +124,12 @@ Once you receive `tool_calls`, send your tool result back as a `role: "tool"` me
 ```
 
 <Note>
-  This production pass confirmed the primary `tool_calls` path. It also observed that `message.reasoning_content` may appear as a key, but it should not be treated as a stable dependency for tool-calling flows.
+  この本番通過では、主要な`tool_calls`パスが確認されました。また、`message.reasoning_content`がキーとして登場する場合もあることが観測されましたが、ツール呼び出しフローの安定した依存関係として扱うべきではありません。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## crazyrouter.com 関連
 
-- [GPT Image 1.5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [OpenAI の全モデルと料金](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [GPT Image 1.5 モデルページ：ライブ価格、実サンプル、コード](https://crazyrouter.com/ja/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT Image 2 モデルページ：ライブ価格、実サンプル、コード](https://crazyrouter.com/ja/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [すべてのOpenAIモデルのライブ価格](https://crazyrouter.com/ja/models/openai?utm_source=docs&utm_medium=related)

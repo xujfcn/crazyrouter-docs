@@ -1,39 +1,39 @@
 ---
-title: "Kling Video Generation"
-description: "Use Crazyrouter with the official Kling standard-video and omni-video contracts"
+title: "Kling 動画生成"
+description: "Crazyrouter を使い、公式 Kling プロトコルに従って標準動画および Omni 動画生成を行います"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-30
 
-# Kling Video Generation
 
-Crazyrouter exposes the current public Kling video family through two official model families:
+# Kling 動画生成
 
-| Route Family | Submit Paths | Fetch Paths | Public Models |
-|-----------|-----------|-----------|-----------|
-| Standard Kling video | `POST /kling/v1/videos/text2video` `POST /kling/v1/videos/image2video` `POST /kling/v1/videos/multi-image2video` | `GET /kling/v1/videos/text2video/{task_id}` `GET /kling/v1/videos/image2video/{task_id}` `GET /kling/v1/videos/multi-image2video/{task_id}` | `kling-v2-5-turbo` `kling-v2-6` `kling-v3` |
-| Kling omni-video | `POST /kling/v1/videos/omni-video` | `GET /kling/v1/videos/omni-video/{task_id}` | `kling-v3` `kling-v3` |
+Crazyrouter は現在、一般公開中の Kling 動画ファミリーを公式プロトコルに基づいて2つのモデルファミリーに分割しています：
 
-All tasks are asynchronous. Successful fetches prefer Crazyrouter archived URLs such as `https://media.crazyrouter.com/...`.
+| ルーティングファミリー | 提出パス | クエリパス | 現在公開中のモデル |
+|------|------|------|------|
+| 標準 Kling 動画 | `POST /kling/v1/videos/text2video` `POST /kling/v1/videos/image2video` `POST /kling/v1/videos/multi-image2video` | `GET /kling/v1/videos/text2video/{task_id}` `GET /kling/v1/videos/image2video/{task_id}` `GET /kling/v1/videos/multi-image2video/{task_id}` | `kling-v2-5-turbo` `kling-v2-6` `kling-v3` |
+| Kling Omni 動画 | `POST /kling/v1/videos/omni-video` | `GET /kling/v1/videos/omni-video/{task_id}` | `kling-v3` `kling-v3` |
 
-## First-Batch Five Models
+すべてのタスクは非同期で処理されます。結果のクエリ時は Crazyrouter のアーカイブアドレス（例: `https://media.crazyrouter.com/...`）が優先して返されます。
 
-| Model | Route Family | Public Capability Surface | Validation Status | Billing Dimension Summary |
-|-----------|-----------|-----------|-----------|-----------|
-| `kling-v2-5-turbo` | Standard Kling video | text-to-video, image-to-video, start-end, reference-video | `Beta` | `mode + duration` |
-| `kling-v2-6` | Standard Kling video | text-to-video, image-to-video, start-end, reference-video, sound, voice control, motion control | `Beta` | `mode + duration + sound + voice control` |
-| `kling-v3` | Standard Kling video | text-to-video, image-to-video, start-end, reference-video, motion control, standard-route element references | `Beta` | `mode + duration + sound`; motion uses a separate billing bucket |
-| `kling-v3` | Kling omni-video | omni-video with image / element / video / voice references | `Beta` | `mode + duration + sound + video input` |
-| `kling-v3` | Kling omni-video | single-shot omni-video | `Beta` | `mode + duration + video input` |
+## 最初の5モデルとその機能
+
+| モデル | ルーティングファミリー | 現在の提供機能 | 検証ステータス | 課金概要 |
+|------|------|------|------|------|
+| `kling-v2-5-turbo` | 標準 Kling 動画 | テキストから動画生成、画像から動画生成、最初/最終フレーム、リファレンス画像から動画 | `Beta` | `mode + duration` |
+| `kling-v2-6` | 標準 Kling 動画 | テキストから動画生成、画像から動画生成、最初/最終フレーム、リファレンス画像から動画、音声、ボイスコントロール、動作制御 | `Beta` | `mode + duration + sound + voice control` |
+| `kling-v3` | 標準 Kling 動画 | テキストから動画生成、画像から動画生成、最初/最終フレーム、リファレンス画像から動画、動作制御、標準ルーティング要素参照 | `Beta` | `mode + duration + sound`；動作制御は個別課金バケット |
+| `kling-v3` | Kling Omni 動画 | Omni 動画、画像/要素/動画/音声参照 | `Beta` | `mode + duration + sound + video input` |
 
 <Note>
-  The customer-facing contract follows the official Kling capability and field definitions. Third-party channels remain internal providers only. Use the live Pricing page as the source of truth for sell-side prices.
+  提供機能やフィールドは公式 Kling プロトコルを基準とし、Crazyrouter は外部チャネルを内部プロバイダーとしてのみ扱い、外部プロトコルを顧客に公開しません。価格はリアルタイムの Pricing ページに準拠します。
 </Note>
 
 <Note>
-  The first-batch Kling five-model family is already aligned to the official field surface and pricing matrix, but every capability row is still marked `Beta` for now. After launch, we will use production logs and the daily script to promote rows out of beta one by one.
+  現在 Kling 最初の5モデルは公式項目や価格マトリクスに整合済みですが、機能ステータスはすべて当面 `Beta` で統一しています。リリースからしばらく経った後、スクリプト統計や生産ログをもとに各項目を正式化していきます。
 </Note>
 
-## Standard Kling Video
+## 標準 Kling 動画
 
 ```
 POST /kling/v1/videos/text2video
@@ -41,33 +41,33 @@ POST /kling/v1/videos/image2video
 POST /kling/v1/videos/multi-image2video
 ```
 
-### Recommended Public Models
+### 現在のおすすめモデル
 
 - `kling-v2-5-turbo`
 - `kling-v2-6`
 - `kling-v3`
 
-### Text-to-Video Parameters
+### テキストから動画生成のパラメータ
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model_name` | string | Yes | Standard Kling video model |
-| `prompt` | string | Yes | Video prompt |
-| `image_urls` | array[string] | No | Official first-frame / first-last-frame input. Recommended when referencing `@element_name` |
-| `negative_prompt` | string | No | Negative prompt |
-| `duration` | string/integer | No | Common values: `5` or `10` |
-| `aspect_ratio` | string | No | Such as `16:9`, `9:16`, `1:1` |
-| `mode` | string | No | Generation mode, such as `std` or `pro` |
-| `sound` | string / boolean | No | Recommended official values are `on` / `off` |
-| `multi_shots` | boolean | No | Official multi-shot switch. The alias `multi_shot` is also accepted |
-| `multi_prompt` | array | Conditionally required | Multi-shot prompt list, up to 5 shots |
-| `kling_elements` | array | No | `kling-v3` standard-route element references used with `@element_name` |
-| `cfg_scale` | number | No | Guidance strength |
-| `camera_control` | object | No | Camera control payload |
-| `callback_url` | string | No | Callback URL |
-| `external_task_id` | string | No | Custom business task ID |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `model_name` | string | はい | 標準 Kling 動画モデル |
+| `prompt` | string | はい | 動画の説明プロンプト |
+| `image_urls` | array[string] | いいえ | 公式の最初/最終フレーム入力。`@element_name` 参照時は明示入力を推奨 |
+| `negative_prompt` | string | いいえ | ネガティブプロンプト |
+| `duration` | string/integer | いいえ | よく使われる `5` または `10` |
+| `aspect_ratio` | string | いいえ | 例: `16:9`、`9:16`、`1:1` |
+| `mode` | string | いいえ | 生成モード。例: `std`、`pro` |
+| `sound` | string / boolean | いいえ | 公式値 `on` / `off` の利用を推奨 |
+| `multi_shots` | boolean | いいえ | 公式のマルチカメラスイッチ。エイリアス `multi_shot` も対応 |
+| `multi_prompt` | array | 条件付き必須 | マルチカメラ説明。最大5シーンまで |
+| `kling_elements` | array | いいえ | `kling-v3` 標準ルーティング要素の参照。プロンプト内の `@element_name` と併用 |
+| `cfg_scale` | number | いいえ | ガイド強度 |
+| `camera_control` | object | いいえ | カメラ制御パラメータ |
+| `callback_url` | string | いいえ | コールバックURL |
+| `external_task_id` | string | いいえ | ビジネス側カスタムタスクID |
 
-### Request Example
+### リクエスト例
 
 <CodeGroup>
 
@@ -77,8 +77,8 @@ curl -X POST https://api.crazyrouter.com/kling/v1/videos/text2video \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model_name": "kling-v2-5-turbo",
-    "prompt": "A cat chasing butterflies in a garden, sunny day, cinematic quality",
-    "negative_prompt": "blurry, low quality, distorted",
+    "prompt": "一只猫咪在花园里追蝴蝶，阳光明媚，电影级画质",
+    "negative_prompt": "模糊, 低质量, 变形",
     "duration": "5",
     "aspect_ratio": "16:9",
     "mode": "std"
@@ -96,7 +96,7 @@ response = requests.post(
     },
     json={
         "model_name": "kling-v2-5-turbo",
-        "prompt": "A cat chasing butterflies in a garden, sunny day",
+        "prompt": "一只猫咪在花园里追蝴蝶，阳光明媚",
         "duration": "5",
         "aspect_ratio": "16:9",
         "mode": "std"
@@ -108,45 +108,46 @@ print(response.json())
 
 </CodeGroup>
 
-### Successful Submit Response
+### 提出成功レスポンス例
 
 ```json
 {
-  "created_at": 1774539107,
-  "id": "866168216002236456",
-  "model": "kling-v2-5-turbo",
-  "object": "video",
-  "progress": 0,
-  "status": "",
-  "task_id": "866168216002236456"
+  "code": "success",
+  "message": "",
+  "data": {
+    "id": "866168216002236456",
+    "task_id": "866168216002236456",
+    "model": "kling-v2-5-turbo",
+    "status": "queued"
+  }
 }
 ```
 
 ---
 
-### Image-to-Video Parameters
+### 画像から動画生成のパラメータ
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model_name` | string | Yes | Standard Kling video model |
-| `image_urls` | array[string] | Preferred | Official first-frame / first-last-frame input. Length `1` means first frame; length `2` means first + last frame |
-| `image` | string | Compatibility | Compatibility alias, equivalent to `image_urls[0]` |
-| `prompt` | string | No | Motion or camera prompt |
-| `image_tail` | string | Compatibility | Compatibility alias, equivalent to `image_urls[1]` |
-| `negative_prompt` | string | No | Negative prompt |
-| `duration` | string/integer | No | Common values: `5` or `10` |
-| `aspect_ratio` | string | No | Output ratio |
-| `mode` | string | No | Generation mode |
-| `sound` | string / boolean | No | Recommended official values are `on` / `off` |
-| `multi_shots` | boolean | No | Official multi-shot switch. The alias `multi_shot` is also accepted |
-| `multi_prompt` | array | Conditionally required | Multi-shot prompt list |
-| `kling_elements` | array | No | `kling-v3` standard-route element references |
-| `cfg_scale` | number | No | Guidance strength |
-| `camera_control` | object | No | Camera control payload |
-| `callback_url` | string | No | Callback URL |
-| `external_task_id` | string | No | Custom business task ID |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `model_name` | string | はい | 標準 Kling 動画モデル |
+| `image_urls` | array[string] | 推奨 | 公式の最初/最終フレーム入力。長さ `1` で最初のフレーム、長さ `2` で最初と最後のフレーム |
+| `image` | string | 互換 | エイリアス互換、`image_urls[0]` と等価 |
+| `prompt` | string | いいえ | 動作またはカメラの説明 |
+| `image_tail` | string | 互換 | エイリアス互換、`image_urls[1]` と等価 |
+| `negative_prompt` | string | いいえ | ネガティブプロンプト |
+| `duration` | string/integer | いいえ | よく使われる `5` または `10` |
+| `aspect_ratio` | string | いいえ | 出力比率 |
+| `mode` | string | いいえ | 生成モード |
+| `sound` | string / boolean | いいえ | 公式値 `on` / `off` の利用を推奨 |
+| `multi_shots` | boolean | いいえ | 公式のマルチカメラスイッチ。エイリアス `multi_shot` も対応 |
+| `multi_prompt` | array | 条件付き必須 | マルチカメラ説明 |
+| `kling_elements` | array | いいえ | `kling-v3` 標準ルーティング要素の参照 |
+| `cfg_scale` | number | いいえ | ガイド強度 |
+| `camera_control` | object | いいえ | カメラ制御パラメータ |
+| `callback_url` | string | いいえ | コールバックURL |
+| `external_task_id` | string | いいえ | ビジネス側カスタムタスクID |
 
-### Image-to-Video Example
+### 画像から動画生成例
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/kling/v1/videos/image2video \
@@ -154,43 +155,67 @@ curl -X POST https://api.crazyrouter.com/kling/v1/videos/image2video \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model_name": "kling-v3",
-    "prompt": "The person in the image starts smiling and slowly turns their head",
+    "prompt": "图片中的人物开始微笑并缓缓转头",
     "image": "https://example.com/portrait.jpg",
     "duration": "5",
     "mode": "std"
   }'
 ```
 
-`image_urls` is the official-first field. `image + image_tail` remain supported as compatibility aliases and are treated as first-frame / last-frame input. Video tasks are asynchronous. Use [Task Query](/jp/video/kling/query) to fetch the terminal result.
+公式の優先フィールドは `image_urls` です。`image + image_tail` も引き続き利用可能で、最初/最後フレーム互換エイリアスとして扱われます。動画タスクは非同期であり、[タスククエリ](/jp/video/kling/query) で最終結果を取得してください。
+
+### ローカルリファレンス画像をアップロードして動画生成
+
+リファレンス画像がローカルにある場合は、まず一時イメージホスティングサービスで公開URLを取得し、それをKlingに渡してください。一時画像はデフォルトで72時間保存され、保存期間内は日ごとの課金はありません。
+
+```bash cURL
+UPLOAD_RESPONSE=$(curl -sS -X POST https://api.crazyrouter.com/v1/files/uploads \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "file=@./portrait.png" \
+  -F "purpose=model_input")
+
+IMAGE_URL=$(python -c "import json,sys; print(json.load(sys.stdin)['url'])" <<< "$UPLOAD_RESPONSE")
+
+curl -X POST https://api.crazyrouter.com/kling/v1/videos/image2video \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d "{
+    \"model_name\": \"kling-v3\",
+    \"prompt\": \"图片中的人物缓缓转头并微笑，镜头轻微推进，电影级光影\",
+    \"image_urls\": [\"$IMAGE_URL\"],
+    \"duration\": \"5\",
+    \"mode\": \"std\"
+  }"
+```
 
 ---
 
-### Multi-Image Reference Video Parameters
+### リファレンス画像から動画生成のパラメータ
 
 ```
 POST /kling/v1/videos/multi-image2video
 ```
 
-This route maps to the official standard-family Kling `Reference` capability. Unlike `image2video`, it does not use `image` or `image_tail`; it uses the official `image_list` reference input instead.
+このパスは標準 Kling 公式 `Reference` 機能に対応します。それは `image2video` とは異なり、`image`/`image_tail` を使わず、公式の `image_list` をリファレンス素材入力として利用します。
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model_name` | string | Yes | Standard Kling video model |
-| `prompt` | string | Yes | Identity and motion prompt for the reference images |
-| `image_list` | array | Yes | Official reference image list |
-| `negative_prompt` | string | No | Negative prompt |
-| `duration` | string/integer | No | Common values: `5` or `10` |
-| `aspect_ratio` | string | No | Output ratio |
-| `mode` | string | No | Generation mode |
-| `sound` | string / boolean | No | Recommended official values are `on` / `off` |
-| `multi_shots` | boolean | No | Official multi-shot switch. The alias `multi_shot` is also accepted |
-| `multi_prompt` | array | Conditionally required | Multi-shot prompt list |
-| `cfg_scale` | number | No | Guidance strength |
-| `camera_control` | object | No | Camera control payload |
-| `callback_url` | string | No | Callback URL |
-| `external_task_id` | string | No | Custom business task ID |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `model_name` | string | はい | 標準 Kling 動画モデル |
+| `prompt` | string | はい | リファレンス画像の一貫性および動作説明 |
+| `image_list` | array | はい | 公式リファレンス画像リスト |
+| `negative_prompt` | string | いいえ | ネガティブプロンプト |
+| `duration` | string/integer | いいえ | よく使われる `5` または `10` |
+| `aspect_ratio` | string | いいえ | 出力比率 |
+| `mode` | string | いいえ | 生成モード |
+| `sound` | string / boolean | いいえ | 公式値 `on` / `off` の利用を推奨 |
+| `multi_shots` | boolean | いいえ | 公式のマルチカメラスイッチ。エイリアス `multi_shot` も対応 |
+| `multi_prompt` | array | 条件付き必須 | マルチカメラ説明 |
+| `cfg_scale` | number | いいえ | ガイド強度 |
+| `camera_control` | object | いいえ | カメラ制御パラメータ |
+| `callback_url` | string | いいえ | コールバックURL |
+| `external_task_id` | string | いいえ | ビジネス側カスタムタスクID |
 
-### Multi-Image Reference Example
+### リファレンス画像から動画生成例
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/kling/v1/videos/multi-image2video \
@@ -198,7 +223,7 @@ curl -X POST https://api.crazyrouter.com/kling/v1/videos/multi-image2video \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model_name": "kling-v3",
-    "prompt": "Keep the same Shiba Inu identity while it runs across a sunny park",
+    "prompt": "保持同一只柴犬的形象，在草地上向前奔跑",
     "duration": "5",
     "aspect_ratio": "16:9",
     "mode": "pro",
@@ -216,42 +241,41 @@ curl -X POST https://api.crazyrouter.com/kling/v1/videos/multi-image2video \
 ```
 
 <Note>
-  `multi-image2video` is the standard Kling reference route. If your input is a first frame or a first-last pair, continue using `image2video`. Query reference tasks through `GET /kling/v1/videos/multi-image2video/{task_id}`.
+  `multi-image2video` は標準 Kling ファミリーのリファレンス画像機能の入口です。入力が最初/最終フレームの場合は `image2video` をご利用ください。このタスクのクエリには `GET /kling/v1/videos/multi-image2video/{task_id}` を使用してください。
 </Note>
 
 ---
 
-## Kling Omni Video
+## Kling Omni 動画
 
 ```
 POST /kling/v1/videos/omni-video
 ```
 
-### Public Models
+### 現在公開中のモデル
 
 - `kling-v3`
-- `kling-v3`
 
-### Request Parameters
+### リクエストパラメータ
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model_name` | string | Yes | Only `kling-v3` and `kling-v3` are accepted on this route |
-| `prompt` | string | Yes | Official omni prompt that can reference assets from `image_list`, `element_list`, `video_list`, and `voice_list` |
-| `sound` | string | No | Official values are `on` / `off` |
-| `duration` | string/integer | No | Commonly `5`; max duration depends on the selected model's official capability |
-| `aspect_ratio` | string | No | Such as `16:9`, `9:16`, `1:1` |
-| `mode` | string | No | Generation mode such as `std` or `pro` |
-| `multi_shots` | boolean | No | Official multi-shot switch. The alias `multi_shot` is also accepted |
-| `multi_prompt` | array | Conditionally required | Multi-shot prompt list |
-| `image_list` | array | No | Official image reference list |
-| `element_list` | array | No | Official element reference list |
-| `video_list` | array | No | Official video reference list |
-| `voice_list` | array | No | Official voice reference list |
-| `callback_url` | string | No | Callback URL |
-| `external_task_id` | string | No | Custom business task ID |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `model_name` | string | はい | `kling-v3` のみサポート |
+| `prompt` | string | はい | 公式 Omni プロンプト。`image_list`、`element_list`、`video_list`、`voice_list` のオブジェクト参照可 |
+| `sound` | string | いいえ | 公式値は `on` / `off` 使用 |
+| `duration` | string/integer | いいえ | よく使われる `5`、上限は該当モデルの公式ドキュメントに従う |
+| `aspect_ratio` | string | いいえ | 例: `16:9`、`9:16`、`1:1` |
+| `mode` | string | いいえ | 生成モード。例: `std`、`pro` |
+| `multi_shots` | boolean | いいえ | 公式のマルチカメラスイッチ。エイリアス `multi_shot` も対応 |
+| `multi_prompt` | array | 条件付き必須 | マルチカメラ説明 |
+| `image_list` | array | いいえ | 公式画像リファレンスリスト |
+| `element_list` | array | いいえ | 公式要素リファレンスリスト |
+| `video_list` | array | いいえ | 公式動画リファレンスリスト |
+| `voice_list` | array | いいえ | 公式音声リファレンスリスト |
+| `callback_url` | string | いいえ | コールバックURL |
+| `external_task_id` | string | いいえ | ビジネス側カスタムタスクID |
 
-### Omni Example
+### Omni リクエスト例
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/kling/v1/videos/omni-video \
@@ -259,7 +283,7 @@ curl -X POST https://api.crazyrouter.com/kling/v1/videos/omni-video \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model_name": "kling-v3",
-    "prompt": "<<<image_1>>> walks toward the camera in a rainy alley",
+    "prompt": "<<<image_1>>> 在雨夜巷子里向镜头走来",
     "sound": "on",
     "duration": "5",
     "aspect_ratio": "16:9",
@@ -274,12 +298,12 @@ curl -X POST https://api.crazyrouter.com/kling/v1/videos/omni-video \
 ```
 
 <Note>
-  `kling-v3` is currently exposed as single-shot omni generation only. `kling-v3` is the broader omni model. The omni route prefers the official `element_list` field and also accepts the compatibility alias `kling_elements`. Fetch omni tasks through `GET /kling/v1/videos/omni-video/{task_id}`.
+  Omni ルーティングは公式 `element_list` の使用を推奨しますが、`kling_elements` エイリアスにも対応しています。タスクをクエリする際は提出パスと同じファミリーの `GET /kling/v1/videos/omni-video/{task_id}` を使ってください。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [Kling 2.6 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/kling/aigc-video-kling-2-6?utm_source=docs&utm_medium=related)
-- [Kling 3.0 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/kling/aigc-video-kling-3-0?utm_source=docs&utm_medium=related)
-- [Kling AI の全モデルと料金](https://crazyrouter.com/en/models/kling?utm_source=docs&utm_medium=related)
+- [Kling 2.6 モデルページ：リアルタイム価格、実例、呼び出しコード](https://crazyrouter.com/ja/models/kling/aigc-video-kling-2-6?utm_source=docs&utm_medium=related)
+- [Kling 3.0 モデルページ：リアルタイム価格、実例、呼び出しコード](https://crazyrouter.com/ja/models/kling/aigc-video-kling-3-0?utm_source=docs&utm_medium=related)
+- [Kling AI 全モデルと価格](https://crazyrouter.com/ja/models/kling?utm_source=docs&utm_medium=related)

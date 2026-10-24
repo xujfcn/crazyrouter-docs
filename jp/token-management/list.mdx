@@ -1,38 +1,38 @@
 ---
-title: 'List Tokens'
-description: 'Get a paginated list of API tokens for the current user'
+title: 'トークン一覧の取得'
+description: '現在のユーザーの API トークン一覧をページング取得します'
 api: 'GET /api/token/'
 ---
-> 更新日: 2026-07-20
+> 内容更新日: 2026-07-20
 
-## Overview
+## インターフェース説明
 
-Retrieve all API tokens created by the current user, with pagination support.
+現在のユーザーが作成したすべての API トークン（Token）を取得します。ページング機能をサポートします。
 
 <Note>
-  The `/api/token/*` endpoints are mainly for Crazyrouter dashboard automation around API key management. They require a user `access token` plus the `New-Api-User` header, and are not the normal interface for `sk-xxx` model calls. Use `https://crazyrouter.com` as the base URL; `https://api.crazyrouter.com` is reserved for model APIs and returns `404 api_only_endpoint` for management paths.
+  この `/api/token/*` インターフェース群は、Crazyrouter コンソールの API Key 管理自動化に主に使用されます。ユーザーの `access token` と `New-Api-User` リクエストヘッダーが必要です。通常の `sk-xxx` モデル呼び出しプロセス向けのインターフェースではありません。リクエストのベース URL には必ず `https://crazyrouter.com` を利用してください。`https://api.crazyrouter.com` はモデル API 専用入り口で、管理パスで呼び出すと `404 api_only_endpoint` が返されます。
 </Note>
 
-## Authentication
+## 認証方法
 
-Authenticate using the user's access token with the following headers:
+ユーザーの Access Token を利用して認証を行います。リクエストヘッダーに以下を含めてください：
 
 ```text
 Authorization: Bearer {access_token}
 New-Api-User: {user_id}
 ```
 
-## Request Parameters
+## リクエストパラメータ
 
 <ParamField query="p" type="integer" default="1">
-  Page number. The backend accepts older styles too, but `1` is the recommended starting page
+  ページ番号。コードはレガシー記法に対応していますが、`1` から始めることを推奨します
 </ParamField>
 
 <ParamField query="size" type="integer" default="10">
-  Items per page, maximum 100
+  1ページあたりの件数。最大100件
 </ParamField>
 
-## Response Format
+## レスポンス形式
 
 ```json
 {
@@ -48,7 +48,7 @@ New-Api-User: {user_id}
         "user_id": 1,
         "key": "sk-xxxxxxxxxxxxxxxx",
         "status": 1,
-        "name": "My Token",
+        "name": "我的令牌",
         "created_time": 1706000000,
         "accessed_time": 1706100000,
         "expired_time": -1,
@@ -65,24 +65,24 @@ New-Api-User: {user_id}
 }
 ```
 
-## Field Descriptions
+## フィールド説明
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | int | Token ID |
-| `key` | string | API key in `sk-xxx` format |
-| `status` | int | Status: 1=enabled, 2=disabled |
-| `name` | string | Token name |
-| `expired_time` | int | Expiration timestamp, `-1` means never expires |
-| `remain_quota` | int | Remaining quota |
-| `unlimited_quota` | bool | Whether quota is unlimited |
-| `used_quota` | int | Used quota |
-| `model_limits_enabled` | bool | Whether the model whitelist is enabled |
-| `model_limits` | string | Model restriction config string |
-| `allow_ips` | string | IP whitelist string |
-| `group` | string | Group |
+| フィールド | 型 | 説明 |
+|------|------|------|
+| `id` | int | トークンID |
+| `key` | string | API Key（sk-xxx形式） |
+| `status` | int | 状態：1＝有効、2＝無効 |
+| `name` | string | トークン名称 |
+| `expired_time` | int | 有効期限のタイムスタンプ。`-1` は期限なし |
+| `remain_quota` | int | 残り使用枠 |
+| `unlimited_quota` | bool | 無制限枠か否か |
+| `used_quota` | int | 使用済み枠 |
+| `model_limits_enabled` | bool | モデルのホワイトリストを有効にしているか |
+| `model_limits` | string | モデル制限設定文字列 |
+| `allow_ips` | string | IPホワイトリスト文字列 |
+| `group` | string | グループ |
 
-## Code Examples
+## コード例
 
 <CodeGroup>
 
@@ -102,7 +102,7 @@ response = requests.get(
 
 page = response.json()["data"]
 for token in page["items"]:
-    print(f"[{token['name']}] {token['key'][:10]}... Quota: {token['remain_quota']}")
+    print(f"[{token['name']}] {token['key'][:10]}... 额度: {token['remain_quota']}")
 ```
 
 ```bash cURL

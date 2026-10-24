@@ -2,7 +2,8 @@
 title: "列出模型"
 description: "基于生产环境复核，使用 GET /v1/models 获取当前 Token 可用模型列表"
 ---
-> 更新日期：2026-06-06
+> 内容更新: 2026-06-30
+
 
 # 列出模型
 
@@ -131,7 +132,7 @@ for (const model of models.data) {
 
 ## 定价信息
 
-如果你还需要公共定价信息，请以 [Pricing 页面](/pricing) 为准。程序侧确认当前 Token 可见模型时，继续使用本页的 `GET /v1/models`。
+如果你还需要公共定价信息，请以 [Pricing 页面](https://crazyrouter.com/zh/pricing) 为准。程序侧确认当前 Token 可见模型时，继续使用本页的 `GET /v1/models`。
 
 <Note>
   `GET /v1/models` 返回的 `supported_endpoint_types` 只表示当前模型支持的接口风格。其中 `openai` 对应 `POST /v1/chat/completions`，`anthropic` 对应 `POST /v1/messages`，只有 `openai-response` 才对应 `POST /v1/responses`。Claude 当前公开支持的是 `openai` + `anthropic`，不支持 `openai-response`。

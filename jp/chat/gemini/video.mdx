@@ -1,27 +1,27 @@
 ---
-title: "Gemini Video Understanding"
-description: "Gemini native video understanding documented from successful Crazyrouter request patterns on 2026-04-08"
+title: "Gemini ビデオ理解"
+description: "2026-04-08 Crazyrouter 本サイトでの成功リクエスト経験に基づく Gemini ネイティブビデオ理解のまとめ"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Gemini Video Understanding
+# Gemini ビデオ理解
 
 ```text
 POST /v1beta/models/{model}:generateContent
 ```
 
-As of `2026-04-08`, successful Crazyrouter and local `:4000` retests show:
+`2026-04-08`時点で、Crazyrouter 本サイトとローカルの`4000`ポートで再検証した結果：
 
-- `gemini-2.5-pro` can read `video/mp4`
-- the currently verified primary path is `fileData.fileUri`
-- the video URL must be publicly reachable by the Gemini upstream
+- `gemini-3.1-pro` は`video/mp4`を読み取ることができます
+- 現在安定して稼働している主なルートは`fileData.fileUri`です
+- 動画ファイルは、Geminiのアップストリームからアクセス可能なパブリックURLである必要があります
 
 ---
 
-## Verified Minimal Request
+## 検証済みの最小リクエスト
 
 ```bash
-curl "https://api.crazyrouter.com/v1beta/models/gemini-2.5-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -35,7 +35,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-2.5-pro:generateContent?k
             }
           },
           {
-            "text": "Describe the main subject, motion, and whether the camera is static."
+            "text": "请用一句中文回答：视频里的主体是什么，如何运动，镜头是否固定。"
           }
         ]
       }
@@ -46,7 +46,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-2.5-pro:generateContent?k
   }'
 ```
 
-Observed successful response shape:
+本番環境で成功した同タイプの主要なレスポンス形式：
 
 ```json
 {
@@ -55,7 +55,7 @@ Observed successful response shape:
       "content": {
         "parts": [
           {
-            "text": "The main subject is a red ball rolling from left to right, and the camera is static."
+            "text": "视频里的主体是一个红色小球，它从左向右滚动，镜头是固定的。"
           }
         ]
       }
@@ -64,20 +64,20 @@ Observed successful response shape:
 }
 ```
 
-## Request Notes
+## リクエストの要点
 
-- The primary recommended path for video understanding is `fileData.fileUri`
-- Set `mimeType` to the real file type, such as `video/mp4`
-- `fileUri` must be reachable by the Gemini upstream
-- Private-network URLs, signed flows that cannot be crawled, or inaccessible storage links are likely to fail
+- ビデオ理解の現在主推奨記述例は`fileData.fileUri`です
+- `mimeType`は実際のファイルに沿って記入してください（例：`video/mp4`）
+- `fileUri`はGeminiのアップストリームからアクセス可能でなければなりません
+- ファイルがプライベートネットワーク内にある場合、認証が必要な場合、またはURLが直接接続できないと失敗しやすいです
 
 <Note>
-  Do not assume the image-understanding request shape is the same as the video-understanding request shape. Images currently work best through `inlineData`, while the verified video path here uses `fileData.fileUri`.
+  画像理解は優先的に`inlineData`を使用し、画像の成功例をそのまま動画に転用しないでください。画像の詳細は [Gemini 画像理解](/jp/chat/gemini/vision) をご覧ください。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [Gemini 2.5 Flash 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash-Lite 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash 価格比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash モデルページ：リアルタイム価格・実際のサンプル・呼び出しコード](https://crazyrouter.com/ja/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash-Lite 価格比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)

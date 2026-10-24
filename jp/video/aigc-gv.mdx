@@ -1,12 +1,12 @@
 ---
-title: "AIGC GV VOD 呼び出しガイド"
-description: "Crazyrouter の Tencent VOD ルートで GV / Google Veo 動画モデルを呼び出す方法"
+title: "AIGC GV VOD の呼び出し方法"
+description: "Crazyrouter の Tencent VOD 回線を通じて GV / Google Veo ビデオモデルを呼び出す方法"
 ---
-> 更新日: 2026-06-24
+> 内容更新日: 2026-06-29
 
-# AIGC GV VOD 呼び出しガイド
+# AIGC GV VOD の呼び出し方法
 
-`aigc-video-gv-*` は Crazyrouter が Tencent VOD ルートで公開している GV / Google Veo 動画モデルです。AIGC Kling VOD と同じ OpenAI 風の非同期動画 API を使います。
+`aigc-video-gv-*` は、Crazyrouter が Tencent VOD 回線を通じて接続する GV / Google Veo ビデオモデルです。呼び出し方法は AIGC Kling VOD と同じで、OpenAI スタイルのビデオ非同期 API を使用します：
 
 ```http
 POST /v1/video/generations
@@ -14,22 +14,22 @@ GET /v1/video/generations/{task_id}
 ```
 
 <Note>
-  `aigc-video-gv-*` only uses `/v1/video/generations` and the matching query route. Do not send these models to `/v1/video/create`; a route mismatch will surface as `model_not_found` or a similar upstream error.
+  `aigc-video-gv-*` は `/v1/video/generations` と一致するクエリルートのみを使用します。これらのモデルを `/v1/video/create` に送信しないでください。ルートが一致しない場合は `model_not_found` または同様の上流エラーが発生します。
 </Note>
 
 ## 利用可能なモデル
 
 | モデル | 上流バージョン | 説明 |
 |------|------|------|
-| `aigc-video-gv-3.1` | GV 3.1 | 高品質版、音声生成対応 |
-| `aigc-video-gv-3.1-fast` | GV 3.1 Fast | 高速版、音声生成対応 |
-| `aigc-video-gv-3.1-lite` | GV 3.1 Lite | 軽量版、音声生成対応 |
+| `aigc-video-gv-3.1` | GV 3.1 | 高品質バージョン、音声付き動画対応 |
+| `aigc-video-gv-3.1-fast` | GV 3.1 Fast | より高速なバージョン、音声付き動画対応 |
+| `aigc-video-gv-3.1-lite` | GV 3.1 Lite | 軽量バージョン、音声付き動画対応 |
 
 <Note>
-  Tencent VOD の GV 3.1 は Google Veo ルートであり、Kling ではありません。`aigc-video-kling-3.1` のようなモデル名は使わないでください。
+  Tencent VOD の GV 3.1 は Google Veo 回線となっており、Kling ではありません。`aigc-video-kling-3.1` などのモデル名は使用しないでください。
 </Note>
 
-## タスク作成
+## タスクの作成
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/video/generations \
@@ -46,9 +46,9 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
   }'
 ```
 
-## 画像入力と複数画像参照
+## 画像生成および複数画像参照
 
-単一画像では `image` を使えます。複数画像参照では `metadata.image_list` を使ってください。
+1枚画像の場合は `image` を使用可能です。複数画像参照には `metadata.image_list` の利用を推奨します：
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/video/generations \
@@ -75,24 +75,24 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
 ```
 
 <Warning>
-  GV の複数画像入力は `FileInfos` で送る必要があります。Crazyrouter は `image_list` を `FileInfos` に変換し、GV の複数画像リクエストでは `LastFrameUrl` を使いません。
+  GV の複数画像入力は必ず `FileInfos` で渡す必要があります。当サイトでは `image_list` を `FileInfos` に変換し、また GV 複数画像リクエストに `LastFrameUrl` は使用しません。
 </Warning>
 
-## よく使う `metadata` フィールド
+## よく使う metadata フィールド
 
 | フィールド | 説明 |
 |------|------|
-| `resolution` | `720P`、`1080P`、`2K`、`4K`。利用可能な仕様は Pricing ページを参照 |
-| `sound` | 音声生成の有無。`true` / `false`、`on` / `off` |
+| `resolution` | `720P`、`1080P`、`2K`、`4K`。利用可能な仕様は Pricing ページでご確認ください |
+| `sound` | 音声の生成有無を設定。`true` / `false`、`on` / `off` に対応 |
 | `audio_generation` | `Enabled` / `Disabled` を直接指定 |
-| `image_list` | 複数画像参照リスト |
-| `reference_type` / `ReferenceType` | GV 参照タイプ。一般的には `asset` または `style` |
+| `image_list` | 複数画像参照配列 |
+| `reference_type` / `ReferenceType` | GV 参照タイプ。主に `asset` または `style` を利用 |
 
-価格、割引、有効な仕様はリアルタイムの [Pricing ページ](/pricing) を基準にしてください。
+価格、割引、利用可能な仕様は [Pricing ページ](https://crazyrouter.com/ja/pricing) をご参照ください。
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [Google Veo 3.1 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/google/aigc-video-gv-3-1?utm_source=docs&utm_medium=related)
-- [Kling 2.6 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/kling/aigc-video-kling-2-6?utm_source=docs&utm_medium=related)
-- [Google の全モデルと料金](https://crazyrouter.com/en/models/google?utm_source=docs&utm_medium=related)
+- [Google Veo 3.1 モデルページ: リアルタイム価格、実サンプル、呼び出しコード](https://crazyrouter.com/ja/models/google/aigc-video-gv-3-1?utm_source=docs&utm_medium=related)
+- [Kling 2.6 モデルページ: リアルタイム価格、実サンプル、呼び出しコード](https://crazyrouter.com/ja/models/kling/aigc-video-kling-2-6?utm_source=docs&utm_medium=related)
+- [Google 全モデルと価格](https://crazyrouter.com/ja/models/google?utm_source=docs&utm_medium=related)

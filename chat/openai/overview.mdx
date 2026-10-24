@@ -1,18 +1,18 @@
 ---
 title: "聊天完成对象"
-description: "基于当前生产行为，理解 Chat Completion 与 Chat Completion Chunk 的核心结构"
+description: "聊天完成和聊天完成分块对象的核心面向生产结构"
 ---
-> 更新日期：2026-06-06
+> 内容更新: 2026-06-09
 
 # 聊天完成对象
 
-`/v1/chat/completions` 非流式返回 `chat.completion`，流式返回 `chat.completion.chunk`。
+`/v1/chat/completions` 对非流式请求返回 `chat.completion`，对流式请求返回 `chat.completion.chunk`。
 
-本文页保留的是 Crazyrouter 当前 OpenAI 兼容返回里最稳定、最通用的结构认知。
+本页侧重于 Crazyrouter 当前最稳定、最广泛适用的兼容 OpenAI 的响应结构。
 
 ## 非流式对象
 
-当前生产最小请求示例：
+最精简的生产请求：
 
 ```bash cURL
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -30,7 +30,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-当前生产返回的典型骨架：
+典型生产响应骨架：
 
 ```json
 {
@@ -53,17 +53,17 @@ curl https://api.crazyrouter.com/v1/chat/completions \
 }
 ```
 
-### 应该这样理解
+### 如何读取
 
-- `message.content` 是最终文本输出
-- `message.tool_calls` 只在模型请求工具时出现
-- `message.reasoning_content` 在某些模型或某些路由下可能出现，但当前不应把它当成稳定必有字段
+- `message.content` 是最终文本答案
+- `message.tool_calls` 仅在模型请求工具执行时出现
+- `message.reasoning_content` 可能会出现在某些模型或路由中，但目前不应将其视为保证字段
 
 ---
 
 ## 流式对象
 
-流式请求时，服务器通过 SSE 逐块返回 `chat.completion.chunk`：
+对于流式请求，服务器返回 `chat.completion.chunk` SSE 事件：
 
 ```json
 {
@@ -84,7 +84,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
 }
 ```
 
-常见 SSE 形态：
+常见 SSE 结构：
 
 ```text
 data: {"object":"chat.completion.chunk",...}
@@ -94,24 +94,24 @@ data: [DONE]
 
 ---
 
-## 常看字段
+## 通常关注的字段
 
-| 字段 | 说明 |
-|------|------|
-| `object` | 非流式是 `chat.completion`，流式是 `chat.completion.chunk` |
-| `model` | 实际返回所使用的模型名 |
-| `choices[].message.content` | 非流式最终文本 |
-| `choices[].message.tool_calls` | 非流式工具调用 |
-| `choices[].delta.content` | 流式增量文本 |
-| `choices[].finish_reason` | 停止原因，如 `stop`、`length`、`tool_calls` |
+| 字段 | 含义 |
+|-------|---------|
+| `object` | 非流式为 `chat.completion`，流式为 `chat.completion.chunk` |
+| `model` | 用于响应的实际模型 |
+| `choices[].message.content` | 最终非流式文本 |
+| `choices[].message.tool_calls` | 非流式工具请求 |
+| `choices[].delta.content` | 流式文本增量 |
+| `choices[].finish_reason` | 停止原因，例如 `stop`、`length` 或 `tool_calls` |
 
 <Note>
-  上游模型可能会透传额外字段。写客户端时应优先依赖稳定的通用字段，不要假设每个模型都暴露相同的扩展字段。
+  上游模型可能会传递额外字段。客户端代码应优先依赖稳定的通用字段，切勿假设每个模型都提供相同扩展。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 相关页面
+## crazyrouter.com 上的相关内容
 
-- [GPT Image 1.5 模型页：实时价格、真实样例、调用代码](https://crazyrouter.com/zh/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2 模型页：实时价格、真实样例、调用代码](https://crazyrouter.com/zh/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [OpenAI 全部模型与价格](https://crazyrouter.com/zh/models/openai?utm_source=docs&utm_medium=related)
+- [GPT Image 1.5 模型页面：实时价格、真实样例、代码](https://crazyrouter.com/zh/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT Image 2 模型页面：实时价格、真实样例、代码](https://crazyrouter.com/zh/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [所有 OpenAI 模型及实时价格](https://crazyrouter.com/zh/models/openai?utm_source=docs&utm_medium=related)

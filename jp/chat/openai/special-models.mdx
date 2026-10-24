@@ -1,27 +1,25 @@
 ---
-title: "Special Models"
-description: "Historical special-model notes are hidden from public navigation"
+title: "特殊モデル（現在非公開）"
+description: "過去の特殊モデルページはパブリックナビゲーションから非表示になりました"
 noindex: true
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Special Models
+# 特殊モデル（現在非公開）
 
-This historical special-models page is no longer shown as a public Crazyrouter integration path. Special-purpose and experimental models change quickly, so this page no longer includes copyable examples for delisted or non-public models.
+過去の特殊モデルページは現在、公開APIサンプルとしては表示されていません。新規導入の場合は以下をご利用ください：
 
-For current availability, check:
+- [最新モデルの使用例](/jp/latest-model-examples)
+- [モデル一覧](/jp/chat/openai/models)
+- [Chat Completions](/jp/chat/openai/completions)
 
-- [Model list](/jp/chat/openai/models)
-- `/api/pricing`
-- the dashboard model picker for your token
-
-<Warning>
-  A model appearing in a historical note does not mean it is currently callable. Always verify with the same-day model list and one minimal live request before publishing examples.
-</Warning>
+<Note>
+  本番環境への導入前に、必ず`GET /v1/models`を呼び出して、現在のトークンで可視なモデルIDを確認してください。公開モデルのインデックスに含まれていないモデル、または現在のトークンで見えないモデルを、デフォルト設定やサンプルとして書き込まないでください。
+</Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [GPT Image 1.5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [OpenAI の全モデルと料金](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [GPT Image 1.5 モデルページ：リアルタイム価格、実例、呼び出しコード](https://crazyrouter.com/ja/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT Image 2 モデルページ：リアルタイム価格、実例、呼び出しコード](https://crazyrouter.com/ja/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [OpenAI 全モデル＆価格一覧](https://crazyrouter.com/ja/models/openai?utm_source=docs&utm_medium=related)

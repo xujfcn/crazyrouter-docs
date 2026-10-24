@@ -1,0 +1,67 @@
+---
+title: "Documentación de Crazyrouter"
+description: "Encuentra rápidamente la API de Crazyrouter, la integración de herramientas, capacidades de modelos y documentación legible por IA según la tarea"
+---
+> Contenido actualizado: 2026-06-16
+
+<Note>
+  Ruta de acceso a la API: la entrada internacional predeterminada es `https://api.crazyrouter.com`, se recomienda priorizar `https://cn.crazyrouter.com` en el este de Asia. Los clientes compatibles con OpenAI suelen añadir `/v1` tras el dominio principal; los clientes nativos de Claude Code / Anthropic usan solo el dominio principal, sin añadir `/v1`. Consulta [Puntos finales de la API](/es/api-endpoint) para más detalles.
+</Note>
+
+Crazyrouter es una pasarela API unificada para modelos de IA. Puedes usar una sola clave API para invocar capacidades de modelos para texto, imagen, video, audio, embedding, rerank y la integración de herramientas de terceros.
+
+## Elige tu tarea
+
+<CardGroup cols={2}>
+  <Card title="Cómo usar llms.txt" icon="bot" href="/es/llms-guide">
+    Permite a las herramientas de IA leer `https://docs.crazyrouter.com/llms.txt` y generar el método de invocación correcto según la página de precios y la ruta real.
+  </Card>
+  <Card title="Inicio rápido" icon="rocket" href="/es/quickstart">
+    Obtén tu clave API, configura la URL base y completa tu primera solicitud en 5 minutos.
+  </Card>
+  <Card title="Integración de herramientas" icon="plug" href="/es/integrations/claude-code">
+    Integra herramientas de IA populares como Claude Code, Codex CLI, Cursor, Cline, Cherry Studio, OpenClaw, entre otras.
+  </Card>
+  <Card title="Modelos de texto" icon="message" href="/es/chat/openai/completions">
+    Utiliza OpenAI Chat, Claude Messages, Gemini Native y la API de Responses.
+  </Card>
+  <Card title="Generación de imágenes" icon="image" href="/es/images/gpt-image">
+    Invoca modelos de imagen como GPT Image, Qwen Image, Midjourney, Nano Banana Pro, DALL-E y muchos otros.
+  </Card>
+  <Card title="Vídeo" icon="video" href="/es/video/unified">
+    Integra interfaces de generación de video como Veo, Kling, Seedance, Runway, Luma, Sora, Wan, entre otras.
+  </Card>
+  <Card title="Modelos y facturación" icon="tag" href="https://crazyrouter.com/pricing">
+    Consulta precios de modelos, modelos disponibles, manejo de errores, estado del servicio y directrices para la consola de administración.
+  </Card>
+{/* crazyrouter-site-links */}
+  <Card title="Comparación de precios de modelos" icon="coins" href="https://crazyrouter.com/es/pricing?utm_source=docs&utm_medium=card">
+    Comparación de precios oficiales, en Azure, Bedrock, Vertex, OpenRouter y Crazyrouter de 35 modelos, revisados diariamente, con historial de precios y estimación de tarifa mensual.
+  </Card>
+  <Card title="Ver modelos por proveedor" icon="layer-group" href="https://crazyrouter.com/es/models?utm_source=docs&utm_medium=card">
+    Modelos disponibles, precios en tiempo real, ejemplos reales y código para invocación de 14 fabricantes, incluyendo Anthropic, OpenAI, Google, DeepSeek y más.
+  </Card>
+</CardGroup>
+
+## Documentación para herramientas de IA
+
+<CardGroup cols={2}>
+  <Card title="Entrada legible por IA" icon="bot" href="/es/ai-tools">
+    Índice de documentación para herramientas de IA como Codex, Claude Code, ChatGPT, Cursor, entre otras.
+  </Card>
+  <Card title="Contexto completo de la documentación" icon="file-text" href="https://docs.crazyrouter.com/llms-full.txt">
+    Documentación consolidada en un solo archivo, ideal para copiar o facilitar a herramientas de IA con lectura de URL.
+  </Card>
+</CardGroup>
+
+## Rutas frecuentes
+
+| ¿Qué quieres hacer? | Lectura recomendada |
+| --- | --- |
+| Confirmar Base URL y rutas | [Puntos finales de la API](/es/api-endpoint) |
+| Crear y usar una clave API | [Método de autenticación](/es/authentication) |
+| Enviar tu primera solicitud compatible con OpenAI | [Comenzar rápidamente](/es/quickstart) |
+| Integrar Claude Code | [Integración Claude Code](/es/integrations/claude-code) |
+| Integrar Codex CLI | [Integración Codex CLI](/es/integrations/codex) |
+| Usar una imagen local como referencia | [Instrucciones de carga de imágenes](/es/upload) |
+| Diagnosticar errores de solicitud | [Manejo de errores](/es/error-handling) |

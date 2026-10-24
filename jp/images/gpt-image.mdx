@@ -1,16 +1,16 @@
 ---
 title: "GPT Image"
-description: "Generate and edit images with gpt-image-2 through the OpenAI-compatible Images API"
+description: "gpt-image-2 を使用して画像を生成・編集します。OpenAI Images API と互換性があります。"
 ---
-> 更新日: 2026-09-18
+> 内容更新日: 2026-09-18
 
 <Tip>
-  送信後すぐに戻り、あとで画像 URL を取得したい場合は[非同期画像生成](/jp/images/async)を使えます。Gemini 系はパス接尾辞を `:asyncGenerateContent` に、OpenAI 系は `Prefer: respond-async` ヘッダーを付けるだけで、リクエストボディは 1 バイトも変えません。
+  画像生成リクエストを送信した後すぐにレスポンスを受け取り、後から画像URLをポーリングで取得したい場合、このモデルは[非同期生成](/jp/images/async)をサポートしています：Gemini 系の場合はパスのサフィックスを `:asyncGenerateContent` に、OpenAI 系の場合は `Prefer: respond-async` ヘッダーを追加し、リクエストボディは一切変更不要です。
 </Tip>
 
 # GPT Image
 
-`gpt-image-2` uses the OpenAI-compatible Images API:
+`gpt-image-2` は OpenAI Images API の互換パスで呼び出せます：
 
 ```text
 POST /v1/images/generations
@@ -18,35 +18,37 @@ POST /v1/images/edits
 ```
 
 <Warning>
-  Use the primary image route `https://api.crazyrouter.com/v1` for `gpt-image-2`. The full generation endpoint is `https://api.crazyrouter.com/v1/images/generations`. Account login, billing, and the console remain on `https://crazyrouter.com`.
+  `gpt-image-2` 画像生成リクエストは、主経路`https://api.crazyrouter.com/v1` を優先してご利用ください。完全な生成エンドポイントは `https://api.crazyrouter.com/v1/images/generations` です。アカウントのログイン・チャージ・コンソールは引き続き `https://crazyrouter.com` をご利用ください。
 </Warning>
 
-## Generate Image
+## 画像生成
 
-### Request Parameters
+### リクエストパラメータ
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model` | string | Yes | Fixed as `gpt-image-2` |
-| `prompt` | string | Yes | Image description prompt |
-| `n` | integer | No | Number of images, default `1`, range `1-10` |
-| `size` | string | No | `auto` or `WxH`. Dimensions must be multiples of 16, each side must be at most 3840, total pixels must be 655360 to 8294400, and the long:short side ratio must not exceed 3:1. Common values: `1024x1024`, `1536x1024`, `1024x1536` |
-| `quality` | string | No | `auto`, `low`, `medium`, `high`. `hd` is accepted for compatibility and normalized to `high`; `standard` is rejected |
-| `background` | string | No | `auto` or `opaque`. `transparent` is not supported for `gpt-image-2` |
-| `output_format` | string | No | `png`, `jpeg`, `webp` |
-| `output_compression` | integer | No | `0-100`, only with `output_format=jpeg` or `output_format=webp` |
-| `moderation` | string | No | `auto` or `low` |
-| `stream` | boolean | No | Return an SSE stream |
-| `partial_images` | integer | No | `0-3`, only when `stream=true` |
-| `user` | string | No | End-user identifier |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `model` | string | 必須 | 固定値 `gpt-image-2` |
+| `prompt` | string | 必須 | 画像の説明プロンプト |
+| `n` | integer | 任意 | 生成する枚数、デフォルトは `1`、範囲は `1-10` |
+| `size` | string | 任意 | `auto` または `幅×高さ`。幅と高さは16の倍数で、1辺3840以下、総ピクセル数は 655360 から 8294400 の間、縦横比は最大3:1まで。よく使う値：`1024x1024`、`1536x1024`、`1024x1536` |
+| `quality` | string | 任意 | `auto`、`low`、`medium`、`high`。`hd` にも対応、サーバー側で`high`に正規化されます。`standard` も同様で、サーバー側で `auto`に正規化されます |
+| `background` | string | 任意 | `auto` または `opaque`。`gpt-image-2`は`transparent`をサポートしません |
+| `output_format` | string | 任意 | `png`、`jpeg`、`webp` |
+| `output_compression` | integer | 任意 | `0-100`、`output_format`が`jpeg`または`webp`の場合のみ有効 |
+| `moderation` | string | 任意 | `auto`または`low` |
+| `stream` | boolean | 任意 | SSEストリームレスポンスを使用するかどうか |
+| `partial_images` | integer | 任意 | `0-3`、`stream=true`の場合のみ使用可能 |
+| `user` | string | 任意 | エンドユーザー識別子 |
 
-These parameters are rejected for `gpt-image-2`: `response_format`, `style`, `input_fidelity`, `background=transparent`, `quality=standard`, and `output_format=png` with `output_compression`.
+レガシーDALL-E / OpenAI Imagesクライアントと互換性を持たせるため、`gpt-image-2`は`response_format=url`、`response_format=b64_json`、`quality=standard`、`style=vivid/natural`を受け付けます。そのうち`response_format`と`style`は上流へは転送されず、`quality=standard`は`auto`へ正規化されます。
 
 <Warning>
-  `response_format` is not a `gpt-image-2` parameter. Do not send `response_format="url"` or `response_format="b64_json"`; use `output_format="png"`, `"jpeg"`, or `"webp"` to choose the image file format, and read `data[0].url` from the response by default. `response_format` notes on DALL-E, Doubao, Qwen, or other image-model pages do not apply to `gpt-image-2`.
+  `response_format`はCrazyrouterが旧クライアント用に残した互換フィールドで、`gpt-image-2`上流パラメータではありません。新しい接続時は`output_format="png"`、`"jpeg"`、`"webp"`で画像ファイル形式を制御し、レスポンスの`data[0].url`をデフォルトで読み取ってください。旧クライアントが`response_format="b64_json"`を送信した場合、サーバー側はbase64レスポンスの意味をできるだけ保ちます。
 </Warning>
 
-### Request Examples
+引き続き拒否されるパラメータの組み合わせ例：`input_fidelity`、`background=transparent`、`output_format=png` と `output_compression` の併用。
+
+### リクエスト例
 
 <CodeGroup>
 
@@ -56,7 +58,7 @@ curl -X POST https://api.crazyrouter.com/v1/images/generations \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "gpt-image-2",
-    "prompt": "A cat wearing a spacesuit walking on the moon with Earth in the background",
+    "prompt": "一只穿着宇航服的猫咪在月球上行走，背景是地球",
     "n": 1,
     "size": "1024x1024",
     "quality": "low",
@@ -74,7 +76,7 @@ client = OpenAI(
 
 response = client.images.generate(
     model="gpt-image-2",
-    prompt="A cat wearing a spacesuit walking on the moon with Earth in the background",
+    prompt="一只穿着宇航服的猫咪在月球上行走，背景是地球",
     n=1,
     size="1024x1024",
     quality="low",
@@ -86,9 +88,9 @@ print(response.data[0].url)
 
 </CodeGroup>
 
-### Streaming
+### ストリーム生成
 
-`gpt-image-2` supports `stream=true`. If you send `partial_images`, you must also set `stream=true`, and the value must be `0-3`.
+`gpt-image-2`は`stream=true`に対応しています。リクエストに`partial_images`が含まれる場合、同時に`stream`を有効にし、値の範囲は`0-3`としてください。
 
 ```bash cURL
 curl -N -X POST https://api.crazyrouter.com/v1/images/generations \
@@ -96,7 +98,7 @@ curl -N -X POST https://api.crazyrouter.com/v1/images/generations \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "gpt-image-2",
-    "prompt": "A simple blue verification icon on a white background",
+    "prompt": "一个蓝色极简验证图标，白色背景",
     "size": "1024x1024",
     "quality": "high",
     "stream": true,
@@ -105,10 +107,10 @@ curl -N -X POST https://api.crazyrouter.com/v1/images/generations \
 ```
 
 <Note>
-  Synchronous `quality=high` requests, including the compatibility value `quality=hd`, can take a long time. For image workloads, use `https://api.crazyrouter.com/v1`; for high-quality jobs, prefer `stream=true` or set your client timeout above 180 seconds.
+  `quality=high`や互換書式`quality=hd`の同期リクエストは処理に時間がかかる場合があります。画像生成系は`https://api.crazyrouter.com/v1`を優先利用してください。高品質なリクエストには`stream=true`を使うか、クライアント側タイムアウトを180秒以上に設定してください。
 </Note>
 
-### Response Example
+### レスポンス例
 
 ```json
 {
@@ -126,32 +128,32 @@ curl -N -X POST https://api.crazyrouter.com/v1/images/generations \
 
 ---
 
-## Edit Image
+## 画像編集
 
 ```
 POST /v1/images/edits
 ```
 
-Edit an existing image with mask-based region editing support. You can also pass multiple reference images for blending, style transfer, or composition work.
+既存の画像に基づき編集を行います。マスク領域編集に対応し、複数の参考画像を使用した合成、スタイル転送、部分的な合成にも対応します。
 
-### Request Parameters
+### リクエストパラメータ
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model` | string | Yes | Fixed as `gpt-image-2` |
-| `image` / `image[]` | file or file[] | Yes | Original image or reference image file(s), sent as multipart; `gpt-image-2` supports up to `16` reference images |
-| `prompt` | string | Yes | Edit description |
-| `mask` | file | No | Mask image; transparent areas indicate regions to edit |
-| `n` | integer | No | Number of images, default `1`, range `1-10` |
-| `size` | string | No | Same rules as generation |
-| `quality` | string | No | `auto`, `low`, `medium`, `high`; `hd` is normalized to `high` |
-| `background` | string | No | `auto` or `opaque` |
-| `output_format` | string | No | `png`, `jpeg`, `webp` |
-| `output_compression` | integer | No | `0-100`, only with `output_format=jpeg` or `output_format=webp` |
-| `stream` | boolean | No | Return an SSE stream |
-| `partial_images` | integer | No | `0-3`, only when `stream=true` |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `model` | string | 必須 | 固定値 `gpt-image-2` |
+| `image` / `image[]` | file または file[] | 必須 | 元画像または参考画像ファイル（multipart）；`gpt-image-2`は最大`16`枚まで参考画像をサポート |
+| `prompt` | string | 必須 | 編集内容説明 |
+| `mask` | file | 任意 | マスク画像、透明部分が編集対象範囲となります |
+| `n` | integer | 任意 | 生成数、デフォルトは`1`、範囲は`1-10` |
+| `size` | string | 任意 | 画像生成エンドポイントと同様 |
+| `quality` | string | 任意 | `auto`、`low`、`medium`、`high`；`hd`は`high`へ正規化されます |
+| `background` | string | 任意 | `auto`または`opaque` |
+| `output_format` | string | 任意 | `png`、`jpeg`、`webp` |
+| `output_compression` | integer | 任意 | `0-100`。`output_format`が`jpeg`または`webp`のとき有効 |
+| `stream` | boolean | 任意 | SSEストリームレスポンスを使用するかどうか |
+| `partial_images` | integer | 任意 | `0-3`、`stream=true`のとき使用 |
 
-### Single-Image Edit Example
+### 単一画像編集例
 
 ```python Python
 from openai import OpenAI
@@ -165,7 +167,7 @@ response = client.images.edit(
     model="gpt-image-2",
     image=open("original.png", "rb"),
     mask=open("mask.png", "rb"),
-    prompt="Add a rainbow in the sky",
+    prompt="在天空中添加一道彩虹",
     n=1,
     size="1024x1024",
     quality="low",
@@ -174,9 +176,9 @@ response = client.images.edit(
 print(response.data[0].url)
 ```
 
-### Multi-Reference Edit Example
+### 複数画像リファレンス編集例
 
-Multi-image editing requests must use `multipart/form-data`. Prefer multiple `image[]` fields for reference images; repeated `image` fields are also accepted.
+複数画像編集リクエストは`multipart/form-data`の使用が必須です。複数の`image[]`フィールドで参考画像を送るのが推奨です。サーバー側は`image`フィールドの繰り返しにも対応します。
 
 <CodeGroup>
 
@@ -184,7 +186,7 @@ Multi-image editing requests must use `multipart/form-data`. Prefer multiple `im
 curl -X POST https://api.crazyrouter.com/v1/images/edits \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -F "model=gpt-image-2" \
-  -F "prompt=Blend the person from the first image with the background from the second image into one natural campaign visual" \
+  -F "prompt=把第一张图的人物与第二张图的背景融合成一张自然的宣传图" \
   -F "size=1024x1024" \
   -F "quality=low" \
   -F "n=1" \
@@ -200,7 +202,7 @@ response = requests.post(
     headers={"Authorization": "Bearer YOUR_API_KEY"},
     data={
         "model": "gpt-image-2",
-        "prompt": "Blend the person from the first image with the background from the second image into one natural campaign visual",
+        "prompt": "把第一张图的人物与第二张图的背景融合成一张自然的宣传图",
         "size": "1024x1024",
         "quality": "low",
         "n": "1",
@@ -219,12 +221,12 @@ print(response.json()["data"][0]["url"])
 </CodeGroup>
 
 <Note>
-  `gpt-image-2` supports up to 16 reference images. Multi-image requests are routed to carriers that support multi-reference image editing.
+  `gpt-image-2`の複数参考画像は最大16枚まで対応します。複数画像リクエストは、公式OpenAI多画像対応チャネルに優先的にルーティングされます。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [GPT Image 2 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [GPT Image 1.5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [OpenAI の全モデルと料金](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [GPT Image 2 モデルページ：リアルタイム価格、実例、利用コード](https://crazyrouter.com/ja/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [GPT Image 1.5 モデルページ：リアルタイム価格、実例、利用コード](https://crazyrouter.com/ja/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [OpenAI 全モデルと価格一覧](https://crazyrouter.com/ja/models/openai?utm_source=docs&utm_medium=related)

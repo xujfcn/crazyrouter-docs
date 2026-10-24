@@ -1,0 +1,121 @@
+---
+title: "Volcengine"
+description: "Usa la API de Volcengine para generar videos"
+---
+> Contenido actualizado: 2026-06-09
+
+# Volcengine
+
+Volcengine provee las capacidades de generación de videos de ByteDance.
+
+## Crear tarea de video
+
+```
+POST /volc/v1/contents/generations/tasks
+```
+
+### Parámetros de solicitud
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `model` | string | Sí | Nombre del modelo |
+| `content` | object | Sí | Configuración del contenido |
+| `content.prompt` | string | Sí | Palabras clave descriptivas del video |
+| `content.image_url` | string | No | URL de la imagen de referencia |
+| `content.aspect_ratio` | string | No | Relación de aspecto |
+
+### Ejemplo de solicitud
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/volc/v1/contents/generations/tasks \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "doubao-video",
+    "content": {
+      "prompt": "一只蝴蝶在花丛中飞舞，微距镜头",
+      "aspect_ratio": "16:9"
+    }
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/volc/v1/contents/generations/tasks",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "doubao-video",
+        "content": {
+            "prompt": "一只蝴蝶在花丛中飞舞，微距镜头",
+            "aspect_ratio": "16:9"
+        }
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### Ejemplo de respuesta
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "task_id": "volc_task_abc123"
+  }
+}
+```
+
+---
+
+## Consultar tarea
+
+```
+GET /volc/v1/contents/generations/tasks/{task_id}
+```
+
+```bash cURL
+curl https://api.crazyrouter.com/volc/v1/contents/generations/tasks/volc_task_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Ejemplo de respuesta (completado)
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "task_id": "volc_task_abc123",
+    "status": "SUCCESS",
+    "content": {
+      "video_url": "https://cdn.volcengine.com/videos/...",
+      "duration": 5
+    }
+  }
+}
+```
+
+### Estado de la tarea
+
+| Estado | Descripción |
+|------|------|
+| `SUBMITTED` | Enviado |
+| `PROCESSING` | En proceso |
+| `SUCCESS` | Exitoso |
+| `FAILED` | Fallido |
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Todos los modelos y precios de ByteDance](https://crazyrouter.com/es/models/bytedance?utm_source=docs&utm_medium=related)

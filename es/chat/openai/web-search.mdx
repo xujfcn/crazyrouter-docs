@@ -1,0 +1,127 @@
+---
+title: "Búsqueda web"
+description: "Búsqueda web al estilo OpenAI revalidada en producción en Crazyrouter"
+---
+> Contenido actualizado: 2026-06-09
+
+# Búsqueda web
+
+Esta página solo documenta el comportamiento de búsqueda web tipo OpenAI que fue revalidado frente al entorno de producción de Crazyrouter en `2026-03-22`.
+
+La ruta principal actual es:
+
+- `gpt-5.5`
+- `POST /v1/responses`
+- `tools: [{ "type": "web_search_preview" }]`
+
+## Conclusión actual
+
+En la revisión de producción de hoy:
+
+- `gpt-5.5` a través de la API de Respuestas devolvió de forma fiable `web_search_call`
+- el viejo sondeo de Chat Completions usando `tools: [{ "type": "web_search" }]` devolvió `200`, pero no proporcionó una señal estable y verificable de disparo de búsqueda, por lo que no se utiliza como patrón principal documentado
+
+---
+
+## Solicitud verificada
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "input": "Use web search to find one current technology headline published recently.",
+    "tools": [
+      {
+        "type": "web_search_preview"
+      }
+    ]
+  }'
+```
+
+Valores verificados de `output.type`:
+
+```json
+["web_search_call", "message"]
+```
+
+Esto demuestra que el paso de búsqueda y la respuesta final se devuelven por separado.
+
+---
+
+## Ejemplo en Python
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+response = client.responses.create(
+    model="gpt-5.5",
+    input="Use web search to find one current technology headline published recently.",
+    tools=[
+        {"type": "web_search_preview"}
+    ]
+)
+
+print(response.output_text)
+```
+
+---
+
+## Cómo confirmar que realmente se ejecutó una búsqueda
+
+Inspcciona `response.output` directamente:
+
+```python Python
+for item in response.output:
+    print(item.type)
+```
+
+Si ves:
+
+```text
+web_search_call
+message
+```
+
+entonces el modelo primero buscó y luego respondió.
+
+---
+
+## Patrón antiguo no recomendado como principal
+
+Esta revisión de producción también probó la modalidad antigua de Chat Completions:
+
+```json
+{
+  "tools": [
+    {
+      "type": "web_search"
+    }
+  ]
+}
+```
+
+Resultado:
+
+- la solicitud devolvió `200`
+- pero no se observó ningún marcador de disparo de búsqueda estable y verificable
+
+Por lo tanto, para la documentación de Crazyrouter, actualmente la búsqueda web al estilo OpenAI debe ser documentada primero mediante la API de Respuestas.
+
+Páginas relacionadas:
+
+- [Búsqueda web por Respuestas](/es/chat/responses/web-search)
+- [Centro de funcionalidades: Búsqueda web](/es/features/web-search)
+
+{/* crazyrouter-model-links v2 */}
+## Relacionado en crazyrouter.com
+
+- [Página de modelo GPT Image 1.5: precio en tiempo real, ejemplos reales, código](https://crazyrouter.com/es/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Página de modelo GPT Image 2: precio en tiempo real, ejemplos reales, código](https://crazyrouter.com/es/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Todos los modelos OpenAI con precios en tiempo real](https://crazyrouter.com/es/models/openai?utm_source=docs&utm_medium=related)

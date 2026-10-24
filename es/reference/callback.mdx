@@ -1,0 +1,126 @@
+---
+title: "Protocolo de Callback"
+description: "Protocolo de callback de Webhook para tareas asíncronas"
+---
+> Contenido actualizado: 2026-10-22
+
+## Resumen
+
+Para tareas asíncronas (dibujos Midjourney, generación de videos, etc.), Crazyrouter soporta notificar el cambio de estado de la tarea a través de un webhook de callback.
+
+## Configuración de la URL de Callback
+
+Al enviar la tarea, especifica la dirección de callback usando el parámetro `notifyHook`:
+
+```json
+{
+  "prompt": "a beautiful sunset",
+  "notifyHook": "https://your-server.com/api/callback"
+}
+```
+
+## Formato de la solicitud de callback
+
+Crazyrouter enviará una solicitud POST a tu URL de callback:
+
+```
+POST https://your-server.com/api/callback
+Content-Type: application/json
+```
+
+### Callback para Midjourney
+
+```json
+{
+  "id": "task_abc123",
+  "action": "IMAGINE",
+  "status": "SUCCESS",
+  "prompt": "a beautiful sunset",
+  "imageUrl": "https://cdn.example.com/image.png",
+  "progress": "100%",
+  "failReason": "",
+  "submitTime": 1706000000000,
+  "startTime": 1706000010000,
+  "finishTime": 1706000060000
+}
+```
+
+### Callback para generación de video (Kling/Luma/Runway)
+
+```json
+{
+  "id": "task_xyz789",
+  "status": "succeed",
+  "type": "video",
+  "output": {
+    "video_url": "https://cdn.example.com/video.mp4",
+    "cover_url": "https://cdn.example.com/cover.jpg",
+    "duration": 5.0
+  },
+  "created_at": 1706000000,
+  "updated_at": 1706000120
+}
+```
+
+## Flujo de cambios de estado de callback
+
+```
+提交 → NOT_START → IN_PROGRESS → SUCCESS / FAILURE
+```
+
+Cada vez que cambia el estado, se activará un callback.
+
+## Ejemplo de servidor de callback
+
+<CodeGroup>
+
+```python Python (Flask)
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+@app.route("/api/callback", methods=["POST"])
+def callback():
+    data = request.json
+    task_id = data["id"]
+    status = data["status"]
+
+    print(f"任务 {task_id} 状态更新: {status}")
+
+    if status == "SUCCESS":
+        image_url = data.get("imageUrl")
+        print(f"图片地址: {image_url}")
+
+    return jsonify({"success": True})
+
+app.run(port=8080)
+```
+
+```javascript Node.js (Express)
+const express = require('express');
+const app = express();
+app.use(express.json());
+
+app.post('/api/callback', (req, res) => {
+  const { id, status, imageUrl } = req.body;
+  console.log(`任务 ${id} 状态: ${status}`);
+
+  if (status === 'SUCCESS') {
+    console.log(`图片: ${imageUrl}`);
+  }
+
+  res.json({ success: true });
+});
+
+app.listen(8080);
+```
+
+</CodeGroup>
+
+<Warning>
+  La URL de callback debe ser una dirección accesible públicamente. Por favor, asegúrate de que tu servidor pueda recibir solicitudes POST y devuelva un código de estado 200 en menos de 5 segundos.
+</Warning>
+
+<Note>
+  Si el callback falla, el sistema intentará de nuevo hasta 3 veces, con intervalos de 10 segundos, 30 segundos y 60 segundos respectivamente.
+</Note>

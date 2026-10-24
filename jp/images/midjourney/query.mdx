@@ -1,20 +1,20 @@
 ---
-title: "Query Task Status"
-description: "Query Midjourney task status, supporting single and batch queries"
+title: "タスク状態を照会する"
+description: "Midjourney タスクの状態を照会します。単体照会と一括照会の両方に対応します。"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Query Task Status
+# タスク状態を照会する
 
-## Query Single Task
+## 単体タスク照会
 
 ```
 GET /mj/task/{id}/fetch
 ```
 
-Query task details and status by task ID.
+タスク ID に基づいてタスクの詳細と状態を照会します。
 
-### Request Examples
+### リクエスト例
 
 <CodeGroup>
 
@@ -36,7 +36,7 @@ print(response.json())
 
 </CodeGroup>
 
-### Response Example (Processing)
+### レスポンス例（処理中）
 
 ```json
 {
@@ -54,7 +54,7 @@ print(response.json())
 }
 ```
 
-### Response Example (Completed)
+### レスポンス例（完了済み）
 
 ```json
 {
@@ -85,21 +85,21 @@ print(response.json())
 
 ---
 
-## Batch Query Tasks
+## 一括タスク照会
 
 ```
 POST /mj/task/list-by-condition
 ```
 
-Batch query tasks by conditions.
+条件に基づいてタスクリストを一括照会します。
 
-### Request Parameters
+### リクエストパラメータ
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `ids` | array | No | List of task IDs |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `ids` | array | いいえ | タスク ID リスト |
 
-### Request Example
+### リクエスト例
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/mj/task/list-by-condition \
@@ -110,7 +110,7 @@ curl -X POST https://api.crazyrouter.com/mj/task/list-by-condition \
   }'
 ```
 
-### Response Example
+### レスポンス例
 
 ```json
 [
@@ -132,5 +132,5 @@ curl -X POST https://api.crazyrouter.com/mj/task/list-by-condition \
 ```
 
 <Note>
-  A polling interval of 3-5 seconds is recommended. Tasks typically complete within 30-120 seconds, depending on Midjourney service load.
+  ポーリング間隔は 3～5 秒ごとを推奨します。タスクは通常 30～120 秒以内に完了しますが、Midjourney サービスの負荷によって異なる場合があります。
 </Note>

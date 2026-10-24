@@ -2,36 +2,38 @@
 title: "Grok モデル"
 description: "OpenAI Chat Completions 形式で Grok テキストモデルを呼び出す"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
 # Grok モデル
 
-```text
+```
 POST /v1/chat/completions
 ```
 
-Grok テキストモデルは OpenAI 互換の Chat Completions 形式で呼び出せます。`base_url` を Crazyrouter に向け、`model` に Grok のモデル ID を指定してください。
+Grok テキストモデルは OpenAI Chat Completions 互換フォーマットで呼び出します。`base_url` を Crazyrouter に設定し、`model` に Grok モデル ID を入力するだけで利用できます。
 
 <Note>
-  モデルの可用性は、チャネル状態、トークン権限、pricing 設定によって変わります。本番利用前に、同じ API キーで `GET /v1/models` を呼び出し、対象モデルが表示されることを確認してください。
+  モデルの利用可能性は、チャネル、トークン権限、および pricing ページの設定によって変動します。正式リリース前には、まず `GET /v1/models` で現在の API Key がご希望のモデルを参照できるか確認することをおすすめします。
 </Note>
 
-## よく使うモデル
+## よく使われるモデル
 
-| Model | 説明 |
-|-------|------|
+現在主流の Grok テキストモデル書式は以下の通りです：
+
+| モデル | 説明 |
+|------|------|
 | `grok-4` | Grok 4 メインモデル |
-| `grok-4-fast` | Grok 4 fast 変種 |
-| `grok-4-fast-non-reasoning` | Grok 4 fast 非推論変種 |
-| `grok-4-fast-reasoning` | Grok 4 fast 推論変種 |
+| `grok-4-fast` | Grok 4 fast バリアント |
+| `grok-4-fast-non-reasoning` | Grok 4 fast 非推論バリアント |
+| `grok-4-fast-reasoning` | Grok 4 fast 推論バリアント |
 | `grok-4.1` | Grok 4.1 |
 | `grok-4.1-fast` | Grok 4.1 fast |
-| `grok-4.1-thinking` | Grok 4.1 thinking |
-| `grok-4.2` | Grok 4.2 |
-| `grok-4-0709` | 日付付き Grok 4 モデル |
+| `grok-4.1-fast` | Grok 4.1 thinking |
+| `grok-4.1-fast` | Grok 4.2 |
+| `grok-4-0709` | Grok 4 日付バージョン |
 
 <Warning>
-  古い `grok-4` / `grok-4.1` 系の名前は履歴呼び出しや互換設定に残っている場合がありますが、公開 pricing では主に `grok-4*` 系を維持しています。新規連携では `grok-4`、`grok-4.1`、`grok-4.2`、または fast/reasoning 変種を優先してください。
+  古い `grok-4` / `grok-4.1` 系列は、歴史的な呼び出しまたは下位互換の設定で参照されることがありますが、現在公開されている pricing では主に `grok-4*` 系列が維持されています。新規接続の場合は `grok-4`、`grok-4.1`、`grok-4.1-fast` や fast/reasoning バリアントを優先してください。
 </Warning>
 
 ## 最小リクエスト
@@ -97,9 +99,9 @@ console.log(response.choices[0].message.content);
 
 </CodeGroup>
 
-## ストリーミング
+## ストリーミング出力
 
-`stream: true` を設定すると SSE ストリーミングを利用できます。
+`stream: true` をセットすることで SSE ストリーミング出力が利用できます。
 
 ```bash
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -117,9 +119,9 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-## 推論モデル
+## 推論バリアント
 
-モデル名に `reasoning` または `thinking` を含む Grok モデルでは、リクエスト形式をシンプルに保つことを推奨します。
+モデル名に `reasoning` または `thinking` を含む Grok モデルには、なるべくシンプルなリクエストパラメータを使用することを推奨します：
 
 ```json
 {
@@ -135,26 +137,26 @@ curl https://api.crazyrouter.com/v1/chat/completions \
 ```
 
 <Note>
-  推論フィールド、検索フィールド、実験的パラメータの対応状況は上流チャネルによって異なります。チャネルをまたいだ安定利用では、`model`、`messages`、`temperature`、`top_p`、`max_tokens`、`stream` など標準的な OpenAI Chat フィールドを優先してください。
+  上流のチャネルによっては、推論フィールド・検索フィールド・実験的なパラメータのサポート状況が異なる場合があります。複数チャネルで安定的な利用を目指す際は、標準的な OpenAI Chat フィールド（`model`、`messages`、`temperature`、`top_p`、`max_tokens`、`stream`）の優先利用を推奨します。
 </Note>
 
-## 関連する画像モデル
+## 関連画像モデル
 
-Grok の画像生成は Chat Completions ではなく、次の Images API を使用します。
+Grok の画像生成は Chat Completions を利用しません。次をご利用ください：
 
 ```text
 POST /v1/images/generations
 ```
 
-画像モデルのパラメータは [Grok 画像モデル](/jp/images/grok) を参照してください。
+画像モデルのパラメータは[GroK 画像モデル](/jp/images/grok)をご確認ください。
 
-関連ページ:
+関連ページ：
 
-- [公式モデル課金方式](/jp/reference/official-pricing-methods)
+- [モデル公式価格方式](/jp/reference/official-pricing-methods)
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [GPT Image 1.5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [OpenAI の全モデルと料金](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [GPT Image 1.5 モデルページ：リアルタイム価格・実例・利用例コード](https://crazyrouter.com/ja/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT Image 2 モデルページ：リアルタイム価格・実例・利用例コード](https://crazyrouter.com/ja/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [OpenAI 全モデルと価格](https://crazyrouter.com/ja/models/openai?utm_source=docs&utm_medium=related)

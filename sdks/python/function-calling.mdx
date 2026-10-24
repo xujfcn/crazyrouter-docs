@@ -1,12 +1,12 @@
 ---
-title: 'Python Function Calling'
-description: 'Python 实现 Function Calling 完整示例'
+title: "Python函数调用"
+description: "完整的Python函数调用示例"
 ---
-> 更新日期：2026-06-06
+> 内容更新: 2026-06-09
 
-## 概述
+## 概览
 
-Function Calling 允许模型调用你定义的函数，实现与外部系统的交互。模型不会直接执行函数，而是返回函数名和参数，由你的代码执行后将结果返回给模型。
+函数调用允许模型调用您定义的函数，实现与外部系统的交互。模型不会直接执行函数——它返回函数名称和参数，然后您的代码执行这些函数并将结果返回给模型。
 
 ## 完整示例
 
@@ -16,24 +16,24 @@ from openai import OpenAI
 
 client = OpenAI(api_key="sk-xxx", base_url="https://api.crazyrouter.com/v1")
 
-# 1. 定义工具
+# 1. Define tools
 tools = [
     {
         "type": "function",
         "function": {
             "name": "get_weather",
-            "description": "获取指定城市的天气信息",
+            "description": "Get weather information for a specified city",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "city": {
                         "type": "string",
-                        "description": "城市名称，如：北京"
+                        "description": "City name, e.g.: New York"
                     },
                     "unit": {
                         "type": "string",
                         "enum": ["celsius", "fahrenheit"],
-                        "description": "温度单位"
+                        "description": "Temperature unit"
                     }
                 },
                 "required": ["city"]
@@ -44,12 +44,12 @@ tools = [
         "type": "function",
         "function": {
             "name": "search_products",
-            "description": "搜索商品",
+            "description": "Search for products",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "query": {"type": "string", "description": "搜索关键词"},
-                    "max_price": {"type": "number", "description": "最高价格"}
+                    "query": {"type": "string", "description": "Search keyword"},
+                    "max_price": {"type": "number", "description": "Maximum price"}
                 },
                 "required": ["query"]
             }
@@ -57,15 +57,15 @@ tools = [
     }
 ]
 
-# 2. 模拟函数实现
+# 2. Mock function implementations
 def get_weather(city, unit="celsius"):
-    return {"city": city, "temperature": 22, "unit": unit, "condition": "晴"}
+    return {"city": city, "temperature": 22, "unit": unit, "condition": "Sunny"}
 
 def search_products(query, max_price=None):
-    return [{"name": f"{query} 商品A", "price": 99}, {"name": f"{query} 商品B", "price": 199}]
+    return [{"name": f"{query} Product A", "price": 99}, {"name": f"{query} Product B", "price": 199}]
 
-# 3. 对话循环
-messages = [{"role": "user", "content": "北京今天天气怎么样？顺便帮我搜一下雨伞"}]
+# 3. Conversation loop
+messages = [{"role": "user", "content": "What's the weather like in New York today? Also search for umbrellas"}]
 
 response = client.chat.completions.create(
     model="gpt-5.5",
@@ -76,7 +76,7 @@ response = client.chat.completions.create(
 
 message = response.choices[0].message
 
-# 4. 处理工具调用
+# 4. Handle tool calls
 if message.tool_calls:
     messages.append(message)
 
@@ -95,7 +95,7 @@ if message.tool_calls:
             "content": json.dumps(result, ensure_ascii=False)
         })
 
-    # 5. 获取最终回复
+    # 5. Get final response
     final = client.chat.completions.create(
         model="gpt-5.5",
         messages=messages,
@@ -104,7 +104,7 @@ if message.tool_calls:
     print(final.choices[0].message.content)
 ```
 
-## 强制调用特定函数
+## 强制指定函数调用
 
 ```python
 response = client.chat.completions.create(
@@ -117,9 +117,9 @@ response = client.chat.completions.create(
 
 ## 支持的模型
 
-当前文档中的 OpenAI 兼容 Function Calling 示例，建议优先使用以下已验证模型：
+对于本页面中兼容OpenAI的函数调用示例，请首先使用以下经过验证的基础版本：
 - `gpt-5.5`
 
 <Note>
-  `gpt-5.5` 的工具调用已于 2026 年 3 月 23 日在 Crazyrouter 生产环境完成实测。其他厂商模型的工具调用能力请优先参考各自专页，因为接入格式和支持细节可能不同。
+    在2026年3月23日，使用`gpt-5.5`进行工具调用已在Crazyrouter生产环境中通过验证。对于其他厂商，请首先查看其专属页面，因为请求格式和支持详情可能有所不同。
 </Note>

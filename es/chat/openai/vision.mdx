@@ -1,0 +1,119 @@
+---
+title: "Chat de reconocimiento de imágenes"
+description: "Entrada de imágenes al estilo OpenAI, cubriendo los dos métodos: base64 y URL remota"
+---
+> Contenido actualizado: 2026-06-09
+
+# Chat de reconocimiento de imágenes
+
+```
+POST /v1/chat/completions
+```
+
+Crazyrouter en entorno de producción ha verificado soporte para los modelos más usados con entrada al estilo OpenAI `image_url`:
+
+- Modelos visuales OpenAI como `gpt-4o`, `gpt-4o-mini`, `gpt-5.5`, `gpt-5.5`, etc.
+- La entrada admite dos formas: `data:image/...;base64,...` data URL y `https://` URL pública
+- El `message.content` de retorno es actualmente una cadena de texto simple
+
+> Orden recomendado: primero sube la imagen local mediante la [interfaz de carga de imágenes](/es/upload) para obtener una URL temporal `media.crazyrouter.com`, luego envíala a `image_url`; o simplemente envía el data URL en base64. También se puede usar una URL remota pública, pero debe cumplir las "Restricciones de URL remota" descritas más abajo.
+
+---
+
+## Usar base64 data URL (más estable)
+
+```bash
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o-mini",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {"type": "text", "text": "What color is this image?"},
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "data:image/png;base64,iVBORw0KGgoAAA..."
+            }
+          }
+        ]
+      }
+    ],
+    "max_tokens": 100
+  }'
+```
+
+Ejemplo de respuesta:
+
+```json
+{
+  "model": "gpt-4o-mini",
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "Red."
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Usar URL https remota
+
+```bash
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-4o-mini",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {"type": "text", "text": "Describe in 5 words."},
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "https://www.gstatic.com/webp/gallery/1.jpg"
+            }
+          }
+        ]
+      }
+    ],
+    "max_tokens": 40
+  }'
+```
+
+### Restricciones de URL remota
+
+La URL debe ser una dirección de imagen accesible **por el servidor de Crazyrouter**, no basta con que sea accesible desde el navegador. Causas comunes de fallo:
+
+| Modo de fallo | Causa | Método de solución |
+|--------------|-------|------------------|
+| No se puede resolver el dominio | Dirección interna o error de escritura | Usa una URL pública https |
+| 403 Forbidden | Algunos CDN (como wikimedia, S3 privado) limitan el UA / Referer del servidor | Usa la [interfaz de carga de imágenes](/es/upload) o base64 |
+| Content-Type no es `image/*` | La URL devuelve una página HTML o redirige a inicio de sesión | Asegúrate de que la URL directa sea descargable |
+| Archivo supera los 20MB | Límite de tamaño por archivo | Comprime o recorta y luego sube |
+
+Si ves el mensaje de error `Unable to process the image you provided. Please verify the image URL is publicly accessible, or upload it as base64.`, significa que la URL no es accesible desde el servidor, revisa según la tabla anterior.
+
+---
+
+## Prácticas recomendadas
+
+- Recursos internos, imágenes privadas o de accesibilidad incierta: primero usa [`POST /v1/files/uploads`](/es/upload) para obtener una URL temporal `media.crazyrouter.com/...` válida por 72 horas, luego envíala a `image_url`
+- Imágenes pequeñas (< 1MB) o de uso único: usa directamente el data URL en base64, evitando una carga adicional
+- Uso avanzado como múltiples imágenes, parámetro `detail`, etc.: actualmente soportado por toda la infraestructura upstream OpenAI, sigue el protocolo oficial de OpenAI
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Página del modelo GPT Image 1.5: precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Página del modelo GPT Image 2: precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Todos los modelos y precios de OpenAI](https://crazyrouter.com/es/models/openai?utm_source=docs&utm_medium=related)

@@ -1,39 +1,41 @@
 ---
-title: 'RikkaHub Setup Guide'
-description: 'Configure Crazyrouter API in RikkaHub'
+title: "RikkaHub 設定チュートリアル"
+description: "RikkaHub で Crazyrouter API を設定する方法"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-## Overview
+## 概要
 
-RikkaHub is an AI model aggregation client that supports unified management of multiple model providers.
+RikkaHub は、さまざまなモデルサービスプロバイダを一元管理できる AI モデル統合クライアントです。
 
-## Configuration Steps
+## 設定手順
 
 <Steps>
-  <Step title="Open Settings">
-    Go to the RikkaHub settings page and find the `Model Services` or `API Configuration` option.
+  <Step title="設定を開く">
+    RikkaHub の設定ページに入り、`モデルサービス` または `API 設定` オプションを探します。
   </Step>
-  <Step title="Add Provider">
-    Click to add a new provider:
-    - **Type**: OpenAI Compatible
-    - **Name**: Crazyrouter
+  <Step title="サービスプロバイダを追加">
+    新しいサービスプロバイダを追加します：
+    - **種類**: OpenAI Compatible
+    - **名前**: Crazyrouter
     - **API Base URL**: `https://api.crazyrouter.com/v1`
     - **API Key**: `sk-xxx`
   </Step>
-  <Step title="Select Models">
-    After configuration, select the models you want to use from the model list.
+  <Step title="モデルを選択">
+    設定が完了したら、モデル一覧から使用したいモデルを選択してください。
   </Step>
 </Steps>
 
-## Available Models
+## 利用可能なモデル
 
-After configuration, you can use all models supported by Crazyrouter, including:
-- GPT-4o, GPT-4o-mini
-- Claude Sonnet, Claude Opus
-- Gemini Pro, Gemini Flash
-- And 300+ other models
+設定完了後、まずは現在検証済みの主要モデルを追加することをおすすめします：
+
+- `gpt-5.5`
+- `claude-opus-4-8`
+- `gemini-3.1-pro`
+
+まず `gpt-5.5` で初回の接続テストを行い、その後必要に応じて Claude、Gemini もしくは当サイトのモデルリストに公開されている他のモデルを追加してください。
 
 <Note>
-  RikkaHub supports configuring multiple providers simultaneously, allowing flexible switching during conversations.
+  RikkaHub では複数のサービスプロバイダを同時に設定でき、会話中に柔軟に切り替えることが可能です。
 </Note>

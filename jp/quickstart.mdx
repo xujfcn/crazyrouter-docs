@@ -1,19 +1,22 @@
 ---
-title: 'クイックスタート'
-description: '5 分で最初の API リクエストを実行する'
+title: "API クイックスタートガイド"
+description: "5分で初めてのAPIコールを完了しましょう"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-16
 
-## Step 1: API キーを取得する
+## ステップ1：API Key を取得する
 
-1. [Crazyrouter](https://crazyrouter.com) にアクセスしてアカウントを作成します。
-2. ログイン後、[Token Management](https://crazyrouter.com/console/token) ページを開きます。
-3. 「Create Token」をクリックして API キーを生成します。
+1. [Crazyrouter](https://crazyrouter.com) にアクセスしてアカウントを登録してください。
+2. ログイン後、[トークン管理](https://crazyrouter.com/console/token) ページへ進みます。
+3. 「新規トークン作成」をクリックしてAPI Keyを作成します。
 
-## Step 2: リクエストを送信する
+## ステップ2：リクエストを送信する
+
+<Note>
+国際接続の標準エンドポイントには優先的に`https://api.crazyrouter.com/v1`をご記入ください。東アジア地域では`https://cn.crazyrouter.com/v1`を優先的にご利用ください。クライアントがルートドメインか`/v1`のどちらを指定すべきか不明な場合は、まず[API Endpoint 説明](https://docs.crazyrouter.com/jp/api-endpoint)をご参照ください。
+</Note>
 
 <CodeGroup>
-
 ```bash cURL
 curl https://api.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
@@ -21,7 +24,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   -d '{
     "model": "gpt-5.5",
     "messages": [
-      {"role": "user", "content": "Hello"}
+      {"role": "user", "content": "你好"}
     ]
   }'
 ```
@@ -36,7 +39,7 @@ client = OpenAI(
 
 response = client.chat.completions.create(
     model="gpt-5.5",
-    messages=[{"role": "user", "content": "Hello"}]
+    messages=[{"role": "user", "content": "你好"}]
 )
 print(response.choices[0].message.content)
 ```
@@ -51,16 +54,15 @@ const client = new OpenAI({
 
 const response = await client.chat.completions.create({
   model: 'gpt-5.5',
-  messages: [{ role: 'user', content: 'Hello' }]
+  messages: [{ role: 'user', content: '你好' }]
 });
 console.log(response.choices[0].message.content);
 ```
-
 </CodeGroup>
 
-## Step 3: レスポンスを確認する
+## ステップ3：結果を確認する
 
-成功時のレスポンス例:
+成功時のレスポンス例：
 
 ```json
 {
@@ -71,7 +73,7 @@ console.log(response.choices[0].message.content);
     "index": 0,
     "message": {
       "role": "assistant",
-      "content": "Hello! How can I help you today?"
+      "content": "你好！有什么可以帮助你的吗？"
     },
     "finish_reason": "stop"
   }],
@@ -84,9 +86,9 @@ console.log(response.choices[0].message.content);
 ```
 
 <Note>
-  このクイックスタートの `gpt-5.5` 例は、Crazyrouter 本番環境で 2026-03-23 に検証済みです。
+このクイックスタートページの`gpt-5.5`のサンプルは2026-06-06のドキュメント基準に合わせて更新されています。
 </Note>
 
 <Note>
-  OpenAI 互換クライアントや LangChain、LlamaIndex、Cursor などのフレームワークは、通常 `base_url` と `api_key` を変更するだけで連携できます。
+OpenAI互換の全クライアントやフレームワーク（LangChain、LlamaIndex、Cursorなど）は、`base_url`と`api_key`を変更するだけで接続可能です。
 </Note>

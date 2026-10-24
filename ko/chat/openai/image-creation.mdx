@@ -1,31 +1,31 @@
 ---
-title: "채팅으로 이미지 생성"
-description: "2026-03-23 Crazyrouter 프로덕션 환경 검증을 기반으로 한 Chat 이미지 생성 현황과 안정적인 대체 방안"
+title: "채팅 이미지 생성"
+description: "채팅 이미지 동작 및 Crazyrouter 프로덕션 기준으로 2026-03-23에 검증된 안정적인 대안"
 ---
-> 업데이트: 2026-06-06
+> 내용 업데이트: 2026-06-09
 
-# 채팅으로 이미지 생성
+# 채팅 이미지 생성
 
 ```
 POST /v1/chat/completions
 ```
 
-2026년 3월 23일 기준, Crazyrouter 프로덕션 환경에서 Chat 이미지 생성에 대한 실측 결과는 다음과 같습니다.
+2026년 3월 23일 기준, Crazyrouter 프로덕션 체크 결과:
 
-- `gpt-4o`는 정상적으로 `200`을 반환하지만, 응답의 `message.content`는 일반 문자열이며 표준 이미지 다중 파트 콘텐츠가 아닙니다
-- `gpt-image-2`도 정상적으로 `200`을 반환하지만, 현재 반환 형태는 여전히 텍스트나 Markdown이며 파라미터 블록, 작업 ID, 미리보기 링크를 포함할 뿐 표준 OpenAI `image_url` 다중 파트 구조가 아닙니다
-- 안정적이고 프로그램으로 파싱 가능한 이미지 결과가 필요하다면, 현재는 [`/v1/images/generations`](/ko/images/gpt-image) + `gpt-image-2`를 우선 사용해야 합니다. Grok 이미지 모델이 필요하다면 [`Grok 이미지 모델`](/ko/images/grok)을 참고하세요
-- Gemini / Nano Banana 이미지 생성, 참조 이미지 편집 또는 다중 이미지 합성이 필요하다면 통합 Images API를 사용하고, [`Nano Banana 2`](/ko/images/nano-banana-2) 또는 [`Nano Banana Pro`](/ko/images/nano-banana-pro)를 우선 참고하세요
+- `gpt-4o`은 `200`를 반환하지만, `message.content`는 표준 멀티파트 이미지 콘텐츠가 아니라 일반 텍스트임
+- `gpt-image-2` 역시 `200`를 반환하지만, 현재 응답 형식은 여전히 파라미터 블록, ID, 미리보기 링크가 포함된 텍스트 또는 마크다운으로, 표준 OpenAI `image_url` 멀티파트 구조와 다름
+- 안정적이고 기계 판독 가능한 이미지 출력이 필요하다면 현재 권장 경로는 [`/v1/images/generations`](/ko/images/gpt-image) 및 `gpt-image-2`임. Grok 이미지 모델의 경우 [`Grok Image Models`](/ko/images/grok) 참조
+- 기준 이미지 편집 및 다중 이미지 입력이 필요하다면 Nano Banana 계열을 안정적인 `/v1/images/generations` 시작점으로 계속 사용하지 마세요. [`Nano Banana 2`](/ko/images/nano-banana-2)에 문서화된 Gemini 네이티브 경로로 시작하시고, [`Nano Banana`](/ko/images/nano-banana)는 현재 제한 테스트 중임
 
 <Warning>
-  Crazyrouter의 현재 Chat 이미지 생성 응답을 표준 OpenAI `content: [{type: "image_url", ...}]` 구조로 파싱하지 마세요.
+  현재 Crazyrouter 채팅 이미지 응답을 표준 OpenAI `content: [{type: "image_url", ...}]` 형태로 파싱하지 마세요.
 </Warning>
 
 ---
 
-## 현재 재현 가능한 Chat 동작
+## 현재 재현 가능한 채팅 동작
 
-아래 요청은 프로덕션 환경에서 `gpt-image-2`에 도달했고 `200`을 반환했습니다.
+아래 요청이 프로덕션의 `gpt-image-2`에 전달되어 `200`를 반환함:
 
 ```bash
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -43,7 +43,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-프로덕션 환경에서 실제로 관측된 `message.content`는 다음과 같은 문자열입니다.
+관찰된 `message.content`는 대략 다음과 같은 형태의 문자열이었음:
 
 ```text
 {
@@ -56,13 +56,13 @@ ID: ...
 Data Preview: https://...
 ```
 
-이는 현재 Chat 경로가 표준화된 다중 파트 이미지 메시지 객체가 아니라 "텍스트로 감싼 이미지 작업 결과"에 더 가깝다는 것을 보여줍니다.
+즉, 현재 채팅 경로는 표준화된 멀티파트 이미지 메시지 객체라기보다 텍스트로 래핑된 이미지 태스크 출력처럼 동작함
 
 ---
 
-## 안정적인 경로: Images API
+## 안정 경로: Images API
 
-프로그램적으로 이미지를 가져오는 것이 목표라면, 현재 더 안정적인 방식은 다음과 같습니다.
+프로그래밍 방식 이미지 가져오기에는 다음을 사용하세요:
 
 ```bash
 curl -X POST https://api.crazyrouter.com/v1/images/generations \
@@ -77,21 +77,21 @@ curl -X POST https://api.crazyrouter.com/v1/images/generations \
   }'
 ```
 
-현재 `gpt-image-2`의 안정적인 경로는 주 수신 라인인 `https://api.crazyrouter.com/v1`을 사용합니다. 응답은 보통 다음을 반환합니다.
+현재 `gpt-image-2` 안정 경로는 기본 이미지 라우트인 `https://api.crazyrouter.com/v1`를 사용함. 응답에는 일반적으로 다음이 포함됨:
 
 - `data[0].url`
 
-`gpt-image-2`는 `response_format`을 지원하지 않으므로 `response_format="url"`이나 `response_format="b64_json"`을 전달하지 마세요. 이미지 파일 형식을 제어하려면 `output_format="png"`, `"jpeg"` 또는 `"webp"`를 사용하세요.
+`gpt-image-2`는 하위 호환성 필드로 `response_format="url"`와 `response_format="b64_json"`를 허용하지만, 새로운 연동은 이미지 파일 포맷을 선택하기 위해 `output_format="png"`, `"jpeg"` 또는 `"webp"`를 사용해야 함
 
-즉, 현재 안정적인 자동화 소비 방식은 여전히 Chat Completions의 이미지 호환 경로가 아니라 Images API입니다.
+즉, 안정적인 자동화 경로는 여전히 이미지 API이며, 채팅-이미지 호환 경로가 아님
 
 <Note>
-  단순히 수동으로 사용해 보는 경우라면 `gpt-image-2`의 Chat 경로로도 결과를 확인할 수 있습니다. 프론트엔드/백엔드 자동화, 결과 저장, 이미지 후처리를 하려면 [`GPT Image 문서`](/ko/images/gpt-image), [`Grok 이미지 모델`](/ko/images/grok) 또는 [`Nano Banana 2`](/ko/images/nano-banana-2)를 직접 사용하세요. 이미지 관련 장시간 요청에는 `https://api.crazyrouter.com/v1`을 우선 사용하세요.
+  수동 테스트만 필요하다면, `gpt-image-2` 채팅 경로로 관찰 용도로는 유효함. 백엔드 자동화, 저장, 후처리가 필요하면 [`GPT Image docs`](/ko/images/gpt-image) 또는 [`Grok Image Models`](/ko/images/grok)를 사용하세요. 작업이 기준 이미지 편집이나 다중 이미지 입력에 의존한다면 [`Nano Banana 2`](/ko/images/nano-banana-2)에 설명된 Gemini 네이티브 경로를 시작점으로 삼으세요. Nano Banana 계열 `/v1/images/generations`를 안정적 권장 경로로 계속 이용하지 마세요.
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 관련 페이지 (crazyrouter.com)
+## crazyrouter.com 관련 문서
 
-- [GPT Image 1.5 모델 페이지: 실시간 가격, 샘플, 코드](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2 모델 페이지: 실시간 가격, 샘플, 코드](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [OpenAI 전체 모델과 가격](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [GPT 이미지 1.5 모델 페이지: 실시간 가격, 실제 샘플, 코드](https://crazyrouter.com/ko/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT 이미지 2 모델 페이지: 실시간 가격, 실제 샘플, 코드](https://crazyrouter.com/ko/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [실시간 가격이 제공되는 모든 OpenAI 모델](https://crazyrouter.com/ko/models/openai?utm_source=docs&utm_medium=related)

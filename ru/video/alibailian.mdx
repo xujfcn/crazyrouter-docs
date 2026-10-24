@@ -1,69 +1,70 @@
 ---
-title: "Ali Bailian Video API"
-description: "Ali Bailian-compatible video routes. Clients use /alibailian/api/v1/* while Crazyrouter now proxies upstream to official DashScope /api/v1/* endpoints"
+title: "Видеоинтерфейс Али Бай Лян"
+description: "Видеоинтерфейс, совместимый с Али Бай Лян. Для внешнего использования применяется путь совместимости /alibailian/api/v1/*, во внутренней системе Crazyrouter уже настроена интеграция с официальным апстримом DashScope по /api/v1/*"
 ---
-> Дата обновления: 2026-06-07
+> Обновление содержания: 2026-06-09
 
-# Ali Bailian Video API
 
-Crazyrouter exposes Ali Bailian-compatible video routes so applications already using DashScope / Ali Bailian video formats can migrate with minimal path changes.
+# Видеоинтерфейс Али Бай Лян
 
-## What This Page Covers
+Crazyrouter предоставляет видеоинтерфейс, совместимый с Али Бай Лян, что облегчает прямую миграцию приложений, уже интегрированных под форматы видеоинтерфейса DashScope / Али Бай Лян.
 
-- This page documents Crazyrouter's Ali-compatible public alias for workflows already integrated against the DashScope / Ali Bailian video body shape; those workflows can continue using `/alibailian/api/v1/*`
-- Internally, Crazyrouter now talks to the official DashScope upstream through `/api/v1/*`
-- If you want Crazyrouter's unified video API rather than the Ali-compatible migration path, use `/v1/video/generations`
-- Wan text-to-video currently uses `/v1/video/generations`. In particular, `wan2.2-t2v-plus` is not supported on this page's `/alibailian/...video-synthesis` submit path.
-- Actual model availability still depends on your token allowlist, pricing configuration, and current production channel bindings; do not assume every upstream Ali model is enabled by default
+## Что охватывает эта страница
 
-## Supported Endpoints
+- Здесь описаны совместимые псевдонимы Али для внешнего интерфейса Crazyrouter — они идеально подходят тем рабочим процессам, которые уже реализованы под интеграцию с DashScope / Али Бай Лян с поддержкой видеоформата `/alibailian/api/v1/*`.
+- Официальный внутренний апстрим Crazyrouter унифицирован и всегда указывает на путь DashScope `/api/v1/*`
+- Если вы хотите использовать универсальный видеоинтерфейс Crazyrouter, а не миграционный совместимый путь Али, перейдите на `/v1/video/generations`
+- Видеомодуль Wan Wen Sheng в настоящее время использует `/v1/video/generations`. Особое внимание: `wan2.2-t2v-plus` не поддерживает отправку по адресу, указанному на этой странице (`/alibailian/...video-synthesis`).
+- Возможность вызова конкретной модели всё ещё зависит от вашего белого списка токенов, тарифов на модель и текущего состояния её размещения в проде; не стоит считать, что все апстримные видеомодели Али по умолчанию открыты
+
+## Поддерживаемые эндпойнты
 
 - `POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis`
 - `GET /alibailian/api/v1/tasks/{task_id}`
 
-## Internal Upstream Mapping
+## Описание внутренних апстримных путей
 
-- Public compatibility submit path: `POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis`
-- Public compatibility query path: `GET /alibailian/api/v1/tasks/{task_id}`
-- Crazyrouter upstream submit path: `POST /api/v1/services/aigc/video-generation/video-synthesis`
-- Crazyrouter upstream query path: `GET /api/v1/tasks/{task_id}`
+- Внешний путь для совместимой отправки: `POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis`
+- Внешний путь для совместимого запроса: `GET /alibailian/api/v1/tasks/{task_id}`
+- Внутренняя отправка в апстрим Crazyrouter: `POST /api/v1/services/aigc/video-generation/video-synthesis`
+- Внутренний запрос в апстрим Crazyrouter: `GET /api/v1/tasks/{task_id}`
 
-## Authentication
+## Аутентификация
 
 ```http
 Authorization: Bearer YOUR_API_KEY
 ```
 
-## POST Create Video
+## POST Генерация видео
 
 ```
 POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis
 ```
 
-### Request Body Shape
+### Структура тела запроса
 
-| Field | Type | Required | Description |
-|------|------|----------|-------------|
-| `model` | string | Yes | Model name, such as `wan2.5-i2v-preview` |
-| `input` | object | Yes | Core input payload |
-| `input.prompt` | string | No | Positive prompt |
-| `input.negative_prompt` | string | No | Negative prompt |
-| `input.img_url` | string | No | First-frame image URL or Base64 |
-| `input.audio_url` | string | No | Audio file URL |
-| `input.template` | string | No | Video effect template |
-| `parameters` | object | No | Advanced processing parameters |
-| `parameters.resolution` | string | No | Resolution tier, for example `480P` |
-| `parameters.duration` | integer | No | Video duration in seconds |
-| `parameters.prompt_extend` | boolean | No | Whether to enable prompt enhancement |
-| `parameters.watermark` | boolean | No | Whether to add an AI watermark |
-| `parameters.audio` | boolean | No | Whether to auto-add audio |
-| `parameters.seed` | integer | No | Random seed |
+| Поле | Тип | Обязательное | Описание |
+|------|------|------|------|
+| `model` | string | Да | Имя модели, например `wan2.5-i2v-preview` |
+| `input` | object | Да | Базовые входные параметры |
+| `input.prompt` | string | Нет | Прямой (позитивный) промпт |
+| `input.negative_prompt` | string | Нет | Обратный (негативный) промпт |
+| `input.img_url` | string | Нет | URL первого кадра или Base64 |
+| `input.audio_url` | string | Нет | URL аудиофайла |
+| `input.template` | string | Нет | Шаблон видеоэффектов |
+| `parameters` | object | Нет | Параметры расширенной обработки |
+| `parameters.resolution` | string | Нет | Режим разрешения, например `480P` |
+| `parameters.duration` | integer | Нет | Продолжительность видео (сек) |
+| `parameters.prompt_extend` | boolean | Нет | Использовать интеллектуальный рерайт |
+| `parameters.watermark` | boolean | Нет | Добавить AI-водяной знак |
+| `parameters.audio` | boolean | Нет | Автоматически дополнять звук |
+| `parameters.seed` | integer | Нет | Случайное зерно (seed) |
 
 <Warning>
-  Submitting `wan2.2-t2v-plus` to this page's path returns `invalid_request` in production, with guidance to use `/v1/video/generations`. For Wan text-to-video, see [Wan Video](/ru/video/wan) or [Video Generation Alias](/ru/video/openai-video-alias-create).
+  Запрос `wan2.2-t2v-plus` на этот путь приведёт к возврату `invalid_request`; для вывода в проде используйте `/v1/video/generations`. Для информационного видео Wan смотрите [Видео Wan](/ru/video/wan) или [Псевдонимы видеогенерации](/ru/video/openai-video-alias-create).
 </Warning>
 
-### Request Example
+### Пример запроса
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/alibailian/api/v1/services/aigc/video-generation/video-synthesis \
@@ -72,7 +73,7 @@ curl -X POST https://api.crazyrouter.com/alibailian/api/v1/services/aigc/video-g
   -d '{
     "model": "wan2.5-i2v-preview",
     "input": {
-      "prompt": "Change the lighting",
+      "prompt": "改变一下光线",
       "img_url": "https://example.com/first-frame.png"
     },
     "parameters": {
@@ -83,7 +84,7 @@ curl -X POST https://api.crazyrouter.com/alibailian/api/v1/services/aigc/video-g
   }'
 ```
 
-### Response Example
+### Пример ответа
 
 ```json
 {
@@ -95,20 +96,20 @@ curl -X POST https://api.crazyrouter.com/alibailian/api/v1/services/aigc/video-g
 }
 ```
 
-## GET Query Task
+## GET Запрос задачи
 
 ```
 GET /alibailian/api/v1/tasks/{task_id}
 ```
 
-### Request Example
+### Пример запроса
 
 ```bash cURL
 curl https://api.crazyrouter.com/alibailian/api/v1/tasks/a55bfe14-6e78-4b9d-b97d-128420399ed1 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-### Response Example
+### Пример ответа
 
 ```json
 {
@@ -121,20 +122,20 @@ curl https://api.crazyrouter.com/alibailian/api/v1/tasks/a55bfe14-6e78-4b9d-b97d
     "task_id": "a55bfe14-6e78-4b9d-b97d-128420399ed1",
     "end_time": "2025-10-11 19:02:27.297",
     "video_url": "https://dashscope-result.example.com/video.mp4",
-    "orig_prompt": "Change the lighting",
+    "orig_prompt": "改变一下光线",
     "submit_time": "2025-10-11 18:55:56.952",
     "task_status": "SUCCEEDED",
-    "actual_prompt": "A man in orange clothes flies from right to left on a broom...",
+    "actual_prompt": "橙衣男性骑着扫帚从画面右侧向左侧高速飞过……",
     "scheduled_time": "2025-10-11 18:55:57.908"
   },
   "request_id": "ec8f059e-f2e5-4887-bb43-3306cd38f403"
 }
 ```
 
-## Error Behavior Verified Locally
+## Ошибочные ответы, выявленные локально
 
-- the local environment confirmed the create route exists; when a model is unavailable it returns a business error such as `model_not_found` rather than `404`
-- the local environment also confirmed the query route exists; a nonexistent task returns:
+- Локально подтверждено: маршрут создания существует; если модель недоступна, возвращается бизнес-ошибка типа `model_not_found`, а не `404`
+- Локально подтверждено: маршрут запроса существует; если задача не найдена, возвращается:
 
 ```json
 {
@@ -145,10 +146,10 @@ curl https://api.crazyrouter.com/alibailian/api/v1/tasks/a55bfe14-6e78-4b9d-b97d
 ```
 
 <Note>
-This path family is primarily for protocol-compatible migration. The request and response bodies stay much closer to native DashScope / Bailian conventions than to Crazyrouter's unified video schema. It also does not mean every Ali video model is publicly enabled on Crazyrouter; treat current pricing, token allowlists, and live channel bindings as the source of truth.
+Этот набор маршрутов Али Бай Лян особенно подходит для «протокольно-совместимой миграции». Форматы тела запроса и ответа максимально близки к стилю оригинального DashScope / Бай Лян, а не к унифицированному формату Crazyrouter. При этом это не означает «все видеомодели Али открыты во внешнем API Crazyrouter»; детали зависят от актуальной ценовой политики, белого списка моделей и текущей доступности.
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Смежные страницы
 
-- [Все модели Alibaba Cloud с актуальными ценами](https://crazyrouter.com/en/models/alibaba?utm_source=docs&utm_medium=related)
+- [Все модели и цены Alibaba Cloud](https://crazyrouter.com/ru/models/alibaba?utm_source=docs&utm_medium=related)

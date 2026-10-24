@@ -1,40 +1,42 @@
 ---
-title: "Grok Models"
-description: "Call Grok text models through the OpenAI Chat Completions format"
+title: "Модель Grok"
+description: "Использование текстовой модели Grok через формат OpenAI Chat Completions"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Grok Models
+# Модель Grok
 
 ```
 POST /v1/chat/completions
 ```
 
-Grok text models use the OpenAI-compatible Chat Completions format. Point `base_url` to Crazyrouter and pass the Grok model ID in `model`.
+Текстовая модель Grok вызывается в формате, совместимом с OpenAI Chat Completions. Вам просто нужно указать `base_url` на Crazyrouter и вписать ID модели Grok в `model`.
 
 <Note>
-  Model availability depends on channel status, token permissions, and the live pricing configuration. Before production use, call `GET /v1/models` with the same API key and confirm that the target model is visible.
+  Доступность моделей зависит от канала, разрешений токена и настроек страницы pricing. Перед запуском рекомендуется использовать `GET /v1/models` для проверки, может ли ваш текущий API Key увидеть целевую модель.
 </Note>
 
-## Common Models
+## Популярные модели
 
-| Model | Description |
-|-------|-------------|
-| `grok-4` | Main Grok 4 model |
-| `grok-4-fast` | Grok 4 fast variant |
-| `grok-4-fast-non-reasoning` | Grok 4 fast non-reasoning variant |
-| `grok-4-fast-reasoning` | Grok 4 fast reasoning variant |
+Ниже представлены распространённые записи для текстовых моделей Grok:
+
+| Модель | Описание |
+|------|------|
+| `grok-4` | Основная модель Grok 4 |
+| `grok-4-fast` | Вариант Grok 4 fast |
+| `grok-4-fast-non-reasoning` | Grok 4 fast без рассуждений |
+| `grok-4-fast-reasoning` | Grok 4 fast с рассуждениями |
 | `grok-4.1` | Grok 4.1 |
 | `grok-4.1-fast` | Grok 4.1 fast |
-| `grok-4.1-thinking` | Grok 4.1 thinking |
-| `grok-4.2` | Grok 4.2 |
-| `grok-4-0709` | Dated Grok 4 model |
+| `grok-4.1-fast` | Grok 4.1 thinking |
+| `grok-4.1-fast` | Grok 4.2 |
+| `grok-4-0709` | Версия Grok 4 с датой |
 
 <Warning>
-  Older `grok-4` / `grok-4.1` names may still appear in historical calls or compatibility setups, but the public pricing surface primarily keeps the `grok-4*` family. New integrations should start with `grok-4`, `grok-4.1`, `grok-4.2`, or the fast/reasoning variants.
+  Старые серии `grok-4` / `grok-4.1` могут использоваться в исторических вызовах или совместимых настройках, но актуальная публичная ценовая политика включает в основном серию `grok-4*`. При новом подключении рекомендуем выбирать `grok-4`, `grok-4.1`, `grok-4.1-fast` или варианты fast/reasoning.
 </Warning>
 
-## Minimal Request
+## Минимальный запрос
 
 <CodeGroup>
 
@@ -97,9 +99,9 @@ console.log(response.choices[0].message.content);
 
 </CodeGroup>
 
-## Streaming
+## Потоковый вывод
 
-Set `stream: true` to use SSE streaming.
+Для использования SSE потокового вывода, задайте `stream: true`.
 
 ```bash
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -117,9 +119,9 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-## Reasoning Variants
+## Варианты reasoning
 
-For Grok models containing `reasoning` or `thinking` in the name, keep the request shape simple:
+Для моделей Grok с названиями, содержащими `reasoning` или `thinking`, рекомендуется оставлять параметры запроса простыми:
 
 ```json
 {
@@ -135,26 +137,26 @@ For Grok models containing `reasoning` or `thinking` in the name, keep the reque
 ```
 
 <Note>
-  Reasoning fields, search fields, and experimental parameters can differ by upstream channel. For cross-channel stability, prefer standard OpenAI Chat fields: `model`, `messages`, `temperature`, `top_p`, `max_tokens`, and `stream`.
+  Поддержка reasoning, поиска или экспериментальных параметров может отличаться для разных каналов. Для стабильного подключения через разные каналы используйте стандартные поля OpenAI Chat: `model`, `messages`, `temperature`, `top_p`, `max_tokens`, `stream`.
 </Note>
 
-## Related Image Models
+## Связанные модели изображений
 
-Grok image generation does not use Chat Completions. Use:
+Генерация изображений Grok не поддерживает Chat Completions. Используйте:
 
 ```text
 POST /v1/images/generations
 ```
 
-See [Grok Image Models](/ru/images/grok) for image parameters.
+Параметры моделей изображений смотрите в разделе [Модель изображений Grok](/ru/images/grok).
 
-Related pages:
+Связанные страницы:
 
-- [Official Model Pricing Methods](/ru/reference/official-pricing-methods)
+- [Официальное ценообразование моделей](/ru/reference/official-pricing-methods)
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [GPT Image 1.5: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [Все модели OpenAI с актуальными ценами](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [Страница модели GPT Image 1.5: актуальные цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Страница модели GPT Image 2: актуальные цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Все модели и цены OpenAI](https://crazyrouter.com/ru/models/openai?utm_source=docs&utm_medium=related)

@@ -1,105 +1,105 @@
 ---
-title: 'Coze Setup Guide'
-description: 'Use Crazyrouter in Coze through API plugins or workflow HTTP nodes, and clearly separate the public setup path from enterprise custom-model capabilities'
+title: "Coze 設定チュートリアル"
+description: "Coze（扣子）で HTTP/API プラグインやワークフローノードを使って Crazyrouter を呼び出し、公開使用可能な方法と企業版カスタムモデルの方法を明確に区別する方法"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-Coze is ByteDance's bot and workflow platform. It is useful for building bots, chaining workflow steps, calling plugins, and publishing to different channels. When connecting Coze to Crazyrouter, the most stable and public-doc-friendly path is not to assume every Coze plan supports direct custom-model integration. The recommended public path is to use an HTTP / API plugin or a workflow HTTP request node first.
+Coze（扣子）はバイトダンスが提供するインテリジェントエージェント＆ワークフロープラットフォームです。Bot 作成、ワークフローの編成、プラグイン呼び出し、多チャネル公開などに適しています。Crazyrouter を接続する場合、公開ドキュメント向けで最も確実な推奨ルートは「すべてのバージョンがカスタムモデルを利用できる」と仮定せず、まず HTTP / API プラグインやワークフローの HTTP リクエストノード経由で進めることです。
 
-## Start Here
+## 結論から先に
 
-For most Crazyrouter users, these are the two recommended Coze integration paths:
+ほとんどの Crazyrouter ユーザーにとって、Coze では以下の2つの方法がおすすめです：
 
-- Option 1: call Crazyrouter through a `Create from API` plugin
-- Option 2: call Crazyrouter through a workflow HTTP request node
+- 方法1：`API を基に作成` プラグインを使って Crazyrouter を呼び出す
+- 方法2：ワークフロー内の HTTP リクエストノードで Crazyrouter を呼び出す
 
-Do not present "attach Crazyrouter directly as a custom model in Coze model management" as the default public guide, because:
+「Coze モデル管理で Crazyrouter カスタムモデルを直接接続する」方法を公開主要チュートリアルとして記載するのは推奨しません。その理由は：
 
-- Coze features differ across editions, regions, and plans
-- Coze's published plan FAQ explicitly lists `custom model` as an enterprise flagship capability
-- For public documentation, the safer baseline is the HTTP / API plugin route
+- Coze のバージョン・地域・プランによって利用可能な機能が大きく異なるため
+- Coze の公式プラン説明で、`カスタムモデル` は企業フラッグシップ版の機能と明記されています
+- 公開ドキュメントとしては、より安全なのは HTTP / API プラグインルートです
 
 <Warning>
-The most important accuracy rule for this page is: document Coze's public baseline as "call Crazyrouter through HTTP / API plugins or workflow HTTP requests", not "every user can directly mount a custom upstream model".
+このページで最も重視すべき正確性の原則は、「Coze の公開主要ルートを『HTTP / API プラグインで Crazyrouter を呼び出す』と明記し、すべてのユーザーがモデル管理でカスタム上流を掛けると仮定しない」ことです。
 </Warning>
 
-## Who This Guide Is For
+## 適したユーザー
 
-- Users who want to call Crazyrouter inside a Coze bot or workflow
-- Users who want Crazyrouter to act as an external model endpoint
-- Users who want the smallest reproducible setup before touching enterprise-only capabilities
-- Teams that want plugin- or workflow-based access to multiple models
+- Coze Bot やワークフローで Crazyrouter を利用したい方
+- Crazyrouter を外部モデル呼び出しノードとして使いたい方
+- まず最小検証チェーンを作りたい、最初から企業版カスタムモデル機能には進まない方
+- Bot からプラグインやワークフローで複数モデル機能へアクセスしたい方
 
-## Recommended Public Setup
+## 推奨接続方法
 
-### Public baseline: HTTP / API plugin route
+### 公開主要ルート：HTTP / API プラグイン方式
 
-Recommended parameters:
+推奨パラメータ：
 
-- Request method: `POST`
-- URL: `https://api.crazyrouter.com/v1/chat/completions`
-- Headers:
+- リクエスト方法：`POST`
+- URL：`https://api.crazyrouter.com/v1/chat/completions`
+- ヘッダー：
   - `Authorization: Bearer sk-xxx`
   - `Content-Type: application/json`
-- First validation model: `gpt-5.5`
+- 最初の検証モデル：`gpt-5.5`
 
-### Why this route comes first
+### なぜこの方法を最初に推奨するのか
 
-Because it:
+理由は：
 
-- depends less on Coze plan differences
-- makes it easier to tell whether the issue is Coze setup or Crazyrouter token / model scope
-- is the most stable route to document publicly
+- Coze プラン差異に依存しない
+- 「Coze 設定の問題」か「Crazyrouter トークン / モデルの問題」かを簡単に切り分けられる
+- 公開文書で安定した説明がしやすい
 
-## Requirements And Prerequisites
+## システム要件と事前条件
 
-| Item | Notes |
+| 項目 | 説明 |
 |------|------|
-| Crazyrouter account | Register at [crazyrouter.com](https://crazyrouter.com) first |
-| Crazyrouter token | Create a dedicated token for Coze |
-| Coze account | You need access to create bots, workflows, or plugins |
-| Publish or debug access | At minimum, you should be able to debug a bot or workflow |
-| Allowed models | Allow at least one chat model first |
+| Crazyrouter アカウント | [crazyrouter.com](https://crazyrouter.com) で登録 |
+| Crazyrouter トークン | Coze 用にトークンを個別作成するのが推奨 |
+| Coze アカウント | Bot / ワークフロー / プラグインの作成権限が必要 |
+| 公開権限 | Bot やワークフローのデバッグが最低限できること |
+| 利用可能モデル | チャットモデルが最低1つ開放されていること |
 
-Suggested initial allowlist:
+推奨初期ホワイトリスト：
 
 - `gpt-5.5`
 - `claude-opus-4-8`
 - `gemini-3.1-pro`
 
-## Option 1: Connect Crazyrouter Through An API Plugin
+## 方法1：API プラグインで Crazyrouter 接続
 
 <Steps>
-  <Step title="Step 1: Create a dedicated Crazyrouter token for Coze">
-    For the first pass, only allow:
+  <Step title="ステップ1：Crazyrouter で Coze 専用トークンを作成">
+    初回は以下のみ開放推奨：
 
     - `gpt-5.5`
     - `claude-opus-4-8`
 
-    Do not enable too many models on day one. Troubleshooting is easier when the scope is small.
+    最初から多くのモデルを開放しない方が、トラブルシュートが容易です。
   </Step>
 
-  <Step title="Step 2: Create an API plugin in Coze">
-    In the Coze workspace, open the area that matches your current version, usually something like:
+  <Step title="ステップ2：Coze で API プラグインを作成">
+    Coze のワークスペースに入り、現在のバージョン画面で：
 
-    - `Plugins`
-    - `Create Plugin`
-    - `Create from API` or a similarly named entry
+    - `プラグイン`
+    - `プラグインを作成`
+    - `API を基に作成` または近い名称の入口を選択
 
     <Note>
-    Exact menu names may vary by Coze version, region, or product line, but the core idea is the same: create a plugin that calls an external HTTP API.
+    Coze の画面名称はバージョン・地域・製品ラインによって多少違うことがありますが、基本的な考え方は「外部 HTTP API プラグインを作成する」ことです。
     </Note>
   </Step>
 
-  <Step title="Step 3: Set the request method and URL">
-    Enter:
+  <Step title="ステップ3：リクエスト方法と URL を設定">
+    記入：
 
     - `Method`: `POST`
     - `URL`: `https://api.crazyrouter.com/v1/chat/completions`
   </Step>
 
-  <Step title="Step 4: Configure headers">
-    Enter:
+  <Step title="ステップ4：リクエストヘッダを設定">
+    記入：
 
     ```text
     Authorization: Bearer sk-xxx
@@ -107,8 +107,8 @@ Suggested initial allowlist:
     ```
   </Step>
 
-  <Step title="Step 5: Start with the smallest request body">
-    For the first test, use:
+  <Step title="ステップ5：最小リクエストボディを設定">
+    初回は最小リクエストボディ推奨：
 
     ```json
     {
@@ -122,41 +122,41 @@ Suggested initial allowlist:
     }
     ```
 
-    If your plugin UI supports parameter mapping, map user input into a placeholder such as `{{input}}`.
+    プラグイン画面がパラメータマッピングをサポートしている場合、ユーザー入力を `{{input}}` のようなプレースホルダー変数にマッピング可能です。
   </Step>
 
-  <Step title="Step 6: Validate the plugin connection first">
-    If your version supports plugin debugging, send:
+  <Step title="ステップ6：まずはプラグイン内で接続確認を行う">
+    現バージョンがプラグインのデバッグをサポートしていれば、まず以下を送信：
 
     ```text
     Reply only OK
     ```
 
-    Make sure the API returns successfully before attaching the plugin to a bot or workflow.
+    まず安定してレスポンスを返すことを確認し、次に Bot やワークフローに連結しましょう。
   </Step>
 
-  <Step title="Step 7: Add the plugin to a bot or workflow">
-    After the plugin passes standalone testing, attach it to:
+  <Step title="ステップ7：Bot またはワークフロー内でプラグインを呼び出す">
+    プラグイン単体テストが通ったら、以下へ追加：
 
-    - a bot plugin capability
-    - or a workflow node
+    - Bot のプラグイン機能
+    - もしくはワークフローノード
 
-    For the first rollout, keep the task simple, such as summarization, rewrite, or a fixed Q&A step.
+    最初はプラグインに簡単なタスクのみ担当させるのがおすすめです（例：要約、リライト、固定Q&Aなど）。
   </Step>
 </Steps>
 
-## Option 2: Connect Crazyrouter Through A Workflow HTTP Request Node
+## 方法2：ワークフロー HTTP リクエストノードで Crazyrouter 接続
 
-If you do not want to maintain a separate plugin, you can call Crazyrouter directly from a workflow HTTP request node.
+プラグイン単独管理をしたくない場合は、ワークフロー内で HTTP リクエストノードを直接使って呼び出しも可能です。
 
-### Recommended configuration
+### 推奨設定
 
-- Request method: `POST`
-- URL: `https://api.crazyrouter.com/v1/chat/completions`
-- Headers:
+- リクエスト方法：`POST`
+- URL：`https://api.crazyrouter.com/v1/chat/completions`
+- ヘッダー：
   - `Authorization: Bearer sk-xxx`
   - `Content-Type: application/json`
-- Body:
+- ボディ：
 
 ```json
 {
@@ -170,86 +170,86 @@ If you do not want to maintain a separate plugin, you can call Crazyrouter direc
 }
 ```
 
-### Recommended validation order
+### 推奨検証順序
 
-1. Send a fixed string such as `Reply only OK`
-2. Replace the fixed string with a variable input
-3. Map the result into downstream nodes only after the HTTP node is stable
+1. ノード内で固定文字 `Reply only OK` を送信
+2. その後、変数入力を試す
+3. 最後に出力を次ノードへマッピングする
 
-## How To Think About "Custom Model Integration"
+## 「カスタムモデル接続」の理解について
 
-Some Coze versions or plans may support custom-model integration, but that should not be the default public Crazyrouter guide.
+Coze の一部バージョンやプランではカスタムモデル接続が可能な場合もありますが、Crazyrouter 公開ドキュメントの主ルートとして採用すべきではありません。
 
-Reasons:
+理由：
 
-- Coze's own plan FAQ currently lists `custom model` as an enterprise flagship capability
-- For most ordinary users, the most reproducible and lowest-friction route is still HTTP / API plugins
-- This page therefore treats custom-model support as background context, not as the default public setup path
+- Coze 公式プラン FAQ では `カスタムモデル` が企業フラッグシップ版機能と明記されています
+- 一般ユーザーにとって公開再現しやすく検証しやすいのはやはり HTTP / API プラグイン方式
+- このページではカスタムモデル機能は補足背景でのみ記載し、公開教育の標準ルートとして明記しません
 
-## Recommended Models
+## 推奨モデル設定
 
-| Use case | Recommended model | Why |
+| 利用シーン | 推奨モデル | 理由 |
 |----------|----------|------|
-| First connection test | `gpt-5.5` | Verified successfully in production on March 23, 2026, and best for validating the Coze-to-Crazyrouter path |
-| Higher-quality output | `claude-opus-4-8` | Better for stronger explanation and content generation |
-| Gemini fallback path | `gemini-3.1-pro` | Useful as a second compatibility-validation path |
+| 初回チェーン検証 | `gpt-5.5` | 2026年3月23日実環境で成功実績あり、Coze→Crazyrouter の呼び出しチェーン検証に最適 |
+| 高品質出力 | `claude-opus-4-8` | より強力な解釈・内容生成に最適 |
+| Gemini バックアップ | `gemini-3.1-pro` | 2つ目の互換検証ルートとして推奨 |
 
-## Token Best Practices
+## トークン設定ベストプラクティス
 
-| Setting | Recommendation | Why |
+| 設定 | 推奨 | 説明 |
 |------|------|------|
-| Dedicated token | Required | Do not share a Coze token with desktop apps or IDE tools |
-| Model allowlist | Strongly recommended | Start with only one or two models |
-| Spending limit | Strongly recommended | Workflow loops and retries can multiply usage |
-| Environment isolation | Recommended | Use separate tokens for dev / test / production |
-| Leak handling | Rotate immediately | Replace the key if it appears in screenshots or shared workspaces |
+| 専用トークン | 必須 | Coze はデスクトップクライアント・IDEツールとトークン共用は禁止 |
+| モデルホワイトリスト | 強く推奨 | 初回は1～2モデルのみ開放 |
+| クオータ上限 | 強く推奨 | ワークフローのループやプラグイン再試行で消費量が増加 |
+| 環境分離 | 推奨 | dev/test/productionでトークンを分ける |
+| 漏洩対応 | 即時ローテーション | プラグインスクリーンショットや共有ワークスペースで露出後は即キー交換 |
 
-## Validation Checklist
+## 検証チェックリスト
 
-- [ ] Created a dedicated Crazyrouter token for Coze
-- [ ] Chosen the HTTP / API plugin route or workflow HTTP request route first
-- [ ] Set the request URL to `https://api.crazyrouter.com/v1/chat/completions`
-- [ ] Filled the `Authorization` header as `Bearer sk-xxx`
-- [ ] Set `Content-Type` to `application/json`
-- [ ] Validated the smallest request body with `gpt-5.5`
-- [ ] Confirmed the plugin or HTTP node works in standalone debugging
-- [ ] Confirmed it still works after attaching to the bot or workflow
-- [ ] Confirmed the request appears in Crazyrouter logs
+- [ ] Coze専用 Crazyrouter トークン作成済み
+- [ ] HTTP / API プラグインまたはワークフロー HTTP リクエストノード優先ルートを選択済み
+- [ ] リクエストURLを `https://api.crazyrouter.com/v1/chat/completions` に設定済み
+- [ ] `Authorization` ヘッダーに `Bearer sk-xxx` 正しく記入済み
+- [ ] `Content-Type` を `application/json` に設定済み
+- [ ] 最小リクエストボディを `gpt-5.5` で検証成功
+- [ ] プラグインやノード単独デバッグ成功
+- [ ] Botやワークフローに追加しても稼働確認済み
+- [ ] Crazyrouter バックエンドログで該当リクエスト確認
 
-## Common Errors And Fixes
+## よくあるエラーと修正方法
 
-| Symptom | Common cause | Fix |
-|------|------|------|
-| 401 unauthorized | Token is wrong, expired, or copied incompletely | Generate a new token and re-enter the `Authorization` header |
-| 404 | URL is wrong or missing `/v1/chat/completions` | Change it to the full URL |
-| 403 / model not allowed | The token does not allow that model | Allow the model in Crazyrouter token settings |
-| `model not found` | Model name is wrong | Switch back to `gpt-5.5` and revalidate |
-| Plugin can be created but fails inside the bot | Input / output mapping is inconsistent | Fall back to a fixed-string test first |
-| Workflow node fails intermittently | Input is too large, retries are too aggressive, or concurrency is too high | Shrink the input and return to a minimal test |
-| You cannot find a "model management" custom-upstream entry from another tutorial | Your version or plan is different | Go back to the HTTP / API plugin route instead of relying on enterprise-only capabilities |
+| 現象 | 主な原因 | 修正方法 |
+|------|----------|----------|
+| 401 unauthorized | トークンが誤り・期限切れ・一部欠損 | トークンを再作成し `Authorization` ヘッダー再記入 |
+| 404 | URLミス、または `/v1/chat/completions` 不足 | URL完全化して修正 |
+| 403 / model not allowed | トークンで対象モデル未開放 | Crazyrouter トークン設定でモデル開放 |
+| `model not found` | モデル名が間違っている | `gpt-5.5` に戻して再検証 |
+| プラグインは作成できるが Botで呼べない | プラグイン入出力マッピング不整合 | 固定文字列でデバッグに戻す |
+| ワークフローノードが時々失敗 | 入力が長すぎる・再試行多すぎ・高並列 | 入力縮小・複雑さ削減で最小検証 |
+| 他人のチュートリアルで「モデル管理接続」が見つからない | バージョンやプラン違い | HTTP / API プラグイン主要ルートに戻り、まず企業版機能依存は避ける |
 
 ## FAQ
 
-### What is the best Coze-to-Crazyrouter route?
+### Cozeで Crazyrouter を最も推奨する方法は？
 
-In public docs, prefer the HTTP / API plugin route or the workflow HTTP request node route.
+公開ドキュメントでは HTTP / API プラグインやワークフロー HTTP リクエストノード方式が最優先。
 
-### Why is "custom model integration" not the main path here?
+### なぜ「カスタムモデル接続」を主ルートにしないのか？
 
-Because Coze capabilities vary a lot by version and plan, and Coze's plan FAQ also places `custom model` under enterprise flagship capabilities. Public docs should lead with the most reproducible lower-threshold HTTP path.
+Coze はバージョンやプランによって機能差異が大きく、公式 FAQ にも `カスタムモデル` は企業フラッグシップ版機能と記載。公開ドキュメント向けにはより再現性・ハードルが低い HTTP 方式が適しています。
 
-### What URL should I enter?
+### URLには何を記入すべき？
 
-Use `https://api.crazyrouter.com/v1/chat/completions`.
+`https://api.crazyrouter.com/v1/chat/completions` を記入してください。
 
-### What should the first model be?
+### 最初に推奨されるモデルは？
 
-Start with `gpt-5.5`.
+まず `gpt-5.5` を使いましょう。
 
-### When should I add Claude or more models?
+### Claudeなど追加モデルはいつ追加すべき？
 
-Only after the single-model, single-node, single-task path is already stable.
+まず単一モデル・単一ノード・単一タスクを正常稼働させてから、段階的にホワイトリストを拡大。
 
 <Note>
-If your goal is "make Coze call Crazyrouter reliably first", the most important thing is not choosing the fanciest integration path. It is getting the smallest HTTP / API flow working end to end.
+目的が「Cozeでまず Crazyrouter を安定呼び出しする」なら、最も大切なのは複雑な接続を追求することではなく、まず HTTP / API プラグインで最小チェーンを確実に通すことです。
 </Note>

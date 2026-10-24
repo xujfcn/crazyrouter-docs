@@ -1,20 +1,20 @@
 ---
-title: "GPT-5 Thinking Mode"
-description: "Production-revalidated GPT-5.4 reasoning via the Responses API"
+title: "Режим мышления GPT-5"
+description: "Производственная повторная валидация рассуждений GPT-5.4 через API Responses"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# GPT-5 Thinking Mode
+# Режим мышления GPT-5
 
-This page only documents GPT reasoning behavior that was revalidated against Crazyrouter production on `2026-03-22`.
+На этой странице документируется только поведение рассуждений GPT, прошедшее повторную валидацию против продакшена Crazyrouter на `2026-03-22`.
 
-The current primary example uses:
+Текущий основной пример использует:
 
 - `gpt-5.5`
 - `POST /v1/responses`
 
 <Note>
-  Claude does not currently support `POST /v1/responses`. If you are integrating Claude, use `POST /v1/messages` or `POST /v1/chat/completions` instead of the request shape on this page.
+  Claude в настоящее время не поддерживает `POST /v1/responses`. Если вы интегрируете Claude, используйте `POST /v1/messages` или `POST /v1/chat/completions` вместо структуры запроса на этой странице.
 </Note>
 
 ```
@@ -23,7 +23,7 @@ POST /v1/responses
 
 ---
 
-## Basic usage
+## Базовое использование
 
 <CodeGroup>
 
@@ -85,15 +85,15 @@ console.log(response.output_text);
 
 ---
 
-## Verified response shape
+## Проверенная форма ответа
 
-Verified `output.type` values:
+Проверенные значения `output.type`:
 
 ```json
 ["reasoning", "message"]
 ```
 
-Typical `reasoning` item shape:
+Обычная структура элемента `reasoning`:
 
 ```json
 {
@@ -109,7 +109,7 @@ Typical `reasoning` item shape:
 }
 ```
 
-The final answer is returned through the `message` item:
+Окончательный ответ возвращается через элемент `message`:
 
 ```json
 {
@@ -125,26 +125,26 @@ The final answer is returned through the `message` item:
 
 ---
 
-## `reasoning` parameter
+## Параметр `reasoning`
 
-| Field | Type | Description |
+| Поле | Тип | Описание |
 |-------|------|-------------|
-| `effort` | string | Reasoning intensity. Verified values include `low`, `medium`, and `high` |
-| `summary` | string | Summary granularity. `concise` and `detailed` were revalidated |
+| `effort` | строка | Интенсивность рассуждений. Проверенные значения включают `low`, `medium` и `high` |
+| `summary` | строка | Гранулярность сводки. `concise` и `detailed` были повторно проверены |
 
-### Practical rule
+### Практическое правило
 
-- If you only want stronger reasoning, send `effort`
-- If you need an inspectable reasoning summary, send both `effort` and `summary`
+- Если вам нужна только более сильная аргументация, отправьте `effort`
+- Если вам нужна контролируемая сводка рассуждений, отправьте оба `effort` и `summary`
 
-In the current recheck:
+В текущей пере проверке:
 
-- with only `effort`, the `reasoning` item existed but `summary` could be an empty array
-- with `summary: "detailed"`, `summary_text` was returned reliably
+- только с `effort`, элемент `reasoning` существовал, но `summary` мог быть пустым массивом
+- с `summary: "detailed"`, `summary_text` возвращался стабильно
 
 ---
 
-## Extract the thinking summary
+## Извлечение сводки мышления
 
 ```python Python
 response = client.responses.create(
@@ -169,9 +169,9 @@ for item in response.output:
 
 ---
 
-## Streaming thinking
+## Потоковое мышление
 
-The following Responses SSE event names were revalidated in production:
+В производстве были повторно подтверждены следующие имена SSE-событий Responses:
 
 - `response.reasoning_summary_part.added`
 - `response.reasoning_summary_text.delta`
@@ -180,7 +180,7 @@ The following Responses SSE event names were revalidated in production:
 - `response.output_text.done`
 - `response.completed`
 
-Example:
+Пример:
 
 ```python Python
 stream = client.responses.create(
@@ -202,19 +202,19 @@ for event in stream:
 
 ---
 
-## Current recommendation
+## Текущая рекомендация
 
-- If you need a visible reasoning field, prefer `gpt-5.5` with the Responses API
-- Do not treat `gpt-5.5` Chat Completions `reasoning_content` as the current primary contract
-- If you only care about the final answer, Chat Completions with `reasoning_effort` is still fine
+- Если вам нужно видимое поле рассуждений, используйте предпочтительно `gpt-5.5` с API Responses
+- Не рассматривайте `gpt-5.5` Chat Completions `reasoning_content` как основной контракт
+- Если вас интересует только окончательный ответ, Chat Completions с `reasoning_effort` тоже подходит
 
 <Warning>
-  Reasoning mode increases both latency and token usage. Higher `effort` generally costs more.
+  Режим рассуждений увеличивает как задержку, так и расход токенов. Более высокий `effort`, как правило, стоит дороже.
 </Warning>
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Похожие на crazyrouter.com
 
-- [GPT-5: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/gpt-5?utm_source=docs&utm_medium=related)
-- [GPT-5: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-5?utm_source=docs&utm_medium=related)
-- [GPT-5.4: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/gpt-5-4?utm_source=docs&utm_medium=related)
+- [Сравнение цен GPT-5: список против Azure / Bedrock / Vertex против Crazyrouter](https://crazyrouter.com/ru/pricing/gpt-5?utm_source=docs&utm_medium=related)
+- [Страница модели GPT-5: живая цена, настоящие примеры, код](https://crazyrouter.com/ru/models/openai/gpt-5?utm_source=docs&utm_medium=related)
+- [Сравнение цен GPT-5.4: список против Azure / Bedrock / Vertex против Crazyrouter](https://crazyrouter.com/ru/pricing/gpt-5-4?utm_source=docs&utm_medium=related)

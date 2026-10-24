@@ -1,0 +1,118 @@
+---
+title: "Configuración de Hermes Agent"
+description: "Configura Hermes Agent para trabajar con Crazyrouter y utiliza modelos de IA compatibles a través de un endpoint compatible con OpenAI"
+icon: "robot"
+---
+> Contenido actualizado: 2026-10-12
+
+Con [crazyrouter-hermes](https://github.com/xujfcn/crazyrouter-hermes), puedes cambiar [Hermes Agent](https://github.com/NousResearch/Hermes-Agent) para utilizar Crazyrouter como proveedor de modelos. Después de la configuración, Hermes usa `https://api.crazyrouter.com/v1` como un endpoint compatible con OpenAI y llama a Claude, GPT, DeepSeek, Gemini, Qwen y más de 627 modelos adicionales mediante una sola API Key de Crazyrouter.
+
+## ¿A quién va dirigido?
+
+- Para usuarios de Hermes Agent que quieren usar Crazyrouter como proveedor de modelos
+- Para escenarios de agent locales, donde los modelos y cuotas deben gestionarse a través de Crazyrouter
+- Para quienes desean configurar `OPENAI_API_KEY`, `OPENAI_BASE_URL` y el modelo predeterminado con un solo comando
+
+## Requisitos
+
+| Punto | Descripción |
+|------|-------------|
+| Hermes Agent | Instala Hermes localmente y asegúrate de que se inicia correctamente |
+| Cuenta Crazyrouter | Crea una cuenta en [crazyrouter.com](https://crazyrouter.com) |
+| Crazyrouter API Key | Se recomienda crear un token `sk-...` independiente para Hermes |
+| Acceso a modelos | Permite en el token los modelos que planeas utilizar |
+
+<Tip>
+Hermes se conecta a Crazyrouter usando configuraciones compatibles con OpenAI. La URL base debe ser `https://api.crazyrouter.com/v1`.
+</Tip>
+
+## Configuración en un solo comando
+
+<Tabs>
+  <Tab title="Linux / macOS / WSL2">
+    ```bash
+    curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup.sh | bash
+    ```
+  </Tab>
+  <Tab title="Windows PowerShell">
+    ```powershell
+    irm https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup.ps1 | iex
+    ```
+  </Tab>
+  <Tab title="Windows CMD">
+    ```bat
+    curl -o setup.bat https://raw.githubusercontent.com/xujfcn/crazyrouter-hermes/main/setup.bat
+    setup.bat
+    ```
+  </Tab>
+</Tabs>
+
+El script te pedirá que ingreses la Crazyrouter API Key, elijas el modelo predeterminado y, si es necesario, verifiques la conexión.
+
+<Warning>
+El script guarda la configuración local de Hermes. Si ya tienes tus propios ajustes, primero realiza una copia de seguridad de `~/.hermes/.env` y `~/.hermes/config.yaml`.
+</Warning>
+
+## Configuración manual
+
+Si no deseas ejecutar el script, configura Hermes manualmente.
+
+### Variables de entorno
+
+Edita `~/.hermes/.env`:
+
+```bash
+OPENAI_API_KEY=sk-your-crazyrouter-key
+OPENAI_BASE_URL=https://api.crazyrouter.com/v1
+```
+
+### Modelo predeterminado
+
+Edita `~/.hermes/config.yaml`:
+
+```yaml
+model:
+  provider: "custom"
+  default: "claude-opus-4-8"
+  base_url: "https://api.crazyrouter.com/v1"
+```
+
+Cambia `default` a cualquier modelo permitido en tu token Crazyrouter.
+
+## Cambio de modelos
+
+Después de la configuración, cambia los modelos dentro de Hermes usando `/model`:
+
+```text
+/model claude-opus-4-8
+/model gpt-5.5
+/model claude-sonnet-4-6
+/model gemini-3.1-pro
+/model deepseek-v4-pro
+/model qwen-max
+/model gpt-4o
+```
+
+Si al cambiar aparece `model not allowed` o `403`, normalmente el modelo elegido no está permitido en el token Crazyrouter actual.
+
+## Lista de verificación
+
+- [ ] `OPENAI_API_KEY` en `~/.hermes/.env` es un token de Crazyrouter válido
+- [ ] `OPENAI_BASE_URL` es igual a `https://api.crazyrouter.com/v1`
+- [ ] `provider` en `~/.hermes/config.yaml` es igual a `custom`
+- [ ] El modelo predeterminado está permitido en el token de Crazyrouter
+- [ ] Hermes responde al mensaje de prueba
+- [ ] `/model gpt-5.5` u otro modelo permitido se cambia con éxito
+
+## Problemas frecuentes
+
+| Síntoma | Causa probable | Solución |
+|---------|---------------|---------|
+| `401 unauthorized` | La API Key es inválida, expiró o fue reemplazada | Crea un nuevo token de Crazyrouter y actualiza `~/.hermes/.env` |
+| `403` o `model not allowed` | El token no permite el modelo seleccionado | Permite el modelo en la configuración del token Crazyrouter |
+| Hermes sigue usando el proveedor anterior | Hermes no leyó la configuración o se modificó el archivo incorrecto | Reinicia Hermes y revisa `~/.hermes/.env` y `~/.hermes/config.yaml` |
+| Tiempo de espera de conexión | La red local no puede conectarse a Crazyrouter | Revisa proxy, firewall y DNS |
+
+<Card title="Abrir el repositorio crazyrouter-hermes" icon="github" href="https://github.com/xujfcn/crazyrouter-hermes">
+  Revisa los scripts de configuración, ejemplo de configuración manual y notas actuales.
+</Card>

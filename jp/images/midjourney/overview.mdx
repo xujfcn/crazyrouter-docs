@@ -1,22 +1,22 @@
 ---
-title: "Midjourney Overview"
-description: "Midjourney image generation API overview, including task objects, status descriptions, and response fields"
+title: "Midjourney 概要"
+description: "Midjourney 画像生成 API の概要、タスクオブジェクト、ステータス説明、レスポンスフィールドを含みます"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Midjourney Overview
+# Midjourney 概要
 
-Crazyrouter provides a complete Midjourney API proxy, supporting all operations including Imagine, Blend, Describe, Upscale, Variation, and more. All requests are processed asynchronously via tasks.
+Crazyrouter は Midjourney API の完全なプロキシを提供し、Imagine、Blend、Describe、Upscale、Variation などすべての操作をサポートしています。すべてのリクエストは非同期タスクとして処理されます。
 
-## Base Path
+## 基本パス
 
 ```
 https://api.crazyrouter.com/mj
 ```
 
-## Authentication
+## 認証
 
-Pass your API Key in the request header:
+リクエストヘッダーに API Key を含めてください：
 
 ```
 Authorization: Bearer YOUR_API_KEY
@@ -24,44 +24,44 @@ Authorization: Bearer YOUR_API_KEY
 
 ---
 
-## Task Object
+## タスクオブジェクト
 
-Each Midjourney request submission returns a task object. The task object contains the following fields:
+Midjourney リクエストを送信すると、システムはタスクオブジェクトを返します。タスクオブジェクトは以下のフィールドを含みます：
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | string | Unique task identifier |
-| `action` | string | Task type: `IMAGINE`, `UPSCALE`, `VARIATION`, `BLEND`, `DESCRIBE`, etc. |
-| `status` | string | Task status |
-| `prompt` | string | Submitted prompt |
-| `promptEn` | string | Translated English prompt |
-| `description` | string | Task description |
-| `submitTime` | number | Submission time (millisecond timestamp) |
-| `startTime` | number | Processing start time |
-| `finishTime` | number | Completion time |
-| `progress` | string | Progress percentage, e.g. `"100%"` |
-| `imageUrl` | string | Generated image URL |
-| `failReason` | string | Failure reason (only present on failure) |
-| `properties` | object | Additional properties |
-| `buttons` | array | List of available action buttons |
-
----
-
-## Task Status
-
-| Status | Description |
-|--------|-------------|
-| `NOT_START` | Task submitted, waiting to be processed |
-| `SUBMITTED` | Task submitted to Midjourney |
-| `IN_PROGRESS` | Task is being processed |
-| `SUCCESS` | Task completed |
-| `FAILURE` | Task failed |
+| フィールド | 型 | 説明 |
+|------|------|------|
+| `id` | string | タスクのユニーク識別子 |
+| `action` | string | タスクタイプ：`IMAGINE`、`UPSCALE`、`VARIATION`、`BLEND`、`DESCRIBE` など |
+| `status` | string | タスクステータス |
+| `prompt` | string | 提供されたプロンプト |
+| `promptEn` | string | 翻訳された英語プロンプト |
+| `description` | string | タスク説明 |
+| `submitTime` | number | 提出時刻（ミリ秒タイムスタンプ） |
+| `startTime` | number | 処理開始時刻 |
+| `finishTime` | number | 完了時刻 |
+| `progress` | string | 進捗率、例：`"100%"` |
+| `imageUrl` | string | 生成された画像 URL |
+| `failReason` | string | 失敗理由（失敗時のみ値が入る） |
+| `properties` | object | 追加属性 |
+| `buttons` | array | 実行可能な操作ボタン一覧 |
 
 ---
 
-## Action Buttons
+## タスクステータス
 
-After a task completes, the `buttons` field contains available follow-up actions:
+| ステータス | 説明 |
+|------|------|
+| `NOT_START` | タスクが提出され、処理待ち |
+| `SUBMITTED` | タスクが Midjourney に提出済み |
+| `IN_PROGRESS` | タスク処理中 |
+| `SUCCESS` | タスク完了 |
+| `FAILURE` | タスク失敗 |
+
+---
+
+## 操作ボタン
+
+タスク完了後、`buttons` フィールドに後続操作が含まれます：
 
 ```json
 {
@@ -78,24 +78,24 @@ After a task completes, the `buttons` field contains available follow-up actions
 }
 ```
 
-Use the `customId` to call the Action endpoint to perform the corresponding operation (upscale, variation, etc.).
+`customId` を利用し、Action インターフェースから対応する操作（アップスケール、バリエーション等）を実行できます。
 
 ---
 
-## API Endpoints Overview
+## API エンドポイント一覧
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/mj/submit/imagine` | Submit an Imagine task |
-| POST | `/mj/submit/action` | Execute an action (upscale, variation, etc.) |
-| POST | `/mj/submit/blend` | Blend images |
-| POST | `/mj/submit/describe` | Describe an image |
-| POST | `/mj/submit/modal` | Submit modal confirmation |
-| POST | `/mj/submit/shorten` | Shorten a prompt |
-| GET | `/mj/task/{id}/fetch` | Query a single task |
-| POST | `/mj/task/list-by-condition` | Batch query tasks |
-| GET | `/mj/task/{id}/image-seed` | Get image seed |
+| メソッド | エンドポイント | 説明 |
+|------|------|------|
+| POST | `/mj/submit/imagine` | Imagine タスクを提出 |
+| POST | `/mj/submit/action` | 操作実行（アップスケール、バリエーションなど） |
+| POST | `/mj/submit/blend` | 画像のブレンド |
+| POST | `/mj/submit/describe` | 画像の説明 |
+| POST | `/mj/submit/modal` | ポップアップ確認を提出 |
+| POST | `/mj/submit/shorten` | プロンプトを短縮 |
+| GET | `/mj/task/{id}/fetch` | 単一タスクの照会 |
+| POST | `/mj/task/list-by-condition` | タスクを一括照会 |
+| GET | `/mj/task/{id}/image-seed` | 画像の Seed を取得 |
 
 <Note>
-  Midjourney tasks are processed asynchronously. After submission, you need to poll the task status. It is recommended to query every 3-5 seconds until the status becomes `SUCCESS` or `FAILURE`.
+  Midjourney タスクは非同期で処理されるため、送信後はタスクステータスをポーリングチェックする必要があります。3～5秒ごとにステータスを照会し、状態が `SUCCESS` または `FAILURE` になるまで繰り返してください。
 </Note>

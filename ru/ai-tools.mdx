@@ -1,34 +1,60 @@
 ---
-title: 'Вход для AI tools'
-description: 'Точки входа в документацию Crazyrouter для Codex, Claude Code, ChatGPT, Cursor и других AI tools'
+title: "AI-инструменты для чтения документации"
+description: "Входная точка к документации Crazyrouter для таких AI-инструментов, как Codex, Claude Code, ChatGPT, Cursor и других."
 ---
-> Дата обновления: 2026-07-20
+> Обновление содержания: 2026-07-20
 
-Используйте эту страницу, когда нужно дать AI tool доступ к документации Crazyrouter.
+Эта страница предназначена для передачи документации Crazyrouter AI-инструментам. В первую очередь рекомендуется использовать стабильные входные точки ниже.
 
-## Рекомендуемые точки входа
+## Рекомендуемые ссылки
 
 <CardGroup cols={2}>
-  <Card title="Индекс llms.txt" icon="list" href="https://docs.crazyrouter.com/llms.txt">
-    Компактный индекс ключевых страниц и описаний. Подходит для выбора нужных документов.
+  <Card title="Индекс документации llms.txt" icon="list" href="https://docs.crazyrouter.com/llms.txt">
+    Упрощённый индекс, содержит ключевые страницы и описания, подходит для предварительного определения AI, какие документы следует прочитать.
   </Card>
   <Card title="Полный контекст llms-full.txt" icon="file-text" href="https://docs.crazyrouter.com/llms-full.txt">
-    Единый файл со всей документацией для AI tools, которые умеют читать URL или вставленный текст.
+    Полная агрегированная версия документации, подходит для AI-инструментов, которым необходимо сразу получить весь контекст.
   </Card>
-  <Card title="Sitemap" icon="sitemap" href="https://docs.crazyrouter.com/sitemap.xml">
-    Стандартный sitemap для поисковиков, crawlers и собственных индексов.
+  <Card title="Карта сайта" icon="sitemap" href="https://docs.crazyrouter.com/sitemap.xml">
+    Стандартная sitemap, подходит для поисковых систем, сканеров и самописных индексов.
   </Card>
-  <Card title="Markdown pages" icon="markdown" href="https://docs.crazyrouter.com/ru/quickstart.md">
-    Добавьте `.md` к URL страницы документации, чтобы получить Markdown.
+  <Card title="Страница Markdown" icon="markdown" href="https://docs.crazyrouter.com/quickstart.md">
+    Одностраничую документацию можно получить, добавив `.md` в конец URL для получения версии в Markdown.
   </Card>
 </CardGroup>
 
-## Prompt for AI tools
+## Подсказки для AI-инструментов
 
 ```text
-First read https://docs.crazyrouter.com/llms.txt to identify the relevant pages.
-If full context is needed, read https://docs.crazyrouter.com/llms-full.txt.
-For OpenAI-compatible clients, use base_url https://api.crazyrouter.com/v1.
-For Claude Code / Anthropic-native clients, use root domain https://api.crazyrouter.com and do not append /v1.
-Для endpoints аккаунта и управления, например `/api/user/self`, `/api/token/*` и `/api/log/*`, используйте https://crazyrouter.com; API-only домены возвращают для этих маршрутов 404 api_only_endpoint.
+请先读取 https://docs.crazyrouter.com/llms.txt 判断相关页面。
+如果需要完整上下文，再读取 https://docs.crazyrouter.com/llms-full.txt。
+模型名称、价格和计费方式必须以 https://crazyrouter.com/pricing 为准。
+如需确认当前 API Key 实际可用模型，请调用 GET https://api.crazyrouter.com/v1/models。
+接入 OpenAI 兼容客户端时 base_url 使用 https://api.crazyrouter.com/v1。
+接入 Claude Code / Anthropic 原生客户端时使用根域名 https://api.crazyrouter.com，不要追加 /v1。
+东亚地区优先使用 https://cn.crazyrouter.com；OpenAI 兼容客户端对应 https://cn.crazyrouter.com/v1。
+账户与管理接口（如 `/api/user/self`、`/api/token/*`、`/api/log/*`）必须使用 https://crazyrouter.com；发送到 API-only 域名会返回 404 api_only_endpoint。
 ```
+
+## Наиболее часто используемая документация
+
+| Сценарий                | Документация |
+|-------------------------|--------------|
+| Первое подключение      | [Быстрый старт](/ru/quickstart) |
+| Base URL и маршруты     | [API-эндпоинты](/ru/api-endpoint) |
+| API Key                 | [Методы аутентификации](/ru/authentication) |
+| Claude Code             | [Интеграция с Claude Code](/ru/integrations/claude-code) |
+| Codex CLI               | [Интеграция с Codex CLI](/ru/integrations/codex) |
+| OpenAI Chat             | [Create Chat Completion](/ru/chat/openai/completions) |
+| Claude Messages         | [Формат Claude Native](/ru/chat/anthropic/messages) |
+| Gemini Native           | [Формат Gemini Native](/ru/chat/gemini/native) |
+| Генерация изображений   | [GPT Image](/ru/images/gpt-image) |
+| Видео                   | [Унифицированный видеоинтерфейс](/ru/video/unified) |
+
+## Требования по трактовке
+
+- `llms.txt` — это не полный перечень моделей.
+- Модели, цены и способы оплаты определяются на странице [Ценообразование](https://crazyrouter.com/pricing).
+- Какие модели доступны текущему токену, определяется по ответу `GET https://api.crazyrouter.com/v1/models`.
+- Для Восточной Азии предпочтительно использовать `https://cn.crazyrouter.com`, для клиентов, совместимых с OpenAI, — `https://cn.crazyrouter.com/v1`.
+- При генерации кода вызова используйте в первую очередь примеры проверенных эндпоинтов из конкретной документации по моделям.

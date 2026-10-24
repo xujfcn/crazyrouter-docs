@@ -1,27 +1,27 @@
 ---
-title: "Gemini Audio Understanding"
-description: "Gemini native audio understanding documented from successful Crazyrouter request patterns on 2026-04-08"
+title: "Gemini オーディオ理解"
+description: "2026-04-08 Crazyrouter 当サイトでの成功リクエスト経験を基にまとめた Gemini ネイティブ音声理解ガイド"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Gemini Audio Understanding
+# Gemini オーディオ理解
 
 ```text
 POST /v1beta/models/{model}:generateContent
 ```
 
-As of `2026-04-08`, successful Crazyrouter and local `:4000` retests show:
+`2026-04-08` 時点で、Crazyrouter 当サイト及びローカル `4000` ポートでの再テストの結論：
 
-- `gemini-2.5-pro` can read `audio/wav`
-- the currently verified primary path is `inlineData`
-- short audio classification, transcription, language hints, and summaries can be requested directly in text
+- `gemini-3.1-pro` は `audio/wav` を読み取ることが可能です
+- 現在安定して稼働確認済みのメイン経路は `inlineData` です
+- 短い音声に対する文字起こし、言語判定、要約説明は全てテキストプロンプトで直接実行できます
 
 ---
 
-## Verified Minimal Request
+## 検証済みの最小リクエスト
 
 ```bash
-curl "https://api.crazyrouter.com/v1beta/models/gemini-2.5-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -35,7 +35,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-2.5-pro:generateContent?k
             }
           },
           {
-            "text": "Return JSON with transcript, language, and summary."
+            "text": "请返回 JSON，字段为 transcript、language、summary。"
           }
         ]
       }
@@ -46,7 +46,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-2.5-pro:generateContent?k
   }'
 ```
 
-Observed successful response shape:
+本番環境で同様条件下にて返却された成功形式の主要パターン：
 
 ```json
 {
@@ -55,7 +55,7 @@ Observed successful response shape:
       "content": {
         "parts": [
           {
-            "text": "```json\n{\n  \"transcript\": \"ding\",\n  \"language\": \"zh-CN\",\n  \"summary\": \"The audio contains one short notification sound.\"\n}\n```"
+            "text": "```json\n{\n  \"transcript\": \"叮\",\n  \"language\": \"zh-CN\",\n  \"summary\": \"音频中包含一个简短的提示音。\"\n}\n```"
           }
         ]
       }
@@ -64,20 +64,20 @@ Observed successful response shape:
 }
 ```
 
-## Request Notes
+## リクエストの要点
 
-- Prefer `inlineData` for audio understanding
-- Keep `mimeType` aligned with the actual format, such as `audio/wav` or `audio/mpeg`
-- Put raw Base64 into `data` without a Data URL prefix
-- If you need strict JSON instead of JSON-looking text, combine this route with [Structured Outputs](/jp/features/structured-outputs)
+- オーディオ理解には`inlineData`の優先利用を推奨
+- `mimeType`は実際の音声フォーマットと一致させてください（例：`audio/wav`、`audio/mpeg`）
+- `data`にはBase64データのみを記載し、Data URLのプリフィックスは含めないでください
+- 厳密なJSON形式が必要な場合は、[構造化出力](/jp/features/structured-outputs)制約を追記してください
 
 <Note>
-  This page only covers the short-audio understanding path that was actually rechecked successfully. For longer STT workflows, realtime audio, or TTS, see the existing [STT](/jp/audio/stt), [Realtime](/jp/audio/realtime), and [TTS](/jp/audio/tts) pages.
+  本ページは、すでに稼働が確認された短い音声理解のメインパスをまとめています。より長いオーディオの文字起こしや音声生成については、それぞれ既存の [STT](/jp/audio/stt)、[TTS](/jp/audio/tts) ページをご覧ください。Realtimeは現在、公開向けの推奨事例としては記載していません。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [Gemini 2.5 Flash 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash-Lite 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash 価格比較：公式 / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ja/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash モデルページ：リアルタイム価格、実例、利用コード](https://crazyrouter.com/ja/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash-Lite 価格比較：公式 / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ja/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)

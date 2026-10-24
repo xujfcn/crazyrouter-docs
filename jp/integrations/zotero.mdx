@@ -1,114 +1,114 @@
 ---
-title: 'Zotero Setup Guide'
-description: 'Connect Crazyrouter to Zotero through AI plugins that support OpenAI-compatible endpoints, and clearly separate directly supported plugin types from ones that are not a good public default'
+title: "Zotero 設定チュートリアル"
+description: "Zotero で OpenAI 互換インターフェースをサポートする AI プラグインを通じて Crazyrouter を接続し、直接接続可能なプラグインタイプとそうでないものを明確に区別します"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-Zotero itself is a reference manager, not a built-in Crazyrouter client. In practice, the integration path is usually: install a Zotero AI plugin first, and then enter Crazyrouter's OpenAI-compatible URL, API key, and model inside that plugin.
+Zotero 自体は文献管理ツールであり、Crazyrouter の設定画面は直接組み込まれていません。実際の接続方法は、まず AI 呼び出し機能を持つ Zotero プラグインを導入し、そのプラグイン内に Crazyrouter の OpenAI 互換エンドポイント、API Key、モデル名を入力する流れとなります。
 
-The most important rule for this page is not "any Zotero AI plugin will work". You should first separate plugins into two groups:
+このページで最も重要な原則は「適当な Zotero AI プラグインなら何でも接続できる」ではなく、まずプラグインの種類を分けることです：
 
-- directly usable: plugins that support a custom `Base API URL`, `API URL`, or `Endpoint`
-- not a good public default: plugins that only accept an official OpenAI key and do not expose a custom upstream URL
+- 直接接続可能：プラグインが `Base API URL` / `API URL` / `Endpoint` のカスタム設定に対応している
+- 直接接続不可または公開手順に不向き：公式 OpenAI Key 入力のみで、上流アドレスをカスタムできない
 
-## Start Here
+## まず結論から
 
-The recommended public Crazyrouter path in Zotero is:
+Crazyrouter を Zotero で推奨する一般的な接続方法は：
 
-- choose a Zotero AI plugin that supports a custom OpenAI-compatible endpoint
-- enter `https://api.crazyrouter.com/v1` as the base URL
-- enter `sk-xxx` as the API key
-- use `gpt-5.5` as the first validation model
+- OpenAI 互換アドレスのカスタマイズに対応した Zotero AI プラグインを選ぶ
+- ベースアドレスを `https://api.crazyrouter.com/v1` に設定
+- API Key を `sk-xxx` に設定
+- 検証モデルはまず `gpt-5.5` を利用
 
 <Warning>
-Not every Zotero AI plugin supports a custom upstream URL. If a plugin only exposes an "OpenAI API Key" field and does not provide a `Base URL` or `API URL` setting, it usually cannot be redirected to Crazyrouter directly. That kind of plugin should not be the default public guide.
+すべての Zotero AI プラグインがカスタム上流アドレスに対応しているわけではありません。もし「OpenAI API Key 入力のみ」で、`Base URL` や `API URL` の設定欄がないプラグインだと、大抵そのままでは Crazyrouter にリダイレクトできません。こうしたプラグインは一般向け手順とすべきではありません。
 </Warning>
 
-## Why This Guide Is Written This Way
+## なぜこの手順なのか
 
-Because the Zotero AI plugin ecosystem varies a lot:
+現時点で Zotero の AI プラグインは多様性が大きいため：
 
-- Zotero's own plugin documentation explains that plugins are community-built, with a common installation flow but different capabilities
-- some plugins explicitly document a configurable `base API URL`
-- other plugins publicly document only an `OpenAI API Key`
+- Zotero 公式ドキュメントによれば、プラグインはコミュニティ主導で、導入方法は共通ですが、機能は統一されていません
+- カスタム `base API URL` に対応していると明記しているものもあります
+- 逆に公開ドキュメントには `OpenAI API Key` 設定のみ記載されたものもあります
 
-So the public Crazyrouter guide should teach users to choose a plugin that supports a custom OpenAI-compatible endpoint, rather than assuming every plugin can connect directly.
+このため Crazyrouter の公式説明文は「OpenAI 互換カスタムアドレス可」なプラグインを優先案内し、「全部のプラグインがすぐ接続できる」前提にしないことが肝心です。
 
-## Who This Guide Is For
+## 対象ユーザー
 
-- Users who want paper summarization, translation, and Q&A inside Zotero
-- Users who want literature reading and Crazyrouter model calls in one workflow
-- Users who want AI help while reviewing items, reading PDFs, or organizing notes
-- Users who prefer a GUI workflow instead of writing scripts
+- Zotero で論文要約、翻訳、QA をしたい人
+- 文献管理と Crazyrouter モデル利用を一つのワークフローにまとめたい人
+- 文献、PDF 読解やノート整理に AI 機能を導入したい人
+- スクリプトは書かず Zotero の GUI だけで構成したい人
 
-## Prerequisites
+## 前提条件
 
-| Item | Notes |
+| 項目 | 説明 |
 |------|------|
-| Crazyrouter account | Register at [crazyrouter.com](https://crazyrouter.com) first |
-| Crazyrouter token | Create a dedicated token for Zotero |
-| Zotero desktop app | Plugins mainly run in the desktop app |
-| AI plugin | It must support a custom OpenAI-compatible endpoint |
-| Papers or PDFs | Prepare at least one test item |
+| Crazyrouter アカウント | まず [crazyrouter.com](https://crazyrouter.com) で登録 |
+| Crazyrouter token | Zotero 専用の token 発行を推奨 |
+| Zotero デスクトップ | プラグインは主にデスクトップ用 |
+| AI プラグイン | OpenAI 互換アドレスをカスタム可能なものが必要 |
+| 文献・PDF | テスト用に最低一つのエントリを用意 |
 
-Suggested first-pass allowlist:
+最初は以下のみ許可推奨：
 
 - `gpt-5.5`
 - `claude-opus-4-8`
 - `gemini-3.1-pro`
 
-## Install Zotero
+## Zotero のインストール
 
 ### Windows
 
-1. Open the [Zotero download page](https://www.zotero.org/download/)
-2. Download the Windows installer
-3. Run the installer
-4. Launch Zotero
+1. [Zotero 公式ダウンロードページ](https://www.zotero.org/download/)を開く
+2. Windows 用インストーラをダウンロード
+3. インストーラを実行
+4. Zotero を起動
 
 ### macOS
 
-1. Open the [Zotero download page](https://www.zotero.org/download/)
-2. Download the macOS build
-3. Move Zotero into `Applications`
-4. Launch Zotero
+1. [Zotero 公式ダウンロードページ](https://www.zotero.org/download/)を開く
+2. macOS パッケージをダウンロード
+3. Zotero を `Applications` へドラッグ＆ドロップ
+4. Zotero を起動
 
 ### Linux
 
-1. Open the [Zotero download page](https://www.zotero.org/download/)
-2. Download the official Linux package
-3. Extract it and launch Zotero following Zotero's official instructions
-4. Confirm Zotero starts normally
+1. [Zotero 公式ダウンロードページ](https://www.zotero.org/download/)を開く
+2. 公式 Linux パッケージをダウンロード
+3. 解凍し公式手順通り起動
+4. Zotero が正常に開くか確認
 
 <Note>
-According to Zotero's official documentation, plugins are mainly installed in the desktop app. These AI plugin flows are not a good first-pass setup route from mobile.
+Zotero 公式ドキュメントによれば、プラグインは主にデスクトップ版に導入します。AI 系プラグインはモバイル初回設定にはあまり向きません。
 </Note>
 
-## How To Choose A Zotero AI Plugin
+## Zotero AI プラグインの選び方
 
-For public documentation, prefer plugins that provide:
+以下を満たすプラグインが公開ドキュメント上で特に推奨されます：
 
-- a `Base API URL`, `API URL`, or `Endpoint` field
-- an `API Key` field
-- a manual model field
-- ideally a preferences panel inside Zotero
+- `Base API URL`、`API URL`、`Endpoint` いずれか入力欄がある
+- `API Key` の入力対応
+- モデル名の手動入力ができる
+- Zotero の設定画面からパラメータ変更が可能だとなお良い
 
-### A practical public rule
+### 公開ドキュメントでのおすすめ判断基準
 
-If a plugin's public docs mention capabilities like these, it is usually a better Crazyrouter candidate:
+下記機能の記載が明確なプラグインは Crazyrouter 接続により適しています：
 
 - `Customize base API URL`
 - `API URL`
 - `Custom endpoint`
 - `Model preferences`
 
-For example, the public README for `zotero-chatgpt` explicitly mentions a configurable `base API URL`; by contrast, the public README for `Aria` focuses on entering an `OpenAI API Key` and model preferences, and does not present a custom upstream URL as the main public path. So the safer Crazyrouter baseline is to choose a plugin that clearly supports a custom OpenAI-compatible endpoint.
+例として、`zotero-chatgpt` の公開 README は `base API URL` カスタマイズに対応と明記。一方 `Aria` の公開 README には `OpenAI API Key`、モデルプリファレンス入力記述がメインで、「上流カスタム」は主軸で扱われていません。このため Crazyrouter のナレッジでは「OpenAI 互換アドレスのカスタマイズ対応プラグインを選ぶ」が推奨主線となります。
 
-## Recommended Configuration Shape
+## 推奨設定形式
 
-The exact field names vary by plugin, but for a first pass use this pattern:
+プラグインごとに項目名称は異なりますが初期設定は下記方針が手堅いです：
 
-| Plugin field | Recommended value |
+| プラグイン項目 | 推奨値 |
 |----------|--------|
 | Base API URL / API URL | `https://api.crazyrouter.com/v1` |
 | Full Endpoint | `https://api.crazyrouter.com/v1/chat/completions` |
@@ -116,69 +116,69 @@ The exact field names vary by plugin, but for a first pass use this pattern:
 | Model | `gpt-5.5` |
 
 <Tip>
-If the plugin asks for a "base URL", prefer `https://api.crazyrouter.com/v1`. Only use `https://api.crazyrouter.com/v1/chat/completions` when the plugin explicitly asks for the full chat endpoint.
+「基礎アドレス」入力なら `https://api.crazyrouter.com/v1` を優先入力。プラグイン側が「フルエンドポイント」明示の場合のみ `https://api.crazyrouter.com/v1/chat/completions` を使ってください。
 </Tip>
 
-## Configuration Steps
+## 設定手順
 
 <Steps>
-  <Step title="Step 1: Create a dedicated Crazyrouter token for Zotero">
-    For the first pass, only allow:
+  <Step title="ステップ1：Zotero専用Crazyrouterトークンを作成する">
+    初回は以下のみ許可：
 
     - `gpt-5.5`
     - `claude-opus-4-8`
 
-    Do not open a large model list on day one. A narrow scope is easier to debug.
+    モデルを一気に大量開放せず、まずは件数を絞りデバッグしやすく。
   </Step>
 
-  <Step title="Step 2: Install the Zotero desktop app">
-    Install Zotero for your platform and confirm that you can open at least one paper item or PDF normally.
+  <Step title="ステップ2：Zoteroデスクトップ版をインストールする">
+    OS に応じて Zotero をセットアップ。論文エントリが取り込めるか確認。
   </Step>
 
-  <Step title="Step 3: Download and install the AI plugin">
-    Based on Zotero's official plugin installation documentation, download the plugin `.xpi` file first. Then in Zotero:
+  <Step title="ステップ3：AIプラグインをダウンロードしてインストールする">
+    Zotero 公式プラグイン導入ガイドに基づき、まずプラグインの `.xpi` ファイルを入手し Zotero で：
 
-    - open `Tools`
-    - open `Plugins`
-    - drag the `.xpi` file onto the Plugins window
+    - `Tools` を開く
+    - `Plugins` に移動
+    - `.xpi` ファイルをプラグインウィンドウへドラッグ
 
-    Restart Zotero after installation.
+    完了したら Zotero を再起動。
   </Step>
 
-  <Step title="Step 4: Open the plugin settings">
-    Common entry points include:
+  <Step title="ステップ4：プラグイン設定画面に入る">
+    典型的な設定箇所：
 
     - `Edit` → `Preferences`
-    - the plugin's own preferences page
-    - a plugin sidebar or toolbar entry
+    - プラグインの設定画面
+    - サイドバーやツールバーのエントリ
 
-    The exact location depends on the plugin, but the goal is always to find the API and model configuration area.
+    プラグインごとに場所は違いますが、API とモデル設定欄を探すのがコツです。
   </Step>
 
-  <Step title="Step 5: Enter the Crazyrouter URL, key, and model">
-    If the plugin supports a base-URL style configuration, enter:
+  <Step title="ステップ5：Crazyrouterのアドレス、キー、およびモデルを入力する">
+    基礎アドレス型の場合は以下推奨：
 
     - `Base API URL`: `https://api.crazyrouter.com/v1`
     - `API Key`: `sk-xxx`
     - `Model`: `gpt-5.5`
 
-    If the plugin supports only a full endpoint field, use:
+    フルエンドポイント指定型は以下：
 
     - `Endpoint`: `https://api.crazyrouter.com/v1/chat/completions`
   </Step>
 
-  <Step title="Step 6: Restart Zotero if the plugin requires it">
-    Some plugins need a Zotero restart after changes to the API key, model, or preference fields. After the first setup, a restart is a safe default.
+  <Step title="ステップ6：プラグインの指示に従い、Zoteroを再起動する">
+    一部プラグインは API Key やモデル、設定変更後に Zotero 再起動が必要です。初回設定後は一度再起動推奨。
   </Step>
 
-  <Step title="Step 7: Run the smallest academic validation">
-    Do not begin with a complicated literature review. For the first pass, only:
+  <Step title="ステップ7：最も基本的な学術シナリオで初回検証を行う">
+    いきなり複雑な依頼はせず、まず：
 
-    - select one item with an abstract
-    - or open one small PDF
-    - run one summarization, translation, or simple Q&A action
+    - 要約付き文献を選択
+    - あるいは軽い PDF 開く
+    - 要約／翻訳／簡単 QA を一度実行
 
-    A good first prompt is:
+    テスト用プロンプト例：
 
     ```text
     Summarize this paper in 3 bullet points.
@@ -186,103 +186,103 @@ If the plugin asks for a "base URL", prefer `https://api.crazyrouter.com/v1`. On
   </Step>
 </Steps>
 
-## Recommended Validation Order
+## 推奨検証プロセス
 
-Move in this order:
+下記順で進めてください：
 
-1. Confirm Zotero and the plugin both open correctly
-2. Validate `gpt-5.5` first
-3. Test single-paper summarization
-4. Test translation next
-5. Only then try multi-paper comparison, long-form analysis, or batch tasks
+1. Zotero 本体およびプラグインの起動確認
+2. `gpt-5.5` の接続確認
+3. 単独文献の要約
+4. 翻訳実行
+5. 複数文献比較や長文解析・バッチ実行
 
-## Recommended Models
+## 推奨モデル
 
-| Scenario | Recommended model | Why |
+| シーン | モデル | 理由 |
 |------|----------|------|
-| First connection test | `gpt-5.5` | Verified successfully in production on March 23, 2026, and best for plugin-to-Crazyrouter validation |
-| Deep analysis and explanation | `claude-opus-4-8` | Better for long explanations, comparison, and method-level interpretation |
-| Gemini fallback path | `gemini-3.1-pro` | Useful as a second compatibility-validation path |
+| チェーン初回検証 | `gpt-5.5` | 2026年3月23日、商用稼働成功済み、Crazyrouter への疎通確認に最適 |
+| 詳細分析や解説 | `claude-opus-4-8` | 複雑な要約、手法比較、長文解説に適合 |
+| Gemini 予備 | `gemini-3.1-pro` | 二次的な互換性検証経路に |
 
-## Good Zotero Workflows For Crazyrouter
+## Zotero で想定する利用形態
 
-### Single-paper summarization
+### 単一論文の要約
 
-This is the best first validation because the context is small and the output is easy to judge.
+初期検証に最適。文脈がシンプルで結果判断しやすい。
 
-### PDF translation
+### PDF 翻訳
 
-Start with one page or one short passage before expanding the scope.
+まずは1ページまたは短い範囲でテスト推奨、徐々に拡大。
 
-### Multi-paper comparison
+### 複数文献比較
 
-Do not use this as the first test. Try it only after single-paper summarization and translation are already stable.
+初回に実施は避けてください。単一要約・翻訳の安定確認後、比較・要旨・研究ギャップ抽出など複雑処理へ進めます。
 
-### Note generation
+### ノート整理
 
-If the plugin can write results back into Zotero notes, begin with short summaries first instead of generating long notes in bulk.
+結果を Zotero ノートに書き戻せるプラグインなら、まず短い要約から試し、最初から大量ノート自動生成は避けてください。
 
-## Token Best Practices
+## Token 運用のベストプラクティス
 
-| Setting | Recommendation | Why |
+| 設定 | 推奨 | 説明 |
 |------|------|------|
-| Dedicated token | Required | Do not share it with IDEs or automation |
-| Model allowlist | Strongly recommended | Start with only one or two models |
-| Spending limit | Strongly recommended | Long PDFs and repeated summaries can amplify usage |
-| Use-case separation | Recommended | Separate personal academic usage from team-shared usage |
-| Leak response | Rotate immediately | Replace the key if it appears in demos, recordings, or screenshots |
+| 専用 token | 必須 | IDE や自動化プロセスと使い回さない |
+| モデル許可リスト | 強く推奨 | まず 1～2 モデルのみ許可 |
+| クオータ制限 | 強く推奨 | 長文 PDF や多段要約は消費増大につながる |
+| 用途別 token | 推奨 | 個人利用とチーム共有は分離 |
+| 漏洩時対応 | すぐローテーション | デモ・画面共有・設定露出後は即時入れ替え |
 
-## Validation Checklist
+## 検証チェックリスト
 
-- [ ] Zotero desktop is installed
-- [ ] An AI plugin with a custom OpenAI-compatible endpoint is installed
-- [ ] A dedicated Crazyrouter token was created for Zotero
-- [ ] The base URL or full endpoint was entered correctly
-- [ ] `sk-xxx` was entered correctly
-- [ ] `gpt-5.5` was used as the first model
-- [ ] Zotero was restarted if the plugin requires it
-- [ ] A single-paper summarization or translation test succeeded
-- [ ] The request appears in Crazyrouter logs
+- [ ] Zotero デスクトップ版導入済み
+- [ ] OpenAI 互換カスタムアドレス対応 AI プラグイン導入済み
+- [ ] Zotero 専用 Crazyrouter token 作成済み
+- [ ] ベースアドレスを `https://api.crazyrouter.com/v1` またはフルエンドポイントとして入力済み
+- [ ] `sk-xxx` を正しく入力
+- [ ] `gpt-5.5` のみ先行設定
+- [ ] 設定変更後、必要に応じ Zotero 再起動済み
+- [ ] 単一要約／単一翻訳で正常性確認済み
+- [ ] Crazyrouter 管理画面で該当リクエストをログ上で確認済み
 
-## Common Errors And Fixes
+## よくあるエラーと対処法
 
-| Symptom | Common cause | Fix |
+| 現象 | 主な原因 | 修復方法 |
 |------|----------|----------|
-| The plugin only has an OpenAI key field and no Base URL | The plugin does not support a custom upstream | Switch to a plugin that supports a custom `Base API URL` or `Endpoint` |
-| 401 unauthorized | Token is wrong, incomplete, or expired | Generate a new token and enter it again |
-| 404 | The base URL or full endpoint is wrong | Reset it to `https://api.crazyrouter.com/v1` or `https://api.crazyrouter.com/v1/chat/completions` |
-| 403 / model not allowed | The token does not allow that model | Allow the model in Crazyrouter token settings |
-| `model not found` | The model name is wrong | Switch back to `gpt-5.5` and do a minimal validation |
-| The plugin shows no response or ignores new settings | The plugin needs a Zotero restart | Restart Zotero and try again |
-| Summarization fails without a clear API error | The item has no abstract, the PDF is missing, or the plugin did not receive enough context | Switch to an item with an abstract or an attached PDF |
-| Long-document jobs are very slow | The PDF is too long or the task is too heavy | Reduce the scope to one paragraph, one page, or one paper |
+| プラグインに OpenAI Key 入力欄しかない | 上流カスタム非対応 | `Base API URL` または `Endpoint` カスタム可能なプラグインに差替え |
+| 401 unauthorized | token ミス・コピペ不完全・期限切れなど | token 再生成し再設定 |
+| 404 | ベースまたはフルアドレスの入力ミス | ベースは `https://api.crazyrouter.com/v1`／フルは `https://api.crazyrouter.com/v1/chat/completions` へ戻す |
+| 403 / model not allowed | token で該当モデル非許可 | Crazyrouter token 設定で該当モデル許可 |
+| `model not found` | モデル名のタイプミス | 最小要件確認は `gpt-5.5` で実施 |
+| プラグイン無反応／設定反映されない | プラグイン側で Zotero 再起動必要 | 再起動後リトライ |
+| 要約失敗だがエラー応答なし | 選択文献に要約無し・PDF未添付・プラグインが文脈取得できない | 要約or PDF付きで再確認 |
+| 長文処理が遅い | PDF 多頁・依頼内容が重すぎる | 最初は1段落、1頁、1ファイル要約に縮小 |
 
 ## FAQ
 
-### Can Zotero itself connect to Crazyrouter directly?
+### Zotero 自体から Crazyrouter 設定できる？
 
-Usually not through Zotero alone. The common route is to configure Crazyrouter inside an AI plugin that supports OpenAI-compatible endpoints.
+通常は Zotero 本体間接でなく、OpenAI 互換インターフェース対応 AI プラグイン経由になります。
 
-### What kind of plugin is best for Crazyrouter?
+### どのプラグインが Crazyrouter 向き？
 
-Prefer plugins that support a custom `Base API URL`, `API URL`, or `Endpoint`.
+`Base API URL`、`API URL`、`Endpoint` のカスタム可能なものを最優先で選んでください。
 
-### What if the plugin only accepts an OpenAI API Key?
+### OpenAI API Key のみしか入力できないプラグインは？
 
-That plugin usually cannot be redirected to Crazyrouter directly, so it is not a good public default. It is better to switch to a plugin with custom endpoint support.
+このタイプは Crazyrouter 上流変更に未対応。公開の標準手順としない方針です。カスタムアドレス入力可能なプラグインに切替推奨。
 
-### What base URL should I enter?
+### ベースアドレスは何を入れれば？
 
-Prefer `https://api.crazyrouter.com/v1`.
+`https://api.crazyrouter.com/v1` を推奨します。
 
-### What should the first model be?
+### 一つ目のモデルは？
 
-Start with `gpt-5.5`.
+`gpt-5.5` から入力。
 
-### When should I try multi-paper analysis or complex review prompts?
+### 複数分析や総合要約はいつから？
 
-Only after single-paper summarization and single-paper translation are already stable.
+最初に単一要約や単一翻訳安定確認後、段階的に複雑化。
 
 <Note>
-If your goal is "make Zotero work with Crazyrouter first", the key is not choosing the fanciest plugin. It is confirming that your plugin truly supports a custom OpenAI-compatible endpoint, and then validating a single-paper summary with `gpt-5.5`.
+目標が「とりあえず Zotero で Crazyrouter を通す」場合、必要なのは強力なプラグインを追い求めるより、「本当にカスタム OpenAI 互換アドレスに対応するプラグインか」と、`gpt-5.5` で単独要約が動くかの確認です。
 </Note>

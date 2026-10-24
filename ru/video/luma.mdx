@@ -1,32 +1,32 @@
 ---
 title: "Luma"
-description: "Use the Luma Dream Machine API to generate videos"
+description: "Создайте видео с помощью Luma Dream Machine API"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
 # Luma
 
-Luma Dream Machine provides high-quality video generation capabilities. Official docs: [docs.lumalabs.ai](https://docs.lumalabs.ai/docs/video-generation)
+Luma Dream Machine предоставляет возможности высококачественной генерации видео. Официальная документация: [docs.lumalabs.ai](https://docs.lumalabs.ai/docs/video-generation)
 
-## Create Video
+## Создать видео
 
 ```
 POST /luma/generations
 ```
 
-### Request Parameters
+### Параметры запроса
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `user_prompt` | string | Yes | Video description prompt |
-| `model_name` | string | No | Model name: `ray-v1`, `ray-v2` |
-| `duration` | string | No | Video duration (seconds) |
-| `resolution` | string | No | Resolution: `540p`, `720p`, `1080p` |
-| `expand_prompt` | boolean | No | Whether to auto-expand the prompt |
-| `image_url` | string | No | First frame reference image URL |
-| `image_end_url` | string | No | Last frame reference image URL |
+| Параметр | Тип | Обязательный | Описание |
+|------|------|------|------|
+| `user_prompt` | string | Да | Текстовый промпт для описания видео |
+| `model_name` | string | Нет | Название модели: `ray-v1`, `ray-v2` |
+| `duration` | string | Нет | Длительность видео (секунды) |
+| `resolution` | string | Нет | Разрешение: `540p`, `720p`, `1080p` |
+| `expand_prompt` | boolean | Нет | Автоматически дополнять промпт |
+| `image_url` | string | Нет | URL референсного изображения для первого кадра |
+| `image_end_url` | string | Нет | URL референсного изображения для последнего кадра |
 
-### Request Examples
+### Пример запроса
 
 <CodeGroup>
 
@@ -65,7 +65,7 @@ print(response.json())
 
 </CodeGroup>
 
-### Response Example
+### Пример ответа
 
 ```json
 {
@@ -77,9 +77,9 @@ print(response.json())
 
 ---
 
-## Image-to-Video
+## Генерация видео по изображению
 
-Pass `image_url` as the first frame:
+Передайте `image_url` в качестве первого кадра:
 
 ```json
 {
@@ -89,7 +89,7 @@ Pass `image_url` as the first frame:
 }
 ```
 
-First-last frame mode:
+Режим первого и последнего кадра:
 
 ```json
 {
@@ -102,7 +102,7 @@ First-last frame mode:
 
 ---
 
-## Query Task
+## Запрос статуса задачи
 
 ```
 GET /luma/generations/{task_id}
@@ -113,7 +113,7 @@ curl https://api.crazyrouter.com/luma/generations/luma_gen_abc123 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-### Response Example
+### Пример ответа
 
 ```json
 {
@@ -129,13 +129,13 @@ curl https://api.crazyrouter.com/luma/generations/luma_gen_abc123 \
 
 ---
 
-## Extend Video
+## Продление видео
 
 ```
 POST /luma/generations/{task_id}/extend
 ```
 
-Extend a completed video.
+Продлите уже завершённое видео.
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/luma/generations/luma_gen_abc123/extend \
@@ -146,11 +146,11 @@ curl -X POST https://api.crazyrouter.com/luma/generations/luma_gen_abc123/extend
   }'
 ```
 
-### Task Status
+### Статусы задачи
 
-| Status | Description |
-|--------|-------------|
-| `queued` | Queued |
-| `dreaming` | Generating |
-| `completed` | Completed |
-| `failed` | Failed |
+| Статус | Описание |
+|------|------|
+| `queued` | В очереди |
+| `dreaming` | Генерируется |
+| `completed` | Завершено |
+| `failed` | Неудачно |

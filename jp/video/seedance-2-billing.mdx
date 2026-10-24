@@ -1,0 +1,371 @@
+---
+title: "Seedance 2.0 の料金説明"
+description: "ローカルコードと実測ケースに基づき、Seedance 2.0 / 2.0 Fast の実際の課金方法、クォータ計算式、および token と秒数の関係を解説します"
+---
+> 内容更新日: 2026-06-23
+
+# Seedance 2.0 の料金説明
+
+本記事では **Crazyrouter の現行コード内における実際の課金ロジック** だけを説明します。公式料金ページの一般的な解説ではありません。
+
+対象モデル：
+
+- `doubao-seedance-2-0`
+- `doubao-seedance-2-0-fast`
+
+接続先は必ず `https://api.crazyrouter.com` を使用してください。基本設定は [API Endpoint](https://docs.crazyrouter.com/jp/api-endpoint) をご参照ください。
+
+## 結論から先に
+
+1. `Seedance 2.0` と `Seedance 2.0 Fast` はローカルコード上、いずれも `per_output_token` で精算され、秒数精算ではありません。
+2. タスク提出時、これら2種類のタスクは **デフォルトで事前課金が0** です。
+3. タスク成功後、システムは上流から返される `TotalTokens` または `CompletionTokens` に基づいて最終的に課金します。
+4. `duration` はタスク特性として記録されますが、**Seedance 2.0 の最終課金式には関与しません**。
+5. よって、コード上に**「何 token = 何秒」といった固定のグローバル換算式は存在しません**。
+6. 「だいたい1秒いくら？」と回答したい場合は、タスク完了後に `实际输出 tokens / 实际秒数` で観測値として算出することはできますが、それを固定の課金ルールとはみなせません。
+
+## ローカルコードにおける課金ルール
+
+### 1. どの課金ルールが適用されるか
+
+Seedance 2.0 シリーズの課金ルールは「動画入力の有無」で決まります：
+
+| モデル | 条件 | Billing Key | 単価 |
+|------|------|------|------|
+| `doubao-seedance-2-0` | 動画入力なし | `doubao-seedance-2-0:video0` | `46 / 7 USD / 100万Tokens` |
+| `doubao-seedance-2-0` | 動画入力あり | `doubao-seedance-2-0:video1` | `28 / 7 USD / 100万Tokens` |
+| `doubao-seedance-2-0-fast` | 動画入力なし | `doubao-seedance-2-0-fast:video0` | `37 / 7 USD / 100万Tokens` |
+| `doubao-seedance-2-0-fast` | 動画入力あり | `doubao-seedance-2-0-fast:video1` | `22 / 7 USD / 100万Tokens` |
+
+ここでの `video0` / `video1` は秒数ではなく：
+
+- `video0`: リクエストに動画リファレンス入力なし
+- `video1`: リクエストに動画リファレンス入力あり
+
+該当コード：
+
+- `model/video_billing_seedance.go`
+- `relay/video_billing_runtime.go`
+
+### 2. タスク提出時になぜ通常課金されないのか
+
+実行時、Seedance 2.0 で適用されるプラットフォーム課金モードは `per_output_token` です。この種のタスクでは提出時に：
+
+- `BasePrice` が記録されます
+- `Ratio` が `0` にセットされます
+- よって提出フェーズの `quota = int(ratio * QuotaPerUnit)` 結果は `0` となります
+
+該当コード：
+
+- `relay/video_billing_runtime.go`
+- `relay/relay_task.go`
+
+これが Seedance 2.0 の一般的な挙動が：
+
+- タスク提出成功
+- その場で課金されない、または事前課金0
+- タスク完了後に実際の token で追加課金
+
+となる理由です。
+
+## 最終課金式
+
+タスク成功後、システムはまず `settlePerOutputTokenTaskBilling` を実行します。
+
+Seedance シリーズにおいて、コードは token を以下の優先度で取得します：
+
+1. `taskResult.TotalTokens`
+2. 上記がなければ `taskResult.CompletionTokens`
+
+該当コード：
+
+- `controller/task_video.go`
+
+最終価格式：
+
+```text
+actualPriceUSD =
+  unitPriceUSDPer1MTokens
+  * (billedTokens / 1_000_000)
+  * quantityMultiplier
+  * groupRatio
+  * discount
+```
+
+最終クォータ式：
+
+```text
+actualQuota = int(actualPriceUSD * QuotaPerUnit)
+```
+
+現行コード内：
+
+```text
+QuotaPerUnit = 500000
+```
+
+該当コード：
+
+- `controller/task_video.go`
+- `common/constants.go`
+
+## 秒数はコード中でどんな役割か
+
+### 1. `duration` は認識・記録される
+
+コードは下記から秒数を解析します：
+
+- `req.Duration`
+- `req.Seconds`
+- `metadata.durationSeconds`
+- `metadata.duration_seconds`
+- `metadata.duration`
+- `metadata.seconds`
+
+該当コード：
+
+- `relay/video_billing_runtime.go`
+
+### 2. しかし Seedance 2.0 は秒数課金ではない
+
+`duration` はタスクプロファイルやログには反映されますが、Seedance 2.0 / 2.0 Fast で適用されるのは `per_output_token` であり：
+
+- `match.BilledSeconds` は課金に関与しません
+- 最終課金は上流が返す token のみを参照します
+
+これは Veo や Wan のような `per_second` ビデオモデルとは異なります。
+
+## token と秒数の対応関係
+
+### 課金基準
+
+**直接変換はできません。**
+
+つまり、現行コードでは次のような規則はありません：
+
+```text
+1 秒 = 固定 N tokens
+```
+
+理由は単純です：
+
+- Seedance 2.0 の販売価格設定が `per_second` ではない
+- コードも `duration` を固定 token 枠にマッピングしていない
+- 最終的に、タスク完了時の実際の token 消費量のみを認めます
+
+### 観測基準
+
+「このタスクは平均1秒あたり何 token 消費したか」を検証したい場合は、タスク完了後に**観測値**を計算可能です：
+
+```text
+平均每秒 tokens = billedTokens / requestedDurationSeconds
+```
+
+逆に：
+
+```text
+估算秒数 = billedTokens / 平均每秒 tokens
+```
+
+ただし、これは事後の分析であり課金式ではありません。
+
+## 実測例：4秒 720p のシンプル動画
+
+下記は実際に Seedance 2.0 を呼び出した結果です。ここから本当に `usage` をもとに「このタスクの1秒あたりの単価」をどう逆算するのかを説明します。
+
+<Warning>
+ このケースは `720p` であり、`1080p` ではありません。現時点の Crazyrouter ドキュメントで Seedance 2.0 / 2.0 Fast が公式にサポートする外部呼び出し境界は `480p` と `720p` までです。`1080p` は現時点では非公開領域です。
+</Warning>
+
+### ケース1：最もシンプルなテキストから動画生成
+
+リクエスト特性：
+
+- モデル：`doubao-seedance-2-0`
+- 入力：テキストのみ（画像や動画リファレンスなし）
+- 解像度：`720p`
+- 時間長：`4s`
+- タスクID：`cgt-20260617212928-5s755`
+- 上流実際返却値：`completion_tokens = 87300`、`total_tokens = 87300`
+
+動画リファレンス入力がないため、ヒット：
+
+```text
+billing_key = doubao-seedance-2-0:video0
+unitPrice = 46 / 7 = 6.571428 USD / 100万Tokens
+```
+
+計算手順：
+
+```text
+tokensPerSecond = 87300 / 4 = 21825 tokens/s
+actualPrice = 87300 / 1000000 * 6.571428 = 0.5736 USD
+pricePerSecond = 0.5736 / 4 = 0.1434 USD/s
+```
+
+よって、この非常にシンプルな `4s 720p` テキスト→動画では、観測単価は約：
+
+```text
+约 0.14 USD / 秒
+```
+
+### ケース2：前回の動画を基にリファレンス動画生成
+
+リクエスト特性：
+
+- モデル：`doubao-seedance-2-0`
+- 入力：テキスト + 前回生成した動画を `reference_video` として
+- 解像度：`720p`
+- 時間長：`4s`
+- タスクID：`cgt-20260617214300-rsnsx`
+- 上流実際返却値：`completion_tokens = 173700`、`total_tokens = 173700`
+
+動画リファレンス入力が含まれているため、ヒット：
+
+```text
+billing_key = doubao-seedance-2-0:video1
+unitPrice = 28 / 7 = 4.000000 USD / 100万Tokens
+```
+
+計算手順：
+
+```text
+tokensPerSecond = 173700 / 4 = 43425 tokens/s
+actualPrice = 173700 / 1000000 * 4.000000 = 0.6948 USD
+pricePerSecond = 0.6948 / 4 = 0.1737 USD/s
+```
+
+よって、この `4s 720p` リファレンス動画生成の観測単価は約：
+
+```text
+约 0.17 USD / 秒
+```
+
+### この実測値を顧客にどう説明するか
+
+次のように案内できます：
+
+```text
+Seedance 2.0 does not have a fixed per-second price. It is billed by actual output tokens after the task completes.
+
+In one simple 4-second 720p text-to-video test, the task used 87,300 output tokens, which equals about 21,825 tokens/sec and about $0.14/sec.
+
+In another 4-second 720p reference-video test, the task used 173,700 output tokens, which equals about 43,425 tokens/sec and about $0.17/sec.
+
+These are observed examples, not fixed rates. More complex prompts, reference media, audio, and future resolution support may change the actual output tokens.
+```
+
+したがって、「典型的な1秒＝100,000token」と仮定することはできません。顧客に信頼性のある見積りを伝える場合は、必ず実際のタスクの `usage.total_tokens` または `usage.completion_tokens` で逆算することが推奨されます。
+
+## すぐ使える2つの例
+
+### 例1：`doubao-seedance-2-0-fast`、動画入力あり
+
+仮定：
+
+- `doubao-seedance-2-0-fast:video1` にヒット
+- 上流から `TotalTokens = 1,200,000`が返る
+- `quantityMultiplier = 1`
+- `groupRatio = 1`
+- `discount = 1`
+
+この場合：
+
+```text
+unitPrice = 22 / 7 = 3.142857 USD / 100万Tokens
+actualPrice = 3.142857 * 1.2 = 3.771428 USD
+actualQuota = int(3.771428 * 500000) = 1885714
+```
+
+このリクエストの `duration = 12` であれば、観測値のみ得られます：
+
+```text
+平均每秒 tokens = 1,200,000 / 12 = 100,000
+```
+
+この `100,000 tokens/s` はこの1件のタスクにのみ適用されます。
+
+### 例2：`doubao-seedance-2-0`、動画入力なし
+
+仮定：
+
+- `doubao-seedance-2-0:video0` にヒット
+- 上流から `CompletionTokens = 800,000` が返る
+- `quantityMultiplier = 1`
+- `groupRatio = 1`
+- `discount = 1`
+
+この場合：
+
+```text
+unitPrice = 46 / 7 = 6.571428 USD / 100万Tokens
+actualPrice = 6.571428 * 0.8 = 5.257142 USD
+actualQuota = int(5.257142 * 500000) = 2628571
+```
+
+リクエストに `duration = 8` を記載した場合でも観測のみとなります：
+
+```text
+平均每秒 tokens = 800,000 / 8 = 100,000
+```
+
+「8秒タスク＝80万token」と断定することはできません。
+
+## 注視すべきフィールド
+
+Seedance 2.0 の課金を調べる場合は、まず以下の情報をチェックしましょう：
+
+- リクエストに動画入力が含まれるか
+- ヒットした `billing_key`
+- タスク完了後、上流から返る `TotalTokens` / `CompletionTokens`
+- このタスクの `groupRatio`
+- 当該モデルの割引 `discount`
+- 最終的な `task.Quota`
+
+コードのログ・スナップショットでは：
+
+- `billing_mode`
+- `billing_key`
+- `billing_total_price`
+- `billing_output_tokens`
+- `billing_billed_tokens`
+- `billing_token_kind`
+- `billing_settled`
+
+該当コード：
+
+- `relay/relay_task.go`
+- `model/task.go`
+- `controller/task_video.go`
+
+## ひとことで説明すると
+
+Seedance 2.0 の場合：
+
+- `秒数` がリクエスト特性
+- `token` が課金根拠
+- `quota` は `token` 課金後の社内クォータ
+
+正しい流れは：
+
+```text
+请求 duration -> 生成完成 -> 上游返回 tokens -> 按 token 算 USD -> 按 USD 算 quota
+```
+
+であり、
+
+```text
+duration -> 直接扣 quota
+```
+
+ではありません。
+
+<Note>
+  今後プラットフォームが専用の「秒売りSKU」をSeedance 2.0で導入する場合、そのとき初めて「秒数と価格」の安定した対応が可能になります。しかし2026-06-06時点で、ローカルコードでは未対応です。
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## 関連ページ
+
+- [Seedance 2.0 モデルページ：リアルタイム価格、実サンプル、呼び出しコード](https://crazyrouter.com/ja/models/bytedance/doubao-seedance-2-0?utm_source=docs&utm_medium=related)
+- [ByteDance の全モデルと価格一覧](https://crazyrouter.com/ja/models/bytedance?utm_source=docs&utm_medium=related)

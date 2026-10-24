@@ -1,43 +1,43 @@
 ---
-title: "Create Completion (Legacy)"
-description: "Current production status of the POST /v1/completions compatibility endpoint"
+title: "作成完了 (レガシー)"
+description: "POST /v1/completions 互換性エンドポイントの現在の運用状況"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Create Completion (Legacy)
+# 作成完了 (レガシー)
 
 ```
 POST /v1/completions
 ```
 
 <Warning>
-  This is a compatibility endpoint, not the primary recommended path. For new integrations, prefer `/v1/chat/completions` or `/v1/responses`.
+  これは互換性のためのエンドポイントであり、現在の主要な推奨ルートではありません。新規利用の場合は、優先して `/v1/chat/completions` または `/v1/responses` をご利用ください。
 </Warning>
 
-## Current Production Status
+## 現在の運用状況
 
-As of March 23, 2026, Crazyrouter production confirms:
+2026年3月23日現在、Crazyrouter の本番環境では次のことが確認されています：
 
-- the route still exists
-- a request using the classic example model `gpt-4.1-mini` returned `503`
-- the error code was `model_not_found`
-- the message said the model was temporarily unavailable
+- ルートは依然として利用可能です
+- クラシックサンプルモデル `gpt-5-mini` でリクエストを送信すると、`503` が返されます
+- エラーコードは `model_not_found` です
+- エラーメッセージは「temporarily unavailable」です
 
-In practice, this means the endpoint should be treated as legacy-client compatibility only, not as the default path for new work.
-
----
-
-## Current Recommendation
-
-1. Use [`Chat Completions`](/chat/openai/completions) for new chat-style integrations
-2. Use [`Responses`](/chat/responses/overview) when you need GPT-5 reasoning, web search, or newer response shapes
-3. Only keep testing `/v1/completions` if you already depend on a legacy client and have confirmed that your legacy model is currently available
+つまり、このエンドポイントは「旧クライアントとの互換性テスト用途」に限定し、標準の新規導入策としては推奨されません。
 
 ---
 
-## Retest Template
+## 現時点での推奨
 
-If you must verify whether a legacy model still works on this endpoint, first confirm the model ID through [`/v1/models`](/chat/openai/models), then send a minimal request:
+1. 新しいプロジェクトでは [`Chat Completions`](/jp/chat/openai/completions) を直接ご利用ください
+2. GPT-5 推論や Web Search など新機能が必要な場合は、優先して [`Responses`](/jp/chat/responses/overview) をご利用ください
+3. 既存の旧版クライアントがあり、かつご自身が所有するレガシーモデルが現環境で利用可能と確認できている場合のみ、`/v1/completions` の検証を続けてください
+
+---
+
+## Retest テンプレート
+
+古いモデルがこのエンドポイントで動作するか検証が必要な場合は、まず [`/v1/models`](/jp/chat/openai/models) でモデルIDを確認し、最小限のリクエストを実施してください：
 
 ```bash
 curl https://api.crazyrouter.com/v1/completions \
@@ -50,21 +50,21 @@ curl https://api.crazyrouter.com/v1/completions \
   }'
 ```
 
-Observed production error example:
+本番環境で実際に発生したエラー例：
 
 ```json
 {
   "error": {
     "code": "model_not_found",
-    "message": "Model gpt-4.1-mini is temporarily unavailable",
+    "message": "Model gpt-5-mini is temporarily unavailable",
     "type": "new_api_error"
   }
 }
 ```
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [GPT-5 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gpt-5?utm_source=docs&utm_medium=related)
-- [GPT-5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-5?utm_source=docs&utm_medium=related)
-- [GPT Image 1.5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT-5 価格比較：公式 / Azure / Bedrock / Vertex および Crazyrouter](https://crazyrouter.com/ja/pricing/gpt-5?utm_source=docs&utm_medium=related)
+- [GPT-5 モデルページ：リアルタイム価格・実例・呼び出しコード](https://crazyrouter.com/ja/models/openai/gpt-5?utm_source=docs&utm_medium=related)
+- [GPT Image 1.5 モデルページ：リアルタイム価格・実例・呼び出しコード](https://crazyrouter.com/ja/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)

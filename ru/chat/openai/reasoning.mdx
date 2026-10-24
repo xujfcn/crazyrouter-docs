@@ -1,30 +1,30 @@
 ---
-title: "Reasoning Models"
-description: "Production-revalidated guidance for using Crazyrouter reasoning features and choosing the right protocol"
+title: "Модели рассуждения"
+description: "Проверенное на продакшне руководство по использованию функций рассуждения Crazyrouter и выбору правильного протокола"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Reasoning Models
+# Модели рассуждения
 
-This page only documents reasoning behavior that was revalidated against Crazyrouter production on `2026-03-22`.
+На этой странице документируется только такое поведение рассуждающих моделей, которое было перепроверено в продакшне Crazyrouter на `2026-03-22`.
 
-For OpenAI-compatible integrations, the current guidance is:
+Для интеграций, совместимых с OpenAI, актуальные рекомендации:
 
-- If you only want stronger reasoning and only need the final answer, use Chat Completions with `reasoning_effort`
-- If you need a stable, inspectable reasoning output, prefer the Responses API and see [GPT-5 Thinking Mode](/ru/chat/responses/gpt5-thinking)
+- Если вам нужно лишь усиленное рассуждение и требуется только итоговый ответ, используйте Chat Completions с `reasoning_effort`
+- Если необходим стабильный, проверяемый результат рассуждения, предпочтительнее использовать Responses API и ознакомиться с [Режим мышления GPT-5](/ru/chat/responses/gpt5-thinking)
 
-## Verified combinations
+## Проверенные комбинации
 
-| Route | Model | Request parameter | Current production behavior |
-|-------|-------|-------------------|-----------------------------|
-| Chat Completions | `gpt-5.5` | `reasoning_effort` | Request succeeds and returns a final answer |
-| Responses | `gpt-5.5` | `reasoning.effort` / `reasoning.summary` | `output` includes `reasoning` and `message` items |
+| Маршрут | Модель | Параметр запроса | Текущее поведение в продакшне |
+|---------|--------|------------------|-------------------------------|
+| Chat Completions | `gpt-5.5` | `reasoning_effort` | Запрос выполняется успешно и возвращает итоговый ответ |
+| Responses | `gpt-5.5` | `reasoning.effort` / `reasoning.summary` | `output` включает элементы `reasoning` и `message` |
 
 ---
 
 ## Chat Completions: `reasoning_effort`
 
-The following request shape currently works in production:
+Следующий формат запроса сейчас работает в продакшне:
 
 ```bash cURL
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -43,29 +43,29 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-Available `reasoning_effort` values:
+Доступные значения `reasoning_effort`:
 
-| Value | Meaning |
-|-------|---------|
-| `low` | Faster response for simpler tasks |
-| `medium` | Balanced default-style setting |
-| `high` | More reasoning for harder tasks |
+| Значение | Значение (описание) |
+|----------|---------------------|
+| `low` | Более быстрый ответ для простых задач |
+| `medium` | Сбалансированная настройка по умолчанию |
+| `high` | Больше рассуждения для сложных задач |
 
-### Current response behavior
+### Текущее поведение ответа
 
-In the `2026-03-22` production recheck:
+В ходе перепроверки на продакшне `2026-03-22`:
 
-- the request succeeded
-- the final answer was returned in `message.content`
-- `message.reasoning_content` did not reliably contain usable content
+- запрос был выполнен успешно
+- итоговый ответ был возвращен в `message.content`
+- `message.reasoning_content` не всегда содержал пригодимый контент
 
-So if you only want stronger reasoning, Chat Completions with `reasoning_effort` is still usable. If you need a visible reasoning summary field, do not treat Chat Completions as the primary path.
+Поэтому, если вам нужно только усиленное рассуждение, Chat Completions с `reasoning_effort` все еще можно использовать. Если требуется явно видимое поле с резюме рассуждения, не используйте Chat Completions в качестве основного варианта.
 
 ---
 
-## When you need inspectable reasoning output
+## Когда нужен проверяемый вывод рассуждения
 
-The more reliable production path is the Responses API:
+Более надежный продакшен-путь — это Responses API:
 
 ```bash cURL
 curl https://api.crazyrouter.com/v1/responses \
@@ -81,32 +81,32 @@ curl https://api.crazyrouter.com/v1/responses \
   }'
 ```
 
-Verified `output.type` values:
+Проверенные значения `output.type`:
 
 ```json
 ["reasoning", "message"]
 ```
 
-For concrete response shapes, summary fields, and streaming event names, see:
+Для информации о конкретных форматах ответов, полях-резюме и названиях событий для стриминга см.:
 
-- [GPT-5 Thinking Mode](/ru/chat/responses/gpt5-thinking)
-- [AI Thinking Fields](/ru/reference/thinking)
+- [Режим мышления GPT-5](/ru/chat/responses/gpt5-thinking)
+- [Поля мыслительного AI](/ru/reference/thinking)
 
 ---
 
-## Current recommendation
+## Актуальная рекомендация
 
-- For new builds that need to log or display reasoning summaries, start with the Responses API
-- For existing Chat Completions integrations that only care about the final answer, `reasoning_effort` is still a valid path
-- Do not assume all OpenAI-compatible reasoning models will reliably expose `reasoning_content`
+- Для новых сборок, где нужно вести журнал или отображать резюме рассуждений, начинайте с Responses API
+- Для существующих интеграций Chat Completions, в которых важен только итоговый ответ, `reasoning_effort` все еще остается валидным выбором
+- Не предполагается, что все совместимые с OpenAI модели рассуждения гарантированно будут возвращать `reasoning_content`
 
 <Warning>
-  Reasoning requests usually increase both latency and token usage. Higher `reasoning_effort` generally costs more.
+  Запросы на рассуждение обычно увеличивают задержку и расход токенов. Более высокий `reasoning_effort` обычно стоит дороже.
 </Warning>
 
 {/* crazyrouter-model-links v2 */}
 ## См. также на crazyrouter.com
 
-- [GPT-5: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/gpt-5?utm_source=docs&utm_medium=related)
-- [GPT-5: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-5?utm_source=docs&utm_medium=related)
-- [GPT Image 1.5: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Сравнение цен GPT-5: штатный прайс против Azure / Bedrock / Vertex против Crazyrouter](https://crazyrouter.com/ru/pricing/gpt-5?utm_source=docs&utm_medium=related)
+- [Страница модели GPT-5: живая цена, реальные примеры, код](https://crazyrouter.com/ru/models/openai/gpt-5?utm_source=docs&utm_medium=related)
+- [Страница модели GPT Image 1.5: живая цена, реальные примеры, код](https://crazyrouter.com/ru/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)

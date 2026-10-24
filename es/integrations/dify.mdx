@@ -1,0 +1,199 @@
+---
+title: 'Tutorial de configuración de Dify'
+description: 'Conecta modelos de chat, Embedding y workflow en Dify usando Crazyrouter, completa la configuración de proveedores de modelos, verificación y resolución de problemas.'
+---
+> Contenido actualizado: 2026-06-09
+
+Dify es ideal para crear workflows, Agentes, bases de conocimientos y una plataforma interna de aplicaciones de IA. Al integrar Crazyrouter, se recomienda primero utilizar la ruta de proveedor de modelos compatible con OpenAI de Dify, hacer funcionar el modelo de chat y luego incorporar gradualmente Embedding u otras capacidades.
+
+## Vista general
+
+A través de la configuración de proveedores de modelos en Dify, puedes conectar Crazyrouter como un upstream compatible con OpenAI:
+
+- Protocolo recomendado: `OpenAI-compatible API`
+- Entrada recomendada: `Ajustes / Settings` → `Proveedor de modelos / Model Provider`
+- Base URL: `https://api.crazyrouter.com/v1`
+- Método de autenticación: token de `sk-...`
+- Primer modelo recomendado para verificar: `gpt-5.5`
+
+<Tip>
+En diferentes versiones de Dify o distribuciones con plugins, el nombre del proveedor puede aparecer como `OpenAI`, `OpenAI-API-compatible`, `OpenAI Compatible` o nombres similares. Prioriza elegir una entrada compatible con OpenAI que permita la personalización de `API Base URL`.
+</Tip>
+
+<Note>
+La documentación oficial de Dify considera la personalización de `API Base URL` como una opción en escenarios de proxy o upstream compatible; al integrar Crazyrouter, debes tratar Crazyrouter como este upstream compatible con OpenAI al completar `https://api.crazyrouter.com/v1`. Además, la configuración de proveedores de modelos normalmente requiere permisos de administrador de workspace o Owner; si no ves la entrada, verifica el rol de tu cuenta.
+</Note>
+
+## ¿Quién debería usarlo?
+
+- Personas que quieren construir aplicaciones de workflow, agente o base de conocimientos
+- Equipos que quieren conectar modelos de chat y Embedding a Crazyrouter de forma unificada
+- Personas que quieren proporcionar una plataforma visual de IA para departamentos de negocio
+- Personas que quieren gestionar modelos de prueba y producción en diferentes entornos
+
+## Protocolo de uso
+
+Protocolo recomendado: `OpenAI-compatible API`
+
+Al integrar Crazyrouter en Dify, normalmente se llena la base compatible con OpenAI como:
+
+```text
+https://api.crazyrouter.com/v1
+```
+
+No lo configures como:
+
+- `https://api.crazyrouter.com`
+- `https://api.crazyrouter.com/v1/chat/completions`
+
+<Tip>
+En diferentes versiones de Dify, el texto en la interfaz puede alternar entre `Model Provider`, `Proveedor de modelos`, `Providers` o entradas de mercado de plugins, pero la ruta de verificación inicial no debe cambiar: primero guarda el proveedor, luego añade solo un modelo `LLM` `gpt-5.5`, y finalmente crea una aplicación mínima de chat para verificar.
+</Tip>
+
+## Requisitos previos
+
+| Proyecto | Descripción |
+|------|------|
+| Cuenta de Crazyrouter | Regístrate primero en [crazyrouter.com](https://crazyrouter.com) |
+| Token de Crazyrouter | Se recomienda crear un token `sk-...` específico para Dify |
+| Dify | Se recomienda usar la versión estable actual; el nombre de la entrada puede variar dependiendo de la versión |
+| Modelos disponibles | Al menos un modelo de chat probado con éxito ese día, como `gpt-5.5` |
+
+Lista blanca inicial recomendada:
+
+- `gpt-5.5`
+- `claude-opus-4-8`
+- `text-embedding-3-large`
+- `text-embedding-3-small`
+
+Si vas a construir una base de conocimientos, se recomienda preparar al menos un modelo de chat y uno de Embedding.
+
+## Inicio rápido en 5 minutos
+
+<Steps>
+  <Step title="Crear token exclusivo para Dify">
+    Crea un nuevo token en Crazyrouter, se recomienda llamar `dify`. Inicialmente, habilita solo `gpt-5.5` y un modelo de Embedding, por ejemplo `text-embedding-3-large`.
+  </Step>
+  <Step title="Acceda a la configuración del proveedor de modelos">
+    Inicia sesión en Dify con una cuenta que tenga permisos de administración de workspace, entra en `Ajustes / Settings` → `Proveedor de modelos / Model Provider`.
+  </Step>
+  <Step title="Agregar proveedor compatible con OpenAI">
+    Selecciona la entrada de proveedor tipo `OpenAI` o `OpenAI-compatible` y completa:
+    - `API Key`: tu `sk-...`
+    - `API Base URL`: `https://api.crazyrouter.com/v1`
+  </Step>
+  <Step title="Por ahora solo configure un modelo de chat">
+    Primeramente añade un LLM, por ejemplo:
+    - `Nombre del modelo / Model`: `gpt-5.5`
+    - `Tipo de modelo / Type`: `LLM`
+
+    Después de guardar, crea una aplicación de Chat o Workflow para verificar. No incluyas modelos de chat, Embedding, Rerank y herramientas de workflow todos juntos, para evitar mezclar la resolución de problemas.
+  </Step>
+  <Step title="Completar la primera verificación">
+    En la aplicación, envía el mensaje: `Reply only OK`. Si se retorna correctamente y hay registro en Crazyrouter, el camino del chat está funcionando. Luego puedes agregar Embedding u otros modelos.
+  </Step>
+</Steps>
+
+## Recomendaciones para Embedding y base de conocimientos
+
+Si planeas utilizar base de conocimientos, RAG o búsqueda de documentos en Dify, se recomienda añadir un modelo de Embedding en el segundo paso:
+
+| Uso | Modelo recomendado | Descripción |
+|------|----------|------|
+| Embedding por defecto | `text-embedding-3-large` | De mayor calidad, ideal para iniciar una base de conocimiento |
+| Embedding de bajo costo | `text-embedding-3-small` | Más económico, adecuado para documentos a gran escala |
+
+Secuencia recomendada:
+
+1. Verifica primero el modelo de chat
+2. Verifica después el model de Embedding
+3. Finalmente realiza la importación y afinación de tu base de conocimientos
+
+Así es más sencillo depurar.
+
+## Configuración de modelos recomendada
+
+| Escenario de uso | Modelo recomendado | Motivo |
+|----------|----------|------|
+| Modelo de chat por defecto en workflow | `gpt-5.5` | Probado con éxito ese día, ideal como línea base de chat en Dify |
+| Escenarios complejos y de alta calidad | `claude-opus-4-8` | Más adecuado para explicaciones complejas, resúmenes y textos largos |
+| Gemini como respaldo | `gemini-3.1-pro` | Útil para validar compatibilidad como segunda ruta upstream |
+| Embedding por defecto | `text-embedding-3-large` | Mejor calidad para bases de conocimiento |
+| Embedding de bajo costo | `text-embedding-3-small` | Para casos de indexación sensibles al presupuesto |
+
+Secuencia recomendada: primero modelos de chat, luego modelos de Embedding.
+
+## Mejores prácticas para configuración de tokens
+
+| Configuración | Recomendación | Explicación |
+|------|------|------|
+| Token dedicado | Obligatorio | Dify no debe compartir token con chat frontend ni herramientas CLI |
+| Lista blanca de modelos | Altamente recomendado | Solo habilita modelos que realmente usa el workflow de Dify |
+| Restricción por IP | Habilitar en despliegues fijos | Úsalo con cautela en ambientes de desarrollo local que cambian con frecuencia |
+| Límite de cuota | Altamente recomendado | Los flujos de Dify, procesos por lotes e importación de bases de conocimiento pueden consumir rápidamente la cuota |
+| Separación por entorno | Obligatorio | Usa diferentes tokens para desarrollo, pruebas y producción |
+| Separación chat / Embedding | Recomendado | En casos de mucho tráfico, usa tokens separados para facilitar facturación y control de flujo |
+
+## Lista de verificación
+
+- [ ] Se ha guardado la configuración de Crazyrouter en `Proveedor de modelos / Model Provider`
+- [ ] `API Base URL` ha sido configurado a `https://api.crazyrouter.com/v1`
+- [ ] Al menos un LLM ha sido añadido con éxito
+- [ ] El primer request de la aplicación en Dify retorna con éxito
+- [ ] Los registros en Crazyrouter muestran el request correspondiente
+- [ ] Si se requiere base de conocimiento, al menos un modelo de Embedding ha sido configurado exitosamente
+- [ ] Las cuotas del token y la lista blanca de modelos cumplen con lo esperado
+- [ ] Los tokens para desarrollo, test y producción están separados
+
+## Errores comunes y soluciones
+
+| Síntoma | Causa común | Solución |
+|------|----------|----------|
+| No se ve la entrada `Proveedor de modelos / Model Provider` | La cuenta no es administrador del workspace ni Owner | Usa una cuenta con permisos o pide al administrador configurar |
+| Se ve la entrada de proveedor pero no hay opción compatible con OpenAI | La versión actual lo implementa como plugin, distinto nombre, o requiere habilitar el proveedor | Busca entradas como `OpenAI`, `OpenAI Compatible`, `OpenAI-API-compatible`; revisa los plugins o documentación de la versión si es necesario |
+| No se puede guardar el proveedor | API Key incorrecto, o no se eligió tipo de proveedor con Base URL personalizable | Usa entrada de proveedor compatible con OpenAI y rellena de nuevo `sk-...` |
+| 401 unauthorized | Token inválido, copiado erróneo o eliminado | Regenera el token y reemplaza |
+| 403 / model not allowed | El modelo elegido en Dify no está en la lista blanca del token | Permite el modelo correspondiente en Crazyrouter |
+| 404 | `API Base URL` está puesto como dominio raíz o URL completa | Correcto por `https://api.crazyrouter.com/v1` |
+| Se puede configurar el modelo de chat pero la aplicación falla | Nombre del modelo incorrecto o parámetros de contexto no adecuados | Regrésate a `gpt-5.5` para verificación básica |
+| Error al importar base de conocimiento | El modelo de chat funciona pero el de Embedding no está bien configurado | Verifica Embedding por separado y reimporta la base de conocimiento |
+| El workflow consume mucho rápido | Procesos por lotes, contexto largo o varias aplicaciones usando el mismo token | Separa tokens, limita cuotas y acota el rango de modelos |
+| Funcionalidades avanzadas de algunos modelos no son consistentes en Dify | Parametrización difiere entre modelos en los nodos de Dify | Usa `gpt-5.5` para asegurar la línea base, luego sustituye gradualmente por otros modelos |
+
+## Recomendaciones de rendimiento y costo
+
+- Usa `gpt-5.5` para las pruebas iniciales de workflow; añade otros modelos una vez estable
+- Al lanzar una base de conocimiento, importa solo algunos documentos para validar la calidad, luego haz importaciones masivas
+- Separa la facturación de modelos de chat y Embedding para facilitar el análisis de costes
+- En tareas por lotes, programadas y ambientes internos, fija límites de cuota más estrictos
+- Cuando detectes alto consumo, revisa los logs de Crazyrouter para identificar si se debe a reintentos en workflow, importación de base de conocimiento o uso compartido de token por varias aplicaciones
+
+## Preguntas frecuentes
+
+### ¿Qué Base URL debe llenar Dify?
+
+Debes poner `https://api.crazyrouter.com/v1`.
+
+### ¿Por qué no se recomienda poner el dominio raíz aquí?
+
+Porque los proveedores compatibles con OpenAI en Dify usualmente exigen la dirección base compatible con OpenAI, no el dominio raíz.
+
+### ¿Debería configurar primero el modelo de chat o el de Embedding?
+
+Primero configura el modelo de chat y confirma que la aplicación devuelve resultados, después configura Embedding.
+
+### ¿Se puede configurar directamente el modelo de Rerank?
+
+Depende de la versión de Dify y de los plugins de proveedores disponibles. Se recomienda primero verificar los modelos de chat y Embedding; luego evalúa si necesitas integrar Rerank por separado.
+
+### ¿Por qué se insiste en configurar primero solo un modelo de chat?
+
+Porque los problemas de Dify suelen aparecer tanto en el proveedor, el tipo de modelo, los parámetros de la aplicación o la cadena de la base de conocimiento. Si primero funciona un `gpt-5.5` de chat, la ubicación del fallo será más clara.
+
+### ¿Debería dividir Dify en varios tokens?
+
+Se recomienda hacerlo. Al menos separa desarrollo y producción; en escenarios de alto tráfico, separa chat y Embedding.
+
+<Note>
+Dify es más adecuado para ocupar el rol de "plataforma de aplicaciones" y "plataforma de workflow". A diferencia del frontend de chat, enfatiza la orquestación de procesos, base de conocimientos y gestión multi-entorno, por lo que requiere tokens dedicados, lista blanca de modelos y políticas de cuota.
+</Note>

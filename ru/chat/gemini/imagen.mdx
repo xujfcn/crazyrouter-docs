@@ -1,15 +1,16 @@
 ---
 title: "Imagen 4"
-description: "Google Imagen 4 image generation model, called through the Gemini API"
+description: "Генерация изображений с помощью модели Google Imagen 4, вызывается через Gemini API"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
+
 
 # Imagen 4
 
-Google Imagen 4 is a professional image generation model, called through the Gemini API endpoint.
+Google Imagen 4 — профессиональная модель генерации изображений, доступная через конечную точку Gemini API.
 
 <Warning>
-  Imagen 4 is currently in development. Features and availability may change.
+  В настоящее время Imagen 4 находится в стадии разработки; её возможности и доступность могут изменяться.
 </Warning>
 
 ```
@@ -18,7 +19,7 @@ POST /v1beta/models/imagen-4:generateContent
 
 ---
 
-## Basic Usage
+## Основное использование
 
 <CodeGroup>
 
@@ -30,7 +31,7 @@ curl "https://api.crazyrouter.com/v1beta/models/imagen-4:generateContent?key=YOU
       {
         "role": "user",
         "parts": [
-          {"text": "A golden Labrador retriever running on a sunny meadow, photographic quality, shallow depth of field"}
+          {"text": "一只金色的拉布拉多犬在阳光明媚的草地上奔跑，摄影级画质，浅景深"}
         ]
       }
     ],
@@ -57,7 +58,7 @@ genai.configure(
 model = genai.GenerativeModel("imagen-4")
 
 response = model.generate_content(
-    "A golden Labrador retriever running on a sunny meadow, photographic quality",
+    "一只金色的拉布拉多犬在阳光明媚的草地上奔跑，摄影级画质",
     generation_config=genai.GenerationConfig(
         response_modalities=["IMAGE"],
         image_generation_config={
@@ -71,12 +72,12 @@ for part in response.candidates[0].content.parts:
     if hasattr(part, "inline_data"):
         with open("imagen_output.png", "wb") as f:
             f.write(base64.b64decode(part.inline_data.data))
-        print("Image saved")
+        print("图片已保存")
 ```
 
 </CodeGroup>
 
-### Response Format
+### Формат ответа
 
 ```json
 {
@@ -101,18 +102,18 @@ for part in response.candidates[0].content.parts:
 
 ---
 
-## Parameter Description
+## Описание параметров
 
 ### imageGenerationConfig
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `numberOfImages` | integer | Number of images to generate, 1-4 |
-| `aspectRatio` | string | Aspect ratio: `1:1`, `16:9`, `9:16`, `4:3`, `3:4` |
+| Параметр | Тип | Описание |
+|----------|------|---------|
+| `numberOfImages` | integer | Количество генерируемых изображений, 1–4 |
+| `aspectRatio` | string | Соотношение сторон: `1:1`, `16:9`, `9:16`, `4:3`, `3:4` |
 
 ---
 
-## Batch Generation
+## Массовая генерация
 
 ```json
 {
@@ -127,16 +128,16 @@ for part in response.candidates[0].content.parts:
 ```
 
 <Note>
-  Imagen 4 is a pure image generation model, so `responseModalities` should be set to `["IMAGE"]`. If you need text descriptions alongside images, use the Gemini image generation model instead.
+  Imagen 4 — это чисто генеративная модель изображений, `responseModalities` должен быть установлен на `["IMAGE"]`. Если требуется включить текстовое описание, используйте модель генерации изображений Gemini.
 </Note>
 
 <Note>
-  For Imagen 4 prompts, it is recommended to use detailed descriptive language including style, lighting, composition, and other details for better generation results.
+  Для улучшения результата генерации рекомендуется использовать детализированные и описательные подсказки, включая стиль, освещение, композицию и другие параметры.
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [Gemini 2.5 Flash: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash-Lite: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)
+- [Сравнение цен Gemini 2.5 Flash: Официальный / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Страница модели Gemini 2.5 Flash: актуальные цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Сравнение цен Gemini 2.5 Flash-Lite: Официальный / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)

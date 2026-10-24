@@ -1,159 +1,25 @@
 ---
-title: "Sora"
-description: "Generate videos with OpenAI Sora models through the verified public unified video API, Video Generations API, and OpenAI-compatible video format"
+title: "Sora（現在一時的に非表示）"
+description: "Sora の公開用ユースケースは一時的に非表示になっています。新規導入の場合は、現在公開中の動画モデルおよびビデオ API をご利用ください。"
+noindex: true
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Sora
+# Sora（現在一時的に非表示）
 
-For public Crazyrouter docs, the recommended verified Sora routes are:
+Sora 関連の公開用ユースケースは現在、Crazyrouter の新規導入に推奨される経路としては表示されていません。ユーザーが既に公開停止または未公開のモデルを誤ってコピーするのを避けるため、本ページはナビゲーションから削除されており、リクエスト例も掲載していません。
 
-- `POST /v1/video/create` with `GET /v1/video/query`
-- `POST /v1/video/generations` with `GET /v1/video/generations/{task_id}`
-- `POST /v1/videos` with `GET /v1/videos/{task_id}`
+新規で動画生成を導入される場合は、以下をご参照ください：
 
-If this is your first Sora integration, start with `POST /v1/video/generations`. It has clearer task-state fields and is now documented in dedicated route pages as part of this update round.
-
-## Model Selection
-
-| Model | Description | Speed | Quality | Recommended Use |
-|-------|-------------|-------|---------|-----------------|
-| `sora-2` | Second-generation standard model | Medium | High | Production and day-to-day usage |
-| `sora-2-pro` | Second-generation professional model | Slower | Highest | Professional work and finer control |
-
-## Recommended Main Path: Video Generations API
-
-```
-POST /v1/video/generations
-```
-
-```bash cURL
-curl -X POST https://api.crazyrouter.com/v1/video/generations \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "model": "sora-2",
-    "prompt": "A serene Japanese garden in spring, with cherry blossoms gently falling",
-    "size": "1280x720",
-    "duration": 5
-  }'
-```
-
-Query the task:
-
-```
-GET /v1/video/generations/{task_id}
-```
-
-```bash cURL
-curl https://api.crazyrouter.com/v1/video/generations/video_123 \
-  -H "Authorization: Bearer YOUR_API_KEY"
-```
-
-### When to use this route
-
-- first-pass Sora integration
-- clearer task status and metadata
-- teams that want to follow the new dedicated Crazyrouter video compatibility pages
-
-## Unified Video API
-
-```
-POST /v1/video/create
-```
-
-```bash cURL
-curl -X POST https://api.crazyrouter.com/v1/video/create \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "model": "sora-2",
-    "prompt": "A cat playing piano in a jazz club, cinematic lighting",
-    "aspect_ratio": "16:9"
-  }'
-```
-
-Query the task:
-
-```
-GET /v1/video/query?task_id=your_task_id
-```
-
-```bash cURL
-curl "https://api.crazyrouter.com/v1/video/query?task_id=your_task_id" \
-  -H "Authorization: Bearer YOUR_API_KEY"
-```
-
-## OpenAI-Compatible Video Format
-
-```
-POST /v1/videos
-```
-
-```bash cURL
-curl -X POST https://api.crazyrouter.com/v1/videos \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "model": "sora-2",
-    "prompt": "A cat playing piano in a jazz club, cinematic lighting",
-    "size": "1920x1080",
-    "duration": 10
-  }'
-```
-
-Query the task:
-
-```
-GET /v1/videos/{task_id}
-```
-
-```bash cURL
-curl https://api.crazyrouter.com/v1/videos/sora_task_abc123 \
-  -H "Authorization: Bearer YOUR_API_KEY"
-```
-
-## Status And Result Fields
-
-Common task states:
-
-| Status | Meaning |
-|--------|---------|
-| `queued` | Submitted and waiting |
-| `in_progress` | Generating |
-| `completed` | Finished |
-| `failed` | Failed |
-
-Common result fields:
-
-- `url` or `video_url`: video download URL
-- `thumbnail_url`: preview thumbnail
-- `progress`: generation progress
-- `expires_at`: expiration time for the temporary result URL
+- [Veo 3.1](/jp/video/veo)：`veo-3.1-fast` または `veo-3.1-quality` を使用
+- [統合動画 API](/jp/video/unified)：`POST /v1/video/create` を使用
+- [OpenAI 動画互換フォーマット](/jp/video/openai-video)：`POST /v1/videos` を使用
 
 <Note>
-  Result URLs are usually not permanent. Download the video promptly instead of treating the returned URL as long-term storage.
-</Note>
-
-## Recommended Rollout Order
-
-1. Start with `sora-2`
-2. Start with a short 5-10 second video
-3. Validate one simple text-to-video request first
-4. Add higher resolution, longer duration, or more advanced parameters later
-5. Switch to `sora-2-pro` only after the basic path is stable
-
-## Practical Notes
-
-- Do not assume every more complex native field is part of the stable public baseline
-- If you need route-specific `Video Generations` examples, prefer the new dedicated pages added in this docs round
-- If you are only checking connectivity, validate with a short prompt and short duration first
-
-<Note>
-  This page keeps the public Sora overview concise. More specific compatibility-route details have been split into dedicated video docs so each route can be maintained more accurately.
+  今後 Sora が公開モデル一覧に再度追加される場合は、モデル ID やリクエスト例、検証記録を再度記載します。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [OpenAI の全モデルと料金](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [OpenAI すべてのモデルと価格](https://crazyrouter.com/ja/models/openai?utm_source=docs&utm_medium=related)

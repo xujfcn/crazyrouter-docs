@@ -1,0 +1,130 @@
+---
+title: "Reordenación"
+description: "Reordenar los resultados de búsqueda semánticamente"
+api: "POST /v1/rerank"
+---
+> Contenido actualizado: 2026-06-06
+
+## Descripción de la interfaz
+
+Reordena un conjunto de documentos según su relevancia semántica con la consulta, comúnmente utilizado en la segunda fase de clasificación fina en la generación mejorada por recuperación RAG.
+
+<Note>
+  Consultar la implementación en el formato [SiliconFlow Rerank API](https://docs.siliconflow.cn/cn/api-reference/rerank/create-rerank).
+</Note>
+
+## Modelos soportados
+
+| Modelo | Descripción |
+|------|------|
+| `gte-rerank-v2` | Modelo de reordenación multilingüe, recomendado |
+| `gte-rerank-v2` | Principalmente en inglés |
+
+## Parámetros de solicitud
+
+<ParamField body="model" type="string" required>
+  Nombre del modelo de reordenación, como `gte-rerank-v2`
+</ParamField>
+
+<ParamField body="query" type="string" required>
+  Texto de la consulta
+</ParamField>
+
+<ParamField body="documents" type="string[]" required>
+  Lista de documentos a ordenar
+</ParamField>
+
+<ParamField body="top_n" type="integer">
+  Retornar los primeros N resultados; por defecto retorna todos
+</ParamField>
+
+<ParamField body="return_documents" type="boolean" default="true">
+  Si se debe devolver el texto original del documento en la respuesta
+</ParamField>
+
+## Formato de respuesta
+
+```json
+{
+  "model": "gte-rerank-v2",
+  "results": [
+    {
+      "index": 2,
+      "relevance_score": 0.9875,
+      "document": { "text": "最相关的文档内容" }
+    },
+    {
+      "index": 0,
+      "relevance_score": 0.7432,
+      "document": { "text": "次相关的文档内容" }
+    },
+    {
+      "index": 1,
+      "relevance_score": 0.1205,
+      "document": { "text": "不太相关的文档内容" }
+    }
+  ],
+  "usage": {
+    "total_tokens": 128
+  }
+}
+```
+
+## Ejemplo de código
+
+<CodeGroup>
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/v1/rerank",
+    headers={
+        "Authorization": "Bearer sk-xxx",
+        "Content-Type": "application/json"
+    },
+    json={
+        "model": "gte-rerank-v2",
+        "query": "什么是向量数据库",
+        "documents": [
+            "向量数据库是专门存储和检索高维向量的数据库系统",
+            "关系型数据库使用表格存储结构化数据",
+            "向量数据库支持近似最近邻搜索，适合语义检索场景",
+            "Redis 是一个内存键值存储系统"
+        ],
+        "top_n": 2,
+        "return_documents": True
+    }
+)
+
+data = response.json()
+for result in data["results"]:
+    print(f"[{result['relevance_score']:.4f}] {result['document']['text']}")
+```
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/rerank \
+  -H "Authorization: Bearer sk-xxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gte-rerank-v2",
+    "query": "什么是向量数据库",
+    "documents": [
+      "向量数据库是专门存储和检索高维向量的数据库系统",
+      "关系型数据库使用表格存储结构化数据"
+    ],
+    "top_n": 2
+  }'
+```
+
+</CodeGroup>
+
+## Proceso típico de RAG
+
+```
+用户查询 → Embedding 检索 Top-K → Rerank 精排 → LLM 生成回答
+```
+
+<Warning>
+  Se recomienda que el número de documentos de entrada para el modelo de reordenación no supere las 100 entradas. Un número excesivo de documentos incrementa la latencia y el costo.
+</Warning>

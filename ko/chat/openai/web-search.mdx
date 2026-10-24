@@ -1,25 +1,25 @@
 ---
-title: "Web 검색"
-description: "프로덕션 환경 재검증을 기반으로, Crazyrouter의 OpenAI 스타일 웹 연결 검색 기능을 사용합니다"
+title: "웹 검색"
+description: "Crazyrouter에서 프로덕션 검증된 OpenAI 스타일 웹 검색"
 ---
-> 업데이트: 2026-06-06
+> 내용 업데이트: 2026-06-09
 
-# Web 검색
+# 웹 검색
 
-이 문서 페이지에는 `2026-03-22`에 Crazyrouter 프로덕션 환경에서 재검증된 OpenAI 스타일 Web Search 사용법만 기재합니다.
+이 페이지는 Crazyrouter 프로덕션에서 `2026-03-22`에 대해 재검증된 OpenAI 스타일 웹 검색 동작만 문서화합니다.
 
-현재 메인 권장 경로:
+현재 주요 경로는 다음과 같습니다:
 
 - `gpt-5.5`
 - `POST /v1/responses`
 - `tools: [{ "type": "web_search_preview" }]`
 
-## 현재 주요 결론
+## 현재 결론
 
-오늘 진행한 프로덕션 재검증에서:
+오늘의 프로덕션 재확인에서:
 
-- `gpt-5.5`는 Responses API를 통해 `web_search_call`을 안정적으로 반환할 수 있습니다
-- 기존 방식인 Chat Completions의 `tools: [{ "type": "web_search" }]` 프로브 요청은 `200`을 반환했지만, 이번 라운드에서는 검증 가능한 검색 트리거 신호를 얻지 못했으므로 여기서는 메인 예제로 작성하지 않습니다
+- Responses API를 통한 `gpt-5.5`가 안정적으로 `web_search_call`를 반환했습니다.
+- 이전의 Chat Completions 프로브에서 `tools: [{ "type": "web_search" }]`는 `200`를 반환했지만, 안정적이고 검증 가능한 검색 트리거 신호를 제공하지 않아, 주로 문서화된 패턴으로 사용되지 않습니다.
 
 ---
 
@@ -40,17 +40,17 @@ curl https://api.crazyrouter.com/v1/responses \
   }'
 ```
 
-현재 프로덕션 검증에서 반환된 핵심 `output.type`:
+검증된 `output.type` 값:
 
 ```json
 ["web_search_call", "message"]
 ```
 
-이는 검색 단계와 최종 답변이 별도로 반환됨을 의미합니다.
+이는 검색 단계와 최종 답변이 따로 반환됨을 보여줍니다.
 
 ---
 
-## Python 예시
+## Python 예제
 
 ```python Python
 from openai import OpenAI
@@ -73,29 +73,29 @@ print(response.output_text)
 
 ---
 
-## 실제로 검색이 트리거되었는지 확인하는 방법
+## 실제로 검색이 실행되었는지 확인하는 방법
 
-`response.output`을 직접 확인하는 것을 권장합니다.
+`response.output`를 직접 검사하세요:
 
 ```python Python
 for item in response.output:
     print(item.type)
 ```
 
-출력에 다음이 나타나면:
+만약 다음을 본다면:
 
 ```text
 web_search_call
 message
 ```
 
-이는 모델이 먼저 검색을 수행한 후 최종 답변을 반환했음을 의미합니다.
+모델이 먼저 검색하고 두 번째로 답변한 것입니다.
 
 ---
 
-## 메인 예제로 계속 작성하지 않는 것을 권장하는 기존 방식
+## 주요 방식으로 권장되지 않는 이전 패턴
 
-이번 라운드 프로덕션 프로브에서는 Chat Completions의 기존 방식도 확인했습니다.
+이번 프로덕션 재확인에서는 이전 Chat Completions 형태도 테스트되었습니다:
 
 ```json
 {
@@ -107,21 +107,21 @@ message
 }
 ```
 
-결과는 다음과 같습니다.
+결과:
 
-- 요청은 `200`을 반환함
-- 그러나 안정적으로 검증 가능한 검색 트리거 신호는 얻지 못함
+- 요청이 `200`를 반환함
+- 그러나 안정적이고 검증 가능한 검색 트리거 마커는 확인되지 않았음
 
-따라서 현재 Crazyrouter 문서에서는 OpenAI 스타일 Web Search를 Responses API를 기준으로 작성해야 합니다.
+따라서 Crazyrouter 문서에서는 현재 OpenAI 스타일 웹 검색이 Responses API를 통해 우선적으로 문서화되어야 합니다.
 
 관련 페이지:
 
-- [Responses Web 검색](/ko/chat/responses/web-search)
-- [핵심 기능: Web Search](/ko/features/web-search)
+- [Responses 웹 검색](/ko/chat/responses/web-search)
+- [Feature Hub: 웹 검색](/ko/features/web-search)
 
 {/* crazyrouter-model-links v2 */}
-## 관련 페이지 (crazyrouter.com)
+## crazyrouter.com의 관련 페이지
 
-- [GPT Image 1.5 모델 페이지: 실시간 가격, 샘플, 코드](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2 모델 페이지: 실시간 가격, 샘플, 코드](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [OpenAI 전체 모델과 가격](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [GPT Image 1.5 모델 페이지: 실시간 가격, 실제 샘플, 코드](https://crazyrouter.com/ko/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT Image 2 모델 페이지: 실시간 가격, 실제 샘플, 코드](https://crazyrouter.com/ko/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [실시간 가격이 표시된 모든 OpenAI 모델](https://crazyrouter.com/ko/models/openai?utm_source=docs&utm_medium=related)

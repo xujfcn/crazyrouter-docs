@@ -1,20 +1,20 @@
 ---
-title: "Function Calling"
-description: "基于 2026-03-23 Crazyrouter 生产环境验证的 Chat Completions 工具调用"
+title: "函数调用"
+description: "Chat Completions 工具调用已于 2026-03-23 在 Crazyrouter 生产环境验证通过"
 ---
-> 更新日期：2026-06-06
+> 内容更新: 2026-06-09
 
-# Function Calling
+# 函数调用
 
 ```
 POST /v1/chat/completions
 ```
 
-截至 2026 年 3 月 23 日，Crazyrouter 生产环境已验证 `gpt-5.5` 在 Chat Completions 路径下会返回 `tool_calls`。
+截至 2026 年 3 月 23 日，Crazyrouter 生产环境已验证在 Chat Completions 路径中 `gpt-5.5` 返回 `tool_calls`。
 
 ---
 
-## 第一步：定义工具
+## 步骤 1：定义工具
 
 ```bash
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -45,7 +45,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-生产环境实际返回的关键形态：
+观察到的生产环境响应结构：
 
 ```json
 {
@@ -74,9 +74,9 @@ curl https://api.crazyrouter.com/v1/chat/completions \
 
 ---
 
-## 第二步：回传工具结果
+## 步骤 2：返回工具结果
 
-拿到 `tool_calls` 之后，把你的工具执行结果作为 `role: "tool"` 消息发回：
+收到 `tool_calls` 后，将您的工具结果作为 `role: "tool"` 消息发回：
 
 ```json
 {
@@ -124,12 +124,12 @@ curl https://api.crazyrouter.com/v1/chat/completions \
 ```
 
 <Note>
-  本轮生产验证确认了 `tool_calls` 这条主链路，同时也观察到 `message.reasoning_content` 这个键可能出现，但它不应作为当前工具调用流程的稳定依赖字段。
+  本次生产环境验证确认了主要的 `tool_calls` 路径。同时观察到 `message.reasoning_content` 可能作为一个键出现，但在工具调用流程中不应被视为稳定依赖。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 相关页面
+## crazyrouter.com 上的相关内容
 
-- [GPT Image 1.5 模型页：实时价格、真实样例、调用代码](https://crazyrouter.com/zh/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2 模型页：实时价格、真实样例、调用代码](https://crazyrouter.com/zh/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [OpenAI 全部模型与价格](https://crazyrouter.com/zh/models/openai?utm_source=docs&utm_medium=related)
+- [GPT Image 1.5 模型页面：实时价格，真实样例，代码](https://crazyrouter.com/zh/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT Image 2 模型页面：实时价格，真实样例，代码](https://crazyrouter.com/zh/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [全部 OpenAI 模型及实时价格](https://crazyrouter.com/zh/models/openai?utm_source=docs&utm_medium=related)

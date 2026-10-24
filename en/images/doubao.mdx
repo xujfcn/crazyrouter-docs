@@ -1,8 +1,8 @@
 ---
 title: "Doubao Seedream"
-description: "Use the Doubao Seedream family through the OpenAI Images-compatible public contract"
+description: "Use the Doubao Seedream series model for image generation. Clients continue to use the OpenAI Images compatible protocol."
 ---
-> Last updated: 2026-07-25
+> Content updated: 2026-08-13
 
 # Doubao Seedream
 
@@ -10,62 +10,62 @@ description: "Use the Doubao Seedream family through the OpenAI Images-compatibl
 POST /v1/images/generations
 ```
 
-Crazyrouter exposes the `Seedream` image family through the OpenAI Images-compatible public contract. Clients keep using `/v1/images/generations`; ByteDance official and other third-party channels stay internal as providers only.
+Crazyrouter currently publicly offers the `Seedream` image model series through an OpenAI Images compatible protocol. Clients continue to use the unified `/v1/images/generations`; the Byte official team and other third-party channels only serve as internal providers and do not separately expose the client protocol.
 
-## Public Models
+## Currently Available Models
 
-| Model | Official counterpart | Customer-facing capability | Doc state |
-|------|----------------------|----------------------------|-----------|
-| `doubao-seedream-4-0` | Seedream 4.0 | text-to-image, image-to-image, multi-reference, grouped output | Beta |
-| `doubao-seedream-4-5` | Seedream 4.5 | text-to-image, image-to-image, multi-reference, grouped output | Beta |
-| `doubao-seedream-5-0` | Seedream 5.0 lite | text-to-image, image-to-image, multi-reference, grouped output | Beta |
-| `doubao-seedream-3-0` | Seedream 3.0 | compatibility only | Legacy |
+| Model | Official Correspondence | Current Client Capabilities | Documentation Status |
+|------|----------|--------------|----------|
+| `doubao-seedream-4-0` | Seedream 4.0 | Text-to-image, image-to-image, multiple reference images, group image output | Beta |
+| `doubao-seedream-4-5` | Seedream 4.5 | Text-to-image, image-to-image, multiple reference images, group image output | Beta |
+| `doubao-seedream-5-0` | Seedream 5.0 lite | Text-to-image, image-to-image, multiple reference images, group image output | Beta |
+| `doubao-seedream-3-0` | Seedream 3.0 | Compatibility reserved | Legacy |
 
 <Note>
-  “Beta” here means the customer-facing contract and official capability definition are aligned first, while production carrier closure and live artifact evidence are still being completed.
+  The meaning of “Beta” here is: The client protocol and official capability definitions have been aligned, but current production support and tested artifacts are still being completed. The official capabilities are stated in their full form, and unfinished parts retain the Beta mark.
 </Note>
 
-## Public Contract
+## Client Protocol
 
 ### Request Parameters
 
 | Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model` | string | Yes | `doubao-seedream-4-0`, `doubao-seedream-4-5`, or `doubao-seedream-5-0` |
-| `prompt` | string | Yes | generation prompt |
-| `image_input` | string or string[] | No | reference image URL(s); official 4.0 / 4.5 / 5.0 lite currently document up to `14` images |
-| `size` | string | No | output size. `Seedream 4.5` officially supports `2K`, `4K`, and explicit width×height inside the official range; `Seedream 5.0 lite` currently requires at least `3,686,400` total pixels |
-| `n` | integer | No | output image count, default `1` |
+|------|------|------|------|
+| `model` | string | Yes | `doubao-seedream-4-0`, `doubao-seedream-4-5`, `doubao-seedream-5-0` |
+| `prompt` | string | Yes | Generation prompt |
+| `image_input` | string or string[] | No | Reference image URL. The current capability limit for official 4.0 / 4.5 / 5.0 lite is `14` images |
+| `size` | string | No | Output dimensions. `Seedream 4.5` official support for `2K`, `4K`, as well as explicit width and height within range; `Seedream 5.0 lite` currently requires width × height to be at least `3,686,400` total pixels |
+| `n` | integer | No | Number of output images, default is `1` |
 | `response_format` | string | No | `url` or `b64_json` |
-| `watermark` | boolean | No | whether to enable watermark |
-| `sequential_image_generation` | string | No | `auto` or `disabled`; used for grouped-output semantics |
-| `optimize_prompt_options` | object | No | official prompt optimization options; `Seedream 4.5` and `5.0 lite` are currently aligned only with `mode: "standard"` |
+| `watermark` | boolean | No | Whether to add a watermark |
+| `sequential_image_generation` | string | No | `auto` or `disabled`; used for group image output and sequential generation semantics |
+| `optimize_prompt_options` | object | No | Official prompt optimization options; currently, only `mode: "standard"` is confirmed for `Seedream 4.5` and `5.0 lite` |
 
-### Seedream 5.0 Size Requirement
+### Seedream 5.0 Dimension Requirements
 
-An explicit `WxH` value for `doubao-seedream-5-0` must satisfy:
+Explicit `width x height` dimensions for `doubao-seedream-5-0` must meet the following:
 
 ```text
-width × height >= 3,686,400
+宽 × 高 >= 3,686,400
 ```
 
-| Size | Total pixels | Meets the minimum |
-|------|--------------|-------------------|
-| `2688x1152` | `3,096,576` | No; the upstream returns `InvalidParameter` |
-| `2048x2048` | `4,194,304` | Yes; the model's other dimension and aspect-ratio limits still apply |
+| Size | Total Pixels | Meets Minimum Threshold? |
+|------|--------|------------------|
+| `2688x1152` | `3,096,576` | No; upstream returns `InvalidParameter` |
+| `2048x2048` | `4,194,304` | Yes; also needs to comply with the model-supported width, height, and aspect ratio range |
 
 <Warning>
-  Do not retry the same invalid size or treat this error as proof that the model is unavailable. If the error log says “Service temporarily unavailable” or “The requested model is temporarily unavailable,” check `size` first; the regular error log may hide the more specific upstream size error.
+  Do not repeatedly retry or judge the model as unavailable for the same invalid dimensions. If error logs show “Service temporarily unavailable” or “The requested model is temporarily unavailable”, please check `size` first; current general error logs may mask more specific upstream dimension errors.
 </Warning>
 
-### Reference Image Limits
+### Reference Image Boundaries
 
-- `Seedream 4.0`, `4.5`, and `5.0 lite` officially support up to `14` reference images
-- maximum single reference image size is `10MB`
-- officially supported input formats now include `jpeg`, `png`, `webp`, `bmp`, `tiff`, and `gif`
-- officially supported input aspect-ratio range is `1/16` to `16`
+- `Seedream 4.0`, `4.5`, `5.0 lite` officially support a maximum of `14` reference images
+- The maximum size for a single reference image is `10MB`
+- Supported input formats officially extended to `jpeg`, `png`, `webp`, `bmp`, `tiff`, `gif`
+- Supported input image aspect ratio ranges from `1/16` to `16`
 
-### Request Examples
+### Request Example
 
 <CodeGroup>
 
@@ -75,7 +75,7 @@ curl -X POST https://api.crazyrouter.com/v1/images/generations \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "doubao-seedream-4-5",
-    "prompt": "A premium product poster featuring a transparent glass perfume bottle with soft morning haze lighting and a minimal Chinese title",
+    "prompt": "一张高级感产品海报，主体是一只透明玻璃香水瓶，晨雾光线，简洁中文标题",
     "size": "2K",
     "n": 1,
     "response_format": "url",
@@ -92,7 +92,7 @@ curl -X POST https://api.crazyrouter.com/v1/images/generations \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "doubao-seedream-4-5",
-    "prompt": "Generate a group of product posters for the same character while keeping the subject consistent and varying the camera angle and composition",
+    "prompt": "基于这些参考图生成同一角色的一组商品海报，保持主体一致但镜头和布局不同",
     "image_input": [
       "https://example.com/ref-1.png",
       "https://example.com/ref-2.png"
@@ -116,7 +116,7 @@ client = OpenAI(
 
 response = client.images.generate(
     model="doubao-seedream-4-5",
-    prompt="A premium product poster featuring a transparent glass perfume bottle with soft morning haze lighting and a minimal Chinese title",
+    prompt="一张高级感产品海报，主体是一只透明玻璃香水瓶，晨雾光线，简洁中文标题",
     size="2K",
     n=1
 )
@@ -139,26 +139,26 @@ print(response.data[0].url)
 }
 ```
 
-## Official Billing Truth
+## Official Billing Method
 
-The currently confirmed official truth is billing per successfully generated image, not token-display pricing.
+The currently confirmed official benchmark is “billed by the number of successfully generated images,” not based on input/output token metrics.
 
-| Model | Official billing | Official price | Current doc state |
-|------|-------------------|----------------|-------------------|
-| `doubao-seedream-4-0` | per image | `$0.03 / image` | officially aligned |
-| `doubao-seedream-4-5` | per image | `$0.04 / image` | officially aligned |
-| `doubao-seedream-5-0` | per image | official price still pending confirmation | Beta |
+| Model | Official Benchmark | Official Unit Price | Current Documentation Status |
+|------|----------|----------|--------------|
+| `doubao-seedream-4-0` | Per image | `$0.03 / image` | Aligned with official |
+| `doubao-seedream-4-5` | Per image | `$0.04 / image` | Aligned with official |
+| `doubao-seedream-5-0` | Per image | Official price pending release | Beta |
 
-## Alignment Notes
+## Alignment Description
 
-- The customer-facing contract has been narrowed to `/v1/images/generations`
-- `Seedream 4.5` currently centers on official `2K` and `4K` sizing, with default `2048x2048`
-- `optimize_prompt_options.mode` is currently aligned only as `standard` for `Seedream 4.5` and `5.0 lite`; `fast` is not a public commitment yet
-- `Seedream 3.0` stays as a compatibility alias, but the official-alignment focus of this page is now `4.0 / 4.5 / 5.0 lite`
+- The client protocol has already settled to the unified `/v1/images/generations`
+- `Seedream 4.5` official dimension capability currently focuses on `2K`, `4K`, with `2048x2048` as default
+- `Seedream 4.5` and `5.0 lite`’s `optimize_prompt_options.mode` are currently only aligned according to `standard`; `fast` is not a current client commitment
+- `Seedream 3.0` continues to reserve compatibility aliases, but the official alignment focus on this page has shifted to `4.0 / 4.5 / 5.0 lite`
 
 {/* crazyrouter-model-links v2 */}
-## Related on crazyrouter.com
+## Related Pages
 
-- [Seedream 5.0 model page: live price, real samples, code](https://crazyrouter.com/en/models/bytedance/doubao-seedream-5-0?utm_source=docs&utm_medium=related)
-- [Seedance 1.5 Pro model page: live price, real samples, code](https://crazyrouter.com/en/models/bytedance/doubao-seedance-1-5-pro?utm_source=docs&utm_medium=related)
-- [All ByteDance models with live prices](https://crazyrouter.com/en/models/bytedance?utm_source=docs&utm_medium=related)
+- [Seedream 5.0 Model Page: Live Pricing, Real Examples, Call Code](https://crazyrouter.com/en/models/bytedance/doubao-seedream-5-0?utm_source=docs&utm_medium=related)
+- [Seedance 1.5 Pro Model Page: Live Pricing, Real Examples, Call Code](https://crazyrouter.com/en/models/bytedance/doubao-seedance-1-5-pro?utm_source=docs&utm_medium=related)
+- [All ByteDance Models & Pricing](https://crazyrouter.com/en/models/bytedance?utm_source=docs&utm_medium=related)

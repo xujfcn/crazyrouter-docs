@@ -1,0 +1,101 @@
+---
+title: "Midjourney vista general"
+description: "Midjourney API de generación de imágenes vista general, incluye objeto de tarea, descripción de estados y campos de respuesta"
+---
+> Contenido actualizado: 2026-06-09
+
+# Midjourney vista general
+
+Crazyrouter ofrece una proxy completa para el API de Midjourney, soportando todas las operaciones como Imagine, Blend, Describe, Upscale, Variation, etc. Todas las solicitudes se procesan mediante tareas asíncronas.
+
+## Ruta básica
+
+```
+https://api.crazyrouter.com/mj
+```
+
+## Autenticación
+
+Incluya el API Key en el encabezado de la solicitud:
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+---
+
+## Objeto de tarea
+
+Cada vez que se envía una solicitud a Midjourney, el sistema devuelve un objeto de tarea. El objeto de tarea contiene los siguientes campos:
+
+| Campo | Tipo | Descripción |
+|------|------|------|
+| `id` | string | Identificador único de la tarea |
+| `action` | string | Tipo de tarea: `IMAGINE`, `UPSCALE`, `VARIATION`, `BLEND`, `DESCRIBE`, etc. |
+| `status` | string | Estado de la tarea |
+| `prompt` | string | Prompts enviados |
+| `promptEn` | string | Prompts traducidos al inglés |
+| `description` | string | Descripción de la tarea |
+| `submitTime` | number | Hora de envío (timestamp en milisegundos) |
+| `startTime` | number | Hora de inicio del procesamiento |
+| `finishTime` | number | Hora de finalización |
+| `progress` | string | Porcentaje de avance, como `"100%"` |
+| `imageUrl` | string | URL de la imagen generada |
+| `failReason` | string | Razón del fallo (solo si ha fallado) |
+| `properties` | object | Propiedades adicionales |
+| `buttons` | array | Lista de botones de acción disponibles |
+
+---
+
+## Estado de la tarea
+
+| Estado | Descripción |
+|------|------|
+| `NOT_START` | Tarea enviada, en espera de procesamiento |
+| `SUBMITTED` | Tarea enviada a Midjourney |
+| `IN_PROGRESS` | Tarea en proceso |
+| `SUCCESS` | Tarea finalizada |
+| `FAILURE` | Tarea fallida |
+
+---
+
+## Botones de acción
+
+Tras la finalización de la tarea, el campo `buttons` incluirá las acciones disponibles para realizar:
+
+```json
+{
+  "buttons": [
+    {"customId": "MJ::JOB::upsample::1::hash", "emoji": "U1", "label": "U1", "style": 2},
+    {"customId": "MJ::JOB::upsample::2::hash", "emoji": "U2", "label": "U2", "style": 2},
+    {"customId": "MJ::JOB::upsample::3::hash", "emoji": "U3", "label": "U3", "style": 2},
+    {"customId": "MJ::JOB::upsample::4::hash", "emoji": "U4", "label": "U4", "style": 2},
+    {"customId": "MJ::JOB::variation::1::hash", "emoji": "V1", "label": "V1", "style": 2},
+    {"customId": "MJ::JOB::variation::2::hash", "emoji": "V2", "label": "V2", "style": 2},
+    {"customId": "MJ::JOB::variation::3::hash", "emoji": "V3", "label": "V3", "style": 2},
+    {"customId": "MJ::JOB::variation::4::hash", "emoji": "V4", "label": "V4", "style": 2}
+  ]
+}
+```
+
+Puede usar `customId` para invocar la interfaz Action y ejecutar la acción correspondiente (ampliar, variante, etc.).
+
+---
+
+## Enumeración de Endpoints de API
+
+| Método | Endpoint | Descripción |
+|------|------|------|
+| POST | `/mj/submit/imagine` | Enviar tarea Imagine |
+| POST | `/mj/submit/action` | Ejecutar acción (ampliar, variante, etc.) |
+| POST | `/mj/submit/blend` | Mezclar imágenes |
+| POST | `/mj/submit/describe` | Describir imagen |
+| POST | `/mj/submit/modal` | Confirmar ventana emergente |
+| POST | `/mj/submit/shorten` | Acortar prompt |
+| GET | `/mj/task/{id}/fetch` | Consultar una tarea |
+| POST | `/mj/task/list-by-condition` | Consulta de tareas por lote |
+| GET | `/mj/task/{id}/image-seed` | Obtener Seed de la imagen |
+
+<Note>
+  Las tareas Midjourney se procesan de manera asíncrona. Tras enviarlas, debe consultar periódicamente el estado. Se recomienda consultar cada 3-5 segundos hasta que el estado sea `SUCCESS` o `FAILURE`.
+</Note>

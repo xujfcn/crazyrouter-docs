@@ -1,0 +1,96 @@
+---
+title: "Formato compatible con Claude OpenAI"
+description: "Ruta de compatibilidad con Claude Chat Completions basada en la verificación de entorno de producción Crazyrouter del 23-03-2026"
+---
+> Contenido actualizado: 2026-06-23
+
+
+# Formato compatible con Claude OpenAI
+
+```
+POST /v1/chat/completions
+```
+
+Hasta el 23 de marzo de 2026, en el entorno de producción de Crazyrouter se ha verificado:
+
+- `claude-opus-4-8` las solicitudes no en streaming devuelven `object: "chat.completion"`
+- `message` la versión estable actual incluye `role`, `content`
+- Las solicitudes en streaming devuelven `chat.completion.chunk`
+- SSE sigue finalizando con `data: [DONE]`
+
+<Warning>
+Esta página es la ruta estándar de conversación de Claude utilizando el formato compatible con OpenAI Chat Completions. Para `tool_use` nativo de Claude, Claude Code, y escenarios de programación de Agentes que utilizan herramientas integradas, por favor usa prioritariamente el [formato nativo de Claude](/es/chat/anthropic/messages) de `POST /v1/messages`. El formato compatible con OpenAI no garantiza el soporte equivalente para los bloques de herramientas nativos de Claude.
+</Warning>
+
+---
+
+## Solicitudes no en streaming
+
+```bash
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "claude-opus-4-8",
+    "messages": [
+      {"role": "system", "content": "You are a concise assistant."},
+      {"role": "user", "content": "Compare PostgreSQL and MySQL in one paragraph."}
+    ],
+    "max_tokens": 256,
+    "temperature": 0.2
+  }'
+```
+
+Forma clave de respuesta:
+
+```json
+{
+  "object": "chat.completion",
+  "model": "claude-opus-4-8",
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "PostgreSQL and MySQL are both popular..."
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Solicitudes en streaming
+
+```bash
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "claude-opus-4-8",
+    "messages": [
+      {"role": "user", "content": "Say hello in one sentence."}
+    ],
+    "max_tokens": 128,
+    "stream": true
+  }'
+```
+
+En el sondeo streaming en producción del 23-03-2026, el fragmento inicial es el siguiente:
+
+```text
+data: {"object":"chat.completion.chunk","model":"claude-opus-4-8","choices":[{"delta":{"role":"assistant"}}]}
+data: {"object":"chat.completion.chunk","model":"claude-opus-4-8","choices":[{"delta":{"content":"Hello! ..."}}]}
+data: [DONE]
+```
+
+<Note>
+  Si necesitas `thinking` nativo de Claude, bloques de herramientas nativos o entrada documental, utiliza preferentemente [Claude Messages](/es/chat/anthropic/messages).
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Comparativa de precios de Claude Fable 5: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Página del modelo Claude Fable 5: Precio en tiempo real, ejemplos reales, código de invocación](https://crazyrouter.com/es/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Comparativa de precios de Claude Haiku 4.5: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/claude-haiku-4-5?utm_source=docs&utm_medium=related)

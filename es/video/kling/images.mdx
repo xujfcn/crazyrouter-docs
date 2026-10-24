@@ -1,0 +1,125 @@
+---
+title: "Generación de imágenes Kling"
+description: "Genera imágenes utilizando la API de Kling"
+---
+> Contenido actualizado: 2026-06-09
+
+# Generación de imágenes Kling
+
+```
+POST /kling/v1/images/generations
+```
+
+La documentación pública actual solo garantiza la ruta principal de generación de imágenes de Kling. No escribas erróneamente los campos extendidos del lado de imagen que aún no han sido publicados como contrato estable para los clientes.
+
+## Alcance validado actualmente
+
+- `kling-v2-5-turbo` La generación de imágenes ha completado la validación bounded
+- Los resultados exitosos priorizan devolver la dirección de archivo de Crazyrouter, como `https://media.crazyrouter.com/...png`
+
+## Parámetros de solicitud
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `model` | string | No | El ejemplo común actual es `kling-v2-5-turbo` |
+| `prompt` | string | Sí | Palabra clave de descripción de la imagen |
+| `negative_prompt` | string | No | Palabra clave negativa |
+| `aspect_ratio` | string | No | Por ejemplo `1:1`, `16:9`, `9:16` |
+| `n` | integer | No | Cantidad a generar, por defecto `1` |
+| `callback_url` | string | No | Dirección de callback |
+| `external_task_id` | string | No | ID de tarea personalizada del lado del negocio |
+
+## Ejemplo de solicitud
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/kling/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "kling-v2-5-turbo",
+    "prompt": "一只戴着墨镜的柴犬，写实摄影风格",
+    "negative_prompt": "blurry, low quality",
+    "aspect_ratio": "1:1",
+    "n": 1
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/kling/v1/images/generations",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "kling-v2-5-turbo",
+        "prompt": "一只戴着墨镜的柴犬，写实摄影风格",
+        "negative_prompt": "blurry, low quality",
+        "aspect_ratio": "1:1",
+        "n": 1
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+## Ejemplo de respuesta de envío exitoso
+
+```json
+{
+  "created_at": 1774536039,
+  "id": "2037177945839673344",
+  "model": "kling-v2-5-turbo",
+  "object": "video",
+  "progress": 0,
+  "status": "",
+  "task_id": "2037177945839673344"
+}
+```
+
+---
+
+## Consultar tarea de imagen
+
+```
+GET /kling/v1/images/generations/{task_id}
+```
+
+```bash cURL
+curl https://api.crazyrouter.com/kling/v1/images/generations/2037177945839673344 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Ejemplo de respuesta (finalizado)
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "error": null,
+    "format": "png",
+    "metadata": null,
+    "status": "succeeded",
+    "task_id": "2037177945839673344",
+    "url": "https://media.crazyrouter.com/task-artifacts/2026/03/26/50/imageGenerate/2037177945839673344.png"
+  }
+}
+```
+
+<Note>
+  La generación de imágenes Kling es una tarea asíncrona. Después del envío, obtén el resultado final utilizando la interfaz de consulta. En esta página no se documentan como contrato público rígido los parámetros extendidos del lado de la imagen como Imagen-a-imagen, `image_fidelity`, etc.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Página del modelo Kling 2.6: precio en tiempo real, ejemplos reales, código de invocación](https://crazyrouter.com/es/models/kling/aigc-video-kling-2-6?utm_source=docs&utm_medium=related)
+- [Página del modelo Kling 3.0: precio en tiempo real, ejemplos reales, código de invocación](https://crazyrouter.com/es/models/kling/aigc-video-kling-3-0?utm_source=docs&utm_medium=related)
+- [Todos los modelos y precios de Kling AI](https://crazyrouter.com/es/models/kling?utm_source=docs&utm_medium=related)

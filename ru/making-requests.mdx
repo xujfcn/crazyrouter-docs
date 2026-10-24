@@ -1,28 +1,32 @@
 ---
-title: 'Making Requests'
-description: 'Learn how to make API requests correctly'
+title: "Отправка запроса"
+description: "Узнайте, как правильно отправлять API запросы"
 ---
-> Дата обновления: 2026-06-14
+> Обновление содержания: 2026-06-16
 
-## Request Format
+## Формат запроса
 
-All API requests use the HTTPS protocol with JSON request bodies.
+Все запросы к API используются через протокол HTTPS, тело запроса передаётся в формате JSON.
 
-### Required Headers
+<Note>
+По умолчанию рекомендуется использовать `https://api.crazyrouter.com/v1`. Если вы не уверены, стоит ли указывать основной домен или `/v1` в каком-либо инструменте, сначала ознакомьтесь с [описанием API Endpoint](https://docs.crazyrouter.com/ru/api-endpoint).
+</Note>
 
-| Header | Value | Description |
-|--------|-------|-------------|
-| `Authorization` | `Bearer YOUR_API_KEY` | API authentication key |
-| `Content-Type` | `application/json` | Request body format |
+### Обязательные заголовки запроса
 
-### Optional Headers
+| Header | Значение | Описание |
+|--------|-----|------|
+| `Authorization` | `Bearer YOUR_API_KEY` | Ключ аутентификации API |
+| `Content-Type` | `application/json` | Формат тела запроса |
 
-| Header | Value | Description |
-|--------|-------|-------------|
-| `Accept` | `application/json` | Response format |
-| `Content-Encoding` | `gzip` | Optional. Set this when the request body is gzip-compressed |
+### Дополнительные заголовки запроса
 
-## Request Example
+| Header | Значение | Описание |
+|--------|-----|------|
+| `Accept` | `application/json` | Формат ответа |
+| `Content-Encoding` | `gzip` | Необязательно. Устанавливается, если тело запроса сжато с помощью gzip |
+
+## Пример запроса
 
 ```bash
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -35,13 +39,13 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-## Sending a gzip request body
+## Отправка тела запроса с использованием gzip
 
-If your request body is large, for example long context, long documents, or a large message history, you can gzip-compress the original JSON body before sending it.
+Если тело вашего запроса большое, например вы загружаете длинный контекст, большой документ или большую историю сообщений, вы можете сжать исходный JSON-запрос с помощью gzip и отправить его.
 
-gzip only changes the transport format. It does not change the request semantics. Crazyrouter decompresses the body before parsing the JSON.
+Включение gzip меняет только способ передачи, но не изменяет семантику запроса. Сервер автоматически распакует тело перед разбором JSON.
 
-Add these headers:
+Необходимо добавить заголовок запроса:
 
 ```http
 Content-Type: application/json
@@ -49,7 +53,7 @@ Content-Encoding: gzip
 ```
 
 <Note>
-  `Content-Encoding: gzip` means the request body itself is gzip-compressed. It is different from `Accept-Encoding: gzip`, which is usually used for response compression.
+  `Content-Encoding: gzip` обозначает, что "тело запроса уже сжато gzip". Это отличается от `Accept-Encoding: gzip`, который обычно используется для сжатия ответа.
 </Note>
 
 ### Python
@@ -62,7 +66,7 @@ import requests
 payload = {
     "model": "gpt-5.5",
     "messages": [
-        {"role": "user", "content": "Put your long context or document here..."}
+        {"role": "user", "content": "这里放很长的上下文或文档内容..."}
     ],
     "stream": False
 }
@@ -92,7 +96,7 @@ import zlib from "node:zlib";
 const payload = {
   model: "gpt-5.5",
   messages: [
-    { role: "user", content: "Put your long context or document here..." },
+    { role: "user", content: "这里放很长的上下文或文档内容..." },
   ],
   stream: false,
 };
@@ -122,7 +126,7 @@ cat > body.json <<'JSON'
   "messages": [
     {
       "role": "user",
-      "content": "Put your long context or document here..."
+      "content": "这里放很长的上下文或文档内容..."
     }
   ],
   "stream": false
@@ -138,20 +142,20 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   --data-binary @body.json.gz
 ```
 
-### Automatically enable gzip by body size
+### Автоматическое включение gzip в зависимости от размера
 
-If your system is a workflow, you usually do not need to manually decide which business steps should use gzip. Put the decision in your shared HTTP client wrapper: serialize the JSON body first, check its byte size, and gzip only when it is above a threshold.
+Если ваша система представляет собой рабочий процесс, обычно вам не нужно вручную в бизнес-логике разделять "какие запросы сжимать, а какие нет". Рекомендуется проверять размер JSON тела запроса на уровне единого HTTP клиента, и автоматически включать gzip при превышении порогового значения.
 
-Recommended threshold:
+Рекомендуемое пороговое значение:
 
 ```text
-body >= 128KB: enable gzip
-body < 128KB: send as normal JSON
+body >= 128KB：启用 gzip
+body < 128KB：保持原样发送
 ```
 
-If your requests are often MB-sized, `256KB` is also a reasonable threshold. Do not force gzip for very small requests, because compression overhead and gzip headers can make them larger.
+Если ваши запросы часто бывают гигабайтного размера, вы также можете установить порог `256KB`. Для маленьких запросов не рекомендуется принудительно применять gzip, так как накладные расходы на сжатие и заголовок gzip могут увеличить объём.
 
-Python wrapper example:
+Пример обёртки на Python:
 
 ```python
 import gzip
@@ -175,7 +179,7 @@ def post_json(url, payload, api_key, gzip_threshold=128 * 1024):
     return requests.post(url, headers=headers, data=body, timeout=120)
 ```
 
-Node.js wrapper example:
+Пример обёртки на Node.js:
 
 ```js
 import zlib from "node:zlib";
@@ -203,15 +207,15 @@ async function postJson(url, payload, apiKey, gzipThreshold = 128 * 1024) {
 }
 ```
 
-Use this when:
+Сценарии применения:
 
-- a single request body is often larger than 1 MB
-- you repeatedly upload long context or long documents
-- your client can directly control the HTTP body and headers
+- Обычно размер тела запроса превышает 1MB
+- Многократная загрузка длинного контекста или больших документов
+- Клиент может напрямую управлять HTTP body и заголовками запроса
 
-## Streaming Requests
+## Стриминг-запросы
 
-Set `stream: true` to enable SSE streaming output:
+Установите `stream: true` для включения SSE-стриминга:
 
 ```bash
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -224,12 +228,12 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-Streaming responses use the Server-Sent Events (SSE) format. Each event starts with `data: ` and the stream ends with `data: [DONE]`.
+Формат ответа в режиме потоковой передачи — Server-Sent Events (SSE), каждое событие начинается с `data: `, заканчивается `data: [DONE]`.
 
-## Online Debugging
+## Онлайн-отладка
 
-You can debug the API online using the following methods:
+Вы можете протестировать API онлайн следующими способами:
 
-1. **Crazyrouter Playground** - After signing in, visit [crazyrouter.com/console/playground](https://crazyrouter.com/console/playground) to test directly in your browser
-2. **cURL** - Send requests using the command-line tool
-3. **Postman / Apifox** - Use API debugging tools
+1. **Crazyrouter Playground** — после входа откройте [crazyrouter.com/console/playground](https://crazyrouter.com/console/playground), чтобы протестировать прямо в браузере
+2. **cURL** — отправляйте запросы через командную строку
+3. **Postman / Apifox** — используйте инструменты для тестирования API

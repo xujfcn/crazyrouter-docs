@@ -1,32 +1,32 @@
 ---
-title: "OpenAI Video Format"
-description: "Use the OpenAI-compatible video API format to create, query, and download videos"
+title: "OpenAI ビデオフォーマット"
+description: "OpenAI 互換のビデオ API フォーマットを使ってビデオを作成・照会・ダウンロードする"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-30
 
-# OpenAI Video Format
+# OpenAI ビデオフォーマット
 
-Crazyrouter supports the official OpenAI video API format, compatible with the OpenAI SDK.
+Crazyrouter は OpenAI 公式のビデオ API フォーマットをサポートしており、OpenAI SDK と互換性があります。
 
-## Create Video
+## ビデオの作成
 
 ```
 POST /v1/videos
 ```
 
-### Request Parameters
+### リクエストパラメータ
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model` | string | Yes | Model name, e.g. `sora-2`, `sora-2-pro` |
-| `prompt` | string | Yes | Video description prompt |
-| `size` | string | No | Video size: `1920x1080`, `1080x1920`, `1080x1080` |
-| `duration` | integer | No | Video duration (seconds) |
-| `image_url` | string | No | Reference image URL |
-| `storyboard` | array | No | Storyboard script |
-| `private` | boolean | No | Whether to use private mode |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `model` | string | はい | モデル名。例: `veo-3.1-fast`、`veo-3.1-quality` |
+| `prompt` | string | はい | ビデオ説明プロンプト |
+| `size` | string | いいえ | ビデオサイズ：`1920x1080`、`1080x1920`、`1080x1080` |
+| `duration` | integer | いいえ | ビデオ長さ（秒単位） |
+| `image_url` | string | いいえ | 参照画像URL |
+| `storyboard` | array | いいえ | ストーリーボードスクリプト |
+| `private` | boolean | いいえ | プライベートモードかどうか |
 
-### Request Examples
+### リクエスト例
 
 <CodeGroup>
 
@@ -35,7 +35,7 @@ curl -X POST https://api.crazyrouter.com/v1/videos \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "model": "sora-2",
+    "model": "veo-3.1-fast",
     "prompt": "A timelapse of a city skyline from day to night, clouds moving quickly",
     "size": "1920x1080",
     "duration": 10
@@ -52,7 +52,7 @@ response = requests.post(
         "Authorization": "Bearer YOUR_API_KEY"
     },
     json={
-        "model": "sora-2",
+        "model": "veo-3.1-fast",
         "prompt": "A timelapse of a city skyline from day to night",
         "size": "1920x1080",
         "duration": 10
@@ -64,19 +64,20 @@ print(response.json())
 
 </CodeGroup>
 
-### Response Example
+### レスポンス例
 
 ```json
 {
   "id": "video_abc123",
   "object": "video",
-  "status": "processing"
+  "status": "processing",
+  "created_at": 1709123456
 }
 ```
 
 ---
 
-## Query Video
+## ビデオの照会
 
 ```
 GET /v1/videos/{id}
@@ -87,32 +88,31 @@ curl https://api.crazyrouter.com/v1/videos/video_abc123 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-### Response Example (Completed)
+### レスポンス例（完了時）
 
 ```json
 {
-  "id": "video_abc123",
-  "object": "video",
-  "status": "SUCCESS",
-  "created_at": 1709123456,
-  "video": {
-    "url": "https://crazyrouter.com/files/video_abc123.mp4",
-    "duration": 10,
-    "width": 1920,
-    "height": 1080
+  "code": "success",
+  "message": "",
+  "data": {
+    "id": "video_abc123",
+    "task_id": "video_abc123",
+    "status": "SUCCESS",
+    "artifact_url": "https://media.crazyrouter.com/task-artifacts/example.mp4",
+    "result_url": "https://media.crazyrouter.com/task-artifacts/example.mp4"
   }
 }
 ```
 
 ---
 
-## Download Video
+## ビデオのダウンロード
 
 ```
 GET /v1/videos/{id}/content
 ```
 
-Download the video file directly.
+ビデオファイルを直接ダウンロードします。
 
 ```bash cURL
 curl -o output.mp4 https://api.crazyrouter.com/v1/videos/video_abc123/content \
@@ -121,13 +121,13 @@ curl -o output.mp4 https://api.crazyrouter.com/v1/videos/video_abc123/content \
 
 ---
 
-## Edit Video
+## ビデオを編集
 
-Pass `image_url` in the create request for image-to-video:
+`image_url` を作成リクエスト内で指定すると画像からビデオ生成が可能です：
 
 ```json
 {
-  "model": "sora-2",
+  "model": "veo-3.1-fast",
   "prompt": "The scene comes to life with gentle movement",
   "image_url": "https://example.com/scene.jpg",
   "size": "1920x1080",
@@ -137,11 +137,11 @@ Pass `image_url` in the create request for image-to-video:
 
 ---
 
-## Storyboard
+## Storyboard ストーリーボード
 
 ```json
 {
-  "model": "sora-2",
+  "model": "veo-3.1-fast",
   "storyboard": [
     {"prompt": "Wide shot of a forest at dawn", "duration": 3},
     {"prompt": "A deer walks into frame", "duration": 4},
@@ -153,30 +153,30 @@ Pass `image_url` in the create request for image-to-video:
 
 ---
 
-## Private Mode
+## プライベートモード
 
-Set `private: true` so the generated video won't appear in the public gallery:
+`private: true` を設定すると、生成されたビデオが公開ギャラリーに表示されなくなります：
 
 ```json
 {
-  "model": "sora-2",
+  "model": "veo-3.1-fast",
   "prompt": "A confidential product demo video",
   "size": "1920x1080",
   "private": true
 }
 ```
 
-### Task Status
+### タスクステータス
 
-| Status | Description |
-|--------|-------------|
-| `processing` | Processing |
-| `SUCCESS` | Completed |
-| `failed` | Failed |
+| ステータス | 説明 |
+|------|------|
+| `processing` | 処理中 |
+| `SUCCESS` | 完了 |
+| `failed` | 失敗 |
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [GPT Image 1.5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [OpenAI の全モデルと料金](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [GPT Image 1.5 モデルページ：リアルタイム価格、実際例、呼び出しコード](https://crazyrouter.com/ja/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT Image 2 モデルページ：リアルタイム価格、実際例、呼び出しコード](https://crazyrouter.com/ja/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [OpenAI 全モデルと価格](https://crazyrouter.com/ja/models/openai?utm_source=docs&utm_medium=related)

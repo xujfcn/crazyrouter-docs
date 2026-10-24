@@ -1,0 +1,88 @@
+---
+title: 'Buscar tokens'
+description: 'Buscar tokens por palabra clave'
+api: 'GET /api/token/search'
+---
+> Contenido actualizado: 2026-07-20
+
+## Descripción de la interfaz
+
+Busca tokens según palabras clave, admite coincidencia difusa por nombre y también filtrado por fragmentos de token.
+
+<Note>
+  Este grupo de interfaces `/api/token/*` está destinado principalmente a la automatización de la gestión de claves API en la consola de Crazyrouter. Requiere los encabezados de solicitud `access token` y `New-Api-User` del usuario, y no son interfaces para el uso directo en flujos de llamada de modelos `sk-xxx` comunes. La URL base de la solicitud debe usar `https://crazyrouter.com`; `https://api.crazyrouter.com` es la entrada especial para la API de modelo. Llamar a rutas de gestión devolverá `404 api_only_endpoint`.
+</Note>
+
+## Método de autenticación
+
+Utilice autenticación del lado del usuario; incluya en los encabezados de la solicitud:
+
+```text
+Authorization: Bearer your_access_token
+New-Api-User: 1
+```
+
+## Parámetros de solicitud
+
+<ParamField query="keyword" type="string" required>
+  Palabra clave de búsqueda, coincide con el nombre del token
+</ParamField>
+
+<ParamField query="token" type="string">
+  Opcional. Filtrar por fragmento de cadena del token
+</ParamField>
+
+## Formato de respuesta
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": [
+    {
+      "id": 5,
+      "name": "生产环境",
+      "key": "sk-xxxxxxxx",
+      "status": 1,
+      "remain_quota": 50000,
+      "used_quota": 8000,
+      "created_time": 1706000000,
+      "model_limits_enabled": false,
+      "model_limits": "",
+      "allow_ips": "",
+      "group": "default"
+    }
+  ]
+}
+```
+
+## Ejemplo de código
+
+<CodeGroup>
+
+```python Python
+import requests
+
+headers = {
+    "Authorization": "Bearer your_access_token",
+    "New-Api-User": "1",
+    "User-Agent": "Mozilla/5.0"
+}
+
+response = requests.get(
+    "https://crazyrouter.com/api/token/search?keyword=生产&token=sk-",
+    headers=headers
+)
+
+tokens = response.json()["data"]
+for token in tokens:
+    print(f"[{token['id']}] {token['name']} - 剩余额度: {token['remain_quota']}")
+```
+
+```bash cURL
+curl "https://crazyrouter.com/api/token/search?keyword=生产&token=sk-" \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 1"
+```
+
+</CodeGroup>

@@ -1,42 +1,93 @@
 ---
-title: '画像アップロードガイド'
-description: '画像をアップロードして一時的な公開 URL を取得し、画像入力対応 API で使用する方法'
+title: "画像アップロード説明"
+description: "ローカル画像をアップロードして、48時間有効な一時的なパブリックURLを取得できます。画像生成、動画生成、画像認識用のAPIで使用できます。"
 ---
-> 更新日: 2026-08-18
+> 内容更新日: 2026-09-28
 
-Crazyrouter は、モデルが読み取れる一時的な公開画像 URL を作成するためのアップロード API を提供しています。Vision、画像編集、画像から動画、ワークフロー連携などで利用できます。
+Crazyrouter は一時的なパブリック画像アップロードAPIを提供しており、ローカルの参照画像をモデルがアクセスできるパブリックURLに変換できます。これは Kling、Veo、Seedance、Runway、Luma、MiniMax、Nano Banana Pro、Doubao Seedream など、`image_url`、`image_urls`、`image_list`、`images` または `image_input` が必要とするAPIに適しています。
 
 <Note>
-  一時画像はデフォルトで 48 時間保存され、その後自動的に削除されます。保存期間中のストレージは個別課金されませんが、ユーザー単位のアップロード容量とレート制限があります。
+  一時的な画像はデフォルトで48時間保存され、期限切れ後は自動で削除されます。保存期間中は日割り料金は発生しません。現在はユーザーのアップロード枠と速度制限による濫用防止が行われています。
 </Note>
 
 <Note>
-  返却される `id` は内部ファイル ID です。`image_input` には `id` ではなく返却された `url` を使用してください。Nano Banana Pro の Base64 / multipart 編集は指定されたグレーアカウントのみ利用できます。
+  返される`id`は当サイトのファイル記録IDです。モデルリクエスト内の`image_input`には、返却された`url`を使用してください。`id`を直接送信しないでください。`nano-banana-pro`のBase64 / multipartグレースケール機能は指定アカウントのみ利用可能です。
 </Note>
 
-## Endpoint Overview
+## API概要
 
-| Scenario | Endpoint |
-|----------|----------|
-| Local file upload | `POST /v1/files/uploads` |
-| Base64 image upload | `POST /v1/files/uploads/base64` |
-| Remote image rehosting | `POST /v1/files/uploads/url` |
-| Presigned direct R2 upload | `POST /v1/files/uploads/presign` |
+| シナリオ | API |
+|------|------|
+| ローカルファイルアップロード | `POST /v1/files/uploads` |
+| Base64画像アップロード | `POST /v1/files/uploads/base64` |
+| リモート画像の転送保存 | `POST /v1/files/uploads/url` |
+| 署名付き直送 R2 | `POST /v1/files/uploads/presign` |
 
-Common limits:
+共通制限：
 
-| Item | Current rule |
-|------|--------------|
-| Auth | `Authorization: Bearer YOUR_API_KEY` |
-| Supported formats | `image/png`, `image/jpeg`, `image/webp`, `image/gif` |
-| Single file size | 20MB |
-| User upload quota | 200MB / rolling 24-hour window |
-| Default expiration | 48 hours |
-| Returned URL | `https://media.crazyrouter.com/task-artifacts/tmp-inputs/...` |
+| 項目 | 現行ルール |
+|------|------|
+| 認証 | `Authorization: Bearer YOUR_API_KEY` |
+| サポート形式 | `image/png`、`image/jpeg`、`image/webp`、`image/gif` |
+| 1ファイルの最大サイズ | 20MB |
+| ユーザーアップロード枠 | 200MB / 24時間ローリングウィンドウ |
+| デフォルト有効期限 | 48時間 |
+| 返却URL | `https://media.crazyrouter.com/task-artifacts/tmp-inputs/...` |
 
-## Presigned Direct R2 Upload
+## ローカルファイルアップロード
 
-大量アップロードのワークフローでは、まず presigned upload URL を取得し、クライアントからストレージへ直接 `PUT` できます。画像バイナリは Crazyrouter のアプリケーションサーバーを経由しません。
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/files/uploads \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "file=@./reference.png" \
+  -F "purpose=model_input"
+```
+
+レスポンス例：
+
+```json
+{
+  "id": "file_e5bbce820b5941409682a9c5e9ba79f1",
+  "url": "https://media.crazyrouter.com/task-artifacts/tmp-inputs/2026/05/13/user-1/file_e5bbce820b5941409682a9c5e9ba79f1.png",
+  "mime_type": "image/png",
+  "size": 2025,
+  "expires_at": "2026-05-16T04:41:35.0131789Z"
+}
+```
+
+## Base64アップロード
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/files/uploads/base64 \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "data": "data:image/png;base64,iVBORw0KGgoAAA...",
+    "filename": "reference.png",
+    "purpose": "model_input"
+  }'
+```
+
+## リモートURL転送
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/files/uploads/url \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "url": "https://example.com/reference.png",
+    "filename": "reference.png",
+    "purpose": "model_input"
+  }'
+```
+
+リモートURLは、Crazyrouterサーバーがアクセスできる`http`または`https`画像アドレスである必要があります。システムはファイルサイズ、MIMEタイプ、SSRF防御チェックを行います。
+
+## 署名付き直送 R2
+
+大量アップロードの場合、まず署名付きアップロードURLを申請し、クライアントが画像`PUT`を直接ストレージエンドポイントにアップロードできます。こうすることで、画像バイナリはCrazyrouterアプリサーバーを経由せず、毎日大量画像をアップロードするワークフローに適した方法です。
+
+ステップ1：直送URLを申請する
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/files/uploads/presign \
@@ -50,7 +101,7 @@ curl -X POST https://api.crazyrouter.com/v1/files/uploads/presign \
   }'
 ```
 
-Example response:
+レスポンス例：
 
 ```json
 {
@@ -69,7 +120,7 @@ Example response:
 }
 ```
 
-Then upload directly:
+ステップ2：クライアントが`upload_url`へ直接アップロード
 
 ```bash cURL
 curl -X PUT "$UPLOAD_URL" \
@@ -78,8 +129,43 @@ curl -X PUT "$UPLOAD_URL" \
   --data-binary @./reference.jpg
 ```
 
-アップロード完了後、モデルリクエストでは `upload_url` ではなく、返却された `url` を使用してください。
+アップロードが完了したら、返却された`url`をモデルリクエストの画像URLとして使用します。
 
 <Warning>
-  `upload_url` は短時間だけ有効な書き込み用 URL です。`Content-Type` と `Content-Length` は presign リクエストと一致している必要があります。
+  `upload_url`は短期間有効な書き込みアドレスで、通常は約15分以内の使用が必要です。`Content-Type`および`Content-Length`は申請時と同じである必要があります。`upload_url`はモデルに送信しないでください。返却された`url`をモデルリクエストで利用してください。
+</Warning>
+
+## 実例：ローカル参照画像をKlingの動画生成に利用
+
+ステップ1：ローカル参照画像をアップロード
+
+```bash cURL
+UPLOAD_RESPONSE=$(curl -sS -X POST https://api.crazyrouter.com/v1/files/uploads \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "file=@./portrait.png" \
+  -F "purpose=model_input")
+
+IMAGE_URL=$(python -c "import json,sys; print(json.load(sys.stdin)['url'])" <<< "$UPLOAD_RESPONSE")
+echo "$IMAGE_URL"
+```
+
+ステップ2：返却された`IMAGE_URL`をKling動画生成に転送
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/kling/v1/videos/image2video \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d "{
+    \"model_name\": \"kling-v3\",
+    \"prompt\": \"图片中的人物缓缓转头并微笑，镜头轻微推进，电影级光影\",
+    \"image_urls\": [\"$IMAGE_URL\"],
+    \"duration\": \"5\",
+    \"mode\": \"std\"
+  }"
+```
+
+正常に送信されるとタスクIDが返却されます。[Klingタスク確認](/jp/video/kling/query) で最終的な動画結果を入手できます。
+
+<Warning>
+  一時的なURLは永久素材ライブラリではありません。タスク送信前にURLの有効期限が切れていないことを確認し、長期運用画像のアドレスとしては保存しないでください。
 </Warning>

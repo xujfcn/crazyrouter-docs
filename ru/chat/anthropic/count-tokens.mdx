@@ -1,38 +1,39 @@
 ---
-title: "Claude Token Counting"
-description: "POST /v1/messages/count_tokens estimate the input token count for a Claude Messages request"
+title: "Клауд Подсчет Токенов"
+description: "POST /v1/messages/count_tokens Предварительная оценка количества токенов во входных данных запроса Claude Messages"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Claude Token Counting
+
+# Клауд Подсчет Токенов
 
 ```
 POST /v1/messages/count_tokens
 ```
 
-Use this endpoint to estimate input token usage before you send the real `POST /v1/messages` request. It is useful for Claude CLI, Claude Code, budget checks, and context-trimming logic.
+Используется для предварительной оценки того, сколько токенов будет потрачено на входную часть перед фактическим вызовом `POST /v1/messages`. Подходит для Claude CLI, Claude Code, контроля бюджета или логики обрезки контекста.
 
-## Authentication
+## Аутентификация
 
-The recommended headers follow Anthropic-style requests:
+Рекомендуется использовать стиль заголовка запроса Anthropic:
 
 ```http
 x-api-key: YOUR_API_KEY
 anthropic-version: 2023-06-01
 ```
 
-Standard Bearer authentication also works, but Anthropic ecosystem clients usually send the headers above.
+Можно также использовать стандартную Bearer аутентификацию, но клиенты из экосистемы Anthropic обычно передают вышеуказанный заголовок.
 
-## Request Body
+## Тело запроса
 
-The body follows the Claude Messages shape. The smallest practical request usually includes:
+Тело запроса оформляется в стиле Claude Messages. Обычно минимально необходимые поля:
 
 - `model`
 - `messages`
 
-If your request also includes `system`, `tools`, tool results, or text content, those are included in the estimate too.
+Если в запросе есть `system`, `tools`, результаты инструментов или текстовое содержимое, они также будут учитываться при оценке.
 
-## Request Example
+## Пример запроса
 
 <CodeGroup>
 
@@ -68,7 +69,7 @@ print(resp.json())
 
 </CodeGroup>
 
-## Response Example
+## Пример ответа
 
 ```json
 {
@@ -76,32 +77,32 @@ print(resp.json())
 }
 ```
 
-## Response Fields
+## Возвращаемые поля
 
-| Field | Type | Description |
-|------|------|-------------|
-| `input_tokens` | integer | Estimated input tokens for the text portion of the request |
-| `warning` | string | Optional warning; may appear when images or files were not included in the estimate |
+| Поле | Тип | Описание |
+|------|------|---------|
+| `input_tokens` | integer | Оценка числа входных токенов текстовой части текущего запроса |
+| `warning` | string | Дополнительное предупреждение; если запрос содержит изображения или файлы, то может быть указано, что такие данные не учтены в оценке |
 
-## Current Limits
+## Ограничения
 
-The current implementation mainly estimates:
+На данный момент оценка производится главным образом для:
 
 - `system`
-- text content in `messages`
-- text and JSON content in tool definitions and tool results
+- Текстового содержимого `messages`
+- Текст/JSON внутри инструментария и результатов инструментов
 
 <Warning>
-If the request contains images or files, those image/file tokens are not included in `input_tokens`. In that case the response may include a `warning`, and real billing can be higher than this estimate.
+Если запрос содержит изображения или файлы, данный интерфейс не учитывает токены соответствующих изображений/файлов в `input_tokens`. В этом случае в ответе может появиться `warning`, а реальная стоимость будет выше предварительно рассчитанной.
 </Warning>
 
 <Note>
-This endpoint returns an estimate, not a final billing record. Actual usage is determined by the real model call.
+Данный интерфейс возвращает только предварительную оценку, а не итоговую расчетную величину. Фактическое использование определяется результатами вызова модели.
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [Claude Fable 5: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
-- [Claude Fable 5: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
-- [Claude Haiku 4.5: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/claude-haiku-4-5?utm_source=docs&utm_medium=related)
+- [Сравнение цен Claude Fable 5: официальный / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Страница модели Claude Fable 5: актуальные цены, реальные примеры, код для вызова](https://crazyrouter.com/ru/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Сравнение цен Claude Haiku 4.5: официальный / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/claude-haiku-4-5?utm_source=docs&utm_medium=related)

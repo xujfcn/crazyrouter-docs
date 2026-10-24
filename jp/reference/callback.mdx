@@ -1,16 +1,16 @@
 ---
-title: 'Callback Protocol'
-description: 'Webhook callback protocol for async tasks'
+title: "コールバックプロトコル"
+description: "非同期タスクの Webhook コールバックプロトコル"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-10-22
 
-## Overview
+## 概要
 
-For async tasks (Midjourney image generation, video generation, etc.), Crazyrouter supports Webhook callbacks to notify task status changes.
+非同期タスク（Midjourney 描画、動画生成など）に関して、Crazyrouter は Webhook コールバックによるタスク状態の変更通知をサポートしています。
 
-## Callback URL Configuration
+## コールバック URL の設定
 
-Specify the callback URL via the `notifyHook` parameter when submitting a task:
+タスク送信時に、`notifyHook` パラメータを使ってコールバック先アドレスを指定します：
 
 ```json
 {
@@ -19,16 +19,16 @@ Specify the callback URL via the `notifyHook` parameter when submitting a task:
 }
 ```
 
-## Callback Request Format
+## コールバックリクエスト形式
 
-Crazyrouter sends a POST request to your callback URL:
+Crazyrouter はあなたのコールバック URL へ POST リクエストを送信します：
 
 ```
 POST https://your-server.com/api/callback
 Content-Type: application/json
 ```
 
-### Midjourney Callback
+### Midjourney コールバック
 
 ```json
 {
@@ -45,7 +45,7 @@ Content-Type: application/json
 }
 ```
 
-### Video Generation Callback (Kling/Luma/Runway)
+### 動画生成コールバック（Kling/Luma/Runway）
 
 ```json
 {
@@ -62,15 +62,15 @@ Content-Type: application/json
 }
 ```
 
-## Callback Status Flow
+## コールバック状態遷移
 
 ```
-Submitted → NOT_START → IN_PROGRESS → SUCCESS / FAILURE
+提交 → NOT_START → IN_PROGRESS → SUCCESS / FAILURE
 ```
 
-A callback is triggered on each status change.
+状態が更新されるたびにコールバックが一度発生します。
 
-## Callback Server Examples
+## コールバックサーバーサンプル
 
 <CodeGroup>
 
@@ -85,11 +85,11 @@ def callback():
     task_id = data["id"]
     status = data["status"]
 
-    print(f"Task {task_id} status update: {status}")
+    print(f"任务 {task_id} 状态更新: {status}")
 
     if status == "SUCCESS":
         image_url = data.get("imageUrl")
-        print(f"Image URL: {image_url}")
+        print(f"图片地址: {image_url}")
 
     return jsonify({"success": True})
 
@@ -103,10 +103,10 @@ app.use(express.json());
 
 app.post('/api/callback', (req, res) => {
   const { id, status, imageUrl } = req.body;
-  console.log(`Task ${id} status: ${status}`);
+  console.log(`任务 ${id} 状态: ${status}`);
 
   if (status === 'SUCCESS') {
-    console.log(`Image: ${imageUrl}`);
+    console.log(`图片: ${imageUrl}`);
   }
 
   res.json({ success: true });
@@ -118,9 +118,9 @@ app.listen(8080);
 </CodeGroup>
 
 <Warning>
-  The callback URL must be publicly accessible. Ensure your server can receive POST requests and return a 200 status code within 5 seconds.
+  コールバック URL はインターネット上からアクセス可能である必要があります。サーバーが POST リクエストを受信でき、5秒以内に200ステータスコードで応答できることを確認してください。
 </Warning>
 
 <Note>
-  If a callback fails, the system retries up to 3 times with intervals of 10 seconds, 30 seconds, and 60 seconds.
+  コールバックに失敗した場合、システムは最大3回までリトライを行い、間隔はそれぞれ10秒、30秒、60秒となります。
 </Note>

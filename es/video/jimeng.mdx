@@ -1,0 +1,156 @@
+---
+title: "Jimeng"
+description: "Usa la API de Jimeng para generar videos"
+---
+> Contenido actualizado: 2026-06-09
+
+# Jimeng
+
+Jimeng es el servicio de generación de videos de ByteDance. Crazyrouter actualmente solo usa la ruta `/jimeng/*` para recomendaciones al cliente y no expone directamente la ruta upstream `Action + Version` como protocolo principal.
+
+## Alcance actualmente validado
+
+- `POST /jimeng/submit/videos` ha sido validado para enviar videos generados por `jimeng-video-3.0` a partir de texto
+- Entrada de imagen única y `recamera` de imagen única están validadas como utilizables
+- La cadena principal de muestras positivas actualmente estables está centrada en `1080P`
+- `720P / recamera` sigue siendo un seguimiento tipo carrier de `ch119`, y no se considera dentro del alcance de expansión pública del contrato principal en este momento
+- Los resultados de consulta devolverán preferentemente direcciones de medios ya archivadas por Crazyrouter, como `https://media.crazyrouter.com/...`
+- La ruta de recaptura de tareas candidatas `expired` ya está cerrada, pero los ejemplos con expiración natural todavía esperan una ventana de retención más larga en el backend; esto no afecta la conexión a la cadena principal
+
+## Enviar tareas de video
+
+```
+POST /jimeng/submit/videos
+```
+
+### Modelos recomendados actualmente
+
+- `jimeng-video-3.0`: modelo principal recomendado para clientes actualmente
+
+### Parámetros de solicitud
+
+| Parámetro | Tipo | Requerido | Descripción |
+|------|------|------|------|
+| `model` | string | Sí | Nombre del modelo para clientes, actualmente recomendado `jimeng-video-3.0` |
+| `prompt` | string | Requerido condicional | Recomendado rellenar para generación de video a partir de texto; también se recomienda añadir una descripción de acción a `recamera` |
+| `duration` | integer | No | Recomendado usar `5` o `10` |
+| `aspect_ratio` | string | No | Proporción, como `16:9`, `9:16` |
+| `image_url` | string | No | Entrada de imagen única por URL |
+| `binary_data_base64` | string[] | No | Entrada de imagen única codificada en Base64 |
+| `image_urls` | string[] | No | Compatible con entrada tipo array; actualmente no se debe considerar como compromiso público de múltiples imágenes de referencia |
+| `template_id` | string | No | Plantilla `recamera` de imagen única, como `handheld` |
+| `camera_strength` | string | No | Intensidad `recamera` de imagen única, como `weak`, `medium`, `strong` |
+| `req_key` | string | No | Usado para depuración o escenarios compatibles, no se recomienda transmitir explícitamente en accesos comunes |
+
+### Ejemplo de generación de video a partir de texto
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/jimeng/submit/videos \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "jimeng-video-3.0",
+    "prompt": "镜头缓慢推进，一只橘猫在窗边打哈欠，晨光柔和",
+    "duration": 5,
+    "aspect_ratio": "9:16"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/jimeng/submit/videos",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "jimeng-video-3.0",
+        "prompt": "镜头缓慢推进，一只橘猫在窗边打哈欠，晨光柔和",
+        "duration": 5,
+        "aspect_ratio": "9:16"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### Ejemplo de `recamera` de imagen única
+
+```json
+{
+  "model": "jimeng-video-3.0",
+  "prompt": "镜头自然手持推进，人物轻微转身",
+  "image_url": "https://example.com/portrait.png",
+  "duration": 5,
+  "aspect_ratio": "9:16",
+  "template_id": "handheld",
+  "camera_strength": "medium"
+}
+```
+
+### Ejemplo de respuesta cuando se envía con éxito
+
+```json
+{
+  "id": "2526913314163451526",
+  "task_id": "2526913314163451526",
+  "object": "video",
+  "model": "jimeng-video-3.0",
+  "status": "",
+  "progress": 0,
+  "created_at": 1774570545
+}
+```
+
+---
+
+## Consultar tareas
+
+```
+GET /jimeng/fetch/{task_id}
+```
+
+```bash cURL
+curl https://api.crazyrouter.com/jimeng/fetch/2526913314163451526 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Ejemplo de respuesta (completado)
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "error": null,
+    "format": "mp4",
+    "metadata": null,
+    "status": "succeeded",
+    "task_id": "2526913314163451526",
+    "url": "https://media.crazyrouter.com/task-artifacts/2026/03/27/51/generate/2526913314163451526.mp4"
+  }
+}
+```
+
+### Estado de la tarea
+
+| Estado | Descripción |
+|------|------|
+| `queued` | Enviado o en cola |
+| `processing` | Generando |
+| `succeeded` | Completado, `url` se puede recuperar directamente |
+| `failed` | Error final |
+
+<Note>
+  Los documentos públicos actualmente solo garantizan entrada de imagen única y `recamera` de imagen única. No escribas erróneamente `image_urls` como si fuera un contrato principal de múltiples imágenes de referencia de Jimeng, ni uses `frames` como parámetro recomendado público; valores de `frames` no soportados podrían fallar tardíamente en la etapa del algoritmo upstream.
+</Note>
+
+<Note>
+  Los documentos públicos están actualmente limitados a las áreas validadas y estables: `jimeng-video-3.0 + texto a vídeo / entrada de una imagen / recamera con una imagen`. Si `720P / recamera` se abre más, depende de la revisión posterior de muestras tipo carrier, no de si el código del repositorio aún puede seguir exponiéndolo.
+</Note>

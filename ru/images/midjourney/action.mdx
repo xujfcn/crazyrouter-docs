@@ -1,29 +1,29 @@
 ---
-title: "Execute Actions"
-description: "Execute Midjourney follow-up actions: upscale, variation, blend, describe, and more"
+title: "Выполнение операций"
+description: "Выполнение последующих операций Midjourney: увеличение, вариации, смешивание, описание и др."
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Execute Actions
+# Выполнение операций
 
-## Action - Upscale / Variation
+## Action - Увеличение / Вариация
 
 ```
 POST /mj/submit/action
 ```
 
-Execute follow-up actions on a completed Imagine task, such as Upscale, Variation, etc.
+Выполнение следующих действий для завершённого задания Imagine, таких как увеличение (Upscale), вариация (Variation) и др.
 
-### Request Parameters
+### Параметры запроса
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `taskId` | string | Yes | Original task ID |
-| `customId` | string | Yes | The `customId` of the action button, obtained from the task's `buttons` field |
-| `notifyHook` | string | No | Callback URL |
-| `state` | string | No | Custom state |
+| Параметр | Тип | Обязательный | Описание |
+|------|------|------|------|
+| `taskId` | string | Да | ID исходного задания |
+| `customId` | string | Да | `customId` кнопки действия, получение из поля `buttons` задания |
+| `notifyHook` | string | Нет | Адрес обратного вызова |
+| `state` | string | Нет | Пользовательский статус |
 
-### Request Example
+### Пример запроса
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/mj/submit/action \
@@ -35,12 +35,12 @@ curl -X POST https://api.crazyrouter.com/mj/submit/action \
   }'
 ```
 
-### Response Example
+### Пример ответа
 
 ```json
 {
   "code": 1,
-  "description": "Submitted successfully",
+  "description": "提交成功",
   "result": "task_action_001",
   "properties": {}
 }
@@ -48,25 +48,25 @@ curl -X POST https://api.crazyrouter.com/mj/submit/action \
 
 ---
 
-## Blend - Image Blending
+## Blend - Смешивание изображений
 
 ```
 POST /mj/submit/blend
 ```
 
-Blend multiple images to generate a new image.
+Смешивание нескольких изображений для создания нового.
 
-### Request Parameters
+### Параметры запроса
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `botType` | string | No | `MID_JOURNEY` (default) or `NIJI_JOURNEY` |
-| `base64Array` | array | Yes | Array of Base64-encoded images, 2-5 images |
-| `dimensions` | string | No | Output dimensions: `PORTRAIT`, `SQUARE`, `LANDSCAPE` |
-| `notifyHook` | string | No | Callback URL |
-| `state` | string | No | Custom state |
+| Параметр | Тип | Обязательный | Описание |
+|------|------|------|------|
+| `botType` | string | Нет | `MID_JOURNEY` (по умолчанию) либо `NIJI_JOURNEY` |
+| `base64Array` | array | Да | Массив изображений в кодировке Base64, 2-5 шт. |
+| `dimensions` | string | Нет | Размер вывода: `PORTRAIT`, `SQUARE`, `LANDSCAPE` |
+| `notifyHook` | string | Нет | Адрес обратного вызова |
+| `state` | string | Нет | Пользовательский статус |
 
-### Request Example
+### Пример запроса
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/mj/submit/blend \
@@ -81,36 +81,36 @@ curl -X POST https://api.crazyrouter.com/mj/submit/blend \
   }'
 ```
 
-### Response Example
+### Пример ответа
 
 ```json
 {
   "code": 1,
-  "description": "Submitted successfully",
+  "description": "提交成功",
   "result": "task_blend_001"
 }
 ```
 
 ---
 
-## Describe - Image Description
+## Describe - Описание изображения
 
 ```
 POST /mj/submit/describe
 ```
 
-Upload an image and let Midjourney generate corresponding prompt descriptions.
+Загрузка изображения для генерации соответствующего описания подсказки Midjourney.
 
-### Request Parameters
+### Параметры запроса
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `botType` | string | No | `MID_JOURNEY` (default) or `NIJI_JOURNEY` |
-| `base64` | string | Yes | Base64-encoded image |
-| `notifyHook` | string | No | Callback URL |
-| `state` | string | No | Custom state |
+| Параметр | Тип | Обязательный | Описание |
+|------|------|------|------|
+| `botType` | string | Нет | `MID_JOURNEY` (по умолчанию) либо `NIJI_JOURNEY` |
+| `base64` | string | Да | Изображение закодированное в Base64 |
+| `notifyHook` | string | Нет | Адрес обратного вызова |
+| `state` | string | Нет | Пользовательский статус |
 
-### Request Example
+### Пример запроса
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/mj/submit/describe \
@@ -123,23 +123,23 @@ curl -X POST https://api.crazyrouter.com/mj/submit/describe \
 
 ---
 
-## Modal - Dialog Confirmation
+## Modal - Подтверждение в всплывающем окне
 
 ```
 POST /mj/submit/modal
 ```
 
-Submit a Midjourney modal confirmation action (e.g. Region Vary and other operations requiring secondary confirmation).
+Отправка подтверждения во всплывающем окне Midjourney (для операций как Region Vary, требующих дополнительного подтверждения).
 
-### Request Parameters
+### Параметры запроса
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `taskId` | string | Yes | Original task ID |
-| `prompt` | string | No | Prompt in the modal dialog |
-| `maskBase64` | string | No | Base64-encoded mask image |
+| Параметр | Тип | Обязательный | Описание |
+|------|------|------|------|
+| `taskId` | string | Да | ID исходного задания |
+| `prompt` | string | Нет | Подсказка во всплывающем окне |
+| `maskBase64` | string | Нет | Маска изображения в кодировке Base64 |
 
-### Request Example
+### Пример запроса
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/mj/submit/modal \
@@ -152,5 +152,5 @@ curl -X POST https://api.crazyrouter.com/mj/submit/modal \
 ```
 
 <Note>
-  All actions return a new task ID after submission. Use the [Query Task Status](/ru/images/midjourney/query) endpoint to get results.
+  После отправки всех операций возвращается новый ID задания, результат можно получить через интерфейс [проверки статуса задания](/ru/images/midjourney/query).
 </Note>

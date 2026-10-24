@@ -1,8 +1,8 @@
 ---
 title: "Gemini Image Understanding"
-description: "Gemini native image understanding documented from successful Crazyrouter request patterns on 2026-04-08"
+description: "A summary of Gemini's native image understanding, based on successful requests to Crazyrouter as of 2026-04-08"
 ---
-> Last updated: 2026-06-06
+> Content updated: 2026-06-09
 
 # Gemini Image Understanding
 
@@ -10,11 +10,11 @@ description: "Gemini native image understanding documented from successful Crazy
 POST /v1beta/models/{model}:generateContent
 ```
 
-As of `2026-04-08`, successful Crazyrouter and local `:4000` retests show:
+As of `2026-04-08`, repeated local testing between Crazyrouter and `4000` port shows:
 
-- `gemini-3.1-pro` can reliably read images through `inlineData`
-- remote image URLs through `fileData.fileUri` have shown repeated fetch and upstream-body failures
-- the primary recommended request shape for image understanding is therefore `inlineData`
+- `gemini-3.1-pro` can reliably read images through `inlineData` and return text descriptions
+- Using remote image URLs as `fileData.fileUri` has encountered issues such as fetch failures and abnormal upstream responses across various channels
+- Therefore, the recommended method for image understanding in this document is to use `inlineData`
 
 ---
 
@@ -35,7 +35,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
             }
           },
           {
-            "text": "Describe this image in one short sentence."
+            "text": "请用一句中文描述这张图片里有什么。"
           }
         ]
       }
@@ -43,7 +43,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Observed production response shape:
+The key response format seen in production:
 
 ```json
 {
@@ -52,7 +52,7 @@ Observed production response shape:
       "content": {
         "parts": [
           {
-            "text": "This image shows a smooth multi-color gradient background."
+            "text": "这张图片展示了多种鲜艳色彩平滑过渡的渐变效果。"
           }
         ]
       }
@@ -61,20 +61,20 @@ Observed production response shape:
 }
 ```
 
-## Request Notes
+## Request Key Points
 
-- Prefer `inlineData` for image understanding
-- Keep `mimeType` aligned with the actual file format, such as `image/png` or `image/jpeg`
-- Put raw Base64 into `data` without the `data:image/...;base64,` prefix
-- If you only have a remote image URL, do not treat it as the current primary Gemini image-understanding path on Crazyrouter
+- For image understanding, give priority to `inlineData`
+- `mimeType` should match the actual image format, such as `image/png` or `image/jpeg`
+- For `data`, only fill in the Base64 content; do not include the `data:image/...;base64,` prefix
+- If you only have a remote image URL, do not use it as the preferred main pathway for Gemini image understanding at this time
 
 <Note>
-  For video understanding, see [Gemini Video Understanding](/en/chat/gemini/video). For audio understanding, see [Gemini Audio Understanding](/en/chat/gemini/audio).
+  If you want to work with video understanding, see [Gemini Video Understanding](/en/chat/gemini/video). If you want to work with audio understanding, see [Gemini Audio Understanding](/en/chat/gemini/audio).
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## Related on crazyrouter.com
+## Related Pages
 
-- [Gemini 2.5 Flash price comparison: list vs Azure / Bedrock / Vertex vs Crazyrouter](https://crazyrouter.com/en/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash model page: live price, real samples, code](https://crazyrouter.com/en/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash-Lite price comparison: list vs Azure / Bedrock / Vertex vs Crazyrouter](https://crazyrouter.com/en/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash Price Comparison: Official / Azure / Bedrock / Vertex and Crazyrouter](https://crazyrouter.com/en/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash Model Page: live prices, real examples, and sample code](https://crazyrouter.com/en/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash-Lite Price Comparison: Official / Azure / Bedrock / Vertex and Crazyrouter](https://crazyrouter.com/en/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)

@@ -1,0 +1,192 @@
+---
+title: "Инструкция по подключению LiteLLM"
+description: "Подключение Crazyrouter к AI-шлюзу LiteLLM: экспорт моделей и цен, запуск прокси, проверка запросов, изучение бюджетов команды и границ совместимости"
+---
+> Обновление содержания: 2026-10-24
+
+LiteLLM может использоваться как единый корпоративный AI-шлюз: приложения подключаются к LiteLLM, а LiteLLM обращается к Crazyrouter. Настройку проектов, отделов, виртуальных ключей, бюджетов и политики аудита необходимо выполнять в собственной инсталляции LiteLLM — они не включаются автоматически только из-за использования Crazyrouter API Key.
+
+```text
+Application → LiteLLM Proxy → Crazyrouter → Model
+```
+
+## Архитектура подключения и подготовка
+
+Подготовьте Python 3.11, отдельный ключ Crazyrouter для вывода, и модели, доступные по этому ключу. Этот документ протестирован на **LiteLLM 1.106.2**, что не гарантирует актуальность версии. В качестве примера используются четыре модели: `claude-opus-5-5`, `gpt-6-astra`, `glm-5.3`, `deepseek-v4.1-flash`; замените на доступные вам модели.
+
+<Warning>
+`CRAZYROUTER_API_KEY` — это ключ для вызовов Crazyrouter от LiteLLM; `LITELLM_MASTER_KEY` — ваш административный ключ LiteLLM. Не смешивайте их и не раздавайте административный ключ отделам или конечным пользователям. Реальные ключи хранятся только в серверном окружении или менеджере ключей; не размещайте их в Git, документах или на фронте.
+</Warning>
+
+## 1. Установка и переменные среды
+
+В новом рабочем каталоге выполните следующие команды. Переменные среды действуют только для текущего терминала; если шлюз уже настроен, не генерируйте главные ключи повторно, используйте текущий безопасный. При деплойменте контейнера нужно передавать переменные внутрь контейнера. На Windows, если виртуальное окружение не активируется — запустите `.venv\Scripts` напрямую с `python.exe` и `litellm.exe`.
+
+<CodeGroup>
+```bash macOS / Linux
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install "litellm[proxy]==1.106.2"
+read -rsp 'Crazyrouter API key: ' CRAZYROUTER_API_KEY; echo
+export CRAZYROUTER_API_KEY
+export LITELLM_MASTER_KEY="$(python -c 'import secrets; print("sk-" + secrets.token_hex(32))')"
+```
+
+```powershell Windows PowerShell
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install "litellm[proxy]==1.106.2"
+$secret = Read-Host 'Crazyrouter API key' -AsSecureString
+$env:CRAZYROUTER_API_KEY = [System.Net.NetworkCredential]::new('', $secret).Password
+$env:LITELLM_MASTER_KEY = python -c "import secrets; print('sk-' + secrets.token_hex(32))"
+```
+</CodeGroup>
+
+## 2. Экспорт конфигурации и запуск
+
+Используйте авторизованный `GET /v1/litellm/config` для получения списка моделей и актуальных цен для текущего ключа. Ответ — это обёрнутый объект: **сохраняйте только `config` как конфигурацию LiteLLM**, не вставляйте весь ответ целиком. Сохраните скрипт как `export_config.py`, используйте формат JSON (также корректный YAML), сохраняйте цены `model_info` с ссылкой на переменные среды, не записывайте реальные ключи.
+
+```python export_config.py
+import json
+import os
+from pathlib import Path
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode
+from urllib.request import HTTPRedirectHandler, Request, build_opener
+
+
+class NoRedirect(HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+key = os.environ["CRAZYROUTER_API_KEY"]
+if not key:
+    raise SystemExit("CRAZYROUTER_API_KEY is empty")
+query = urlencode({
+    "provider": "openai",
+    "models": "claude-opus-5-5,gpt-6-astra,glm-5.3,deepseek-v4.1-flash",
+})
+request = Request(
+    "https://api.crazyrouter.com/v1/litellm/config?" + query,
+    headers={"Authorization": "Bearer " + key,
+             "User-Agent": "Crazyrouter-LiteLLM-Setup/1.0"},
+)
+try:
+    with build_opener(NoRedirect).open(request, timeout=30) as response:
+        payload = json.load(response)
+except HTTPError as error:
+    raise SystemExit(f"Export failed (HTTP {error.code}); no file written.")
+except URLError:
+    raise SystemExit("Export connection failed; no file written.")
+
+config = payload["config"]
+if not config.get("model_list"):
+    raise SystemExit("Export contains no models")
+config.setdefault("litellm_settings", {})["drop_params"] = False
+config.setdefault("general_settings", {})["master_key"] = "os.environ/LITELLM_MASTER_KEY"
+output = json.dumps(config, ensure_ascii=False, indent=2)
+if key in output:
+    raise SystemExit("Refusing to write a secret")
+with Path("crazyrouter.config.json").open("x", encoding="utf-8") as handle:
+    handle.write(output + "\n")
+print("Saved configuration. Import/reload it in LiteLLM explicitly.")
+```
+
+```shell
+python export_config.py
+litellm --config ./crazyrouter.config.json --host 127.0.0.1 --port 4100
+```
+
+<Note>
+Скрипт не позволит перезаписать существующий файл; при обновлении сначала создайте резервную копию и сравните конфигурации, затем объедините с актуальной настройкой шлюза и перезапустите её явно. `4100` — пример порта, если он занят, измените его и в команде запуска, и в адресе проверки. Команда слушает только на localhost, не обновляет или перезапускает ваши сервисы.
+</Note>
+
+## 3. Проверка локального шлюза
+
+Оставьте терминал прокси активным, в другом терминале с тем же окружением безопасно установите **тот же** `LITELLM_MASTER_KEY`, не генерируя новый ключ. Сохраните скрипт ниже как `verify_proxy.py`. Данная административная smoke-тестовая проверка приведёт к обычному расходу модели; для ежедневных задач используйте ограниченные виртуальные ключи.
+
+```python verify_proxy.py
+import json
+import os
+from urllib.request import Request, urlopen
+
+base = "http://127.0.0.1:4100/v1"
+headers = {"Authorization": "Bearer " + os.environ["LITELLM_MASTER_KEY"],
+           "Content-Type": "application/json"}
+
+with urlopen(Request(base + "/models", headers=headers), timeout=30) as response:
+    models = json.load(response)["data"]
+assert any(model["id"] == "gpt-6-astra" for model in models), "Model not registered"
+
+body = {"model": "gpt-6-astra", "max_tokens": 1024,
+        "messages": [{"role": "user", "content": "Reply with exactly OK."}]}
+with urlopen(Request(base + "/chat/completions", headers=headers,
+                     data=json.dumps(body).encode()), timeout=120) as response:
+    result = json.load(response)
+choice = result["choices"][0]
+assert choice["finish_reason"] == "stop", "Incomplete response"
+assert (choice["message"].get("content") or "").strip() == "OK", "Check final answer"
+assert result.get("usage", {}).get("total_tokens", 0) > 0, "Missing usage"
+print("PASS: model registration, final answer, finish reason, usage")
+```
+
+```shell
+python verify_proxy.py
+```
+
+Это минимальный smoke-тест, не полноценная сертификация совместимости. Для каждой модели дополнительно проверьте обычные и потоковые запросы: проверьте финальный текст, причину завершения, SSE `[DONE]` и итоговое usage; тесты инструментов должны проверять параметры и корректную передачу результатов tool. HTTP 200, текст размышления или JSON/Markdown в ограждении не считаются успешным прохождением.
+
+## 4. Протокол Claude Native (по необходимости)
+
+По умолчанию экспорт использует `openai/<model>`, `api_base` для `https://api.crazyrouter.com/v1`. Для поддержки nativные свойства Claude, такие как кеширование или thinking, экспортируйте отдельно с помощью `provider=anthropic&models=claude-opus-5-5`, используйте `anthropic/<model>` и базовый адрес `https://api.crazyrouter.com`, не добавляйте `/v1` или `/chat/completions`.
+
+```yaml
+model_list:
+  - model_name: claude-native
+    litellm_params:
+      model: anthropic/claude-opus-5-5
+      api_base: https://api.crazyrouter.com
+      api_key: os.environ/CRAZYROUTER_API_KEY
+litellm_settings:
+  drop_params: false
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+```
+
+Пример выше демонстрирует только структуру подключения, без указания цен. Для реальной работы объедините `model_info` из native-экспорта с основной конфигурацией. Если адаптер OpenAI зарегистрирован одновременно, используйте отдельный `model_name`, например `claude-native`, для native-экспорта; вызывайте их через это алиас, чтобы исключить смешивание маршрутизации одноимённых моделей.
+
+## Совместимость и обработка ошибок
+
+- Сохраняйте `drop_params: false`, не скрывайте неподдерживаемые параметры.
+- Проверено: Claude `json_schema`; `json_object` чётко не поддерживается и не преобразуется в гарантированный другой формат вывода.
+- На протестированном пути Claude, жёстко указанные tools / `required` явно отклоняются: HTTP `400`, прямой код ошибки `unsupported_forced_tool_choice`. Для выбора tool в режиме auto измените клиентский запрос на использование `tool_choice: "auto"`; шлюз не будет автоматически пытаться вызвать tool по принуждению.
+- При отказе клиент получит фиксированное пояснение на английском, без передачи внутренней конфигурации или ключей. OpenAI-адаптер LiteLLM 1.106.2 сохраняет английское сообщение, но упаковует код ошибки как `"400"`; сравнивайте не по оригинальному коду ошибки.
+- TTL для `5m` / `1h` в `cache_control` для Claude можно передавать напрямую; режим 5m на создание и чтение проверен, режим 1h протестирован только на cold write, не гарантирует кэширование или чтение спустя час.
+- Способности модели, её доступность, визуальные функции, длинный контекст, отказоустойчивость и корпоративные бюджеты необходимо протестировать отдельно — выводы по имени модели или этой инструкции не допустимы.
+
+## Команды, бюджеты и безопасность в продакшене
+
+- Создавайте команды и ограниченные виртуальные ключи LiteLLM для проектов/отделов, задавайте права на модели, бюджеты и лимиты скорости. Не делитесь главным ключом.
+- Соблюдайте рекомендации LiteLLM по настройке базы данных, аутентификации, правам доступа и постоянству. Локальный запуск без БД проверяет только вывод; бюджет не применяется. Функции и правила авторизации определяются текущей версией.
+- Тестируйте отдельные сценарии: отказ в доступе к чужим моделям, исчерпание бюджета, отзыв ключа, лимитирование и аудит. Защищайте логи с подсказками и персональными данными, явно ограничивайте срок хранения.
+- Внешние подключения должны быть через HTTPS и контроль доступа; не открывайте демо или админ API напрямую.
+- Экспортированная цена — это снимок. После изменения цен или скидок экспортируйте, импортируйте и перезапустите конфигурацию, автоматическая публикация не предусмотрена. Расчёты стоимости LiteLLM не равны итоговому счёту Crazyrouter, сверяйте данные регулярно.
+
+## Частые вопросы
+
+| Явление | Куда смотреть |
+| --- | --- |
+| Экспорт вернул 401 | Используйте ключ Crazyrouter для вывода, а не главный ключ LiteLLM или ключ сессии консоли. |
+| Экспорт вернул 404 | Проверьте ID модели и разрешённые для текущего ключа модели. |
+| Экспорт вернул 422 | Убедитесь, что провайдер и цена корректны; не подставляйте случайные фиксированные цены. |
+| LiteLLM вернул 401 | При вызове downstream используйте главный ключ LiteLLM (для локальных тестов) или валидный виртуальный ключ. |
+| Модель не зарегистрирована / переменная среды отсутствует | Проверьте, что `config` сохранён, переменные среды переданы в процесс прокси/контейнер и конфигурация перезапущена. |
+| Принудительный tool дал 400 | Выберите `auto` явно или используйте модель с подтверждённой поддержкой соответствующего инструментального / thinking-конфига. |
+| Бюджет не ограничивает запросы | Проверьте настройки БД, команды/виртуальные ключи, проведите реальный тест на отказ по бюджету. |
+
+## Официальные ссылки
+
+- [LiteLLM Proxy configuration](https://docs.litellm.ai/docs/proxy/configs)
+- [LiteLLM virtual keys](https://docs.litellm.ai/docs/proxy/virtual_keys)
+- [LiteLLM budgets](https://docs.litellm.ai/docs/proxy/users)

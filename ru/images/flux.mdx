@@ -1,27 +1,27 @@
 ---
 title: "Flux"
-description: "Flux models are not currently exposed on the Crazyrouter pricing page"
+description: "Модели Flux в настоящее время не отображаются на странице с тарифами Crazyrouter"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-10-12
 
 # Flux
 
 <Warning>
-  The current Crazyrouter pricing page does not expose a directly callable Flux `model_name`. This page no longer provides Flux request examples, and old `flux-*` model IDs should not be used in production configs.
+  На текущей странице тарифов Crazyrouter отсутствует возможность напрямую вызвать Flux `model_name`. На этой странице больше не приводятся примеры запросов Flux, и устаревшие идентификаторы моделей `flux-*` не рекомендуется использовать в производственных настройках.
 </Warning>
 
-## Current Alternatives
+## Актуальные альтернативы
 
-For image generation or editing, prefer models that are currently exposed on the pricing page:
+Для генерации или редактирования изображений рекомендуется выбирать модели, которые сейчас доступны на странице с тарифами:
 
-| Use case | Suggested models |
-|----------|------------------|
-| OpenAI Images | `gpt-image-2` |
-| Gemini Images | `nano-banana`, `nano-banana-2`, `nano-banana-pro` |
-| Grok Images | `grok-4-image` |
-| Qwen Images | `qwen-image-2.0`, `qwen-image-plus`, `qwen-image-max` |
-| Doubao Images | `doubao-seedream-4-5`, `doubao-seedream-5-0` |
+| Сценарий использования | Рекомендуемые модели |
+|-----------------------|-----------------------|
+| OpenAI Images         | `gpt-image-2`       |
+| Gemini Images         | `nano-banana`, `nano-banana-2`, `nano-banana-pro` |
+| Grok Images           | `grok-4-image`       |
+| Qwen Images           | `qwen-image-2.0`, `qwen-image-plus`, `qwen-image-max` |
+| Doubao Images         | `doubao-seedream-4-5`, `doubao-seedream-5-0` |
 
-## How To Confirm
+## Как проверить
 
-Use `https://crazyrouter.com/pricing` and the current model list returned by `GET /v1/models` as the source of truth. Only publicly visible models that can be submitted successfully should be used as documentation examples or customer-facing defaults.
+Используйте `https://crazyrouter.com/pricing` и актуальный список моделей, возвращаемый `GET /v1/models`, как достоверный источник информации. Для примеров документации и значений по умолчанию для клиентов используйте только публично видимые модели, для которых успешно проходят отправки запросов.

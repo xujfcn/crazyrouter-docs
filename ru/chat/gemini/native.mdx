@@ -1,33 +1,33 @@
 ---
-title: "Gemini Native Format"
-description: "Production-revalidated Gemini 3 Pro native API usage on Crazyrouter"
+title: "Gemini родной формат"
+description: "На основе повторной проверки в производственной среде, используется родная API функция Gemini 3 Pro"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Gemini Native Format
+# Gemini родной формат
 
-This page only documents Gemini Native behavior that was revalidated against Crazyrouter production on `2026-03-22`.
+На этой странице записаны только те случаи использования Gemini Native, которые `2026-03-22` были проверены на Crazyrouter в производственной среде.
 
-Current primary example model:
+Текущая основная модель для демонстрации:
 
 - `gemini-3.1-pro`
 
-Dedicated multimodal pages based on successful request patterns:
+Специально оформленные мультимодальные страницы по успешным запросам:
 
-- [Gemini Image Understanding](/ru/chat/gemini/vision)
-- [Gemini Video Understanding](/ru/chat/gemini/video)
-- [Gemini Audio Understanding](/ru/chat/gemini/audio)
+- [Gemini понимание изображений](/ru/chat/gemini/vision)
+- [Gemini понимание видео](/ru/chat/gemini/video)
+- [Gemini понимание аудио](/ru/chat/gemini/audio)
 
-## Endpoints
+## Эндпоинт
 
 ```text
 POST /v1beta/models/{model}:generateContent
 POST /v1beta/models/{model}:streamGenerateContent
 ```
 
-## Authentication
+## Аутентификация
 
-Pass the API key through the URL parameter:
+Передавайте API Key через параметр URL:
 
 ```text
 ?key=YOUR_API_KEY
@@ -35,7 +35,7 @@ Pass the API key through the URL parameter:
 
 ---
 
-## Basic text generation
+## Основная генерация текста
 
 ```bash cURL
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
@@ -57,7 +57,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Verified response shape:
+Ключевые структуры, фактически возвращаемые в текущем производстве:
 
 ```json
 {
@@ -78,9 +78,9 @@ Verified response shape:
 
 ---
 
-## Streaming generation
+## Генерация потоком
 
-This recheck confirmed that `streamGenerateContent` returns incremental SSE output.
+В данной итерации подтверждено, что `streamGenerateContent` может отдавать инкрементальные данные через SSE.
 
 ```bash cURL
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:streamGenerateContent?key=YOUR_API_KEY&alt=sse" \
@@ -99,7 +99,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:streamGenerateCon
   }'
 ```
 
-Observed SSE chunk shape:
+Получаемые в производстве SSE-фрагменты имеют форму, аналогичную:
 
 ```text
 data: {"candidates":[{"content":{"parts":[{"text":"...","thoughtSignature":"..."}]}}]}
@@ -107,9 +107,9 @@ data: {"candidates":[{"content":{"parts":[{"text":"...","thoughtSignature":"..."
 
 ---
 
-## Structured outputs
+## Структурированный вывод
 
-This production recheck confirmed that `responseMimeType + responseSchema` works:
+В производственной среде подтверждено, что `responseMimeType + responseSchema` применим:
 
 ```bash cURL
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
@@ -139,7 +139,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Verified production output:
+Проверенный производственный ответ:
 
 ```json
 {"city":"Tokyo","country":"Japan"}
@@ -149,7 +149,7 @@ Verified production output:
 
 ## Google Search
 
-This production recheck confirmed that the `googleSearch` tool works:
+В производственной среде подтверждено, что инструмент `googleSearch` работоспособен:
 
 ```bash cURL
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
@@ -173,7 +173,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Verified fields include:
+Ключевые поля, возвращаемые в текущем производстве:
 
 - `groundingMetadata.webSearchQueries`
 - `groundingMetadata.groundingChunks`
@@ -183,7 +183,7 @@ Verified fields include:
 
 ## Thinking
 
-This production recheck confirmed that `thinkingConfig` works:
+В производственной среде подтверждено, что `thinkingConfig` применим:
 
 ```bash cURL
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
@@ -208,7 +208,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Verified marker:
+Ключевые проверочные маркеры текущей производственной среды:
 
 ```json
 {
@@ -220,27 +220,27 @@ Verified marker:
 
 ---
 
-## Common `generationConfig` fields
+## Часто используемые поля generationConfig
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `maxOutputTokens` | integer | Maximum output tokens |
-| `temperature` | number | Sampling temperature |
-| `responseMimeType` | string | MIME type for structured outputs |
-| `responseSchema` | object | Structured output constraint |
-| `thinkingConfig` | object | Thinking mode configuration |
+| Поле | Тип | Описание |
+|------|------|----------|
+| `maxOutputTokens` | integer | Максимальное количество токенов вывода |
+| `temperature` | number | Температура семплирования |
+| `responseMimeType` | string | MIME-тип для структурированного вывода |
+| `responseSchema` | object | Ограничения для структурированного вывода |
+| `thinkingConfig` | object | Конфигурация режима мышления |
 
 <Note>
-  Gemini Native uses the `contents[].parts[]` structure rather than OpenAI-style `messages`. If you want an OpenAI-style route instead, use [Gemini OpenAI-Compatible Format](/ru/chat/gemini/openai-compat).
+  Gemini Native использует структуру `contents[].parts[]`, а не структуру OpenAI `messages`. Если вы хотите использовать стиль OpenAI, пожалуйста, перейдите к [Gemini OpenAI совместимый формат](/ru/chat/gemini/openai-compat).
 </Note>
 
-Related pages:
+Связанные страницы:
 
-- [Official Model Pricing Methods](/ru/reference/official-pricing-methods)
+- [Официальная система моделирования цен](/ru/reference/official-pricing-methods)
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [Gemini 2.5 Flash: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash-Lite: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)
+- [Сравнение цен Gemini 2.5 Flash: официальные / Azure / Bedrock / Vertex с Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Страница модели Gemini 2.5 Flash: актуальные цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Сравнение цен Gemini 2.5 Flash-Lite: официальные / Azure / Bedrock / Vertex с Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)

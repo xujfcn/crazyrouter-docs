@@ -1,37 +1,38 @@
 ---
-title: "Video Generation Alias"
-description: "POST /v1/video/generations compatibility alias for clients that already depend on this video-generation path"
+title: "動画生成エイリアス"
+description: "POST /v1/video/generations 互換性のあるエイリアスインターフェース。該当するパスに依存したクライアントが動画生成タスクを提出できるように提供します。"
 ---
-> 更新日: 2026-06-07
+> 内容更新日: 2026-06-30
 
-# Video Generation Alias
+
+# 動画生成エイリアス
 
 ```
 POST /v1/video/generations
 ```
 
-This is a Crazyrouter compatibility alias for clients or middleware that are already pinned to the `/v1/video/generations` path.
+これはCrazyrouterが提供する互換性エイリアスルートで、`/v1/video/generations`パスに固定利用する動画クライアントやミドルウェアに適しています。
 
-## Authentication
+## 認証
 
 ```http
 Authorization: Bearer YOUR_API_KEY
 ```
 
-## When To Use It
+## いつ使用するべきか
 
-- your client is hardcoded to `/v1/video/generations`
-- you are migrating an older video workflow and do not want to change the path
-- you need to preserve compatibility with an existing third-party request shape
-- you want to submit Wan text-to-video models such as `wan2.5-t2v-preview` or `wan2.2-t2v-plus`
+- クライアントが既に`/v1/video/generations`に書き込まれている
+- 履歴動画ワークフローを移行中で、呼び出しパスを変更したくない
+- サードパーティで既に公開されたリクエストフォーマットとの互換が必要
+- Wan文生動画を提出したい場合、例：`wan2.5-t2v-preview`や`wan2.2-t2v-plus`
 
-For new integrations, prefer:
+新規接続開発では、以下を優先してください：
 
-- Wan text-to-video: use this page's `POST /v1/video/generations`
-- Veo / unified-video workflows: use `POST /v1/video/create` with `veo-3.1-fast` or `veo-3.1-quality`
-- OpenAI-compatible video workflows: use `POST /v1/videos`
+- Wan文生動画：本ページの`POST /v1/video/generations`を使用
+- Veo／統一動画ワークフロー：`POST /v1/video/create`を使用し、`veo-3.1-fast`または`veo-3.1-quality`を提出
+- OpenAI公式互換動画ワークフロー：`POST /v1/videos`を使用
 
-## Minimal Request Example
+## 最小リクエスト例
 
 ### Wan 2.2 T2V Plus
 
@@ -41,13 +42,13 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "wan2.2-t2v-plus",
-    "prompt": "A calm cinematic shot of clouds over mountains",
+    "prompt": "一段平静的电影感山间云海镜头",
     "seconds": "5",
     "size": "480P"
   }'
 ```
 
-### Generic Minimal Example
+### 一般的な最小例
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/video/generations   -H "Content-Type: application/json"   -H "Authorization: Bearer YOUR_API_KEY"   -d '{
@@ -56,19 +57,20 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations   -H "Content-Type
   }'
 ```
 
-## Typical Success Response
+## 典型的成功レスポンス
 
 ```json
 {
   "id": "video_task_abc123",
+  "task_id": "video_task_abc123",
   "status": "processing",
   "status_update_time": 1709123456
 }
 ```
 
-## Error Response Verified Locally
+## ローカル検証済みエラー応答
 
-On the local `http://127.0.0.1:4000` environment, this route was verified to exist. When the model is temporarily unavailable, it returns a business error rather than `404`:
+ローカル`http://127.0.0.1:4000`環境でこのルートは既に存在が検証されています。モデルが一時的に利用できない場合は、`404`ではなく業務エラーが返されます：
 
 ```json
 {
@@ -78,21 +80,21 @@ On the local `http://127.0.0.1:4000` environment, this route was verified to exi
 }
 ```
 
-## Notes
+## 注意事項
 
-- request fields vary by video model and upstream capability
-- model availability depends on the token whitelist and current upstream state
-- Wan text-to-video uses `model`, `prompt`, `seconds`, and `size`; the verified `wan2.2-t2v-plus` combinations are `seconds: "5"` with `size: "480P"` or `"1080P"`.
-- Do not submit `wan2.2-t2v-plus` to `/alibailian/api/v1/services/aigc/video-generation/video-synthesis`.
-- after task creation, query status with `GET /v1/video/generations/{task_id}`
+- リクエストボディの項目は、具体的な動画モデルや上流機能によって変わります
+- `model`の可用性は現在のトークンホワイトリストと上流チャネルの状態に依存します
+- Wan文生動画は`model`、`prompt`、`seconds`、`size`を使用します。`wan2.2-t2v-plus`の検証済み組み合わせは`seconds: "5"`、`size: "480P"`、または`"1080P"`です。
+- `wan2.2-t2v-plus`は`/alibailian/api/v1/services/aigc/video-generation/video-synthesis`に提出しないでください。
+- タスク作成が成功したら、引き続き`GET /v1/video/generations/{task_id}`を呼び出して状態を確認できます
 
 <Note>
-This route is a compatibility alias. It does not guarantee that every video model shares the exact same body schema. Wan text-to-video currently uses this route; Veo and unified-video workflows should use `/v1/video/create` with `veo-3.1-fast` or `veo-3.1-quality`.
+このルートは互換エイリアスであり、すべての動画モデルが完全に同じリクエスト項目を共有しているわけではありません。Wan文生動画は現在、本ページのルート利用を推奨します。Veoや統一動画ワークフローの場合は`/v1/video/create`を利用し、`veo-3.1-fast`または`veo-3.1-quality`を提出してください。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [Wan 2.2 T2V Plus モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/alibaba/wan2-2-t2v-plus?utm_source=docs&utm_medium=related)
-- [GPT Image 1.5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [Alibaba Cloud の全モデルと料金](https://crazyrouter.com/en/models/alibaba?utm_source=docs&utm_medium=related)
+- [Wan 2.2 T2V Plus モデルページ：リアルタイム価格、実際のサンプル、呼び出しコード](https://crazyrouter.com/ja/models/alibaba/wan2-2-t2v-plus?utm_source=docs&utm_medium=related)
+- [GPT Image 1.5 モデルページ：リアルタイム価格、実際のサンプル、呼び出しコード](https://crazyrouter.com/ja/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Alibaba Cloud 全モデルと価格](https://crazyrouter.com/ja/models/alibaba?utm_source=docs&utm_medium=related)

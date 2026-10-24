@@ -1,0 +1,182 @@
+---
+title: "Formato de video OpenAI"
+description: "Crea, consulta y descarga videos utilizando el formato de API de video compatible con OpenAI"
+---
+> Contenido actualizado: 2026-06-30
+
+# Formato de video OpenAI
+
+Crazyrouter es compatible con el formato oficial de la API de video de OpenAI y el SDK de OpenAI.
+
+## Crear video
+
+```
+POST /v1/videos
+```
+
+### Parámetros de solicitud
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `model` | string | Sí | Nombre del modelo, como `veo-3.1-fast`, `veo-3.1-quality` |
+| `prompt` | string | Sí | Palabras clave descriptivas del video |
+| `size` | string | No | Dimensiones del video: `1920x1080`, `1080x1920`, `1080x1080` |
+| `duration` | integer | No | Duración del video (segundos) |
+| `image_url` | string | No | URL de imagen de referencia |
+| `storyboard` | array | No | Guión técnico de storyboard |
+| `private` | boolean | No | ¿Es modo privado? |
+
+### Ejemplo de solicitud
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/videos \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "veo-3.1-fast",
+    "prompt": "A timelapse of a city skyline from day to night, clouds moving quickly",
+    "size": "1920x1080",
+    "duration": 10
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/v1/videos",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "veo-3.1-fast",
+        "prompt": "A timelapse of a city skyline from day to night",
+        "size": "1920x1080",
+        "duration": 10
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### Ejemplo de respuesta
+
+```json
+{
+  "id": "video_abc123",
+  "object": "video",
+  "status": "processing",
+  "created_at": 1709123456
+}
+```
+
+---
+
+## Consultar video
+
+```
+GET /v1/videos/{id}
+```
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/videos/video_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Ejemplo de respuesta (completado)
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "id": "video_abc123",
+    "task_id": "video_abc123",
+    "status": "SUCCESS",
+    "artifact_url": "https://media.crazyrouter.com/task-artifacts/example.mp4",
+    "result_url": "https://media.crazyrouter.com/task-artifacts/example.mp4"
+  }
+}
+```
+
+---
+
+## Descargar video
+
+```
+GET /v1/videos/{id}/content
+```
+
+Descarga directamente el archivo de video.
+
+```bash cURL
+curl -o output.mp4 https://api.crazyrouter.com/v1/videos/video_abc123/content \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+---
+
+## Editar video
+
+Incluye `image_url` en la solicitud de creación para generar video a partir de imagen:
+
+```json
+{
+  "model": "veo-3.1-fast",
+  "prompt": "The scene comes to life with gentle movement",
+  "image_url": "https://example.com/scene.jpg",
+  "size": "1920x1080",
+  "duration": 5
+}
+```
+
+---
+
+## Storyboard
+
+```json
+{
+  "model": "veo-3.1-fast",
+  "storyboard": [
+    {"prompt": "Wide shot of a forest at dawn", "duration": 3},
+    {"prompt": "A deer walks into frame", "duration": 4},
+    {"prompt": "Close-up of the deer looking at camera", "duration": 3}
+  ],
+  "size": "1920x1080"
+}
+```
+
+---
+
+## Modo privado
+
+Configura `private: true` para evitar que el video generado aparezca en la galería pública:
+
+```json
+{
+  "model": "veo-3.1-fast",
+  "prompt": "A confidential product demo video",
+  "size": "1920x1080",
+  "private": true
+}
+```
+
+### Estado de la tarea
+
+| Estado | Descripción |
+|------|------|
+| `processing` | Procesando |
+| `SUCCESS` | Completado |
+| `failed` | Fallido |
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Página de modelo GPT Image 1.5: precio en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Página de modelo GPT Image 2: precio en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Todos los modelos y precios de OpenAI](https://crazyrouter.com/es/models/openai?utm_source=docs&utm_medium=related)

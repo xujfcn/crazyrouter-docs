@@ -1,32 +1,32 @@
 ---
-title: "Fal.ai Images"
-description: "Text-to-image generation and image editing via Fal.ai endpoints"
+title: "Fal.ai 画像"
+description: "Fal.ai エンドポイントを通じて、テキストから画像生成や画像編集を行います"
 ---
-> 更新日: 2026-06-23
+> 内容更新日: 2026-06-09
 
-# Fal.ai Images
+# Fal.ai 画像
 
-Crazyrouter proxies Fal.ai image generation endpoints, supporting text-to-image and image editing.
+Crazyrouter は Fal.ai の画像生成エンドポイントを代理し、テキストから画像生成と画像編集をサポートします。
 
-## Text-to-Image
+## テキストから画像生成
 
 ```
 POST /fal-ai/nano-banana
 ```
 
-### Request Parameters
+### リクエストパラメータ
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `prompt` | string | Yes | Image description prompt |
-| `negative_prompt` | string | No | Negative prompt |
-| `image_size` | string | No | Image size: `square_hd`, `landscape_4_3`, `portrait_4_3`, `landscape_16_9`, `portrait_16_9` |
-| `num_images` | integer | No | Number of images, default 1 |
-| `seed` | integer | No | Random seed |
-| `guidance_scale` | number | No | Guidance strength |
-| `num_inference_steps` | integer | No | Number of inference steps |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `prompt` | string | 必須 | 画像の説明プロンプト |
+| `negative_prompt` | string | 任意 | ネガティブプロンプト |
+| `image_size` | string | 任意 | 画像サイズ：`square_hd`、`landscape_4_3`、`portrait_4_3`、`landscape_16_9`、`portrait_16_9` |
+| `num_images` | integer | 任意 | 生成数、初期値は 1 |
+| `seed` | integer | 任意 | ランダムシード |
+| `guidance_scale` | number | 任意 | ガイダンス強度 |
+| `num_inference_steps` | integer | 任意 | 推論ステップ数 |
 
-### Request Examples
+### リクエスト例
 
 <CodeGroup>
 
@@ -62,7 +62,7 @@ print(response.json())
 
 </CodeGroup>
 
-### Response Example
+### レスポンス例
 
 ```json
 {
@@ -81,24 +81,24 @@ print(response.json())
 
 ---
 
-## Image Editing
+## 画像編集
 
 ```
 POST /fal-ai/nano-banana/edit
 ```
 
-Edit an existing image.
+既存の画像をもとに編集を行います。
 
-### Request Parameters
+### リクエストパラメータ
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `prompt` | string | Yes | Edit description |
-| `image_url` | string | Yes | Original image URL |
-| `mask_url` | string | No | Mask image URL |
-| `strength` | number | No | Edit strength, 0-1 |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `prompt` | string | 必須 | 編集プロンプト|
+| `image_url` | string | 必須 | 元画像のURL |
+| `mask_url` | string | 任意 | マスク画像URL |
+| `strength` | number | 任意 | 編集強度、0～1 |
 
-### Request Example
+### リクエスト例
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/fal-ai/nano-banana/edit \
@@ -111,7 +111,7 @@ curl -X POST https://api.crazyrouter.com/fal-ai/nano-banana/edit \
   }'
 ```
 
-### Response Example
+### レスポンス例
 
 ```json
 {
@@ -127,5 +127,5 @@ curl -X POST https://api.crazyrouter.com/fal-ai/nano-banana/edit \
 ```
 
 <Note>
-  Fal.ai endpoints support multiple underlying models. For available models, refer to the [Model Pricing](https://crazyrouter.com/pricing) page.
+  Fal.ai エンドポイントは、複数の基盤モデルをサポートしています。利用可能なモデルについては [モデル価格](https://crazyrouter.com/pricing) ページをご参照ください。
 </Note>

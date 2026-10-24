@@ -1,0 +1,276 @@
+---
+title: "Método de precios oficiales del modelo"
+description: "Según la descripción del modelo, el nombre interno de Crazyrouter corresponde al criterio de facturación oficial del proveedor de origen"
+---
+
+{/* crazyrouter-site-links */}
+<Tip>
+  ¿Necesitas el **precio real** y no el oficial? Consulta la comparación en tiempo real de los precios oficiales / Azure / Bedrock / Vertex / OpenRouter y Crazyrouter de cada modelo (verificada diariamente, incluye historial de precios) en [Comparación de precios de modelos](https://crazyrouter.com/es/pricing?utm_source=docs&utm_medium=card); para ver todos los modelos por proveedor, consulta [Directorio de modelos](https://crazyrouter.com/es/models?utm_source=docs&utm_medium=card).
+</Tip>
+> Contenido actualizado: 2026-06-09
+
+# Método de precios oficiales del modelo
+
+Este artículo explica solo el criterio de facturación oficial de los proveedores ascendentes, y no equivale al precio real de Crazyrouter.
+
+- Criterio oficial ascendiente: propios métodos de cobro de los proveedores `input`, `output`, `cached input`, `tool call`, `search grounding`, `prompt caching`, entre otros
+- Criterio de Crazyrouter: precio propio del sitio, multiplicador, descuento, diferencias de canal y método de liquidación
+
+<Note>
+  Esta página está organizada según la documentación oficial del proveedor consultada en `2026-04-27`. Los proveedores pueden cambiar precios, ajustar modelos de vista previa, contexto largo, herramientas de búsqueda y reglas de caché; antes de lanzar, por favor verifica una vez más con el enlace oficial.
+</Note>
+
+## Ejemplo de precios unitarios oficiales
+
+Los siguientes ejemplos presentan solo la tarifa más común y más fácil de usar para la planificación de negocio de cada proveedor:
+
+- Anthropic: tarifa estándar de API, sin incluir multiplicadores `Fast mode`, `US-only inference` ni descuento Batch
+- OpenAI: tarifa `Standard`, sin incluir recargos por Batch, Priority, Regional Processing
+- Gemini: tarifa `Standard`, por defecto para entradas de texto / imagen / video, y elige `<= 200K prompt` para `Gemini 3*`
+- xAI: si el nombre de la ruta interna no tiene una tarifa de columna estática pública, la tabla marcará explícitamente "no aislado"
+- Z.AI: utiliza la tarifa oficial `Text Models`
+- MiniMax: tabla principal utiliza `Pay as You Go`, tarifa por suscripción se detalla en `Token Plan`
+
+<Note>
+  Salvo que se marque especialmente, los importes en la siguiente tabla son por defecto `USD / 1M tokens`.
+</Note>
+
+### Ejemplo de precios unitarios de Anthropic
+
+| Modelo interno | Correspondencia oficial | Base Input | Cache 5m / 1h / Hit | Output | Observaciones |
+| --- | --- | --- | --- | --- | --- |
+| `claude-opus-4-8` | `claude-opus-4-8` | `$3` | `$3.75 / $6 / $0.30` | `$15` | `1M context` precio estándar; Batch aproximadamente `50 % del precio` |
+| `claude-opus-4-8` | `claude-opus-4-8` | `$5` | `$6.25 / $10 / $0.50` | `$25` | `Fast mode` precio estándar aparte según `6x` |
+| `claude-opus-4-8` | `claude-opus-4-8` | `$5` | `$6.25 / $10 / $0.50` | `$25` | Si se habilita `US-only inference`, el proveedor tiene multiplicador regional adicional |
+| `claude-opus-4-8` | `claude-opus-4-8` instantánea | `$3` | `$3.75 / $6 / $0.30` | `$15` | El nombre de instantánea usa el precio de `Sonnet 4.5`, no es otra lista de precios |
+
+### Ejemplo de precios unitarios de OpenAI
+
+| Modelo interno | Correspondencia oficial | Input | Cached input | Output | Observaciones |
+| --- | --- | --- | --- | --- | --- |
+| `gpt-5.5` | `gpt-5.5` | `$2.50` | `$0.25` | `$15.00` | Precio estándar adecuado para menos de `270K`; contextos extralargos tienen multiplicador adicional |
+| `gpt-4o` | `gpt-4o` | `$2.50` | `$1.25` | `$10.00` | Tarifa clásica de tres segmentos unificados |
+| `gpt-5` | `gpt-5` | `$1.25` | `$0.125` | `$10.00` | Cargos de herramientas independientes |
+| `gpt-5.5` | `gpt-5.1-codex-max` | `$1.25` | `$0.125` | `$10.00` | Común en flujos de trabajo Codex / agentic coding, estructura de precios sigue siendo el estándar de tres segmentos |
+| `gpt-5-mini` | `gpt-5-mini` | `$0.25` | `$0.025` | `$2.00` | Versión de modelo pequeño |
+| `gpt-5-nano` | `gpt-5-nano` | `$0.05` | `$0.005` | `$0.40` | Ruta de menor precio de GPT-5 |
+| `gpt-5.5` | `gpt-5.5` | `$1.75` | `$0.175` | `$14.00` | Anterior buque insignia, sigue siendo el estándar de tokens en tres segmentos |
+| `gpt-5.5` | `gpt-5.5` | `$5.00` | `$0.50` | `$30.00` | Tarifas oficiales actuales de flagship; el estándar es válido para contextos menores de `270K` |
+
+### Ejemplo de precios unitarios de Gemini
+
+| Modelo interno | Correspondencia oficial | Precio estándar de entrada | Precio estándar de caché | Precio estándar de salida | Observaciones |
+| --- | --- | --- | --- | --- | --- |
+| `gemini-3.1-pro` | `gemini-3.1-pro` | `$2.00` | `$0.20` + `$4.50 / 1M tok / hr` almacenamiento | `$12.00` | `<= 200K` segmento Prompt; `> 200K` para `$4 / $0.40 / $18`; Google actualmente ofrece cuotas gratis de Search / Maps y `$14 / 1,000 search queries` para Gemini 3 Family |
+| `gemini-2.5-flash-lite` | `gemini-2.5-flash-lite` | `$0.10` (texto / imagen / video) | `$0.01` (texto / imagen / video) + `$1.00 / 1M tok / hr` almacenamiento | `$0.40` | Entrada de audio es `$0.30`, caché de audio es `$0.03`; Search es `1,500 RPD` gratis y luego `$35 / 1,000 grounded prompts` |
+
+### Ejemplo de precios unitarios de xAI
+
+| Modelo interno | Correspondencia oficial | Prompt / Caché / Salida | Tarifas de herramienta | Notas |
+| --- | --- | --- | --- | --- |
+| `grok-4.1-fast` | Enrutamiento reasoning interno | La página estática oficial no enumera el precio independiente `grok-4.1-fast` | `web_search $5 / 1k`, `x_search $5 / 1k`, `code_execution $5 / 1k`, `attachment_search $10 / 1k`, `collections_search $2.50 / 1k` | `reasoning tokens` se cobra según `completion token price` |
+| `grok-4.1` | Enrutamiento principal interno | La página estática oficial no enumera el precio independiente `grok-4.1` | Igual que arriba | El nombre interno se parece más a un nombre de capa de enrutamiento, no debe equipararse directamente a SKU estático de xAI |
+
+<Note>
+  Lo que se puede verificar de manera estable en la documentación estática pública actual de xAI son las reglas de clasificación de tokens, tarifas de invocación de herramientas, Batch `50 % del precio` y “ver el precio de token por modelo en la página de detalles del modelo o en el console”. Dado que `grok-4.1` / `grok-4.1-fast` no tienen precio listado aparte en la documentación estática, esta página no aplica otros números de SKU a ellos.
+</Note>
+
+### Ejemplo de precios Z.AI / GLM
+
+| Modelo interno | Correspondencia oficial | Entrada | Entrada cacheada | Almacenamiento de entrada cacheada | Salida | Notas |
+| --- | --- | --- | --- | --- | --- | --- |
+| `glm-5` | `GLM-5` | `$1.0` | `$0.2` | `Limited-time Free` | `$3.2` | `Web Search` cobra adicionalmente `$0.01 / use` |
+
+### Ejemplo de precios MiniMax
+
+#### Pago por uso
+
+| Modelo interno | Correspondencia oficial | Entrada | Lectura de caché de prompts | Escritura de caché de prompts | Salida | Notas |
+| --- | --- | --- | --- | --- | --- | --- |
+| `MiniMax-M2.7` | `MiniMax-M2.7` | `$0.3` | `$0.06` | `$0.375` | `$1.2` | Este es el nivel más adecuado para hacer presupuestos API directamente |
+
+#### Plan de tokens
+
+| Paquete | Cuota mensual | Cuota `M2.7` |
+| --- | --- | --- |
+| Starter | `$10 / month` | `1,500 requests / 5hrs` |
+| Plus | `$20 / month` | `4,500 requests / 5hrs` |
+| Max | `$50 / month` | `15,000 requests / 5hrs` |
+
+## Anthropic
+
+El método oficial de facturación de este grupo de modelos Anthropic no es simplemente dos columnas `input / output`, sino que se desglosa en:
+
+- `Base Input Tokens`
+- `5m Cache Writes`
+- `1h Cache Writes`
+- `Cache Hits & Refreshes`
+- `Output Tokens`
+
+Además, hay dos reglas comunes:
+
+- `Batch API` la entrada y salida normalmente se cobran según el precio estándar `50 % del precio`
+- La regla pública de múltiplos para caché de prompt es: `Escritura en caché de 5 minutos = 1.25x input`, `Escritura en caché de 1 hora = 2x input`, `Lectura de caché = 0.1x input`
+
+| Nombre del modelo interno | Correspondencia oficial | Método oficial de facturación | Explicación especial |
+| --- | --- | --- | --- |
+| `claude-opus-4-8` | Anthropic `claude-opus-4-8` | Se cobra según `base input / 5m cache write / 1h cache write / cache hit / output` | Anthropic ha confirmado que `Sonnet 4.6` soporta `1M context`, y ese contexto largo se cobra al precio estándar, sin precio adicional |
+| `claude-opus-4-8` | Anthropic `claude-opus-4-8` | Se cobra según `base input / 5m cache write / 1h cache write / cache hit / output` | `Opus 4.6` también soporta la facturación estándar `1M context`; además, la oficial ofrece `Fast mode` por separado, a precio estándar `6x` |
+| `claude-opus-4-8` | Anthropic `claude-opus-4-8` | Se cobra según `base input / 5m cache write / 1h cache write / cache hit / output` | `Opus 4.7` es el modelo independiente actualmente listado en el precio público oficial de Anthropic; si se habilita `US-only inference`, la documentación oficial indica que habrá un multiplicador `1.1x` |
+| `claude-opus-4-8` | Anthropic ID de snapshot `claude-opus-4-8`, el alias público normalmente se escribe como `claude-opus-4-8` | Sigue cobrando según el método `Sonnet 4.5` del `base input / cache write / cache hit / output` | Este nombre de API con fecha es de snapshot, no es otra tarifa independiente; para presupuestos debe entenderse según el criterio oficial `Claude Sonnet 4.5` |
+
+Enlaces oficiales:
+
+- Precios Anthropic: [platform.claude.com/docs/en/about-claude/pricing](https://platform.claude.com/docs/en/about-claude/pricing)
+- Descripción general de modelos Anthropic: [platform.claude.com/docs/en/about-claude/models/overview](https://platform.claude.com/docs/en/about-claude/models/overview)
+
+## OpenAI
+
+La divulgación oficial de OpenAI para este grupo de modelos de texto es la más uniforme, el núcleo es:
+
+- `Input`
+- `Cached input`
+- `Output`
+
+Las reglas adicionales normalmente son:
+
+- `Responses API` no tiene precio adicional, sigue cobrando según el precio por token del modelo seleccionado
+- `Web search`, herramientas de contenedor/ejecución de código, uso de computadora, etc. se cobran aparte, y no están incluidas en el precio por token
+- `Batch API` la entrada y salida normalmente se cobran según el precio estándar `50 % del precio`
+
+| Nombre del modelo interno | Correspondencia oficial | Método de facturación oficial | Notas especiales |
+| --- | --- | --- | --- |
+| `gpt-5.5` | Alias interno, normalmente corresponde a OpenAI `gpt-5.5` | Se factura según `input / cached input / output` | El precio estándar público de `gpt-5.5` se aplica al contexto inferior a `270K`; el endpoint de procesamiento regional tiene `+10%` por separado |
+| `gpt-4o` | OpenAI `gpt-4o` | Se factura según `input / cached input / output` | `gpt-4o` es el criterio unificado clásico, no tiene un campo de escritura de caché separado como Claude, ni una tabla separada de Search grounding como Gemini |
+| `gpt-5` | OpenAI `gpt-5` | Se factura según `input / cached input / output` | Si activas herramientas en la API de Responses, las tarifas de herramientas se calculan por separado; en la página de precios pública no hay una fila separada para el “precio unitario de thinking token” |
+| `gpt-5.5` | Debería corresponder a OpenAI `gpt-5.1-codex-max` | Se factura según `input / cached input / output` | Este es un modelo orientado a Codex, pero la estructura de precios públicos sigue siendo la misma que la de un modelo GPT-5.1 de texto normal; es más adecuado para flujos de trabajo de agente o Codex |
+| `gpt-5-mini` | OpenAI `gpt-5-mini` | Se factura según `input / cached input / output` | Versión de modelo pequeño, la estructura no cambia, solo cambia el precio unitario, que es más bajo |
+| `gpt-5-nano` | OpenAI `gpt-5-nano` | Se factura según `input / cached input / output` | La versión Nano también utiliza la tarifa triple estándar por token |
+| `gpt-5.5` | OpenAI `gpt-5.5` | Se factura según `input / cached input / output` | `gpt-5.5` sigue considerándose un modelo estándar de la serie GPT-5; si utilizas Web search / File search / Code interpreter, las herramientas se cobran por separado |
+| `gpt-5.5` | OpenAI `gpt-5.5` | Se factura según `input / cached input / output` | Actualmente OpenAI lo clasifica como modelo flagship; la página de precios pública indica que el precio estándar se aplica a contextos de menos de `270K`, para contextos extendidos consulta la última tabla detallada de precios |
+
+Enlaces oficiales:
+
+- OpenAI Precios: [openai.com/api/pricing](https://openai.com/api/pricing/)
+- Precios en la documentación de OpenAI: [platform.openai.com/docs/pricing](https://platform.openai.com/docs/pricing/)
+- Modelos de OpenAI: [developers.openai.com/api/docs/models](https://developers.openai.com/api/docs/models)
+
+## Google Gemini
+
+El método de facturación oficial de Gemini difiere más de los de los dos anteriores; normalmente, no hay solo un precio estándar, sino que se presentan al mismo tiempo:
+
+- `Standard`
+- `Batch`
+- `Flex`
+- `Priority`
+
+Y se listan por separado:
+
+- `Input`
+- `Output (including thinking tokens)`
+- `Context caching price`
+- `Context caching storage`
+- `Grounding with Google Search`
+- `Grounding with Google Maps`
+
+| Nombre del modelo interno | Correspondencia oficial | Método de facturación oficial | Notas especiales |
+| --- | --- | --- | --- |
+| `gemini-3.1-pro` | Google `gemini-3.1-pro`, el nombre mostrado internamente suele ser `gemini-3.1-pro` | Oficialmente se factura según cuatro modos de procesamiento `Standard / Batch / Flex / Priority`, y para cada modo se desglosa `input / output / caching / search grounding / maps grounding` | Este es un modelo de vista previa; además, `<= 200K` y `> 200K` prompt son dos tarifas diferentes, no un solo precio unitario |
+| `gemini-2.5-flash-lite` | Google `gemini-2.5-flash-lite` | Se factura por tramos según `Standard / Batch / Flex / Priority` y se lista por separado `input / output / context caching / storage / Google Search / Google Maps` | Este es un modelo estable, no de vista previa; el `output` está expresado oficialmente como "incluye thinking tokens" |
+
+Enlaces oficiales:
+
+- Precios de Gemini: [ai.google.dev/gemini-api/docs/pricing](https://ai.google.dev/gemini-api/docs/pricing)
+- Modelos Gemini: [ai.google.dev/models/gemini](https://ai.google.dev/models/gemini)
+
+## xAI Grok
+
+El punto clave de las reglas oficiales de xAI no es si el modelo thinking tiene otra tabla de precios, sino que separa los tokens y las herramientas:
+
+- `Prompt tokens`
+- `Cached prompt tokens`
+- `Completion tokens`
+- `Reasoning tokens`
+
+xAI también especifica especialmente:
+
+- `Reasoning tokens` se cobra según `completion token price`
+- Herramientas server-side como `Web Search`, `X Search`, `Code Execution`, `Collections Search` se cobran por separado según `Por cada 1000 llamadas`
+- Para las tarifas de tipo token, `Batch API` generalmente es `50 % del precio`
+
+| Nombre del modelo interno | Correspondencia oficial | Método de facturación oficial | Notas especiales |
+| --- | --- | --- | --- |
+| `grok-4.1-fast` | Enrutamiento reasoning interno; oficialmente corresponde semánticamente a la configuración `Thinking` de Grok 4.1 | Según la política oficial, cuatro clases de token `prompt / cached prompt / completion / reasoning`, más tarifas por invocación de herramientas según sea necesario | Actualmente, la página pública de precio API de xAI se centra en este tipo de SKU `grok-4-1-fast-reasoning`; por lo tanto, es más preciso entenderlo como “liquidación de acuerdo a la estructura oficial de facturación del modelo reasoning de xAI” y no como un SKU oficial independiente nombrado internamente |
+| `grok-4.1` | Enrutamiento principal de Grok 4.1 interno; semánticamente corresponde más a la configuración no-thinking de Grok 4.1 | El criterio oficial sigue siendo `prompt / cached prompt / completion`, si se habilita búsqueda, ejecución de código o recuperación de archivos adjuntos, las tarifas de herramientas se calculan por separado | Actualmente la página pública de xAI enfatiza `grok-4.1-fast` y `grok-4-1-fast-*`; por lo tanto, para el presupuesto, deben considerarse prioritariamente las reglas actuales públicas para las tarifas de tipo token y herramienta de xAI |
+
+Enlaces oficiales:
+
+- Modelos y precios de xAI: [docs.x.ai/developers/models](https://docs.x.ai/developers/models)
+- Consumo y límites de uso de xAI: [docs.x.ai/developers/rate-limits](https://docs.x.ai/developers/rate-limits)
+- Precios de caché de prompts en xAI: [docs.x.ai/developers/advanced-api-usage/prompt-caching/usage-and-pricing](https://docs.x.ai/developers/advanced-api-usage/prompt-caching/usage-and-pricing)
+
+## Z.AI / GLM
+
+La política oficial `GLM-5` de Z.AI es similar a la de OpenAI, pero añade una tarifa de almacenamiento en caché:
+
+- `Input`
+- `Cached Input`
+- `Cached Input Storage`
+- `Output`
+
+Al mismo tiempo, las herramientas integradas como `Web Search` se cobran por separado según el número de usos.
+
+| Nombre del modelo en el sitio | Correspondencia oficial | Método oficial de cobro | Nota especial |
+| --- | --- | --- | --- |
+| `glm-5` | Z.AI `GLM-5` | Cobro según `input / cached input / cached input storage / output` | Si se activa el `Web Search` incorporado oficialmente, habrá un cobro adicional según `per use`; esto es diferente de solo considerar el precio por token |
+
+Enlaces oficiales:
+
+- Precios de Z.AI: [docs.z.ai/guides/overview/pricing](https://docs.z.ai/guides/overview/pricing)
+- Introducción GLM-5: [docs.z.ai/guides/llm/glm-5](https://docs.z.ai/guides/llm/glm-5)
+
+## MiniMax
+
+Para los modelos MiniMax, primero hay que distinguir dos formas de venta oficial:
+
+- `Pay as You Go`
+- `Token Plan`
+
+Entre ellas:
+
+- `Pay as You Go` es el cobro estándar por uso de API
+- `Token Plan` es por suscripción, `M2.7` se cobra según `Cuota de solicitudes en una ventana móvil de 5 horas`, no solo por tokens
+
+| Nombre del modelo en el sitio | Correspondencia oficial | Método oficial de cobro | Nota especial |
+| --- | --- | --- | --- |
+| `MiniMax-M2.7` | Debe corresponder a `MiniMax-M2.7` en el sitio | Si es por `Pay as You Go`, se cobra según `input / output / prompt caching read / prompt caching write`; si es por `Token Plan`, entonces se cobra según el cupo de suscripción de `requests / 5hrs` | Esta es la opción más diferente de esta página. Al hacer presupuestos de producción, primero revisa `Pay as You Go`; para uso intensivo de codificación por desarrolladores, revisa si `Token Plan` resulta más rentable |
+
+Enlaces oficiales:
+
+- Resumen de precios MiniMax: [platform.minimax.io/docs/pricing/overview](https://platform.minimax.io/docs/pricing/overview)
+- MiniMax Pago por Uso: [platform.minimax.io/docs/guides/pricing-paygo](https://platform.minimax.io/docs/guides/pricing-paygo)
+- MiniMax Plan de tokens: [platform.minimax.io/docs/guides/pricing-token-plan](https://platform.minimax.io/docs/guides/pricing-token-plan)
+
+## Conclusión
+
+Si solo quieres juzgar rápidamente “¿cómo cobra oficialmente?”, puedes recordar estas categorías:
+
+- Anthropic: `base input + cache write/read + output`
+- OpenAI: `input + cached input + output`, herramientas se cobran aparte
+- Gemini: `Varios modos de procesamiento + input/output + caching + search/maps grounding`
+- xAI: `prompt/cached/completion/reasoning`, herramientas del lado del servidor se cobran aparte
+- Z.AI: `input + cached input + cached storage + output`
+- MiniMax: `Tokens de pago por uso` o `Cuota de suscripción`, ambos sistemas coexisten
+
+<Warning>
+  Esta página explica el “sistema de precios oficiales aguas arriba”, no los precios de venta externos de Crazyrouter. Para recargas, cobros, multiplicadores y descuentos reales, consulta los precios, consola y `/api/pricing` en el sitio de Crazyrouter.
+</Warning>
+
+## Páginas relacionadas en el sitio
+
+- [Lista de modelos OpenAI](/es/chat/openai/models)
+- [Lista de modelos Gemini compatibles con OpenAI](/es/chat/gemini/openai-models)
+- [Formato nativo Claude](/es/chat/anthropic/messages)
+- [Formato nativo Gemini](/es/chat/gemini/native)
+- [Modelo Grok](/es/chat/openai/grok)
+- [Modelos con soporte de tokens](/es/token-management/models)

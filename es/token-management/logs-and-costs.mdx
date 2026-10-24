@@ -1,0 +1,367 @@
+---
+title: "Monitor de registros de llamadas y gastos"
+description: "Consulta la lista de API Key, registros de llamadas, cuotas acumuladas y gastos en dólares a través de la interfaz de administración"
+---
+> Contenido actualizado: 2026-07-20
+
+## Escenarios aplicables
+
+Cuando el cliente necesita monitorear cada API Key, se recomienda utilizar la combinación de interfaces de administración de Crazyrouter, en lugar de consultar directamente con `sk-xxx` en el lado del negocio:
+
+- Obtener la lista de API Keys bajo la cuenta actual
+- Consultar registros de llamadas filtrando por rango de tiempo, nombre de Key, nombre de modelo
+- Resumir el consumo total de un Key determinado
+- Convertir gastos en dólares según los parámetros de tipo de cambio del sistema
+
+<Note>
+  La interfaz de administración utiliza autenticación de usuario, no el Token de negocios usado para invocar modelos.
+</Note>
+
+<Warning>
+  Todas las cuentas y interfaces de administración de esta página (incluyendo `/api/token/*`, `/api/log/*` y `/api/user/self`) deben solicitar `https://crazyrouter.com`. `https://api.crazyrouter.com` solo sirve para APIs de modelo/medios, si se usa incorrectamente devolverá `404 api_only_endpoint`.
+</Warning>
+
+## Método de autenticación
+
+Las interfaces de administración deben incluir los siguientes encabezados en cada solicitud:
+
+```text
+Authorization: Bearer {access_token}
+New-Api-User: {user_id}
+```
+
+- `access_token`: Token de acceso generado tras iniciar sesión, utilizado para autenticación en consola/interfaz de administración
+- `New-Api-User`: ID del usuario actual, debe coincidir con el usuario vinculado a `access_token`
+- `sk-xxx`: Token de negocios para llamadas de modelos, no válido para `/api/token/*`, `/api/log/*` u otras interfaces administrativas
+
+## Flujo de integración recomendado
+
+Se recomienda integrarse en el siguiente orden:
+
+1. Invoca `/api/token/` para obtener la lista de Keys bajo la cuenta actual
+2. Según `token_name`, llama a `/api/log/self` para obtener el registro detallado de un Key
+3. Invoca `/api/log/self/stat` para obtener la cuota acumulada bajo las mismas condiciones
+4. Invoca `/api/status` para obtener `quota_per_unit`
+5. Utiliza `quota / quota_per_unit` para convertir gastos en dólares
+
+## 1. Obtener la lista de API Keys
+
+```bash cURL
+curl "https://crazyrouter.com/api/token/?p=1&page_size=100" \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 485"
+```
+
+Ejemplo de respuesta:
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "page": 1,
+    "page_size": 100,
+    "total": 1,
+    "items": [
+      {
+        "id": 409,
+        "name": "gptai",
+        "key": "sk-xxxxxxxxxxxxxxxx",
+        "status": 2,
+        "used_quota": 16605808,
+        "model_limits_enabled": true,
+        "model_limits": "kimi-k2.5"
+      }
+    ]
+  }
+}
+```
+
+Se recomienda que el cliente guarde los siguientes campos para monitoreo posterior:
+
+- `id`
+- `name`
+- `status`
+- `used_quota`
+- `model_limits_enabled`
+- `model_limits`
+
+## 2. Consultar registros de llamadas de un Key
+
+Mediante `/api/log/self` puedes consultar los registros de consumo del usuario actual; se recomienda incluir al menos:
+
+- `type`
+- `token_name`
+- `start_timestamp`
+- `end_timestamp`
+- `p`
+- `page_size`
+
+Ejemplo:
+
+```bash cURL
+curl "https://crazyrouter.com/api/log/self?type=2&token_name=gptai&start_timestamp=1771334901&end_timestamp=1772309095&p=1&page_size=5" \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 485"
+```
+
+Ejemplo de respuesta:
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "page": 1,
+    "page_size": 5,
+    "total": 4988,
+    "items": [
+      {
+        "created_at": 1772308747,
+        "token_name": "gptai",
+        "model_name": "deepseek-chat",
+        "quota": 3188,
+        "cost_usd": 0.006376,
+        "prompt_tokens": 884,
+        "completion_tokens": 397,
+        "use_time": 16.48,
+        "is_stream": true,
+        "ip": "203.0.113.10",
+        "other": {
+          "client": "openai-python",
+          "request_id": "req_xxx",
+          "request_method": "POST",
+          "request_path": "/v1/chat/completions",
+          "http_status": 200,
+          "discount": 0
+        }
+      }
+    ]
+  }
+}
+```
+
+### Descripción de campos clave
+
+| Campo | Descripción |
+|----|----|
+| `token_name` | El Key de negocios que se ha utilizado |
+| `model_name` | El modelo usado para facturación |
+| `quota` | Cuota del sistema deducida en esta petición |
+| `cost_usd` | Gasto en dólares convertido en esta petición |
+| `prompt_tokens` | Token de entrada |
+| `completion_tokens` | Token de salida |
+| `use_time` | Tiempo de petición, en segundos |
+| `other.request_id` | ID de solicitud, ideal para rastreo de cadenas |
+| `other.client` | Identificador del cliente que llama |
+| `other.request_path` | Ruta exacta de la interfaz invocada |
+| `other.http_status` | Código de estado de la respuesta upstream |
+
+<Note>
+  `cost_usd` representa el gasto en dólares convertido según el sistema, calculado por `quota / quota_per_unit`. Si tu entorno de producción aún no tiene esta versión, puedes usar la cuota acumulada para hacer el cálculo manual.
+</Note>
+
+<Warning>
+Las solicitudes individuales fallidas no generan gastos, los campos `quota` / `cost_usd` en el registro deben ser 0. Sin embargo, en modo Agente, flujos de trabajo, invocaciones en cadena o programación automática en IDE, una acción de usuario puede dividirse en varias solicitudes de modelo: si una de ellas fue exitosa antes de que ocurriera una falla posterior, las solicitudes que sí se completaron correctamente se facturarán según el consumo real de tokens. Para investigar consumos anómalos, revisa cada registro por separado, no solo el resultado final de la tarea.
+</Warning>
+
+## 3. Consultar consumo acumulado
+
+Si solo necesitas monitoreo automático o informes diarios, se recomienda usar la interfaz de resumen:
+
+```bash cURL
+curl "https://crazyrouter.com/api/log/self/stat?type=2&token_name=gptai&start_timestamp=1771334901&end_timestamp=1772309095" \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 485"
+```
+
+Ejemplo de respuesta:
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "quota": 16605808,
+    "rpm": 0,
+    "tpm": 0
+  }
+}
+```
+
+En ella:
+
+- `quota`: consumo total de cuota bajo los filtros aplicados
+- `rpm`, `tpm`: campos reservados, útiles para monitoreo ampliado
+
+## 4. Consultar saldo actual de la cuenta
+
+Si el cliente quiere mostrar el saldo actual de su cuenta Crazyrouter en su backend, además de monitorear por Key de negocios, puede llamar a `/api/user/self`.
+
+Los encabezados de solicitud son los mismos que para otras interfaces administrativas:
+
+```bash cURL
+curl "https://crazyrouter.com/api/user/self" \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 4004"
+```
+
+Ejemplo de respuesta:
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "id": 4004,
+    "username": "google_4004",
+    "quota": 11000000,
+    "used_quota": 0,
+    "request_count": 0,
+    "group": "default"
+  }
+}
+```
+
+Campos clave:
+
+| Campo | Descripción |
+|------|------|
+| `quota` | Saldo restante actual, unidad: cuota interna del sistema |
+| `used_quota` | Cuota usada históricamente, unidad: cuota interna del sistema |
+| `request_count` | Número de solicitudes históricas |
+| `group` | Grupo de cuentas actual |
+
+Método de conversión:
+
+```text
+balance_usd = quota / quota_per_unit
+used_usd = used_quota / quota_per_unit
+```
+
+Ejemplo:
+
+```text
+quota = 11000000
+quota_per_unit = 500000
+
+balance_usd = 11000000 / 500000 = 22
+```
+
+Es decir, el saldo en el ejemplo anterior es:
+
+```text
+$22.00
+```
+
+<Note>
+  `/api/user/self` es más adecuado para "mostrar el saldo total actual de la cuenta"; `/api/log/self` y `/api/log/self/stat` son más útiles para "analizar consumos por rango de tiempo, Key o modelo".
+</Note>
+
+## 5. Convertir gasto en dólares
+
+Los parámetros de conversión del sistema se pueden obtener mediante la interfaz pública `/api/status`:
+
+```bash cURL
+curl "https://api.crazyrouter.com/api/status"
+```
+
+Campos relevantes en la respuesta:
+
+```json
+{
+  "success": true,
+  "message": "",
+  "data": {
+    "quota_per_unit": 500000,
+    "quota_display_type": "USD",
+    "usd_exchange_rate": 7.3
+  }
+}
+```
+
+Fórmula de conversión:
+
+```text
+cost_usd = quota / quota_per_unit
+```
+
+Ejemplo:
+
+```text
+16605808 / 500000 = 33.211616 USD
+```
+
+## Ejemplo de integración en Python
+
+```python
+import requests
+
+BASE_URL = "https://crazyrouter.com"
+ACCESS_TOKEN = "your_access_token"
+USER_ID = "485"
+TOKEN_NAME = "gptai"
+
+headers = {
+    "Authorization": f"Bearer {ACCESS_TOKEN}",
+    "New-Api-User": USER_ID,
+    "User-Agent": "Mozilla/5.0",
+}
+
+token_resp = requests.get(
+    f"{BASE_URL}/api/token/",
+    params={"p": 1, "page_size": 100},
+    headers=headers,
+    timeout=30,
+)
+token_resp.raise_for_status()
+tokens = token_resp.json()["data"]["items"]
+
+log_resp = requests.get(
+    f"{BASE_URL}/api/log/self/stat",
+    params={
+        "type": 2,
+        "token_name": TOKEN_NAME,
+        "start_timestamp": 1771334901,
+        "end_timestamp": 1772309095,
+    },
+    headers=headers,
+    timeout=30,
+)
+log_resp.raise_for_status()
+quota = log_resp.json()["data"]["quota"]
+
+status_resp = requests.get(f"{BASE_URL}/api/status", timeout=30)
+status_resp.raise_for_status()
+quota_per_unit = status_resp.json()["data"]["quota_per_unit"]
+
+cost_usd = quota / quota_per_unit
+
+print("tokens:", [item["name"] for item in tokens])
+print("quota:", quota)
+print("cost_usd:", round(cost_usd, 6))
+```
+
+## Recomendaciones de monitoreo
+
+Para el monitoreo del cliente, se recomienda como mínimo registrar los siguientes aspectos:
+
+- Estadísticas por `token_name` de número de llamadas, cuota total, gasto total
+- Estadísticas por `model_name` de distribución de consumo por modelo
+- Diferenciar por `other.request_path` entre `/v1/chat/completions`, `/v1/responses` y otras interfaces
+- Estadísticas por `other.http_status` de tasas de éxito y fracaso
+- Registrar vínculos de trazabilidad por `other.request_id` para diagnóstico de problemas
+
+## Preguntas frecuentes
+
+### ¿Por qué no se puede usar directamente `sk-xxx` en la interfaz de administración?
+
+Porque `sk-xxx` es un certificado de llamadas de negocios, validado por el middleware `TokenAuth`; las interfaces de administración como `/api/token/*`, `/api/log/self*` requieren autenticación de usuario, usando `access_token` y `New-Api-User`.
+
+### ¿Se puede consultar los registros por Key propio?
+
+Sí. Se recomienda filtrar mediante `token_name` los resultados de `/api/log/self` y `/api/log/self/stat`.
+
+### ¿Se puede obtener directamente el monto de gasto por API?
+
+Si la versión del servidor ya soporta el campo `cost_usd`, puedes obtener el gasto en dólares por cada petición directamente en el registro. Para resúmenes, se recomienda usar `quota / quota_per_unit` para calcular el gasto manualmente, el resultado será igual al mostrado en consola.

@@ -1,11 +1,11 @@
 ---
 title: "Nano Banana Pro"
-description: "Use nano-banana-pro for reference-image generation and editing through the OpenAI Images API"
+description: "Use nano-banana-pro for reference image-based generation and editing, compatible with OpenAI Images API"
 ---
-> Last updated: 2026-09-18
+> Content updated: 2026-09-28
 
 <Tip>
-  Need the call to return immediately and fetch the image URL later? This model supports [async image generation](/en/images/async): swap the Gemini suffix for `:asyncGenerateContent`, or add a `Prefer: respond-async` header on the OpenAI endpoints — the request body stays byte-identical.
+  Need to get an immediate response after submission and then poll for the image URL later? This model supports [asynchronous image generation](/en/images/async): For Gemini series, change the path suffix to `:asyncGenerateContent`; for the OpenAI series, add the `Prefer: respond-async` header. The request body does not need to be changed at all.
 </Tip>
 
 # Nano Banana Pro
@@ -14,69 +14,82 @@ description: "Use nano-banana-pro for reference-image generation and editing thr
 POST /v1/images/generations
 ```
 
-Use `nano-banana-pro` for image generation and reference-image editing through one public `OpenAI Images API` style contract.
+Use `nano-banana-pro` to generate images or edit based on references, all using the unified, `OpenAI Images API`-style open protocol.
 
-## What This Page Covers
+<Warning>
+  Requests for image generation, image editing, and multiple reference images are usually time-consuming. For production access, it's recommended to use the primary route `https://api.crazyrouter.com/v1`; the full generation endpoint is `https://api.crazyrouter.com/v1/images/generations`. Account login, recharge, and the dashboard still use `https://crazyrouter.com`.
+</Warning>
 
-- This page only covers `nano-banana-pro`
-- The customer-facing entry point is `POST /v1/images/generations`
-- The input image field is `image_input`
-- The default public contract remains URL-based `image_input`; designated gray-release accounts additionally support data URLs, raw Base64, and three-image multipart editing
-- data URLs, Base64, and multipart are Crazyrouter compatibility extensions, not a claim that every upstream carrier natively supports them
-- Gemini / Vertex and other providers may sit behind this route, but those provider details are not part of the customer contract
+## What this page covers
+
+- This page only covers `nano-banana-pro` / `nano-banana-pro`
+- The client entrypoint for requests is unified as `POST /v1/images/generations`
+- The input image field is unified as `image_input`
+- The default open protocol is still recommended to use `image_input` URL; for designated graylist accounts, dataURL, raw Base64, and three-image multipart editing are also supported
+- `data:` / Base64 / multipart are Crazyrouter compatibility extensions, not guaranteed to be natively supported by all upstream carriers
+- Backend can be providers like Gemini / Vertex, but those details are not part of the client protocol
+- Users should not send `generationConfig`, `imageConfig`, `imageOutputOptions`, or `image_output_options`; these are auto-converted from unified parameters by Crazyrouter
+
+## Model Name
+
+| Recommended Model Name | Equivalent Underlying Model |
+|------|------|
+| `nano-banana-pro` | `nano-banana-pro` |
+
+It's recommended to use `nano-banana-pro` in client code. If your system already uses `nano-banana-pro` directly, you can continue to call it through the same `/v1/images/generations` endpoint.
 
 ## Capability Status
 
-| Capability / Spec | Status | Notes |
-|-----------|--------|-------|
-| `T2I` | `Beta` | Historical coverage exists, but the current public artifact bundle is still centered on edit/reference flows |
-| `I2I + 1K` | `Verified` | The single-image edit live path is closed |
-| `I2I + 4K` | `Verified` | `4K + 21:9 + png/jpg` has a live artifact |
-| `Reference + 1..2 refs` | `Verified` | `2`-reference live verification is closed |
-| Gray user `11257`: data URL / raw Base64 | `Verified` | Single-image and three-image `image_input` verified on production channel 304 |
-| Gray user `11257`: three-image multipart | `Verified` | `/v1/images/edits` accepts `image`, `image[]`, and `image[n]` |
-| `2K` | `Beta` | The current public artifact is still pending |
-| higher multi-reference limits / exact `30 MiB` boundary | `Beta` | Not committed in the current public contract |
+| Capability / Specification | Status | Description |
+|------|------|------|
+| `T2I` | `Beta` | Previously covered, but the current public artifact set still mainly uses editing/reference image paths |
+| `I2I + 1K` | `Verified` | Single-image editing live has closed the loop |
+| `I2I + 4K` | `Verified` | `4K + 21:9 + png/jpeg/jpg` live has closed the loop |
+| `Reference + 1..2 refs` | `Verified` | `2` image live has closed the loop |
+| `11257` graylist: dataURL/raw Base64 | `Verified` | Production channel 304 has verified single-image and three-image `image_input` |
+| `11257` graylist: three-image multipart | `Verified` | `/v1/images/edits` supports `image`, `image[]`, `image[n]` |
+| `2K` | `Beta` | The current public artifact still needs supplementation |
+| Higher multi-image limit / exact `30 MiB` boundary | `Beta` | The current public contract does not commit to this |
 
 <Note>
-  The Pricing page and this doc use the same status language: `Verified` means there is a current minimal live artifact, while `Beta` means the official capability exists but the public validation set or edge coverage is still being completed.
+  The Pricing page and this documentation use the same status definitions: `Verified` means the smallest current live closed loop exists, `Beta` means the capability exists officially but currently the public verifications or boundaries are still being supplemented.
 </Note>
 
-## Currently Validated Capabilities
+## Currently Verified Capabilities
 
-The following conclusions come from historical live validation and the August 18, 2026 production gray release:
+The following conclusions are based on historical live verification and `2026-08-18` production graylist checks:
 
-- official Vertex `channel 318 (vertexsophie)` direct truth:
-  - `2` reference images work
-- local relay on `localhost:4000`, pinned to `channel 318`, verified:
-  - single `WEBP` URL reference works
-  - single `JPEG` URL reference works
-  - `2` `PNG` URL references work
-  - `resolution: "1K"` works
-  - `resolution: "4K"` works
-  - `aspect_ratio: "1:1"` works
-  - `aspect_ratio: "21:9"` works
-  - `output_format: "png"` works
-  - `output_format: "jpg"` works
-  - the response returns `data[].url`
+- Official Vertex `channel 318 (vertexsophie)` direct connection has been verified:
+  - `2` reference images available
+- Local `4000` port, fixed `channel 318` verified:
+  - Single `WEBP` URL reference image available
+  - Single `JPEG` URL reference image available
+  - `2` `PNG` URL reference images available
+  - `resolution: "1K"` available
+  - `resolution: "4K"` available
+  - `aspect_ratio: "1:1"` available
+  - `aspect_ratio: "21:9"` available
+  - `output_format: "png"` available
+  - `output_format: "jpg"` available
+- Responses can directly return `data[].url`
 
-For designated gray user `11257` on production channel `304`, we verified:
+Designated graylist account `11257` in production channel `304` has been verified:
 
-- data URLs, raw Base64, and multiple `image_input` images on `/v1/images/generations`
-- multipart `image`, `image[]`, and `image[n]` fields on `/v1/images/edits`
-- three-image ordering for original, annotation, and reference images
+- `/v1/images/generations`'s `image_input` supports dataURL, raw Base64, and multi-image input
+- `/v1/images/edits` supports multipart `image`, `image[]`, `image[n]`
+- Original image, annotation image, and reference image can be combined in that upload order to make a three-image editing request
 
-Do not present the following as fully promised customer-facing capability yet:
+Do not consider the following capabilities as fully committed for clients:
 
-- whether the exact multi-image limit is `8` or higher
+- Whether the exact multi-image upper limit is `8` or higher
 - `2K`
-- exact large-file URL limit
-- exact `30 MiB` boundary
-- additional `aspect_ratio` combinations
-- exact `output_compression` semantics
+- Precise large file URL upper limit
+- Precise `30 MiB` boundary
+- Other `aspect_ratio` combinations
+- Exact semantic boundary of `output_compression`
 
 <Note>
-  Non-gray accounts remain URL-only. Base64, data URLs, and multipart editing are currently enabled only for designated gray accounts.
+  Default accounts are still treated as public URL-only. Base64, dataURL, and multipart image editing are currently only available to designated graylist accounts; if you need access, please ensure your account is on the graylist.
 </Note>
 
 ---
@@ -84,48 +97,49 @@ Do not present the following as fully promised customer-facing capability yet:
 ## Request Parameters
 
 | Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model` | string | Yes | Fixed as `nano-banana-pro` |
-| `prompt` | string | Yes | Generation or edit instruction |
-| `image_input` | string or string[] | No | URLs by default; gray accounts may also send data URLs/raw Base64, with three images verified |
-| `resolution` | string | No | Current public promise is `1K` and `4K` |
-| `aspect_ratio` | string | No | Current public promise is `1:1` and `21:9` |
-| `output_format` | string | No | Current public promise is `png` and `jpg` |
-| `n` | integer | No | Number of images, default `1` |
+|------|------|------|------|
+| `model` | string | Yes | Recommended `nano-banana-pro`; also compatible with `nano-banana-pro` |
+| `prompt` | string | Yes | Generation or editing instruction |
+| `image_input` | string or string[] | No | Usually pass reference image URL; graylist accounts can also pass dataURL / raw Base64; three images already verified |
+| `resolution` | string | No | Currently officially supports `1K`, `4K` |
+| `aspect_ratio` | string | No | Currently officially supports `1:1`, `21:9` |
+| `output_format` | string | No | Currently officially supports `png`, `jpeg` / `jpg` |
+| `output_compression` | integer | No | `0-100`, used for JPEG compression quality |
+| `n` | integer | No | Quantity to generate, default `1` |
 
 ### Current Multi-Image Status
 
-- `2` references: verified
-- gray user `11257` with three references: verified
-- higher counts: exact upstream max is still pending, so do not promise it publicly yet
+- `2` images: verified
+- `11257` graylist three-image: verified
+- Higher count: upstream exact max still to be tested, not committed yet
 
-### Routing Note
+### Routing Explanation
 
-- single-image requests can use normal available carriers
-- multi-image requests normally use official `Gemini / Vertex` carriers; designated gray accounts may use an explicitly verified gray carrier
-- that is a server-side routing rule; the customer contract stays the same
+- Single image requests can be served by general available providers
+- By default, multi-image requests are only routed to official `Gemini / Vertex` carrier; specified graylist accounts can use verified graylist carriers
+- This is an internal server routing policy; client protocol remains unchanged
 
-### Gray three-image multipart editing
+### Graylist Three-Image Multipart
 
-Gray user `11257` can use `/v1/images/edits`:
+`11257` graylist accounts can use `/v1/images/edits`:
 
 ```bash
 curl -X POST https://api.crazyrouter.com/v1/images/edits \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -F "model=nano-banana-pro" \
-  -F "prompt=Use image one as the original, image two as the annotation, and image three as the reference. Edit only the annotated area." \
+  -F "prompt=以第一张为原图，第二张为批注图，第三张为参考图，仅修改批注区域" \
   -F "image[]=@original.png" \
   -F "image[]=@annotation.png" \
   -F "image[]=@reference.png"
 ```
 
-Images are ordered by submission order. The annotation image is treated as a visual reference; pixel-perfect GPT-mask semantics are not guaranteed.
+The order of images is determined by the client’s submission order. The annotation image is currently used as a visual reference input; GPT-mask-style pixel-level region locking is not guaranteed.
 
 ---
 
-## Request Examples
+## Request Example
 
-### Single-Image Edit
+### Single Image Editing
 
 <CodeGroup>
 
@@ -135,7 +149,7 @@ curl -X POST https://api.crazyrouter.com/v1/images/generations \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "nano-banana-pro",
-    "prompt": "Turn this product image into an ultra-wide hero KV with a cleaner background while preserving the subject",
+    "prompt": "把这张商品图改成超宽横幅 KV，背景更简洁，保留主体结构",
     "image_input": [
       "https://help-static-aliyun-doc.aliyuncs.com/file-manage-files/zh-CN/20250925/fpakfo/image36.webp"
     ],
@@ -156,7 +170,7 @@ response = requests.post(
     },
     json={
         "model": "nano-banana-pro",
-        "prompt": "Turn this product image into an ultra-wide hero KV with a cleaner background while preserving the subject",
+        "prompt": "把这张商品图改成超宽横幅 KV，背景更简洁，保留主体结构",
         "image_input": [
             "https://help-static-aliyun-doc.aliyuncs.com/file-manage-files/zh-CN/20250925/fpakfo/image36.webp"
         ],
@@ -172,12 +186,28 @@ print(data["data"][0]["url"])
 
 </CodeGroup>
 
-### Two-Reference Input
+### Text-to-Image
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "nano-banana-pro",
+    "prompt": "A premium product poster for a red apple, studio lighting, clean background",
+    "resolution": "1K",
+    "aspect_ratio": "1:1",
+    "output_format": "jpeg",
+    "output_compression": 85
+  }'
+```
+
+### Dual Reference Images
 
 ```json
 {
   "model": "nano-banana-pro",
-  "prompt": "Blend the subject and composition from these two references into one high-quality hero visual",
+  "prompt": "融合两张参考图的主体与构图，生成一张高质量主视觉图",
   "image_input": [
     "https://example.com/ref-1.png",
     "https://example.com/ref-2.png"
@@ -191,7 +221,7 @@ print(data["data"][0]["url"])
 
 ## Response Example
 
-The recommended automation path is to consume `data[].url`:
+It is recommended to directly consume `data[].url`:
 
 ```json
 {
@@ -204,43 +234,43 @@ The recommended automation path is to consume `data[].url`:
 }
 ```
 
-To retrieve the generated image, read `data[0].url`. Crazyrouter currently archives upstream inline image output and returns a public URL to the client.
+If you need to get the final generated image result, just read `data[0].url`. Currently, Crazyrouter will archive upstream inline images as accessible URLs, then return them to the client.
 
 ---
 
-## Validation Snapshot
+## Verified Result Summary
 
 | Item | Current Status |
-|------|----------------|
-| single URL reference | verified |
-| `2` URL references | verified |
-| `WEBP` URL | verified |
-| `JPEG` URL | verified |
-| `PNG` URL | verified |
-| `1K` | verified |
-| `4K` | verified |
-| `1:1` | verified |
-| `21:9` | verified |
-| `output_format = png` | verified |
-| `output_format = jpg` | verified |
-| exact `8`-image ceiling | `Beta` |
-| exact `30 MiB` URL boundary | `Beta` |
+|------|----------|
+| Single URL reference image | Verified |
+| `2` URL reference images | Verified |
+| `WEBP` URL | Verified |
+| `JPEG` URL | Verified |
+| `PNG` URL | Verified |
+| `1K` | Verified |
+| `4K` | Verified |
+| `1:1` | Verified |
+| `21:9` | Verified |
+| `output_format = png` | Verified |
+| `output_format = jpeg / jpg` | Verified |
+| Exact `8` image limit | `Beta` |
+| Exact `30 MiB` URL boundary | `Beta` |
 | `2K` | `Beta` |
 
-## Current Known Limits
+## Currently Known Limitations
 
-- Non-gray accounts cannot use `image`, `data:` / Base64, or multipart image input
-- The gray path is verified up to three images; higher limits are not promised yet
-- the docs do not promise the exact `30 MiB` URL boundary yet
-- the docs do not promise full closure on every screenshot-listed ratio or parameter yet
+- Non-graylist accounts do not accept `image`, `data:` / Base64 or multipart image input
+- Graylist accounts are currently verified up to three images; higher image count is not committed
+- This documentation does not commit to a precise `30 MiB` URL boundary
+- This documentation does not commit that all the proportions and parameters listed in screenshots are fully closed
 
 <Note>
-  If you need Gemini native `generateContent` image endpoints, see [Gemini Image Generation](/en/chat/gemini/image-gen) and [Gemini Image Editing](/en/chat/gemini/image-edit). If you care more about reference-count breadth, also see [Nano Banana](/en/images/nano-banana) and [Nano Banana 2](/en/images/nano-banana-2).
+  If you need a unified parameter guide for Gemini / Nano Banana image generation or editing, see [Gemini Image Generation](/en/chat/gemini/image-gen) and [Gemini Image Editing](/en/chat/gemini/image-edit). For other levels, refer to [Nano Banana](/en/images/nano-banana) and [Nano Banana 2](/en/images/nano-banana-2).
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## Related on crazyrouter.com
+## Related Pages
 
-- [Nano Banana Pro model page: live price, real samples, code](https://crazyrouter.com/en/models/google/nano-banana-pro?utm_source=docs&utm_medium=related)
-- [Nano Banana 2 model page: live price, real samples, code](https://crazyrouter.com/en/models/google/nano-banana-2?utm_source=docs&utm_medium=related)
-- [All Google models with live prices](https://crazyrouter.com/en/models/google?utm_source=docs&utm_medium=related)
+- [Nano Banana Pro model page: real-time pricing, sample usage, call code](https://crazyrouter.com/en/models/google/nano-banana-pro?utm_source=docs&utm_medium=related)
+- [Nano Banana 2 model page: real-time pricing, sample usage, call code](https://crazyrouter.com/en/models/google/nano-banana-2?utm_source=docs&utm_medium=related)
+- [Google: All models and pricing](https://crazyrouter.com/en/models/google?utm_source=docs&utm_medium=related)

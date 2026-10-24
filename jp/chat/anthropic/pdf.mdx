@@ -1,20 +1,21 @@
 ---
-title: "Claude PDF Support"
-description: "Claude PDF input verified against Crazyrouter production on 2026-03-23"
+title: "Claude PDF サポート"
+description: "2026年3月23日に Crazyrouter 本番環境にて検証されている Claude PDF 入力"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Claude PDF Support
+
+# Claude PDF サポート
 
 ```
 POST /v1/messages
 ```
 
-As of March 23, 2026, Crazyrouter production has verified that `claude-opus-4-8` can read a Base64 PDF through the native Messages API and return a text summary.
+2026年3月23日現在、Crazyrouter 本番環境で `claude-opus-4-8` は Messages API によって Base64 PDF を読み込み、テキスト要約を返すことが確認されています。
 
 ---
 
-## Verified Minimal Request
+## 検証済みの最小リクエスト
 
 ```bash
 curl https://api.crazyrouter.com/v1/messages \
@@ -46,7 +47,7 @@ curl https://api.crazyrouter.com/v1/messages \
   }'
 ```
 
-Observed production response shape:
+本番環境から実際に返却された主要な形式：
 
 ```json
 {
@@ -61,12 +62,12 @@ Observed production response shape:
 ```
 
 <Note>
-  This page keeps only the Base64 PDF path that was revalidated successfully. Remote URLs, multi-PDF comparison, and streamed PDF output were not rechecked item by item in this pass.
+  このページでは、Base64 PDF の入力経路のみ再テスト済みとして保持しています。リモート URL、複数 PDF の比較、ストリーミング PDF 出力などの複雑なシナリオは、今回個別の再テストは行っていません。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [Claude Fable 5 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
-- [Claude Fable 5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
-- [Claude Haiku 4.5 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/claude-haiku-4-5?utm_source=docs&utm_medium=related)
+- [Claude Fable 5 価格比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Claude Fable 5 モデルページ：リアルタイム価格、実際のサンプル、呼び出しコード](https://crazyrouter.com/ja/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Claude Haiku 4.5 価格比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/claude-haiku-4-5?utm_source=docs&utm_medium=related)

@@ -1,33 +1,33 @@
 ---
-title: "Speech-to-Text (STT)"
-description: "Use POST /v1/audio/transcriptions to convert speech to text"
+title: "音声文字起こし (STT)"
+description: "POST /v1/audio/transcriptions を使用して音声をテキストに変換します"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Speech-to-Text (STT)
+# 音声文字起こし (STT)
 
 ```
 POST /v1/audio/transcriptions
 ```
 
-Transcribe audio files to text, compatible with the OpenAI Whisper API format.
+音声ファイルをテキストに書き起こします。OpenAI Whisper API のフォーマットに対応しています。
 
-## Request Parameters
+## リクエストパラメータ
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `file` | file | Yes | Audio file (multipart/form-data) |
-| `model` | string | Yes | Model name: `whisper-1`, `whisper-1` |
-| `language` | string | No | Audio language (ISO-639-1 format), e.g. `zh`, `en`, `ja` |
-| `response_format` | string | No | Output format: `json` (default), `text`, `srt`, `verbose_json`, `vtt` |
-| `temperature` | number | No | Sampling temperature, 0-1 |
-| `prompt` | string | No | Prompt to help the model understand context |
+| パラメータ | タイプ | 必須 | 説明 |
+|------|------|------|------|
+| `file` | file | はい | 音声ファイル（multipart/form-data） |
+| `model` | string | はい | モデル名：`whisper-1`、`whisper-1` |
+| `language` | string | いいえ | 音声言語（ISO-639-1形式）、例：`zh`、`en`、`ja` |
+| `response_format` | string | いいえ | 出力フォーマット：`json`（デフォルト）、`text`、`srt`、`verbose_json`、`vtt` |
+| `temperature` | number | いいえ | サンプリング温度、0-1 |
+| `prompt` | string | いいえ | プロンプト。モデルが文脈を理解するのを補助します |
 
-### Supported Audio Formats
+### 対応音声フォーマット
 
-`mp3`, `mp4`, `mpeg`, `mpga`, `m4a`, `wav`, `webm`
+`mp3`、`mp4`、`mpeg`、`mpga`、`m4a`、`wav`、`webm`
 
-## Request Examples
+## リクエスト例
 
 <CodeGroup>
 
@@ -36,7 +36,7 @@ curl -X POST https://api.crazyrouter.com/v1/audio/transcriptions \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -F file=@audio.mp3 \
   -F model=whisper-1 \
-  -F language=en \
+  -F language=zh \
   -F response_format=json
 ```
 
@@ -52,7 +52,7 @@ with open("audio.mp3", "rb") as audio_file:
     transcript = client.audio.transcriptions.create(
         model="whisper-1",
         file=audio_file,
-        language="en",
+        language="zh",
         response_format="json"
     )
 
@@ -71,7 +71,7 @@ const client = new OpenAI({
 const transcript = await client.audio.transcriptions.create({
   model: "whisper-1",
   file: fs.createReadStream("audio.mp3"),
-  language: "en",
+  language: "zh",
 });
 
 console.log(transcript.text);
@@ -79,52 +79,52 @@ console.log(transcript.text);
 
 </CodeGroup>
 
-## Response Examples
+## レスポンス例
 
-### JSON Format
+### JSON 形式
 
 ```json
 {
-  "text": "Hello, welcome to the Crazyrouter API. Today we'll introduce the speech-to-text feature."
+  "text": "你好，欢迎使用 Crazyrouter API。今天我们来介绍一下语音转文字功能。"
 }
 ```
 
-### verbose_json Format
+### verbose_json 形式
 
 ```json
 {
   "task": "transcribe",
-  "language": "english",
+  "language": "chinese",
   "duration": 5.2,
-  "text": "Hello, welcome to the Crazyrouter API.",
+  "text": "你好，欢迎使用 Crazyrouter API。",
   "segments": [
     {
       "id": 0,
       "start": 0.0,
       "end": 2.5,
-      "text": "Hello, welcome to the Crazyrouter API."
+      "text": "你好，欢迎使用 Crazyrouter API。"
     }
   ]
 }
 ```
 
-### SRT Format
+### SRT 形式
 
 ```
 1
 00:00:00,000 --> 00:00:02,500
-Hello, welcome to the Crazyrouter API.
+你好，欢迎使用 Crazyrouter API。
 ```
 
 ---
 
-## Audio Translation
+## 音声翻訳
 
 ```
 POST /v1/audio/translations
 ```
 
-Translate non-English audio to English text. Parameters are the same as the transcription endpoint.
+非英語の音声を英語のテキストに翻訳します。パラメータは文字起こしインターフェースと同じです。
 
 ```python Python
 with open("chinese_audio.mp3", "rb") as audio_file:
@@ -133,9 +133,9 @@ with open("chinese_audio.mp3", "rb") as audio_file:
         file=audio_file
     )
 
-print(translation.text)  # Outputs English translation
+print(translation.text)  # 输出英文翻译
 ```
 
 <Note>
-  Specifying the `language` parameter can improve transcription accuracy. Audio file size limit is 25MB.
+  `language` パラメータを指定することで文字起こしの精度が向上します。音声ファイルのサイズ制限は25MBです。
 </Note>

@@ -1,18 +1,18 @@
 ---
-title: "채팅 완료 객체"
-description: "현재 프로덕션 동작을 기준으로 Chat Completion과 Chat Completion Chunk의 핵심 구조를 이해합니다"
+title: "챗 컴플리션 오브젝트"
+description: "챗 컴플리션 및 챗 컴플리션 청크 오브젝트의 핵심 프로덕션 중심 구조"
 ---
-> 업데이트: 2026-06-06
+> 내용 업데이트: 2026-06-09
 
-# 채팅 완료 객체
+# 챗 컴플리션 오브젝트
 
-`/v1/chat/completions`는 비스트리밍 시 `chat.completion`을, 스트리밍 시 `chat.completion.chunk`를 반환합니다.
+`/v1/chat/completions`는 비스트리밍 요청에 대해 `chat.completion`를, 스트리밍 요청에 대해서는 `chat.completion.chunk`를 반환합니다.
 
-이 문서는 Crazyrouter의 현재 OpenAI 호환 응답에서 가장 안정적이고 범용적인 구조 이해를 정리합니다.
+이 페이지는 오늘날 Crazyrouter에서 가장 안정적이고 널리 사용 가능한 OpenAI 호환 응답 구조에 초점을 맞춥니다.
 
-## 비스트리밍 객체
+## 비스트리밍 오브젝트
 
-현재 프로덕션의 최소 요청 예시:
+최소 프로덕션 요청:
 
 ```bash cURL
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -30,7 +30,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-현재 프로덕션에서 반환되는 일반적인 뼈대:
+일반적인 프로덕션 응답 골격:
 
 ```json
 {
@@ -53,17 +53,17 @@ curl https://api.crazyrouter.com/v1/chat/completions \
 }
 ```
 
-### 이렇게 이해하면 됩니다
+### 읽는 방법
 
-- `message.content`는 최종 텍스트 출력입니다
-- `message.tool_calls`는 모델이 도구를 요청할 때만 나타납니다
-- `message.reasoning_content`는 일부 모델이나 일부 라우트에서 나타날 수 있지만, 현재는 항상 존재하는 안정적인 필드로 취급해서는 안 됩니다
+- `message.content`는 최종 텍스트 답변입니다
+- `message.tool_calls`는 모델이 도구 실행을 요청할 때만 나타납니다
+- `message.reasoning_content`는 일부 모델이나 경로에서 나타날 수 있지만, 현재 보장된 필드로 간주해서는 안 됩니다
 
 ---
 
-## 스트리밍 객체
+## 스트리밍 오브젝트
 
-스트리밍 요청 시 서버는 SSE를 통해 `chat.completion.chunk`를 청크 단위로 순차 반환합니다.
+스트리밍 요청의 경우, 서버는 `chat.completion.chunk` SSE 이벤트를 반환합니다:
 
 ```json
 {
@@ -94,24 +94,24 @@ data: [DONE]
 
 ---
 
-## 자주 확인하는 필드
+## 주로 신경 쓸 필드
 
-| 필드 | 설명 |
-|------|------|
-| `object` | 비스트리밍은 `chat.completion`, 스트리밍은 `chat.completion.chunk` |
-| `model` | 실제로 응답에 사용된 모델 이름 |
-| `choices[].message.content` | 비스트리밍의 최종 텍스트 |
-| `choices[].message.tool_calls` | 비스트리밍의 도구 호출 |
-| `choices[].delta.content` | 스트리밍의 증분 텍스트 |
-| `choices[].finish_reason` | 정지 사유, 예: `stop`, `length`, `tool_calls` |
+| 필드 | 의미 |
+|-------|---------|
+| `object` | 비스트리밍의 경우 `chat.completion`, 스트리밍의 경우 `chat.completion.chunk` |
+| `model` | 응답에 사용된 실제 모델 |
+| `choices[].message.content` | 최종 비스트리밍 텍스트 |
+| `choices[].message.tool_calls` | 비스트리밍 도구 요청 |
+| `choices[].delta.content` | 스트리밍 텍스트 델타 |
+| `choices[].finish_reason` | `stop`, `length`, `tool_calls` 같은 중단 사유 |
 
 <Note>
-  업스트림 모델이 추가 필드를 그대로 전달할 수 있습니다. 클라이언트를 작성할 때는 안정적인 범용 필드를 우선 사용하고, 모든 모델이 동일한 확장 필드를 노출한다고 가정하지 마십시오.
+  상류(Upstream) 모델에서 추가 필드를 전달할 수 있습니다. 클라이언트 코드는 모든 모델이 동일한 확장 필드를 제공한다고 가정하기보다는, 우선 안정적인 공통 필드에 의존하는 것이 좋습니다.
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 관련 페이지 (crazyrouter.com)
+## crazyrouter.com의 관련 항목
 
-- [GPT Image 1.5 모델 페이지: 실시간 가격, 샘플, 코드](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2 모델 페이지: 실시간 가격, 샘플, 코드](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [OpenAI 전체 모델과 가격](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [GPT 이미지 1.5 모델 페이지: 실시간 가격, 실제 샘플, 코드](https://crazyrouter.com/ko/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT 이미지 2 모델 페이지: 실시간 가격, 실제 샘플, 코드](https://crazyrouter.com/ko/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [실시간 가격이 제공되는 모든 OpenAI 모델](https://crazyrouter.com/ko/models/openai?utm_source=docs&utm_medium=related)

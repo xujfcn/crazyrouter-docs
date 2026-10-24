@@ -1,27 +1,27 @@
 ---
-title: "Responses Web Search"
-description: "Responses web search verified against Crazyrouter production on 2026-03-23"
+title: "レスポンスWeb検索"
+description: "2026-03-23にCrazyrouter本番環境で検証されたレスポンスWeb検索"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Responses Web Search
+# レスポンスWeb検索
 
 ```
 POST /v1/responses
 ```
 
-As of March 23, 2026, Crazyrouter production has verified `gpt-5.5` on the Responses API using:
+2026年3月23日現在、Crazyrouter本番環境にて、`gpt-5.5`は以下を用いてResponses APIで検証されています:
 
 - `tools: [{ "type": "web_search_preview" }]`
-- an `output` sequence of `web_search_call`, then `message`
+- `output`のシーケンスと、その後に`web_search_call`、`message`
 
 <Note>
-  Claude does not currently support `POST /v1/responses`. For Claude web search, use `POST /v1/chat/completions` or the native Claude path instead.
+  Claudeは現在、`POST /v1/responses`をサポートしていません。ClaudeのWeb検索を利用する場合は、`POST /v1/chat/completions`またはネイティブなClaudeパスをご利用ください。
 </Note>
 
 ---
 
-## Minimal Request
+## 最小リクエスト
 
 ```bash
 curl https://api.crazyrouter.com/v1/responses \
@@ -38,7 +38,7 @@ curl https://api.crazyrouter.com/v1/responses \
   }'
 ```
 
-Observed production response shape:
+本番環境で観測されたレスポンスの形状:
 
 ```json
 {
@@ -55,18 +55,18 @@ Observed production response shape:
 
 ---
 
-## Current Verification Rule
+## 現行の検証ルール
 
-If you need to confirm that the model actually searched the web, the safest current checks are:
+モデルが実際にWeb検索を行ったかどうかを確認したい場合、現時点で最も安全なチェック方法は次の通りです:
 
-- whether `web_search_call` appears in `output`
-- whether the final answer still arrives as a `message`
+- `web_search_call`が`output`に現れるかどうか
+- 最終回答が依然として`message`として到着するかどうか
 
 <Warning>
-  This page no longer keeps older outdated examples, and it does not document un-revalidated search parameters as the current primary path.
+  このページでは、古くなった過去の例は保存しておらず、再検証されていない検索パラメータについても現行の主要パスとしては記載していません。
 </Warning>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## crazyrouter.com の関連情報
 
-- [OpenAI の全モデルと料金](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [リアルタイム価格付きの全OpenAIモデル一覧](https://crazyrouter.com/ja/models/openai?utm_source=docs&utm_medium=related)

@@ -1,23 +1,24 @@
 ---
-title: "Claude Chat Object"
-description: "Production-revalidated Anthropic Message object and native SSE events as of 2026-03-23"
+title: "Объект чата Claude"
+description: "На основе ревизии в производстве от 2026-03-23, разъяснение объекта сообщения Anthropic и нативных SSE-событий"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Claude Chat Object
 
-Crazyrouter supports the Anthropic native Messages API.
+# Объект чата Claude
 
-This page only documents Message-object and streaming-event behavior that was revalidated in production on `2026-03-23`.
+Crazyrouter поддерживает нативный Messages API от Anthropic.
 
-## Message object
+На этой странице приведены только Message-объекты и типы потоковых событий, которые `2026-03-23` уже были проверены в производственной среде.
 
-The current minimal production request uses:
+## Объект Message
+
+Минимальный запрос в актуальной версии продакшена использует:
 
 - `model: "claude-opus-4-8"`
 - `POST /v1/messages`
 
-Typical production response skeleton:
+Типичный каркас ответа в текущей продакшен-версии:
 
 ```json
 {
@@ -40,21 +41,21 @@ Typical production response skeleton:
 }
 ```
 
-### Common fields
+### Часто используемые поля
 
-| Field | Type | Meaning |
-|-------|------|---------|
-| `id` | string | Unique message identifier |
-| `type` | string | Always `message` |
-| `role` | string | Always `assistant` |
-| `content` | array | Content block list |
-| `model` | string | Actual model used |
-| `stop_reason` | string | Stop reason such as `end_turn`, `tool_use`, or `max_tokens` |
-| `usage` | object | Token usage |
+| Поле | Тип | Описание |
+|------|------|------|
+| `id` | string | Уникальный идентификатор сообщения |
+| `type` | string | Всегда `message` |
+| `role` | string | Всегда `assistant` |
+| `content` | array | Список контент-блоков |
+| `model` | string | Фактически использованная модель |
+| `stop_reason` | string | Причина остановки, такие как `end_turn`, `tool_use`, `max_tokens` |
+| `usage` | object | Статистика использования токенов |
 
-### Common content block types
+### Часто встречающиеся типы блоков content
 
-Text block:
+Текстовый блок:
 
 ```json
 {
@@ -63,7 +64,7 @@ Text block:
 }
 ```
 
-Tool-use block:
+Блок вызова инструмента:
 
 ```json
 {
@@ -76,7 +77,7 @@ Tool-use block:
 }
 ```
 
-Thinking block:
+Блок размышлений:
 
 ```json
 {
@@ -87,9 +88,9 @@ Thinking block:
 
 ---
 
-## Streaming event types
+## Типы потоковых событий
 
-In the `2026-03-23` production recheck, native streaming for `claude-opus-4-8` returned these SSE events:
+В ходе производственной ревизии `2026-03-23` нативный интерфейс `claude-opus-4-8` возвращал следующие SSE-события:
 
 - `message_start`
 - `content_block_start`
@@ -98,7 +99,7 @@ In the `2026-03-23` production recheck, native streaming for `claude-opus-4-8` r
 - `message_delta`
 - `message_stop`
 
-### Event examples
+### Пример событий
 
 `message_start`
 
@@ -144,25 +145,25 @@ data: {"type":"message_stop"}
 
 ---
 
-## Practical interpretation
+## Практический критерий
 
-- If `content` only contains `text`, it is a normal answer
-- If `stop_reason = "tool_use"` and `content` contains `tool_use`, the model is making a tool call
-- If `content` contains `thinking`, the current model and request shape triggered extended thinking
+- Если в `content` содержится только `text`, то это обычный ответ
+- Если `stop_reason = "tool_use"` и в `content` встречается `tool_use`, то происходит вызов инструмента
+- Если в `content` есть `thinking`, это означает, что текущая модель и форма запроса активировали расширенное размышление
 
 <Note>
-  A `thinking` block is not returned by every Claude model by default. The currently revalidated explicit thinking path is `claude-opus-4-8`.
+  Блок `thinking` не возвращается по умолчанию всеми моделями Claude. На данный момент подтверждена работа только для `claude-opus-4-8`.
 </Note>
 
-Related pages:
+Связанные страницы:
 
-- [Claude Native Format](/ru/chat/anthropic/messages)
-- [Feature Hub: Tool Calling](/ru/features/tool-calling)
-- [Feature Hub: Reasoning](/ru/features/reasoning)
+- [Нативный формат Claude](/ru/chat/anthropic/messages)
+- [Ключевая возможность: Tool Calling](/ru/features/tool-calling)
+- [Ключевая возможность: Reasoning](/ru/features/reasoning)
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [Claude Fable 5: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
-- [Claude Fable 5: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
-- [Claude Haiku 4.5: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/claude-haiku-4-5?utm_source=docs&utm_medium=related)
+- [Сравнение цен Claude Fable 5: Официальный / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Страница моделей Claude Fable 5: Актуальные цены, реальные примеры, код для вызова](https://crazyrouter.com/ru/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Сравнение цен Claude Haiku 4.5: Официальный / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/claude-haiku-4-5?utm_source=docs&utm_medium=related)

@@ -1,29 +1,29 @@
 ---
-title: "Execute Actions"
-description: "Execute Midjourney follow-up actions: upscale, variation, blend, describe, and more"
+title: "実行操作"
+description: "Midjourney の後続操作を実行します：アップスケール、バリエーション、ブレンド、説明など"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Execute Actions
+# 実行操作
 
-## Action - Upscale / Variation
+## Action - アップスケール / バリエーション
 
 ```
 POST /mj/submit/action
 ```
 
-Execute follow-up actions on a completed Imagine task, such as Upscale, Variation, etc.
+完了した Imagine タスクに対して、アップスケール（Upscale）、バリエーション（Variation）などの後続操作を実行します。
 
-### Request Parameters
+### リクエストパラメータ
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `taskId` | string | Yes | Original task ID |
-| `customId` | string | Yes | The `customId` of the action button, obtained from the task's `buttons` field |
-| `notifyHook` | string | No | Callback URL |
-| `state` | string | No | Custom state |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `taskId` | string | はい | 元のタスクID |
+| `customId` | string | はい | 操作ボタンの `customId`、タスクの `buttons` フィールドから取得 |
+| `notifyHook` | string | いいえ | コールバックURL |
+| `state` | string | いいえ | カスタムステータス |
 
-### Request Example
+### リクエスト例
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/mj/submit/action \
@@ -35,12 +35,12 @@ curl -X POST https://api.crazyrouter.com/mj/submit/action \
   }'
 ```
 
-### Response Example
+### レスポンス例
 
 ```json
 {
   "code": 1,
-  "description": "Submitted successfully",
+  "description": "提交成功",
   "result": "task_action_001",
   "properties": {}
 }
@@ -48,25 +48,25 @@ curl -X POST https://api.crazyrouter.com/mj/submit/action \
 
 ---
 
-## Blend - Image Blending
+## Blend - 画像合成
 
 ```
 POST /mj/submit/blend
 ```
 
-Blend multiple images to generate a new image.
+複数の画像を合成して新しい画像を生成します。
 
-### Request Parameters
+### リクエストパラメータ
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `botType` | string | No | `MID_JOURNEY` (default) or `NIJI_JOURNEY` |
-| `base64Array` | array | Yes | Array of Base64-encoded images, 2-5 images |
-| `dimensions` | string | No | Output dimensions: `PORTRAIT`, `SQUARE`, `LANDSCAPE` |
-| `notifyHook` | string | No | Callback URL |
-| `state` | string | No | Custom state |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `botType` | string | いいえ | `MID_JOURNEY`（デフォルト）または `NIJI_JOURNEY` |
+| `base64Array` | array | はい | Base64 エンコードされた画像の配列（2～5枚） |
+| `dimensions` | string | いいえ | 出力サイズ：`PORTRAIT`、`SQUARE`、`LANDSCAPE` |
+| `notifyHook` | string | いいえ | コールバックURL |
+| `state` | string | いいえ | カスタムステータス |
 
-### Request Example
+### リクエスト例
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/mj/submit/blend \
@@ -81,36 +81,36 @@ curl -X POST https://api.crazyrouter.com/mj/submit/blend \
   }'
 ```
 
-### Response Example
+### レスポンス例
 
 ```json
 {
   "code": 1,
-  "description": "Submitted successfully",
+  "description": "提交成功",
   "result": "task_blend_001"
 }
 ```
 
 ---
 
-## Describe - Image Description
+## Describe - 画像説明
 
 ```
 POST /mj/submit/describe
 ```
 
-Upload an image and let Midjourney generate corresponding prompt descriptions.
+画像をアップロードして、Midjourney に対応したプロンプト説明文を生成してもらいます。
 
-### Request Parameters
+### リクエストパラメータ
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `botType` | string | No | `MID_JOURNEY` (default) or `NIJI_JOURNEY` |
-| `base64` | string | Yes | Base64-encoded image |
-| `notifyHook` | string | No | Callback URL |
-| `state` | string | No | Custom state |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `botType` | string | いいえ | `MID_JOURNEY`（デフォルト）または `NIJI_JOURNEY` |
+| `base64` | string | はい | Base64 エンコードされた画像 |
+| `notifyHook` | string | いいえ | コールバックURL |
+| `state` | string | いいえ | カスタムステータス |
 
-### Request Example
+### リクエスト例
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/mj/submit/describe \
@@ -123,23 +123,23 @@ curl -X POST https://api.crazyrouter.com/mj/submit/describe \
 
 ---
 
-## Modal - Dialog Confirmation
+## Modal - ポップアップ確認
 
 ```
 POST /mj/submit/modal
 ```
 
-Submit a Midjourney modal confirmation action (e.g. Region Vary and other operations requiring secondary confirmation).
+Midjourney のポップアップ確認操作（Region Vary など再確認が必要な操作）を送信します。
 
-### Request Parameters
+### リクエストパラメータ
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `taskId` | string | Yes | Original task ID |
-| `prompt` | string | No | Prompt in the modal dialog |
-| `maskBase64` | string | No | Base64-encoded mask image |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `taskId` | string | はい | 元のタスクID |
+| `prompt` | string | いいえ | ポップアップのプロンプト文 |
+| `maskBase64` | string | いいえ | マスク画像のBase64エンコード |
 
-### Request Example
+### リクエスト例
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/mj/submit/modal \
@@ -152,5 +152,5 @@ curl -X POST https://api.crazyrouter.com/mj/submit/modal \
 ```
 
 <Note>
-  All actions return a new task ID after submission. Use the [Query Task Status](/jp/images/midjourney/query) endpoint to get results.
+  すべての操作は送信後、新しいタスクIDが返されます。結果は[タスクステータス確認](/jp/images/midjourney/query)APIで取得してください。
 </Note>

@@ -1,8 +1,8 @@
 ---
 title: "Gemini Image Editing"
-description: "Current Gemini image-editing availability note updated from the 2026-04-14 Crazyrouter production retest"
+description: "Use Gemini / Nano Banana image editing features through the OpenAI Images API"
 ---
-> Last updated: 2026-08-18
+> Content updated: 2026-09-28
 
 # Gemini Image Editing
 
@@ -10,58 +10,46 @@ description: "Current Gemini image-editing availability note updated from the 20
 POST /v1/images/generations
 ```
 
-The customer-facing Gemini / Nano Banana editing contract is the OpenAI-compatible Images API. Use `POST /v1/images/generations` for URL references and, for designated gray accounts, data URLs, raw Base64, or multipart editing through `POST /v1/images/edits`.
+Gemini / Nano Banana image editing is standardized on Crazyrouter via the OpenAI Images compatible entry. The `image_input` URL is used by default; accounts specified for grayscale also support dataURL, raw Base64, and `/v1/images/edits` multipart three-image editing.
 
 <Warning>
-  Provider-native `generateContent` details are internal. Use the public Images API contract; gray-only input extensions must not be assumed for non-gray accounts.
+  Requests such as image editing and multiple reference images usually take longer. For production integration, please use the primary supported routing, `https://api.crazyrouter.com/v1`, with the complete endpoint being `https://api.crazyrouter.com/v1/images/generations`.
 </Warning>
 
-<Note>
-  See [Nano Banana Pro](/en/images/nano-banana-pro) for the current gray-release limits and examples.
-</Note>
+---
+
+## Current Recommendations
+
+1. New integrations should preferably use `nano-banana-2` or `nano-banana-pro`
+2. For image input, use `image_input`, submitting a URL or an array of URLs
+3. Do not submit native Gemini fields, such as `generationConfig`, `imageConfig`, `imageOutputOptions`
+4. It is recommended to set client timeout to 180 seconds or more
 
 ---
 
-## Current Recommendation
+## Request Template
 
-1. If your goal is Gemini text-to-image, use [Gemini Image Generation](/en/chat/gemini/image-gen)
-2. If your goal is a currently usable reference-image editing route, start with [Nano Banana 2](/en/images/nano-banana-2)
-3. If you must evaluate `nano-banana`, follow the controlled-test guidance on [Nano Banana](/en/images/nano-banana)
-4. Use `POST /v1/images/generations` as the public Nano Banana entry point; see the model page for gray-only input extensions
-
----
-
-## Retest Template
-
-For public integration, use the Images API examples on the model page. Native `generateContent` is an internal provider path:
+Below is the minimal request for editing a reference image via the unified Images API:
 
 ```bash
-curl "https://api.crazyrouter.com/v1beta/models/nano-banana-2:generateContent?key=YOUR_API_KEY" \
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "contents": [
-      {
-        "role": "user",
-        "parts": [
-          {"text": "Edit this image: change the background to blue and keep the main square visible. Return image output."},
-          {
-            "inlineData": {
-              "mimeType": "image/png",
-              "data": "iVBORw0KGgoAAA..."
-            }
-          }
-        ]
-      }
+    "model": "nano-banana-2",
+    "prompt": "把参考图背景改成蓝色，保留主体结构和边缘细节",
+    "image_input": [
+      "https://example.com/reference.png"
     ],
-    "generationConfig": {
-      "responseModalities": ["IMAGE"]
-    }
+    "resolution": "1K",
+    "aspect_ratio": "1:1",
+    "output_format": "png"
   }'
 ```
 
 {/* crazyrouter-model-links v2 */}
-## Related on crazyrouter.com
+## Related Pages
 
-- [Gemini 2.5 Flash price comparison: list vs Azure / Bedrock / Vertex vs Crazyrouter](https://crazyrouter.com/en/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash model page: live price, real samples, code](https://crazyrouter.com/en/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash-Lite price comparison: list vs Azure / Bedrock / Vertex vs Crazyrouter](https://crazyrouter.com/en/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash Price Comparison: Official / Azure / Bedrock / Vertex vs Crazyrouter](https://crazyrouter.com/en/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash Model Page: Real-time Pricing, Actual Examples, API Calls](https://crazyrouter.com/en/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash-Lite Price Comparison: Official / Azure / Bedrock / Vertex vs Crazyrouter](https://crazyrouter.com/en/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)

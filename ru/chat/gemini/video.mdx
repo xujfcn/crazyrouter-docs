@@ -1,27 +1,27 @@
 ---
-title: "Gemini Video Understanding"
-description: "Gemini native video understanding documented from successful Crazyrouter request patterns on 2026-04-08"
+title: "Gemini Видео-понимание"
+description: "Gemini нативное видео-понимание, основанное на опыте успешных запросов на сайте Crazyrouter от 2026-04-08"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Gemini Video Understanding
+# Gemini Видео-понимание
 
 ```text
 POST /v1beta/models/{model}:generateContent
 ```
 
-As of `2026-04-08`, successful Crazyrouter and local `:4000` retests show:
+По состоянию на `2026-04-08`, повторные тесты между Crazyrouter этим сайтом и локальным `4000` портом показывают:
 
-- `gemini-2.5-pro` can read `video/mp4`
-- the currently verified primary path is `fileData.fileUri`
-- the video URL must be publicly reachable by the Gemini upstream
+- `gemini-3.1-pro` может читать `video/mp4`
+- В настоящее время стабильно работает основной маршрут `fileData.fileUri`
+- Видео-файл должен быть публично доступным URL, который может получить Gemini
 
 ---
 
-## Verified Minimal Request
+## Проверенный минимальный запрос
 
 ```bash
-curl "https://api.crazyrouter.com/v1beta/models/gemini-2.5-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -35,7 +35,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-2.5-pro:generateContent?k
             }
           },
           {
-            "text": "Describe the main subject, motion, and whether the camera is static."
+            "text": "请用一句中文回答：视频里的主体是什么，如何运动，镜头是否固定。"
           }
         ]
       }
@@ -46,7 +46,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-2.5-pro:generateContent?k
   }'
 ```
 
-Observed successful response shape:
+Ключевые формы успешных ответов в производственной среде:
 
 ```json
 {
@@ -55,7 +55,7 @@ Observed successful response shape:
       "content": {
         "parts": [
           {
-            "text": "The main subject is a red ball rolling from left to right, and the camera is static."
+            "text": "视频里的主体是一个红色小球，它从左向右滚动，镜头是固定的。"
           }
         ]
       }
@@ -64,20 +64,20 @@ Observed successful response shape:
 }
 ```
 
-## Request Notes
+## Важные моменты запроса
 
-- The primary recommended path for video understanding is `fileData.fileUri`
-- Set `mimeType` to the real file type, such as `video/mp4`
-- `fileUri` must be reachable by the Gemini upstream
-- Private-network URLs, signed flows that cannot be crawled, or inaccessible storage links are likely to fail
+- Для видео-понимания сейчас рекомендуется использовать основной вариант записи `fileData.fileUri`
+- `mimeType` заполняется реальным файлом, например `video/mp4`
+- `fileUri` должен быть доступен upstream Gemini
+- Если файл находится в частной сети, требует аутентификацию или URL недоступен напрямую, запрос, скорее всего, будет неудачным
 
 <Note>
-  Do not assume the image-understanding request shape is the same as the video-understanding request shape. Images currently work best through `inlineData`, while the verified video path here uses `fileData.fileUri`.
+  Для понимания изображений используйте предпочтительно `inlineData`, не копируйте удачные методы с картинок напрямую для видео. За изображениями обращайтесь к [Gemini Понимание изображений](/ru/chat/gemini/vision).
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [Gemini 2.5 Flash: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash-Lite: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash Сравнение цен: Официально / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash Страница модели: реальные цены, реальные примеры, код для вызова](https://crazyrouter.com/ru/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash-Lite Сравнение цен: Официально / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)

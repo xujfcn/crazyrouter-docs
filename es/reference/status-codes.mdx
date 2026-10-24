@@ -1,0 +1,127 @@
+---
+title: "Códigos de estado"
+description: "Referencia de los códigos de estado para todos los tipos de API"
+---
+> Contenido actualizado: 2026-10-22
+
+## Códigos de estado HTTP
+
+| Código de estado | Descripción | Sugerencia de manejo |
+|------------------|-------------|----------------------|
+| 200 | Solicitud exitosa | - |
+| 400 | Error en los parámetros de la solicitud | Verifica el formato y los parámetros del cuerpo de la solicitud |
+| 401 | Fallo de autenticación | Verifica si la API Key es correcta |
+| 403 | Permiso insuficiente | Verifica si el token tiene permisos para acceder a este modelo |
+| 404 | Recurso no encontrado | Revisa la ruta de la URL |
+| 429 | Frecuencia de solicitudes excedida | Reduce la frecuencia de solicitudes o contacta al administrador |
+| 500 | Error 5xx del servidor | Se puede reintentar; puede ser un error interno de este sitio o un 5xx del servidor superior devuelto por este sitio |
+| 502 | Fallo al obtener resultado desde gateway o servidor superior | Por lo general significa que se accedió a la etapa de llamada superior, pero no se obtuvo una respuesta o resultado válido del servidor superior, se puede reintentar |
+| 503 | Servicio no disponible | El sistema está en mantenimiento |
+
+## Diferencia entre 500 y 502
+
+- `500` es un error de servidor más general. En CrazyRouter, puede indicar tanto un error interno de este sitio como un `5xx` devuelto directamente por el servidor superior y retransmitido por este sitio al cliente.
+- `502` es más específico y generalmente significa que la solicitud ya alcanzó la gateway de CrazyRouter o la etapa de llamada al servidor superior, pero CrazyRouter no obtuvo una respuesta válida o un resultado del servidor superior, por ejemplo, el servidor superior no es accesible, la respuesta es inválida a nivel de gateway o falló la obtención de la dirección de resultado de la tarea.
+- Si este tipo de problemas ocurre de forma recurrente:
+  - Muchos `502` usualmente requieren revisar primero la disponibilidad del canal superior, la conectividad de red y si la URL del resultado es accesible.
+  - Muchos `500` deben ser diferenciados según el tipo de error y los registros; solo si está claramente marcado como un `site_internal` interno del sitio o un caso de panic, debe considerarse claramente como un problema propio de CrazyRouter.
+
+## Códigos de estado de Chat Completions
+
+```json
+{
+  "error": {
+    "message": "错误描述",
+    "type": "error_type",
+    "code": "error_code"
+  }
+}
+```
+
+| code | Descripción |
+|------|-------------|
+| `invalid_api_key` | La API Key es inválida o ha expirado |
+| `insufficient_quota` | Saldo insuficiente |
+| `model_not_found` | El modelo no existe o no está habilitado |
+| `context_length_exceeded` | La entrada excede el límite de longitud de contexto del modelo |
+| `rate_limit_exceeded` | Frecuencia de solicitud excedida |
+| `content_filter` | El contenido ha sido bloqueado por el filtro de seguridad |
+
+## Códigos de estado de tareas de Midjourney
+
+| Estado | Descripción |
+|--------|-------------|
+| `NOT_START` | La tarea no ha comenzado |
+| `SUBMITTED` | Enviado |
+| `IN_PROGRESS` | Generando |
+| `SUCCESS` | Generación exitosa |
+| `FAILURE` | Fallo en la generación |
+| `CANCEL` | Cancelado |
+
+### Códigos de error de MJ
+
+| code | Descripción |
+|------|-------------|
+| 1 | Envío exitoso |
+| 21 | La tarea ya existe |
+| 22 | En cola |
+| 23 | La cola está llena |
+| 24 | Fallo al enviar |
+
+## Códigos de estado de video Kling
+
+| Estado | Descripción |
+|--------|-------------|
+| `queued` | Enviado o en cola |
+| `processing` | Procesando |
+| `succeeded` | Generación exitosa |
+| `failed` | Fallo en la generación |
+
+## Códigos de estado de tareas Jimeng
+
+| Estado | Descripción |
+|--------|-------------|
+| `queued` | Enviado o en cola |
+| `processing` | Procesando |
+| `succeeded` | Generación exitosa |
+| `failed` | Fallo en la generación |
+
+## Códigos de estado de video Luma
+
+| Estado | Descripción |
+|--------|-------------|
+| `pending` | En espera |
+| `processing` | Procesando |
+| `completed` | Completado |
+| `failed` | Fallido |
+
+## Códigos de estado de video Runway
+
+| Estado | Descripción |
+|--------|-------------|
+| `PENDING` | En espera |
+| `RUNNING` | Generando |
+| `SUCCEEDED` | Exitoso |
+| `FAILED` | Fallido |
+
+## Sugerencias generales de manejo de errores
+
+<Warning>
+  Ante un error 429, no rehagas la solicitud inmediatamente. Se recomienda aplicar una estrategia de retroceso exponencial (Exponential Backoff), comenzando con una espera de 1 segundo y duplicando el tiempo en cada intento.
+</Warning>
+
+```python
+import time
+import requests
+
+def request_with_retry(url, headers, json_data, max_retries=3):
+    for i in range(max_retries):
+        response = requests.post(url, headers=headers, json=json_data)
+        if response.status_code == 429:
+            wait = 2 ** i
+            print(f"频率限制，等待 {wait} 秒后重试...")
+            time.sleep(wait)
+            continue
+        return response
+    return response
+```

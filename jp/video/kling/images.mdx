@@ -1,35 +1,36 @@
 ---
-title: "Kling Image Generation"
-description: "Use the Kling API to generate images"
+title: "Kling 画像生成"
+description: "Kling API を使って画像を生成する"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Kling Image Generation
+
+# Kling 画像生成
 
 ```
 POST /kling/v1/images/generations
 ```
 
-The current public docs only commit to the main Kling image-generation path. Do not document undocumented image-side extensions as if they were already a stable public contract.
+現在公開されているドキュメントは、Kling 画像生成のメインパスのみを保証しています。まだ公開されていない image-side の拡張フィールドを、安定した対外契約と誤認して記述しないでください。
 
-## Currently Verified Scope
+## 現時点で検証済みの範囲
 
-- `kling-v2-5-turbo` image generation has completed bounded verification
-- successful results prefer Crazyrouter archived URLs such as `https://media.crazyrouter.com/...png`
+- `kling-v2-5-turbo` 画像生成は、bounded 検証が完了しています
+- 成功時のレスポンスは優先的に Crazyrouter アーカイブアドレス（例：`https://media.crazyrouter.com/...png`）を返します
 
-## Request Parameters
+## リクエストパラメータ
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model` | string | No | Common validated example: `kling-v2-5-turbo` |
-| `prompt` | string | Yes | Image prompt |
-| `negative_prompt` | string | No | Negative prompt |
-| `aspect_ratio` | string | No | Such as `1:1`, `16:9`, `9:16` |
-| `n` | integer | No | Number of images, default `1` |
-| `callback_url` | string | No | Callback URL |
-| `external_task_id` | string | No | Custom business task ID |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `model` | string | いいえ | 現在よく使われている例は `kling-v2-5-turbo` |
+| `prompt` | string | はい | 画像の説明プロンプト |
+| `negative_prompt` | string | いいえ | ネガティブプロンプト |
+| `aspect_ratio` | string | いいえ | `1:1`、`16:9`、`9:16` など |
+| `n` | integer | いいえ | 生成数、デフォルトは `1` |
+| `callback_url` | string | いいえ | コールバックアドレス |
+| `external_task_id` | string | いいえ | ビジネス側のカスタムタスク ID |
 
-## Request Example
+## リクエスト例
 
 <CodeGroup>
 
@@ -39,7 +40,7 @@ curl -X POST https://api.crazyrouter.com/kling/v1/images/generations \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "kling-v2-5-turbo",
-    "prompt": "A realistic shiba inu wearing sunglasses",
+    "prompt": "一只戴着墨镜的柴犬，写实摄影风格",
     "negative_prompt": "blurry, low quality",
     "aspect_ratio": "1:1",
     "n": 1
@@ -57,7 +58,7 @@ response = requests.post(
     },
     json={
         "model": "kling-v2-5-turbo",
-        "prompt": "A realistic shiba inu wearing sunglasses",
+        "prompt": "一只戴着墨镜的柴犬，写实摄影风格",
         "negative_prompt": "blurry, low quality",
         "aspect_ratio": "1:1",
         "n": 1
@@ -69,7 +70,7 @@ print(response.json())
 
 </CodeGroup>
 
-## Successful Submit Response
+## 正常に送信された場合のレスポンス例
 
 ```json
 {
@@ -85,7 +86,7 @@ print(response.json())
 
 ---
 
-## Query Image Task
+## 画像タスクの照会
 
 ```
 GET /kling/v1/images/generations/{task_id}
@@ -96,7 +97,7 @@ curl https://api.crazyrouter.com/kling/v1/images/generations/2037177945839673344
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-### Completed Response Example
+### レスポンス例（完了時）
 
 ```json
 {
@@ -114,12 +115,12 @@ curl https://api.crazyrouter.com/kling/v1/images/generations/2037177945839673344
 ```
 
 <Note>
-  Kling image generation is asynchronous. Query the task for terminal output. This page intentionally does not document image-to-image, `image_fidelity`, or other image-side extension parameters as a public hard contract.
+ Kling 画像生成は非同期タスクです。送信後は照会インターフェースで最終結果を取得してください。本ページでは画像から画像へ、`image_fidelity`などのimage-side拡張パラメータを公開されたハードな契約とはみなしていません。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [Kling 2.6 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/kling/aigc-video-kling-2-6?utm_source=docs&utm_medium=related)
-- [Kling 3.0 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/kling/aigc-video-kling-3-0?utm_source=docs&utm_medium=related)
-- [Kling AI の全モデルと料金](https://crazyrouter.com/en/models/kling?utm_source=docs&utm_medium=related)
+- [Kling 2.6 モデルページ：リアルタイム価格、実サンプル、呼び出しコード](https://crazyrouter.com/ja/models/kling/aigc-video-kling-2-6?utm_source=docs&utm_medium=related)
+- [Kling 3.0 モデルページ：リアルタイム価格、実サンプル、呼び出しコード](https://crazyrouter.com/ja/models/kling/aigc-video-kling-3-0?utm_source=docs&utm_medium=related)
+- [Kling AI 全モデルと価格一覧](https://crazyrouter.com/ja/models/kling?utm_source=docs&utm_medium=related)

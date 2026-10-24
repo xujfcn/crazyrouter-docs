@@ -1,28 +1,29 @@
 ---
-title: "MiniMax Video"
-description: "Use the MiniMax/Hailuo API to generate videos"
+title: "MiniMax Видео"
+description: "Генерация видео с помощью MiniMax/Hailuo API"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# MiniMax Video
 
-MiniMax (Hailuo) provides high-quality video generation capabilities.
+# MiniMax Видео
 
-## Create Video
+MiniMax (Hailuo) предоставляет высококачественные возможности генерации видео.
+
+## Создать видео
 
 ```
 POST /minimax/v1/video_generation
 ```
 
-### Request Parameters
+### Параметры запроса
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model` | string | Yes | Model name, e.g. `video-01`, `video-01-live2d` |
-| `prompt` | string | Yes | Video description prompt |
-| `first_frame_image` | string | No | First frame image URL |
+| Параметр | Тип | Обязательный | Описание |
+|------|------|------|------|
+| `model` | string | да | Имя модели, например `video-01`, `video-01-live2d` |
+| `prompt` | string | да | Промпт-описание видео |
+| `first_frame_image` | string | нет | URL первого кадра изображения |
 
-### Request Examples
+### Пример запроса
 
 <CodeGroup>
 
@@ -32,7 +33,7 @@ curl -X POST https://api.crazyrouter.com/minimax/v1/video_generation \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "video-01",
-    "prompt": "A kitten napping in the sunlight, a gentle breeze ruffling its fur"
+    "prompt": "一只小猫在阳光下打盹，微风吹动它的毛发"
   }'
 ```
 
@@ -47,7 +48,7 @@ response = requests.post(
     },
     json={
         "model": "video-01",
-        "prompt": "A kitten napping in the sunlight, a gentle breeze ruffling its fur"
+        "prompt": "一只小猫在阳光下打盹，微风吹动它的毛发"
     }
 )
 
@@ -56,7 +57,7 @@ print(response.json())
 
 </CodeGroup>
 
-### Response Example
+### Пример ответа
 
 ```json
 {
@@ -70,19 +71,19 @@ print(response.json())
 
 ---
 
-## Image-to-Video
+## Генерация видео по картинке
 
 ```json
 {
   "model": "video-01",
-  "prompt": "The person in the image starts smiling",
+  "prompt": "图片中的人物开始微笑",
   "first_frame_image": "https://example.com/portrait.jpg"
 }
 ```
 
 ---
 
-## Query Task
+## Проверка статуса задачи
 
 ```
 GET /minimax/v1/query/video_generation?task_id={task_id}
@@ -93,7 +94,7 @@ curl "https://api.crazyrouter.com/minimax/v1/query/video_generation?task_id=mini
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-### Response Example (Completed)
+### Пример ответа (завершено)
 
 ```json
 {
@@ -107,18 +108,18 @@ curl "https://api.crazyrouter.com/minimax/v1/query/video_generation?task_id=mini
 }
 ```
 
-### Task Status
+### Статусы задачи
 
-| Status | Description |
-|--------|-------------|
-| `Queueing` | Queued |
-| `Processing` | Processing |
-| `Success` | Succeeded |
-| `Fail` | Failed |
+| Статус | Описание |
+|------|------|
+| `Queueing` | В очереди |
+| `Processing` | В обработке |
+| `Success` | Успешно |
+| `Fail` | Ошибка |
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [MiniMax M3: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/minimax-m3?utm_source=docs&utm_medium=related)
-- [MiniMax M3: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/minimax/minimax-m3?utm_source=docs&utm_medium=related)
-- [Все модели Hailuo с актуальными ценами](https://crazyrouter.com/en/models/hailuo?utm_source=docs&utm_medium=related)
+- [Сравнение цен MiniMax M3: официально / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/minimax-m3?utm_source=docs&utm_medium=related)
+- [Страница модели MiniMax M3: актуальные цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/minimax/minimax-m3?utm_source=docs&utm_medium=related)
+- [Все модели и цены Hailuo](https://crazyrouter.com/ru/models/hailuo?utm_source=docs&utm_medium=related)

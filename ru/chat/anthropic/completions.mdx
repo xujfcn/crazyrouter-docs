@@ -1,25 +1,29 @@
 ---
-title: "Claude OpenAI-Compatible Chat"
-description: "Claude Chat Completions compatibility path verified against Crazyrouter production on 2026-03-23"
+title: "Claude OpenAI-совместимый формат"
+description: "Путь совместимости Claude Chat Completions, подтвержденный в производственной среде Crazyrouter на 2026-03-23"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-23
 
-# Claude OpenAI-Compatible Chat
+# Claude OpenAI-совместимый формат
 
 ```
 POST /v1/chat/completions
 ```
 
-As of March 23, 2026, Crazyrouter production has verified:
+По состоянию на 23 марта 2026 года производственная среда Crazyrouter подтверждает:
 
-- non-stream `claude-opus-4-8` requests return `object: "chat.completion"`
-- the current `message` reliably includes `role` and `content`
-- streaming requests return `chat.completion.chunk`
-- the SSE stream still ends with `data: [DONE]`
+- `claude-opus-4-8` Нестриминговые запросы возвращают `object: "chat.completion"`
+- `message` Текущая стабильная версия включает `role`, `content`
+- Стриминговые запросы возвращают `chat.completion.chunk`
+- SSE всё еще завершается `data: [DONE]`
+
+<Warning>
+Эта страница описывает стандартный путь диалога Claude в совместимом с OpenAI Chat Completions формате. Если вам нужен родной `tool_use` Claude, Claude Code или сценарии агентной разработки с использованием инструментов, используйте сначала [родной формат Claude](/ru/chat/anthropic/messages) для `POST /v1/messages`. Совместимый с OpenAI формат не гарантирует равноценную поддержку родных инструментальных блоков Claude.
+</Warning>
 
 ---
 
-## Non-Streaming Request
+## Нестриминговые запросы
 
 ```bash
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -36,7 +40,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-Observed response shape:
+Ключевые формы ответа:
 
 ```json
 {
@@ -55,7 +59,7 @@ Observed response shape:
 
 ---
 
-## Streaming Request
+## Стриминговые запросы
 
 ```bash
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -71,7 +75,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-The 2026-03-23 production streaming probe began like this:
+В производственном стриминговом пробном запуске от 2026-03-23, начальный фрагмент выглядит следующим образом:
 
 ```text
 data: {"object":"chat.completion.chunk","model":"claude-opus-4-8","choices":[{"delta":{"role":"assistant"}}]}
@@ -80,12 +84,12 @@ data: [DONE]
 ```
 
 <Note>
-  If you need Claude-native `thinking`, native tool blocks, or document inputs, prefer [Claude Messages](/chat/anthropic/messages).
+  Если вам нужен родной `thinking` Claude, родные инструментальные блоки или ввод документа, используйте сначала [Claude Messages](/ru/chat/anthropic/messages).
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [Claude Fable 5: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
-- [Claude Fable 5: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
-- [Claude Haiku 4.5: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/claude-haiku-4-5?utm_source=docs&utm_medium=related)
+- [Сравнение цен Claude Fable 5: Официальный / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Страница модели Claude Fable 5: Текущие цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Сравнение цен Claude Haiku 4.5: Официальный / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/claude-haiku-4-5?utm_source=docs&utm_medium=related)

@@ -1,88 +1,88 @@
 ---
-title: 'n8n Setup Guide'
-description: 'Configure Crazyrouter in n8n with OpenAI credentials, AI Agent workflows, and an HTTP Request fallback, then finish validation and troubleshooting'
+title: 'n8n 設定チュートリアル'
+description: 'n8n で Crazyrouter を使って OpenAI 認証情報、AI Agent ワークフロー、および HTTP Request フォールバック手順を設定し、検証とトラブルシュートを完了します'
 ---
-> 更新日: 2026-06-23
+> 内容更新日: 2026-06-09
 
-n8n is a strong fit when you want to place LLM calls inside automation flows, agents, approval chains, and business-system integrations. When connecting it to Crazyrouter, the recommended rollout is to get one minimal workflow working with n8n's OpenAI credential path first, then decide whether you need the more flexible HTTP Request fallback.
+n8n は LLM 呼び出しを自動化フロー、Agent ノード、承認フローや業務システム統合に組み込むのに適しています。Crazyrouter との連携時には、まず n8n の OpenAI 認証情報経由で最小ワークフローを実行し、その後より柔軟な HTTP Request ノードへの切り替えを検討することを推奨します。
 
-## Overview
+## 概要
 
-Using n8n's OpenAI credentials or AI nodes, you can route workflow model traffic through Crazyrouter:
+n8n の OpenAI 認証情報または AI ノードを通じて、ワークフロー内のモデルリクエストを Crazyrouter にリダイレクトできます：
 
-- Recommended protocol: `OpenAI-compatible API`
-- Recommended route: n8n `OpenAI API` credential + node-level `Base URL`
-- Base URL: `https://api.crazyrouter.com/v1`
-- Auth method: `sk-...` token
-- Recommended first validation model: `gpt-5.5`
+- 推奨プロトコル：`OpenAI-compatible API`
+- 推奨連携方法：n8n `OpenAI API` 認証情報 + ノードレベル `Base URL`
+- Base URL：`https://api.crazyrouter.com/v1`
+- 認証方式：`sk-...` トークン
+- 最初の動作検証に推奨するモデル：`gpt-5.5`
 
-If a specific node does not expose the parameters or newer model features you need, fall back to the `HTTP Request` node and call Crazyrouter directly.
+一部ノードで必要なパラメータや最新モデル機能がサポートされていない場合は、`HTTP Request` ノードで Crazyrouter API を直接呼び出すフォールバックが可能です。
 
-## Best For
+## 対象ユーザー
 
-- teams putting AI inside automation workflows
-- users connecting forms, databases, approvals, webhooks, and LLMs
-- builders using `AI Agent` nodes with tool orchestration
-- internal automation stacks that need visual workflow control
+- AI を自動化ワークフローに組み入れたい方
+- フォーム、データベース、承認、Webhook とモデル連携をしたい方
+- AI Agent ノードやオーケストレーションツールで呼び出しを行いたい方
+- Crazyrouter を可視化環境で業務フローに統合したい方
 
-## Protocol Used
+## 利用プロトコル
 
-Recommended protocol: `OpenAI-compatible API`
+推奨プロトコル：`OpenAI-compatible API`
 
-When connecting Crazyrouter in n8n, use:
+n8n で Crazyrouter を連携する場合、次の値を入力してください：
 
 ```text
 https://api.crazyrouter.com/v1
 ```
 
-Do not enter:
+次の値は入力しないでください：
 
 - `https://api.crazyrouter.com`
 - `https://api.crazyrouter.com/v1/chat/completions`
 
-## Prerequisites
+## 前提条件
 
-| Item | Details |
-|------|---------|
-| Crazyrouter account | Register first at [crazyrouter.com](https://crazyrouter.com) |
-| Crazyrouter token | Create a dedicated `sk-...` token for n8n |
-| n8n | Use a current stable version with AI nodes available |
-| Available models | Allow at least one verified chat model such as `gpt-5.5` |
+| 項目 | 説明 |
+|------|------|
+| Crazyrouter アカウント | 最初に [crazyrouter.com](https://crazyrouter.com) で登録 |
+| Crazyrouter トークン | n8n 専用の `sk-...` トークン発行を推奨 |
+| n8n | 現在の安定版利用＆AIノードの利用可否確認 |
+| 利用可能なモデル | 当日に正常動作確認済みのチャットモデル（例: `gpt-5.5`）を最低 1 つ許可 |
 
-Recommended starting whitelist:
+推奨する初回ホワイトリスト：
 
 - `gpt-5.5`
 - `claude-opus-4-8`
 - `gemini-3.1-pro`
-- `text-embedding-3-large` if you will use vector or retrieval-related flows
+- `text-embedding-3-large`（ベクトルや検索系ノード利用の場合）
 
-## 5-Minute Quick Start
+## 5分間クイックスタート
 
 <Steps>
-  <Step title="Create a dedicated n8n token">
-    In the Crazyrouter dashboard, create a token named `n8n`. For the first rollout, allow only `gpt-5.5` and `claude-opus-4-8`.
+  <Step title="n8n 専用トークンを作成する">
+    Crazyrouter 管理画面で `n8n` という名前のトークンを作成します。初回は `gpt-5.5` と `claude-opus-4-8` のみ許可することを推奨します。
   </Step>
-  <Step title="Add an OpenAI credential">
-    In n8n, go to `Settings` → `Credentials` → `Add Credential`, then choose `OpenAI API` or the equivalent OpenAI credential type in your version.
+  <Step title="OpenAI の認証情報を追加する">
+    n8n 内で `Settings` → `Credentials` → `Add Credential` に進み、`OpenAI API` もしくは現在バージョンに対応した OpenAI 認証情報タイプを選択します。
   </Step>
-  <Step title="Enter the credential and node values">
-    First fill in the credential:
-    - `API Key`: your `sk-...`
+  <Step title="認証情報とノード情報を記入する">
+    まず認証情報に次を入力します：
+    - `API Key`: あなたの `sk-...`
 
-    Then in the `OpenAI`, `OpenAI Chat Model`, or related AI node `Options`, set:
+    次に `OpenAI`、`OpenAI Chat Model` または該当 AI ノードの `Options` で設定：
     - `Base URL`: `https://api.crazyrouter.com/v1`
   </Step>
-  <Step title="Build a minimal workflow">
-    Create a workflow such as `Manual Trigger` → `OpenAI Chat Model` → `Output`, and set the model to `gpt-5.5`.
+  <Step title="最小限のワークフローを作成する">
+    新規ワークフローを作成し、次の順で使用します：`Manual Trigger` → `OpenAI Chat Model` → `Output`（モデルは `gpt-5.5` を指定）
   </Step>
-  <Step title="Run the first validation">
-    Send a simple input such as `Reply only OK` through the `OpenAI Chat Model` node and execute the workflow manually. Once it succeeds, add AI Agent or more complex logic later.
+  <Step title="初回認証を完了する">
+    `OpenAI Chat Model` ノードに簡単な入力（例: `Reply only OK`）を入力し、ワークフローを手動実行します。正常なレスポンスが返れば、AI Agent や複雑なフローの設定に進んでください。
   </Step>
 </Steps>
 
-## Minimal Workflow Example
+## 最小ワークフロー例
 
-### OpenAI Chat Model node
+### OpenAI Chat Model ノード
 
 ```json
 {
@@ -96,25 +96,25 @@ Recommended starting whitelist:
 }
 ```
 
-### AI Agent workflow
+### AI Agent ワークフロー
 
-Start with the simplest path:
+可能な限りシンプルな流れから始めるのを推奨します：
 
 1. `Manual Trigger`
 2. `AI Agent`
 3. `Output`
 
-In the `AI Agent`, choose the Crazyrouter credential and attach only one simple tool for the first test. That keeps model issues separate from tool-chain issues.
+`AI Agent` で作成した Crazyrouter 認証情報を選択し、最初はツールノード1つだけを接続しましょう。ツールの問題とモデルの問題を区別しやすくなります。
 
-## HTTP Request Fallback
+## HTTP Request フォールバック手順
 
-Use the `HTTP Request` node if you need:
+以下の場合は：
 
-- newer parameters not yet exposed by n8n AI nodes
-- tighter control over the request body
-- easier debugging of headers, body, or streaming behavior
+- 一部 n8n AI ノードが未対応の新規パラメータを使いたい
+- より柔軟なリクエストボディ制御が必要
+- headers, body, stream パラメータの明確なデバッグが必要
 
-Example:
+`HTTP Request` ノードを使い Crazyrouter を直接呼び出せます：
 
 ```http
 Method: POST
@@ -132,93 +132,93 @@ Body:
 ```
 
 <Tip>
-Recommended order: first validate with the native OpenAI credential and AI nodes; only switch to `HTTP Request` when node coverage is not enough.
+推奨順序：まずは OpenAI 認証情報 + ネイティブ AI ノードで動作確認し、ノード機能が不足する場合のみ `HTTP Request` へ切り替えましょう。
 </Tip>
 
 <Note>
-Depending on the n8n version, `Base URL` may appear on the credential page or in the specific OpenAI / Chat Model node `Options`. Current official docs more clearly document node-level `Base URL` overrides, so for Crazyrouter the safest first setup is: put the API key in the credential, then set `Base URL` on the node.
+n8n のバージョンによっては `Base URL` が認証情報ページ、または OpenAI/Chat Model ノードの `Options` に表示されます。現行の公式ドキュメントではノードレベル `Base URL` の上書きをより明記しているため、Crazyrouter 連携時は「認証情報に Key、ノードに Base URL」を入力する設計で設定します。
 </Note>
 
-## Recommended Model Setup
+## 推奨モデル設定
 
-| Use case | Recommended model | Why |
-|----------|-------------------|-----|
-| Default workflow model | `gpt-5.5` | Verified successfully in production on March 23, 2026, and suited for the main n8n baseline |
-| Higher-quality complex agent flows | `claude-opus-4-8` | Better for more complex explanation and long-form tasks |
-| Gemini fallback path | `gemini-3.1-pro` | Useful as a second vendor-compatible validation path |
-| Retrieval / vector-related flows | `text-embedding-3-large` | Good for later vector or search-enhanced pipelines |
+| 利用シーン | 推奨モデル | 理由 |
+|------------|------------|------|
+| デフォルトワークフローモデル | `gpt-5.5` | 当日検証済みで n8n のベースラインに適合 |
+| 高品質・複雑 Agent シーン | `claude-opus-4-8` | 複雑な説明や長文タスクに好適 |
+| Gemini 予備 | `gemini-3.1-pro` | 2点目の互換性検証経路として有用 |
+| 検索／ベクトル系 | `text-embedding-3-large` | 今後のベクトル処理・検索強化に対応 |
 
-Recommended order: get `gpt-5.5` working in a minimal flow, then expand to agents, tools, and batch jobs.
+推奨手順：まず `gpt-5.5` で最小ワークフローを動作確認後、Agent・ツール・バッチタスクへ拡張してください。
 
-## Token Setup Best Practices
+## トークン設定のベストプラクティス
 
-| Setting | Recommendation | Notes |
-|---------|----------------|-------|
-| Dedicated token | Required | Do not share it with chat frontends, CLI tools, or SDK demos |
-| Model whitelist | Strongly recommended | Allow only the models the workflows really need |
-| IP restriction | Recommended for fixed server egress | Use carefully if local dev and cloud runs are mixed |
-| Quota cap | Strongly recommended | Retries, loops, and bulk tasks can burn through budget quickly |
-| Environment separation | Required | Use different tokens for dev, staging, and production |
-| Node tiering | Recommended | Use cheaper models for high-volume jobs and stronger models only where needed |
+| 設定         | 推奨度      | 説明 |
+|--------------|------------|------|
+| 専用トークン   | 必須        | n8n はチャットフロント、CLI や SDK サンプルとトークン共有不可 |
+| モデルホワイトリスト | 強く推奨    | 利用するモデルだけ許可 |
+| IP 制限       | 固定サーバー出口用を推奨 | ローカルテストやクラウド混在利用時は注意 |
+| クォータ上限   | 強く推奨    | 自動化タスクはリトライ・ループ・バッチ消費が急増しがち |
+| 環境分離       | 必須        | 開発・テスト・本番ワークフローは別トークン利用 |
+| ノード階層分離 | 推奨        | 高頻度タスクは低コストモデル、重要タスクは高性能モデル |
 
-## Verification Checklist
+## 検証チェックリスト
 
-- [ ] the `OpenAI API` credential is saved successfully
-- [ ] node-level `Base URL` is set to `https://api.crazyrouter.com/v1`
-- [ ] the `OpenAI Chat Model` node executes successfully
-- [ ] the first minimal workflow returns a valid response
-- [ ] the `AI Agent` node works too if you need agent flows
-- [ ] the request appears in the Crazyrouter logs
-- [ ] token quota and model whitelist match your plan
-- [ ] dev, staging, and production workflows use separate tokens
+- [ ] `OpenAI API` 認証情報を正常保存済み
+- [ ] ノードレベル `Base URL` を `https://api.crazyrouter.com/v1` に設定済み
+- [ ] `OpenAI Chat Model` ノードが正常動作
+- [ ] 最初の最小ワークフローが正常レスポンス
+- [ ] Agent 利用時は `AI Agent` ノードでモデル呼び出しも OK
+- [ ] Crazyrouter 管理画面で該当リクエストのログ確認
+- [ ] トークン・モデルホワイトリスト・クォータが想定通り
+- [ ] 開発 / テスト / 本番の各ワークフローでトークン分離済み
 
-## Common Errors and Fixes
+## よくあるエラーと修正法
 
-| Symptom | Likely cause | Fix |
-|---------|--------------|-----|
-| credential test fails | wrong API key, or `Base URL` was entered in the wrong place for your n8n version | recheck the `sk-...` value and confirm `Base URL` is set where your version actually supports it |
-| 401 unauthorized | token expired, was deleted, or pasted with extra spaces | create a new token and replace it |
-| 403 / model not allowed | the workflow uses a model that is not whitelisted | allow that model in Crazyrouter |
-| 404 | `Base URL` was entered as the root domain or a full endpoint path | change it to `https://api.crazyrouter.com/v1` |
-| workflow keeps retrying and cost grows fast | node retries, loops, or batch logic is misconfigured | limit retries, split flows, and add quota caps |
-| AI Agent starts but tool use is unstable | the tool chain is too complex for first-pass validation | keep only one simple tool until the baseline works |
-| native AI node is missing parameters you need | n8n's node wrapper does not expose that feature yet | switch that step to an `HTTP Request` node |
-| batch jobs are slow or expensive | model choice or flow design is a poor fit for the task | move large-volume runs back to the smallest validated baseline first |
+| 現象 | よくある原因 | 修正法 |
+|------|----------|--------|
+| 認証情報テスト失敗 | API Key のエラー、あるいは Base URL 設定場所ミス | `sk-...` を再度チェック＋`Base URL` を自身のバージョン対応位置に入力 |
+| 401 unauthorized | トークン無効化・削除・スペース含むコピー | 新規トークン発行・再登録 |
+| 403 / model not allowed | 利用モデルがホワイトリスト外 | Crazyrouter 管理画面で該当モデル許可 |
+| 404 | `Base URL` を root ドメインや完全 API パスで設定 | `https://api.crazyrouter.com/v1` へ修正 |
+| フローが無限リトライ・コスト急増 | ノードエラー時の自動リトライ／ループ設定漏れ | リトライ上限・ワークフロー分割・クォータ設定 |
+| AI Agent 起動は OK だがツール呼び出し不安定 | 認証情報でなくツール側の複雑さ | ツールノードを 1 つのみにして検証 |
+| ネイティブ AI ノードにパラメータ欠如 | n8n ノード実装未対応 | `HTTP Request` ノードで Crazyrouter を直接呼び出す |
+| バッチタスクでのパフォーマンス不安定 | モデル適正やノード実装のミスマッチ | まず `gpt-5.5` で最小構成検証、その後モデル拡張 |
 
-## Performance and Cost Tips
+## パフォーマンス・コストの推奨事項
 
-- Keep `gpt-5.5` as the default automation baseline during initial rollout
-- Add stricter caps and alerts for looped, scheduled, or batch workflows
-- Keep production and debugging flows on separate tokens
-- Validate AI Agent flows with fewer tools and shorter chains before scaling up
-- If cost spikes, check both Crazyrouter logs and n8n execution history to see whether retries or loops are the cause
+- 自動化タスクはまず `gpt-5.5` でベースラインを設定
+- ループやバッチ、定期実行では厳しいクォータ・エラー通知を
+- 本番用・デバッグ用ワークフローのトークン分割
+- Agent ワークフローは少数ツール・短い連携で安定後に拡張
+- 料金高騰時は Crazyrouter ログと n8n 履歴から再試行・ループ有無を確認
 
 ## FAQ
 
-### Which Base URL should I use in n8n?
+### n8n ではどの Base URL を入力すればいいですか？
 
-Use `https://api.crazyrouter.com/v1`.
+`https://api.crazyrouter.com/v1` を入力してください。
 
-### Should I put `Base URL` in the credential or in the node?
+### Base URL は認証情報とノードのどちらに入力しますか？
 
-Check the UI in your current n8n version. Current official docs more clearly mention node-level `Base URL` options; if your credential page also supports it, that can work too, but the safest first setup is credential for the API key and node for `Base URL`.
+利用中の n8n バージョン画面を優先して確認。現行ドキュメントではノードレベルの `Base URL` オプションを明記。認証情報ページにも入力欄があればそこでも可。最初の設定はノードレベルを推奨します。
 
-### Should I start with native AI nodes or `HTTP Request`?
+### まず使うべきはネイティブ AI ノード？HTTP Request ノード？
 
-Start with native OpenAI credentials and AI nodes. Use `HTTP Request` only when you need deeper control or unsupported parameters.
+まずはネイティブ OpenAI 認証情報＋AI ノードを利用。パラメータ不足や詳細デバッグが必要な時だけ `HTTP Request` へ切り替えてください。
 
-### Which model should I test first?
+### 最初に推奨するモデルは？
 
-Start with `gpt-5.5`.
+`gpt-5.5` を先に使いましょう。
 
-### Why did workflow costs suddenly increase?
+### ワークフローの費用が急増したのはなぜ？
 
-Usually the cause is not a single request. It is more often loops, batches, retries, or many executions sharing one token.
+大抵は単一リクエストではなく、ループ・バッチ・自動リトライや複数人によるワークフロー同時トリガーです。
 
-### Does n8n really need multiple tokens?
+### n8n で複数トークン分割は必須ですか？
 
-Yes. At minimum, separate development from production. High-volume jobs should often get their own token too.
+少なくとも開発用・本番用は分離を強く推奨。高頻度処理は別トークン分割が理想です。
 
 <Note>
-Once n8n is connected to Crazyrouter, the real challenge is not just making one request work. It is controlling retries, loops, batch execution, and quota boundaries across automation flows.
+n8n を Crazyrouter へ連携する価値は「モデル呼び出しができる」だけでなく、「モデルを自動化パイプラインに統合できる」ことにあります。そのため、肝心なのは一回の対話の正常応答ではなく、リトライ・ループ・バッチ処理・トークン配分まで一括管理することです。
 </Note>

@@ -1,24 +1,25 @@
 ---
-title: 'ChatGPT on WeChat Setup Guide'
-description: 'Configure Crazyrouter API in the ChatGPT on WeChat project with production-verified model recommendations'
+title: 'ChatGPT on WeChat 設定チュートリアル'
+description: 'ChatGPT on WeChat プロジェクトで Crazyrouter API を設定し、実稼働環境で検証済みの最新モデルを使用する方法'
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-## Overview
 
-ChatGPT on WeChat is a widely used WeChat bot project that can route private and group chat traffic through Crazyrouter. The safest rollout is to keep its standard OpenAI-compatible configuration and validate one production-verified model before expanding the bot behavior.
+## 概要
 
-## Recommended First-Pass Setup
+ChatGPT on WeChat は一般的な微信（WeChat）ロボットプロジェクトであり、Crazyrouter のモデル機能を個人チャットやグループチャットに接続できます。接続時には、デフォルトの OpenAI 互換設定方式を継続使用し、まずは実地で検証済みのモデルで最小限の応答ルートを通すことを推奨します。
+
+## 推奨ファーストラウンド設定
 
 - `open_ai_api_base`: `https://api.crazyrouter.com/v1`
-- first validation model: `gpt-5.5`
-- keep the initial allowlist small so troubleshooting stays simple
+- 最初の検証モデル：`gpt-5.5`
+- 初回はモデル数を絞り、トラブルシューティングの範囲を限定する
 
-## Configuration
+## 設定方法
 
-### Edit Configuration File
+### 設定ファイルの編集
 
-Edit `config.json`:
+`config.json` を編集してください：
 
 ```json
 {
@@ -29,11 +30,11 @@ Edit `config.json`:
   "single_chat_prefix": [""],
   "single_chat_reply_prefix": "",
   "group_chat_prefix": ["@bot"],
-  "group_name_white_list": ["AI Chat Group"]
+  "group_name_white_list": ["AI交流群"]
 }
 ```
 
-### Environment Variables
+### 環境変数による設定
 
 ```bash
 export OPEN_AI_API_KEY=sk-xxx
@@ -41,7 +42,7 @@ export OPEN_AI_API_BASE=https://api.crazyrouter.com/v1
 export MODEL=gpt-5.5
 ```
 
-### Docker Deployment
+### Docker 配備
 
 ```yaml
 services:
@@ -55,29 +56,29 @@ services:
       - ./config.json:/app/config.json
 ```
 
-## Recommended Models
+## 推奨モデル
 
-| Scenario | Model | Description |
-|----------|-------|-------------|
-| First-pass route validation | `gpt-5.5` | Verified successfully in Crazyrouter production on March 23, 2026, and best for the OpenAI-compatible baseline |
-| Higher-quality long replies | `claude-opus-4-8` | Better for complex explanations, summaries, and longer text |
-| Gemini fallback path | `gemini-3.1-pro` | Useful as a second vendor-compatible validation path |
+| シーン        | モデル             | 説明                                                                                   |
+|---------------|--------------------|----------------------------------------------------------------------------------------|
+| 初回ルート検証| `gpt-5.5`    | 2026 年 3 月 23 日に実稼働環境で検証済みで、OpenAI 互換ルートの初期確認に最適です        |
+| 高品質長文応答| `claude-opus-4-8`    | 複雑な解説・要約・長文テキストにより適しています                                    |
+| Gemini 予備枠 | `gemini-3.1-pro`    | 2番目のサプライヤー互換性検証ルートの補完に適しています                             |
 
-## Suggested Validation Order
+## 推奨検証手順
 
-1. Create one dedicated token
-2. Start with one model: `gpt-5.5`
-3. Send `Reply only OK` in a private chat first
-4. Confirm the request appears in Crazyrouter logs
-5. Only then expand group triggers, prefixes, and additional models
+1. まずは1つの token のみ設定
+2. 1つのモデル `gpt-5.5` のみ設定
+3. 個人チャットで `Reply only OK` を送信
+4. Crazyrouter 管理画面のログに該当リクエストが記録されたことを確認
+5. その後グループチャット、さらに多くのプレフィクスルールや他モデルを段階的に開放
 
 <Warning>
-  WeChat bot projects must comply with WeChat usage policies. Avoid sending messages too frequently to prevent account restrictions.
+  微信（WeChat）ロボットプロジェクトは微信の利用規則を遵守し、頻繁なメッセージ送信によるアカウント制限を避けてください。
 </Warning>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [GPT Image 1.5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [OpenAI の全モデルと料金](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [GPT Image 1.5 モデルページ：リアルタイム価格、実例、呼び出しコード](https://crazyrouter.com/ja/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT Image 2 モデルページ：リアルタイム価格、実例、呼び出しコード](https://crazyrouter.com/ja/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [OpenAI 全モデルおよび価格一覧](https://crazyrouter.com/ja/models/openai?utm_source=docs&utm_medium=related)

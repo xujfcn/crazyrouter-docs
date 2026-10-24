@@ -1,92 +1,92 @@
 ---
-title: 'Aider Setup Guide'
-description: 'Connect Aider to Crazyrouter through the OpenAI-compatible path, with separate Windows and macOS install flows, config-file setup, env vars, and validation steps'
+title: "Aider 設定チュートリアル"
+description: "Aider CLI で OpenAI 互換方式を用いて Crazyrouter を導入し、Windows と macOS を区別したインストール・環境変数・設定ファイル・検証手順の完全ガイドを提供"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-Aider is a practical terminal pair-programming tool that works especially well for small iterative code changes, diff review, explicit context-file control, and repeated fix cycles inside a git repo. For Crazyrouter, the safest path is Aider's officially supported OpenAI-compatible setup.
+Aider はとても便利な端末用ペアプログラミングツールであり、Gitリポジトリでの小さなステップによるコード修正、diffの審査、文脈ファイルの追加や段階的な修正に最適です。Crazyrouter と連携する場合は、Aider 公式がサポートする OpenAI 互換の設定方法が最も安全です。
 
-## Overview
+## 概要
 
-With environment variables or `~/.aider.conf.yml`, Aider can send requests to Crazyrouter:
+環境変数または `~/.aider.conf.yml` を使うことにより、Aider は Crazyrouter へリクエストを送信できます：
 
-- recommended protocol: `OpenAI-compatible API`
-- base URL: `https://api.crazyrouter.com/v1`
-- auth variable: `OPENAI_API_KEY`
-- recommended default model string: `gpt-5.5`
+- 推奨プロトコル：`OpenAI-compatible API`
+- Base URL：`https://api.crazyrouter.com/v1`
+- 認証変数：`OPENAI_API_KEY`
+- 推奨デフォルトモデル記述：`gpt-5.5`
 
 <Tip>
-If your main workflow is `read code -> edit a few places -> inspect the diff -> refine once more`, Aider is often one of the lightest and easiest tools to operationalize.
+日常的なワークフローが「コードを読む -> 数カ所直す -> diffを見る -> さらに修正する」という場合、Aider は軽量かつ安定して現場導入しやすい端末開発ツールのひとつです。
 </Tip>
 
-## Best For
+## 対象者
 
-- users who want small-step code edits from the terminal
-- workflows that need explicit control over context files, diffs, and commit cadence
-- teams that want Aider billed separately from Codex or Claude Code
-- users who want the simplest OpenAI-compatible Crazyrouter setup path
+- 端末で小刻みなコード修正コミットを行いたい方
+- 文脈ファイルや diff、コミットペースを明確に操作したい方
+- Aider と Codex、Claude Code の課金管理を分けたい方
+- まず最も直接的な OpenAI 互換方式で Crazyrouter に接続したい方
 
-## Protocol Used
+## 使用プロトコル
 
-Recommended protocol: `OpenAI-compatible API`
+推奨プロトコル：`OpenAI-compatible API`
 
-Aider officially supports these settings:
+Aider 公式でサポートされる設定項目：
 
 - `OPENAI_API_KEY`
 - `OPENAI_API_BASE`
 - `openai-api-key`
 - `openai-api-base`
 
-For Crazyrouter, use:
+Crazyrouter の設定例：
 
 ```text
 OPENAI_API_BASE=https://api.crazyrouter.com/v1
 ```
 
-One important accuracy detail: Crazyrouter model names are the raw model IDs shown in the model list and pricing page, such as `gpt-5.5` and `claude-opus-4-8`. Use that raw model ID directly in Aider:
+注意点：Crazyrouter におけるモデル名は、管理画面のモデルリストや pricing ページに表示されている元のモデルIDです。例として `gpt-5.5`、`claude-opus-4-8` です。Aider 側でもこのモデルIDを直接入力してください：
 
 ```text
 gpt-5.5
 ```
 
 <Warning>
-Do not add an extra `openai/` prefix to Crazyrouter model names. `openai/gpt-5.5` is not a Crazyrouter model ID and can cause `model not found` or no-route failures.
+Crazyrouter のモデル名には `openai/` プレフィックスを追加しないこと。`openai/gpt-5.5` は本サービスのモデル名ではなく、これを記載すると `model not found` やルートで利用不可となります。
 </Warning>
 
-## Prerequisites
+## システム要件と前提条件
 
-| Item | Notes |
-|------|-------|
-| Crazyrouter account | Create one at [crazyrouter.com](https://crazyrouter.com) |
-| Crazyrouter token | Create a dedicated token for Aider |
-| Git | Prefer `git 2.23+` |
-| Python | If you use the `aider-install` path, make sure you have `Python 3.8-3.13`; if you use the official one-line installer, it can provision Python 3.12 as needed |
-| Aider | Use a current stable version |
-| Git repo | Aider generally works best inside a git repo |
-| Allowed models | Allow at least one coding-friendly model |
+| 項目            | 説明 |
+|-----------------|------|
+| Crazyrouter アカウント | [crazyrouter.com](https://crazyrouter.com)でアカウント登録してください |
+| Crazyrouter トークン    | Aider 専用のトークン作成を推奨 |
+| Git                     | `git 2.23+` を推奨 |
+| Python                  | `aider-install` 経路の場合、事前に `Python 3.8-3.13` を導入推奨。公式ワンクリックインストールの場合、必要に応じて Python 3.12 を導入します |
+| Aider                   | 最新安定バージョン利用を推奨 |
+| Git リポジトリ         | Aider は Git リポジトリ内での使用体験が最良です |
+| 利用可能モデル         | 利用したいコーディングモデルを最低1つ許可 |
 
-Suggested starter allowlist:
+初期ホワイトリスト例：
 
 - `gpt-5.5`
 - `claude-opus-4-8`
 - `gemini-3.1-pro`
 
-## Full Install Path By Operating System
+## OS別の完全インストール手順
 
-### Recommended Windows Path
+### Windows 推奨手順
 
-The most reliable Windows setup is: `Git` + `Python` + `PowerShell install flow for Aider` + `PowerShell environment variables`.
+Aider の Windows で最も安全な経路は：`Git` + `Python` + `PowerShell で Aider をインストールする` + `PowerShell で環境変数を設定する` です。
 
-Recommended order:
+推奨作業順：
 
-1. Install Git
-2. Install Python
-3. Install Aider from the official PowerShell installer, or use `aider-install`
-4. Set temporary env vars in PowerShell
-5. Persist user-level env vars in PowerShell
-6. Open a fresh terminal and verify both the command and variables
+1. Git をインストール
+2. Python をインストール
+3. PowerShell で Aider 公式インストールスクリプトを実行、または `aider-install` を先に導入
+4. PowerShell で一時変数を設定
+5. PowerShell でユーザー固有の永続変数設定
+6. 新しい端末を開いて `aider` コマンドと変数が有効か確認
 
-Recommended verification commands:
+推奨検証コマンド：
 
 ```powershell
 git --version
@@ -98,22 +98,22 @@ where.exe python
 where.exe aider
 ```
 
-If `aider --version` is not found, close and reopen PowerShell and try again.
+`aider --version` でコマンドが見つからない場合、PowerShell を閉じて再度開き、リトライしてください。
 
-### Recommended macOS Path
+### macOS 推奨手順
 
-The smoothest macOS setup is usually: `Xcode Command Line Tools` + `Homebrew` + `Git` + `Python` + `Aider official installer` + `~/.zshrc` for persistent env vars.
+Aider の macOS における最もスムーズな流れは：`Xcode Command Line Tools` + `Homebrew` + `Git` + `Python` + `Aider 公式インストールスクリプト` + `~/.zshrc` の永続環境変数設定です。
 
-Recommended order:
+推奨作業順：
 
-1. Install Xcode Command Line Tools
-2. Install Homebrew if needed
-3. Install Git and Python
-4. Run Aider's official installer, or install via `aider-install` or `uv`
-5. Persist env vars in `~/.zshrc`
-6. Open a fresh terminal and verify the executable path
+1. Xcode Command Line Tools のインストール
+2. Homebrew のインストール（未導入の場合）
+3. Git・Python のインストール
+4. Aider 公式インストールスクリプト実行 または `aider-install` / `uv` でインストール
+5. `~/.zshrc` の設定
+6. 新しい端末を開いて `aider` コマンドと変数経路確認
 
-Recommended verification commands:
+推奨検証コマンド：
 
 ```bash
 git --version
@@ -125,149 +125,156 @@ which python3
 which aider
 ```
 
-### Linux Note
+### Linux の注意点
 
-Linux can generally follow the same terminal flow as macOS, except persistent variables usually belong in `~/.bashrc`. For a first pass, it is safer to validate with temporary env vars before making the setup permanent.
+Linux は基本的に macOSの端末手順を参考にでき、永続環境変数は通常 `~/.bashrc` に記載します。ローカル開発や初回クラウド導入時には、まず現在のshellで一時的な変数を設定して動作確認、必要に応じて永続化してください。
 
-## Detailed Install Walkthrough
-
-Before connecting Aider to Crazyrouter, make sure the local toolchain is ready.
-
-### 1. Install Git
-
-<Tabs>
-  <Tab title="Windows PowerShell">
-    ```powershell
-    winget install --id Git.Git -e --source winget
-    git --version
-    where.exe git
-    ```
-  </Tab>
-  <Tab title="macOS">
-    ```bash
-    xcode-select --install
-    git --version
-    ```
-    Or:
-    ```bash
-    brew install git
-    git --version
-    which git
-    ```
-  </Tab>
-  <Tab title="Ubuntu / Debian">
-    ```bash
-    sudo apt update
-    sudo apt install -y git
-    git --version
-    which git
-    ```
-  </Tab>
-</Tabs>
-
-Recommended one-time identity setup:
-
-```bash
-git config --global user.name "Your Name"
-git config --global user.email "you@example.com"
-git config --global init.defaultBranch main
-```
-
-### 2. Install Python and pip
-
-<Tabs>
-  <Tab title="Windows PowerShell">
-    ```powershell
-    winget install Python.Python.3.12
-    python --version
-    pip --version
-    where.exe python
-    ```
-  </Tab>
-  <Tab title="macOS">
-    ```bash
-    brew install python
-    python3 --version
-    pip3 --version
-    which python3
-    ```
-  </Tab>
-  <Tab title="Ubuntu / Debian">
-    ```bash
-    sudo apt update
-    sudo apt install -y python3 python3-pip python3-venv
-    python3 --version
-    pip3 --version
-    which python3
-    ```
-  </Tab>
-</Tabs>
-
-### 3. Install Aider
-
-Aider's current official one-line installers are:
-
-<Tabs>
-  <Tab title="Windows PowerShell">
-    ```powershell
-    powershell -ExecutionPolicy ByPass -c "irm https://aider.chat/install.ps1 | iex"
-    aider --version
-    where.exe aider
-    ```
-  </Tab>
-  <Tab title="macOS / Linux">
-    ```bash
-    curl -LsSf https://aider.chat/install.sh | sh
-    aider --version
-    which aider
-    ```
-  </Tab>
-</Tabs>
-
-If you prefer a more explicit step-by-step install, Aider's official `aider-install` flow is also valid:
-
-<Tabs>
-  <Tab title="Windows PowerShell">
-    ```powershell
-    python -m pip install aider-install
-    aider-install
-    aider --version
-    ```
-  </Tab>
-  <Tab title="macOS / Linux">
-    ```bash
-    python3 -m pip install aider-install
-    aider-install
-    aider --version
-    ```
-  </Tab>
-</Tabs>
-
-If your team already standardizes on `uv`, Aider's docs also allow:
-
-```bash
-python -m pip install uv
-uv tool install --force --python python3.12 --with pip aider-chat@latest
-aider --version
-```
-
-<Warning>
-Avoid starting with a plain system-wide `pip install aider-chat`. Aider's own installers, `aider-install`, or `uv` are usually safer and easier to debug.
-</Warning>
-
-## Quick Start
+## ゼロからの完全インストール手順
 
 <Steps>
-  <Step title="Create an Aider-specific token">
-    In Crazyrouter, create a token named something like `aider`. Start by allowing only models such as `gpt-5.5`, `claude-opus-4-8`, and `gemini-3.1-pro`.
+  <Step title="ステップ 1：Git をインストールする">
+    マシンに Git が未導入の場合は必ず先にインストールしてください。
+
+    <Tabs>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        winget install --id Git.Git -e --source winget
+        git --version
+        where.exe git
+        ```
+      </Tab>
+      <Tab title="macOS">
+        ```bash
+        xcode-select --install
+        git --version
+        ```
+        または：
+        ```bash
+        brew install git
+        git --version
+        which git
+        ```
+      </Tab>
+      <Tab title="Ubuntu / Debian">
+        ```bash
+        sudo apt update
+        sudo apt install -y git
+        git --version
+        which git
+        ```
+      </Tab>
+    </Tabs>
+
+    推奨追加：
+
+    ```bash
+    git config --global user.name "Your Name"
+    git config --global user.email "you@example.com"
+    git config --global init.defaultBranch main
+    ```
+  </Step>
+
+  <Step title="ステップ 2：Python と pip をインストールする">
+    Aider 公式インストーラーは Python を用いるか、必要に応じて自分専用の Python 実行環境を自動準備します。トラブルシュートを見据え、事前にマシンの Python 動作を確認してください。
+
+    <Tabs>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        winget install Python.Python.3.12
+        python --version
+        pip --version
+        where.exe python
+        ```
+      </Tab>
+      <Tab title="macOS">
+        ```bash
+        brew install python
+        python3 --version
+        pip3 --version
+        which python3
+        ```
+      </Tab>
+      <Tab title="Ubuntu / Debian">
+        ```bash
+        sudo apt update
+        sudo apt install -y python3 python3-pip python3-venv
+        python3 --version
+        pip3 --version
+        which python3
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="ステップ 3：Aider をインストールする">
+    Aider の現状推奨ワンクリックインストールスクリプトはこちらです。
+
+    <Tabs>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        powershell -ExecutionPolicy ByPass -c "irm https://aider.chat/install.ps1 | iex"
+        aider --version
+        where.exe aider
+        ```
+      </Tab>
+      <Tab title="macOS / Linux">
+        ```bash
+        curl -LsSf https://aider.chat/install.sh | sh
+        aider --version
+        which aider
+        ```
+      </Tab>
+    </Tabs>
+
+    インストールの詳細確認を重視したい場合、Aider 公式 `aider-install` 経路も選択可能です：
+
+    <Tabs>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        python -m pip install aider-install
+        aider-install
+        aider --version
+        ```
+      </Tab>
+      <Tab title="macOS / Linux">
+        ```bash
+        python3 -m pip install aider-install
+        aider-install
+        aider --version
+        ```
+      </Tab>
+    </Tabs>
+
+    すでにチームで統一して `uv` を利用中の場合、公式ドキュメント通りに導入ください：
+
+    ```bash
+    python -m pip install uv
+    uv tool install --force --python python3.12 --with pip aider-chat@latest
+    aider --version
+    ```
+
+    <Warning>
+    システム環境に手動で `pip install aider-chat` を直接配置することは初期導入では推奨しません。公式としてはインストールスクリプトや `aider-install`、`uv` を使った依存管理がより安定します。
+    </Warning>
+  </Step>
+
+  <Step title="ステップ 4：Crazyrouter で Aider 専用 token を作成する">
+    Crazyrouter 管理画面で `aider` という名前でトークンを作成し、初回は以下のみ許可してください：
+
+    - `gpt-5.5`
+    - `claude-opus-4-8`
+    - `gemini-3.1-pro`
 
     <Note>
-    The allowlist here uses Crazyrouter's raw model IDs. Use the same raw model IDs in Aider.
+    このホワイトリストには Crazyrouter の元のモデル名のみ記載、`openai/` プレフィックス不要です。
     </Note>
   </Step>
-  <Step title="Set the environment variables">
+
+  <Step title="ステップ 5：現在の端末で一時的に環境変数を設定する">
+    まず一時的な設定を行い、動作確認後に永続設定へ移してください。
+
     <Tabs>
-      <Tab title="Linux / macOS">
+      <Tab title="macOS / Linux">
         ```bash
         export OPENAI_API_KEY=sk-xxx
         export OPENAI_API_BASE=https://api.crazyrouter.com/v1
@@ -285,7 +292,8 @@ Avoid starting with a plain system-wide `pip install aider-chat`. Aider's own in
       </Tab>
     </Tabs>
   </Step>
-  <Step title="Persist the environment variables">
+
+  <Step title="ステップ 6：環境変数を永続的な設定に書き込む">
     <Tabs>
       <Tab title="Linux Bash">
         ```bash
@@ -310,126 +318,180 @@ Avoid starting with a plain system-wide `pip install aider-chat`. Aider's own in
 
         $env:OPENAI_API_KEY = "sk-xxx"
         $env:OPENAI_API_BASE = "https://api.crazyrouter.com/v1"
+
+        echo $env:OPENAI_API_BASE
+        ```
+      </Tab>
+    </Tabs>
+
+    永続化後は新しい端末を開き、再度下記を実行することを推奨します：
+
+    <Tabs>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        aider --version
+        echo $env:OPENAI_API_BASE
+        ```
+      </Tab>
+      <Tab title="macOS / Linux">
+        ```bash
+        aider --version
+        echo $OPENAI_API_BASE
         ```
       </Tab>
     </Tabs>
   </Step>
-  <Step title="Optionally add a config file">
-    Add this to `~/.aider.conf.yml`:
-    ```yaml
-    model: gpt-5.5
-    openai-api-base: https://api.crazyrouter.com/v1
-    ```
 
-    If you prefer a safer secret-handling pattern, keep the key only in environment variables and store only `model` plus `openai-api-base` in the config file.
+  <Step title="ステップ 7：オプションとして ~/.aider.conf.yml に書き込む">
+    毎回手動でパラメータ追加したくない場合、設定ファイルへ記載しておくことも可能です。
+
+    <Tabs>
+      <Tab title="macOS / Linux">
+        ```bash
+        cat > ~/.aider.conf.yml <<'EOF'
+        model: gpt-5.5
+        openai-api-base: https://api.crazyrouter.com/v1
+        EOF
+        cat ~/.aider.conf.yml
+        ```
+      </Tab>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        @'
+        model: gpt-5.5
+        openai-api-base: https://api.crazyrouter.com/v1
+        '@ | Set-Content -Path "$HOME/.aider.conf.yml"
+
+        Get-Content $HOME/.aider.conf.yml
+        ```
+      </Tab>
+    </Tabs>
+
+    セキュリティ重視の場合は、key を環境変数のみに入れ、設定ファイルには `model` と `openai-api-base` のみ残す運用も可能です。
   </Step>
-  <Step title="Prepare the repo before the first real run">
-    If this folder is not a Git repo yet:
+
+  <Step title="ステップ 8：Git リポジトリを準備し、最初のスナップショットを作成する">
+    Aider の体験は Git リポジトリ内が最適です。現在ディレクトリが Git リポジトリでない場合：
+
     ```bash
     git init
     git add .
     git commit -m "chore: initial snapshot before Aider"
     ```
-    If it is already an existing repo, at least inspect the current state first:
+
+    既存リポジトリの場合は、まず状況を確認してください：
+
     ```bash
     git status
     ```
   </Step>
-  <Step title="Launch Aider inside your repo">
+
+  <Step title="ステップ 9：Aider を起動して最初の認証を完了する">
+    プロジェクトディレクトリへ入り、以下を実行してください：
+
     ```bash
+    cd /path/to/your/project
     aider --model gpt-5.5
     ```
-  </Step>
-  <Step title="Run the first validation">
-    Start with a low-risk task such as: `Check the README for typos and suggest the smallest safe edits.` Confirm Aider can read files and respond sensibly before using it for real code changes.
+
+    初回検証は以下順序で進めることをおすすめします：
+
+    1. `現在のリポジトリ構造のみを要約してください。ファイルの変更はしないでください。`
+    2. `README を読んで、最小限の修正提案をしてください。直接修正はまだしないでください。`
+    3. diff が正常表示されることを確認したら、小規模修正を行ってください
+
+    <Tip>
+    他のモデルを一時検証したい場合も同じ記述方式で、例えば `aider --model claude-opus-4-8`。
+    </Tip>
   </Step>
 </Steps>
 
-## Recommended Model Setup
+## 推奨モデル設定
 
-| Use case | Recommended Aider model string | Why |
-|----------|--------------------------------|-----|
-| default coding driver | `gpt-5.5` | uses Crazyrouter's raw model ID and works as the OpenAI-compatible Aider baseline |
-| Claude-style alternative | `claude-opus-4-8` | good for long-context explanation and steady multi-turn collaboration |
-| Gemini fallback path | `gemini-3.1-pro` | useful as a second compatibility-validation path |
+| 利用場面 | Aider 推奨記述 | 理由 |
+|----------|----------------|------|
+| デフォルト主力コーディング | `gpt-5.5` | Crazyrouter の元モデルID使用で、Aider OpenAI 互換の基準として最適 |
+| Claude 系代替           | `claude-opus-4-8` | 長めの文脈解釈や、安定した多段一問一答協調用途に向く |
+| Gemini バックアップ     | `gemini-3.1-pro` | 2番目の互換性検証経路として最適 |
 
-Recommended rollout: start with `gpt-5.5`. Then add `claude-opus-4-8` or `gemini-3.1-pro` only after the baseline path is stable.
+まず `gpt-5.5` で動作確認、状況に応じて `claude-opus-4-8` や `gemini-3.1-pro` を追加してください。
 
-## Token Setup Best Practices
+## トークン設定ベストプラクティス
 
-| Setting | Recommendation | Notes |
-|---------|----------------|-------|
-| dedicated token | Required | Do not share the Aider token with other IDE or CLI tools |
-| model allowlist | Strongly recommended | Keep the model set small to avoid accidental high-cost switching |
-| IP restriction | Situational | Consider it on fixed servers; be careful on mobile dev machines |
-| quota cap | Strongly recommended | Long sessions and repeated repair loops can add up quickly |
-| environment split | Recommended | Separate local development, remote hosts, and CI |
-| leak response | Rotate immediately | If `.aider.conf.yml`, shell history, or recordings expose the key, rotate it |
+| 設定         | 推奨   | 説明                                     |
+|--------------|--------|------------------------------------------|
+| 専用トークン | 必須   | Aider と他の IDE / CLI でトークン共用しないこと |
+| モデルホワイトリスト | 強く推奨 | 最小モデルセットを維持し、高額モデル誤切替を防ぐ |
+| IP制限       | 環境次第 | 固定サーバーなら有効化も検討、モバイル開発機では慎重に |
+| 使用量上限   | 強く推奨 | Aider は長いセッションやラウンド修正で消費が継続 |
+| 環境分離     | 推奨   | ローカル・リモート・CIごとにトークン分離 |
+| 流出対応     | 即時交換 | `.aider.conf.yml`、shell履歴や録画流出後は速やかにキー交換 |
 
-## Verification Checklist
+## 検証チェックリスト
 
-- [ ] `git --version` works
-- [ ] `python --version` or `python3 --version` works
-- [ ] `aider --version` works
-- [ ] `OPENAI_API_KEY` is set correctly
-- [ ] `OPENAI_API_BASE` is `https://api.crazyrouter.com/v1`
-- [ ] if `~/.aider.conf.yml` is used, the model string is a Crazyrouter raw model ID such as `gpt-5.5`
-- [ ] `aider --model gpt-5.5` launches correctly
-- [ ] the first read-only or small-change task succeeds
-- [ ] Crazyrouter logs show the matching request
-- [ ] token quota and model allowlist match your intended setup
+- [ ] `git --version` 正常
+- [ ] `python --version` または `python3 --version` が正常
+- [ ] `aider --version` 正常
+- [ ] `OPENAI_API_KEY` が正しく設定されている
+- [ ] `OPENAI_API_BASE` が `https://api.crazyrouter.com/v1` に設定済み
+- [ ] `~/.aider.conf.yml` を利用する場合、モデル名は Crazyrouter の元のモデルID（例：`gpt-5.5`）で記載
+- [ ] `aider --model gpt-5.5` が正常に起動できる
+- [ ] 最初の読み取り専用または小規模な変更のタスクで正常な応答を返す
+- [ ] Crazyrouter バックエンドログで該当リクエストが確認できる
+- [ ] トークンの割当とモデルのホワイトリストが期待通りになっている
 
-## Common Errors And Fixes
+## よくあるエラーと修復方法
 
-| Symptom | Likely cause | Fix |
-|---------|--------------|-----|
-| `401 unauthorized` | wrong, expired, or incomplete API key | generate a new token and set it again |
-| `403` or `model not allowed` | the token does not allow the selected model | allow that model in Crazyrouter token settings |
-| `404` | wrong base URL or missing `/v1` | use `https://api.crazyrouter.com/v1` |
-| `model not found` | wrong model string, an unsupported `openai/` prefix, or a model that is not currently available on Crazyrouter | switch back to a raw model ID that exists on the pricing page or model list, such as `gpt-5.5` or `claude-opus-4-8` |
-| Aider launches but performs poorly | the model is too weak or the context is too noisy | return to `gpt-5.5` and reduce the context files |
-| config file and env vars behave inconsistently | the two configuration sources conflict | pick one primary source and restart Aider |
-| cost rises too quickly | long sessions and too many context files | clear or restart the session and shrink the context |
+| 現象 | よくある原因 | 修復方法 |
+|------|----------|----------|
+| `aider: command not found` | Aider のインストールが成功していない、またはインストーラが実行ファイルを PATH に登録していない | 公式インストーラを再実行し、新しいターミナルで再試行 |
+| Pythonバージョンの混乱 | システムのPythonとAider実行環境が衝突している | インストールスクリプト、`aider-install` または `uv` を優先的に使い、複数の依存パッケージを混在させない |
+| 401 unauthorized | API Key が間違っている、期限切れ、またはコピーが不完全 | トークンを再生成して再設定 |
+| 403 / model not allowed | トークンで現在のモデルが許可されていない | Crazyrouter のトークン設定でモデルを許可 |
+| 404 | Base URL が間違っている、または `/v1` が不足している | `https://api.crazyrouter.com/v1` に修正 |
+| `model not found` | モデル名の記載ミス、存在しない`openai/`プレフィックスの使用、または該当モデルが当サイトで未公開 | pricingページやモデルリストにある元のモデルID（例：`gpt-5.5`、`claude-opus-4-8`）に戻す |
+| 設定ファイルと環境変数の挙動不一致 | 両設定の衝突 | メイン設定元を一つにして、Aiderを再起動 |
+| コスト急増 | 長いセッションや大量のコンテキストファイル | コンテキストを適宜整理し、トークン割当を制限 |
 
-## Performance And Cost Tips
+## パフォーマンスとコストのアドバイス
 
-- validate on a small repo first
-- keep `gpt-5.5` as the main model and add `claude-opus-4-8` only when you need cross-vendor validation
-- split tokens by project type so cost tracking stays clear
-- clear context when the session becomes too long or drifts away from the task
-- after larger edits, review both the Aider diff and Crazyrouter logs
+- 初回導入時は小規模レポジトリで検証する
+- デフォルトは`gpt-5.5`を使い、クロス検証が必要な場合は`claude-opus-4-8`を追加
+- プロジェクトタイプごとにトークンを分け、コストの統計がしやすいようにする
+- 長いセッションでは不要ファイルの含有を避けるため、コンテキストを整理
+- 大幅な変更時は必ずAider生成のdiffやCrazyrouter ログを確認
 
 ## FAQ
 
-### What base URL should I use for Aider?
+### AiderにはどのBase URLを入力すればよいですか？
 
-Use `https://api.crazyrouter.com/v1`.
+`https://api.crazyrouter.com/v1`を入力してください。
 
-### Why should the model name not be `openai/gpt-5.5`?
+### なぜモデル名を`openai/gpt-5.5`のように書いてはいけないのですか？
 
-Because Crazyrouter model names do not include provider prefixes. Crazyrouter recognizes raw model IDs such as `gpt-5.5`; `openai/gpt-5.5` is treated as a different model name and is not available.
+Crazyrouterのモデル名はベンダープレフィックスを付けません。実際に認識されるのは`gpt-5.5`のような元のモデルIDです。`openai/gpt-5.5`は別のモデル名として扱われ、当サイトにはそのモデルがありません。
 
-### Should I prefer env vars or a config file?
+### 環境変数と設定ファイル、どちらがおすすめですか？
 
-Both work. Environment variables are faster for a first setup; `~/.aider.conf.yml` is useful once the setup becomes permanent.
+どちらも可能です。まずは環境変数の方が速いですが、長期利用には`~/.aider.conf.yml`も設定すると良いです。
 
-### Which model should I try first?
+### なぜ初回はGitスナップショットを取るよう推奨しますか？
 
-Start with `gpt-5.5`.
+Aiderはファイルを変更したりdiffを生成したり、コミットやコミット提案を自動で行います。事前にスナップショットを取っておけば、トラブル時やロールバックが簡単です。
 
-### Does Aider have to run inside a git repo?
+### 最初に推奨されるモデルは何ですか？
 
-Not strictly, but the experience is usually best inside a git repo because change review is easier and safer.
+`gpt-5.5`が最初の推奨モデルです。
 
-### Why should I avoid allowing too many models at first?
+### Aiderは必ずGitレポジトリで使わないといけませんか？
 
-Because multi-turn sessions make troubleshooting, budget control, and stability harder when the model surface area is too broad.
+必須ではありませんが、Gitレポジトリ内での利用経験が一番良く、変更結果のレビューも容易です。
 
 <Note>
-If you want a very lightweight terminal tool for day-to-day small-step coding, Aider still deserves a strong place in the Crazyrouter application guides.
+日常的に細かくコードを修正する軽量端末ツールとしてAiderはCrazyrouterの利用ガイド内で優先的に活用をおすすめします。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [Aider 連携ガイド](https://crazyrouter.com/en/integrations/aider?utm_source=docs&utm_medium=related)
+- [Aider導入ガイド（ワンクリックスクリプト、Base URL、推奨モデル）](https://crazyrouter.com/zh/integrations/aider?utm_source=docs&utm_medium=related)

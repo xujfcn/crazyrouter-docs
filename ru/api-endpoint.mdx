@@ -1,8 +1,8 @@
 ---
-title: 'API endpoints'
-description: 'Адреса API endpoints и справочник'
+title: "Адрес вызова посредника API"
+description: "Описание адреса конечной точки API"
 ---
-> Дата обновления: 2026-07-20
+> Обновление содержания: 2026-08-13
 
 ## Базовый URL API
 
@@ -10,96 +10,113 @@ description: 'Адреса API endpoints и справочник'
 https://api.crazyrouter.com
 ```
 
-`https://api.crazyrouter.com` теперь является стандартной международной точкой входа для API. Вход в аккаунт, оплата и панель управления остаются на:
+`https://api.crazyrouter.com` уже включён в качестве стандартного международного входа для API. Для входа в аккаунт, пополнения счета и доступа к панели управления используйте:
 
-```text
+```
 https://crazyrouter.com
 ```
 
 <Warning>
-Для endpoints аккаунта и управления, включая `/api/user/self`, `/api/token/*` и `/api/log/*`, обязательно используйте основной домен `https://crazyrouter.com`. Не отправляйте эти пути на `https://api.crazyrouter.com` или `https://cn.crazyrouter.com`: эти домены предназначены для model и media API, поэтому management routes возвращают `404 api_only_endpoint`. Для model endpoints, таких как `/v1/chat/completions`, `/v1/messages` и `/v1/models`, продолжайте использовать специализированные API-домены.
+Для интерфейсов управления аккаунтом необходимо использовать основной домен `https://crazyrouter.com`, включая `/api/user/self`, `/api/token/*` и `/api/log/*`. Не отправляйте эти пути на `https://api.crazyrouter.com` или `https://cn.crazyrouter.com`; эти домены предназначены только для модели и медиа API, при ошибочном использовании будет возвращён `404 api_only_endpoint`. Интерфейсы моделирования (например, `/v1/chat/completions`, `/v1/messages`, `/v1/models`) продолжают использовать специальный домен для API.
 </Warning>
 
-Для Восточной Азии предпочтительно использовать следующий API-адрес:
+Для Восточной Азии рекомендуем использовать следующие адреса доступа:
 
-```text
+```
 https://cn.crazyrouter.com
 ```
 
-Перед настройкой SDK, IDE, агента или стороннего клиента проверьте, нужен ли этому инструменту root domain или Base URL с `/v1`.
+Если вы настраиваете стороннего клиента, SDK, IDE или Agent, сначала уточните, должен ли инструмент использовать корневой домен или `/v1`:
 
-## Какой Base URL использовать
+<Card title="Инструкция по выбору адреса подключения" icon="book" href="https://docs.crazyrouter.com/ru/api-endpoint">
+  Сначала по этому разделу решайте, использовать ли корневой домен или `/v1`, затем вернитесь к документации по конкретному инструменту для настройки.
+</Card>
 
-| Сценарий | Международный адрес по умолчанию | Предпочтительный адрес для Восточной Азии | Примечание |
-|----------|--------------------|--------------------|------------|
-| OpenAI-совместимые SDK / клиенты | `https://api.crazyrouter.com/v1` | `https://cn.crazyrouter.com/v1` | Клиент сам добавляет пути вроде `/chat/completions` и `/models` |
-| Claude Code / Anthropic-native клиенты | `https://api.crazyrouter.com` | `https://cn.crazyrouter.com` | Клиент сам добавляет `/v1/messages`, поэтому не добавляйте `/v1` вручную |
-| curl / raw HTTP requests | Полный endpoint, например `https://api.crazyrouter.com/v1/chat/completions` | Полный endpoint, например `https://cn.crazyrouter.com/v1/chat/completions` | В ручных HTTP-запросах нужно указывать полный API path |
-| Управление аккаунтом, балансом, token и логами | `https://crazyrouter.com` | `https://crazyrouter.com` | Для `/api/user/self`, `/api/token/*` и `/api/log/*`; не используйте API-only домен |
+## Рекомендуемые адреса доступа
+
+По умолчанию предпочтительно использовать международный вход `https://api.crazyrouter.com`. Для пользователей Восточной Азии предпочтителен `https://cn.crazyrouter.com`. Эти два адреса предназначены только для API-запросов; для входа на сайт, пополнения счета, консоли управления и ценовых страниц продолжайте использовать `https://crazyrouter.com`.
+
+## Какой адрес должен быть указан для различных клиентов
+
+| Способ использования | Международный адрес по умолчанию | Преимущественный для Восточной Азии | Описание |
+|---------------------|-----------------------|--------------------|---------|
+| SDK / клиенты, совместимые с OpenAI | `https://api.crazyrouter.com/v1` | `https://cn.crazyrouter.com/v1` | Клиент будет дополнительно соединять этот адрес с `/chat/completions`, `/models` и другими путями |
+| Родной клиент Claude Code / Anthropic | `https://api.crazyrouter.com` | `https://cn.crazyrouter.com` | Клиент самостоятельно добавляет `/v1/messages`, не добавляйте вручную `/v1` |
+| curl / ручные HTTP-запросы | Используйте полный адрес, например `https://api.crazyrouter.com/v1/chat/completions` | Используйте полный адрес, например `https://cn.crazyrouter.com/v1/chat/completions` | Для ручных запросов необходим полный путь API |
+| Интерфейсы управления аккаунтом, балансом, токенами и журналами | `https://crazyrouter.com` | `https://crazyrouter.com` | Подходит для `/api/user/self`, `/api/token/*`, `/api/log/*`; не используйте исключительно API-домены |
 
 <Warning>
-Если в логах видны `/v1/v1/models`, `/v1/v1/messages` или `/v1/messages/v1/messages`, клиент дублирует API path. Для Claude Code / Anthropic-native клиентов верните root domain. Для OpenAI-совместимых клиентов оставьте Base URL только до `/v1`.
+Если в журнале появились `/v1/v1/models`, `/v1/v1/messages` или `/v1/messages/v1/messages`, значит клиент ошибочно дважды добавил путь API. Родной клиент Claude Code или Anthropic следует вернуть к корневому домену; для клиентов OpenAI оставляйте только до `/v1`.
 </Warning>
 
-## Основные endpoints
+<Warning>
+Для исходных вызовов `tool_use` от Claude, возможностей программирования Claude Code и отдельных инструментов Agent в IDE рекомендуется использовать канал сообщений Anthropic, то есть `POST /v1/messages`. Совместимый с OpenAI `/v1/chat/completions` больше подходит для обычных диалогов и базовой интеграции, но не эквивалентен Messages API от Claude; при вызове Claude через OpenAI-совместимый адрес может быть нестабильно использование инструментов.
+</Warning>
 
-### Chat API
+## Основные конечные точки
 
-| Endpoint | Метод | Описание |
-|----------|-------|----------|
+### Чат API
+
+| Конечная точка | Метод | Описание |
+|---------------|-------|----------|
 | `/v1/chat/completions` | POST | Формат OpenAI Chat |
 | `/v1/messages` | POST | Формат Anthropic Claude |
 | `/v1/responses` | POST | OpenAI Responses API |
-| `/v1/completions` | POST | Legacy Completions |
+| `/v1/completions` | POST | Устаревшие завершения |
 
-### Нативный формат Gemini
+### Формат Gemini
 
-| Endpoint | Метод | Описание |
-|----------|-------|----------|
-| `/v1beta/models/{model}:generateContent` | POST | Генерация контента |
+| Конечная точка | Метод | Описание |
+|---------------|-------|----------|
+| `/v1beta/models/{model}:generateContent` | POST | Генерация текста |
 | `/v1beta/models/{model}:streamGenerateContent` | POST | Потоковая генерация |
 
-### Image API
+### API для изображений
 
-| Endpoint | Метод | Описание |
-|----------|-------|----------|
+| Конечная точка | Метод | Описание |
+|---------------|-------|----------|
 | `/v1/images/generations` | POST | Генерация изображений OpenAI |
 | `/v1/images/edits` | POST | Редактирование изображений |
-| `/mj/submit/imagine` | POST | Генерация изображений Midjourney |
+| `/mj/submit/imagine` | POST | Рисование с помощью Midjourney |
 | `/ideogram/v1/ideogram-v3/generate` | POST | Ideogram V3 |
 | `/kling/v1/images/generations` | POST | Генерация изображений Kling |
-| `/kling/v1/images/kolors-virtual-try-on` | POST | Kling virtual try-on |
+| `/kling/v1/images/kolors-virtual-try-on` | POST | Виртуальная примерка Kling |
 
-### Video API
+### API для видео
 
-| Endpoint | Метод | Описание |
-|----------|-------|----------|
-| `/v1/video/create` | POST | Единое создание видео |
-| `/v1/video/query` | GET | Единый запрос статуса видео |
-| `/kling/v1/videos/text2video` | POST | Kling text-to-video |
-| `/kling/v1/videos/image2video` | POST | Kling image-to-video |
-| `/kling/v1/videos/multi-image2video` | POST | Видео Kling с несколькими референсами |
-| `/kling/v1/videos/omni-video` | POST | Kling omni-video |
-| `/jimeng/submit/videos` | POST | Отправка задачи Jimeng |
-| `/jimeng/fetch/{task_id}` | GET | Запрос задачи Jimeng |
-| `/luma/generations` | POST | Генерация видео Luma |
-| `/runwayml/v1/tasks` | POST | Генерация видео Runway |
+| Конечная точка | Метод | Описание |
+|---------------|-------|----------|
+| `/v1/video/create` | POST | Универсальное создание видео |
+| `/v1/video/query` | GET | Универсальный запрос видео |
+| `/kling/v1/videos/text2video` | POST | Kling: создание видео из текста |
+| `/kling/v1/videos/image2video` | POST | Kling: создание видео из изображения |
+| `/kling/v1/videos/multi-image2video` | POST | Kling: видео по референсу |
+| `/kling/v1/videos/omni-video` | POST | Kling Omni видео |
+| `/jimeng/submit/videos` | POST | Отправка JiMeng видео |
+| `/jimeng/fetch/{task_id}` | GET | JiMeng: запрос задач |
+| `/luma/generations` | POST | Luma: генерация видео |
+| `/runwayml/v1/image_to_video` | POST | Runway: создание видео из изображения |
+| `/runwayml/v1/tasks/{task_id}` | GET | Runway: запрос задачи |
 
-### Audio API
+### API для аудио
 
-| Endpoint | Метод | Описание |
-|----------|-------|----------|
-| `/v1/audio/speech` | POST | Text-to-Speech (TTS) |
-| `/v1/audio/transcriptions` | POST | Speech-to-Text (STT) |
+| Конечная точка | Метод | Описание |
+|---------------|-------|----------|
+| `/v1/audio/speech` | POST | Преобразование текста в речь (TTS) |
+| `/v1/audio/transcriptions` | POST | Преобразование речи в текст (STT) |
 
 ### Другие API
 
-| Endpoint | Метод | Описание |
-|----------|-------|----------|
-| `/v1/embeddings` | POST | Embeddings |
-| `/v1/rerank` | POST | Reranking |
+| Конечная точка | Метод | Описание |
+|---------------|-------|----------|
+| `/v1/embeddings` | POST | Векторные встраивания |
+| `/v1/rerank` | POST | Пересортировка |
 | `/v1/models` | GET | Список моделей |
+| `/v1/files/uploads` | POST | Временная загрузка локального изображения |
+| `/v1/files/uploads/base64` | POST | Временная загрузка Base64-изображения |
+| `/v1/files/uploads/url` | POST | Конвертация удалённого изображения во временный URL |
+| `/v1/files/uploads/presign` | POST | Предварительно подписанная быстрая загрузка R2 |
 
 <Note>
-Все endpoints поддерживают HTTPS. Международная API-точка входа по умолчанию — `https://api.crazyrouter.com`; для Восточной Азии предпочтительно использовать `https://cn.crazyrouter.com`; вход в аккаунт, оплата и панель управления остаются на `https://crazyrouter.com`.
+Все конечные точки поддерживают HTTPS. Международный API-адрес по умолчанию: `https://api.crazyrouter.com`; для Восточной Азии предпочтителен `https://cn.crazyrouter.com`; для входа в аккаунт, пополнения счета и панели используйте `https://crazyrouter.com`.
 </Note>

@@ -1,16 +1,17 @@
 ---
-title: "Gemini Tools"
-description: "Gemini native tool capabilities verified against Crazyrouter production on 2026-03-23"
+title: "Gemini ツール呼び出し"
+description: "2026年3月23日 Crazyrouter本番環境検証に基づく Gemini ネイティブツール機能"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Gemini Tools
+
+# Gemini ツール呼び出し
 
 ```
 POST /v1beta/models/{model}:generateContent
 ```
 
-As of March 23, 2026, Crazyrouter production has verified that `gemini-3.1-pro` can reliably trigger these Gemini-native tool capabilities:
+2026年3月23日時点で、Crazyrouter 本番環境は `gemini-3.1-pro` を用いて以下の Gemini ネイティブツール機能を安定してトリガーできることを確認しています：
 
 - `codeExecution`
 - `googleSearch`
@@ -18,14 +19,14 @@ As of March 23, 2026, Crazyrouter production has verified that `gemini-3.1-pro` 
 - `functionDeclarations`
 
 <Note>
-  This page keeps only request patterns and response markers that were reproduced against production.
+  本ページには本番環境で実際に成功したリクエスト形式とレスポンス識別のみを残しています。
 </Note>
 
 ---
 
-## Code Execution
+## コード実行
 
-The following request returned both `executableCode` and `codeExecutionResult` in production:
+以下のリクエストは本番環境で `executableCode` と `codeExecutionResult` の2つの主要レスポンスブロックを返しました：
 
 ```bash
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
@@ -47,7 +48,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Observed response shape:
+本番環境で観測された主要レスポンス形式：
 
 ```json
 {
@@ -79,9 +80,9 @@ Observed response shape:
 
 ---
 
-## Google Search
+## Google検索
 
-The following request returned `groundingMetadata` in production, confirming that Google Search was actually used:
+以下のリクエストは本番環境で `groundingMetadata` を返し、モデルが確かに Google Search をトリガーしたことを示しています：
 
 ```bash
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
@@ -103,16 +104,16 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Current markers to check:
+現在これに基づいて確認可能：
 
 - `candidates[0].groundingMetadata`
-- Normal text output in `candidates[0].content.parts[*].text`
+- 通常のテキスト回答は引き続き `candidates[0].content.parts[*].text` にあります
 
 ---
 
-## URL Context
+## URLコンテキスト
 
-The following request returned `urlContextMetadata` in production, along with `groundingMetadata`:
+以下のリクエストは本番環境で `urlContextMetadata` を返し、かつ `groundingMetadata` も含まれています：
 
 ```bash
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
@@ -134,16 +135,16 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Current markers to check:
+現在これに基づいて確認可能：
 
 - `candidates[0].urlContextMetadata`
 - `candidates[0].groundingMetadata`
 
 ---
 
-## Custom Function Calling
+## カスタム関数呼び出し
 
-The following request returned `functionCall` in production:
+以下のリクエストは本番環境で `functionCall` を返しました：
 
 ```bash
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
@@ -179,7 +180,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Observed response shape:
+主要レスポンス形式：
 
 ```json
 {
@@ -202,11 +203,11 @@ Observed response shape:
 }
 ```
 
-To continue the tool loop, send the tool result back with Gemini-native `functionResponse`.
+関数結果の返却時は、引き続き Gemini ネイティブの `functionResponse` 構造体を利用できます。
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [Gemini 2.5 Flash 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash-Lite 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash 価格比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash モデルページ：リアルタイム価格、実際のサンプル、呼び出しコード](https://crazyrouter.com/ja/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash-Lite 価格比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)

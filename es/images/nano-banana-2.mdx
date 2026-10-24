@@ -1,0 +1,152 @@
+---
+title: "Nano Banana 2"
+description: "Usa nano-banana-2 para invocar la imagen Gemini 3.1 Flash mediante la API de imágenes de OpenAI"
+---
+> Contenido actualizado: 2026-09-18
+
+<Tip>
+  ¿Necesitas enviar y recibir de inmediato, o luego consultar el URL de la imagen? Este modelo soporta [generación de imágenes asíncrona](/es/images/async): Para la serie Gemini cambia el sufijo del path por `:asyncGenerateContent`, para la serie OpenAI añade el encabezado `Prefer: respond-async`, y no hace falta modificar ni un byte del cuerpo de la solicitud.
+</Tip>
+
+# Nano Banana 2
+
+```
+POST /v1/images/generations
+```
+
+`nano-banana-2` es el alias público de `nano-banana-2`. El lado del usuario utiliza el protocolo de compatibilidad de OpenAI Images de manera uniforme; el servidor convierte parámetros unificados como `output_format`, `output_compression`, `resolution`, `aspect_ratio` en solicitudes nativas Gemini / Vertex.
+
+<Warning>
+  `nano-banana-2` pertenece a un modelo de imágenes de largo procesamiento. Para producción, prioriza el uso de la línea principal `https://api.crazyrouter.com/v1`, el endpoint completo de generación es `https://api.crazyrouter.com/v1/images/generations`. Para login de cuentas, recarga y consola sigue usando `https://crazyrouter.com`.
+</Warning>
+
+## Nombre del modelo
+
+| Nombre recomendado del modelo | Modelo subyacente equivalente |
+|------|------|
+| `nano-banana-2` | `nano-banana-2` |
+
+Recomendamos usar `nano-banana-2` en el código de tus clientes. Si tu sistema ya utiliza directamente `nano-banana-2`, también puedes seguir llamando mediante la misma entrada `/v1/images/generations`.
+
+## Parámetros de solicitud
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `model` | string | Sí | Recomienda `nano-banana-2`; también compatible con `nano-banana-2` |
+| `prompt` | string | Sí | Orden para generar o editar |
+| `image_input` | string o string[] | No | URL de imágenes de referencia; si no se envía es para generación desde texto |
+| `resolution` | string | No | `1K`, `2K`, `4K` |
+| `aspect_ratio` | string | No | Como `1:1`, `16:9`, `9:16`, `21:9`, `auto` |
+| `output_format` | string | No | `png`, `jpeg` / `jpg` |
+| `output_compression` | integer | No | `0-100`, para calidad de compresión JPEG |
+| `n` | integer | No | Cantidad de imágenes a generar, por defecto `1` |
+
+<Note>
+  No envíes campos nativos de Gemini en solicitudes de cliente, como `generationConfig`, `imageConfig`, `imageOutputOptions`, `image_output_options`. Crazyrouter se encarga de generar estos campos en el servidor siguiendo el protocolo actual del upstream.
+</Note>
+
+## Ejemplo de generación desde texto
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "nano-banana-2",
+    "prompt": "A clean ecommerce hero shot of a red apple on a white background",
+    "resolution": "1K",
+    "aspect_ratio": "16:9",
+    "output_format": "jpeg",
+    "output_compression": 85
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://api.crazyrouter.com/v1",
+)
+
+response = client.images.generate(
+    model="nano-banana-2",
+    prompt="A clean ecommerce hero shot of a red apple on a white background",
+    n=1,
+    extra_body={
+        "resolution": "1K",
+        "aspect_ratio": "16:9",
+        "output_format": "jpeg",
+        "output_compression": 85,
+    },
+)
+
+print(response.data[0].url or response.data[0].b64_json)
+```
+
+</CodeGroup>
+
+## Ejemplo de edición utilizando imagen de referencia
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "nano-banana-2",
+    "prompt": "把参考图改成横幅广告图，保留主体，背景更干净",
+    "image_input": [
+      "https://example.com/reference.png"
+    ],
+    "resolution": "1K",
+    "aspect_ratio": "16:9",
+    "output_format": "png"
+  }'
+```
+
+## Respuesta
+
+La respuesta sigue el estilo de OpenAI Images. Por defecto se prioriza la lectura de `data[0].url`; algunos canales compatibles pueden devolver `data[0].b64_json`.
+
+```json
+{
+  "created": 1778990000,
+  "data": [
+    {
+      "url": "https://media.crazyrouter.com/task-artifacts/2026/05/17/sync-image/request-id-1.png"
+    }
+  ]
+}
+```
+
+## Explicación de migración
+
+Si el código antiguo llama directamente a:
+
+```text
+POST /v1beta/models/nano-banana-2:generateContent
+```
+
+Se recomienda migrar a:
+
+```text
+POST https://api.crazyrouter.com/v1/images/generations
+```
+
+Y cambiar los parámetros nativos de Gemini por parámetros unificados:
+
+| Concepto nativo de Gemini | Parámetro unificado Crazyrouter |
+|------|------|
+| `imageConfig.aspectRatio` | `aspect_ratio` |
+| `imageConfig.imageSize` | `resolution` |
+| `imageOutputOptions.mimeType` | `output_format` |
+| `imageOutputOptions.compressionQuality` | `output_compression` |
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Página del modelo Nano Banana 2: precio en tiempo real, ejemplos reales, código de invocación](https://crazyrouter.com/es/models/google/nano-banana-2?utm_source=docs&utm_medium=related)
+- [Página del modelo Nano Banana Pro: precio en tiempo real, ejemplos reales, código de invocación](https://crazyrouter.com/es/models/google/nano-banana-pro?utm_source=docs&utm_medium=related)
+- [Todos los modelos y precios de Google](https://crazyrouter.com/es/models/google?utm_source=docs&utm_medium=related)

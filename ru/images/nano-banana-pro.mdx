@@ -1,11 +1,11 @@
 ---
 title: "Nano Banana Pro"
-description: "Use nano-banana-pro for reference-image generation and editing through the OpenAI Images API"
+description: "Генерация и редактирование на основе референсных изображений с использованием nano-banana-pro, совместим с OpenAI Images API"
 ---
-> Дата обновления: 2026-09-18
+> Обновление содержания: 2026-09-28
 
 <Tip>
-  Нужно получить ответ сразу, а URL изображения забрать позже? Модель поддерживает [асинхронную генерацию](/ru/images/async): для Gemini замените суффикс пути на `:asyncGenerateContent`, для эндпоинтов OpenAI добавьте заголовок `Prefer: respond-async` — тело запроса не меняется ни на байт.
+  Нужно ли немедленно возвращать результат после запроса и затем опрашивать URL изображения позже? Эта модель поддерживает [асинхронную генерацию изображений](/ru/images/async): Gemini — просто поменяйте суффикс пути на `:asyncGenerateContent`, OpenAI — добавьте заголовок `Prefer: respond-async`, тело запроса менять не требуется.
 </Tip>
 
 # Nano Banana Pro
@@ -14,93 +14,132 @@ description: "Use nano-banana-pro for reference-image generation and editing thr
 POST /v1/images/generations
 ```
 
-Use `nano-banana-pro` for image generation and reference-image editing through one public `OpenAI Images API` style contract.
-
-## What This Page Covers
-
-- This page only covers `nano-banana-pro`
-- The customer-facing entry point is `POST /v1/images/generations`
-- The input image field is `image_input`
-- The default public contract remains URL-based `image_input`; designated gray accounts also support data URLs, raw Base64, and three-image multipart editing
-- Gemini / Vertex and other providers may sit behind this route, but those provider details are not part of the customer contract
-
-## Capability Status
-
-| Capability / Spec | Status | Notes |
-|-----------|--------|-------|
-| `T2I` | `Beta` | Historical coverage exists, but the current public artifact bundle is still centered on edit/reference flows |
-| `I2I + 1K` | `Verified` | The single-image edit live path is closed |
-| `I2I + 4K` | `Verified` | `4K + 21:9 + png/jpg` has a live artifact |
-| `Reference + 1..2 refs` | `Verified` | `2`-reference live verification is closed |
-| `2K` | `Beta` | The current public artifact is still pending |
-| higher multi-reference limits / exact `30 MiB` boundary | `Beta` | Not committed in the current public contract |
-
-<Note>
-  The Pricing page and this doc use the same status language: `Verified` means there is a current minimal live artifact, while `Beta` means the official capability exists but the public validation set or edge coverage is still being completed.
-</Note>
-
-## Currently Validated Capabilities
-
-The following conclusions come from live validation on March 31, 2026:
-
-- official Vertex `channel 318 (vertexsophie)` direct truth:
-  - `2` reference images work
-- local relay on `localhost:4000`, pinned to `channel 318`, verified:
-  - single `WEBP` URL reference works
-  - single `JPEG` URL reference works
-  - `2` `PNG` URL references work
-  - `resolution: "1K"` works
-  - `resolution: "4K"` works
-  - `aspect_ratio: "1:1"` works
-  - `aspect_ratio: "21:9"` works
-  - `output_format: "png"` works
-  - `output_format: "jpg"` works
-  - the response returns `data[].url`
-
-Do not present the following as fully promised customer-facing capability yet:
-
-- whether the exact multi-image limit is `8` or higher
-- `2K`
-- exact large-file URL limit
-- exact `30 MiB` boundary
-- additional `aspect_ratio` combinations
-- exact `output_compression` semantics
+Используйте `nano-banana-pro` для генерации изображений и редактирования на основе референсов; вся работа по открытому протоколу в стиле `OpenAI Images API`.
 
 <Warning>
-  Non-gray accounts remain URL-only. Base64, data URLs, and multipart editing are currently enabled only for designated gray accounts.
+  Запросы на генерацию изображений, редактирование картинок, работу с несколькими референсами обычно занимают больше времени. Для интеграций в продакшене рекомендуем использовать основной маршрут `https://api.crazyrouter.com/v1`, полный endpoint для генерации — `https://api.crazyrouter.com/v1/images/generations`. Вход в аккаунт, пополнение и консоль — всё как прежде через `https://crazyrouter.com`.
 </Warning>
 
+## Что охватывает эта страница
+
+- Эта страница покрывает только `nano-banana-pro` / `nano-banana-pro`
+- Вход для пользовательских запросов всегда `POST /v1/images/generations`
+- Поле входного изображения — всегда `image_input`
+- По умолчанию советуем использовать URL по открытому протоколу `image_input`; для указанных серых аккаунтов дополнительно поддерживаются dataURL, raw Base64 и трёхкартинный multipart-редактор
+- `data:` / Base64 / multipart — расширение Crazyrouter, не означает, что все провайдеры наверху его поддерживают
+- На бекенде может стоять Gemini, Vertex или другой провайдер, но технические детали провайдера не являются частью клиентского протокола
+- Не передавайте с пользовательской стороны параметры `generationConfig`, `imageConfig`, `imageOutputOptions`, `image_output_options` — Crazyrouter сам конвертирует их из общих параметров
+
+## Имена моделей
+
+| Рекомендуемое имя модели | Эквивалентная базовая модель |
+|------|------|
+| `nano-banana-pro` | `nano-banana-pro` |
+
+Рекомендуется использовать `nano-banana-pro` в клиентском коде. Если в вашей системе уже прописан `nano-banana-pro`, тоже можно вызывать через тот же `/v1/images/generations`.
+
+## Статус возможностей
+
+| Возможность / спецификация | Статус | Описание |
+|------|------|------|
+| `T2I` | `Beta` | В прошлом покрывалось, но сейчас артефакты доступны только для редактирования и по референсным путям |
+| `I2I + 1K` | `Verified` | Редактирование одной картинки в live закрыто |
+| `I2I + 4K` | `Verified` | `4K + 21:9 + png/jpeg/jpg` live закрыто |
+| `Reference + 1..2 refs` | `Verified` | `2` — картинки в live закрыто |
+| `11257` (серый режим): dataURL / raw Base64 | `Verified` | В продакшене канал 304 проверен для одной и трёх картинок `image_input` |
+| `11257` (серый): трёхкартинный multipart | `Verified` | `/v1/images/edits` поддерживает `image`, `image[]`, `image[n]` |
+| `2K` | `Beta` | Публичные артефакты ещё дополняются |
+| Более высокий лимит по количеству картинок / точная граница `30 MiB` | `Beta` | В текущем контракте публично не обещается |
+
+<Note>
+  Страница цен использует ту же схему статусов: `Verified` означает, что минимальный live-функционал уже есть, `Beta` — что функция доступна, но публично валидация и границы ещё дополняются.
+</Note>
+
+## Уже верифицированные возможности
+
+Ниже — выводы на основе исторической live-валидации и продакшен-грей `2026-08-18`:
+
+- Официальный прямой Vertex `channel 318 (vertexsophie)` уже верифицирован:
+  - Можно использовать `2` референс-изображений
+- Проверены локальный порт `4000` и фиксированный `channel 318`:
+  - Одна референсная картинка `WEBP` по URL — работает
+  - Одна референсная картинка `JPEG` по URL — работает
+  - `2` картинки `PNG` по URL — работают
+  - Доступен `resolution: "1K"`
+  - Доступен `resolution: "4K"`
+  - Доступен `aspect_ratio: "1:1"`
+  - Доступен `aspect_ratio: "21:9"`
+  - Доступен `output_format: "png"`
+  - Доступен `output_format: "jpg"`
+- Ответ может напрямую возвращать `data[].url`
+
+Для указанного серого аккаунта `11257` прошёл валидацию на продакшен-канале `304`:
+
+- `/v1/images/generations` — модель `image_input` — поддерживает dataURL, raw Base64 и мультикартинный ввод
+- `/v1/images/edits` поддерживает multipart для `image`, `image[]`, `image[n]`
+- Исходное изображение, картинка с аннотациями и референсы могут по порядку загрузки объединяться в трёхкартинный редактор
+
+Следующие возможности нельзя считать полностью гарантированными для внешнего клиента:
+
+- Точный лимит по многокартинности — `8` или больше
+- `2K`
+- Точный лимит URL для больших файлов
+- Точные границы `30 MiB`
+- Другие комбинации `aspect_ratio`
+- Точные семантические границы для `output_compression`
+
+<Note>
+  По умолчанию публичный протокол для обычных аккаунтов — только URL. Base64, dataURL и multipart-редактор — только для допущенных серых аккаунтов; чтобы получить доступ, сперва убедитесь, что ваш аккаунт в списке.
+</Note>
+
 ---
 
-## Request Parameters
+## Параметры запроса
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model` | string | Yes | Fixed as `nano-banana-pro` |
-| `prompt` | string | Yes | Generation or edit instruction |
-| `image_input` | string or string[] | No | URLs by default; designated gray accounts may also send data URLs/raw Base64, with three images verified |
-| `resolution` | string | No | Current public promise is `1K` and `4K` |
-| `aspect_ratio` | string | No | Current public promise is `1:1` and `21:9` |
-| `output_format` | string | No | Current public promise is `png` and `jpg` |
-| `n` | integer | No | Number of images, default `1` |
+| Параметр | Тип | Обязателен | Описание |
+|------|------|------|------|
+| `model` | string | Да | Рекомендуется `nano-banana-pro`; также поддерживается `nano-banana-pro` |
+| `prompt` | string | Да | Инструкция генерации или редактирования |
+| `image_input` | string или string[] | Нет | По умолчанию используйте URL референса; серый аккаунт может также использовать dataURL / raw Base64, сейчас три картинки уже проверены |
+| `resolution` | string | Нет | Официально гарантируется `1K`, `4K` |
+| `aspect_ratio` | string | Нет | Официально гарантируется `1:1`, `21:9` |
+| `output_format` | string | Нет | Официально гарантируется `png`, `jpeg` / `jpg` |
+| `output_compression` | integer | Нет | `0-100`, для управления качеством JPEG |
+| `n` | integer | Нет | Количество генерируемых изображений, по умолчанию `1` |
 
-### Current Multi-Image Status
+### Актуальный статус многокартинности
 
-- `2` references: verified
-- gray user `11257` with three references: verified
-- higher counts: exact upstream max is still pending, so do not promise it publicly yet
+- `2` картинок: уже проверено
+- `11257` три картинки (серый): уже проверено
+- Большее число: максимумы от провайдера уточняются, не гарантируется
 
-### Routing Note
+### Разъяснение маршрутизации
 
-- single-image requests can use normal available carriers
-- multi-image requests normally use official `Gemini / Vertex` carriers; designated gray accounts may use an explicitly verified gray carrier
-- that is a server-side routing rule; the customer contract stays the same
+- Один референс — обычный маршрут
+- По умолчанию многокартинный запрос идёт только к официальному carrier `Gemini / Vertex`; серые аккаунты могут выбрать протестированный carrier
+- Это внутренняя политика на сервере; клиентский протокол не меняется
+
+### Трёхкартинный multipart для серых
+
+Аккаунт в серой зоне `11257` может использовать `/v1/images/edits`:
+
+```bash
+curl -X POST https://api.crazyrouter.com/v1/images/edits \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "model=nano-banana-pro" \
+  -F "prompt=以第一张为原图，第二张为批注图，第三张为参考图，仅修改批注区域" \
+  -F "image[]=@original.png" \
+  -F "image[]=@annotation.png" \
+  -F "image[]=@reference.png"
+```
+
+Порядок изображений определяется последовательностью в клиентском запросе. Картинка с аннотациями сейчас является лишь визуальным референсом; точная маска по пикселям (GPT-style) не гарантируется.
 
 ---
 
-## Request Examples
+## Пример запроса
 
-### Single-Image Edit
+### Редактирование одной картинки
 
 <CodeGroup>
 
@@ -110,7 +149,7 @@ curl -X POST https://api.crazyrouter.com/v1/images/generations \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "nano-banana-pro",
-    "prompt": "Turn this product image into an ultra-wide hero KV with a cleaner background while preserving the subject",
+    "prompt": "把这张商品图改成超宽横幅 KV，背景更简洁，保留主体结构",
     "image_input": [
       "https://help-static-aliyun-doc.aliyuncs.com/file-manage-files/zh-CN/20250925/fpakfo/image36.webp"
     ],
@@ -131,7 +170,7 @@ response = requests.post(
     },
     json={
         "model": "nano-banana-pro",
-        "prompt": "Turn this product image into an ultra-wide hero KV with a cleaner background while preserving the subject",
+        "prompt": "把这张商品图改成超宽横幅 KV，背景更简洁，保留主体结构",
         "image_input": [
             "https://help-static-aliyun-doc.aliyuncs.com/file-manage-files/zh-CN/20250925/fpakfo/image36.webp"
         ],
@@ -147,12 +186,28 @@ print(data["data"][0]["url"])
 
 </CodeGroup>
 
-### Two-Reference Input
+### Генерация по тексту
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "nano-banana-pro",
+    "prompt": "A premium product poster for a red apple, studio lighting, clean background",
+    "resolution": "1K",
+    "aspect_ratio": "1:1",
+    "output_format": "jpeg",
+    "output_compression": 85
+  }'
+```
+
+### Двойной референс
 
 ```json
 {
   "model": "nano-banana-pro",
-  "prompt": "Blend the subject and composition from these two references into one high-quality hero visual",
+  "prompt": "融合两张参考图的主体与构图，生成一张高质量主视觉图",
   "image_input": [
     "https://example.com/ref-1.png",
     "https://example.com/ref-2.png"
@@ -164,9 +219,9 @@ print(data["data"][0]["url"])
 
 ---
 
-## Response Example
+## Пример ответа
 
-The recommended automation path is to consume `data[].url`:
+По умолчанию рекомендуется непосредственно использовать `data[].url`:
 
 ```json
 {
@@ -179,44 +234,43 @@ The recommended automation path is to consume `data[].url`:
 }
 ```
 
-To retrieve the generated image, read `data[0].url`. Crazyrouter currently archives upstream inline image output and returns a public URL to the client.
+Чтобы получить готовый результат, просто читайте `data[0].url`. Сейчас Crazyrouter архивирует inline-изображения от провайдера по URL и отдаёт их клиенту.
 
 ---
 
-## Validation Snapshot
+## Итог верифицированных результатов
 
-| Item | Current Status |
-|------|----------------|
-| single URL reference | verified |
-| `2` URL references | verified |
-| `WEBP` URL | verified |
-| `JPEG` URL | verified |
-| `PNG` URL | verified |
-| `1K` | verified |
-| `4K` | verified |
-| `1:1` | verified |
-| `21:9` | verified |
-| `output_format = png` | verified |
-| `output_format = jpg` | verified |
-| exact `8`-image ceiling | `Beta` |
-| exact `30 MiB` URL boundary | `Beta` |
+| Фича | Текущий статус |
+|------|----------|
+| Одна референсная картинка по URL | Проверено |
+| `2` референсов по URL | Проверено |
+| `WEBP` по URL | Проверено |
+| `JPEG` по URL | Проверено |
+| `PNG` по URL | Проверено |
+| `1K` | Проверено |
+| `4K` | Проверено |
+| `1:1` | Проверено |
+| `21:9` | Проверено |
+| `output_format = png` | Проверено |
+| `output_format = jpeg / jpg` | Проверено |
+| Точный лимит `8` по многокартинности | `Beta` |
+| Точная граница URL `30 MiB` | `Beta` |
 | `2K` | `Beta` |
 
-## Current Known Limits
+## Известные ограничения
 
-- `image` is not accepted
-- `data:` / Base64 is available only for designated gray accounts; other accounts remain URL-only
-- the docs do not promise more than `2` references yet
-- the docs do not promise the exact `30 MiB` URL boundary yet
-- the docs do not promise full closure on every screenshot-listed ratio or parameter yet
+- Для обычных аккаунтов не принимаются `image`, `data:` / Base64 или multipart-изображения
+- Для серых аккаунтов максимум три картинки сейчас проверено, больше не гарантируется
+- Этот документ не гарантирует точные URL-лимиты по `30 MiB`
+- Не гарантируется, что все параметры и соотношения, приведённые в примерах, уже полностью доступны публично
 
 <Note>
-  If you need Gemini native `generateContent` image endpoints, see [Gemini Image Generation](/ru/chat/gemini/image-gen) and [Gemini Image Editing](/ru/chat/gemini/image-edit). If you care more about reference-count breadth, also see [Nano Banana](/ru/images/nano-banana) and [Nano Banana 2](/ru/images/nano-banana-2).
+  Для единой справки по параметрам генерации и редактирования изображений Gemini / Nano Banana см. [Gemini — генерация изображений](/ru/chat/gemini/image-gen) и [Gemini — редактирование изображений](/ru/chat/gemini/image-edit). Для других тарифов см. [Nano Banana](/ru/images/nano-banana) и [Nano Banana 2](/ru/images/nano-banana-2).
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Смежные страницы
 
-- [Nano Banana Pro: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/google/nano-banana-pro?utm_source=docs&utm_medium=related)
-- [Nano Banana 2: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/google/nano-banana-2?utm_source=docs&utm_medium=related)
-- [Все модели Google с актуальными ценами](https://crazyrouter.com/en/models/google?utm_source=docs&utm_medium=related)
+- [Страница Nano Banana Pro: текущая цена, реальные примеры, код вызова](https://crazyrouter.com/ru/models/google/nano-banana-pro?utm_source=docs&utm_medium=related)
+- [Страница Nano Banana 2: текущая цена, реальные примеры, код вызова](https://crazyrouter.com/ru/models/google/nano-banana-2?utm_source=docs&utm_medium=related)
+- [Google: все модели и цены](https://crazyrouter.com/ru/models/google?utm_source=docs&utm_medium=related)

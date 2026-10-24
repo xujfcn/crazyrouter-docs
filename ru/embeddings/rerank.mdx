@@ -1,48 +1,48 @@
 ---
-title: 'Rerank'
-description: 'Semantically rerank search results'
+title: "Переранжирование"
+description: "Семантическое переранжирование результатов поиска"
 api: 'POST /v1/rerank'
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-06
 
-## Overview
+## Описание интерфейса
 
-Reorder a set of documents by semantic relevance to a query. Commonly used as the second-stage reranking step in RAG (Retrieval-Augmented Generation) pipelines.
+Выполняет повторную сортировку группы документов по семантической релевантности к запросу, обычно используется как второй этап при улучшенном поиске с генерацией (RAG).
 
 <Note>
-  Implemented following the [SiliconFlow Rerank API](https://docs.siliconflow.cn/cn/api-reference/rerank/create-rerank) format.
+  Реализовано по формату [SiliconFlow Rerank API](https://docs.siliconflow.cn/cn/api-reference/rerank/create-rerank).
 </Note>
 
-## Supported Models
+## Поддерживаемые модели
 
-| Model | Description |
-|-------|-------------|
-| `gte-rerank-v2` | Multilingual reranking model, recommended |
-| `gte-rerank-v2` | Primarily English |
+| Модель | Описание |
+|------|------|
+| `gte-rerank-v2` | Многоязычная модель для переранжирования, рекомендуется |
+| `gte-rerank-v2` | В основном для английского языка |
 
-## Request Parameters
+## Параметры запроса
 
 <ParamField body="model" type="string" required>
-  Reranking model name, e.g. `gte-rerank-v2`
+  Название модели переранжирования, например `gte-rerank-v2`
 </ParamField>
 
 <ParamField body="query" type="string" required>
-  Query text
+  Текст запроса
 </ParamField>
 
 <ParamField body="documents" type="string[]" required>
-  List of documents to rerank
+  Список документов для ранжирования
 </ParamField>
 
 <ParamField body="top_n" type="integer">
-  Return the top N results. Defaults to returning all
+  Вернуть первые N результатов, по умолчанию возвращаются все
 </ParamField>
 
 <ParamField body="return_documents" type="boolean" default="true">
-  Whether to include the original document text in the response
+  Возвращать ли оригинальный текст документов в ответе
 </ParamField>
 
-## Response Format
+## Формат ответа
 
 ```json
 {
@@ -51,17 +51,17 @@ Reorder a set of documents by semantic relevance to a query. Commonly used as th
     {
       "index": 2,
       "relevance_score": 0.9875,
-      "document": { "text": "Most relevant document content" }
+      "document": { "text": "最相关的文档内容" }
     },
     {
       "index": 0,
       "relevance_score": 0.7432,
-      "document": { "text": "Second most relevant document content" }
+      "document": { "text": "次相关的文档内容" }
     },
     {
       "index": 1,
       "relevance_score": 0.1205,
-      "document": { "text": "Less relevant document content" }
+      "document": { "text": "不太相关的文档内容" }
     }
   ],
   "usage": {
@@ -70,7 +70,7 @@ Reorder a set of documents by semantic relevance to a query. Commonly used as th
 }
 ```
 
-## Code Examples
+## Пример кода
 
 <CodeGroup>
 
@@ -85,12 +85,12 @@ response = requests.post(
     },
     json={
         "model": "gte-rerank-v2",
-        "query": "What is a vector database",
+        "query": "什么是向量数据库",
         "documents": [
-            "A vector database is a database system specialized for storing and retrieving high-dimensional vectors",
-            "Relational databases use tables to store structured data",
-            "Vector databases support approximate nearest neighbor search, suitable for semantic retrieval scenarios",
-            "Redis is an in-memory key-value store"
+            "向量数据库是专门存储和检索高维向量的数据库系统",
+            "关系型数据库使用表格存储结构化数据",
+            "向量数据库支持近似最近邻搜索，适合语义检索场景",
+            "Redis 是一个内存键值存储系统"
         ],
         "top_n": 2,
         "return_documents": True
@@ -108,10 +108,10 @@ curl -X POST https://api.crazyrouter.com/v1/rerank \
   -H "Content-Type: application/json" \
   -d '{
     "model": "gte-rerank-v2",
-    "query": "What is a vector database",
+    "query": "什么是向量数据库",
     "documents": [
-      "A vector database is a database system specialized for storing and retrieving high-dimensional vectors",
-      "Relational databases use tables to store structured data"
+      "向量数据库是专门存储和检索高维向量的数据库系统",
+      "关系型数据库使用表格存储结构化数据"
     ],
     "top_n": 2
   }'
@@ -119,12 +119,12 @@ curl -X POST https://api.crazyrouter.com/v1/rerank \
 
 </CodeGroup>
 
-## Typical RAG Pipeline
+## Типичный процесс RAG
 
 ```
-User Query → Embedding Retrieval Top-K → Rerank → LLM Generates Answer
+用户查询 → Embedding 检索 Top-K → Rerank 精排 → LLM 生成回答
 ```
 
 <Warning>
-  The number of input documents for reranking should not exceed 100. Too many documents will increase latency and cost.
+  Рекомендуется, чтобы количество входных документов для переранжирования не превышало 100. Слишком большое количество документов увеличивает задержку и стоимость.
 </Warning>

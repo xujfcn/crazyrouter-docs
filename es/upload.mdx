@@ -1,0 +1,171 @@
+---
+title: "Instrucciones para la carga de imágenes"
+description: "Sube imágenes locales y obtén una URL pública temporal válida por 48 horas, para usar en las interfaces de imagen a imagen, imagen a video y reconocimiento de imagen"
+---
+> Contenido actualizado: 2026-09-28
+
+Crazyrouter proporciona una interfaz para subida temporal de imágenes públicas, diseñada para convertir imágenes de referencia locales en una URL pública que el modelo pueda acceder. Es adecuada para Kling, Veo, Seedance, Runway, Luma, MiniMax, Nano Banana Pro, Doubao Seedream y otros interfaces que requieren `image_url`, `image_urls`, `image_list`, `images` o `image_input`.
+
+<Note>
+  Las imágenes temporales se guardan por defecto durante 48 horas y se eliminan automáticamente después. No hay cobro independiente por día durante el periodo de almacenamiento; actualmente se limita el abuso mediante el límite de cuota y velocidad de subida por usuario.
+</Note>
+
+<Note>
+  `id` devuelto es el ID de registro de archivos de este sitio; el `image_input` en la petición al modelo debe usar el `url` devuelto, no se debe enviar directamente `id`. La capacidad de escala de grises Base64 / multipart para `nano-banana-pro` solo está disponible para cuentas especificadas.
+</Note>
+
+## Descripción general de la interfaz
+
+| Escenario | Interfaz |
+|------|------|
+| Carga de archivo local | `POST /v1/files/uploads` |
+| Carga de imagen Base64 | `POST /v1/files/uploads/base64` |
+| Transferencia de imagen remota | `POST /v1/files/uploads/url` |
+| Subida directa prefirmada a R2 | `POST /v1/files/uploads/presign` |
+
+Restricciones generales:
+
+| Item | Regla actual |
+|------|------|
+| Autenticación | `Authorization: Bearer YOUR_API_KEY` |
+| Formatos soportados | `image/png`, `image/jpeg`, `image/webp`, `image/gif` |
+| Tamaño máximo por archivo | 20MB |
+| Cuota de subida de usuario | 200MB / ventana móvil de 24 horas |
+| Periodo de validez por defecto | 48 horas |
+| URL devuelta | `https://media.crazyrouter.com/task-artifacts/tmp-inputs/...` |
+
+## Carga de archivo local
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/files/uploads \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "file=@./reference.png" \
+  -F "purpose=model_input"
+```
+
+Ejemplo de respuesta:
+
+```json
+{
+  "id": "file_e5bbce820b5941409682a9c5e9ba79f1",
+  "url": "https://media.crazyrouter.com/task-artifacts/tmp-inputs/2026/05/13/user-1/file_e5bbce820b5941409682a9c5e9ba79f1.png",
+  "mime_type": "image/png",
+  "size": 2025,
+  "expires_at": "2026-05-16T04:41:35.0131789Z"
+}
+```
+
+## Carga Base64
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/files/uploads/base64 \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "data": "data:image/png;base64,iVBORw0KGgoAAA...",
+    "filename": "reference.png",
+    "purpose": "model_input"
+  }'
+```
+
+## Transferencia de URL remota
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/files/uploads/url \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "url": "https://example.com/reference.png",
+    "filename": "reference.png",
+    "purpose": "model_input"
+  }'
+```
+
+La URL remota debe ser una dirección de imagen `http` o `https` accesible por el servidor de Crazyrouter. El sistema realiza comprobaciones de tamaño de archivo, tipo MIME y protección SSRF.
+
+## Subida directa prefirmada a R2
+
+En escenarios de alta carga, se puede solicitar primero una URL de subida prefirmada, y luego el cliente sube directamente la imagen `PUT` al punto de almacenamiento. De este modo, el binario de la imagen no pasa por el servidor de aplicaciones Crazyrouter, ideal para cargas masivas diarias de imágenes.
+
+Primer paso, solicitar URL de subida directa:
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/files/uploads/presign \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "filename": "reference.jpg",
+    "content_type": "image/jpeg",
+    "size": 12345,
+    "purpose": "model_input"
+  }'
+```
+
+Ejemplo de respuesta:
+
+```json
+{
+  "id": "file_e5bbce820b5941409682a9c5e9ba79f1",
+  "upload_url": "https://...r2.cloudflarestorage.com/...?...",
+  "url": "https://media.crazyrouter.com/task-artifacts/tmp-inputs/2026/06/21/user-1/file_e5bbce820b5941409682a9c5e9ba79f1.jpg",
+  "method": "PUT",
+  "headers": {
+    "Content-Type": "image/jpeg",
+    "Content-Length": "12345"
+  },
+  "mime_type": "image/jpeg",
+  "size": 12345,
+  "expires_at": "2026-06-22T04:41:35Z",
+  "upload_expires_at": "2026-06-21T04:56:35Z"
+}
+```
+
+Segundo paso, el cliente sube directamente a `upload_url`:
+
+```bash cURL
+curl -X PUT "$UPLOAD_URL" \
+  -H "Content-Type: image/jpeg" \
+  -H "Content-Length: 12345" \
+  --data-binary @./reference.jpg
+```
+
+Tras completar la subida, utiliza el `url` devuelto como la URL de imagen en la petición al modelo.
+
+<Warning>
+  `upload_url` es una dirección de escritura válida por corto tiempo, normalmente se debe usar dentro de unos 15 minutos. `Content-Type` y `Content-Length` deben ser iguales a los solicitados; no envíes `upload_url` al modelo, en la petición al modelo se debe usar el `url` devuelto.
+</Warning>
+
+## Caso real: imagen de referencia local para Kling imagen a video
+
+Primer paso, carga la imagen de referencia local:
+
+```bash cURL
+UPLOAD_RESPONSE=$(curl -sS -X POST https://api.crazyrouter.com/v1/files/uploads \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "file=@./portrait.png" \
+  -F "purpose=model_input")
+
+IMAGE_URL=$(python -c "import json,sys; print(json.load(sys.stdin)['url'])" <<< "$UPLOAD_RESPONSE")
+echo "$IMAGE_URL"
+```
+
+Segundo paso, envía el `IMAGE_URL` devuelto a Kling imagen a video:
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/kling/v1/videos/image2video \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d "{
+    \"model_name\": \"kling-v3\",
+    \"prompt\": \"图片中的人物缓缓转头并微笑，镜头轻微推进，电影级光影\",
+    \"image_urls\": [\"$IMAGE_URL\"],
+    \"duration\": \"5\",
+    \"mode\": \"std\"
+  }"
+```
+
+Al enviar correctamente se devuelve un ID de tarea. Usa [consulta de tareas Kling](/es/video/kling/query) para obtener el resultado final del video.
+
+<Warning>
+  La URL temporal no es una biblioteca de medios permanente. Por favor, asegúrate de que la URL siga válida antes de enviar la tarea, no la guardes como dirección de imagen de uso a largo plazo.
+</Warning>

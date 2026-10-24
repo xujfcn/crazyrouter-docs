@@ -1,0 +1,191 @@
+---
+title: "Tutorial de integración"
+description: "Basado en la revisión del entorno de producción, los caminos iniciales para integrar Crazyrouter desde OpenAI, Anthropic y Gemini"
+---
+> Contenido actualizado: 2026-06-09
+
+# Tutorial de integración
+
+Esta página solo registra las rutas iniciales `2026-03-23` ya verificadas en el entorno de producción de Crazyrouter.
+
+Si deseas comenzar lo más rápido posible, primero distingue tres tipos de integración:
+
+- Compatible con OpenAI: `https://api.crazyrouter.com/v1`
+- Nativo de Anthropic: `https://api.crazyrouter.com`
+- Nativo de Gemini: `https://api.crazyrouter.com/v1beta/models/...`
+
+## Principio de migración más corta
+
+Para migrar desde un cliente compatible con OpenAI a Crazyrouter, normalmente solo necesitas cambiar dos cosas:
+
+1. `base_url` cambiar a `https://api.crazyrouter.com/v1`
+2. `api_key` cambiar a `sk-xxx` de Crazyrouter
+
+---
+
+## Migrando desde OpenAI
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="gpt-5.5",
+    messages=[{"role": "user", "content": "Hello"}],
+    max_tokens=64
+)
+```
+
+La revisión de producción de esta ronda confirma:
+
+- `gpt-5.5` puede devolver respuestas normalmente a través de `/v1/chat/completions`
+- Si necesitas un resumen de razonamiento o búsqueda web al estilo OpenAI, cambia prioritariamente a `/v1/responses`
+
+Páginas relacionadas:
+
+- [Resumen de la API de respuestas](/es/chat/responses/overview)
+- [Modo de pensamiento de GPT-5](/es/chat/responses/gpt5-thinking)
+
+---
+
+## Migrando desde Anthropic
+
+### Opción A: Continuar usando la capa compatible con OpenAI
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="claude-opus-4-8",
+    messages=[{"role": "user", "content": "Hello"}],
+    max_tokens=64
+)
+```
+
+### Opción B: Usar Messages nativos de Anthropic
+
+```python
+import anthropic
+
+client = anthropic.Anthropic(
+    api_key="sk-xxx",
+    base_url="https://api.crazyrouter.com"
+)
+
+response = client.messages.create(
+    model="claude-opus-4-8",
+    max_tokens=128,
+    messages=[{"role": "user", "content": "Hello"}]
+)
+```
+
+Si necesitas:
+
+- Conversación regular de Claude: prioriza `claude-opus-4-8`
+- Necesitas un bloque de pensamiento claramente: prioriza `claude-opus-4-8`
+
+Página relacionada:
+
+- [Formato nativo de Claude](/es/chat/anthropic/messages)
+
+---
+
+## Migrando desde Gemini
+
+### Opción A: Capa compatible con OpenAI
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="gemini-3.1-pro",
+    messages=[{"role": "user", "content": "Hello"}],
+    max_tokens=64
+)
+```
+
+### Opción B: Nativo de Gemini
+
+```bash
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {"text": "Hello"}
+        ]
+      }
+    ]
+  }'
+```
+
+Si necesitas:
+
+- Solo reutilizar el código existente del SDK de OpenAI: primero usa la capa compatible
+- Necesitas salida estructurada, Google Search, o pensamiento: prioriza el nativo de Gemini
+
+Páginas relacionadas:
+
+- [Formato compatible de Gemini y OpenAI](/es/chat/gemini/openai-compat)
+- [Formato nativo de Gemini](/es/chat/gemini/native)
+
+---
+
+## Método por variables de entorno
+
+Si usas la capa compatible con OpenAI, primero recomienda configurar:
+
+<Tabs>
+  <Tab title="Linux / macOS">
+    ```bash
+    export OPENAI_API_KEY=sk-xxx
+    export OPENAI_BASE_URL=https://api.crazyrouter.com/v1
+    ```
+  </Tab>
+  <Tab title="Windows">
+    ```powershell
+    $env:OPENAI_API_KEY = "sk-xxx"
+    $env:OPENAI_BASE_URL = "https://api.crazyrouter.com/v1"
+    ```
+  </Tab>
+</Tabs>
+
+Luego puedes directamente en el código:
+
+```python
+from openai import OpenAI
+client = OpenAI()
+```
+
+---
+
+## Recomendaciones para comenzar
+
+| Objetivo | Método recomendado para comenzar |
+|------|--------------|
+| Integración más rápida de GPT | Compatible con OpenAI + `gpt-5.5` |
+| Integración más rápida de Claude | Nativo de Anthropic + `claude-opus-4-8` |
+| Integración más rápida de Gemini | Compatible con OpenAI o nativo de Gemini + `gemini-3.1-pro` |
+| Para resumen de razonamiento | API de respuestas |
+| Para bloque de pensamiento de Claude | `claude-opus-4-8` |
+| Para Gemini Google Search / pensamiento / responseSchema | Nativo de Gemini |
+
+<Note>
+  Crazyrouter es compatible con los protocolos de OpenAI, Anthropic y Gemini al mismo tiempo. La forma más estable normalmente no es "forzar todos los modelos por el mismo protocolo", sino elegir la entrada más adecuada según la capacidad.
+</Note>

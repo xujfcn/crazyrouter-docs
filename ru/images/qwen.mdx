@@ -1,8 +1,8 @@
 ---
 title: "Qwen Image"
-description: "Use the Qwen Image family through the OpenAI Images-compatible public contract"
+description: "Использование моделей серии Qwen Image для генерации изображений по тексту, клиент продолжает использовать совместимый протокол OpenAI Images"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-06
 
 # Qwen Image
 
@@ -10,34 +10,34 @@ description: "Use the Qwen Image family through the OpenAI Images-compatible pub
 POST /v1/images/generations
 ```
 
-Crazyrouter exposes the first batch of `Qwen Image` generation models through the OpenAI Images-compatible public contract. Clients keep using `/v1/images/generations`; Alibaba official and third-party channels stay internal as providers only.
+В настоящее время Crazyrouter предоставляет первую партию моделей генерации `Qwen Image` через совместимый протокол OpenAI Images. Клиенты продолжают использовать и единый `/v1/images/generations`, официальные и сторонние сервисы Alibaba выступают только как внутренние провайдеры и не раскрывают клиентский протокол отдельно.
 
-## Public Models
+## Текущие открытые модели
 
-| Model | Upstream execution shape | Customer-facing capability | Verification |
-|------|---------------------------|----------------------------|--------------|
-| `qwen-image-plus` | async generation | text-to-image | verified |
-| `qwen-image-max` | sync generation | text-to-image | verified |
-| `qwen-image-2.0` | sync generation | text-to-image | verified |
-| `qwen-image-2.0` | sync generation | text-to-image | Beta |
+| Модель | Тип исполнения upstream | Возможности для клиента | Статус проверки |
+|--------|--------------------------|------------------------|----------------|
+| `qwen-image-plus` | Асинхронная генерация | Генерация изображений по тексту | Проверено |
+| `qwen-image-max` | Синхронная генерация | Генерация изображений по тексту | Проверено |
+| `qwen-image-2.0` | Синхронная генерация | Генерация изображений по тексту | Проверено |
+| `qwen-image-2.0` | Синхронная генерация | Генерация изображений по тексту | Beta |
 
 <Note>
-  `qwen-image-2.0` is already aligned in protocol and code, but the production carrier evidence is still being closed, so it remains Beta for now.
+  `qwen-image-2.0` протокол и код уже согласованы, но производственные доказательства ещё дополняются, поэтому временно отмечено как Beta.
 </Note>
 
-## Public Contract
+## Клиентский протокол
 
-### Request Parameters
+### Параметры запроса
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model` | string | Yes | `qwen-image-plus`, `qwen-image-max`, `qwen-image-2.0`, or `qwen-image-2.0` |
-| `prompt` | string | Yes | text-to-image prompt |
-| `size` | string | No | output size; use sizes currently exposed by the model page or playground |
-| `n` | integer | No | number of images, default `1` |
-| `response_format` | string | No | `url` or `b64_json` |
+| Параметр | Тип | Обязателен | Описание |
+|----------|-----|------------|----------|
+| `model` | string | Да | `qwen-image-plus`, `qwen-image-max`, `qwen-image-2.0`, `qwen-image-2.0` |
+| `prompt` | string | Да | Подсказка для генерации изображения |
+| `size` | string | Нет | Размер вывода. Рекомендуется выбрать поддержку размера на странице модели или playground |
+| `n` | integer | Нет | Количество создаваемых изображений, по умолчанию `1` |
+| `response_format` | string | Нет | `url` или `b64_json` |
 
-### Request Example
+### Пример запроса
 
 <CodeGroup>
 
@@ -47,7 +47,7 @@ curl -X POST https://api.crazyrouter.com/v1/images/generations \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "qwen-image-max",
-    "prompt": "A premium perfume poster with soft studio lighting and the title Morning Mist in Chinese",
+    "prompt": "一张具有高级感的产品海报，主体是一瓶玻璃香水，柔和棚拍光线，中文标题“晨雾”",
     "size": "1024x1024",
     "n": 1,
     "response_format": "url"
@@ -64,7 +64,7 @@ client = OpenAI(
 
 response = client.images.generate(
     model="qwen-image-max",
-    prompt="A premium perfume poster with soft studio lighting and the title Morning Mist in Chinese",
+    prompt="一张具有高级感的产品海报，主体是一瓶玻璃香水，柔和棚拍光线，中文标题“晨雾”",
     size="1024x1024",
     n=1
 )
@@ -74,7 +74,7 @@ print(response.data[0].url)
 
 </CodeGroup>
 
-### Response Example
+### Пример ответа
 
 ```json
 {
@@ -87,25 +87,25 @@ print(response.data[0].url)
 }
 ```
 
-## Official Billing Truth
+## Официальная схема тарификации
 
-The current official truth for Qwen Image is billing per successfully generated image, not input/output token display pricing.
+Официальное тарифицирование Qwen Image основывается на количестве успешно сгенерированных изображений, не отображает ввод/вывод по токенам.
 
-| Model | Official billing | Official price | Current doc state |
-|------|-------------------|----------------|-------------------|
-| `qwen-image-plus` | per image | `¥0.20 / image` | verified |
-| `qwen-image-max` | per image | `¥0.50 / image` | verified |
-| `qwen-image-2.0` | per image | `¥0.20 / image` | verified |
-| `qwen-image-2.0` | per image | `¥0.50 / image` | Beta |
+| Модель | Официальная схема | Официальная цена за единицу | Текущий статус документа |
+|--------|-------------------|-----------------------------|-------------------------|
+| `qwen-image-plus` | По изображениям | `¥0.20 / изображение` | Проверено |
+| `qwen-image-max` | По изображениям | `¥0.50 / изображение` | Проверено |
+| `qwen-image-2.0` | По изображениям | `¥0.20 / изображение` | Проверено |
+| `qwen-image-2.0` | По изображениям | `¥0.50 / изображение` | Beta |
 
-## Scope Notes
+## Пояснения по границам
 
-- This first batch commits only the public `text-to-image` capability. Additional upstream multimodal abilities are not exposed as separate customer protocols yet.
-- Providers may run async or sync upstream paths internally, but the customer-facing contract remains the same OpenAI Images request/response shape.
-- The edit model `qwen-image-plus` is not part of this first-batch generation closure. Treat editing as a separate capability decision.
+- На этой странице гарантируются только клиентские возможности `Генерация изображения по тексту`; дополнительные мульти-модальные функции upstream не раскрываются на клиентский протокол.
+- На стороне provider для `Qwen Image` могут быть асинхронные или синхронные различия, но клиент продолжает использовать единый формат запроса/ответа OpenAI Images.
+- Редактирующая модель изображений `qwen-image-plus` не входит в охват этой партии «закрытия генеративных моделей»; при необходимости функции редактирования следует отдельно оценивать актуальное состояние открытия этой модели.
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [Qwen Image 2.0: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/alibaba/qwen-image-2-0?utm_source=docs&utm_medium=related)
-- [Все модели Alibaba Cloud с актуальными ценами](https://crazyrouter.com/en/models/alibaba?utm_source=docs&utm_medium=related)
+- [Страница модели Qwen Image 2.0: актуальная цена, реальные примеры, код вызова](https://crazyrouter.com/ru/models/alibaba/qwen-image-2-0?utm_source=docs&utm_medium=related)
+- [Все модели и цены Alibaba Cloud](https://crazyrouter.com/ru/models/alibaba?utm_source=docs&utm_medium=related)

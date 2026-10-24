@@ -1,27 +1,27 @@
 ---
-title: "Gemini Audio Understanding"
-description: "Gemini native audio understanding documented from successful Crazyrouter request patterns on 2026-04-08"
+title: "Gemini аудио понимание"
+description: "На основе опыта успешных запросов Crazyrouter на сайте от 2026-04-08, собрано руководство по нативному аудио пониманию Gemini"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Gemini Audio Understanding
+# Gemini аудио понимание
 
 ```text
 POST /v1beta/models/{model}:generateContent
 ```
 
-As of `2026-04-08`, successful Crazyrouter and local `:4000` retests show:
+По состоянию на `2026-04-08`, повторная проверка локальных портов Crazyrouter и `4000` показала:
 
-- `gemini-2.5-pro` can read `audio/wav`
-- the currently verified primary path is `inlineData`
-- short audio classification, transcription, language hints, and summaries can be requested directly in text
+- `gemini-3.1-pro` может читать `audio/wav`
+- В настоящее время стабильно работает основная цепочка `inlineData`
+- Для коротких аудио-файлов транскрибирование, определение языка и создание коротких аннотаций можно выполнить напрямую через текстовые подсказки
 
 ---
 
-## Verified Minimal Request
+## Проверенный минимальный запрос
 
 ```bash
-curl "https://api.crazyrouter.com/v1beta/models/gemini-2.5-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -35,7 +35,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-2.5-pro:generateContent?k
             }
           },
           {
-            "text": "Return JSON with transcript, language, and summary."
+            "text": "请返回 JSON，字段为 transcript、language、summary。"
           }
         ]
       }
@@ -46,7 +46,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-2.5-pro:generateContent?k
   }'
 ```
 
-Observed successful response shape:
+Ключевые характеристики успешных ответов в производственной среде:
 
 ```json
 {
@@ -55,7 +55,7 @@ Observed successful response shape:
       "content": {
         "parts": [
           {
-            "text": "```json\n{\n  \"transcript\": \"ding\",\n  \"language\": \"zh-CN\",\n  \"summary\": \"The audio contains one short notification sound.\"\n}\n```"
+            "text": "```json\n{\n  \"transcript\": \"叮\",\n  \"language\": \"zh-CN\",\n  \"summary\": \"音频中包含一个简短的提示音。\"\n}\n```"
           }
         ]
       }
@@ -64,20 +64,20 @@ Observed successful response shape:
 }
 ```
 
-## Request Notes
+## Основные моменты запроса
 
-- Prefer `inlineData` for audio understanding
-- Keep `mimeType` aligned with the actual format, such as `audio/wav` or `audio/mpeg`
-- Put raw Base64 into `data` without a Data URL prefix
-- If you need strict JSON instead of JSON-looking text, combine this route with [Structured Outputs](/ru/features/structured-outputs)
+- Для понимания аудио рекомендуется использовать `inlineData`
+- `mimeType` должен совпадать с реальным аудио-форматом, например `audio/wav`, `audio/mpeg`
+- В `data` вводите только содержимое Base64, без префикса Data URL
+- Если вам необходим строгий JSON, можете дополнительно использовать ограничение [структурированный вывод](/ru/features/structured-outputs)
 
 <Note>
-  This page only covers the short-audio understanding path that was actually rechecked successfully. For longer STT workflows, realtime audio, or TTS, see the existing [STT](/ru/audio/stt), [Realtime](/ru/audio/realtime), and [TTS](/ru/audio/tts) pages.
+  На текущей странице описан основной путь для успешного понимания коротких аудио. Для транскрипции более длинных аудио и генерации речи смотрите страницы существующих [STT](/ru/audio/stt) и [TTS](/ru/audio/tts); Realtime пока не представлен как открытый рекомендованный пример.
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [Gemini 2.5 Flash: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash-Lite: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)
+- [Сравнение цен Gemini 2.5 Flash: Официальные / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Страница модели Gemini 2.5 Flash: актуальные цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Сравнение цен Gemini 2.5 Flash-Lite: Официальные / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)

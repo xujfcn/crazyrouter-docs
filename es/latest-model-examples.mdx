@@ -1,0 +1,106 @@
+---
+title: "Ejemplos de uso de modelos más recientes"
+description: "Ejemplos de uso actualizados basados en el índice público de modelos locales"
+---
+> Contenido actualizado: 2026-10-22
+
+# Ejemplos de uso de modelos más recientes
+
+Esta página está organizada según el índice público de modelos `web/src/data/models/index.json`. Los nuevos ejemplos priorizan el uso de estos modelos; los modelos que han sido retirados o que no se encuentran en el índice público ya no se muestran como ejemplos.
+
+## Resumen de modelos recomendados
+
+| Escenario | Modelo recomendado |
+|-----------|-------------------|
+| Chat por defecto, razonamiento general | `gpt-5.5` |
+| Chat con sensibilidad al costo | `gpt-5-mini` |
+| Codificación Claude y contexto largo | `claude-opus-4-8` |
+| Tareas de alta dificultad con Claude | `claude-opus-4-8` |
+| Tareas ligeras de bajo costo con Claude | `claude-opus-4-8` |
+| Gemini multimodal nativo | `gemini-3.1-pro` |
+| Gemini de baja latencia | `gemini-3.1-flash-lite` |
+| Razonamiento DeepSeek | `deepseek-v4-pro` |
+| Chat rápido xAI | `grok-4.1-fast` |
+| MiniMax con contexto largo | `MiniMax-M2.7` |
+| Comprensión visual Qwen | `qwen3-vl-235b-a22b-instruct` o `qwen2.5-vl-72b-instruct` |
+
+## Completados de chat
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "messages": [
+      {"role": "user", "content": "用三句话解释这个接口适合什么场景"}
+    ]
+  }'
+```
+
+## API de respuestas
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "input": "给出一个安全上线前的 API 文档检查清单"
+  }'
+```
+
+## Mensajes Claude
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-opus-4-8",
+    "max_tokens": 256,
+    "messages": [
+      {"role": "user", "content": "请审查这段 API 变更说明是否清楚"}
+    ]
+  }'
+```
+
+## Gemini nativo
+
+```bash cURL
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [{"text": "总结一下今天要验证的 API 文档重点"}]
+      }
+    ]
+  }'
+```
+
+## Comprensión visual
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "qwen3-vl-235b-a22b-instruct",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {"type": "text", "text": "描述这张图片中的关键信息"},
+          {"type": "image_url", "image_url": {"url": "https://example.com/image.png"}}
+        ]
+      }
+    ]
+  }'
+```
+
+<Note>
+  Los modelos realmente disponibles también estarán sujetos a la lista blanca de tokens, el estado del canal y las actualizaciones de la plataforma. Antes de la integración en producción, por favor consulta la [`GET /v1/models`](/es/chat/openai/models) para confirmar los ID de modelos visibles para el token actual.
+</Note>

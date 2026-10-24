@@ -1,26 +1,27 @@
 ---
-title: "List Models"
-description: "Production-revalidated GET /v1/models usage for listing models available to the current token"
+title: "Перечислить модели"
+description: "На основе проверки в производственной среде, используйте GET /v1/models для получения списка моделей, доступных для текущего токена"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-30
 
-# List Models
+
+# Перечислить модели
 
 ```
 GET /v1/models
 ```
 
-Returns the list of models available to the current API key.
+Возвращает список моделей, доступных для текущего API Key.
 
-This page only documents behavior that was revalidated against Crazyrouter production on `2026-04-14`.
+На этой странице документации описаны только действия, которые `2026-04-14` уже прошли проверку в производственной среде Crazyrouter.
 
-## Authentication
+## Аутентификация
 
 ```text
 Authorization: Bearer YOUR_API_KEY
 ```
 
-## Request example
+## Пример запроса
 
 <CodeGroup>
 
@@ -62,27 +63,27 @@ for (const model of models.data) {
 
 ---
 
-## Current production findings
+## Текущие выводы по производственной проверке
 
-In the `2026-04-14` production recheck:
+В рамках производственной проверки `2026-04-14`:
 
-- the endpoint returned `200`
-- the top-level `success` field was `true`
-- the top-level `object` was `list`
-- the current model count was `605`
-- the following models were confirmed present:
+- Эндпоинт возвращает `200`
+- Верхний уровень `success` равен `true`
+- Верхний уровень `object` равен `list`
+- Текущее количество возвращаемых моделей равно `605`
+- Следующие модели подтверждены в возвращаемом списке:
   - `gpt-5.5`
   - `claude-opus-4-8`
   - `claude-opus-4-8`
   - `gemini-3.1-pro`
 
 <Note>
-  The exact count and model set can change with upstream configuration, token permissions, and platform updates. Treat the examples here as current examples, not a fixed complete inventory.
+  Общее количество моделей и конкретный список могут изменяться в зависимости от конфигурации канала, прав токена и обновлений платформы, поэтому не следует рассматривать пример в документации как полный перечень.
 </Note>
 
 ---
 
-## Response example
+## Пример ответа
 
 ```json
 {
@@ -117,34 +118,34 @@ In the `2026-04-14` production recheck:
 }
 ```
 
-## Common fields
+## Часто используемые поля
 
-| Field | Type | Meaning |
-|-------|------|---------|
-| `success` | boolean | Whether the request succeeded |
-| `id` | string | Model identifier used in API calls |
-| `object` | string | Always `model` |
-| `created` | integer | Timestamp |
-| `owned_by` | string | Owning organization or source label |
+| Поле | Тип | Описание |
+|------|------|------|
+| `success` | boolean | Успешен ли запрос |
+| `id` | string | Идентификатор модели, переданный при вызове API |
+| `object` | string | Всегда равно `model` |
+| `created` | integer | Метка времени |
+| `owned_by` | string | Идентификатор организации или источника модели |
 
 ---
 
-## Pricing information
+## Информация о ценах
 
-If you also need public pricing data, use the Pricing page. For programmatic confirmation of currently visible models, keep using `GET /v1/models`.
+Если вам нужна публичная информация о тарифах, ориентируйтесь на [страницу Pricing](https://crazyrouter.com/ru/pricing). Для программной проверки моделей, видимых текущему токену, используйте `GET /v1/models` с этой страницы.
 
 <Note>
-  `GET /v1/models` returns `supported_endpoint_types`, which only describe the interface styles the current model supports. `openai` maps to `POST /v1/chat/completions`, `anthropic` maps to `POST /v1/messages`, and only `openai-response` maps to `POST /v1/responses`. Claude currently exposes `openai` + `anthropic`, not `openai-response`.
+  `GET /v1/models` возвращает `supported_endpoint_types` только для указания поддерживаемого интерфейсного стиля конкретной модели. При этом `openai` соответствует `POST /v1/chat/completions`, `anthropic` соответствует `POST /v1/messages`, и только `openai-response` соответствует `POST /v1/responses`. На данный момент Claude поддерживает только `openai` + `anthropic`, не поддерживает `openai-response`.
 </Note>
 
-Related page:
+Связанные страницы:
 
-- [Gemini-Compatible OpenAI Model List](/ru/chat/gemini/openai-models)
-- [Official Model Pricing Methods](/ru/reference/official-pricing-methods)
+- [Список моделей Gemini, совместимых с OpenAI](/ru/chat/gemini/openai-models)
+- [Официальные методы тарифообразования моделей](/ru/reference/official-pricing-methods)
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [GPT Image 1.5: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [Все модели OpenAI с актуальными ценами](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [Страница модели GPT Image 1.5: актуальные цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Страница модели GPT Image 2: актуальные цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Все модели и цены OpenAI](https://crazyrouter.com/ru/models/openai?utm_source=docs&utm_medium=related)

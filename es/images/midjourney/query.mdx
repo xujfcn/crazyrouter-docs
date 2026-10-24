@@ -1,0 +1,136 @@
+---
+title: "Consultar el estado de la tarea"
+description: "Consultar el estado de la tarea de Midjourney, admite consulta individual y consulta por lotes"
+---
+> Contenido actualizado: 2026-06-09
+
+# Consultar el estado de la tarea
+
+## Consultar una sola tarea
+
+```
+GET /mj/task/{id}/fetch
+```
+
+Consultar los detalles y el estado de la tarea según el ID de la tarea.
+
+### Ejemplo de solicitud
+
+<CodeGroup>
+
+```bash cURL
+curl https://api.crazyrouter.com/mj/task/task_1234567890/fetch \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    "https://api.crazyrouter.com/mj/task/task_1234567890/fetch",
+    headers={"Authorization": "Bearer YOUR_API_KEY"}
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### Ejemplo de respuesta (en proceso)
+
+```json
+{
+  "id": "task_1234567890",
+  "action": "IMAGINE",
+  "status": "IN_PROGRESS",
+  "prompt": "a beautiful sunset over the ocean --ar 16:9 --v 6",
+  "promptEn": "a beautiful sunset over the ocean --ar 16:9 --v 6",
+  "progress": "65%",
+  "submitTime": 1709123456000,
+  "startTime": 1709123457000,
+  "imageUrl": "",
+  "failReason": "",
+  "buttons": []
+}
+```
+
+### Ejemplo de respuesta (completado)
+
+```json
+{
+  "id": "task_1234567890",
+  "action": "IMAGINE",
+  "status": "SUCCESS",
+  "prompt": "a beautiful sunset over the ocean --ar 16:9 --v 6",
+  "promptEn": "a beautiful sunset over the ocean --ar 16:9 --v 6",
+  "progress": "100%",
+  "submitTime": 1709123456000,
+  "startTime": 1709123457000,
+  "finishTime": 1709123520000,
+  "imageUrl": "https://cdn.discordapp.com/attachments/.../image.png",
+  "failReason": "",
+  "buttons": [
+    {"customId": "MJ::JOB::upsample::1::abc123", "emoji": "U1", "label": "U1", "style": 2},
+    {"customId": "MJ::JOB::upsample::2::abc123", "emoji": "U2", "label": "U2", "style": 2},
+    {"customId": "MJ::JOB::upsample::3::abc123", "emoji": "U3", "label": "U3", "style": 2},
+    {"customId": "MJ::JOB::upsample::4::abc123", "emoji": "U4", "label": "U4", "style": 2},
+    {"customId": "MJ::JOB::variation::1::abc123", "emoji": "V1", "label": "V1", "style": 2},
+    {"customId": "MJ::JOB::variation::2::abc123", "emoji": "V2", "label": "V2", "style": 2},
+    {"customId": "MJ::JOB::variation::3::abc123", "emoji": "V3", "label": "V3", "style": 2},
+    {"customId": "MJ::JOB::variation::4::abc123", "emoji": "V4", "label": "V4", "style": 2}
+  ],
+  "properties": {}
+}
+```
+
+---
+
+## Consulta por lotes de tareas
+
+```
+POST /mj/task/list-by-condition
+```
+
+Consultar la lista de tareas por lotes según condiciones específicas.
+
+### Parámetros de solicitud
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|----------|------|-------------|-------------|
+| `ids` | array | No | Lista de ID de tareas |
+
+### Ejemplo de solicitud
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/mj/task/list-by-condition \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "ids": ["task_1234567890", "task_0987654321"]
+  }'
+```
+
+### Ejemplo de respuesta
+
+```json
+[
+  {
+    "id": "task_1234567890",
+    "action": "IMAGINE",
+    "status": "SUCCESS",
+    "progress": "100%",
+    "imageUrl": "https://cdn.discordapp.com/attachments/.../image1.png"
+  },
+  {
+    "id": "task_0987654321",
+    "action": "IMAGINE",
+    "status": "IN_PROGRESS",
+    "progress": "40%",
+    "imageUrl": ""
+  }
+]
+```
+
+<Note>
+  Se recomienda un intervalo de sondeo de 3-5 segundos. Las tareas normalmente se completan en 30-120 segundos, dependiendo de la carga del servicio Midjourney.
+</Note>

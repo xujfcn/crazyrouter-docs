@@ -1,0 +1,104 @@
+---
+title: "Generación de imágenes Gemini"
+description: "Llama al modelo de imágenes Gemini / Nano Banana a través de la API OpenAI Images"
+---
+> Contenido actualizado: 2026-06-06
+
+# Generación de imágenes Gemini
+
+```
+POST /v1/images/generations
+```
+
+Crazyrouter proporciona una interfaz unificada compatible con OpenAI Images para el modelo de imágenes Gemini. No es necesario que el usuario invoque directamente el `generateContent` nativo de Gemini, ni tampoco pasar `generationConfig.imageConfig` nativo de Gemini.
+
+| Nombre de modelo público recomendado | Nombre de modelo subyacente compatible |
+|------|------|
+| `nano-banana` | `nano-banana` |
+| `nano-banana-pro` | `nano-banana-pro` |
+| `nano-banana-2` | `nano-banana-2` |
+
+<Warning>
+  La generación de imágenes Gemini corresponde a una solicitud de larga duración. Para producción, se recomienda usar prioritariamente la ruta principal `https://api.crazyrouter.com/v1`; el endpoint completo de generación es `https://api.crazyrouter.com/v1/images/generations`.
+</Warning>
+
+<Note>
+  Se recomienda utilizar `nano-banana`, `nano-banana-pro`, `nano-banana-2` en el código del cliente. Si tu sistema ya utiliza directamente `nano-banana`, `nano-banana-pro`, `nano-banana-2`, también puedes seguir llamando a través de la misma entrada de la API de Images.
+</Note>
+
+---
+
+## Parámetros de la solicitud
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `model` | string | Sí | `nano-banana`, `nano-banana-pro`, `nano-banana-2`, o el nombre canónico de Gemini correspondiente |
+| `prompt` | string | Sí | Instrucción de generación o edición |
+| `image_input` | string o string[] | No | URL de imagen de referencia; si no se proporciona, será generación desde texto |
+| `resolution` | string | No | `1K`, `2K`, `4K` |
+| `aspect_ratio` | string | No | Como `1:1`, `16:9`, `9:16`, `21:9`, `auto` |
+| `output_format` | string | No | `png`, `jpeg` / `jpg` |
+| `output_compression` | integer | No | `0-100`, utilizado para la calidad de compresión JPEG |
+| `n` | integer | No | Cantidad generada, por defecto `1` |
+
+No envíes estos campos privados de origen: `generationConfig`, `imageConfig`, `imageOutputOptions`, `image_output_options`.
+
+## Ejemplo de solicitud
+
+```bash
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "nano-banana-2",
+    "prompt": "A simple red square on a white background, clean vector style",
+    "resolution": "1K",
+    "aspect_ratio": "1:1",
+    "output_format": "png"
+  }'
+```
+
+La respuesta mantiene el estilo de OpenAI Images:
+
+```json
+{
+  "created": 1778990000,
+  "data": [
+    {
+      "url": "https://media.crazyrouter.com/task-artifacts/2026/05/17/sync-image/request-id-1.png"
+    }
+  ]
+}
+```
+
+---
+
+## Edición de imagen de referencia
+
+```bash
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "nano-banana-pro",
+    "prompt": "把参考图改成高级电商海报，保留主体，背景更简洁",
+    "image_input": [
+      "https://example.com/reference.png"
+    ],
+    "resolution": "1K",
+    "aspect_ratio": "1:1",
+    "output_format": "jpeg",
+    "output_compression": 85
+  }'
+```
+
+<Note>
+  Si realmente necesitas el formato de API nativo de Gemini, consulta el [formato nativo de Gemini](/es/chat/gemini/native). Pero para la generación y edición de imágenes, se recomienda utilizar siempre la API de Images de esta página desde el lado del cliente.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Comparación de precios de Gemini 2.5 Flash: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Página del modelo Gemini 2.5 Flash: Precio en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Comparación de precios de Gemini 2.5 Flash-Lite: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)

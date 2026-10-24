@@ -1,0 +1,156 @@
+---
+title: "Luma"
+description: "Generar videos utilizando la API de Luma Dream Machine"
+---
+> Contenido actualizado: 2026-06-09
+
+# Luma
+
+Luma Dream Machine ofrece capacidades de generación de videos de alta calidad. Documentación oficial: [docs.lumalabs.ai](https://docs.lumalabs.ai/docs/video-generation)
+
+## Crear video
+
+```
+POST /luma/generations
+```
+
+### Parámetros de solicitud
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `user_prompt` | string | Sí | Palabras clave para la descripción del video |
+| `model_name` | string | No | Nombre del modelo: `ray-v1`, `ray-v2` |
+| `duration` | string | No | Duración del video (segundos) |
+| `resolution` | string | No | Resolución: `540p`, `720p`, `1080p` |
+| `expand_prompt` | boolean | No | Expandir automáticamente el texto descriptivo |
+| `image_url` | string | No | URL de imagen de referencia para el primer fotograma |
+| `image_end_url` | string | No | URL de imagen de referencia para el último fotograma |
+
+### Ejemplo de solicitud
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/luma/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "user_prompt": "A drone shot flying over a tropical island with crystal clear water",
+    "model_name": "ray-v2",
+    "duration": "5",
+    "resolution": "720p",
+    "expand_prompt": true
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/luma/generations",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "user_prompt": "A drone shot flying over a tropical island",
+        "model_name": "ray-v2",
+        "duration": "5",
+        "resolution": "720p"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### Ejemplo de respuesta
+
+```json
+{
+  "id": "luma_gen_abc123",
+  "state": "queued",
+  "created_at": "2024-03-01T12:00:00Z"
+}
+```
+
+---
+
+## Video generado a partir de imagen
+
+Introduce `image_url` como primer fotograma:
+
+```json
+{
+  "user_prompt": "The person in the image starts walking forward",
+  "model_name": "ray-v2",
+  "image_url": "https://example.com/portrait.jpg"
+}
+```
+
+Modo fotograma inicial-final:
+
+```json
+{
+  "user_prompt": "Smooth transition between two scenes",
+  "model_name": "ray-v2",
+  "image_url": "https://example.com/start.jpg",
+  "image_end_url": "https://example.com/end.jpg"
+}
+```
+
+---
+
+## Consultar tarea
+
+```
+GET /luma/generations/{task_id}
+```
+
+```bash cURL
+curl https://api.crazyrouter.com/luma/generations/luma_gen_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Ejemplo de respuesta
+
+```json
+{
+  "id": "luma_gen_abc123",
+  "state": "completed",
+  "created_at": "2024-03-01T12:00:00Z",
+  "video": {
+    "url": "https://storage.cdn-luma.com/...",
+    "download_url": "https://storage.cdn-luma.com/..."
+  }
+}
+```
+
+---
+
+## Extender video
+
+```
+POST /luma/generations/{task_id}/extend
+```
+
+Extiende un video ya completado.
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/luma/generations/luma_gen_abc123/extend \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "user_prompt": "Continue the drone shot, camera pans to reveal a beach resort"
+  }'
+```
+
+### Estado de la tarea
+
+| Estado | Descripción |
+|------|------|
+| `queued` | En cola |
+| `dreaming` | En proceso de generación |
+| `completed` | Completado |
+| `failed` | Fallido |

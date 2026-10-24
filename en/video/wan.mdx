@@ -1,91 +1,76 @@
 ---
 title: "Wan Video"
-description: "Wan video family overview. Wan text-to-video uses /v1/video/generations; image-to-video, first-last-frame, and subject-reference workflows use the /alibailian/api/v1/* compatibility contract"
+description: "Wan video model overview. Wan text-to-video uses /v1/video/generations; workflows for image-to-video, first&last frames, and subject reference in Alibaba format use /alibailian/api/v1/* compatible paths"
 ---
-> Last updated: 2026-06-07
+> Content updated: 2026-06-30
 
 # Wan Video
 
-The Wan family currently uses different public contracts by capability:
+The Wan series currently uses different client-facing protocols based on its capabilities:
 
-- Text-to-video (`wan2.5-t2v-preview`, `wan2.2-t2v-plus`): submit with `POST /v1/video/generations` and query with `GET /v1/video/generations/{task_id}`.
-- Image-to-video, first-last-frame, and subject-reference video: submit with the Ali Bailian-compatible `POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis` path and query with `GET /alibailian/api/v1/tasks/{task_id}`.
+- Text-to-Video (`wan2.5-t2v-preview`, `wan2.2-t2v-plus`): Uses `POST /v1/video/generations`, and queries via `GET /v1/video/generations/{task_id}`.
+- Image-to-Video, First & Last Frame Video, Subject Reference Video: Uses Alibaba Bailian compatible path `POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis`, and queries via `GET /alibailian/api/v1/tasks/{task_id}`.
 
 <Warning>
-  Do not submit `wan2.2-t2v-plus` to `/alibailian/api/v1/services/aigc/video-generation/video-synthesis`. Production rejects that model on the Ali-compatible path with `invalid_request` and tells clients to use `/v1/video/generations`.
+  Do not submit `wan2.2-t2v-plus` to `/alibailian/api/v1/services/aigc/video-generation/video-synthesis`. Production environment will return `invalid_request`, and prompt you to use `/v1/video/generations` instead.
 </Warning>
 
-For Ali-shaped workflows, see the full request and task-query schema in [Ali Bailian Video API](/en/video/alibailian). This page closes the first batch of public `Wan` models, capabilities, billing truth, and recommended protocol.
+For complete request body and task query formats in Alibaba-format workflows, please see the [Alibaba Bailian Video API](/en/video/alibailian). This page summarizes currently available `Wan` models, capabilities, pricing units, and recommended protocols.
 
-## First-Batch Models
+## First Batch of Models
 
-| Model | Customer-facing capability | Official billing truth | Current state |
-|------|-----------------------------|------------------------|---------------|
-| `wan2.5-t2v-preview` | text-to-video | per second | verified |
-| `wan2.5-i2v-preview` | image-to-video | per second | verified |
-| `wan2.2-t2v-plus` | text-to-video | per second | verified |
-| `wan2.2-i2v-plus` | image-to-video | per second | verified |
-| `wan2.2-i2v-flash` | image-to-video | per second | verified |
-| `wan2.2-kf2v-flash` | first-last-frame video | per second | Beta |
-| `wan2.2-s2v` | subject-reference video | per second | Beta |
+| Model | Client Capability | Official Pricing Base | Current Status |
+|------|-------------------|----------------------|---------------|
+| `wan2.5-t2v-preview` | Text-to-Video | Per second | Verified |
+| `wan2.5-i2v-preview` | Image-to-Video | Per second | Verified |
+| `wan2.2-t2v-plus` | Text-to-Video | Per second | Verified |
+| `wan2.2-i2v-plus` | Image-to-Video | Per second | Verified |
+| `wan2.2-i2v-flash` | Image-to-Video | Per second | Verified |
+| `wan2.2-kf2v-flash` | First & Last Frame Video | Per second | Beta |
+| `wan2.2-s2v` | Subject Reference Video | Per second | Beta |
 
 <Note>
-  `wan2.2-kf2v-flash` and `wan2.2-s2v` are already aligned in code and billing capability buckets, but their live artifact closure is still in progress, so they remain Beta.
+  `wan2.2-kf2v-flash` and `wan2.2-s2v` have already aligned code and pricing buckets, but the current live artifact is still being completed. Therefore, keep the Beta label for now.
 </Note>
 
-## Capabilities And Official Prices
+## Capabilities and Official Pricing
 
-| Model | Capability bucket | Resolution | Official price |
-|------|--------------------|------------|----------------|
-| `wan2.5-t2v-preview` | text-to-video | `480P / 720P / 1080P` | `¥0.30 / ¥0.60 / ¥1.00 / sec` |
-| `wan2.5-i2v-preview` | image-to-video | `480P / 720P / 1080P` | `¥0.30 / ¥0.60 / ¥1.00 / sec` |
-| `wan2.2-t2v-plus` | text-to-video | `480P / 1080P` | `¥0.14 / ¥0.70 / sec` |
-| `wan2.2-i2v-plus` | image-to-video | `480P / 1080P` | `¥0.14 / ¥0.70 / sec` |
-| `wan2.2-i2v-flash` | image-to-video | `480P / 720P / 1080P` | `¥0.10 / ¥0.20 / ¥0.48 / sec` |
-| `wan2.2-kf2v-flash` | first-last-frame video | `480P / 720P / 1080P` | `¥0.10 / ¥0.20 / ¥0.48 / sec` |
-| `wan2.2-s2v` | subject-reference video | `480P / 720P` | `¥0.50 / ¥0.90 / sec` |
+| Model | Capability Bucket | Resolution | Official Unit Price |
+|------|-------------------|------------|---------------------|
+| `wan2.5-t2v-preview` | Text-to-Video | `480P / 720P / 1080P` | `¥0.30 / ¥0.60 / ¥1.00 / second` |
+| `wan2.2-t2v-plus` | Text-to-Video | `480P / 1080P` | `¥0.14 / ¥0.70 / second` |
+| `wan2.2-i2v-plus` | Image-to-Video | `480P / 1080P` | `¥0.14 / ¥0.70 / second` |
+| `wan2.2-i2v-flash` | Image-to-Video | `480P / 720P / 1080P` | `¥0.10 / ¥0.20 / ¥0.48 / second` |
+| `wan2.2-kf2v-flash` | First & Last Frame Video | `480P / 720P / 1080P` | `¥0.10 / ¥0.20 / ¥0.48 / second` |
+| `wan2.2-s2v` | Subject Reference Video | `480P / 720P` | `¥0.50 / ¥0.90 / second` |
 
-## Protocol Conventions
+## Protocol Agreements
 
-### 1. Text-to-video
+### 1. Text-to-Video
 
-- Recommended submit path: `POST /v1/video/generations`
+- Recommended submission path: `POST /v1/video/generations`
 - Recommended query path: `GET /v1/video/generations/{task_id}`
 - Key fields: `model`, `prompt`, `seconds`, `size`
 - Typical models: `wan2.5-t2v-preview`, `wan2.2-t2v-plus`
 
-### 2. Image-to-video
+### 2. Image-to-Video
 
 - Key field: `input.img_url`
 - Typical models: `wan2.5-i2v-preview`, `wan2.2-i2v-plus`, `wan2.2-i2v-flash`
 
-### 3. First-last-frame video
+### 3. First & Last Frame Video
 
 - Key fields: `input.first_frame_url`, `input.last_frame_url`
 - Typical model: `wan2.2-kf2v-flash`
 
-### 4. Subject-reference video
+### 4. Subject Reference Video
 
-- Key field: `input.image_url`
+- Key fields: `input.image_url`
 - Typical model: `wan2.2-s2v`
 
 ## Request Examples
 
-### Text-to-video: Wan 2.5
-
-```bash cURL
-curl -X POST https://api.crazyrouter.com/v1/video/generations \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "model": "wan2.5-t2v-preview",
-    "prompt": "A cinematic seaside sunset with a slow camera push-in",
-    "seconds": "5",
-    "size": "1280*720"
-  }'
-```
-
-### Text-to-video: Wan 2.2 T2V Plus
+### Text-to-Video: Wan 2.2 T2V Plus
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/video/generations \
@@ -93,13 +78,13 @@ curl -X POST https://api.crazyrouter.com/v1/video/generations \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "wan2.2-t2v-plus",
-    "prompt": "A calm cinematic shot of clouds over mountains",
+    "prompt": "一段平静的电影感山间云海镜头",
     "seconds": "5",
     "size": "480P"
   }'
 ```
 
-### Image-to-video
+### Image-to-Video
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/alibailian/api/v1/services/aigc/video-generation/video-synthesis \
@@ -108,7 +93,7 @@ curl -X POST https://api.crazyrouter.com/alibailian/api/v1/services/aigc/video-g
   -d '{
     "model": "wan2.5-i2v-preview",
     "input": {
-      "prompt": "Make the subject turn toward the camera",
+      "prompt": "让画面中的人物转头看向镜头",
       "img_url": "https://example.com/first-frame.png"
     },
     "parameters": {
@@ -120,13 +105,13 @@ curl -X POST https://api.crazyrouter.com/alibailian/api/v1/services/aigc/video-g
   }'
 ```
 
-### First-last-frame video
+### First & Last Frame Video
 
 ```json
 {
   "model": "wan2.2-kf2v-flash",
   "input": {
-    "prompt": "A smooth transition from day to night",
+    "prompt": "镜头从白天平滑过渡到夜晚",
     "first_frame_url": "https://example.com/frame-start.png",
     "last_frame_url": "https://example.com/frame-end.png"
   },
@@ -137,13 +122,13 @@ curl -X POST https://api.crazyrouter.com/alibailian/api/v1/services/aigc/video-g
 }
 ```
 
-### Subject-reference video
+### Subject Reference Video
 
 ```json
 {
   "model": "wan2.2-s2v",
   "input": {
-    "prompt": "Animate the reference portrait with light natural speaking motion",
+    "prompt": "让参考人物自然说话并有轻微头部动作",
     "image_url": "https://example.com/portrait.png",
     "audio_url": "https://example.com/voice.mp3"
   },
@@ -156,31 +141,31 @@ curl -X POST https://api.crazyrouter.com/alibailian/api/v1/services/aigc/video-g
 
 ## Task Retrieval
 
-Wan remains an async task family. Query with the matching route for the submit contract.
+Wan currently still uses an asynchronous task model. After the client creates a task, query according to the submission protocol:
 
-Text-to-video:
+Text-to-Video:
 
 ```http
 GET /v1/video/generations/{task_id}
 ```
 
-Ali-compatible image-to-video, first-last-frame, and subject-reference workflows:
+Alibaba-compatible workflows for image, first&last frame, and subject reference:
 
 ```http
 GET /alibailian/api/v1/tasks/{task_id}
 ```
 
-When `output.task_status` reaches success, use `output.video_url` as the final video result.
+When the query returns `status = SUCCESS`, obtain the final video result from `result_url` or `artifact_url`.
 
-## Scope Notes
+## Boundary Explanations
 
-- The current recommended customer-facing contract for Wan text-to-video is `/v1/video/generations`, not the Ali Bailian-compatible submit path.
-- The Ali Bailian-compatible path is primarily for image-to-video, first-last-frame, subject-reference, and other Ali-shaped migration workflows.
-- Crazyrouter can internally route to official, ApiPass, Kie, or other third-party providers, but those providers do not define customer protocols.
-- Beta rows can still be shown publicly now; after launch, use production task logs to close live evidence and then remove the Beta label.
+- The currently recommended client protocol for Wan text-to-video is `/v1/video/generations`, not the Alibaba Bailian compatible submission path.
+- The Alibaba Bailian compatible path is mainly used for migration scenarios such as image-to-video, first&last frame video, and subject reference video in Alibaba formats.
+- Internally, Crazyrouter can use Official, ApiPass, Kie, or other third-party providers as providers, but these providers do not define client protocols individually.
+- Beta rows can be shown to clients initially; after launch, combine with production task logs to supplement live evidence. After successful closed-loop, remove the Beta label.
 
 {/* crazyrouter-model-links v2 */}
-## Related on crazyrouter.com
+## Related Pages
 
-- [Wan 2.2 T2V Plus model page: live price, real samples, code](https://crazyrouter.com/en/models/alibaba/wan2-2-t2v-plus?utm_source=docs&utm_medium=related)
-- [All Alibaba Cloud models with live prices](https://crazyrouter.com/en/models/alibaba?utm_source=docs&utm_medium=related)
+- [Wan 2.2 T2V Plus Model Page: Real-time Pricing, Actual Examples, Calling Code](https://crazyrouter.com/en/models/alibaba/wan2-2-t2v-plus?utm_source=docs&utm_medium=related)
+- [Alibaba Cloud: All Models and Prices](https://crazyrouter.com/en/models/alibaba?utm_source=docs&utm_medium=related)

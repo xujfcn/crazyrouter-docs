@@ -2,7 +2,7 @@
 title: "Create Completion (Legacy)"
 description: "Current production status of the POST /v1/completions compatibility endpoint"
 ---
-> Last updated: 2026-06-06
+> Content updated: 2026-06-09
 
 # Create Completion (Legacy)
 
@@ -29,15 +29,15 @@ In practice, this means the endpoint should be treated as legacy-client compatib
 
 ## Current Recommendation
 
-1. Use [`Chat Completions`](/chat/openai/completions) for new chat-style integrations
-2. Use [`Responses`](/chat/responses/overview) when you need GPT-5 reasoning, web search, or newer response shapes
+1. Use [`Chat Completions`](/en/chat/openai/completions) for new chat-style integrations
+2. Use [`Responses`](/en/chat/responses/overview) when you need GPT-5 reasoning, web search, or newer response shapes
 3. Only keep testing `/v1/completions` if you already depend on a legacy client and have confirmed that your legacy model is currently available
 
 ---
 
 ## Retest Template
 
-If you must verify whether a legacy model still works on this endpoint, first confirm the model ID through [`/v1/models`](/chat/openai/models), then send a minimal request:
+If you must verify whether a legacy model still works on this endpoint, first confirm the model ID through [`/v1/models`](/en/chat/openai/models), then send a minimal request:
 
 ```bash
 curl https://api.crazyrouter.com/v1/completions \

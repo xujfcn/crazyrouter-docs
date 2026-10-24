@@ -1,42 +1,42 @@
 ---
-title: "Async Image Generation"
-description: "Submit, get a task ID back immediately, poll for an image URL — for gpt-image-2, nano-banana-2, nano-banana-pro and other slow image models"
+title: "Asynchronous Image Generation"
+description: "Returns a task ID immediately after submission, and you can poll for the image URL; suitable for gpt-image-2, nano-banana-2, nano-banana-pro and other long-duration image models."
 ---
-> Last updated: 2026-09-18
+> Content updated: 2026-09-18
 
-# Async Image Generation
+# Asynchronous Image Generation
 
-One image generation usually takes 20–120 seconds. The synchronous endpoints keep the HTTP connection open the whole time, which runs into gateway/proxy read timeouts, and the base64 payloads are large. Async mode splits the call in two:
+Generating an image with a model typically takes 20 to 120 seconds. The synchronous interface requires the client to keep the HTTP connection open while waiting for results, which is prone to gateway/proxy read timeouts, and the returned base64 can also be very large. The asynchronous mode splits this step into two calls:
 
-1. **Submit**: the request returns `202` with a task ID in under a second.
-2. **Poll**: `GET /v1/tasks/{id}` until it completes; `result` then carries an **https URL** for each image (permanently archived on `media.crazyrouter.com`). Base64 is never returned by default.
+1. **Submission:** The request immediately returns `202` and a task ID (in less than 1 second).
+2. **Polling:** Use the task ID to look up `GET /v1/tasks/{id}`; when done, `result` contains the image's **https URL** (permanently archived at `media.crazyrouter.com`), and no base64 is returned.
 
 ```
-Submit (three triggers, see below)
-  POST /v1beta/models/{model}:asyncGenerateContent      # Gemini family, path alias
-  POST /v1/images/generations  + Prefer: respond-async   # OpenAI family
-  POST /v1/images/edits        + Prefer: respond-async   # OpenAI family (with reference image)
+提交（三种触发方式，见下文）
+  POST /v1beta/models/{model}:asyncGenerateContent      # Gemini 系，路径别名
+  POST /v1/images/generations  + Prefer: respond-async   # OpenAI 系
+  POST /v1/images/edits        + Prefer: respond-async   # OpenAI 系（带参考图）
 
-Poll
+查询
   GET  /v1/tasks/{task_id}
 ```
 
 <Note>
-  **Model names, request bodies and billing are identical to the synchronous calls.** Async only changes *when* you get the result; the same API key can mix sync and async requests freely. Failed tasks are not billed.
+  **The model name, request body, and billing are all exactly the same as synchronous requests.** Asynchronous mode just changes "when you receive the result"—the same API Key can submit some requests synchronously and others asynchronously. Failed tasks are not billed.
 </Note>
 
-## Supported models
+## Supported Models
 
-| Model | How to submit | Typical duration |
+| Model | Submission Method | Typical Duration |
 |------|------|------|
-| `nano-banana-2` (Gemini 3.1 Flash Image) | `:asyncGenerateContent` | 15–30 s |
-| `nano-banana-pro` (Gemini 3 Pro Image) | `:asyncGenerateContent` | 30–60 s |
-| `gpt-image-2`, `gpt-image-1.5`, `gpt-image-2.5-*` | `Prefer: respond-async` header or `async: true` field | 60–120 s |
-| Any other image-output model | Same, on its existing endpoint | — |
+| `nano-banana-2` (Gemini 3.1 Flash Image) | `:asyncGenerateContent` | 15~30 seconds |
+| `nano-banana-pro` (Gemini 3 Pro Image) | `:asyncGenerateContent` | 30~60 seconds |
+| `gpt-image-2`, `gpt-image-1.5`, `gpt-image-2.5-*` | `Prefer: respond-async` header, or `async: true` field | 60~120 seconds |
+| Other image output models | Same as above, according to their original endpoints | — |
 
-## Option 1: Gemini path alias (recommended for Gemini clients)
+## Method 1: Gemini Path Alias (Recommended for Gemini Clients)
 
-**Do not change a single byte of the body, headers or query string.** Only swap the action suffix `:generateContent` for `:asyncGenerateContent`.
+**No need to change a single byte in the request body, headers, or query parameters**—just change the action suffix from `:generateContent` to `:asyncGenerateContent`.
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1beta/models/nano-banana-2:asyncGenerateContent \
@@ -65,18 +65,18 @@ Returns `202`:
 ```
 
 <Note>
-  `model` in the response is the resolved underlying model (e.g. `gemini-3.1-flash-image-preview`), matching your usage logs; you still submit with `nano-banana-2`. Reference-image editing works exactly like the sync call: put `inlineData` (base64) or `fileData` (URL) parts in `contents`.
+  The returned `model` is the parsed underlying model name (such as `gemini-3.1-flash-image-preview`), consistent with the billing log; this does not affect submitting using `nano-banana-2`. For reference image editing, the syntax is the same as for synchronous: put `inlineData` (base64) or `fileData` (URL) in `parts`.
 </Note>
 
-`:asyncGenerateContent` accepts image-output models only; a text model returns `400 async mode is only available for image models`. The streaming action `:streamGenerateContent` has no async form.
+`:asyncGenerateContent` only accepts image output models; invoking with a text model will return `400 async mode is only available for image models`. Streaming action `:streamGenerateContent` is not supported asynchronously.
 
-## Option 2: OpenAI image endpoints with a `Prefer` header
+## Method 2: OpenAI Image Endpoint with `Prefer` Header
 
-Add the HTTP header `Prefer: respond-async` to an otherwise unchanged `/v1/images/generations` or `/v1/images/edits` request. Equivalently, send the body field `"async": true` (JSON) or the form field `async=true` (multipart).
+Add an HTTP header `Prefer: respond-async` to the existing `/v1/images/generations` or `/v1/images/edits` request, with everything else unchanged. You can also use the request body field `"async": true` (JSON) or form field `async=true` (multipart), with the same effect.
 
 <CodeGroup>
 
-```bash Text to image
+```bash 文生图
 curl -X POST https://api.crazyrouter.com/v1/images/generations \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Prefer: respond-async" \
@@ -90,7 +90,7 @@ curl -X POST https://api.crazyrouter.com/v1/images/generations \
   }'
 ```
 
-```bash Edit with reference image (multipart)
+```bash 参考图编辑（multipart）
 curl -X POST https://api.crazyrouter.com/v1/images/edits \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Prefer: respond-async" \
@@ -128,29 +128,29 @@ else:
 
 </CodeGroup>
 
-The response carries `Preference-Applied: respond-async` and the same `202` body as Option 1.
+The response will have a `Preference-Applied: respond-async` header, and the body is the same as in Method 1 (`202` + task ID).
 
-## Polling a task
+## Querying Tasks
 
 ```
 GET https://api.crazyrouter.com/v1/tasks/{task_id}
 Authorization: Bearer YOUR_API_KEY
 ```
 
-You can only read tasks submitted by your own account; any other ID returns `404`. Poll every 2–3 seconds and treat 10 minutes without completion as a failure.
+You can only query tasks submitted by your own account; task IDs from other accounts will always return `404`. It is recommended to poll once every 2–3 seconds, and if it is not complete after 10 minutes, consider the task failed.
 
-### Status values
+### Status
 
 | `status` | Meaning |
 |------|------|
-| `queued` | Accepted, waiting for a worker |
-| `running` | Generating |
-| `completed` | Done, `result` is populated |
-| `failed` | Failed, `error` is populated, **not billed** |
+| `queued` | Received, waiting for execution |
+| `running` | Being generated |
+| `completed` | Success, `result` is filled in |
+| `failed` | Failed, `error` is filled in, **not billed** |
 
-### Completed response (Gemini family)
+### Response When Complete (Gemini Series)
 
-`result` is the native Gemini `GenerateContentResponse`; the only change is that each `inlineData` part becomes a `fileData` part pointing at the image URL:
+`result` is the native Gemini `GenerateContentResponse`, only replacing `inlineData` with `fileData`, which points to the image URL:
 
 ```json
 {
@@ -179,9 +179,9 @@ You can only read tasks submitted by your own account; any other ID returns `404
 }
 ```
 
-### Completed response (OpenAI family)
+### Response When Complete (OpenAI Series)
 
-`result` has the same shape as the synchronous `/v1/images/*` response; images are in `data[].url`:
+`result` has the same response structure as synchronous `/v1/images/*`, and the image is in `data[].url`:
 
 ```json
 {
@@ -201,9 +201,9 @@ You can only read tasks submitted by your own account; any other ID returns `404
 }
 ```
 
-If you really need base64, add `?inline=true` to the poll request and the archived image is read back into `inlineData` / `b64_json` (not recommended — slow for large images).
+If you really need base64, add `?inline=true` when querying, and the server will read back the archived image and re-convert it to `inlineData` / `b64_json` (not recommended—slow for large images).
 
-### Failed response
+### Response When Failed
 
 ```json
 {
@@ -220,34 +220,34 @@ If you really need base64, add `?inline=true` to the poll request and the archiv
 
 | `error.code` | Meaning | Retryable |
 |------|------|------|
-| `validation_failed` | Request rejected (4xx) | no |
-| `token_invalid` | API key disabled or not allowed for this model | no |
-| `insufficient_quota` | Balance too low | no |
-| `rate_limited` | Upstream/channel rate limit | yes |
-| `provider_failed` | Upstream generation failed | yes |
-| `timeout` | A single generation exceeded 10 minutes | yes |
-| `no_image` | The model answered without an image (e.g. safety refusal); **billed** like the sync call | no |
+| `validation_failed` | Request parameters rejected (4xx) | No |
+| `token_invalid` | API Key has expired or is not allowed for this model | No |
+| `insufficient_quota` | Insufficient balance | No |
+| `rate_limited` | Upstream/channel rate limit | Yes |
+| `provider_failed` | Upstream generation failure | Yes |
+| `timeout` | Single generation exceeded 10 minutes | Yes |
+| `no_image` | Model returned content but no image (e.g. security interception); these are charged normally according to synchronous rules | No |
 
-`retryable: true` means you may submit a new task; nothing is retried automatically.
+`retryable: true` means you can submit a new task; the system will not retry automatically.
 
-## Idempotent submission
+## Idempotent Submission
 
-Network retries can submit the same task twice. Send an `Idempotency-Key: <any string>` header with the submit request; the same account + key returns the same task ID (the second call answers `200` instead of `202`) with no duplicate generation or charge.
+Network retries may cause the same task to be submitted multiple times. With the `Idempotency-Key: <any string>` header on your submission request, the same account and same Key will return the same task ID (the second time you get `200` instead of `202`), so the image won't be generated or billed multiple times.
 
-## Sync vs. async at a glance
+## Summary of Differences with Synchronous Mode
 
-| | Sync | Async |
+| | Synchronous | Asynchronous |
 |------|------|------|
-| Submit returns | The image, after 20–120 s | A task ID in under 1 s |
-| Image form | URL or base64 (channel dependent) | Always a URL |
-| Connection-timeout risk | Yes | No |
-| Billing | Per model/size | Identical; failures free |
-| Routing | Capability routing | Same (the replay uses the same routing and failover) |
-| Limits | — | Max 50 pending tasks per account, then `429` |
+| Submission return | Returns image after generation completes (20–120 seconds) | Returns task ID in less than 1 second |
+| Image format | URL or base64 (depending on provider) | Always URL |
+| Connection timeout risk | Yes | No |
+| Billing | Billed based on model/size | Exactly the same; failures not billed |
+| Routing | Capability routing | Same (replay uses same routing and failover) |
+| Limits | — | Max 50 unfinished tasks per account; exceeding this returns `429` |
 
 {/* crazyrouter-model-links v2 */}
-## Related on crazyrouter.com
+## Related Pages
 
-- [GPT Image 2 model page: live price, real samples, code](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [Nano Banana 2 model page: live price, real samples, code](https://crazyrouter.com/en/models/google/nano-banana-2?utm_source=docs&utm_medium=related)
-- [All OpenAI models with live prices](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [GPT Image 2 Model Page: Real-Time Pricing, Real Examples, Calling Code](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Nano Banana 2 Model Page: Real-Time Pricing, Real Examples, Calling Code](https://crazyrouter.com/en/models/google/nano-banana-2?utm_source=docs&utm_medium=related)
+- [All OpenAI Models and Pricing](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)

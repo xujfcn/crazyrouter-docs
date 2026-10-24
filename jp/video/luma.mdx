@@ -1,32 +1,32 @@
 ---
 title: "Luma"
-description: "Use the Luma Dream Machine API to generate videos"
+description: "Luma Dream Machine API を使用して動画を生成する"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
 # Luma
 
-Luma Dream Machine provides high-quality video generation capabilities. Official docs: [docs.lumalabs.ai](https://docs.lumalabs.ai/docs/video-generation)
+Luma Dream Machine は高品質な動画生成機能を提供します。公式ドキュメント：[docs.lumalabs.ai](https://docs.lumalabs.ai/docs/video-generation)
 
-## Create Video
+## 動画を作成する
 
 ```
 POST /luma/generations
 ```
 
-### Request Parameters
+### リクエストパラメータ
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `user_prompt` | string | Yes | Video description prompt |
-| `model_name` | string | No | Model name: `ray-v1`, `ray-v2` |
-| `duration` | string | No | Video duration (seconds) |
-| `resolution` | string | No | Resolution: `540p`, `720p`, `1080p` |
-| `expand_prompt` | boolean | No | Whether to auto-expand the prompt |
-| `image_url` | string | No | First frame reference image URL |
-| `image_end_url` | string | No | Last frame reference image URL |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `user_prompt` | string | はい | 動画の説明用プロンプト |
+| `model_name` | string | いいえ | モデル名：`ray-v1`、`ray-v2` |
+| `duration` | string | いいえ | 動画の長さ（秒） |
+| `resolution` | string | いいえ | 解像度：`540p`、`720p`、`1080p` |
+| `expand_prompt` | boolean | いいえ | プロンプトの自動拡張を行うかどうか |
+| `image_url` | string | いいえ | 最初のフレーム用参照画像のURL |
+| `image_end_url` | string | いいえ | 最後のフレーム用参照画像のURL |
 
-### Request Examples
+### リクエスト例
 
 <CodeGroup>
 
@@ -65,7 +65,7 @@ print(response.json())
 
 </CodeGroup>
 
-### Response Example
+### レスポンス例
 
 ```json
 {
@@ -77,9 +77,9 @@ print(response.json())
 
 ---
 
-## Image-to-Video
+## 画像から動画生成
 
-Pass `image_url` as the first frame:
+`image_url` を最初のフレームとして入力：
 
 ```json
 {
@@ -89,7 +89,7 @@ Pass `image_url` as the first frame:
 }
 ```
 
-First-last frame mode:
+最初と最後のフレームモード：
 
 ```json
 {
@@ -102,7 +102,7 @@ First-last frame mode:
 
 ---
 
-## Query Task
+## タスクの照会
 
 ```
 GET /luma/generations/{task_id}
@@ -113,7 +113,7 @@ curl https://api.crazyrouter.com/luma/generations/luma_gen_abc123 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-### Response Example
+### レスポンス例
 
 ```json
 {
@@ -129,13 +129,13 @@ curl https://api.crazyrouter.com/luma/generations/luma_gen_abc123 \
 
 ---
 
-## Extend Video
+## 動画の延長
 
 ```
 POST /luma/generations/{task_id}/extend
 ```
 
-Extend a completed video.
+完了した動画を延長します。
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/luma/generations/luma_gen_abc123/extend \
@@ -146,11 +146,11 @@ curl -X POST https://api.crazyrouter.com/luma/generations/luma_gen_abc123/extend
   }'
 ```
 
-### Task Status
+### タスク状態
 
-| Status | Description |
-|--------|-------------|
-| `queued` | Queued |
-| `dreaming` | Generating |
-| `completed` | Completed |
-| `failed` | Failed |
+| 状態 | 説明 |
+|------|------|
+| `queued` | キューイング中 |
+| `dreaming` | 生成中 |
+| `completed` | 完了済み |
+| `failed` | 失敗 |

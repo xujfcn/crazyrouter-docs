@@ -1,36 +1,36 @@
 ---
-title: "Ideogram Legacy"
-description: "Use the Ideogram Legacy API for image generation, remixing, upscaling, and description"
+title: "Ideogram Old Version"
+description: "Использование API старой версии Ideogram для генерации, смешивания, увеличения и описания изображений"
 ---
-> Дата обновления: 2026-06-23
+> Обновление содержания: 2026-06-09
 
-# Ideogram Legacy
+# Ideogram старой версии
 
-The Ideogram Legacy API provides basic image generation capabilities.
+API старой версии Ideogram предоставляет базовые функции генерации изображений.
 
 <Note>
-  We recommend using [Ideogram V3](/ru/images/ideogram/v3) for better generation results.
+  Рекомендуется использовать [Ideogram V3](/ru/images/ideogram/v3) для получения лучших результатов генерации.
 </Note>
 
-## Generate Image
+## Генерация изображения
 
 ```
 POST /ideogram/generate
 ```
 
-### Request Parameters
+### Параметры запроса
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `image_request` | object | Yes | Image request object |
-| `image_request.prompt` | string | Yes | Prompt |
-| `image_request.model` | string | No | Model version: `V_2`, `V_2_TURBO` |
-| `image_request.aspect_ratio` | string | No | Aspect ratio |
-| `image_request.magic_prompt_option` | string | No | Prompt enhancement |
-| `image_request.style_type` | string | No | Style type |
-| `image_request.negative_prompt` | string | No | Negative prompt |
+| Параметр | Тип | Обязательный | Описание |
+|------|------|------|------|
+| `image_request` | object | Да | Объект запроса изображения |
+| `image_request.prompt` | string | Да | Промпт |
+| `image_request.model` | string | Нет | Версия модели: `V_2`, `V_2_TURBO` |
+| `image_request.aspect_ratio` | string | Нет | Соотношение сторон |
+| `image_request.magic_prompt_option` | string | Нет | Усиление промпта |
+| `image_request.style_type` | string | Нет | Тип стиля |
+| `image_request.negative_prompt` | string | Нет | Негативный промпт |
 
-### Request Example
+### Пример запроса
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/ideogram/generate \
@@ -46,7 +46,7 @@ curl -X POST https://api.crazyrouter.com/ideogram/generate \
   }'
 ```
 
-### Response Example
+### Пример ответа
 
 ```json
 {
@@ -64,13 +64,13 @@ curl -X POST https://api.crazyrouter.com/ideogram/generate \
 
 ---
 
-## Remix
+## Remix — смешивание
 
 ```
 POST /ideogram/remix
 ```
 
-Generate variations based on a reference image.
+Генерация вариаций на основе референсного изображения.
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/ideogram/remix \
@@ -87,13 +87,13 @@ curl -X POST https://api.crazyrouter.com/ideogram/remix \
 
 ---
 
-## Upscale Image
+## Увеличение изображения
 
 ```
 POST /ideogram/upscale
 ```
 
-Upscale an image to a higher resolution.
+Увеличьте изображение до более высокого разрешения.
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/ideogram/upscale \
@@ -109,13 +109,13 @@ curl -X POST https://api.crazyrouter.com/ideogram/upscale \
 
 ---
 
-## Describe Image
+## Описание изображения
 
 ```
 POST /ideogram/describe
 ```
 
-Let the model describe the image content and generate corresponding prompts.
+Позволяет модели описать содержание изображения и сгенерировать соответствующий промпт.
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/ideogram/describe \
@@ -126,7 +126,7 @@ curl -X POST https://api.crazyrouter.com/ideogram/describe \
   }'
 ```
 
-### Response Example
+### Пример ответа
 
 ```json
 {

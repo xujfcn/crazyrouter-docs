@@ -1,33 +1,33 @@
 ---
-title: "Gemini-Compatible OpenAI Model List"
-description: "Production-revalidated GET /v1beta/openai/models usage for retrieving an OpenAI-style model list"
+title: "Список моделей Gemini, совместимых с OpenAI"
+description: "На основе проверки в производственной среде, используйте GET /v1beta/openai/models для получения списка моделей в стиле OpenAI"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-30
 
-# Gemini-Compatible OpenAI Model List
+# Список моделей Gemini, совместимых с OpenAI
 
 ```
 GET /v1beta/openai/models
 ```
 
-This endpoint is a compatibility bridge:
+Этот эндпоинт является совместимым мостом:
 
-- the auth style can be Gemini-like
-- the response shape is still OpenAI-style model-list JSON
+- Способы аутентификации допускают стиль Gemini
+- Структура ответа остаётся в стиле списка моделей OpenAI
 
-This page only documents behavior that was revalidated against Crazyrouter production on `2026-03-23`.
+На этой странице представлены только те действия, которые были `2026-03-23` проверены на Crazyrouter в производственной среде.
 
-## When to use it
+## Когда использовать
 
-- your client prefers `?key=`
-- your middleware already uses `x-goog-api-key`
-- you want an OpenAI-style `list + data[]` response rather than native Gemini model metadata
+- Ваш клиент привык использовать `?key=`
+- Ваш промежуточный слой уже использует `x-goog-api-key`
+- Вы хотите получить структуру OpenAI-style `list + data[]`, а не нативные метаданные моделей Gemini
 
-If you are using a normal OpenAI-compatible client, prefer [GET /v1/models](/ru/chat/openai/models).
+Если вы стандартный клиент OpenAI, сначала используйте [GET /v1/models](/ru/chat/openai/models).
 
-## Authentication
+## Аутентификация
 
-This recheck confirmed that all three of the following work:
+На данном этапе проверены следующие три способа, все поддерживаются:
 
 ```http
 Authorization: Bearer YOUR_API_KEY
@@ -41,7 +41,7 @@ x-goog-api-key: YOUR_API_KEY
 GET /v1beta/openai/models?key=YOUR_API_KEY
 ```
 
-## Request examples
+## Пример запроса
 
 <CodeGroup>
 
@@ -58,16 +58,16 @@ curl https://api.crazyrouter.com/v1beta/openai/models \
 
 ---
 
-## Current production findings
+## Текущий вывод производственной проверки
 
-In the `2026-03-23` production recheck:
+В производственной проверке `2026-03-23`:
 
-- the `?key=` request returned `200`
-- the `x-goog-api-key` request returned `200`
-- the top-level `object` was `list`
-- the top-level `success` was `true`
-- the current model count was `541`
-- common fields inside `data[]` included:
+- Запрос `?key=` возвращает `200`
+- Запрос `x-goog-api-key` возвращает `200`
+- На верхнем уровне `object` — это `list`
+- На верхнем уровне `success` — это `true`
+- Текущее количество возвращаемых моделей — `541`
+- Общие поля элементов в `data[]` включают:
   - `id`
   - `object`
   - `created`
@@ -76,7 +76,7 @@ In the `2026-03-23` production recheck:
 
 ---
 
-## Response example
+## Пример ответа
 
 ```json
 {
@@ -108,32 +108,32 @@ In the `2026-03-23` production recheck:
 }
 ```
 
-## Field notes
+## Описание полей
 
-| Field | Type | Meaning |
-|------|------|---------|
-| `data[]` | array | Models available to the current token |
-| `id` | string | Model identifier |
-| `owned_by` | string | Upstream source or owner label |
-| `supported_endpoint_types` | array | Supported API styles for the model |
-| `object` | string | Always `list` |
-| `success` | boolean | Whether the request succeeded |
+| Поле | Тип | Описание |
+|------|------|------|
+| `data[]` | array | Список моделей, доступных текущему токену |
+| `id` | string | Идентификатор модели |
+| `owned_by` | string | Источник или организация, которой принадлежит модель |
+| `supported_endpoint_types` | array | Стиль API, поддерживаемый данной моделью |
+| `object` | string | Всегда равно `list` |
+| `success` | boolean | Запрос выполнен успешно |
 
 <Note>
-  Read the path meaning of `supported_endpoint_types` from `supported_endpoint` in `GET /api/pricing`. At the moment, `openai` maps to `POST /v1/chat/completions`, `anthropic` maps to `POST /v1/messages`, and only `openai-response` maps to `POST /v1/responses`. Claude currently exposes `openai` + `anthropic`, not `openai-response`.
+  `supported_endpoint_types` обозначает только поддерживаемый стиль API для данной модели. В настоящее время `openai` соответствует `POST /v1/chat/completions`, `anthropic` соответствует `POST /v1/messages`, а `openai-response` — только `POST /v1/responses`. На данный момент Claude официально поддерживает только `openai` + `anthropic`, не поддерживает `openai-response`.
 </Note>
 
 <Note>
-  This endpoint does not return only Gemini models. It returns the OpenAI-style model list visible to the current token, but exposes it through a Gemini-friendly access path.
+  Этот эндпоинт НЕ "только для моделей Gemini". Он возвращает OpenAI-style список моделей, которые видимы через текущий токен, просто способ входа и аутентификации адаптирован для клиента в стиле Gemini.
 </Note>
 
-Related pages:
+Связанные страницы:
 
-- [Official Model Pricing Methods](/ru/reference/official-pricing-methods)
+- [Официальная схема ценообразования моделей](/ru/reference/official-pricing-methods)
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [GPT Image 1.5: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [Все модели Google с актуальными ценами](https://crazyrouter.com/en/models/google?utm_source=docs&utm_medium=related)
+- [Страница модели GPT Image 1.5: актуальные цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Страница модели GPT Image 2: актуальные цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Все модели и цены от Google](https://crazyrouter.com/ru/models/google?utm_source=docs&utm_medium=related)

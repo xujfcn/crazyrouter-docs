@@ -1,93 +1,93 @@
 ---
-title: 'NextChat Setup Guide'
-description: 'Connect Crazyrouter to NextChat through the OpenAI-compatible path, then finish hosted or self-hosted setup, model list control, and troubleshooting'
+title: "NextChat 設定チュートリアル"
+description: "NextChat 内で Crazyrouter に OpenAI 互換モデルを接続し、オンライン設定、自分でのデプロイ、モデルリスト、トラブルシューティングができるようになります。"
 ---
-> 更新日: 2026-06-23
+> 内容更新日: 2026-06-09
 
-NextChat (formerly ChatGPT Next Web) is a good fit when you want a lightweight, fast, easy-to-deploy chat frontend. When connecting it to Crazyrouter, the recommended approach is to stay on NextChat's default OpenAI-compatible route and point the service URL at the Crazyrouter root domain.
+NextChat（旧 ChatGPT Next Web）は、軽量でレスポンスが早く、簡単に自分でデプロイできるチャットフロントエンドをすぐに構築したい方に最適です。Crazyrouter を連携する際は、OpenAI 互換ルートを推奨し、サービスURLを Crazyrouter のルートドメインに設定してください。
 
-## Overview
+## 概要
 
-Using NextChat's OpenAI settings, you can route requests through Crazyrouter:
+NextChat の OpenAI 設定項目から Crazyrouter にリクエストできます：
 
-- Recommended protocol: `OpenAI-compatible API`
-- Recommended route: the default NextChat OpenAI flow
-- Base URL: `https://api.crazyrouter.com`
-- Auth method: `sk-...` token
-- Recommended first validation model: `gpt-5.5`
+- 推奨プロトコル：`OpenAI-compatible API`
+- 推奨接続方法：NextChat 標準の OpenAI ルート
+- Base URL：`https://api.crazyrouter.com`
+- 認証方式：`sk-...` token
+- 推奨初回検証モデル：`gpt-5.5`
 
 <Note>
-NextChat's official README documents `BASE_URL` as the OpenAI API request base URL and uses root-domain style examples. The local `http://127.0.0.1:4000/api/status` response also exposes a root-style `server_address`. So for Crazyrouter, the safest first-pass setup is `https://api.crazyrouter.com`; only switch to a more specific path if your customized build explicitly requires it.
+NextChat 公式 README では `BASE_URL` を OpenAI API request base URL と定義しており、サンプルもルートドメイン形式です。同時にローカルの `http://127.0.0.1:4000/api/status` にて公開される `server_address` もルートアドレスとなっています。そのため Crazyrouter 連携時の初回検証は `https://api.crazyrouter.com` を優先して入力してください。もしカスタム版で詳細なパス指定が必要な場合は、そのバージョンの案内に従って調整してください。
 </Note>
 
-## Best For
+## 対象ユーザー
 
-- users who want a lightweight chat frontend quickly
-- personal or small-team web chat with Crazyrouter
-- admins who want to ship default model and upstream settings through env vars
-- users who want the simplest possible OpenAI-compatible first setup
+- 軽量チャットフロントエンドをすぐに構築したい方
+- Crazyrouter を個人や小規模チームのウェブチャット用に使いたい方
+- 環境変数でデフォルトのモデル・上流を一括設定したい方
+- 最小限の設定で OpenAI 互換ルートをまず動かしたい方
 
-## Protocol Used
+## 利用プロトコル
 
-Recommended protocol: `OpenAI-compatible API`
+推奨プロトコル：`OpenAI-compatible API`
 
-When connecting Crazyrouter in NextChat, start with:
+NextChat と Crazyrouter を連携する時、まず入力するURL：
 
 ```text
 https://api.crazyrouter.com
 ```
 
-Do not start with:
+下記は入力しないでください：
 
 - `https://api.crazyrouter.com/v1/chat/completions`
 - `https://api.crazyrouter.com/v1/models`
 
-If an older or customized NextChat build requires a more specific API host setting, adjust to that version after you validate the baseline setup with the root domain.
+もし NextChat の過去のバージョンでより詳細な API ホストの手入力が求められる場合は、そのバージョンの案内に従って調整してください。初回の接続はルートドメインでベースライン検証を行います。
 
 <Tip>
-The exact entry point varies by deployment style: hosted usage often exposes a settings panel, while self-hosted usage often pushes the values through environment variables only. Regardless of the UI, keep first-pass validation minimal: `API Key` + root-domain `BASE_URL` + one model `gpt-5.5`.
+NextChat のデプロイ形態ごとにアクセス位置が異なります。オンライン利用時は設定画面で入力する例が多く、自分でデプロイする場合は環境変数を直接設定するケースが主流です。UIの仕様変更に関わらず、初回検証は最小構成で統一：`API Key` + ルートドメイン `BASE_URL` + 単一モデル `gpt-5.5`。
 </Tip>
 
-## Prerequisites
+## 前提条件
 
-| Item | Details |
-|------|---------|
-| Crazyrouter account | Register first at [crazyrouter.com](https://crazyrouter.com) |
-| Crazyrouter token | Create a dedicated `sk-...` token for NextChat |
-| NextChat | Hosted or self-hosted is fine; use a current stable version |
-| Available models | Allow at least one verified OpenAI-compatible chat model such as `gpt-5.5` |
+| プロジェクト | 説明 |
+|------|------|
+| Crazyrouter アカウント | まず [crazyrouter.com](https://crazyrouter.com) で登録 |
+| Crazyrouter token | NextChat 用に専用の `sk-...` token を作成推奨 |
+| NextChat | オンライン版か自分でデプロイ版のどちらでも、現行安定版推奨 |
+| 利用可能なモデル | 少なくとも、当日動作確認済みの OpenAI 互換チャットモデルを1つは許可（例：`gpt-5.5`） |
 
-Recommended starting whitelist:
+初回推奨ホワイトリスト：
 
 - `gpt-5.5`
 - `claude-opus-4-8`
 - `gemini-3.1-pro`
 
-## 5-Minute Quick Start
+## 5分でクイックスタート
 
 <Steps>
-  <Step title="Create a dedicated NextChat token">
-    In the Crazyrouter dashboard, create a token named `nextchat`. For the first rollout, allow only baseline models such as `gpt-5.5` and `claude-opus-4-8`.
+  <Step title="NextChat専用トークンを作成する">
+    Crazyrouter 管理画面で新しい token を作成し、名称は `nextchat` を推奨。初回は `gpt-5.5` と `claude-opus-4-8` のようなベースモデルだけを許可。
   </Step>
-  <Step title="Open NextChat settings">
-    In NextChat, open the `Settings` panel from the bottom-left icon or settings entry.
+  <Step title="NextChatの設定を開く">
+    NextChat にログインし、左下の `設定` アイコンか `Settings` をクリック。
   </Step>
-  <Step title="Enter the endpoint and key">
-    In the OpenAI-related settings, enter:
-    - `API Key`: your `sk-...`
-    - `Base URL`: `https://api.crazyrouter.com`
+  <Step title="インターフェースアドレスとキーを入力する">
+    OpenAI 関連設定に下記を入力：
+    - `API Key`：あなたの `sk-...`
+    - `インターフェースアドレス / ベースURL`：`https://api.crazyrouter.com`
   </Step>
-  <Step title="Set the first model">
-    In the `Model` field, manually enter or select `gpt-5.5`. If your version supports a custom model list, add more models later.
+  <Step title="モデルを指定する">
+    `モデル / モデル` で `gpt-5.5` を手入力または選択。バージョンがカスタムモデルリストに対応していれば、追加モデルも補足。
   </Step>
-  <Step title="Run the first validation prompt">
-    Start a new chat and send `Reply only OK`. Once it works, add more models gradually.
+  <Step title="初回認証を完了する">
+    新規チャットセッションを作成して `Reply only OK` を送信。正常レスポンスを受け取ったら少しずつモデル追加。
   </Step>
 </Steps>
 
-## Self-Hosted Quick Config
+## 自分でデプロイする時のクイック設定
 
-A common Docker setup looks like this:
+Docker 環境のよくある例：
 
 ```yaml
 services:
@@ -102,94 +102,94 @@ services:
       - HIDE_USER_API_KEY=1
 ```
 
-Common environment variables:
+主な環境変数の説明：
 
-| Variable | Recommended value | Notes |
-|----------|-------------------|-------|
-| `OPENAI_API_KEY` | `sk-xxx` | default Crazyrouter token |
-| `BASE_URL` | `https://api.crazyrouter.com` | use the root domain first, matching the official `BASE_URL` pattern for baseline validation |
-| `CUSTOM_MODELS` | `+gpt-5.5,+claude-opus-4-8,+gemini-3.1-pro` | adds selectable models in the UI |
-| `HIDE_USER_API_KEY` | `1` | prevents end users from entering their own key |
+| 変数 | 推奨値 | 説明 |
+|------|--------|------|
+| `OPENAI_API_KEY` | `sk-xxx` | 標準 Crazyrouter token |
+| `BASE_URL` | `https://api.crazyrouter.com` | 公式の `BASE_URL` の手順でルートドメインを最初に設定し、ベースライン検証に使用 |
+| `CUSTOM_MODELS` | `+gpt-5.5,+claude-opus-4-8,+gemini-3.1-pro` | フロントエンド向け追加モデル |
+| `HIDE_USER_API_KEY` | `1` | エンドユーザーに他の Key 入力を許可しない |
 
-## Recommended Model Setup
+## 推奨モデル構成
 
-| Use case | Recommended model | Why |
-|----------|-------------------|-----|
-| Default main chat model | `gpt-5.5` | Verified successfully in production on March 23, 2026, and suited for the main NextChat baseline |
-| Higher-quality long-form and explanation | `claude-opus-4-8` | Better for longer text and more complex explanations |
-| Gemini fallback path | `gemini-3.1-pro` | Useful as a second vendor-compatible validation path |
+| 利用シーン | 推奨モデル | 理由 |
+|----------|----------|------|
+| デフォルトチャット主モデル | `gpt-5.5` | 当日動作確認済み・NextChat 基準に最適 |
+| 高品質ロング文・解説 | `claude-opus-4-8` | 長文や複雑な解説に向く |
+| Gemini バックアップ | `gemini-3.1-pro` | 2番目の互換性検証ルート用 |
 
-Recommended order: validate `gpt-5.5` first, then expand the list with `CUSTOM_MODELS`.
+推奨順序：まず `gpt-5.5` で稼働を確認、次に `CUSTOM_MODELS` でモデルリスト拡張。
 
-## Token Setup Best Practices
+## Token 設定ベストプラクティス
 
-| Setting | Recommendation | Notes |
-|---------|----------------|-------|
-| Dedicated token | Required | Do not share it with LobeChat, Cursor, or Codex |
-| Model whitelist | Strongly recommended | Allow only the models the frontend should expose |
-| IP restriction | Consider it for fixed self-hosted egress | Use carefully on changing personal networks |
-| Quota cap | Strongly recommended | Multi-user chat traffic can grow fast |
-| Environment separation | Recommended | Use separate tokens for demo, staging, and production |
-| User-supplied key entry | Disable by default | Set `HIDE_USER_API_KEY=1` if you want centralized cost control |
+| 設定 | 推奨 | 説明 |
+|------|------|------|
+| 専用 token | 必須 | NextChat 用 token を LobeChat、Cursor、Codex と共用しない |
+| モデルホワイトリスト | 強く推奨 | ユーザーのUIに表示されるモデルだけ許可 |
+| IP制限 | 自分でデプロイし出口固定時検討可 | 頻繁にネットワーク変更する個人環境は注意 |
+| クォータ上限 | 強く推奨 | Webチャットで多数利用時は消費急増の可能性 |
+| 環境分離 | 推奨 | デモサイト・テストサイト・本番サイトそれぞれ別token |
+| ユーザーの Key 自由入力 | デフォルトは無効を推奨 | 上流統一・課金制御したい場合は `HIDE_USER_API_KEY=1` を設定 |
 
-## Verification Checklist
+## 検証項目一覧
 
-- [ ] `API Key` is saved correctly
-- [ ] `Base URL` is set to `https://api.crazyrouter.com`
-- [ ] the first model is set to `gpt-5.5`
-- [ ] the first chat request succeeds
-- [ ] `CUSTOM_MODELS` works if you use self-hosted deployment
-- [ ] streaming output works normally
-- [ ] the request appears in the Crazyrouter logs
-- [ ] token quota and model whitelist match your rollout plan
+- [ ] `API Key` を正しく保存済み
+- [ ] `Base URL` を `https://api.crazyrouter.com` に設定済み
+- [ ] 初回モデルを `gpt-5.5` で設定済み
+- [ ] チャット初回リクエストは正常戻り
+- [ ] 自分でデプロイの場合は `CUSTOM_MODELS` が有効化済み
+- [ ] ストリーム出力も正常
+- [ ] Crazyrouter 管理画面ログでリクエスト確認可
+- [ ] token クォータ・モデルホワイトリストも想定通り
 
-## Common Errors and Fixes
+## よくあるエラーと修正方法
 
-| Symptom | Likely cause | Fix |
-|---------|--------------|-----|
-| 401 unauthorized | token is wrong, expired, or pasted with extra spaces | create a new token and replace it |
-| 403 / model not allowed | the model is not in the token whitelist | allow that model in Crazyrouter |
-| 404 | you entered a full endpoint path, or your version expects a different env var name | switch back to `https://api.crazyrouter.com` and check whether your build uses `BASE_URL` or another setting name |
-| the self-hosted UI does not show these settings | your deployment style fixes them in environment variables instead of the frontend settings panel | inspect `OPENAI_API_KEY`, `BASE_URL`, and `CUSTOM_MODELS` in the deployment config directly |
-| no models appear in the UI | `CUSTOM_MODELS` is missing or old config is cached | validate with a manual `gpt-5.5` entry first, then refresh and recheck env vars |
-| request goes out but the model fails | default model name is wrong or unavailable | fall back to `gpt-5.5` for baseline testing |
-| users can still switch to their own key | `HIDE_USER_API_KEY=1` was not set | add that variable in deployment config |
-| usage grows too quickly | many users share one broad token | split tokens, reduce whitelist scope, and add quota caps |
+| 症状 | 主な原因 | 修正方法 |
+|------|----------|----------|
+| 401 unauthorized | token ミス、失効、またはコピー時に空白含む | token 再生成・再設定 |
+| 403 / model not allowed | ホワイトリストでモデルを許可していない | Crazyrouter token 設定で該当モデル許可 |
+| 404 | URL を詳細APIパスにした、またはバージョン変数名ミス | `https://api.crazyrouter.com` に修正し、利用バージョンで `BASE_URL` など変数名も再確認 |
+| 自分でデプロイすると設定項目がUIにない | デプロイ方式で設定を環境変数固定し、前端の設定画面には出さない | デプロイ設定内の `OPENAI_API_KEY`、`BASE_URL`、`CUSTOM_MODELS` を直接確認 |
+| ページでモデルが見えない | `CUSTOM_MODELS` 未設定、または古い設定をキャッシュしている | `gpt-5.5` を手入力で検証し、再読み込み・環境変数確認 |
+| リクエストはできるがモデルエラー | デフォルトモデルの設定ミス、またはモデルが現時点で非稼働 | `gpt-5.5` に戻してベースライン検証 |
+| ユーザーが独自 Key を使えてしまう | `HIDE_USER_API_KEY=1` を未実装 | デプロイ環境で該当変数を追記 |
+| コスト急増 | 多人数で高権限tokenを共用 | token分割、ホワイトリスト縮小、制限設定 |
 
-## Performance and Cost Tips
+## 性能とコストに関するアドバイス
 
-- Default to exposing only `gpt-5.5` in the first rollout
-- Keep premium models out of the default list until you actually need them
-- On public or semi-public deployments, hide user-supplied key entry whenever possible
-- Separate demo traffic from production traffic with different tokens
-- If usage looks abnormal, check Crazyrouter logs first for long sessions or many users sharing one key
+- デフォルトでは `gpt-5.5` のみ許可
+- 高額モデルをデフォルトリストから除外し、必要な時だけ追加
+- 公開/半公開デプロイ時はユーザー独自Key入力欄を極力隠す
+- デモ用と本番用で料金を分け、テスト流量が本番クォータに影響しないように
+- 消費増大時は Crazyrouter ログで長時間チャットや多数同時利用が原因か確認
 
 ## FAQ
 
-### Which URL should I use in NextChat?
+### NextChat にはどのURLを入力すべき？
 
-Start with `https://api.crazyrouter.com`.
+まず `https://api.crazyrouter.com` を入力。
 
-### Why does this guide not recommend `/v1` first?
+### なぜ `/v1` を直接入力しない方が良い？
 
-Because the official NextChat docs show `BASE_URL` in a root-domain style, and the local `4000` environment also exposes a root-style `server_address`. That makes the root domain the safest first-pass setup.
+NextChat の公式ドキュメントで `BASE_URL` のサンプルはルートドメイン形式です。加えてローカル `4000` 環境での `server_address` の返却内容からも、初回検証はルートドメインのほうが安定します。
 
-### Which model should I test first?
+### 初回推奨モデルは何？
 
-Start with `gpt-5.5`.
+最初は `gpt-5.5` を利用。
 
-### Do I have to configure `CUSTOM_MODELS`?
+### `CUSTOM_MODELS` の設定は必須？
 
-No. You can manually enter `gpt-5.5` first, validate the connection, and add a model list later.
+必須ではありません。まず `gpt-5.5` を手入力で検証し、問題なければモデルリスト追加。
 
-### Why do some self-hosted deployments only let me change env vars, not UI settings?
+### 一部デプロイで環境変数しか変更できない理由は？
 
-Because different NextChat deployment modes expose configuration differently. Some self-hosted setups pin upstream routing, keys, and models in environment variables, and the frontend only consumes those values.
+NextChat のデプロイ方法によって設定画面の公開位置が異なります。自分でデプロイする形式の場合、上流・モデル・Keyは環境変数で固定され、前端では編集できません。
 
-### Should I hide user-provided keys in self-hosted deployments?
+### 自分でデプロイ時はユーザー独自 Key を隠すべき？
 
-Yes, if you want centralized upstream routing and predictable cost control.
+上流やコストを一括管理したい時は非表示推奨。
 
 <Note>
-If you want the lightest possible chat frontend with minimal deployment friction, NextChat is a strong fit. If you need richer collaboration or more advanced app-building features, LobeChat or Dify is usually the better next step.
+最も安価に軽量チャットフロントエンドを構築したいなら NextChat が最適です。チームコラボや多機能が必要なら LobeChat や Dify の方が拡張に向いています。
 </Note>

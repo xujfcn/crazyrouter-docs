@@ -1,28 +1,29 @@
 ---
-title: "MiniMax Video"
-description: "Use the MiniMax/Hailuo API to generate videos"
+title: "MiniMax ビデオ"
+description: "MiniMax/海螺 API を使用してビデオを生成"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# MiniMax Video
 
-MiniMax (Hailuo) provides high-quality video generation capabilities.
+# MiniMax ビデオ
 
-## Create Video
+MiniMax（海螺）は高品質なビデオ生成機能を提供します。
+
+## ビデオを作成する
 
 ```
 POST /minimax/v1/video_generation
 ```
 
-### Request Parameters
+### リクエストパラメータ
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model` | string | Yes | Model name, e.g. `video-01`, `video-01-live2d` |
-| `prompt` | string | Yes | Video description prompt |
-| `first_frame_image` | string | No | First frame image URL |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `model` | string | はい | モデル名（例：`video-01`、`video-01-live2d`） |
+| `prompt` | string | はい | ビデオ説明のプロンプトワード |
+| `first_frame_image` | string | いいえ | 最初のフレーム画像のURL |
 
-### Request Examples
+### リクエスト例
 
 <CodeGroup>
 
@@ -32,7 +33,7 @@ curl -X POST https://api.crazyrouter.com/minimax/v1/video_generation \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "video-01",
-    "prompt": "A kitten napping in the sunlight, a gentle breeze ruffling its fur"
+    "prompt": "一只小猫在阳光下打盹，微风吹动它的毛发"
   }'
 ```
 
@@ -47,7 +48,7 @@ response = requests.post(
     },
     json={
         "model": "video-01",
-        "prompt": "A kitten napping in the sunlight, a gentle breeze ruffling its fur"
+        "prompt": "一只小猫在阳光下打盹，微风吹动它的毛发"
     }
 )
 
@@ -56,7 +57,7 @@ print(response.json())
 
 </CodeGroup>
 
-### Response Example
+### レスポンス例
 
 ```json
 {
@@ -70,19 +71,19 @@ print(response.json())
 
 ---
 
-## Image-to-Video
+## 画像からビデオ生成
 
 ```json
 {
   "model": "video-01",
-  "prompt": "The person in the image starts smiling",
+  "prompt": "图片中的人物开始微笑",
   "first_frame_image": "https://example.com/portrait.jpg"
 }
 ```
 
 ---
 
-## Query Task
+## タスクの照会
 
 ```
 GET /minimax/v1/query/video_generation?task_id={task_id}
@@ -93,7 +94,7 @@ curl "https://api.crazyrouter.com/minimax/v1/query/video_generation?task_id=mini
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-### Response Example (Completed)
+### レスポンス例（完了時）
 
 ```json
 {
@@ -107,18 +108,18 @@ curl "https://api.crazyrouter.com/minimax/v1/query/video_generation?task_id=mini
 }
 ```
 
-### Task Status
+### タスクステータス
 
-| Status | Description |
-|--------|-------------|
-| `Queueing` | Queued |
-| `Processing` | Processing |
-| `Success` | Succeeded |
-| `Fail` | Failed |
+| ステータス | 説明 |
+|------|------|
+| `Queueing` | キュー待ち |
+| `Processing` | 処理中 |
+| `Success` | 成功 |
+| `Fail` | 失敗 |
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [MiniMax M3 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/minimax-m3?utm_source=docs&utm_medium=related)
-- [MiniMax M3 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/minimax/minimax-m3?utm_source=docs&utm_medium=related)
-- [Hailuo の全モデルと料金](https://crazyrouter.com/en/models/hailuo?utm_source=docs&utm_medium=related)
+- [MiniMax M3 価格比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/minimax-m3?utm_source=docs&utm_medium=related)
+- [MiniMax M3 モデルページ：リアルタイム価格、実例、呼び出しコード](https://crazyrouter.com/ja/models/minimax/minimax-m3?utm_source=docs&utm_medium=related)
+- [Hailuo 全モデルと価格一覧](https://crazyrouter.com/ja/models/hailuo?utm_source=docs&utm_medium=related)

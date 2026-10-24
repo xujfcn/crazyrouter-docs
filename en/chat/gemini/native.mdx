@@ -1,24 +1,24 @@
 ---
 title: "Gemini Native Format"
-description: "Production-revalidated Gemini 3 Pro native API usage on Crazyrouter"
+description: "Based on production environment verification, using the native API abilities of Gemini 3 Pro"
 ---
-> Last updated: 2026-06-06
+> Content updated: 2026-06-09
 
 # Gemini Native Format
 
-This page only documents Gemini Native behavior that was revalidated against Crazyrouter production on `2026-03-22`.
+This page only records Gemini Native usages of `2026-03-22` that have been verified in the Crazyrouter production environment.
 
-Current primary example model:
+Current main example model:
 
 - `gemini-3.1-pro`
 
-Dedicated multimodal pages based on successful request patterns:
+Individually organized multimodal pages based on successful request experiences:
 
 - [Gemini Image Understanding](/en/chat/gemini/vision)
 - [Gemini Video Understanding](/en/chat/gemini/video)
 - [Gemini Audio Understanding](/en/chat/gemini/audio)
 
-## Endpoints
+## Endpoint
 
 ```text
 POST /v1beta/models/{model}:generateContent
@@ -27,7 +27,7 @@ POST /v1beta/models/{model}:streamGenerateContent
 
 ## Authentication
 
-Pass the API key through the URL parameter:
+Pass the API Key via URL parameter:
 
 ```text
 ?key=YOUR_API_KEY
@@ -35,7 +35,7 @@ Pass the API key through the URL parameter:
 
 ---
 
-## Basic text generation
+## Basic Text Generation
 
 ```bash cURL
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
@@ -57,7 +57,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Verified response shape:
+Key structure returned in the current production environment:
 
 ```json
 {
@@ -78,9 +78,9 @@ Verified response shape:
 
 ---
 
-## Streaming generation
+## Streaming Generation
 
-This recheck confirmed that `streamGenerateContent` returns incremental SSE output.
+This round has verified `streamGenerateContent`, which can use SSE to return incremental content.
 
 ```bash cURL
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:streamGenerateContent?key=YOUR_API_KEY&alt=sse" \
@@ -99,7 +99,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:streamGenerateCon
   }'
 ```
 
-Observed SSE chunk shape:
+The form of the SSE segments received in production is similar to:
 
 ```text
 data: {"candidates":[{"content":{"parts":[{"text":"...","thoughtSignature":"..."}]}}]}
@@ -107,9 +107,9 @@ data: {"candidates":[{"content":{"parts":[{"text":"...","thoughtSignature":"..."
 
 ---
 
-## Structured outputs
+## Structured Output
 
-This production recheck confirmed that `responseMimeType + responseSchema` works:
+The current production environment has verified `responseMimeType + responseSchema` as usable:
 
 ```bash cURL
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
@@ -139,7 +139,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Verified production output:
+Production validation returns:
 
 ```json
 {"city":"Tokyo","country":"Japan"}
@@ -149,7 +149,7 @@ Verified production output:
 
 ## Google Search
 
-This production recheck confirmed that the `googleSearch` tool works:
+The tool `googleSearch` has been verified as usable in the current production environment:
 
 ```bash cURL
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
@@ -173,7 +173,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Verified fields include:
+Key fields returned in production include:
 
 - `groundingMetadata.webSearchQueries`
 - `groundingMetadata.groundingChunks`
@@ -183,7 +183,7 @@ Verified fields include:
 
 ## Thinking
 
-This production recheck confirmed that `thinkingConfig` works:
+The current production environment has verified `thinkingConfig` as usable:
 
 ```bash cURL
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
@@ -208,7 +208,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Verified marker:
+Key indicators validated in production:
 
 ```json
 {
@@ -220,27 +220,27 @@ Verified marker:
 
 ---
 
-## Common `generationConfig` fields
+## Common generationConfig Fields
 
 | Field | Type | Description |
-|-------|------|-------------|
-| `maxOutputTokens` | integer | Maximum output tokens |
+|------|------|------|
+| `maxOutputTokens` | integer | Maximum number of output tokens |
 | `temperature` | number | Sampling temperature |
-| `responseMimeType` | string | MIME type for structured outputs |
-| `responseSchema` | object | Structured output constraint |
+| `responseMimeType` | string | MIME type for structured output |
+| `responseSchema` | object | Structured output constraints |
 | `thinkingConfig` | object | Thinking mode configuration |
 
 <Note>
-  Gemini Native uses the `contents[].parts[]` structure rather than OpenAI-style `messages`. If you want an OpenAI-style route instead, use [Gemini OpenAI-Compatible Format](/en/chat/gemini/openai-compat).
+  Gemini Native uses the `contents[].parts[]` structure, not the OpenAI `messages` structure. If you want to follow the OpenAI style, please use [Gemini OpenAI Compatible Format](/en/chat/gemini/openai-compat).
 </Note>
 
 Related pages:
 
-- [Official Model Pricing Methods](/en/reference/official-pricing-methods)
+- [Official Model Pricing Method](/en/reference/official-pricing-methods)
 
 {/* crazyrouter-model-links v2 */}
-## Related on crazyrouter.com
+## Related pages
 
-- [Gemini 2.5 Flash price comparison: list vs Azure / Bedrock / Vertex vs Crazyrouter](https://crazyrouter.com/en/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash model page: live price, real samples, code](https://crazyrouter.com/en/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash-Lite price comparison: list vs Azure / Bedrock / Vertex vs Crazyrouter](https://crazyrouter.com/en/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash Price Comparison: Official / Azure / Bedrock / Vertex and Crazyrouter](https://crazyrouter.com/en/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash Model Page: Real-time Price, Actual Examples, Call Code](https://crazyrouter.com/en/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash-Lite Price Comparison: Official / Azure / Bedrock / Vertex and Crazyrouter](https://crazyrouter.com/en/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)

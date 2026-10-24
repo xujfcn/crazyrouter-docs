@@ -1,0 +1,262 @@
+---
+title: "Guía de Configuración de ChatBox"
+description: "Conecta Crazyrouter en la aplicación de escritorio ChatBox mediante el modo compatible con OpenAI. Incluye cómo añadir modelos, usar el banco de conocimientos, solucionar problemas y sugerencias para la primera ronda de validación."
+---
+> Contenido actualizado: 2026-06-09
+
+ChatBox es un cliente de IA multiplataforma muy común, compatible con Windows, macOS, Linux y también tiene versión web. Al conectar con Crazyrouter, se recomienda priorizar la configuración usando el método `OpenAI API Compatible` o `OpenAI API` de ChatBox, en vez de buscar una preconfiguración de fabricante específica.
+
+Las ventajas de este método son:
+
+- Configuración sencilla, ideal para que usuarios comunes se conecten rápidamente
+- Permite cambiar directamente entre los modelos permitidos de Crazyrouter
+- Es ideal para escenarios como chat de escritorio, preguntas con base en conocimiento, asistencia para lectura de archivos, entre otros
+
+## Conclusión primero
+
+Se recomienda utilizar la siguiente configuración:
+
+- Proveedor / Modo API: `OpenAI API Compatible` o `OpenAI API`
+- API Host: `https://api.crazyrouter.com`
+- API Path: Mantener por defecto o dejar en blanco
+- API Key: `sk-xxx`
+- Primer modelo de validación: `gpt-5.5`
+
+<Note>
+De acuerdo con la documentación oficial de ChatBox, normalmente `API Path` no requiere ser completado manualmente, y por defecto es la ruta de chat compatible con OpenAI. Por tanto, en la documentación de Crazyrouter, se recomienda dejar `API Host` como el dominio raíz `https://api.crazyrouter.com` y no completar antes `/v1/chat/completions` manualmente.
+</Note>
+
+## ¿Para quién es útil?
+
+- Usuarios que desean usar Crazyrouter rápidamente en escritorio
+- Personas que necesitan conversar, traducir, resumir o asistir la redacción con varios modelos
+- Usuarios que desean combinar capacidades de banco de conocimientos o preguntas sobre archivos locales con Crazyrouter
+- Aquellos que no quieren programar y sólo desean configurar desde la interfaz gráfica
+
+## Requisitos previos
+
+| Elemento | Descripción |
+|------|------|
+| Cuenta Crazyrouter | Primero regístrate en [crazyrouter.com](https://crazyrouter.com) |
+| Token de Crazyrouter | Se recomienda crear un token dedicado para ChatBox |
+| Cliente ChatBox | Se recomienda instalar la versión de escritorio, el soporte de banco de conocimientos es más completo |
+| Modelos disponibles | Debes permitir al menos 1 modelo de chat antes de empezar |
+
+Se recomienda permitir sólo, en una primera ronda:
+
+- `gpt-5.5`
+- `claude-opus-4-8`
+- `gemini-3.1-pro`
+
+## Instalación de ChatBox
+
+### Windows
+
+1. Abre el [sitio web oficial de ChatBox](https://chatboxai.app/)
+2. Descarga el instalador para Windows
+3. Haz doble clic para instalar
+4. Al finalizar, inicia ChatBox
+
+### macOS
+
+1. Abre el [sitio web oficial de ChatBox](https://chatboxai.app/)
+2. Descarga el instalador para macOS
+3. Arrástralo a `Applications`
+4. Si al abrirlo por primera vez aparece una advertencia de seguridad, sigue las instrucciones del sistema para permitirlo
+
+### Linux
+
+1. Accede al [sitio web oficial de ChatBox](https://chatboxai.app/)
+2. Descarga el instalador o versión de escritorio adecuada para tu distribución
+3. Después de instalar, ejecuta ChatBox
+
+<Tip>
+Si solo quieres comprobar si Crazyrouter funciona en ChatBox, prioriza usar el cliente de escritorio. No comiences probando sincronización en múltiples dispositivos, bancos de conocimiento ni listas complejas de modelos.
+</Tip>
+
+## Método de configuración recomendado
+
+Según la versión de ChatBox, los nombres de las opciones pueden variar levemente. Los accesos comunes incluyen:
+
+- `Settings`
+- `Model Provider`
+- `AI Provider`
+- `Add`
+
+Si tu versión ya incluye al proveedor `OpenAI API`, simplemente selecciónalo; si no, agrega un nuevo proveedor `OpenAI API Compatible`.
+
+## Pasos de configuración
+
+<Steps>
+  <Step title="Paso 1: Crear un token exclusivo de ChatBox en Crazyrouter">
+    Para la primera prueba se recomienda permitir sólo 1 o 2 modelos, por ejemplo:
+
+    - `gpt-5.5`
+    - `claude-opus-4-8`
+
+    Así es más fácil identificar problemas y evitar que una lista muy grande complique la localización de fallos.
+  </Step>
+
+  <Step title="Paso 2: Abrir la configuración de ChatBox">
+    Después de iniciar ChatBox, haz clic en la opción de configuración en la esquina inferior izquierda y ve a:
+
+    - `Model Provider`
+    - O `AI Provider`
+  </Step>
+
+  <Step title="Paso 3: Seleccionar o añadir un proveedor compatible con OpenAI">
+    Dos escenarios recomendados:
+
+    - Si ya existe `OpenAI API`, selecciónalo directamente
+    - Si no, haz clic en `Add` para añadir un nuevo proveedor `OpenAI API Compatible`
+  </Step>
+
+  <Step title="Paso 4: Completar la información de conexión de Crazyrouter">
+    Complete estos campos recomendados:
+
+    - `API Host`: `https://api.crazyrouter.com`
+    - `API Path`: Mantener por defecto o dejar en blanco
+    - `API Key`: `sk-xxx`
+
+    Si la interfaz te pide un nombre para el proveedor, puedes ingresar `Crazyrouter`.
+  </Step>
+
+  <Step title="Paso 5: Agregar el primer modelo">
+    Para comenzar, añade sólo un modelo:
+
+    - `gpt-5.5`
+
+    Cuando se valide este canal mínimo, agrega después:
+
+    - `claude-opus-4-8`
+    - `gemini-3.1-pro`
+  </Step>
+
+  <Step title="Paso 6: Utilizar Check o Save para realizar primero una prueba de conectividad">
+    Si tu versión de ChatBox tiene el botón `Check`, pulsa primero `Check`.
+
+    Si sólo tiene `Save`, guarda los cambios y vuelve al menú principal para crear una nueva conversación de prueba.
+  </Step>
+
+  <Step title="Paso 7: Realizar la primera verificación mínima en la interfaz principal">
+    Crea un nuevo chat y verifica que el modelo actual sea `gpt-5.5`. Escribe:
+
+    ```text
+    Reply only OK
+    ```
+
+    Si la respuesta que recibes es `OK` o similar, la conexión principal entre ChatBox y Crazyrouter está funcionando.
+  </Step>
+</Steps>
+
+## Orden recomendado para validación
+
+Se sugiere seguir este orden y no activar muchos modelos o funciones al inicio:
+
+1. Configura sólo 1 token al principio
+2. Sólo un modelo `gpt-5.5`
+3. Realiza primero una validación de chat sólo con texto
+4. Agrega un segundo modelo después
+5. Finalmente, habilita el banco de conocimientos, preguntas sobre archivos o parámetros de conversación complejos
+
+## Modelos recomendados
+
+| Escenario | Modelo recomendado | Razón |
+|------|----------|------|
+| Verificación de conectividad inicial | `gpt-5.5` | Probado satisfactoriamente ese mismo día; ideal como base para validación OpenAI compatible |
+| Redacción y explicación avanzada | `claude-opus-4-8` | Mejor para instrucciones complejas, correcciones, resúmenes |
+| Gemini (respaldo) | `gemini-3.1-pro` | Útil para tener un modelo no OpenAI en el mismo cliente para validación cruzada |
+
+## ¿Cómo combinar las funciones comunes de ChatBox con Crazyrouter?
+
+### Chat normal
+
+La forma más sencilla, útil para verificar que la configuración esté correcta primero.
+
+### Banco de conocimiento / Preguntas sobre archivos
+
+Recomendado sólo después de que el chat normal funcione correctamente. Para la primera prueba:
+
+- Usa archivos lo más pequeños posible
+- El contenido debe ser claro y simple
+- Primero prueba con sólo un archivo
+
+No realices pruebas masivas de banco de conocimiento antes de confirmar que la API está bien configurada.
+
+### Cambio entre varios modelos
+
+Ideal para asignar distintas tareas en ChatBox, por ejemplo:
+
+- Chat base por defecto: `gpt-5.5`
+- Redacción importante y resumen: `claude-opus-4-8`
+- Verificación estándar inicial: `gpt-5.5`
+
+## Sugerencias de parámetros
+
+Si tu versión de ChatBox soporta parámetros de muestreo comunes, la primera vez usa valores conservadores:
+
+| Parámetro | Valor sugerido | Descripción |
+|------|--------|------|
+| Temperature | `0.2` a `0.7` | Primera validación, no muy alto |
+| Max Tokens | Deja por defecto o moderado | Para evitar problemas por respuestas demasiado largas |
+| Context Messages | Deja por defecto | Primero valida el chat básico |
+
+## Mejores prácticas con los tokens
+
+| Configuración | Sugerencia | Descripción |
+|------|------|------|
+| Token dedicado | Obligatorio | No compartas con IDEs ni procesos automatizados |
+| Lista blanca de modelos | Muy recomendable | Permite sólo 1-2 modelos al principio |
+| Límite de cuota | Muy recomendable | Evita un consumo excesivo al usar banco de conocimiento |
+| Tokens por entorno | Recomendado | Separa los de uso personal y los de trabajo/team |
+| Ante fuga | Rota inmediatamente | Cambia la clave tras captura de pantalla, video o exposición en escritorio compartido |
+
+## Lista de verificación de validación
+
+- [ ] ChatBox está instalado y arranca correctamente
+- [ ] Se creó un token dedicado para ChatBox en Crazyrouter
+- [ ] Se eligió `OpenAI API` o `OpenAI API Compatible`
+- [ ] `API Host` está configurado como `https://api.crazyrouter.com`
+- [ ] `API Path` quedó en valor por defecto o en blanco
+- [ ] `sk-xxx` está completado correctamente
+- [ ] Por ahora sólo se agregó `gpt-5.5`
+- [ ] Se validó éxito con `Check` o diálogo mínimo equivalente
+- [ ] Se puede ver la solicitud correspondiente en los logs de Crazyrouter
+
+## Errores comunes y soluciones
+
+| Síntoma | Causa común | Solución |
+|------|----------|----------|
+| 401 unauthorized | Token incorrecto, copiado incompleto o expirado | Genera nuevamente el token y vuelve a pegarlo |
+| 404 | Error en Host o Path | Corrige Host a `https://api.crazyrouter.com`, Path en blanco o por defecto |
+| 403 / model not allowed | El token no tiene habilitado ese modelo | Habilita el modelo en la configuración del token de Crazyrouter |
+| `model not found` | Error de ortografía en el nombre del modelo | Usa primero `gpt-5.5` para la validación mínima |
+| Guardado exitoso pero el chat falla | Proveedor mal seleccionado o modelo no fue añadido realmente | Revisa el tipo de proveedor y la lista de modelos |
+| Banco de conocimiento lento o falla | Archivo demasiado grande o tarea muy compleja | Retrocede a archivos pequeños y preguntas de texto sencillo|
+| Duda sobre si llenar `/v1` | Usualmente no se necesita ruta completa en versiones recientes | Usa solo el dominio Host, deja Path vacío o por defecto |
+
+## FAQ
+
+### ¿Qué proveedor seleccionar en ChatBox?
+
+Prioriza `OpenAI API` o `OpenAI API Compatible`.
+
+### ¿Qué debo ingresar como API Host?
+
+Introduce `https://api.crazyrouter.com`.
+
+### ¿Debo rellenar `/v1/chat/completions` manualmente?
+
+Normalmente no. Según la documentación oficial de ChatBox, `API Path` suele tener un valor por defecto; mantenlo o déjalo vacío al principio.
+
+### ¿Cuál es el primer modelo recomendado?
+
+Primero ingresa `gpt-5.5`.
+
+### ¿Cuándo añadir más modelos y banco de conocimientos?
+
+Hazlo gradualmente, sólo después de que se valide el flujo básico de conversación.
+
+<Note>
+Si tu objetivo es "hacer funcionar ChatBox primero", lo mejor no es configurar muchos modelos y funciones a la vez, sino usar `gpt-5.5` para validar primero la conversación mínima.
+</Note>

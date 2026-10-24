@@ -1,0 +1,93 @@
+---
+title: "Obtener modelos compatibles con el token"
+description: "Consulta la lista de modelos disponibles para el token especificado"
+api: "GET /v1/models"
+---
+> Contenido actualizado: 2026-06-09
+
+## Descripción de la interfaz
+
+Obtiene la lista de modelos que pueden ser llamados por el token actual (API Key). Si el token no tiene restricciones de modelos, se devolverán todos los modelos activados por el sistema.
+
+La interfaz actualmente recomendada y soportada es:
+
+```text
+GET /v1/models
+```
+
+`GET /api/token/models` no es una interfaz disponible públicamente en este momento, por favor usa `/v1/models`.
+
+## Método de autenticación
+
+Utiliza la API Key (sk-xxx) para autenticación:
+
+```
+Authorization: Bearer sk-xxx
+```
+
+## Formato de respuesta
+
+```json
+{
+  "success": true,
+  "object": "list",
+  "data": [
+    {
+      "id": "gpt-5.5",
+      "object": "model",
+      "owned_by": "openai"
+    },
+    {
+      "id": "claude-opus-4-8",
+      "object": "model",
+      "owned_by": "anthropic"
+    }
+  ]
+}
+```
+
+## Ejemplo de código
+
+<CodeGroup>
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+# 通过 OpenAI SDK 获取模型列表
+models = client.models.list()
+for model in models.data:
+    print(model.id)
+```
+
+```python Python (requests)
+import requests
+
+response = requests.get(
+    "https://api.crazyrouter.com/v1/models",
+    headers={"Authorization": "Bearer sk-xxx"}
+)
+
+models = response.json()["data"]
+for model in models:
+    print(model["id"])
+```
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/models \
+  -H "Authorization: Bearer sk-xxx"
+```
+
+</CodeGroup>
+
+<Note>
+  Si utilizas el OpenAI SDK, `client.models.list()` en realidad está llamando `GET /v1/models`.
+</Note>
+
+Página relacionada:
+
+- [Método oficial de precios de modelos](/es/reference/official-pricing-methods)

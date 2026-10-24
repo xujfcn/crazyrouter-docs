@@ -1,0 +1,387 @@
+---
+title: "Tutorial de configuración de Cline"
+description: "Conecta Crazyrouter mediante el proveedor compatible con OpenAI en la extensión Cline de VS Code, incluyendo pasos completos de instalación, configuración, verificación y solución de problemas diferenciados entre Windows y macOS"
+---
+> Contenido actualizado: 2026-06-09
+
+Cline es una potente extensión de codificación proxy en VS Code, adecuada para lectura/escritura de archivos, ejecución en terminal, planificación paso a paso y múltiples rondas de modificación de código. Al integrarse con Crazyrouter, se recomienda utilizar el proveedor `OpenAI Compatible` oficial de Cline.
+
+## Resumen
+
+Mediante el proveedor compatible con OpenAI de Cline, puedes enviar solicitudes proxy a Crazyrouter:
+
+- Protocolo recomendado: `OpenAI-compatible API`
+- Base URL: `https://api.crazyrouter.com/v1`
+- Método de autenticación: token `sk-...`
+- Modelo predeterminado recomendado: `claude-opus-4-8` o `gpt-5.5`
+
+<Warning>
+Cline tiene capacidades para leer y escribir archivos, así como ejecutar comandos en terminal. Tras una integración exitosa, el verdadero riesgo no está en "¿se puede conectar?", sino en "¿se le ha dado permisos excesivos de ejecución?". Se aconseja comenzar por repositorios que tú conozcas.
+</Warning>
+
+## ¿Quién debería usarlo?
+
+- Personas que buscan una experiencia de codificación proxy en VS Code
+- Quienes desean aprovechar las capacidades de múltiples modelos de Crazyrouter para modificar código
+- Quienes desean separar las estadísticas de tráfico entre IDE y CLI
+- Quienes desean usar gateway unificado para modelos como Claude, GPT, etc.
+
+## Protocolo de uso
+
+Protocolo recomendado: `OpenAI-compatible API`
+
+En la configuración de Cline selecciona:
+
+- `API Provider`: `OpenAI Compatible`
+- `Base URL`: `https://api.crazyrouter.com/v1`
+- `API Key`: tu `sk-...`
+- `Model ID`: el nombre del modelo que quieres usar
+
+No escribas la Base URL como:
+
+- `https://api.crazyrouter.com`
+- `https://api.crazyrouter.com/v1/chat/completions`
+
+<Note>
+A diferencia de Claude Code, Codex y Aider, la integración estándar de Cline en VS Code normalmente no requiere que tú mismo escribas variables de entorno. En la mayoría de los casos, basta con rellenar `Base URL`, `API Key` y `Model ID` en la interfaz de configuración de Cline.
+</Note>
+
+## Requisitos del sistema y condiciones previas
+
+| Elemento | Descripción |
+|------|------|
+| Cuenta Crazyrouter | Primero regístrate en [crazyrouter.com](https://crazyrouter.com) |
+| Token Crazyrouter | Se recomienda crear un token exclusivo para Cline |
+| Git | Se recomienda `git 2.23+` |
+| VS Code | Se recomienda la versión estable actual |
+| Extensión Cline | Se recomienda la versión actual |
+| Modelos disponibles | Al menos habilita 1 a 2 modelos adecuados para codificación proxy |
+| Variables de entorno | Normalmente no se requieren para la integración estándar en VS Code |
+
+Lista blanca inicial recomendada:
+
+- `claude-opus-4-8`
+- `gpt-5.5`
+- `gemini-3.1-pro`
+
+## Ruta completa de instalación por sistema operativo
+
+### Ruta recomendada en Windows
+
+La ruta más estable para Cline en Windows es: `Git` + `VS Code` + `Instalar Cline desde el catálogo de extensiones` + `Introduce los parámetros de Crazyrouter directamente en los ajustes de Cline`.
+
+Orden recomendado:
+
+1. Instalar Git
+2. Instalar VS Code
+3. Instalar Cline desde el marketplace de extensiones de VS Code
+4. Crear un token dedicado a Cline en Crazyrouter
+5. Abrir el repositorio y hacer un snapshot de Git
+6. Rellenar `OpenAI Compatible`, `Base URL`, `API Key`, `Model ID` en la configuración de Cline
+
+Comando recomendado para verificación:
+
+```powershell
+git --version
+where.exe git
+code --version
+where.exe code
+```
+
+Si `code --version` no encuentra el comando, pero el VS Code principal se abre normalmente, no afecta al uso de Cline; solamente no podrás abrir el directorio desde terminal usando `code` de momento.
+
+### Ruta recomendada en macOS
+
+La secuencia más cómoda para Cline en macOS suele ser: `Xcode Command Line Tools` + `Homebrew` + `Git` + `VS Code` + `Instalar Cline desde el catálogo de extensiones`.
+
+Orden recomendado:
+
+1. Instalar Xcode Command Line Tools
+2. Instalar Homebrew (si aún no lo tienes)
+3. Instalar Git
+4. Instalar VS Code
+5. Instalar Cline en VS Code
+6. Rellenar los parámetros de Crazyrouter directamente en la configuración de Cline
+
+Comando recomendado para verificación:
+
+```bash
+git --version
+which git
+open -a "Visual Studio Code"
+```
+
+Si deseas usar el comando `code` desde terminal, ejecuta `Shell Command: Install 'code' command in PATH` en el panel de comandos de VS Code y luego verifica:
+
+```bash
+code --version
+which code
+```
+
+### Información para Linux
+
+Los usuarios de Linux pueden seguir el planteamiento de Windows/macOS: primero instala Git y VS Code, luego instala Cline desde el marketplace de extensiones. Los comandos habituales para Ubuntu/Debian son:
+
+```bash
+sudo apt update
+sudo apt install -y git
+sudo snap install code --classic
+git --version
+code --version
+```
+
+## Instalación completa desde cero
+
+<Steps>
+  <Step title="Paso 1: Instalar Git">
+    Si tu equipo aún no tiene Git, instálalo primero.
+
+    <Tabs>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        winget install --id Git.Git -e --source winget
+        git --version
+        where.exe git
+        ```
+      </Tab>
+      <Tab title="macOS">
+        ```bash
+        xcode-select --install
+        git --version
+        ```
+        O:
+        ```bash
+        brew install git
+        git --version
+        which git
+        ```
+      </Tab>
+      <Tab title="Ubuntu / Debian">
+        ```bash
+        sudo apt update
+        sudo apt install -y git
+        git --version
+        which git
+        ```
+      </Tab>
+    </Tabs>
+
+    Tras la instalación se recomienda ejecutar:
+
+    ```bash
+    git config --global user.name "Your Name"
+    git config --global user.email "you@example.com"
+    git config --global init.defaultBranch main
+    ```
+  </Step>
+
+  <Step title="Paso 2: Instalar VS Code">
+    El modo de uso más común de Cline actualmente es como extensión de VS Code.
+
+    <Tabs>
+      <Tab title="Windows PowerShell">
+        ```powershell
+        winget install Microsoft.VisualStudioCode
+        code --version
+        where.exe code
+        ```
+      </Tab>
+      <Tab title="macOS">
+        ```bash
+        brew install --cask visual-studio-code
+        open -a "Visual Studio Code"
+        ```
+
+        Si deseas ejecutar `code` desde terminal, luego en el panel de comandos de VS Code corre:
+
+        ```text
+        Shell Command: Install 'code' command in PATH
+        ```
+
+        Luego verifica:
+
+        ```bash
+        code --version
+        which code
+        ```
+      </Tab>
+      <Tab title="Ubuntu / Debian">
+        ```bash
+        sudo snap install code --classic
+        code --version
+        which code
+        ```
+      </Tab>
+    </Tabs>
+
+    Una vez instalado, abre VS Code normalmente una vez.
+  </Step>
+
+  <Step title="Paso 3: Instalar la extensión Cline">
+    Tras abrir VS Code:
+
+    1. Pulsa `Ctrl/Cmd + Shift + X` para abrir el marketplace de extensiones
+    2. Busca `Cline`
+    3. Haz clic en instalar
+    4. Tras la instalación, haz clic en el icono lateral de Cline, o ejecuta `Ctrl/Cmd + Shift + P` y luego `Cline: Open In New Tab`
+
+    Si VS Code muestra un aviso similar a `Running extensions might...`, simplemente elige permitir.
+
+    Si no ves el icono, reinicia VS Code y revisa de nuevo.
+  </Step>
+
+  <Step title="Paso 4: Crear un token exclusivo para Cline en Crazyrouter">
+    En el backend de Crazyrouter crea un token llamado `cline`; la primera vez solo habilita:
+
+    - `claude-opus-4-8`
+    - `gpt-5.5`
+    - `gemini-3.1-pro`
+
+    <Note>
+    La integración estándar de Cline en VS Code suele rellenar la API Key desde la interfaz, en vez de depender de variables de entorno como Claude Code o Codex. Por tanto, aquí lo fundamental es el token dedicado y la lista blanca de modelos mínima.
+    </Note>
+  </Step>
+
+  <Step title="Paso 5: Preparar el repositorio Git y realizar la primera instantánea">
+    Cline modificará archivos y ejecutará comandos. Antes del primer uso, se recomienda hacer un snapshot del repositorio.
+
+    Si el directorio aún no es repositorio Git:
+
+    ```bash
+    git init
+    git add .
+    git commit -m "chore: initial snapshot before Cline"
+    ```
+
+    Si ya es un repositorio existente, revisa al menos:
+
+    ```bash
+    git status
+    ```
+  </Step>
+
+  <Step title="Paso 6: Configurar Crazyrouter en Cline">
+    Una vez en la configuración de Cline, rellena:
+
+    - `API Provider`: `OpenAI Compatible`
+    - `Base URL`: `https://api.crazyrouter.com/v1`
+    - `API Key`: tu `sk-...`
+    - `Model ID`: primero `claude-opus-4-8`
+
+    Si la interfaz de tu versión actual de Cline tiene el botón `Verify`, pulsa primero para confirmar que la conexión está disponible; si no, puedes enviar una solicitud de prueba solo de lectura para validar.
+
+    Al principio verifica con un solo modelo; no cambies a varios modelos a la vez.
+  </Step>
+
+  <Step title="Paso 7: Completar la primera verificación">
+    Se recomienda verificar por orden:
+
+    1. Primero haz que Cline ejecute una tarea solo de lectura: `Lee el README del espacio de trabajo actual y resume sus puntos principales, sin modificar ningún archivo`
+    2. Luego que realice un análisis de bajo riesgo: `Indica los 3 archivos del repositorio actual que conviene revisar primero`
+    3. Finalmente, prueba una modificación de pequeña escala: `Corrige solo un error tipográfico evidente del README y muestra el diff`
+
+    Cuando estos tres pasos funcionan correctamente y puedas ver los registros correspondientes en el backend de Crazyrouter, significa que el flujo principal está estable.
+  </Step>
+
+  <Step title="Paso 8: Ir habilitando gradualmente permisos más fuertes">
+    Cuando las tareas solo de lectura y los cambios pequeños sean estables, prueba gradualmente:
+
+    1. Modificación de varios archivos a pequeña escala
+    2. Permitir ejecución de comandos de bajo riesgo
+    3. Finalmente, permite las refactorizaciones proxy más complejas
+
+    No se recomienda permitir operaciones automáticas de gran escala en repositorios grandes desde el inicio.
+  </Step>
+</Steps>
+
+## Configuración de modelos recomendados
+
+| Escenario de uso | Modelo recomendado | Motivo |
+|----------|----------|------|
+| Proxy principal por defecto | `claude-opus-4-8` | Planificación por varias rondas, explicación de código y buen manejo de contexto largo |
+| Línea base compatible con OpenAI | `gpt-5.5` | Probada en producción el 23 de marzo de 2026, adecuada como línea base principal compatible con OpenAI |
+| Gemini para respaldo | `gemini-3.1-pro` | Adecuado como segunda ruta de verificación de compatibilidad |
+
+Se recomienda primero probar el flujo proxy con `claude-opus-4-8`; si necesitas añadir la línea base compatible con OpenAI, cambia a `gpt-5.5`.
+
+## Mejores prácticas para la configuración de token
+
+| Configuración | Recomendación | Descripción |
+|------|------|------|
+| Token dedicado | Obligatorio | Cline no debe compartir token con Cursor, Claude Code ni Aider |
+| Lista blanca de modelos | Altamente recomendado | Cline es una herramienta de alto consumo; cuanto más restringida, más segura |
+| Restricción de IP | Actívala en entornos de trabajo fijos | Úsala con precaución en redes móviles de portátiles |
+| Límite de cuota | Altamente recomendado | La ejecución por múltiples rondas proxy puede consumir rápidamente la cuota |
+| Aislamiento de ambientes | Recomendado | Usa tokens separados para VS Code personal, máquinas de desarrollo remotas y ambientes compartidos de equipo |
+| Aislamiento de permisos | Altamente recomendado | Repositorios de alto riesgo deben tener tokens individuales y cuota menor |
+
+## Lista de verificación
+
+- [ ] `git --version` funciona correctamente
+- [ ] VS Code instalado correctamente
+- [ ] Si necesitas abrir proyectos desde terminal, `code --version` funciona
+- [ ] Extensión Cline instalada y funcional
+- [ ] Cline ha seleccionado el proveedor `OpenAI Compatible`
+- [ ] `Base URL` configurado como `https://api.crazyrouter.com/v1`
+- [ ] `API Key` correctamente rellenado
+- [ ] `Model ID` contiene modelos utilizables
+- [ ] Primer tarea solo de lectura ejecutada con éxito
+- [ ] Las tareas de lectura/escritura de archivos o ejecución de comandos funcionan según lo esperado
+- [ ] Puedes ver las solicitudes correspondientes en los registros del backend Crazyrouter
+
+## Errores comunes y solución
+
+| Fenómeno | Causa común | Forma de solucionar |
+|------|----------|----------|
+| La extensión está instalada pero no aparece el icono de Cline | Falta de actualización en VS Code o la extensión no se ha activado correctamente | Reinicia VS Code y abre Cline desde el panel de comandos |
+| El comando `code` no está disponible | VS Code está instalado pero el comando shell no está en el PATH | En Windows, abre de nuevo la terminal; en macOS, ejecuta `Shell Command: Install 'code' command in PATH` desde el panel de comandos |
+| 401 unauthorized | API Key incorrecta, vencida o error de copiado | Genera un token nuevo y pega de nuevo |
+| 403 / modelo no permitido | El token no permite el modelo actual | Permite el modelo en Crazyrouter en la configuración de token |
+| 404 | Base URL se rellenó con dominio raíz o un endpoint específico | Cambia a `https://api.crazyrouter.com/v1` |
+| `model not found` | Nombre de `Model ID` incorrecto o modelo no disponible | Vuelve a `claude-opus-4-8` u otro modelo permitido |
+| No conecta en red corporativa | Proxy o firewall bloquea la conexión | Revisa la configuración de proxy de VS Code; la extensión Cline reutiliza la configuración de proxy de VS Code |
+| Escribe archivos indebidos | Se otorgó permiso de escritura demasiado grande | Comienza validando con tareas solo de lectura y diff de pequeña escala |
+| El costo aumenta rápidamente | Plan múltiple + mucho contexto + ejecución automática | Reduce el alcance de las tareas y configura presupuesto propio para Cline |
+
+## Sugerencias sobre rendimiento y costos
+
+- Al integrarlo por primera vez, haz solo tareas de lectura y modificaciones pequeñas
+- Refactorizaciones complejas: prioriza `claude-opus-4-8` o `gpt-5.5`
+- Para tareas ligeras y frecuentes, no amplíes mucho la lista de modelos; mantén la lista blanca restringida
+- Usa tokens diferentes para cada workspace o tipo de proyecto
+- Tras cada tarea grande, revisa el registro de Crazyrouter para conocer el consumo real
+
+## Preguntas frecuentes
+
+### ¿Qué provider debe elegir Cline?
+
+Elige `OpenAI Compatible`.
+
+### ¿Qué debería rellenarse en la Base URL?
+
+Rellena `https://api.crazyrouter.com/v1`.
+
+### ¿Esta integración de Cline requiere variables de entorno?
+
+Normalmente no. La integración estándar de VS Code basta con poner `Base URL`, `API Key` y `Model ID` en la interfaz de configuración de Cline.
+
+### ¿Por qué la primera vez hay que hacer un snapshot Git?
+
+Porque Cline realmente leerá y escribirá archivos y ejecutará comandos como proxy. Al hacer snapshot, será más fácil revisar y revertir cambios.
+
+### ¿Cuál es el primer modelo recomendado?
+
+Empieza con `claude-opus-4-8`.
+
+### ¿Por qué no se recomienda dar permisos grandes desde el inicio?
+
+Porque Cline modifica realmente tu workspace. Empieza con tareas solo de lectura o de pequeño alcance para mayor estabilidad al comenzar.
+
+<Note>
+Si priorizas una experiencia proxy unificada dentro de VS Code, Cline es más adecuado como "verdadero proxy de código" comparado con la ruta BYOK de Cursor.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Guía de integración de Cline (script, Base URL, modelos recomendados)](https://crazyrouter.com/zh/integrations/cline?utm_source=docs&utm_medium=related)

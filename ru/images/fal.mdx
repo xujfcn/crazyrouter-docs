@@ -1,32 +1,32 @@
 ---
-title: "Fal.ai Images"
-description: "Text-to-image generation and image editing via Fal.ai endpoints"
+title: "Fal.ai Изображения"
+description: "Создание изображений по тексту и редактирование через конечную точку Fal.ai"
 ---
-> Дата обновления: 2026-06-23
+> Обновление содержания: 2026-06-09
 
-# Fal.ai Images
+# Fal.ai Изображения
 
-Crazyrouter proxies Fal.ai image generation endpoints, supporting text-to-image and image editing.
+Crazyrouter проксирует конечную точку генерации изображений Fal.ai, поддерживая создание изображений по тексту и их редактирование.
 
-## Text-to-Image
+## Создание изображений по тексту
 
 ```
 POST /fal-ai/nano-banana
 ```
 
-### Request Parameters
+### Параметры запроса
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `prompt` | string | Yes | Image description prompt |
-| `negative_prompt` | string | No | Negative prompt |
-| `image_size` | string | No | Image size: `square_hd`, `landscape_4_3`, `portrait_4_3`, `landscape_16_9`, `portrait_16_9` |
-| `num_images` | integer | No | Number of images, default 1 |
-| `seed` | integer | No | Random seed |
-| `guidance_scale` | number | No | Guidance strength |
-| `num_inference_steps` | integer | No | Number of inference steps |
+| Параметр | Тип | Обязательный | Описание |
+|------|------|------|------|
+| `prompt` | string | Да | Описание изображения (промпт) |
+| `negative_prompt` | string | Нет | Негативный промпт |
+| `image_size` | string | Нет | Размер изображения: `square_hd`, `landscape_4_3`, `portrait_4_3`, `landscape_16_9`, `portrait_16_9` |
+| `num_images` | integer | Нет | Количество результатов, по умолчанию 1 |
+| `seed` | integer | Нет | Случайное зерно |
+| `guidance_scale` | number | Нет | Сила направляющей |
+| `num_inference_steps` | integer | Нет | Количество шагов вывода |
 
-### Request Examples
+### Пример запроса
 
 <CodeGroup>
 
@@ -62,7 +62,7 @@ print(response.json())
 
 </CodeGroup>
 
-### Response Example
+### Пример ответа
 
 ```json
 {
@@ -81,24 +81,24 @@ print(response.json())
 
 ---
 
-## Image Editing
+## Редактирование изображений
 
 ```
 POST /fal-ai/nano-banana/edit
 ```
 
-Edit an existing image.
+Редактирование на основе существующего изображения.
 
-### Request Parameters
+### Параметры запроса
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `prompt` | string | Yes | Edit description |
-| `image_url` | string | Yes | Original image URL |
-| `mask_url` | string | No | Mask image URL |
-| `strength` | number | No | Edit strength, 0-1 |
+| Параметр | Тип | Обязательный | Описание |
+|------|------|------|------|
+| `prompt` | string | Да | Описание редактирования |
+| `image_url` | string | Да | URL исходного изображения |
+| `mask_url` | string | Нет | URL маскированного изображения |
+| `strength` | number | Нет | Сила редактирования, 0-1 |
 
-### Request Example
+### Пример запроса
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/fal-ai/nano-banana/edit \
@@ -111,7 +111,7 @@ curl -X POST https://api.crazyrouter.com/fal-ai/nano-banana/edit \
   }'
 ```
 
-### Response Example
+### Пример ответа
 
 ```json
 {
@@ -127,5 +127,5 @@ curl -X POST https://api.crazyrouter.com/fal-ai/nano-banana/edit \
 ```
 
 <Note>
-  Fal.ai endpoints support multiple underlying models. For available models, refer to the [Model Pricing](https://crazyrouter.com/pricing) page.
+  Конечная точка Fal.ai поддерживает различные базовые модели. Доступные модели см. на странице [Цены моделей](https://crazyrouter.com/pricing).
 </Note>

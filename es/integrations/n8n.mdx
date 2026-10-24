@@ -1,0 +1,224 @@
+---
+title: "Guía de configuración de n8n"
+description: "Configuración de credenciales OpenAI, flujos de trabajo de Agente IA y plan de respaldo con solicitud HTTP en n8n a través de Crazyrouter, incluyendo validación y solución de problemas"
+---
+> Contenido actualizado: 2026-06-09
+
+n8n es adecuado para integrar llamadas LLM en flujos de automatización, nodos Agente, flujos de aprobación e integración de sistemas empresariales. Para conectar Crazyrouter, se recomienda primero probar el flujo de trabajo mínimo usando la ruta de credenciales OpenAI de n8n, y luego decidir si migrar a un nodo HTTP Request para mayor flexibilidad.
+
+## Resumen
+
+A través de las credenciales OpenAI o nodos IA de n8n, puedes enrutar tus solicitudes de modelo en el flujo hacia Crazyrouter:
+
+- Protocolo recomendado: `OpenAI-compatible API`
+- Método recomendado: credencial n8n `OpenAI API` + nivel de nodo `Base URL`
+- URL base: `https://api.crazyrouter.com/v1`
+- Método de autenticación: token `sk-...`
+- Modelo recomendado para primera verificación: `gpt-5.5`
+
+Si algún nodo no soporta los parámetros necesarios o las funciones más recientes del modelo, retrocede y usa el nodo `HTTP Request` para invocar directamente la API de Crazyrouter.
+
+## ¿Para quién es útil?
+
+- Personas que desean integrar IA en flujos de trabajo automatizados
+- Personas que buscan vincular formularios, bases de datos, aprobaciones, Webhook y modelos
+- Quienes usan herramientas de orquestación de nodos Agente IA
+- Quienes desean conectar Crazyrouter a sus procesos internos empresariales de forma visual
+
+## Protocolo de uso
+
+Protocolo recomendado: `OpenAI-compatible API`
+
+Al integrar Crazyrouter en n8n, se recomienda ingresar:
+
+```text
+https://api.crazyrouter.com/v1
+```
+
+No uses:
+
+- `https://api.crazyrouter.com`
+- `https://api.crazyrouter.com/v1/chat/completions`
+
+## Requisitos previos
+
+| Proyecto             | Descripción                                                   |
+|---------------------|---------------------------------------------------------------|
+| Cuenta Crazyrouter  | Regístrate primero en [crazyrouter.com](https://crazyrouter.com)      |
+| Token Crazyrouter   | Se recomienda crear un token `sk-...` exclusivo para n8n|
+| n8n                 | Usa la versión estable actual y asegúrate de que el nodo IA esté disponible |
+| Modelos disponibles | Habilita al menos un modelo de chat probado exitosamente el mismo día, como `gpt-5.5` |
+
+Lista recomendada para la whitelist inicial:
+
+- `gpt-5.5`
+- `claude-opus-4-8`
+- `gemini-3.1-pro`
+- `text-embedding-3-large` (si vas a usar nodos relacionados con vectores o búsqueda)
+
+## Comienza en 5 minutos
+
+<Steps>
+  <Step title="Crear token dedicado para n8n">
+    Crea un token en el panel de Crazyrouter llamado `n8n`. Por primera vez, solo habilita `gpt-5.5` y `claude-opus-4-8`.
+  </Step>
+  <Step title="Agregar credenciales de OpenAI">
+    En n8n ingresa a `Settings` → `Credentials` → `Add Credential`, selecciona `OpenAI API` o el tipo de credencial OpenAI correspondiente a tu versión.
+  </Step>
+  <Step title="Completar la información de credenciales y nodo">
+    Rellena primero las siguientes credenciales:
+    - `API Key`: tu `sk-...`
+
+    Luego, en `OpenAI`, `OpenAI Chat Model` o en el `Options` del nodo IA relacionado, configura:
+    - `Base URL`: `https://api.crazyrouter.com/v1`
+  </Step>
+  <Step title="Crear flujo de trabajo mínimo">
+    Crea un nuevo flujo de trabajo usando: `Manual Trigger` → `OpenAI Chat Model` → `Output`, y define el modelo como `gpt-5.5`.
+  </Step>
+  <Step title="Completar la primera verificación">
+    En el nodo `OpenAI Chat Model` ingresa una entrada sencilla, por ejemplo `Reply only OK`, y ejecuta el flujo manualmente. Tras el éxito, continúa configurando el Agente IA o procesos más complejos.
+  </Step>
+</Steps>
+
+## Ejemplo de flujo de trabajo mínimo
+
+### Nodo OpenAI Chat Model
+
+```json
+{
+  "node": "OpenAI Chat Model",
+  "parameters": {
+    "model": "gpt-5.5",
+    "messages": [
+      { "role": "user", "content": "{{ $json.input }}" }
+    ]
+  }
+}
+```
+
+### Flujo de trabajo AI Agent
+
+Se recomienda empezar por la ruta más simple:
+
+1. `Manual Trigger`
+2. `AI Agent`
+3. `Output`
+
+En `AI Agent` elige la credencial Crazyrouter recién creada y conecta primero solo un nodo de herramienta simple, para evitar mezclar problemas de modelo y de herramienta.
+
+## Plan de respaldo usando HTTP Request
+
+Si necesitas:
+
+- Un parámetro nuevo que tu nodo AI de n8n aún no soporta
+- Control más flexible sobre el cuerpo de la solicitud
+- Depurar headers, body o el parámetro stream de forma más precisa
+
+Puedes usar directamente el nodo `HTTP Request` para llamar Crazyrouter:
+
+```http
+Method: POST
+URL: https://api.crazyrouter.com/v1/chat/completions
+Headers:
+  Authorization: Bearer sk-xxx
+  Content-Type: application/json
+Body:
+  {
+    "model": "gpt-5.5",
+    "messages": [
+      {"role": "user", "content": "{{ $json.input }}"}
+    ]
+  }
+```
+
+<Tip>
+El orden recomendado es: primero OpenAI credential + nodo IA nativo; solo cambia a `HTTP Request` si el nodo no cubre tus requerimientos.
+</Tip>
+
+<Note>
+En diferentes versiones de n8n, `Base URL` puede encontrarse en la página de credenciales o en el `Options` dentro de los nodos específicos OpenAI / Chat Model. Según la documentación oficial, lo más actual es el override node-level `Base URL`, por tanto, al conectar Crazyrouter, principalmente usa “credencial para la Key, nodo para la Base URL”.
+</Note>
+
+## Configuración recomendada de modelos
+
+| Caso de uso                 | Modelo recomendado     | Motivo                                      |
+|-----------------------------|-----------------------|----------------------------------------------|
+| Modelo por defecto del flujo| `gpt-5.5`       | Probado exitosamente, ideal como base en n8n |
+| Escenarios sofisticados Agent| `claude-opus-4-8`      | Apropiado para tareas complejas y textos largos |
+| Alternativa Gemini          | `gemini-3.1-pro`       | Bueno como segunda vía para pruebas de compatibilidad |
+| Búsqueda / Vectores         | `text-embedding-3-large`       | Útil para procesamiento de vectores o búsqueda mejorada |
+
+Orden sugerido: empieza con `gpt-5.5` para validar el flujo mínimo, luego expande a Agent, herramientas y tareas por lotes.
+
+## Mejores prácticas para configurar token
+
+| Parámetro          | Sugerencia         | Explicación                                                             |
+|--------------------|--------------------|------------------------------------------------------------------------|
+| Token exclusivo    | Obligatorio        | No compartas el mismo token de n8n con frontend de chat, CLI o SDK      |
+| White-list de modelos| Muy recomendable | Solo habilita los modelos realmente usados en el flujo                  |
+| Restricción IP     | Activa si server fijo| Usa con cautela en desarrollo local o ambientes mixtos                 |
+| Límite de cuotas   | Muy recomendable   | Las tareas automáticas pueden agotar rápidamente los límites por reintentos/lotes |
+| Entornos aislados  | Obligatorio        | Usa diferentes tokens para desarrollo, pruebas y producción             |
+| Diferenciación por nodo| Sugerido        | Para tareas frecuentes usa modelos económicos, para críticas usa los de mejor rendimiento |
+
+## Lista de comprobación para validación
+
+- [ ] `OpenAI API` credencial guardada con éxito
+- [ ] El override de nodo `Base URL` está en `https://api.crazyrouter.com/v1`
+- [ ] El nodo `OpenAI Chat Model` ejecuta correctamente
+- [ ] El primer flujo mínimo responde correctamente
+- [ ] Si usas Agent, el nodo `AI Agent` también puede usar el modelo
+- [ ] El registro de Crazyrouter muestra la solicitud correspondiente
+- [ ] Los límites de token y modelos habilitados son los esperados
+- [ ] Hay tokens separados por entorno para desarrollo/pruebas/producción
+
+## Errores conocidos y soluciones
+
+| Síntoma                | Causa común                                   | Solución                                                                        |
+|------------------------|-----------------------------------------------|----------------------------------------------------------------------------------|
+| Fallo al probar credencial| API Key errónea o mal ubicado el Base URL   | Revisa `sk-...` y verifica que `Base URL` está donde tu versión lo permite |
+| 401 unauthorized        | token inválido, borrado o pegado con espacios | Genera un token nuevo y reemplázalo                                              |
+| 403 / model not allowed | El modelo usado no está en la white-list      | Habilita ese modelo en Crazyrouter                                               |
+| 404                     | `Base URL` indica dominio raíz/URL completa | Usa `https://api.crazyrouter.com/v1`                                                           |
+| El flujo reintenta sin parar, suben los costes | Reintentos automáticos tras error, bucles mal configurados | Limita reintentos, divide el flujo y establece cuotas                            |
+| Agent IA funciona pero el nodo de herramienta es inestable | No es falla de credencial, la cadena de herramientas es compleja | Para validar, deja solo una herramienta simple                                     |
+| Nodo AI nativo no soporta ciertos parámetros | El wrapper de n8n aún no incorpora la función | Usa el nodo `HTTP Request` para llamar Crazyrouter directamente             |
+| Bajo rendimiento en procesamiento por lotes   | El modelo y el wrapper no encajan bien        | Retrocede a `gpt-5.5` para validar, luego extiende a otros modelos         |
+
+## Consejos de rendimiento y costes
+
+- Usa `gpt-5.5` como base para automatización
+- Pon límites y alertas rigurosas en bucles, lotes y tareas programadas
+- Separa tokens para producción y debugging
+- Inicia Agent IA con pocas herramientas y rutas cortas; expande luego de estabilizar
+- Ante costes inusuales, revisa primero los logs de Crazyrouter y el historial de n8n, verifica si hay reintentos/bucles
+
+## Preguntas frecuentes (FAQ)
+
+### ¿Qué Base URL debo poner en n8n?
+
+Pon `https://api.crazyrouter.com/v1`.
+
+### ¿Se debe configurar Base URL en la credencial o en el nodo?
+
+Primero verifica la interfaz de tu versión de n8n. La documentación oficial sugiere la opción `Base URL` a nivel de nodo; si tu página de credenciales también lo permite, puedes hacerlo ahí, pero como primer paso, mejor usa la configuración a nivel de nodo.
+
+### ¿Uso primero el nodo AI nativo o HTTP Request?
+
+Empieza con la credencial OpenAI y nodo IA nativos; si faltan parámetros o necesitas depuración avanzada, cambia a `HTTP Request`.
+
+### ¿Cuál es el primer modelo recomendado?
+
+Utiliza `gpt-5.5` primero.
+
+### ¿Por qué aumentó de golpe el coste del flujo?
+
+Normalmente no es por una sola solicitud sino por ciclos, procesamiento por lotes, reintentos automáticos o multitarea con disparadores compartidos.
+
+### ¿Es obligatorio separar tokens en n8n?
+
+Muy recomendable separar al menos desarrollo y producción; las tareas de alta frecuencia mejor con tokens dedicados.
+
+<Note>
+Tras integrar n8n con Crazyrouter, el valor no es solo “poder acceder al modelo”, sino poder insertar el modelo en cadenas de automatización. Por eso, lo esencial no es solo que una conversación funcione, sino que controles reintentos, bucles, procesamiento por lotes y saldo de token al mismo tiempo.
+</Note>

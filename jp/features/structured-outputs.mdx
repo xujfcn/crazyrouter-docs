@@ -1,43 +1,47 @@
 ---
-title: "Structured Outputs"
-description: "Production-verified structured JSON output with the latest GPT and Gemini models"
+title: "構造化出力"
+description: "運用現場で実際に検証された最新の GPT および Gemini 主力モデルによる構造化 JSON 出力"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Structured Outputs
+# 構造化出力
 
-This page only documents Structured Output flows that were **verified with real requests against Crazyrouter production**.
+本ドキュメントには、**Crazyrouter 本番環境で実際のリクエストによる動作確認が取れた** 構造化出力の使い方のみ収録しています。
 
-Verification date:
+検証日時：
 
 - `2026-03-22`
 
-Strictly verified models:
+厳格な検証に成功したモデル：
 
 - `gpt-5.5`
 - `gemini-3.1-pro`
 
-Not included as a strict-success example:
+現時点で厳格な成功例には含めていないモデル：
 
 - `claude-opus-4-8`
 
-Reason:
+理由：
 
-- Under the current OpenAI-compatible `response_format=json_schema` request shape, `claude-opus-4-8` did not show stable strict-JSON behavior across production checks
-- Earlier testing produced JSON wrapped in Markdown code fences
-- The `2026-03-22` recheck returned empty `content`
-- Because the result is not stable or strictly parseable, it is not treated as a verified strict structured-output success example
+- 本番環境での再チェックにて、`claude-opus-4-8` は現行 OpenAI 互換 `response_format=json_schema` 要求形式では安定して「完全な純粋 JSON」にならない挙動を確認
+- 過去のテストでは fenced code block の出現も確認
+- `2026-03-22` の再チェック時には空の `content` の発生も見られた
+- このため現状「厳格な構造化出力が検証された」とは記載しない
 
-## Verified matrix
+---
 
-| Model | Protocol | Endpoint | Success marker |
+## 検証済み能力マトリクス
+
+| モデル | プロトコル | エンドポイント | 成功指標 |
 |------|------|------|----------|
-| `gpt-5.5` | OpenAI Chat Completions | `POST /v1/chat/completions` | Response can be parsed directly as JSON |
-| `gemini-3.1-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | Returns JSON text matching schema |
+| `gpt-5.5` | OpenAI Chat Completions | `POST /v1/chat/completions` | 返却内容がそのまま `JSON.parse` 可能 |
+| `gemini-3.1-pro` | Gemini Native | `POST /v1beta/models/{model}:generateContent` | 返却される `application/json` 形式テキストはそのまま解析できる |
+
+---
 
 ## GPT-5.4
 
-```bash
+```bash cURL
 curl https://api.crazyrouter.com/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
@@ -57,8 +61,8 @@ curl https://api.crazyrouter.com/v1/chat/completions \
         "schema": {
           "type": "object",
           "properties": {
-            "city": { "type": "string" },
-            "country": { "type": "string" }
+            "city": {"type": "string"},
+            "country": {"type": "string"}
           },
           "required": ["city", "country"],
           "additionalProperties": false
@@ -68,15 +72,17 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-Verified production output:
+本番検証時の返却：
 
 ```json
 {"city":"Tokyo","country":"Japan"}
 ```
 
+---
+
 ## Gemini 3 Pro
 
-```bash
+```bash cURL
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -95,8 +101,8 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
       "responseSchema": {
         "type": "object",
         "properties": {
-          "city": { "type": "string" },
-          "country": { "type": "string" }
+          "city": {"type": "string"},
+          "country": {"type": "string"}
         },
         "required": ["city", "country"]
       }
@@ -104,20 +110,38 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Verified production output:
+本番検証時の返却：
 
 ```json
 {"city":"Tokyo","country":"Japan"}
 ```
 
-## See Also
+---
+
+## Claude 4.6 現時点での結論
+
+`2026-03-22` の本番テストでは：
+
+- `claude-opus-4-8` は当該リクエスト形式では安定的かつ再現可能な厳格 JSON 出力をしませんでした
+- テストの度に fenced code block または空の `content` が散見
+- そのため現行 Claude 4.6 は「厳格スキーマ出力確認済み」とはしません
+
+後日 Claude 4.6 をこの一覧に加える場合は、追加の細かい本番検証を行い、以下を必ず確認してください：
+
+- より適切なネイティブプロトコル記法があるか
+- 追加の system prompt が必要か
+- code fence を安定して排除できるか
+
+---
+
+## 関連ドキュメント
 
 - [OpenAI Structured Output](/jp/chat/openai/structured-output)
-- [Gemini Document Understanding](/jp/chat/gemini/document)
+- [Gemini 文書理解](/jp/chat/gemini/document)
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [GPT-5.4 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gpt-5-4?utm_source=docs&utm_medium=related)
-- [GPT-5.4 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-5-4?utm_source=docs&utm_medium=related)
-- [OpenAI の全モデルと料金](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [GPT-5.4 価格比較：公式 / Azure / Bedrock / Vertex および Crazyrouter](https://crazyrouter.com/ja/pricing/gpt-5-4?utm_source=docs&utm_medium=related)
+- [GPT-5.4 モデルページ：リアルタイム価格、実サンプル、呼び出しコード](https://crazyrouter.com/ja/models/openai/gpt-5-4?utm_source=docs&utm_medium=related)
+- [OpenAI 全モデル・価格表](https://crazyrouter.com/ja/models/openai?utm_source=docs&utm_medium=related)

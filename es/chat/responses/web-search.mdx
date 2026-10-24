@@ -1,0 +1,72 @@
+---
+title: "Respuestas Búsqueda Web"
+description: "Respuestas de búsqueda web verificadas contra Crazyrouter en producción el 2026-03-23"
+---
+> Contenido actualizado: 2026-06-09
+
+# Respuestas Búsqueda Web
+
+```
+POST /v1/responses
+```
+
+A partir del 23 de marzo de 2026, Crazyrouter en producción ha verificado `gpt-5.5` en la API de Respuestas usando:
+
+- `tools: [{ "type": "web_search_preview" }]`
+- una secuencia de `output` de `web_search_call`, luego `message`
+
+<Note>
+  Claude actualmente no admite `POST /v1/responses`. Para búsqueda web con Claude, use `POST /v1/chat/completions` o la ruta nativa de Claude en su lugar.
+</Note>
+
+---
+
+## Solicitud Mínima
+
+```bash
+curl https://api.crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "input": "Find one AI news item from March 2026.",
+    "tools": [
+      {
+        "type": "web_search_preview"
+      }
+    ]
+  }'
+```
+
+Estructura de respuesta observada en producción:
+
+```json
+{
+  "output": [
+    {
+      "type": "web_search_call"
+    },
+    {
+      "type": "message"
+    }
+  ]
+}
+```
+
+---
+
+## Regla de Verificación Actual
+
+Si necesita confirmar que el modelo realmente ha buscado en la web, las comprobaciones más seguras disponibles actualmente son:
+
+- si `web_search_call` aparece en `output`
+- si la respuesta final aún está presentada como `message`
+
+<Warning>
+  Esta página ya no conserva ejemplos antiguos obsoletos y tampoco documenta parámetros de búsqueda no revalidados como el camino principal actual.
+</Warning>
+
+{/* crazyrouter-model-links v2 */}
+## Relacionados en crazyrouter.com
+
+- [Todos los modelos de OpenAI con precios en vivo](https://crazyrouter.com/es/models/openai?utm_source=docs&utm_medium=related)

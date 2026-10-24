@@ -1,46 +1,46 @@
 ---
-title: "Unified Video API"
-description: "Crazyrouter unified video generation endpoint, supporting multiple models through a single API format"
+title: "統一動画 API"
+description: "Crazyrouter 統一動画生成インターフェース。複数のモデルを統一フォーマットで呼び出し可能"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-30
 
-# Unified Video API
+# 統一動画 API
 
-Crazyrouter provides a unified video generation endpoint that supports multiple video models through the same API format.
+Crazyrouter は、統一された動画生成インターフェースを提供し、複数の動画モデルを同じ API フォーマットで呼び出すことができます。
 
 <Note>
-  `Seedance` is no longer recommended on the unified `/v1/video/*` contract. Use the native `/volc/v1/contents/generations/tasks` surface instead. See [Seedance](/jp/video/seedance).
+  `Seedance` 現在、統一された `/v1/video/*` プロトコルの利用は推奨していません。ネイティブの `/volc/v1/contents/generations/tasks` をご利用ください。詳細は [Seedance](/jp/video/seedance) を参照してください。
 </Note>
 
-## Supported Models
+## 対応モデル
 
-| Model | Description |
-|-------|-------------|
+| モデル | 説明 |
+|------|------|
 | `veo-3.1-fast` | Google Veo 3.1 Fast |
 | `veo-3.1-quality` | Google Veo 3.1 Quality |
-| `wan-ai/wan2.1-t2v-14b` | Wan text-to-video |
-| `wan-ai/wan2.1-i2v-14b-720p` | Wan image-to-video |
+| `wan2.2-t2v-plus` | Wan テキストから動画生成 |
+| `wan2.5-t2v-preview` | Wan テキストから動画生成 |
 
 ---
 
-## Create Video
+## 動画生成
 
 ```
 POST /v1/video/create
 ```
 
-### Request Parameters
+### リクエストパラメータ
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model` | string | Yes | Model name |
-| `prompt` | string | Yes | Video description prompt |
-| `aspect_ratio` | string | No | Aspect ratio: `16:9`, `9:16`, `1:1` |
-| `size` | string | No | Video size, e.g. `1280x720` |
-| `images` | array | No | For the current public image-to-video path, pass one image URL |
-| `duration` | integer | No | Video duration (seconds) |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `model` | string | はい | モデル名 |
+| `prompt` | string | はい | 動画説明のプロンプト |
+| `aspect_ratio` | string | いいえ | アスペクト比：`16:9`、`9:16`、`1:1` |
+| `size` | string | いいえ | 動画サイズ。例：`1280x720` |
+| `images` | array | いいえ | 現在公開されている画像から動画生成の場合、通常は `1` 枚の画像URLを指定します |
+| `duration` | integer | いいえ | 動画の長さ（秒） |
 
-### Request Examples
+### リクエスト例
 
 <CodeGroup>
 
@@ -50,7 +50,7 @@ curl -X POST https://api.crazyrouter.com/v1/video/create \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "veo-3.1-quality",
-    "prompt": "A golden retriever running on the beach, slow motion, cinematic quality",
+    "prompt": "一只金毛犬在海滩上奔跑，慢动作，电影级画质",
     "aspect_ratio": "16:9"
   }'
 ```
@@ -66,33 +66,32 @@ response = requests.post(
     },
     json={
         "model": "veo-3.1-quality",
-        "prompt": "A golden retriever running on the beach, slow motion, cinematic quality",
+        "prompt": "一只金毛犬在海滩上奔跑，慢动作，电影级画质",
         "aspect_ratio": "16:9"
     }
 )
 
 data = response.json()
-task_id = data["id"]
-print(f"Task ID: {task_id}")
+task_id = data["task_id"]
+print(f"任务 ID: {task_id}")
 ```
 
 </CodeGroup>
 
-### Create Response
+### 生成レスポンス
 
 ```json
 {
-  "id": "video_task_abc123",
-  "status": "processing",
-  "status_update_time": 1709123456
+  "task_id": "video_task_abc123",
+  "status": "processing"
 }
 ```
 
 ---
 
-## Image-to-Video
+## 画像から動画生成
 
-Pass reference images in the `images` parameter:
+`images` パラメータで参考画像を指定します：
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/video/create \
@@ -100,7 +99,7 @@ curl -X POST https://api.crazyrouter.com/v1/video/create \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "wan-ai/wan2.1-i2v-14b-720p",
-    "prompt": "The person in the image starts smiling and waving",
+    "prompt": "图片中的人物开始微笑并挥手",
     "images": ["https://example.com/portrait.jpg"],
     "aspect_ratio": "16:9"
   }'
@@ -108,51 +107,60 @@ curl -X POST https://api.crazyrouter.com/v1/video/create \
 
 ---
 
-## Query Task
+## タスクの確認
 
 ```
 GET /v1/video/query?id={task_id}
 ```
 
-### Request Example
+### リクエスト例
 
 ```bash cURL
 curl "https://api.crazyrouter.com/v1/video/query?id=video_task_abc123" \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-### Query Response (Processing)
+### 確認レスポンス（処理中）
 
 ```json
 {
-  "id": "video_task_abc123",
-  "status": "processing",
-  "status_update_time": 1709123460
+  "code": "success",
+  "message": "",
+  "data": {
+    "task_id": "video_task_abc123",
+    "status": "processing",
+    "url": ""
+  }
 }
 ```
 
-### Query Response (Completed)
+### 確認レスポンス（完了）
 
 ```json
 {
-  "id": "video_task_abc123",
-  "status": "SUCCESS",
-  "status_update_time": 1709123520,
-  "video_url": "https://api.crazyrouter.com/files/video_abc123.mp4"
+  "code": "success",
+  "message": "",
+  "data": {
+    "task_id": "video_task_abc123",
+    "status": "SUCCESS",
+    "url": "https://media.crazyrouter.com/task-artifacts/example.mp4",
+    "artifact_url": "https://media.crazyrouter.com/task-artifacts/example.mp4"
+  }
 }
 ```
 
-### Task Status
+### タスク状態
 
-| Status | Description |
-|--------|-------------|
-| `processing` | Processing |
-| `SUCCESS` | Completed |
-| `failed` | Failed |
+| 状態 | 説明 |
+|------|------|
+| `queued` | キュー待ち |
+| `processing` | 処理中 |
+| `SUCCESS` | 完了 |
+| `failed` | 失敗 |
 
 ---
 
-## Complete Workflow Example
+## 完全なフロー例
 
 ```python Python
 import requests
@@ -165,38 +173,38 @@ headers = {
     "Authorization": f"Bearer {API_KEY}"
 }
 
-# 1. Create video task
+# 1. 创建视频任务
 resp = requests.post(f"{BASE_URL}/v1/video/create", headers=headers, json={
     "model": "veo-3.1-quality",
-    "prompt": "A golden retriever running on the beach, slow motion",
+    "prompt": "一只金毛犬在海滩上奔跑，慢动作",
     "aspect_ratio": "16:9"
 })
-task_id = resp.json()["id"]
-print(f"Task created: {task_id}")
+task_id = resp.json()["task_id"]
+print(f"任务已创建: {task_id}")
 
-# 2. Poll for status
+# 2. 轮询查询状态
 while True:
     resp = requests.get(f"{BASE_URL}/v1/video/query?id={task_id}", headers=headers)
-    result = resp.json()
+    result = resp.json().get("data", resp.json())
     status = result["status"]
-    print(f"Status: {status}")
+    print(f"状态: {status}")
 
-    if status == "completed":
-        print(f"Video URL: {result['video_url']}")
+    if status == "SUCCESS":
+        print(f"视频地址: {result.get('artifact_url') or result.get('url')}")
         break
     elif status == "failed":
-        print("Video generation failed")
+        print("视频生成失败")
         break
 
     time.sleep(10)
 ```
 
 <Note>
-  Video generation typically takes 1-5 minutes. A polling interval of 10 seconds is recommended.
+  動画生成には通常 1〜5分かかります。ポーリング間隔は10秒を推奨します。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [Google Veo 3.1 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/google/aigc-video-gv-3-1?utm_source=docs&utm_medium=related)
-- [Google の全モデルと料金](https://crazyrouter.com/en/models/google?utm_source=docs&utm_medium=related)
+- [Google Veo 3.1 モデルページ：リアルタイム価格・実例・呼び出しコード](https://crazyrouter.com/ja/models/google/aigc-video-gv-3-1?utm_source=docs&utm_medium=related)
+- [Google すべてのモデルと価格](https://crazyrouter.com/ja/models/google?utm_source=docs&utm_medium=related)

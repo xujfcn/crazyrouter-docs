@@ -1,0 +1,150 @@
+---
+title: "Listar modelos"
+description: "Según la revisión del entorno de producción, utiliza GET /v1/models para obtener la lista de modelos disponibles con el Token actual"
+---
+> Contenido actualizado: 2026-06-30
+
+# Listar modelos
+
+```
+GET /v1/models
+```
+
+Devuelve la lista de modelos disponibles para la API Key actual.
+
+Esta página sólo registra acciones `2026-04-14` que ya han sido verificadas en el entorno de producción de Crazyrouter.
+
+## Autenticación
+
+```text
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Ejemplo de solicitud
+
+<CodeGroup>
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/models \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+models = client.models.list()
+
+for model in models.data:
+    print(model.id)
+```
+
+```javascript Node.js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://api.crazyrouter.com/v1",
+});
+
+const models = await client.models.list();
+
+for (const model of models.data) {
+  console.log(model.id);
+}
+```
+
+</CodeGroup>
+
+---
+
+## Conclusión de validación de producción actual
+
+En la revisión de producción de `2026-04-14`:
+
+- El endpoint devuelve `200`
+- El `success` del nivel superior es `true`
+- El `object` del nivel superior es `list`
+- El número actual de modelos devueltos es `605`
+- Los siguientes modelos han sido confirmados en la lista de respuesta:
+  - `gpt-5.5`
+  - `claude-opus-4-8`
+  - `claude-opus-4-8`
+  - `gemini-3.1-pro`
+
+<Note>
+  El número total de modelos y la lista concreta variarán según la configuración del canal, los permisos del token y las actualizaciones de la plataforma. No debe considerarse el ejemplo documental como el conjunto completo fijo.
+</Note>
+
+---
+
+## Ejemplo de respuesta
+
+```json
+{
+  "success": true,
+  "object": "list",
+  "data": [
+    {
+      "id": "gpt-5.5",
+      "object": "model",
+      "created": 1700000000,
+      "owned_by": "openai"
+    },
+    {
+      "id": "claude-opus-4-8",
+      "object": "model",
+      "created": 1700000000,
+      "owned_by": "anthropic"
+    },
+    {
+      "id": "claude-opus-4-8",
+      "object": "model",
+      "created": 1700000000,
+      "owned_by": "anthropic"
+    },
+    {
+      "id": "gemini-3.1-pro",
+      "object": "model",
+      "created": 1700000000,
+      "owned_by": "google"
+    }
+  ]
+}
+```
+
+## Campos comunes
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `success` | boolean | Indica si la solicitud fue exitosa |
+| `id` | string | Identificador del modelo que se pasa al llamar la API |
+| `object` | string | Fijo como `model` |
+| `created` | integer | Marca de tiempo |
+| `owned_by` | string | Identificador de la organización o fuente del modelo |
+
+---
+
+## Información de precios
+
+Si necesitas información pública sobre precios, consulta la [página de precios](https://crazyrouter.com/es/pricing). Para la confirmación de modelos visibles por el Token actual desde el lado de la programación, sigue usando `GET /v1/models` de esta página.
+
+<Note>
+  `GET /v1/models` devuelto por `supported_endpoint_types` solo indica el estilo de interfaz admitido por el modelo actual. `openai` corresponde a `POST /v1/chat/completions`, `anthropic` corresponde a `POST /v1/messages`, solo `openai-response` corresponde a `POST /v1/responses`. Actualmente, Claude admite públicamente `openai` + `anthropic`, no admite `openai-response`.
+</Note>
+
+Páginas relacionadas:
+
+- [Lista de modelos Gemini compatibles con OpenAI](/es/chat/gemini/openai-models)
+- [Método oficial de fijación de precios de modelos](/es/reference/official-pricing-methods)
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Página de modelo GPT Image 1.5: precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Página de modelo GPT Image 2: precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Todos los modelos y precios de OpenAI](https://crazyrouter.com/es/models/openai?utm_source=docs&utm_medium=related)

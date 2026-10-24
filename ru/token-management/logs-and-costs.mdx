@@ -1,50 +1,50 @@
 ---
-title: 'Usage Logs and Cost Monitoring'
-description: 'Use management APIs to list API keys, query usage logs, summarize quota, and calculate USD cost'
+title: "Логи вызовов и мониторинг расходов"
+description: "Запрашивайте список API Key, логи вызовов, суммарные лимиты и расходы в долларах США с помощью административного интерфейса"
 ---
-> Дата обновления: 2026-07-20
+> Обновление содержания: 2026-07-20
 
-## Use Cases
+## Сценарии использования
 
-If a customer needs monitoring per API key, use the Crazyrouter management APIs instead of trying to query with a business `sk-xxx` token directly:
+Когда клиенту необходимо мониторить каждый API Key, рекомендуется использовать связанные административные интерфейсы Crazyrouter, а не напрямую обращаться к `sk-xxx` на стороне приложений:
 
-- List all API keys under the current account
-- Query usage logs by time range, key name, or model name
-- Get summarized quota consumption for a specific key
-- Convert quota into USD cost using system pricing metadata
+- Получение списка API Key текущего аккаунта
+- Запрос логов с фильтрацией по диапазону дат, названию Key, названию модели
+- Получение суммарного расхода по отдельному Key
+- Пересчёт расходов в доллара США на основе системного курса
 
 <Note>
-  Management APIs use user-level authentication, not the business token used for model inference calls.
+  Для административного интерфейса используется аутентификация пользователя, а не бизнес-токен для вызова моделей.
 </Note>
 
 <Warning>
-  All account and management endpoints on this page, including `/api/token/*`, `/api/log/*`, and `/api/user/self`, must use `https://crazyrouter.com`. `https://api.crazyrouter.com` is reserved for model and media APIs and returns `404 api_only_endpoint` for management routes.
+  Все представленные аккаунты и административные интерфейсы (включая `/api/token/*`, `/api/log/*` и `/api/user/self`) должны обращаться к `https://crazyrouter.com`. `https://api.crazyrouter.com` предназначен только для API моделей/медиа, некорректное использование приведёт к `404 api_only_endpoint`.
 </Warning>
 
-## Authentication
+## Способы аутентификации
 
-Management APIs require both headers:
+Административный интерфейс обязательно требует следующие два заголовка запроса:
 
 ```text
 Authorization: Bearer {access_token}
 New-Api-User: {user_id}
 ```
 
-- `access_token`: user access token used for dashboard or management API authentication
-- `New-Api-User`: current user ID, and it must match the user bound to the `access_token`
-- `sk-xxx`: business token for model calls only, not for `/api/token/*` or `/api/log/*` management APIs
+- `access_token`: токен доступа, сгенерированный после входа пользователя, используется для консоли/админ-интерфейса
+- `New-Api-User`: ID текущего пользователя, должен совпадать с пользователем `access_token`
+- `sk-xxx`: бизнес-токен вызова, используется только для работы с моделями, не применяется для административных интерфейсов, таких как `/api/token/*`, `/api/log/*`
 
-## Recommended Integration Flow
+## Рекомендуемый порядок подключения
 
-Recommended sequence:
+Рекомендуется использовать следующий порядок:
 
-1. Call `/api/token/` to get the current account's API key list
-2. Call `/api/log/self` with `token_name` to fetch detailed logs for one key
-3. Call `/api/log/self/stat` to fetch the summarized quota for the same filter
-4. Call `/api/status` to get `quota_per_unit`
-5. Convert quota into USD with `quota / quota_per_unit`
+1. Вызвать `/api/token/` для получения списка Key текущего аккаунта
+2. По инструкции `token_name` запросить подробные логи Key через `/api/log/self`
+3. Вызвать `/api/log/self/stat` для получения суммарного лимита по тем же условиям
+4. Вызвать `/api/status` для получения `quota_per_unit`
+5. Использовать `quota / quota_per_unit` для пересчёта расходов в долларах США
 
-## 1. List API Keys
+## 1. Получение списка API Key
 
 ```bash cURL
 curl "https://crazyrouter.com/api/token/?p=1&page_size=100" \
@@ -52,7 +52,7 @@ curl "https://crazyrouter.com/api/token/?p=1&page_size=100" \
   -H "New-Api-User: 485"
 ```
 
-Example response:
+Пример ответа:
 
 ```json
 {
@@ -77,7 +77,7 @@ Example response:
 }
 ```
 
-Recommended fields to persist for monitoring:
+Рекомендуется сохранять следующие поля для дальнейшего мониторинга:
 
 - `id`
 - `name`
@@ -86,9 +86,9 @@ Recommended fields to persist for monitoring:
 - `model_limits_enabled`
 - `model_limits`
 
-## 2. Query Usage Logs for a Specific Key
+## 2. Запрос логов по отдельному Key
 
-Use `/api/log/self` to query the current user's own consumption logs. At minimum, send:
+Через `/api/log/self` можно получить свои логи расходов; рекомендуется указывать минимум:
 
 - `type`
 - `token_name`
@@ -97,7 +97,7 @@ Use `/api/log/self` to query the current user's own consumption logs. At minimum
 - `p`
 - `page_size`
 
-Example:
+Пример:
 
 ```bash cURL
 curl "https://crazyrouter.com/api/log/self?type=2&token_name=gptai&start_timestamp=1771334901&end_timestamp=1772309095&p=1&page_size=5" \
@@ -105,7 +105,7 @@ curl "https://crazyrouter.com/api/log/self?type=2&token_name=gptai&start_timesta
   -H "New-Api-User: 485"
 ```
 
-Example response:
+Пример ответа:
 
 ```json
 {
@@ -119,7 +119,7 @@ Example response:
       {
         "created_at": 1772308747,
         "token_name": "gptai",
-        "model_name": "deepseek-v4-pro",
+        "model_name": "deepseek-chat",
         "quota": 3188,
         "cost_usd": 0.006376,
         "prompt_tokens": 884,
@@ -141,29 +141,33 @@ Example response:
 }
 ```
 
-### Key Fields
+### Описание ключевых полей
 
-| Field | Description |
-|------|------|
-| `token_name` | Which business key handled the request |
-| `model_name` | The actual billed model |
-| `quota` | System quota consumed by this request |
-| `cost_usd` | USD cost converted from quota |
-| `prompt_tokens` | Input tokens |
-| `completion_tokens` | Output tokens |
-| `use_time` | Request latency in seconds |
-| `other.request_id` | Request ID for tracing |
-| `other.client` | Client identifier |
-| `other.request_path` | Upstream endpoint path |
-| `other.http_status` | Upstream HTTP status code |
+| Поле               | Описание                              |
+|--------------------|---------------------------------------|
+| `token_name`    | Какой бизнес-ключ сработал             |
+| `model_name`    | Фактическая тарифная модель            |
+| `quota`    | Размер снятого за запрос системного лимита |
+| `cost_usd`    | Пересчитанная сумма в долларах США за запрос |
+| `prompt_tokens`    | Токены на вводе                        |
+| `completion_tokens`    | Токены на выводе                       |
+| `use_time`    | Время выполнения запроса (в секундах)  |
+| `other.request_id`    | ID запроса, подходит для трекинга      |
+| `other.client`    | Идентификатор клиентского вызова       |
+| `other.request_path`    | Конкретный путь вызванного интерфейса  |
+| `other.http_status`    | Код статуса ответа от верхнего уровня  |
 
 <Note>
-  `cost_usd` is derived with `quota / quota_per_unit`. If your production environment has not yet been upgraded to a version that returns this field, you can still calculate cost from the summary quota.
+  `cost_usd` показывает расходы в долларах США согласно системному курсу, формула пересчёта — `quota / quota_per_unit`. Если в вашей продакшн-среде это поле пока не поддерживается, можно сделать пересчёт вручную по суммарному лимиту.
 </Note>
 
-## 3. Query Summary Consumption
+<Warning>
+Неудавшиеся одиночные запросы не расходуют средства — `quota` / `cost_usd` в логах должны быть равны 0. Но в режиме Agent, workflow, цепочке вызовов или автопрограммировании через IDE одна операция пользователя может разбиваться на несколько вызовов моделей: если предыдущий запрос завершился успешно и только один из последующих потерпел неудачу, успешные запросы всё равно засчитывают расход токенов. Для поиска необычных затрат необходимо сверять по каждому отдельному запросу лога, а не только по тому, завершилась ли задача ошибкой.
+</Warning>
 
-If you only need a dashboard, report, or alerting input, use the summary endpoint:
+## 3. Суммарный расход
+
+Если не требуется построчное логирование, а нужно только мониторинговая панель или ежедневный отчёт, используйте интерфейс суммирования:
 
 ```bash cURL
 curl "https://crazyrouter.com/api/log/self/stat?type=2&token_name=gptai&start_timestamp=1771334901&end_timestamp=1772309095" \
@@ -171,7 +175,7 @@ curl "https://crazyrouter.com/api/log/self/stat?type=2&token_name=gptai&start_ti
   -H "New-Api-User: 485"
 ```
 
-Example response:
+Пример ответа:
 
 ```json
 {
@@ -185,16 +189,16 @@ Example response:
 }
 ```
 
-Where:
+Где:
 
-- `quota`: total consumed quota under the current filter
-- `rpm` and `tpm`: reserved fields for extended monitoring
+- `quota`: суммарный расход по заданным условиям
+- `rpm`, `tpm`: зарезервированные поля для мониторинга
 
-## 4. Query Current Account Balance
+## 4. Баланс текущего аккаунта
 
-If the customer does not only want per-key monitoring, but also wants to display the current Crazyrouter account balance directly in their own admin panel, call `/api/user/self`.
+Если клиенту нужно не только мониторить отдельные бизнес-ключи, но и отображать текущий баланс Crazyrouter в своей админ-панели — используйте `/api/user/self`.
 
-Use the same management-auth headers:
+Заголовки запроса совпадают с другими административными интерфейсами:
 
 ```bash cURL
 curl "https://crazyrouter.com/api/user/self" \
@@ -202,7 +206,7 @@ curl "https://crazyrouter.com/api/user/self" \
   -H "New-Api-User: 4004"
 ```
 
-Example response:
+Пример ответа:
 
 ```json
 {
@@ -219,23 +223,23 @@ Example response:
 }
 ```
 
-Key fields:
+Ключевые поля:
 
-| Field | Description |
-|------|------|
-| `quota` | Current remaining balance in internal quota units |
-| `used_quota` | Historical used amount in internal quota units |
-| `request_count` | Historical request count |
-| `group` | Current account group |
+| Поле               | Описание                                         |
+|--------------------|--------------------------------------------------|
+| `quota`    | Текущий остаток лимита (внутренняя система quota) |
+| `used_quota`    | Всего использовано лимита (quota)                 |
+| `request_count`    | Количество запросов                              |
+| `group`    | Группа текущего аккаунта                         |
 
-Conversion:
+Метод пересчёта:
 
 ```text
 balance_usd = quota / quota_per_unit
 used_usd = used_quota / quota_per_unit
 ```
 
-Example:
+Пример:
 
 ```text
 quota = 11000000
@@ -244,25 +248,25 @@ quota_per_unit = 500000
 balance_usd = 11000000 / 500000 = 22
 ```
 
-So the example above means:
+То есть, баланс из примера равен:
 
 ```text
 $22.00
 ```
 
 <Note>
-  `/api/user/self` is better for displaying the current total account balance. `/api/log/self` and `/api/log/self/stat` are better for analyzing usage by time range, business key, or model.
+  `/api/user/self` лучше подходит для «текущего общего баланса», а `/api/log/self` и `/api/log/self/stat` — для аналитики по расходам: по времени, ключам или моделям.
 </Note>
 
-## 5. Convert Quota to USD Cost
+## 5. Пересчёт расходов в доллары США
 
-System conversion metadata is available from the public `/api/status` endpoint:
+Параметры для пересчёта доступны через публичный интерфейс `/api/status`:
 
 ```bash cURL
 curl "https://api.crazyrouter.com/api/status"
 ```
 
-Relevant fields:
+В ответе смотрите:
 
 ```json
 {
@@ -276,19 +280,19 @@ Relevant fields:
 }
 ```
 
-Formula:
+Формула пересчёта:
 
 ```text
 cost_usd = quota / quota_per_unit
 ```
 
-Example:
+Пример:
 
 ```text
 16605808 / 500000 = 33.211616 USD
 ```
 
-## Python Example
+## Пример интеграции на Python
 
 ```python
 import requests
@@ -338,26 +342,26 @@ print("quota:", quota)
 print("cost_usd:", round(cost_usd, 6))
 ```
 
-## Monitoring Recommendations
+## Рекомендации по мониторингу
 
-Recommended dimensions for customer-side monitoring:
+Для мониторинга на стороне клиента рекомендуется строить отчёты как минимум по следующим срезам:
 
-- Aggregate request count, total quota, and total cost by `token_name`
-- Aggregate consumption distribution by `model_name`
-- Split traffic by `other.request_path`, such as `/v1/chat/completions` and `/v1/responses`
-- Track success and failure rates by `other.http_status`
-- Keep `other.request_id` for incident investigation
+- По `token_name`: число вызовов, суммарный лимит, суммарные расходы
+- По `model_name`: распределение по моделям
+- По `other.request_path`: разделение по типам интерфейсов `/v1/chat/completions`, `/v1/responses` и др.
+- По `other.http_status`: процент успешных и неудачных вызовов
+- По `other.request_id`: отслеживание цепочки для диагностики
 
-## FAQ
+## Часто задаваемые вопросы
 
-### Why can't management APIs use `sk-xxx` directly?
+### Почему административные интерфейсы нельзя вызывать напрямую через `sk-xxx`?
 
-Because `sk-xxx` is validated by the token-auth flow for business requests, while `/api/token/*` and `/api/log/self*` are user-authenticated management APIs that require `access_token` plus `New-Api-User`.
+Потому что `sk-xxx` — это бизнес-токен, проверяемый в middleware `TokenAuth`. Административные интерфейсы вроде `/api/token/*`, `/api/log/self*` требуют аутентификации пользователя: заголовки `access_token` и `New-Api-User`.
 
-### Can I query my logs for a single key?
+### Можно ли получить свои логи по конкретному Key?
 
-Yes. The recommended approach is filtering `/api/log/self` and `/api/log/self/stat` by `token_name`.
+Да. Рекомендуется фильтрация по `token_name` для отбора `/api/log/self` и `/api/log/self/stat`.
 
-### Can I get cost directly via API?
+### Можно ли получить сумму расходов через API?
 
-If your server version already exposes `cost_usd`, you can read per-request USD cost directly from log items. For summary-level monitoring, use `quota / quota_per_unit`; this matches the dashboard calculation method.
+Если на сервере поддерживается поле `cost_usd`, то траты по каждому запросу сразу доступны в логах. Для суммарных значений рекомендуется пересчитывать с помощью `quota / quota_per_unit` — результат совпадает с консолью.

@@ -1,0 +1,210 @@
+---
+title: "API de Video Unificado"
+description: "Interfaz de generación de video unificada de Crazyrouter, compatible con múltiples modelos a través del mismo formato de llamada"
+---
+> Contenido actualizado: 2026-06-30
+
+# API de Video Unificado
+
+Crazyrouter ofrece una interfaz de generación de video unificada, compatible con varios modelos de video que pueden ser llamados mediante el mismo formato de API.
+
+<Note>
+  `Seedance` Actualmente no se recomienda usar el protocolo unificado `/v1/video/*`; por favor utilice el protocolo nativo `/volc/v1/contents/generations/tasks`, vea [Seedance](/es/video/seedance).
+</Note>
+
+## Modelos compatibles
+
+| Modelo | Descripción |
+|------|------|
+| `veo-3.1-fast` | Google Veo 3.1 Rápido |
+| `veo-3.1-quality` | Google Veo 3.1 Calidad |
+| `wan2.2-t2v-plus` | Wan Generación de video a partir de texto |
+| `wan2.5-t2v-preview` | Wan Generación de video a partir de texto |
+
+---
+
+## Crear video
+
+```
+POST /v1/video/create
+```
+
+### Parámetros de solicitud
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `model` | string | Sí | Nombre del modelo |
+| `prompt` | string | Sí | Palabras clave para la descripción del video |
+| `aspect_ratio` | string | No | Relación de aspecto: `16:9`, `9:16`, `1:1` |
+| `size` | string | No | Tamaño del video, como `1280x720` |
+| `images` | array | No | Generalmente se pasan `1` URLs de imágenes para generación pública de video a partir de imágenes |
+| `duration` | integer | No | Duración del video (segundos) |
+
+### Ejemplo de solicitud
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/create \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "veo-3.1-quality",
+    "prompt": "一只金毛犬在海滩上奔跑，慢动作，电影级画质",
+    "aspect_ratio": "16:9"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/v1/video/create",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "veo-3.1-quality",
+        "prompt": "一只金毛犬在海滩上奔跑，慢动作，电影级画质",
+        "aspect_ratio": "16:9"
+    }
+)
+
+data = response.json()
+task_id = data["task_id"]
+print(f"任务 ID: {task_id}")
+```
+
+</CodeGroup>
+
+### Respuesta de creación
+
+```json
+{
+  "task_id": "video_task_abc123",
+  "status": "processing"
+}
+```
+
+---
+
+## Imagen a video
+
+Ingrese imágenes de referencia en el parámetro `images`:
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/create \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "wan-ai/wan2.1-i2v-14b-720p",
+    "prompt": "图片中的人物开始微笑并挥手",
+    "images": ["https://example.com/portrait.jpg"],
+    "aspect_ratio": "16:9"
+  }'
+```
+
+---
+
+## Consultar tareas
+
+```
+GET /v1/video/query?id={task_id}
+```
+
+### Ejemplo de solicitud
+
+```bash cURL
+curl "https://api.crazyrouter.com/v1/video/query?id=video_task_abc123" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Respuesta de consulta (en proceso)
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "task_id": "video_task_abc123",
+    "status": "processing",
+    "url": ""
+  }
+}
+```
+
+### Respuesta de consulta (completado)
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "task_id": "video_task_abc123",
+    "status": "SUCCESS",
+    "url": "https://media.crazyrouter.com/task-artifacts/example.mp4",
+    "artifact_url": "https://media.crazyrouter.com/task-artifacts/example.mp4"
+  }
+}
+```
+
+### Estado de la tarea
+
+| Estado | Descripción |
+|------|------|
+| `queued` | En cola |
+| `processing` | En proceso |
+| `SUCCESS` | Completado |
+| `failed` | Fallido |
+
+---
+
+## Ejemplo de proceso completo
+
+```python Python
+import requests
+import time
+
+API_KEY = "YOUR_API_KEY"
+BASE_URL = "https://api.crazyrouter.com"
+headers = {
+    "Content-Type": "application/json",
+    "Authorization": f"Bearer {API_KEY}"
+}
+
+# 1. 创建视频任务
+resp = requests.post(f"{BASE_URL}/v1/video/create", headers=headers, json={
+    "model": "veo-3.1-quality",
+    "prompt": "一只金毛犬在海滩上奔跑，慢动作",
+    "aspect_ratio": "16:9"
+})
+task_id = resp.json()["task_id"]
+print(f"任务已创建: {task_id}")
+
+# 2. 轮询查询状态
+while True:
+    resp = requests.get(f"{BASE_URL}/v1/video/query?id={task_id}", headers=headers)
+    result = resp.json().get("data", resp.json())
+    status = result["status"]
+    print(f"状态: {status}")
+
+    if status == "SUCCESS":
+        print(f"视频地址: {result.get('artifact_url') or result.get('url')}")
+        break
+    elif status == "failed":
+        print("视频生成失败")
+        break
+
+    time.sleep(10)
+```
+
+<Note>
+  Generalmente la generación de video requiere de 1 a 5 minutos, se recomienda un intervalo de sondeo de 10 segundos.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Página de modelo Google Veo 3.1: precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/google/aigc-video-gv-3-1?utm_source=docs&utm_medium=related)
+- [Todos los modelos y precios de Google](https://crazyrouter.com/es/models/google?utm_source=docs&utm_medium=related)

@@ -1,33 +1,33 @@
 ---
-title: "Gemini Native Format"
-description: "Production-revalidated Gemini 3 Pro native API usage on Crazyrouter"
+title: "Gemini ネイティブ形式"
+description: "本番環境で検証済み、Gemini 3 Pro のネイティブ API 機能を使用"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Gemini Native Format
+# Gemini ネイティブ形式
 
-This page only documents Gemini Native behavior that was revalidated against Crazyrouter production on `2026-03-22`.
+このページには、`2026-03-22` が Crazyrouter 本番環境で検証済みの Gemini ネイティブ利用方法のみを書いています。
 
-Current primary example model:
+現在の主なサンプルモデル：
 
 - `gemini-3.1-pro`
 
-Dedicated multimodal pages based on successful request patterns:
+成功リクエストの経験に基づき、マルチモーダルページを個別に整理しています：
 
-- [Gemini Image Understanding](/jp/chat/gemini/vision)
-- [Gemini Video Understanding](/jp/chat/gemini/video)
-- [Gemini Audio Understanding](/jp/chat/gemini/audio)
+- [Gemini 画像理解](/jp/chat/gemini/vision)
+- [Gemini 映像理解](/jp/chat/gemini/video)
+- [Gemini 音声理解](/jp/chat/gemini/audio)
 
-## Endpoints
+## エンドポイント
 
 ```text
 POST /v1beta/models/{model}:generateContent
 POST /v1beta/models/{model}:streamGenerateContent
 ```
 
-## Authentication
+## 認証
 
-Pass the API key through the URL parameter:
+URL パラメータとして API Key を渡します：
 
 ```text
 ?key=YOUR_API_KEY
@@ -35,7 +35,7 @@ Pass the API key through the URL parameter:
 
 ---
 
-## Basic text generation
+## 基本文本生成
 
 ```bash cURL
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
@@ -57,7 +57,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Verified response shape:
+現在、本番環境で返される主要な構造：
 
 ```json
 {
@@ -78,9 +78,9 @@ Verified response shape:
 
 ---
 
-## Streaming generation
+## ストリーム生成
 
-This recheck confirmed that `streamGenerateContent` returns incremental SSE output.
+今回の検証で `streamGenerateContent` が SSE による増分コンテンツ返却が可能であることを確認しました。
 
 ```bash cURL
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:streamGenerateContent?key=YOUR_API_KEY&alt=sse" \
@@ -99,7 +99,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:streamGenerateCon
   }'
 ```
 
-Observed SSE chunk shape:
+本番環境で受信された SSE フラグメントの形は以下のようになります：
 
 ```text
 data: {"candidates":[{"content":{"parts":[{"text":"...","thoughtSignature":"..."}]}}]}
@@ -107,9 +107,9 @@ data: {"candidates":[{"content":{"parts":[{"text":"...","thoughtSignature":"..."
 
 ---
 
-## Structured outputs
+## 構造化出力
 
-This production recheck confirmed that `responseMimeType + responseSchema` works:
+現在、本番環境で `responseMimeType + responseSchema` の利用が確認されています：
 
 ```bash cURL
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
@@ -139,7 +139,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Verified production output:
+本番環境で検証済みの返却例：
 
 ```json
 {"city":"Tokyo","country":"Japan"}
@@ -149,7 +149,7 @@ Verified production output:
 
 ## Google Search
 
-This production recheck confirmed that the `googleSearch` tool works:
+現在、本番環境で `googleSearch` ツールの利用が確認されています：
 
 ```bash cURL
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
@@ -173,7 +173,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Verified fields include:
+本番環境で返される主要なフィールドは以下を含みます：
 
 - `groundingMetadata.webSearchQueries`
 - `groundingMetadata.groundingChunks`
@@ -183,7 +183,7 @@ Verified fields include:
 
 ## Thinking
 
-This production recheck confirmed that `thinkingConfig` works:
+現在、本番環境で `thinkingConfig` の利用が確認されています：
 
 ```bash cURL
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
@@ -208,7 +208,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-Verified marker:
+本番環境で検証済みの主要な指標：
 
 ```json
 {
@@ -220,27 +220,27 @@ Verified marker:
 
 ---
 
-## Common `generationConfig` fields
+## generationConfig よく使われるフィールド
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `maxOutputTokens` | integer | Maximum output tokens |
-| `temperature` | number | Sampling temperature |
-| `responseMimeType` | string | MIME type for structured outputs |
-| `responseSchema` | object | Structured output constraint |
-| `thinkingConfig` | object | Thinking mode configuration |
+| フィールド | 型 | 説明 |
+|------|------|------|
+| `maxOutputTokens` | integer | 出力トークン最大数 |
+| `temperature` | number | サンプリング温度 |
+| `responseMimeType` | string | 構造化出力時の MIME タイプ |
+| `responseSchema` | object | 構造化出力制約 |
+| `thinkingConfig` | object | 思考モード設定 |
 
 <Note>
-  Gemini Native uses the `contents[].parts[]` structure rather than OpenAI-style `messages`. If you want an OpenAI-style route instead, use [Gemini OpenAI-Compatible Format](/jp/chat/gemini/openai-compat).
+  Gemini ネイティブは `contents[].parts[]` 構造を採用しており、OpenAI の `messages` 構造ではありません。OpenAI 風に利用したい場合は、[Gemini OpenAI 互換形式](/jp/chat/gemini/openai-compat)をお使いください。
 </Note>
 
-関連ページ:
+関連ページ：
 
-- [公式モデル課金方式](/jp/reference/official-pricing-methods)
+- [モデル公式価格方式](/jp/reference/official-pricing-methods)
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [Gemini 2.5 Flash 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash-Lite 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash 価格比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash モデルページ：リアルタイム価格、実際のサンプル、呼び出しコード](https://crazyrouter.com/ja/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash-Lite 価格比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)

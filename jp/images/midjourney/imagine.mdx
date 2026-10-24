@@ -1,30 +1,30 @@
 ---
-title: "Submit Imagine Task"
-description: "Use POST /mj/submit/imagine to submit a Midjourney image generation task"
+title: "Imagineタスクの提出"
+description: "POST /mj/submit/imagine を使用して Midjourney画像生成タスクを提出する"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Submit Imagine Task
+# Imagineタスクの提出
 
 ```
 POST /mj/submit/imagine
 ```
 
-Submit a Midjourney Imagine task to generate images based on a prompt.
+Midjourney Imagineタスクを提出し、プロンプトに応じて画像を生成します。
 
-## Request Parameters
+## リクエストパラメータ
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `botType` | string | No | Bot type: `MID_JOURNEY` (default) or `NIJI_JOURNEY` |
-| `prompt` | string | Yes | Prompt, supports native Midjourney syntax (e.g. `--ar 16:9 --v 6`) |
-| `base64Array` | array | No | Array of Base64-encoded reference images for image-guided generation |
-| `notifyHook` | string | No | Callback URL for task status changes |
-| `state` | string | No | Custom state information, returned as-is in callbacks |
+| パラメータ | 型 | 必須 | 説明 |
+|-------------|--------|------|------------------------------|
+| `botType` | string | いいえ | ボットタイプ：`MID_JOURNEY`（デフォルト）または `NIJI_JOURNEY` |
+| `prompt` | string | はい | プロンプト。Midjourneyネイティブ構文（例：`--ar 16:9 --v 6`）に対応 |
+| `base64Array` | array | いいえ | 画像参照用のBase64エンコード済み画像配列（垫图用） |
+| `notifyHook` | string | いいえ | タスク状態変更コールバックURL |
+| `state` | string | いいえ | カスタム状態情報。コールバックで原文返却されます |
 
 ---
 
-## Request Examples
+## リクエスト例
 
 <CodeGroup>
 
@@ -60,28 +60,28 @@ print(response.json())
 
 </CodeGroup>
 
-### Response Example
+### レスポンス例
 
 ```json
 {
   "code": 1,
-  "description": "Submitted successfully",
+  "description": "提交成功",
   "result": "task_1234567890",
   "properties": {}
 }
 ```
 
-| Field | Description |
-|-------|-------------|
-| `code` | Status code, `1` means success, `22` means queued |
-| `description` | Status description |
-| `result` | Task ID, used for subsequent queries |
+| フィールド | 説明 |
+|------------|-----------------------------------------|
+| `code` | ステータスコード。`1`は成功、`22`は待機中 |
+| `description` | ステータス説明 |
+| `result` | タスクID。後続の照会に使用 |
 
 ---
 
-## Request with Reference Images
+## 垫图付きリクエスト
 
-Use `base64Array` to pass reference images:
+`base64Array`を使って参照画像を渡します：
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/mj/submit/imagine \
@@ -98,9 +98,9 @@ curl -X POST https://api.crazyrouter.com/mj/submit/imagine \
 
 ---
 
-## Using Niji Journey
+## Niji Journeyを使用する
 
-Set `botType` to `NIJI_JOURNEY` to use the Niji model for anime-style images:
+`botType`を`NIJI_JOURNEY`に設定すると、Nijiモデルでアニメ風画像を生成できます：
 
 ```json
 {
@@ -110,9 +110,9 @@ Set `botType` to `NIJI_JOURNEY` to use the Niji model for anime-style images:
 ```
 
 <Note>
-  After successful submission, a task ID is returned. Use the [Query Task Status](/jp/images/midjourney/query) endpoint to get the generation result.
+  タスク提出成功後はタスクIDが返却されます。生成結果は[タスク状態照会](/jp/images/midjourney/query)APIで取得してください。
 </Note>
 
 <Warning>
-  Images in `base64Array` increase the request payload size. It is recommended to keep each image under 4MB.
+  `base64Array`の画像はリクエストの容量を増やすため、1枚あたり4MB以下を推奨します。
 </Warning>

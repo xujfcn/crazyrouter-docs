@@ -1,27 +1,27 @@
 ---
-title: "Gemini Image Understanding"
-description: "Gemini native image understanding documented from successful Crazyrouter request patterns on 2026-04-08"
+title: "Gemini понимание изображений"
+description: "Понимание изображений Gemini на основе опыта успешных запросов Crazyrouter на нашем сайте 2026-04-08"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Gemini Image Understanding
+# Gemini понимание изображений
 
 ```
 POST /v1beta/models/{model}:generateContent
 ```
 
-As of `2026-04-08`, successful Crazyrouter and local `:4000` retests show:
+По состоянию на `2026-04-08`, повторное тестирование порта Crazyrouter нашего сайта и локального `4000` показывает:
 
-- `gemini-2.5-pro` can reliably read images through `inlineData`
-- remote image URLs through `fileData.fileUri` have shown repeated fetch and upstream-body failures
-- the primary recommended request shape for image understanding is therefore `inlineData`
+- `gemini-3.1-pro` может стабильно читать изображение через `inlineData` и возвращать текстовое описание
+- Для удалённых изображений в виде URL `fileData.fileUri` на разных каналах часто возникают ошибки захвата и аномалии тела ответа от вышестоящего сервера
+- Поэтому для понимания изображений в текущем документе рекомендуем использовать `inlineData` как главный метод
 
 ---
 
-## Verified Minimal Request
+## Проверенный минимальный запрос
 
 ```bash
-curl "https://api.crazyrouter.com/v1beta/models/gemini-2.5-pro:generateContent?key=YOUR_API_KEY" \
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "contents": [
@@ -35,7 +35,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-2.5-pro:generateContent?k
             }
           },
           {
-            "text": "Describe this image in one short sentence."
+            "text": "请用一句中文描述这张图片里有什么。"
           }
         ]
       }
@@ -43,7 +43,7 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-2.5-pro:generateContent?k
   }'
 ```
 
-Observed production response shape:
+Ключевые формы фактического ответа в рабочей среде:
 
 ```json
 {
@@ -52,7 +52,7 @@ Observed production response shape:
       "content": {
         "parts": [
           {
-            "text": "This image shows a smooth multi-color gradient background."
+            "text": "这张图片展示了多种鲜艳色彩平滑过渡的渐变效果。"
           }
         ]
       }
@@ -61,20 +61,20 @@ Observed production response shape:
 }
 ```
 
-## Request Notes
+## Основные моменты запроса
 
-- Prefer `inlineData` for image understanding
-- Keep `mimeType` aligned with the actual file format, such as `image/png` or `image/jpeg`
-- Put raw Base64 into `data` without the `data:image/...;base64,` prefix
-- If you only have a remote image URL, do not treat it as the current primary Gemini image-understanding path on Crazyrouter
+- Для понимания изображений отдавайте предпочтение `inlineData`
+- `mimeType` должен точно соответствовать реальному формату изображения, например, `image/png`, `image/jpeg`
+- В `data` указывайте только содержимое Base64, не добавляйте префикс `data:image/...;base64,`
+- Если у вас есть только URL удалённого изображения, не используйте его как основной маршрут понимания изображений Gemini
 
 <Note>
-  For video understanding, see [Gemini Video Understanding](/ru/chat/gemini/video). For audio understanding, see [Gemini Audio Understanding](/ru/chat/gemini/audio).
+  Если вы хотите реализовать понимание видео, смотрите [Gemini понимание видео](/ru/chat/gemini/video). Если вам нужно понимание аудио, смотрите [Gemini понимание аудио](/ru/chat/gemini/audio).
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [Gemini 2.5 Flash: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash-Lite: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)
+- [Сравнение цен Gemini 2.5 Flash: официальный / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Страница модели Gemini 2.5 Flash: актуальные цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Сравнение цен Gemini 2.5 Flash-Lite: официальный / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)

@@ -1,70 +1,71 @@
 ---
-title: "Gemini Image Generation"
-description: "Current Gemini image-generation behavior updated from the 2026-04-14 Crazyrouter production retest"
+title: "Генерация изображений Gemini"
+description: "Вызов модели изображений Gemini / Nano Banana через OpenAI Images API"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-06
 
-# Gemini Image Generation
+# Генерация изображений Gemini
 
 ```
-POST /v1beta/models/{model}:generateContent
+POST /v1/images/generations
 ```
 
-As of April 14, 2026, the latest production retest against Crazyrouter showed:
+Crazyrouter предоставляет унифицированный совместимый с OpenAI Images интерфейс для модели изображений Gemini. На стороне пользователя не требуется напрямую вызывать нативный `generateContent` Gemini, а также не требуется передавать нативный `generationConfig.imageConfig` Gemini.
 
-- `nano-banana-2` returned `inlineData` when called with `responseModalities: ["IMAGE"]`
-- `nano-banana-pro` returned `text` containing a Markdown image with a `data:image/...;base64,...` payload
-- `nano-banana` also returned `text` containing `data:image/...;base64,...`
-- `nano-banana` returned `text` containing a hosted image URL
+| Рекомендованное публичное имя модели | Совместимое имя базовой модели |
+|------|------|
+| `nano-banana` | `nano-banana` |
+| `nano-banana-pro` | `nano-banana-pro` |
+| `nano-banana-2` | `nano-banana-2` |
 
 <Warning>
-  Gemini image models do not currently share one uniform response shape on Crazyrouter. Do not assume every model will return `inlineData`.
+  Генерация изображений Gemini — это длительный по времени запрос. Для продакшн-интеграций рекомендуется использовать основную линию `https://api.crazyrouter.com/v1`, полный генерирующий endpoint — `https://api.crazyrouter.com/v1/images/generations`.
 </Warning>
 
 <Note>
-  If you are migrating from the Nano Banana family, do not keep using `/v1/images/generations`. `nano-banana-2` should now move directly to `nano-banana-2:generateContent`. `nano-banana` can return image output through `nano-banana:generateContent`, but billing consistency is still under review.
+  Рекомендуется использовать в клиентском коде `nano-banana`, `nano-banana-pro`, `nano-banana-2`. Если ваша система уже использует напрямую `nano-banana`, `nano-banana-pro`, `nano-banana-2`, вы также можете продолжать обращаться через этот же интерфейс Images API.
 </Note>
 
 ---
 
-## Most Practical Current Example
+## Параметры запроса
 
-For the specific goal of getting image bytes directly, the easiest current model to handle is `nano-banana-2`:
+| Параметр | Тип | Обязателен | Описание |
+|------|------|------|------|
+| `model` | string | Да | `nano-banana`, `nano-banana-pro`, `nano-banana-2` или соответствующее canonical-имя Gemini |
+| `prompt` | string | Да | Инструкция на генерацию или редактирование |
+| `image_input` | string или string[] | Нет | URL референс-изображения; если не передан, работает генерация с текстового описания |
+| `resolution` | string | Нет | `1K`, `2K`, `4K` |
+| `aspect_ratio` | string | Нет | Например, `1:1`, `16:9`, `9:16`, `21:9`, `auto` |
+| `output_format` | string | Нет | `png`, `jpeg` / `jpg` |
+| `output_compression` | integer | Нет | `0-100`, используется для настройки качества сжатия JPEG |
+| `n` | integer | Нет | Количество генерируемых изображений, по умолчанию `1` |
+
+Не передавайте эти приватные поля апстрима: `generationConfig`, `imageConfig`, `imageOutputOptions`, `image_output_options`.
+
+## Пример запроса
 
 ```bash
-curl "https://api.crazyrouter.com/v1beta/models/nano-banana-2:generateContent?key=YOUR_API_KEY" \
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "contents": [
-      {
-        "role": "user",
-        "parts": [
-          {"text": "Generate an IMAGE of a simple red square on a white background. Return image output."}
-        ]
-      }
-    ],
-    "generationConfig": {
-      "responseModalities": ["IMAGE"]
-    }
+    "model": "nano-banana-2",
+    "prompt": "A simple red square on a white background, clean vector style",
+    "resolution": "1K",
+    "aspect_ratio": "1:1",
+    "output_format": "png"
   }'
 ```
 
-Observed production response shape:
+Ответ соответствует формату OpenAI Images:
 
 ```json
 {
-  "candidates": [
+  "created": 1778990000,
+  "data": [
     {
-      "content": {
-        "parts": [
-          {
-            "inlineData": {
-              "mimeType": "image/png",
-              "data": "iVBORw0KGgoAAA..."
-            }
-          }
-        ]
-      }
+      "url": "https://media.crazyrouter.com/task-artifacts/2026/05/17/sync-image/request-id-1.png"
     }
   ]
 }
@@ -72,27 +73,32 @@ Observed production response shape:
 
 ---
 
-## Other Observed Output Shapes
+## Редактирование по референс-изображению
 
-The same-day production check also showed these model-specific differences:
-
-- `nano-banana-pro`: `parts[0].text` looked like `![image](data:image/jpeg;base64,...)`
-- `nano-banana`: `parts[0].text` looked like `![image](data:image/png;base64,...)`
-- `nano-banana`: `parts[0].text` looked like `![Image](https://...)`
-
-If you need to support multiple Gemini image models, parse in this order:
-
-1. Check `inlineData` first
-2. Then check whether `text` contains `data:image/`
-3. Then check whether `text` contains a hosted image URL
+```bash
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "nano-banana-pro",
+    "prompt": "把参考图改成高级电商海报，保留主体，背景更简洁",
+    "image_input": [
+      "https://example.com/reference.png"
+    ],
+    "resolution": "1K",
+    "aspect_ratio": "1:1",
+    "output_format": "jpeg",
+    "output_compression": 85
+  }'
+```
 
 <Note>
-  This page no longer keeps aspect-ratio or multi-image parameter guidance, because those parameters were not revalidated in this production pass.
+  Если вам действительно необходим оригинальный формат Gemini API, ознакомьтесь с [оригинальным форматом Gemini](/ru/chat/gemini/native). Но для генерации и редактирования изображений рекомендуется клиентской стороне использовать унифицированный Images API с этой страницы.
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [Gemini 2.5 Flash: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash-Lite: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)
+- [Сравнение цен Gemini 2.5 Flash: официальный / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Страница модели Gemini 2.5 Flash: актуальные цены, реальные примеры, код вызова](https://crazyrouter.com/ru/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Сравнение цен Gemini 2.5 Flash-Lite: официальный / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)

@@ -1,43 +1,43 @@
 ---
-title: "Create Completion (Legacy)"
-description: "Current production status of the POST /v1/completions compatibility endpoint"
+title: "Создание завершения (Legacy)"
+description: "Текущий статус совместимого endpoint POST /v1/completions"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Create Completion (Legacy)
+# Создание завершения (Legacy)
 
 ```
 POST /v1/completions
 ```
 
 <Warning>
-  This is a compatibility endpoint, not the primary recommended path. For new integrations, prefer `/v1/chat/completions` or `/v1/responses`.
+  Это совместимый endpoint, не основной рекомендованный путь. Для новых интеграций предпочитайте `/v1/chat/completions` или `/v1/responses`.
 </Warning>
 
-## Current Production Status
+## Текущий статус в производстве
 
-As of March 23, 2026, Crazyrouter production confirms:
+По состоянию на 23 марта 2026 года, в production Crazyrouter подтверждено:
 
-- the route still exists
-- a request using the classic example model `gpt-4.1-mini` returned `503`
-- the error code was `model_not_found`
-- the message said the model was temporarily unavailable
+- Маршрут все еще существует
+- При отправке запросов с классической моделью `gpt-5-mini` возвращается `503`
+- Код ошибки: `model_not_found`
+- Сообщение об ошибке: «temporarily unavailable»
 
-In practice, this means the endpoint should be treated as legacy-client compatibility only, not as the default path for new work.
-
----
-
-## Current Recommendation
-
-1. Use [`Chat Completions`](/chat/openai/completions) for new chat-style integrations
-2. Use [`Responses`](/chat/responses/overview) when you need GPT-5 reasoning, web search, or newer response shapes
-3. Only keep testing `/v1/completions` if you already depend on a legacy client and have confirmed that your legacy model is currently available
+То есть, данный endpoint сейчас больше подходит для «проверки совместимости старого клиента по необходимости», но не для новых интеграций по умолчанию.
 
 ---
 
-## Retest Template
+## Актуальные рекомендации
 
-If you must verify whether a legacy model still works on this endpoint, first confirm the model ID through [`/v1/models`](/chat/openai/models), then send a minimal request:
+1. Для новых проектов используйте [`Chat Completions`](/ru/chat/openai/completions)
+2. Для использования GPT-5 reasoning, Web Search и других новых возможностей — перейдите к [`Responses`](/ru/chat/responses/overview)
+3. Используйте `/v1/completions` только если у вас есть старый клиент и legacy-модель действительно работает в текущей среде
+
+---
+
+## Шаблон для повторной проверки
+
+Если нужно убедиться, что старая модель еще поддерживается этим endpoint, сначала рекомендуем проверить ID модели через [`/v1/models`](/ru/chat/openai/models), затем отправить минимальный запрос:
 
 ```bash
 curl https://api.crazyrouter.com/v1/completions \
@@ -50,21 +50,21 @@ curl https://api.crazyrouter.com/v1/completions \
   }'
 ```
 
-Observed production error example:
+Пример реальной ошибки в текущей production среде:
 
 ```json
 {
   "error": {
     "code": "model_not_found",
-    "message": "Model gpt-4.1-mini is temporarily unavailable",
+    "message": "Model gpt-5-mini is temporarily unavailable",
     "type": "new_api_error"
   }
 }
 ```
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [GPT-5: сравнение цен — официальная / Azure / Bedrock / Vertex / Crazyrouter](https://crazyrouter.com/ru/pricing/gpt-5?utm_source=docs&utm_medium=related)
-- [GPT-5: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-5?utm_source=docs&utm_medium=related)
-- [GPT Image 1.5: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Сравнение цен GPT-5: Официальный / Azure / Bedrock / Vertex и Crazyrouter](https://crazyrouter.com/ru/pricing/gpt-5?utm_source=docs&utm_medium=related)
+- [Страница модели GPT-5: Актуальная цена, реальные примеры, код вызова](https://crazyrouter.com/ru/models/openai/gpt-5?utm_source=docs&utm_medium=related)
+- [Страница модели GPT Image 1.5: Актуальная цена, примеры, код вызова](https://crazyrouter.com/ru/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)

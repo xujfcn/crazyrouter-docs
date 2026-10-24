@@ -1,0 +1,192 @@
+---
+title: 'Guía de integración de LiteLLM'
+description: "Integrar Crazyrouter en la puerta de enlace LiteLLM AI: exportar configuración de modelos y precios, iniciar el proxy, verificar solicitudes y conocer límites de presupuesto y compatibilidad del equipo"
+---
+> Contenido actualizado: 2026-10-24
+
+LiteLLM puede funcionar como la puerta de enlace AI unificada para la empresa: las aplicaciones se conectan a LiteLLM, que luego llama a Crazyrouter. Los proyectos, departamentos, llaves virtuales, presupuestos y políticas de auditoría deben configurarse en tu propio despliegue de LiteLLM y no se habilitan automáticamente al introducir la API Key de Crazyrouter.
+
+```text
+Application → LiteLLM Proxy → Crazyrouter → Model
+```
+
+## Arquitectura de integración y preparación
+
+Prepara Python 3.11, una clave de inferencia dedicada de Crazyrouter y los modelos a los que se pueda acceder con esa clave. Este documento ha sido verificado con **LiteLLM 1.106.2**, aunque podría no ser la última versión. Los cuatro modelos de ejemplo son `claude-opus-5-5`, `gpt-6-astra`, `glm-5.3`, `deepseek-v4.1-flash`; ajusta según tus modelos disponibles.
+
+<Warning>
+`CRAZYROUTER_API_KEY` es la credencial de LiteLLM para llamar a Crazyrouter desde el servidor; `LITELLM_MASTER_KEY` es tu clave de administrador de LiteLLM. No las mezcles ni envíes la clave de administrador a departamentos o usuarios finales. Mantén las claves reales solo en el entorno del servidor o gestor de claves y nunca las subas a Git, documentación o frontend.
+</Warning>
+
+## 1. Instalación y variables de entorno
+
+Ejecuta los siguientes comandos en un directorio de trabajo nuevo. Las variables de entorno solo afectan al terminal actual; en un gateway existente, sigue usando la clave principal gestionada de manera segura, no la regeneres sin motivo. Cuando uses contenedores, debes pasar las variables dentro del contenedor. En Windows, si no puedes activar el entorno virtual, puedes invocar directamente `.venv\Scripts` dentro de `python.exe` y `litellm.exe`.
+
+<CodeGroup>
+```bash macOS / Linux
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install "litellm[proxy]==1.106.2"
+read -rsp 'Crazyrouter API key: ' CRAZYROUTER_API_KEY; echo
+export CRAZYROUTER_API_KEY
+export LITELLM_MASTER_KEY="$(python -c 'import secrets; print("sk-" + secrets.token_hex(32))')"
+```
+
+```powershell Windows PowerShell
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install "litellm[proxy]==1.106.2"
+$secret = Read-Host 'Crazyrouter API key' -AsSecureString
+$env:CRAZYROUTER_API_KEY = [System.Net.NetworkCredential]::new('', $secret).Password
+$env:LITELLM_MASTER_KEY = python -c "import secrets; print('sk-' + secrets.token_hex(32))"
+```
+</CodeGroup>
+
+## 2. Exportar configuración e iniciar el servicio
+
+Se recomienda usar `GET /v1/litellm/config`, que ya está autenticado, para obtener los modelos y una instantánea de precios válida para la credencial actual. La respuesta es un objeto contenedor: **solo guarda `config` como la configuración de LiteLLM**, no escribas toda la respuesta. Guarda el siguiente script como `export_config.py`, usa JSON (también válido en YAML), conserva el precio de `model_info` y utiliza variables de entorno en vez de la clave real.
+
+```python export_config.py
+import json
+import os
+from pathlib import Path
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode
+from urllib.request import HTTPRedirectHandler, Request, build_opener
+
+
+class NoRedirect(HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+key = os.environ["CRAZYROUTER_API_KEY"]
+if not key:
+    raise SystemExit("CRAZYROUTER_API_KEY is empty")
+query = urlencode({
+    "provider": "openai",
+    "models": "claude-opus-5-5,gpt-6-astra,glm-5.3,deepseek-v4.1-flash",
+})
+request = Request(
+    "https://api.crazyrouter.com/v1/litellm/config?" + query,
+    headers={"Authorization": "Bearer " + key,
+             "User-Agent": "Crazyrouter-LiteLLM-Setup/1.0"},
+)
+try:
+    with build_opener(NoRedirect).open(request, timeout=30) as response:
+        payload = json.load(response)
+except HTTPError as error:
+    raise SystemExit(f"Export failed (HTTP {error.code}); no file written.")
+except URLError:
+    raise SystemExit("Export connection failed; no file written.")
+
+config = payload["config"]
+if not config.get("model_list"):
+    raise SystemExit("Export contains no models")
+config.setdefault("litellm_settings", {})["drop_params"] = False
+config.setdefault("general_settings", {})["master_key"] = "os.environ/LITELLM_MASTER_KEY"
+output = json.dumps(config, ensure_ascii=False, indent=2)
+if key in output:
+    raise SystemExit("Refusing to write a secret")
+with Path("crazyrouter.config.json").open("x", encoding="utf-8") as handle:
+    handle.write(output + "\n")
+print("Saved configuration. Import/reload it in LiteLLM explicitly.")
+```
+
+```shell
+python export_config.py
+litellm --config ./crazyrouter.config.json --host 127.0.0.1 --port 4100
+```
+
+<Note>
+El script rechaza sobrescribir archivos existentes; antes de actualizar, haz una copia de seguridad, compara la configuración y luego combina los cambios en el gateway actual para recargar explícitamente. `4100` es solo un puerto de ejemplo; si está ocupado, cambia el comando de inicio y la dirección de verificación. Este comando solo escucha en la máquina local y no modifica ni reinicia servicios existentes.
+</Note>
+
+## 3. Verificar el gateway local
+
+Deja ejecutándose la terminal del proxy y, en otro terminal con el mismo entorno instalado, configura **la misma** `LITELLM_MASTER_KEY` sin regenerarla. Guarda el siguiente script como `verify_proxy.py`. Esta comprobación de administrador generará un uso real del modelo; en aplicaciones normales debes usar llaves virtuales restringidas.
+
+```python verify_proxy.py
+import json
+import os
+from urllib.request import Request, urlopen
+
+base = "http://127.0.0.1:4100/v1"
+headers = {"Authorization": "Bearer " + os.environ["LITELLM_MASTER_KEY"],
+           "Content-Type": "application/json"}
+
+with urlopen(Request(base + "/models", headers=headers), timeout=30) as response:
+    models = json.load(response)["data"]
+assert any(model["id"] == "gpt-6-astra" for model in models), "Model not registered"
+
+body = {"model": "gpt-6-astra", "max_tokens": 1024,
+        "messages": [{"role": "user", "content": "Reply with exactly OK."}]}
+with urlopen(Request(base + "/chat/completions", headers=headers,
+                     data=json.dumps(body).encode()), timeout=120) as response:
+    result = json.load(response)
+choice = result["choices"][0]
+assert choice["finish_reason"] == "stop", "Incomplete response"
+assert (choice["message"].get("content") or "").strip() == "OK", "Check final answer"
+assert result.get("usage", {}).get("total_tokens", 0) > 0, "Missing usage"
+print("PASS: model registration, final answer, finish reason, usage")
+```
+
+```shell
+python verify_proxy.py
+```
+
+Esta es una prueba mínima (smoke test) y no una certificación completa de compatibilidad. Para cada modelo real, prueba también solicitudes normales y en streaming: revisa el cuerpo final, razón de finalización, SSE de `[DONE]` y usage final. Las pruebas de herramientas deben validar los parámetros y el retorno del resultado. Solo HTTP 200, texto de pensamiento o JSON dentro de Markdown no son suficiente.
+
+## 4. Protocolo nativo Claude (opcional)
+
+La exportación por defecto usa `openai/<model>`, `api_base` es para `https://api.crazyrouter.com/v1`. Si necesitas caché nativa de Claude o semántica thinking, exporta por separado con `provider=anthropic&models=claude-opus-5-5` y usa `anthropic/<model>` y la dirección raíz `https://api.crazyrouter.com`, sin agregar `/v1` ni `/chat/completions`.
+
+```yaml
+model_list:
+  - model_name: claude-native
+    litellm_params:
+      model: anthropic/claude-opus-5-5
+      api_base: https://api.crazyrouter.com
+      api_key: os.environ/CRAZYROUTER_API_KEY
+litellm_settings:
+  drop_params: false
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+```
+
+El ejemplo muestra solo la estructura de conexión, no los precios. En uso real, combina `model_info` de la exportación nativa. Si se registran adaptadores OpenAI y nativos al mismo tiempo, usa un `claude-native` (como `model_name`) independiente para la entrada nativa; así el cliente puede llamarla por el alias, evitando conflictos con elementos de nombre igual.
+
+## Compatibilidad y manejo de errores
+
+- Mantén `drop_params: false` y no omitas silenciosamente parámetros no soportados.
+- Se ha verificado el `json_schema` de Claude; `json_object` no es compatible y no se convertirá automáticamente en otro tipo de salida.
+- En las rutas de Claude actualmente probadas, si se fuerzan herramientas o solicitudes `required`, serán rechazadas explícitamente: HTTP `400`, error directo `unsupported_forced_tool_choice`. Si necesitas selección automática de herramientas, tu cliente debe cambiar explícitamente a `tool_choice: "auto"`; el gateway no hará el downgrade automáticamente.
+- Ante esos rechazos, el cliente recibirá una explicación estándar en inglés sin exponer configuraciones internas ni credenciales. La versión 1.106.2 del adaptador OpenAI de LiteLLM mantiene los mensajes en inglés, pero envuelve el código de error en `"400"`; no te bases solo en el código original.
+- El `cache_control` de Claude permite pasar el `5m` / TTL de `1h`; se verificó creación y lectura de 5m, 1h solo se probó en escritura y no se garantiza tasa de acierto o lectura pasada una hora.
+- Capacidades de modelo, disponibilidad, visión, contexto largo, failover y presupuesto empresarial deben ser validados por separado; no te fíes solo del nombre del modelo ni de este documento de integración.
+
+## Equipos, presupuesto y seguridad en producción
+
+- Crea equipos en LiteLLM y llaves virtuales restringidas por proyecto o departamento, estableciendo permisos de modelo, presupuesto y límites de velocidad; nunca compartas la clave principal.
+- Configura base de datos, autenticación, permisos y persistencia según las directrices oficiales de LiteLLM. Ejecutar localmente sin base de datos solo verifica la inferencia, el presupuesto real no se aplicará; confía en las características y requisitos del release que usas.
+- Antes de lanzar, prueba la denegación por acceso indebido de modelos, agotamiento de presupuesto, revocación de claves, limitación y auditoría. Protege prompts e información personal en logs y define plazos claros de retención.
+- Habilita HTTPS y control de acceso para conexiones externas; nunca expongas directamente el servicio de demostración local o la administración.
+- Los precios exportados son instantáneas. Ante cambios de precio o descuento, vuelve a exportar, importar y recargar; no es automático. La estimación de costes por LiteLLM no equivale al valor final de la factura de Crazyrouter; revisa periódicamente.
+
+## Preguntas frecuentes
+
+| Comportamiento | Lineamiento de verificación |
+| --- | --- |
+| Exportar devuelve 401 | Usa la clave de inferencia de Crazyrouter, no la clave principal de LiteLLM ni credenciales de sesión de consola. |
+| Exportar devuelve 404 | Verifica el ID de modelo y modelos accesibles con la clave actual. |
+| Exportar devuelve 422 | Revisa si el proveedor elegido y el precio pueden expresarse; no uses precios inventados. |
+| LiteLLM devuelve 401 | La llamada downstream requiere la clave principal de LiteLLM (solo administración local) o una clave virtual válida. |
+| Modelo no registrado / variable de entorno no existe | Confirma que guardaste `config`, que la variable de entorno está en el proceso proxy o contenedor y que ya recargaste. |
+| Forzar herramienta devuelve 400 | Elige explícitamente `auto` o un modelo que soporte la herramienta y configuración thinking. |
+| Presupuesto no limita solicitudes | Verifica la base de datos, las políticas de equipo / llaves virtuales y realiza pruebas reales de rechazo de presupuesto. |
+
+## Referencia oficial
+
+- [Configuración del proxy de LiteLLM](https://docs.litellm.ai/docs/proxy/configs)
+- [Llaves virtuales de LiteLLM](https://docs.litellm.ai/docs/proxy/virtual_keys)
+- [Presupuestos de LiteLLM](https://docs.litellm.ai/docs/proxy/users)

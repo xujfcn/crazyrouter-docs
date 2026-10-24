@@ -1,199 +1,199 @@
 ---
-title: 'Immersive Translate Setup Guide'
-description: 'Connect Crazyrouter to the Immersive Translate browser extension through the OpenAI service path, with custom API URL, model, rate, validation, and troubleshooting guidance'
+title: "没入型翻訳設定チュートリアル"
+description: "没入型翻訳ブラウザ拡張で OpenAI サービス経由で Crazyrouter に接続し、カスタム API アドレス・モデル・頻度コントロール・認証およびトラブルシューティングの説明も補足"
 ---
-> 更新日: 2026-06-23
+> 内容更新日: 2026-06-09
 
-Immersive Translate is a strong browser extension for webpage translation, bilingual reading, text-selection translation, and document translation. For Crazyrouter, the most reliable route is the extension's officially supported `OpenAI` service path, using the `More Settings` section to enter a custom API address.
+没入型翻訳は、日常的なウェブページ翻訳、バイリンガル読書、選択翻訳、ドキュメント翻訳に非常に適したブラウザ拡張機能です。Crazyrouter を連携する場合、最も確実な方法は公式がサポートする `OpenAI` サービス設定を利用し、`その他の設定` でカスタム API アドレスを記入してください。
 
-## Overview
+## 概要
 
-With Immersive Translate's OpenAI service setup, you can send requests to Crazyrouter with:
+没入型翻訳の OpenAI サービス設定を通じて、リクエストを Crazyrouter へ送信できます：
 
-- recommended protocol: `OpenAI-compatible API`
-- service type: `OpenAI`
-- API key: your `sk-...`
-- custom API URL: `https://api.crazyrouter.com/v1/chat/completions`
-- recommended first validation model: `gpt-5.5`
+- 推奨プロトコル：`OpenAI-compatible API`
+- サービスタイプ：`OpenAI`
+- API Key：あなたの `sk-...`
+- カスタム API アドレス：`https://api.crazyrouter.com/v1/chat/completions`
+- 推奨初回検証モデル：`gpt-5.5`
 
 <Tip>
-The most important difference between Immersive Translate and ChatBox is this: here you should usually start with the full endpoint path, not just the root domain.
+没入型翻訳と ChatBox 最大の違いは、通常ここでは完全なエンドポイントパスを入力する必要があり、ルートドメインだけではいけません。
 </Tip>
 
-## Why This Guide Uses The Full Endpoint Path
+## なぜ完全なパス入力が必要？
 
-According to Immersive Translate's official OpenAI service docs, the extension supports customizing the OpenAI API address in `More Settings`. For Crazyrouter, the safer first-pass value is therefore:
+没入型翻訳公式 OpenAI サービスドキュメントによると、`その他の設定` で OpenAI API アドレスのカスタマイズが可能です。そのため、Crazyrouter 側では通常完全なアドレスを書く方がより安全です：
 
 ```text
 https://api.crazyrouter.com/v1/chat/completions
 ```
 
 <Warning>
-Do not start by entering only the root domain such as `https://api.crazyrouter.com`, and do not stop at `/v1`. For Immersive Translate's OpenAI-style path, the safest first validation is the full `/v1/chat/completions` endpoint.
+ここにルートドメイン `https://api.crazyrouter.com` や `/v1` のみを入力しないでください。没入型翻訳のような連携方法では、まずは完全な `/v1/chat/completions` パスを用いて検証してください。
 </Warning>
 
-## Best For
+## 対象ユーザー
 
-- users who want high-quality AI webpage translation
-- users who want Crazyrouter-based control over translation costs
-- users who want separate budgets by browser or device
-- users who prefer an OpenAI-compatible route for a browser translation extension
+- ウェブ上で高品質な AI 翻訳を行いたい方
+- Crazyrouter の自身のトークンで翻訳コストを管理したい方
+- 複数のブラウザやデバイスごとにクォータ管理をしたい方
+- OpenAI 互換方式でブラウザ拡張翻訳を利用したい方
 
-## Prerequisites
+## システム要件と前提条件
 
-| Item | Notes |
-|------|-------|
-| Crazyrouter account | Create one at [crazyrouter.com](https://crazyrouter.com) |
-| Crazyrouter token | Create a dedicated token for Immersive Translate |
-| Browser | Chrome, Edge, Firefox, or another supported browser |
-| Immersive Translate extension | Use a current stable release |
-| Allowed models | Allow at least one translation-friendly model |
+| 項目 | 説明 |
+|------|------|
+| Crazyrouter アカウント | まず [crazyrouter.com](https://crazyrouter.com) で登録 |
+| Crazyrouter トークン | 没入型翻訳用にトークンを新規で作成を推奨 |
+| ブラウザ | Chrome、Edge、Firefox など、この拡張が対応するブラウザ |
+| 没入型翻訳拡張 | 最新で安定しているバージョンを推奨 |
+| 利用可能モデル | 最低1つの翻訳モデルを許可しておくこと |
 
-Suggested starter allowlist:
+初期ホワイトリストおすすめ：
 
 - `gpt-5.5`
 - `claude-opus-4-8`
 
-## Install And Setup Path
+## インストールと設定手順
 
-### Chrome / Edge Path
+### Chrome / Edge 手順
 
-1. install Immersive Translate from the extension store
-2. open the extension settings
-3. go to `Translation Services`
-4. choose `OpenAI`
-5. open `More Settings`
-6. enter the Crazyrouter key and full custom API URL
+1. 拡張ストアから没入型翻訳をインストール
+2. 拡張設定を開く
+3. `翻訳サービス` に進む
+4. `OpenAI` を選択
+5. `その他の設定` を開く
+6. Crazyrouter キーと完全なカスタムアドレスを入力
 
-### Firefox Path
+### Firefox 手順
 
-1. install Immersive Translate from Firefox Add-ons
-2. open the settings page
-3. go to `Translation Services`
-4. choose `OpenAI`
-5. open `More Settings`
-6. enter the Crazyrouter settings
+1. Firefox アドオンから没入型翻訳をインストール
+2. 設定ページを開く
+3. `翻訳サービス` に進む
+4. `OpenAI` を選択
+5. `その他の設定` に進む
+6. Crazyrouter のパラメータを入力
 
-## Detailed Setup
+## ゼロからの完全設定
 
 <Steps>
-  <Step title="Step 1: Install the extension">
-    Install Immersive Translate from the official extension store for your browser.
+  <Step title="ステップ1：拡張機能のインストール">
+    公式拡張ストアから「没入型翻訳」をインストール。
   </Step>
 
-  <Step title="Step 2: Create a dedicated Crazyrouter token">
-    For the first pass, allow only:
+  <Step title="ステップ2：Crazyrouterで専用トークンを作成する">
+    初回は以下のみ許可を推奨：
 
     - `gpt-5.5`
     - `claude-opus-4-8`
 
-    Do not start by allowing a wide model set in a translation scenario.
+    いきなり大量のモデルを翻訳環境に追加しないでください。
   </Step>
 
-  <Step title="Step 3: Open the OpenAI service configuration">
-    In the extension UI, go to:
+  <Step title="ステップ3：OpenAIサービス設定を開く">
+    拡張アイコンをクリックして下記に進む：
 
-    - `Settings`
-    - `Translation Services`
-    - choose `OpenAI`
+    - `設定`
+    - `翻訳サービス`
+    - `OpenAI` を選択
   </Step>
 
-  <Step title="Step 4: Enter the API key and custom URL">
-    Fill in:
+  <Step title="ステップ4：APIキーとカスタムアドレスを入力する">
+    記入内容：
 
-    - `API Key`: your `sk-...`
-    - `Custom API URL`: `https://api.crazyrouter.com/v1/chat/completions`
-    - `Model`: start with `gpt-5.5`
+    - `API Key`：あなたの `sk-...`
+    - `カスタムAPIエンドポイントアドレス`：`https://api.crazyrouter.com/v1/chat/completions`
+    - `モデル`：まず `gpt-5.5` を入力
 
-    If some fields are hidden by default, expand `More Settings` first.
+    もし一部のパラメータが画面で折りたたまれている場合は、`その他の設定` を展開して全フィールドを表示してください。
   </Step>
 
-  <Step title="Step 5: Lower the request rate for the first pass">
-    Immersive Translate's official OpenAI docs explicitly warn about rate limits. On the first Crazyrouter validation, keep the request rate conservative, especially for long webpages or ebooks.
+  <Step title="ステップ5：最初にリクエスト頻度を低く設定する">
+    没入型翻訳公式ドキュメントは OpenAI 経由での頻度制限の注意を明記しています。Crazyrouter 連携初回は、リクエスト頻度を低めに設定することを推奨します。特に長文や電子書籍の場合。
 
-    Safe starter pattern:
+    初回は次のように保守的に：
 
-    - keep requests-per-second low
-    - validate with a small page or selected text first
-    - only raise the rate after the setup is already stable
+    - 1 秒あたりのリクエスト数を高くしすぎない
+    - 小ページや選択テキストで先に検証
+    - うまく行ったら徐々に引き上げ
   </Step>
 
-  <Step title="Step 6: Run the smallest practical validation">
-    Recommended order:
+  <Step title="ステップ6：初回の最小検証を完了する">
+    推奨ステップ：
 
-    1. translate a short selected paragraph
-    2. translate a short webpage
-    3. only then try full-page or longer-document translation
+    1. まず短い選択テキストを翻訳
+    2. 次に短いウェブページを翻訳
+    3. 最後に全ページや長いドキュメントをテスト
 
-    That makes it much easier to tell whether the issue is config-related or simply request-volume-related.
+    これなら、「API 設定ミス」か「リクエスト量が多すぎる不安定」かを一番簡単に切り分けられます。
   </Step>
 </Steps>
 
-## Recommended Model Setup
+## 推奨モデル設定
 
-| Use case | Recommended model | Why |
-|----------|-------------------|-----|
-| first-pass minimal validation | `gpt-5.5` | verified successfully in production on March 23, 2026, and best for proving the OpenAI-compatible route works |
-| higher-quality translation | `claude-opus-4-8` | better for long-form explanation, refinement, and more quality-sensitive content |
-| Gemini fallback path | `gemini-3.1-pro` | useful as a second compatibility-validation path after the baseline is already stable |
+| 利用シーン | 推奨モデル | 理由 |
+|----------|----------|------|
+| 最小初回検証 | `gpt-5.5` | 2026年3月23日に本番環境で実証済み。OpenAI 互換翻訳パイプラインの動作確認に最適 |
+| 高品質翻訳 | `claude-opus-4-8` | 長文解説、文章のブラッシュアップ、品質要件が高い場合に最適 |
+| Gemini バックアップ | `gemini-3.1-pro` | 2本目の互換検証経路として適するが、まずは主経路を正常化してから試すことを推奨 |
 
-## Token Setup Best Practices
+## Token 設定ベストプラクティス
 
-| Setting | Recommendation | Notes |
-|---------|----------------|-------|
-| dedicated token | Required | do not share browser translation tokens with IDE or CLI tools |
-| model allowlist | Strongly recommended | start with only 1 to 2 translation models |
-| quota cap | Strongly recommended | full-page and ebook translation can spend much faster than normal chat |
-| device split | Recommended | separate tokens by browser or machine if needed |
-| leak response | Rotate immediately | recordings, screenshots, or browser sync leaks should trigger a key rotation |
+| 設定 | 推奨 | 説明 |
+|------|------|------|
+| 専用トークン | 必須 | ブラウザ翻訳拡張と IDE／CLI ツールのトークンは分離してください |
+| モデルホワイトリスト | 強く推奨 | 最初は1～2モデルのみ許可で始めてください |
+| クォータ上限 | 強く推奨 | 全ページ翻訳・電子書籍翻訳は通常の会話より消費が速いです |
+| デバイス隔離 | 推奨 | ブラウザやデバイスごとにトークンを分けると便利 |
+| 流出対策 | 即時ローテーション | 録画・スクショ・ブラウザ同期などで流出時はすぐ Key を変更 |
 
-## Verification Checklist
+## 検証チェックリスト
 
-- [ ] the extension is installed correctly
-- [ ] `OpenAI` is selected as the translation service
-- [ ] `API Key` is entered correctly
-- [ ] `Custom API URL` is `https://api.crazyrouter.com/v1/chat/completions`
-- [ ] the first model is `gpt-5.5` or another allowed model
-- [ ] a short selected paragraph translates successfully
-- [ ] a short webpage translates successfully
-- [ ] Crazyrouter logs show the matching request
+- [ ] 拡張機能は正しくインストール済み
+- [ ] `OpenAI` 翻訳サービスを選択済み
+- [ ] `API Key` を正しく入力済み
+- [ ] `カスタムAPIエンドポイントアドレス` を `https://api.crazyrouter.com/v1/chat/completions` に設定済み
+- [ ] 初回モデルを `gpt-5.5` または許可済みモデルに設定済み
+- [ ] 短い選択テキストの翻訳成功
+- [ ] 短いウェブページの翻訳成功
+- [ ] Crazyrouter の管理画面で該当リクエスト確認可能
 
-## Common Errors And Fixes
+## よくあるエラーと修正
 
-| Symptom | Likely cause | Fix |
-|---------|--------------|-----|
-| `404` | the API URL is missing `/chat/completions`, or only the root domain was entered | switch to the full `https://api.crazyrouter.com/v1/chat/completions` URL |
-| `401 unauthorized` | wrong, expired, or incomplete API key | generate a new token and paste it again |
-| `403` or `model not allowed` | the token does not allow the selected model | allow that model in Crazyrouter token settings |
-| `429` or unstable behavior | the request rate is too high | lower the request rate and validate on smaller text first |
-| long pages fail more often | concurrency or rate is too high | reduce scope first, then increase gradually |
-| cost rises too fast | you started with full-page or full-document translation immediately | begin with `gpt-5.5` on a smaller scope first |
+| 現象 | 主な原因 | 解決方法 |
+|------|----------|----------|
+| 404 | API アドレスが `/chat/completions` 欠落、またはルートドメインだけ記入 | 完全なアドレス `https://api.crazyrouter.com/v1/chat/completions` に修正 |
+| 401 unauthorized | API Key の誤り・期限切れ・不完全コピー | Token を再発行し再入力 |
+| 403 / モデル許可なし | トークンでモデル許可していない | Crazyrouter のトークン設定でモデルを許可 |
+| 429 / 不安定 | リクエスト頻度過多 | 頻度を下げ、小テキストから検証開始 |
+| 長文翻訳失敗多 | 同時/高頻度翻訳が原因 | まず範囲を小さくして、徐々に増加 |
+| コスト上昇が早い | 全ページ・全サイト・電子書籍の一括翻訳 | まず `gpt-5.5` で小範囲検証・範囲制御 |
 
-## Cost Tips
+## 節約アドバイス
 
-- default to `gpt-5.5`
-- translate selected text first instead of full pages immediately
-- sample long content first before translating all of it
-- if you install the extension on multiple browsers, separate the tokens for cleaner cost tracking
+- デフォルトは `gpt-5.5` を利用
+- まずは選択範囲のみ翻訳を推奨、いきなり全ページ翻訳は避ける
+- 長文書は先にサンプル検証して、全訳が必要か判断
+- 複数ブラウザで拡張利用ならトークン分離でコスト分析
 
 ## FAQ
 
-### What API URL should I enter in Immersive Translate?
+### 没入型翻訳で API アドレスは何を入れる？
 
-Use the full path: `https://api.crazyrouter.com/v1/chat/completions`.
+完全なパス：`https://api.crazyrouter.com/v1/chat/completions` を入力してください。
 
-### Why is this different from ChatBox, where the guide starts from the root domain?
+### なぜ ChatBox と違い、ルートドメインだけを推奨しない？
 
-Because Immersive Translate's official OpenAI custom-address path is better aligned with a full endpoint URL, which makes the first validation more reliable.
+没入型翻訳公式の OpenAI カスタムアドレスエントリは、直接エンドポイントパスを入力する方がより安定して初回検証できます。
 
-### Which model should I try first?
+### 推奨最初のモデルは？
 
-Start with `gpt-5.5`.
+まず `gpt-5.5` を使用してください。
 
-### Why not translate full pages or ebooks immediately?
+### なぜ初回から全ページや電子書籍翻訳を推奨しない？
 
-Because that amplifies configuration mistakes, rate-limit issues, and cost at the same time. Small text first is the fastest debugging pattern.
+設定ミス・頻度制限・コスト問題が一気に顕在化しやすくなるためです。まずは短文から翻訳し、トラブル原因の特定を優先しましょう。
 
 <Note>
-If your goal is to manage browser AI translation cost through Crazyrouter, Immersive Translate is one of the most important browser-extension guides to keep detailed and accurate.
+あなたのゴールが「Crazyrouter でウェブ AI 翻訳コストを管理すること」であれば、没入型翻訳は詳細説明を補足する価値の高いブラウザ拡張です。
 </Note>

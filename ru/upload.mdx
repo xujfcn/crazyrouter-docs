@@ -1,42 +1,93 @@
 ---
-title: 'Image Upload Guidance'
-description: 'Upload images and get temporary public URLs for APIs that accept image input'
+title: "Инструкция по загрузке изображений"
+description: "Загрузите локальное изображение и получите временный публичный URL на 48 часов, предназначенный для генерации изображений по изображению, генерации видео по изображению и API распознавания изображений"
 ---
-> Дата обновления: 2026-08-18
+> Обновление содержания: 2026-09-28
 
-Crazyrouter provides temporary public image upload endpoints for converting local or remote images into model-readable public URLs. Use them for vision, image editing, image-to-video, and workflow integrations.
+Crazyrouter предоставляет временный публичный интерфейс для загрузки изображений, чтобы преобразовать локальные референсные изображения в публичные URL, доступные для моделей. Он подходит для таких сервисов, как Kling, Veo, Seedance, Runway, Luma, MiniMax, Nano Banana Pro, Doubao Seedream и других, которым требуются `image_url`, `image_urls`, `image_list`, `images` или `image_input`.
 
 <Note>
-  Temporary images are kept for 48 hours by default and then cleaned up automatically. Storage during that period is not billed separately; per-user upload quota and rate limits apply.
+  Временные изображения по умолчанию сохраняются 48 часов и автоматически очищаются по истечении срока. В течение периода хранения отдельная ежедневная оплата не требуется; на данный момент действует ограничение по квоте и скорости загрузки для предотвращения злоупотреблений.
 </Note>
 
 <Note>
-  The returned `id` is an internal file record ID. Use the returned `url` in `image_input`, not the `id` itself. Nano Banana Pro Base64 and multipart editing are enabled only for designated gray accounts.
+  Возвращаемый `id` — это идентификатор файла на сайте, а в запросах от модели для `image_input` следует использовать возвращаемый `url`, нельзя передавать `id` напрямую. Возможность передачи `nano-banana-pro` в Base64 / multipart доступна только определённым аккаунтам.
 </Note>
 
-## Endpoint Overview
+## Обзор интерфейса
 
-| Scenario | Endpoint |
-|----------|----------|
-| Local file upload | `POST /v1/files/uploads` |
-| Base64 image upload | `POST /v1/files/uploads/base64` |
-| Remote image rehosting | `POST /v1/files/uploads/url` |
-| Presigned direct R2 upload | `POST /v1/files/uploads/presign` |
+| Сценарий | Интерфейс |
+|------|------|
+| Загрузка локального файла | `POST /v1/files/uploads` |
+| Загрузка изображения Base64 | `POST /v1/files/uploads/base64` |
+| Сохранение удалённого изображения | `POST /v1/files/uploads/url` |
+| Прямое предварительно подписанное размещение R2 | `POST /v1/files/uploads/presign` |
 
-Common limits:
+Общие ограничения:
 
-| Item | Current rule |
-|------|--------------|
-| Auth | `Authorization: Bearer YOUR_API_KEY` |
-| Supported formats | `image/png`, `image/jpeg`, `image/webp`, `image/gif` |
-| Single file size | 20MB |
-| User upload quota | 200MB / rolling 24-hour window |
-| Default expiration | 48 hours |
-| Returned URL | `https://media.crazyrouter.com/task-artifacts/tmp-inputs/...` |
+| Параметр | Текущие правила |
+|------|------|
+| Аутентификация | `Authorization: Bearer YOUR_API_KEY` |
+| Поддерживаемые форматы | `image/png`, `image/jpeg`, `image/webp`, `image/gif` |
+| Максимальный размер файла | 20MB |
+| Квота загрузки пользователя | 200MB / скользящее окно 24 часа |
+| Срок действия по умолчанию | 48 часов |
+| Возвращаемый URL | `https://media.crazyrouter.com/task-artifacts/tmp-inputs/...` |
 
-## Presigned Direct R2 Upload
+## Загрузка локального файла
 
-For high-upload-volume workflows, request a presigned upload URL first, then upload the image directly from your client to the storage endpoint with `PUT`. The image bytes do not pass through the Crazyrouter application server.
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/files/uploads \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "file=@./reference.png" \
+  -F "purpose=model_input"
+```
+
+Пример ответа:
+
+```json
+{
+  "id": "file_e5bbce820b5941409682a9c5e9ba79f1",
+  "url": "https://media.crazyrouter.com/task-artifacts/tmp-inputs/2026/05/13/user-1/file_e5bbce820b5941409682a9c5e9ba79f1.png",
+  "mime_type": "image/png",
+  "size": 2025,
+  "expires_at": "2026-05-16T04:41:35.0131789Z"
+}
+```
+
+## Загрузка Base64
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/files/uploads/base64 \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "data": "data:image/png;base64,iVBORw0KGgoAAA...",
+    "filename": "reference.png",
+    "purpose": "model_input"
+  }'
+```
+
+## Сохранение удалённого URL
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/files/uploads/url \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "url": "https://example.com/reference.png",
+    "filename": "reference.png",
+    "purpose": "model_input"
+  }'
+```
+
+Удалённый URL должен быть адресом изображения `http` или `https`, доступным серверу Crazyrouter. Система проводит проверки размера файла, MIME-типа и защиту от SSRF.
+
+## Прямое предварительно подписанное размещение R2
+
+В случаях большого объёма загрузки сначала можно запросить предварительно подписанный URL, после чего клиент напрямую `PUT` отправляет изображение на конечную точку хранения. Таким образом, бинарные данные изображения не проходят через сервер приложения Crazyrouter, что удобно для рабочих процессов с ежедневной массовой загрузкой изображений.
+
+Первый шаг: запросите URL для прямой загрузки:
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/files/uploads/presign \
@@ -50,7 +101,7 @@ curl -X POST https://api.crazyrouter.com/v1/files/uploads/presign \
   }'
 ```
 
-Example response:
+Пример ответа:
 
 ```json
 {
@@ -69,7 +120,7 @@ Example response:
 }
 ```
 
-Then upload directly:
+Второй шаг: клиент напрямую загружает в `upload_url`:
 
 ```bash cURL
 curl -X PUT "$UPLOAD_URL" \
@@ -78,8 +129,43 @@ curl -X PUT "$UPLOAD_URL" \
   --data-binary @./reference.jpg
 ```
 
-After the upload succeeds, use the returned `url` as the image URL in the model request.
+После завершения загрузки используйте `url` из ответа в качестве URL изображения для запроса модели.
 
 <Warning>
-  The `upload_url` is a short-lived write URL, valid for about 15 minutes by default. `Content-Type` and `Content-Length` must match the presign request. Do not pass `upload_url` to the model; use the returned `url` instead.
+  `upload_url` — это кратковременный адрес для записи, по умолчанию используемый в течение примерно 15 минут. `Content-Type` и `Content-Length` должны совпадать с данными, указанными при запросе; не передавайте `upload_url` модели, в запросах от модели используйте возвращаемый `url`.
+</Warning>
+
+## Практический пример: локальное референсное изображение для создания видео в Kling
+
+Первый шаг: загрузите локальное референсное изображение:
+
+```bash cURL
+UPLOAD_RESPONSE=$(curl -sS -X POST https://api.crazyrouter.com/v1/files/uploads \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "file=@./portrait.png" \
+  -F "purpose=model_input")
+
+IMAGE_URL=$(python -c "import json,sys; print(json.load(sys.stdin)['url'])" <<< "$UPLOAD_RESPONSE")
+echo "$IMAGE_URL"
+```
+
+Второй шаг: передайте возвращённый `IMAGE_URL` в Kling для генерации видео по изображению:
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/kling/v1/videos/image2video \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d "{
+    \"model_name\": \"kling-v3\",
+    \"prompt\": \"图片中的人物缓缓转头并微笑，镜头轻微推进，电影级光影\",
+    \"image_urls\": [\"$IMAGE_URL\"],
+    \"duration\": \"5\",
+    \"mode\": \"std\"
+  }"
+```
+
+После успешной отправки запроса будет возвращён идентификатор задания. Финальный результат видео можно получить с помощью [запроса статуса задания Kling](/ru/video/kling/query).
+
+<Warning>
+  Временный URL не является постоянным хранилищем материалов. Перед отправкой задания убедитесь, что URL всё ещё действителен; не используйте его в качестве долгосрочного бизнес-адреса изображения.
 </Warning>

@@ -1,0 +1,89 @@
+---
+title: "Tutorial de configuración de Gemini CLI"
+description: "Configura Crazyrouter API en Gemini CLI y utiliza modelos y métodos de autenticación que ya han sido validados con solicitudes reales."
+---
+> Contenido actualizado: 2026-06-09
+
+## Descripción general
+
+Gemini CLI es el asistente de IA de Google para la línea de comandos. Configurando la entrada nativa de Gemini de Crazyrouter, puedes utilizar el modelo Gemini directamente desde la línea de comandos, el cual ya ha sido verificado mediante solicitudes reales en el entorno de producción de este sitio.
+
+## Método de configuración
+
+### Variables de entorno
+
+La versión actual de Gemini CLI en modo API Key requiere al menos proporcionar explícitamente `GEMINI_API_KEY`. Si deseas conectar con la entrada nativa de Gemini de Crazyrouter, se recomienda configurar estas 3 variables de entorno al mismo tiempo:
+
+```bash
+export GEMINI_API_KEY=sk-xxx
+export GEMINI_MODEL=gemini-3.1-pro
+export GOOGLE_GEMINI_BASE_URL=https://api.crazyrouter.com
+```
+
+Windows PowerShell:
+
+```powershell
+$env:GEMINI_API_KEY="sk-xxx"
+$env:GEMINI_MODEL="gemini-3.1-pro"
+$env:GOOGLE_GEMINI_BASE_URL="https://api.crazyrouter.com"
+```
+
+Si quieres que esto se aplique automáticamente cada vez que abras el terminal, puedes escribirlo en `~/.gemini/.env` o en el perfil de PowerShell.
+
+### Archivo de configuración
+
+Edita `~/.gemini/settings.json`:
+
+```json
+{
+  "security": {
+    "auth": {
+      "selectedType": "gemini-api-key"
+    }
+  },
+  "apiKey": "sk-xxx",
+  "baseUrl": "https://api.crazyrouter.com",
+  "model": {
+    "name": "gemini-3.1-pro"
+  }
+}
+```
+
+Atención:
+
+- No dejes el método de autenticación como `oauth-personal`, de lo contrario, el CLI seguirá utilizando el inicio de sesión de Google.
+- No escribas `model` como una cadena de texto; en la versión actual debe utilizarse `model.name`.
+- Solo escribir `settings.json` no siempre es suficiente en algunos escenarios; el modo línea de comandos aún puede requerir la variable de entorno `GEMINI_API_KEY`.
+
+### Ejemplo de `.gemini/.env`
+
+También puedes escribir directamente en `~/.gemini/.env`:
+
+```bash
+GEMINI_API_KEY=sk-xxx
+GEMINI_MODEL=gemini-3.1-pro
+GOOGLE_GEMINI_BASE_URL=https://api.crazyrouter.com
+```
+
+### Inicio
+
+```bash
+gemini
+```
+
+## Modelos recomendados
+
+| Modelo | Descripción |
+|------|------|
+| `gemini-3.1-pro` | El 8 de abril de 2026 se verificó con éxito mediante solicitud real desde el entorno de producción de Crazyrouter a través de Gemini CLI; recomendado como línea base principal por el momento |
+
+<Note>
+  Crazyrouter admite tanto el formato nativo de la API de Gemini como el formato compatible con OpenAI. Gemini CLI usa el formato nativo de Gemini. Los métodos de autenticación `gemini-3.1-pro` y `gemini-api-key` y `GOOGLE_GEMINI_BASE_URL=https://api.crazyrouter.com` mencionados en este documento han sido verificados a través de solicitudes reales desde CLI.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Guía de integración de Gemini CLI (script de un clic, Base URL, modelos recomendados)](https://crazyrouter.com/zh/integrations/gemini-cli?utm_source=docs&utm_medium=related)
+- [Comparativa de precios de Gemini 2.5 Flash: Oficial / Azure / Bedrock / Vertex vs. Crazyrouter](https://crazyrouter.com/es/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Página del modelo Gemini 2.5 Flash: precios en tiempo real, ejemplos reales, código de uso](https://crazyrouter.com/es/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)

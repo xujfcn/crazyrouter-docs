@@ -1,0 +1,124 @@
+---
+title: "MiniMax Video"
+description: "Generar videos usando la API de MiniMax/Hailuo"
+---
+> Contenido actualizado: 2026-06-09
+
+# MiniMax Video
+
+MiniMax (Hailuo) ofrece capacidades de generación de videos de alta calidad.
+
+## Crear video
+
+```
+POST /minimax/v1/video_generation
+```
+
+### Parámetros de solicitud
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `model` | string | Sí | Nombre del modelo, como `video-01`, `video-01-live2d` |
+| `prompt` | string | Sí | Palabras clave de descripción del video |
+| `first_frame_image` | string | No | URL de la imagen del primer cuadro |
+
+### Ejemplo de solicitud
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/minimax/v1/video_generation \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "video-01",
+    "prompt": "一只小猫在阳光下打盹，微风吹动它的毛发"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/minimax/v1/video_generation",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "video-01",
+        "prompt": "一只小猫在阳光下打盹，微风吹动它的毛发"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### Ejemplo de respuesta
+
+```json
+{
+  "task_id": "minimax_video_abc123",
+  "base_resp": {
+    "status_code": 0,
+    "status_msg": "success"
+  }
+}
+```
+
+---
+
+## Imagen a video
+
+```json
+{
+  "model": "video-01",
+  "prompt": "图片中的人物开始微笑",
+  "first_frame_image": "https://example.com/portrait.jpg"
+}
+```
+
+---
+
+## Consultar tarea
+
+```
+GET /minimax/v1/query/video_generation?task_id={task_id}
+```
+
+```bash cURL
+curl "https://api.crazyrouter.com/minimax/v1/query/video_generation?task_id=minimax_video_abc123" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Ejemplo de respuesta (completado)
+
+```json
+{
+  "task_id": "minimax_video_abc123",
+  "status": "Success",
+  "file_id": "file_abc123",
+  "base_resp": {
+    "status_code": 0,
+    "status_msg": "success"
+  }
+}
+```
+
+### Estado de la tarea
+
+| Estado | Descripción |
+|------|------|
+| `Queueing` | En cola |
+| `Processing` | Procesando |
+| `Success` | Exitoso |
+| `Fail` | Fallido |
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [MiniMax M3 comparativo de precios: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/minimax-m3?utm_source=docs&utm_medium=related)
+- [Página del modelo MiniMax M3: precio en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/minimax/minimax-m3?utm_source=docs&utm_medium=related)
+- [Todos los modelos y precios de Hailuo](https://crazyrouter.com/es/models/hailuo?utm_source=docs&utm_medium=related)

@@ -1,114 +1,114 @@
 ---
-title: 'Zotero Setup Guide'
-description: 'Connect Crazyrouter to Zotero through AI plugins that support OpenAI-compatible endpoints, and clearly separate directly supported plugin types from ones that are not a good public default'
+title: "Zotero руководство по настройке"
+description: "Как подключить Crazyrouter через AI-плагины Zotero, поддерживающие OpenAI-совместимый интерфейс, с четким разграничением типов плагинов: тех, что можно подключить напрямую, и тех, что нельзя"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-Zotero itself is a reference manager, not a built-in Crazyrouter client. In practice, the integration path is usually: install a Zotero AI plugin first, and then enter Crazyrouter's OpenAI-compatible URL, API key, and model inside that plugin.
+Zotero — это инструмент для управления научными публикациями; он не имеет встроенного интерфейса настройки Crazyrouter. Обычно подключение реализуется следующим образом: сначала устанавливается плагин Zotero, который поддерживает вызовы AI, затем в этом плагине прописываются OpenAI-совместимый адрес Crazyrouter, API Key и название модели.
 
-The most important rule for this page is not "any Zotero AI plugin will work". You should first separate plugins into two groups:
+Главный принцип этой страницы — не "выбрать любой AI-плагин Zotero и подключить", а сначала разделить плагины на типы:
 
-- directly usable: plugins that support a custom `Base API URL`, `API URL`, or `Endpoint`
-- not a good public default: plugins that only accept an official OpenAI key and do not expose a custom upstream URL
+- Можно подключать напрямую: плагин поддерживает пользовательские настройки `Base API URL` / `API URL` / `Endpoint`
+- Нельзя подключать напрямую или не рекомендуется для публичной инструкции: плагин поддерживает только ввод официального OpenAI Key, не имеет поля для пользовательского upstream-адреса
 
-## Start Here
+## Сначала итог
 
-The recommended public Crazyrouter path in Zotero is:
+Рекомендованный способ подключения Crazyrouter к Zotero:
 
-- choose a Zotero AI plugin that supports a custom OpenAI-compatible endpoint
-- enter `https://api.crazyrouter.com/v1` as the base URL
-- enter `sk-xxx` as the API key
-- use `gpt-5.5` as the first validation model
+- Выберите AI-плагин для Zotero, поддерживающий ввод пользовательского OpenAI-совместимого адреса
+- Пропишите базовый адрес как `https://api.crazyrouter.com/v1`
+- Пропишите API Key как `sk-xxx`
+- Для первичной проверки используйте модель `gpt-5.5`
 
 <Warning>
-Not every Zotero AI plugin supports a custom upstream URL. If a plugin only exposes an "OpenAI API Key" field and does not provide a `Base URL` or `API URL` setting, it usually cannot be redirected to Crazyrouter directly. That kind of plugin should not be the default public guide.
+Не все AI-плагины для Zotero поддерживают пользовательский upstream-адрес. Если в плагине есть только поле для "OpenAI API Key" и нет ни `Base URL`, ни `API URL`, то, скорее всего, этот плагин не сможет направлять запросы к Crazyrouter. Такие плагины не подходят для публичных инструкций по настройке.
 </Warning>
 
-## Why This Guide Is Written This Way
+## Почему так
 
-Because the Zotero AI plugin ecosystem varies a lot:
+В экосистеме AI-плагинов Zotero сейчас большая разница:
 
-- Zotero's own plugin documentation explains that plugins are community-built, with a common installation flow but different capabilities
-- some plugins explicitly document a configurable `base API URL`
-- other plugins publicly document only an `OpenAI API Key`
+- В официальной документации Zotero говорится, что плагины развивает сообщество; способ установки общий, но функциональность отличается
+- Некоторые плагины явно поддерживают пользовательские настройки `base API URL`
+- В других только указано, как вводить `OpenAI API Key`
 
-So the public Crazyrouter guide should teach users to choose a plugin that supports a custom OpenAI-compatible endpoint, rather than assuming every plugin can connect directly.
+Поэтому в официальной документации Crazyrouter необходимо в первую очередь учить пользователя выбирать плагины, поддерживающие ввод пользовательского OpenAI-совместимого адреса, а не предполагать, что любой плагин подходит.
 
-## Who This Guide Is For
+## Кому подходит
 
-- Users who want paper summarization, translation, and Q&A inside Zotero
-- Users who want literature reading and Crazyrouter model calls in one workflow
-- Users who want AI help while reviewing items, reading PDFs, or organizing notes
-- Users who prefer a GUI workflow instead of writing scripts
+- Пользователям, желающим делать аннотации, переводы, вопросы-ответы внутри Zotero
+- Тем, кто хочет объединить чтение литературы и вызов моделей Crazyrouter в одну рабочую схему
+- Тем, кто хочет добавить AI-помощника в процессы работы с публикациями, PDF, и заметками
+- Тем, кто не хочет программировать, а предпочитает настраивать всё через графический интерфейс Zotero
 
-## Prerequisites
+## Предварительные условия
 
-| Item | Notes |
+| Элемент | Описание |
 |------|------|
-| Crazyrouter account | Register at [crazyrouter.com](https://crazyrouter.com) first |
-| Crazyrouter token | Create a dedicated token for Zotero |
-| Zotero desktop app | Plugins mainly run in the desktop app |
-| AI plugin | It must support a custom OpenAI-compatible endpoint |
-| Papers or PDFs | Prepare at least one test item |
+| Аккаунт Crazyrouter | Сначала зарегистрируйтесь на [crazyrouter.com](https://crazyrouter.com) |
+| Токен Crazyrouter | Рекомендуется создать отдельный токен для Zotero |
+| Настольная версия Zotero | Плагины работают в основном на ПК |
+| AI-плагин | Должен поддерживать пользовательский OpenAI-совместимый адрес |
+| Публикация или PDF | Подготовьте хотя бы одну тестовую запись |
 
-Suggested first-pass allowlist:
+В первом раунде рекомендуется разрешить только:
 
 - `gpt-5.5`
 - `claude-opus-4-8`
 - `gemini-3.1-pro`
 
-## Install Zotero
+## Установка Zotero
 
 ### Windows
 
-1. Open the [Zotero download page](https://www.zotero.org/download/)
-2. Download the Windows installer
-3. Run the installer
-4. Launch Zotero
+1. Откройте [страницу загрузки Zotero](https://www.zotero.org/download/)
+2. Скачайте установочный файл для Windows
+3. Запустите программу установки
+4. Запустите Zotero
 
 ### macOS
 
-1. Open the [Zotero download page](https://www.zotero.org/download/)
-2. Download the macOS build
-3. Move Zotero into `Applications`
-4. Launch Zotero
+1. Откройте [страницу загрузки Zotero](https://www.zotero.org/download/)
+2. Скачайте установочный файл macOS
+3. Перетащите Zotero в `Applications`
+4. Запустите Zotero
 
 ### Linux
 
-1. Open the [Zotero download page](https://www.zotero.org/download/)
-2. Download the official Linux package
-3. Extract it and launch Zotero following Zotero's official instructions
-4. Confirm Zotero starts normally
+1. Откройте [страницу загрузки Zotero](https://www.zotero.org/download/)
+2. Скачайте официальный пакет для Linux
+3. Распакуйте архив и запустите Zotero согласно инструкции
+4. Убедитесь, что Zotero запускается корректно
 
 <Note>
-According to Zotero's official documentation, plugins are mainly installed in the desktop app. These AI plugin flows are not a good first-pass setup route from mobile.
+По официальной документации Zotero, плагины устанавливаются на настольную версию. AI-плагины обычно не подходят для первичной настройки через мобильное приложение.
 </Note>
 
-## How To Choose A Zotero AI Plugin
+## Как выбрать AI-плагин Zotero
 
-For public documentation, prefer plugins that provide:
+В публичной документации рекомендуется выбирать плагины, отвечающие таким условиям:
 
-- a `Base API URL`, `API URL`, or `Endpoint` field
-- an `API Key` field
-- a manual model field
-- ideally a preferences panel inside Zotero
+- Есть поля для ввода `Base API URL`, `API URL` или `Endpoint`
+- Есть поле для ввода `API Key`
+- Можно вручную прописать название модели
+- Лучше если параметры можно изменить через настройки Zotero
 
-### A practical public rule
+### Рекомендованный способ проверки
 
-If a plugin's public docs mention capabilities like these, it is usually a better Crazyrouter candidate:
+Если в документации плагина явно описаны такие возможности, он лучше подходит для подключения Crazyrouter:
 
 - `Customize base API URL`
 - `API URL`
 - `Custom endpoint`
 - `Model preferences`
 
-For example, the public README for `zotero-chatgpt` explicitly mentions a configurable `base API URL`; by contrast, the public README for `Aria` focuses on entering an `OpenAI API Key` and model preferences, and does not present a custom upstream URL as the main public path. So the safer Crazyrouter baseline is to choose a plugin that clearly supports a custom OpenAI-compatible endpoint.
+Пример: в README плагина `zotero-chatgpt` указано, что он поддерживает пользовательские настройки `base API URL`; в README плагина `Aria` основное внимание уделено полям `OpenAI API Key` и настройке модели; но в описании не говорится о возможности пользовательского upstream-адреса. Поэтому для Crazyrouter наиболее надёжная инструкция — "выбирать плагины с поддержкой пользовательского OpenAI-совместимого адреса".
 
-## Recommended Configuration Shape
+## Рекомендуемый формат настройки
 
-The exact field names vary by plugin, but for a first pass use this pattern:
+Названия полей могут отличаться, но базово рекомендуется заполнить так:
 
-| Plugin field | Recommended value |
+| Поле плагина | Рекомендуемое значение |
 |----------|--------|
 | Base API URL / API URL | `https://api.crazyrouter.com/v1` |
 | Full Endpoint | `https://api.crazyrouter.com/v1/chat/completions` |
@@ -116,69 +116,69 @@ The exact field names vary by plugin, but for a first pass use this pattern:
 | Model | `gpt-5.5` |
 
 <Tip>
-If the plugin asks for a "base URL", prefer `https://api.crazyrouter.com/v1`. Only use `https://api.crazyrouter.com/v1/chat/completions` when the plugin explicitly asks for the full chat endpoint.
+Если плагин требует "базовый адрес", рекомендуем вводить `https://api.crazyrouter.com/v1`. Только если плагин явно требует "полный адрес чат-интерфейса", используйте `https://api.crazyrouter.com/v1/chat/completions`.
 </Tip>
 
-## Configuration Steps
+## Этапы настройки
 
 <Steps>
-  <Step title="Step 1: Create a dedicated Crazyrouter token for Zotero">
-    For the first pass, only allow:
+  <Step title="Шаг 1: Создайте специализированный токен Crazyrouter для Zotero">
+    В первый раз рекомендуется разрешить только:
 
     - `gpt-5.5`
     - `claude-opus-4-8`
 
-    Do not open a large model list on day one. A narrow scope is easier to debug.
+    Не стоит сразу открывать много моделей — так проще устранять проблемы.
   </Step>
 
-  <Step title="Step 2: Install the Zotero desktop app">
-    Install Zotero for your platform and confirm that you can open at least one paper item or PDF normally.
+  <Step title="Шаг 2: Установите настольную версию Zotero">
+    Установите Zotero для вашей ОС, убедитесь в корректном импорте или просмотре хотя бы одной публикации.
   </Step>
 
-  <Step title="Step 3: Download and install the AI plugin">
-    Based on Zotero's official plugin installation documentation, download the plugin `.xpi` file first. Then in Zotero:
+  <Step title="Шаг 3: Скачайте и установите AI-плагин">
+    По официальной инструкции Zotero по установке плагинов, сначала скачайте файл `.xpi`, затем в Zotero:
 
-    - open `Tools`
-    - open `Plugins`
-    - drag the `.xpi` file onto the Plugins window
+    - Откройте `Tools`
+    - Перейдите в `Plugins`
+    - Перетащите файл `.xpi` в окно плагинов
 
-    Restart Zotero after installation.
+    После завершения перезапустите Zotero.
   </Step>
 
-  <Step title="Step 4: Open the plugin settings">
-    Common entry points include:
+  <Step title="Шаг 4: Перейдите в настройки плагина">
+    Частые точки доступа:
 
     - `Edit` → `Preferences`
-    - the plugin's own preferences page
-    - a plugin sidebar or toolbar entry
+    - Страница настроек самого плагина
+    - Боковая панель или toolbar плагина
 
-    The exact location depends on the plugin, but the goal is always to find the API and model configuration area.
+    Расположение зависит от плагина, главное — найти область для ввода API и модели.
   </Step>
 
-  <Step title="Step 5: Enter the Crazyrouter URL, key, and model">
-    If the plugin supports a base-URL style configuration, enter:
+  <Step title="Шаг 5: Введите адрес Crazyrouter, ключ и модель">
+    Если плагин поддерживает режим базового адреса, заполните:
 
     - `Base API URL`: `https://api.crazyrouter.com/v1`
     - `API Key`: `sk-xxx`
     - `Model`: `gpt-5.5`
 
-    If the plugin supports only a full endpoint field, use:
+    Если только полный адрес интерфейса — используйте:
 
     - `Endpoint`: `https://api.crazyrouter.com/v1/chat/completions`
   </Step>
 
-  <Step title="Step 6: Restart Zotero if the plugin requires it">
-    Some plugins need a Zotero restart after changes to the API key, model, or preference fields. After the first setup, a restart is a safe default.
+  <Step title="Шаг 6: При необходимости, перезапустите Zotero, как требует плагин">
+    В некоторых плагинах изменения API Key, модели или параметров требуют перезапуска Zotero. После первой настройки лучше перезапустить программу.
   </Step>
 
-  <Step title="Step 7: Run the smallest academic validation">
-    Do not begin with a complicated literature review. For the first pass, only:
+  <Step title="Шаг 7: Проверьте первый запуск на простейшем академическом сценарии">
+    Не начинайте с сложных обзоров. Для первой проверки рекомендуется:
 
-    - select one item with an abstract
-    - or open one small PDF
-    - run one summarization, translation, or simple Q&A action
+    - Выберите публикацию с аннотацией
+    - Или откройте небольшой PDF
+    - Запустите простую аннотацию / перевод / вопрос-ответ
 
-    A good first prompt is:
+    Для проверки используйте такой промпт:
 
     ```text
     Summarize this paper in 3 bullet points.
@@ -186,103 +186,103 @@ If the plugin asks for a "base URL", prefer `https://api.crazyrouter.com/v1`. On
   </Step>
 </Steps>
 
-## Recommended Validation Order
+## Рекомендуемая последовательность проверок
 
-Move in this order:
+Действуйте по этому порядку:
 
-1. Confirm Zotero and the plugin both open correctly
-2. Validate `gpt-5.5` first
-3. Test single-paper summarization
-4. Test translation next
-5. Only then try multi-paper comparison, long-form analysis, or batch tasks
+1. Сначала убедитесь, что Zotero и плагин запускаются корректно
+2. Проверьте `gpt-5.5`
+3. Сделайте аннотацию одной публикации
+4. Потом перевод
+5. Затем сравнение нескольких публикаций, анализ длинных текстов или пакетные задачи
 
-## Recommended Models
+## Рекомендуемые модели
 
-| Scenario | Recommended model | Why |
+| Сценарий | Модель | Причина |
 |------|----------|------|
-| First connection test | `gpt-5.5` | Verified successfully in production on March 23, 2026, and best for plugin-to-Crazyrouter validation |
-| Deep analysis and explanation | `claude-opus-4-8` | Better for long explanations, comparison, and method-level interpretation |
-| Gemini fallback path | `gemini-3.1-pro` | Useful as a second compatibility-validation path |
+| Проверка канала | `gpt-5.5` | На 23 марта 2026 года подтверждено успешное подключение в продакшене, лучше всего для первичной проверки связи плагин–Crazyrouter |
+| Сложная аналитика и объяснения | `claude-opus-4-8` | Лучше подходит для обзоров, сравнений методов, объяснения длинных текстов |
+| Gemini как резерв | `gemini-3.1-pro` | Можно использовать для проверки совместимости вторым путем |
 
-## Good Zotero Workflows For Crazyrouter
+## Способы использования Zotero
 
-### Single-paper summarization
+### Аннотация одной публикации
 
-This is the best first validation because the context is small and the output is easy to judge.
+Лучше всего для первой проверки — простой контекст, легко оценить результат.
 
-### PDF translation
+### Перевод PDF
 
-Start with one page or one short passage before expanding the scope.
+Сначала протестируйте на одной странице или коротком отрывке, затем расширяйте область.
 
-### Multi-paper comparison
+### Сравнение публикаций
 
-Do not use this as the first test. Try it only after single-paper summarization and translation are already stable.
+Не делайте это первым шагом; дождитесь стабильной аннотации и перевода, затем переходите к обзорам, извлечению пробелов в исследованиях и сложным заданиям.
 
-### Note generation
+### Организация заметок
 
-If the plugin can write results back into Zotero notes, begin with short summaries first instead of generating long notes in bulk.
+Если плагин умеет записывать результат в заметки Zotero, начните с короткой аннотации, не генерируйте сразу длинные заметки.
 
-## Token Best Practices
+## Лучшие практики по токенам
 
-| Setting | Recommendation | Why |
+| Параметр | Советы | Описание |
 |------|------|------|
-| Dedicated token | Required | Do not share it with IDEs or automation |
-| Model allowlist | Strongly recommended | Start with only one or two models |
-| Spending limit | Strongly recommended | Long PDFs and repeated summaries can amplify usage |
-| Use-case separation | Recommended | Separate personal academic usage from team-shared usage |
-| Leak response | Rotate immediately | Replace the key if it appears in demos, recordings, or screenshots |
+| Специализированный токен | Обязательно | Не используйте один токен для Zotero, IDE и автоматизации |
+| Белый список моделей | Настоятельно рекомендуется | Сначала разрешайте только 1–2 модели |
+| Верхний лимит | Настоятельно рекомендуется | Длинные PDF и многоцикловые обзоры активно расходуют ресурс |
+| Разделение токенов по сценариям | Рекомендуется | Для индивидуальных проектов и совместной работы используйте разные токены |
+| Утечка | Сразу меняйте | При демонстрации, записи экрана или публикации настроек сразу меняйте key |
 
-## Validation Checklist
+## Чек-лист проверки
 
-- [ ] Zotero desktop is installed
-- [ ] An AI plugin with a custom OpenAI-compatible endpoint is installed
-- [ ] A dedicated Crazyrouter token was created for Zotero
-- [ ] The base URL or full endpoint was entered correctly
-- [ ] `sk-xxx` was entered correctly
-- [ ] `gpt-5.5` was used as the first model
-- [ ] Zotero was restarted if the plugin requires it
-- [ ] A single-paper summarization or translation test succeeded
-- [ ] The request appears in Crazyrouter logs
+- [ ] Zotero для ПК установлен
+- [ ] AI-плагин с поддержкой пользовательского OpenAI-совместимого адреса установлен
+- [ ] Специализированный токен Crazyrouter для Zotero создан
+- [ ] Базовый адрес введён как `https://api.crazyrouter.com/v1` или полный адрес
+- [ ] `sk-xxx` введён корректно
+- [ ] Сначала выбран только `gpt-5.5`
+- [ ] После изменения параметров Zotero перезапущен (при необходимости)
+- [ ] Проверка аннотации или перевода одной публикации проведена
+- [ ] В логах Crazyrouter есть соответствующий запрос
 
-## Common Errors And Fixes
+## Типичные ошибки и способы исправления
 
-| Symptom | Common cause | Fix |
+| Симптом | Причина | Исправление |
 |------|----------|----------|
-| The plugin only has an OpenAI key field and no Base URL | The plugin does not support a custom upstream | Switch to a plugin that supports a custom `Base API URL` or `Endpoint` |
-| 401 unauthorized | Token is wrong, incomplete, or expired | Generate a new token and enter it again |
-| 404 | The base URL or full endpoint is wrong | Reset it to `https://api.crazyrouter.com/v1` or `https://api.crazyrouter.com/v1/chat/completions` |
-| 403 / model not allowed | The token does not allow that model | Allow the model in Crazyrouter token settings |
-| `model not found` | The model name is wrong | Switch back to `gpt-5.5` and do a minimal validation |
-| The plugin shows no response or ignores new settings | The plugin needs a Zotero restart | Restart Zotero and try again |
-| Summarization fails without a clear API error | The item has no abstract, the PDF is missing, or the plugin did not receive enough context | Switch to an item with an abstract or an attached PDF |
-| Long-document jobs are very slow | The PDF is too long or the task is too heavy | Reduce the scope to one paragraph, one page, or one paper |
+| В плагине только поле для OpenAI Key, нет Base URL | Плагин не поддерживает пользовательский upstream-адрес | Поменяйте на плагин с поддержкой `Base API URL` или `Endpoint` |
+| 401 unauthorized | Ошибка токена, неполный копипаст или токен не активен | Сгенерируйте новый токен и пропишите снова |
+| 404 | Ошибка базового или полного адреса | Исправьте базовый адрес на `https://api.crazyrouter.com/v1`, полный — на `https://api.crazyrouter.com/v1/chat/completions` |
+| 403 / model not allowed | Токен не разрешает текущую модель | В настройках токена Crazyrouter разрешите данную модель |
+| `model not found` | Ошибка в названии модели | Для минимума используйте `gpt-5.5` |
+| Плагин не реагирует или изменения не применяются | Нужно перезагрузить Zotero | После изменений перезапустите Zotero и повторите |
+| Ошибка аннотации, но интерфейс не ругается | Нет аннотации, отсутствует PDF или плагин не получил контекст | Попробуйте публикацию с аннотацией или PDF |
+| Медленная обработка длиных текстов | Слишком длинный PDF или большой объем задачи | Сократите до одного абзаца, страницы или публикации для аннотации |
 
 ## FAQ
 
-### Can Zotero itself connect to Crazyrouter directly?
+### Можно ли настроить Crazyrouter напрямую в Zotero?
 
-Usually not through Zotero alone. The common route is to configure Crazyrouter inside an AI plugin that supports OpenAI-compatible endpoints.
+Обычно настройка идет не в основном Zotero, а через AI-плагин с поддержкой OpenAI-совместимого интерфейса.
 
-### What kind of plugin is best for Crazyrouter?
+### Какие плагины лучше всего подходят для Crazyrouter?
 
-Prefer plugins that support a custom `Base API URL`, `API URL`, or `Endpoint`.
+В первую очередь — поддерживающие пользовательские настройки `Base API URL`, `API URL` или `Endpoint`.
 
-### What if the plugin only accepts an OpenAI API Key?
+### Что делать, если плагин поддерживает только ввод OpenAI API Key?
 
-That plugin usually cannot be redirected to Crazyrouter directly, so it is not a good public default. It is better to switch to a plugin with custom endpoint support.
+Такие плагины не позволяют направлять запросы к Crazyrouter и не рекомендуются в качестве основной инструкции. Лучше выбрать другой с поддержкой пользовательского адреса.
 
-### What base URL should I enter?
+### Какой базовый адрес вводить?
 
-Prefer `https://api.crazyrouter.com/v1`.
+Вводите `https://api.crazyrouter.com/v1`.
 
-### What should the first model be?
+### Какую первую модель настроить?
 
-Start with `gpt-5.5`.
+Для первой проверки используйте `gpt-5.5`.
 
-### When should I try multi-paper analysis or complex review prompts?
+### Когда переходить к сравнению публикаций или сложным обзорам?
 
-Only after single-paper summarization and single-paper translation are already stable.
+Дождитесь стабильной аннотации и перевода одной публикации, затем постепенно усложняйте задачи.
 
 <Note>
-If your goal is "make Zotero work with Crazyrouter first", the key is not choosing the fanciest plugin. It is confirming that your plugin truly supports a custom OpenAI-compatible endpoint, and then validating a single-paper summary with `gpt-5.5`.
+Если ваша цель — "заставить Zotero работать с Crazyrouter", главное не сразу выбирать самый мощный плагин, а убедиться, что выбранный плагин поддерживает ввод пользовательского OpenAI-совместимого адреса, и провести проверку аннотации одной публикации через `gpt-5.5`.
 </Note>

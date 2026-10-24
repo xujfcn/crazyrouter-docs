@@ -1,0 +1,107 @@
+---
+title: "Conteo de tokens de Claude"
+description: "POST /v1/messages/count_tokens Estimar la cantidad de tokens de entrada para una solicitud de Claude Messages"
+---
+> Contenido actualizado: 2026-06-09
+
+# Conteo de tokens de Claude
+
+```
+POST /v1/messages/count_tokens
+```
+
+Se utiliza para estimar cuántos tokens se consumirán en la parte de entrada antes de llamar realmente a `POST /v1/messages`. Es adecuado para Claude CLI, Claude Code, control de presupuesto o lógica de recorte de contexto.
+
+## Autenticación
+
+Se recomienda usar los encabezados de solicitud estilo Anthropic:
+
+```http
+x-api-key: YOUR_API_KEY
+anthropic-version: 2023-06-01
+```
+
+También se puede usar autenticación estándar Bearer, pero los clientes del ecosistema Anthropic normalmente llevan el encabezado anterior.
+
+## Cuerpo de la solicitud
+
+El cuerpo de la solicitud sigue el estilo de Claude Messages. Los campos mínimos normalmente son:
+
+- `model`
+- `messages`
+
+Si la solicitud incluye `system`, `tools`, resultados de herramientas o contenido de texto, estos también se incluirán en la estimación.
+
+## Ejemplo de solicitud
+
+<CodeGroup>
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/messages/count_tokens   -H "Content-Type: application/json"   -H "x-api-key: YOUR_API_KEY"   -H "anthropic-version: 2023-06-01"   -d '{
+    "model": "claude-opus-4-8",
+    "messages": [
+      {"role": "user", "content": "hello"}
+    ]
+  }'
+```
+
+```python Python
+import requests
+
+resp = requests.post(
+    "https://api.crazyrouter.com/v1/messages/count_tokens",
+    headers={
+        "x-api-key": "YOUR_API_KEY",
+        "anthropic-version": "2023-06-01",
+        "Content-Type": "application/json",
+    },
+    json={
+        "model": "claude-opus-4-8",
+        "messages": [
+            {"role": "user", "content": "hello"}
+        ],
+    },
+)
+
+print(resp.json())
+```
+
+</CodeGroup>
+
+## Ejemplo de respuesta
+
+```json
+{
+  "input_tokens": 4
+}
+```
+
+## Campos de retorno
+
+| Campo | Tipo | Descripción |
+|------|------|-------------|
+| `input_tokens` | entero | Estimación de la cantidad de tokens de entrada en la parte de texto de la solicitud actual |
+| `warning` | cadena | Alerta opcional; si la solicitud contiene imágenes o archivos, puede advertir que estos no han sido incluidos en la estimación |
+
+## Limitaciones
+
+La implementación actual estima principalmente:
+
+- El texto de `system`
+- El contenido de texto en `messages`
+- Texto/JSON en las definiciones y resultados de herramientas
+
+<Warning>
+Si la solicitud incluye imágenes o archivos, esta API no cuenta los tokens de las imágenes/archivos en `input_tokens`. En este caso, podría aparecer `warning` en la respuesta, y el costo real será mayor que el valor estimado aquí.
+</Warning>
+
+<Note>
+Esta API devuelve un valor estimado, no el valor final de facturación. El consumo real se basa en el resultado del llamado al modelo.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Comparación de precios Claude Fable 5: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Página de modelos Claude Fable 5: Precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Comparación de precios Claude Haiku 4.5: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/claude-haiku-4-5?utm_source=docs&utm_medium=related)

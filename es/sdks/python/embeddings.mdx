@@ -1,0 +1,76 @@
+---
+title: "Embeddings de Python"
+description: "API de incrustaciones de texto llamada desde Python"
+---
+> Contenido actualizado: 2026-06-06
+
+## Uso básico
+
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-xxx", base_url="https://api.crazyrouter.com/v1")
+
+response = client.embeddings.create(
+    model="text-embedding-3-large",
+    input="Crazyrouter 是一个 AI 模型网关"
+)
+
+embedding = response.data[0].embedding
+print(f"维度: {len(embedding)}")
+```
+
+## Incrustación por lotes
+
+```python
+texts = [
+    "人工智能的发展历史",
+    "机器学习与深度学习的区别",
+    "自然语言处理的应用场景"
+]
+
+response = client.embeddings.create(
+    model="text-embedding-3-large",
+    input=texts
+)
+
+for i, item in enumerate(response.data):
+    print(f"文本 {i}: 维度 {len(item.embedding)}")
+```
+
+## Especificar dimensión
+
+La serie `text-embedding-3-*` admite la personalización de la dimensión de salida:
+
+```python
+response = client.embeddings.create(
+    model="text-embedding-3-large",
+    input="测试文本",
+    dimensions=256  # 降维到 256
+)
+
+print(f"维度: {len(response.data[0].embedding)}")  # 256
+```
+
+## Calcular similitud
+
+```python
+import numpy as np
+
+def cosine_similarity(a, b):
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+
+response = client.embeddings.create(
+    model="text-embedding-3-large",
+    input=["猫是一种宠物", "狗也是常见的宠物", "量子力学是物理学分支"]
+)
+
+vectors = [item.embedding for item in response.data]
+
+print(f"猫 vs 狗: {cosine_similarity(vectors[0], vectors[1]):.4f}")
+print(f"猫 vs 量子力学: {cosine_similarity(vectors[0], vectors[2]):.4f}")
+```
+
+<Note>
+  La reducción de dimensiones puede disminuir los costes de almacenamiento y cálculo, pero implicará una cierta pérdida de precisión. Se recomienda probar y seleccionar la dimensión adecuada según el escenario real.
+</Note>

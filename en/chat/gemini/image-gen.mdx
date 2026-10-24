@@ -1,70 +1,71 @@
 ---
 title: "Gemini Image Generation"
-description: "Current Gemini image-generation behavior updated from the 2026-04-14 Crazyrouter production retest"
+description: "Call the Gemini / Nano Banana image models through the OpenAI Images API"
 ---
-> Last updated: 2026-06-06
+> Content updated: 2026-06-06
 
 # Gemini Image Generation
 
 ```
-POST /v1beta/models/{model}:generateContent
+POST /v1/images/generations
 ```
 
-As of April 14, 2026, the latest production retest against Crazyrouter showed:
+Crazyrouter provides a unified OpenAI Images-compatible entry point for the Gemini image models. Users do not need to call the native Gemini `generateContent` directly, nor do they need to provide the native Gemini `generationConfig.imageConfig`.
 
-- `nano-banana-2` returned `inlineData` when called with `responseModalities: ["IMAGE"]`
-- `nano-banana-pro` returned `text` containing a Markdown image with a `data:image/...;base64,...` payload
-- `nano-banana` also returned `text` containing `data:image/...;base64,...`
-- `nano-banana` returned `text` containing a hosted image URL
+| Recommended Public Model Name | Compatible Backend Model Name |
+|------|------|
+| `nano-banana` | `nano-banana` |
+| `nano-banana-pro` | `nano-banana-pro` |
+| `nano-banana-2` | `nano-banana-2` |
 
 <Warning>
-  Gemini image models do not currently share one uniform response shape on Crazyrouter. Do not assume every model will return `inlineData`.
+  Gemini image generation is a long-running request. For production integration, please prioritize using the primary routing line `https://api.crazyrouter.com/v1`, with the complete generation endpoint being `https://api.crazyrouter.com/v1/images/generations`.
 </Warning>
 
 <Note>
-  If you are migrating from the Nano Banana family, do not keep using `/v1/images/generations`. `nano-banana-2` should now move directly to `nano-banana-2:generateContent`. `nano-banana` can return image output through `nano-banana:generateContent`, but billing consistency is still under review.
+  It is recommended to use `nano-banana`, `nano-banana-pro`, and `nano-banana-2` in your client code. If your system already directly uses `nano-banana`, `nano-banana-pro`, or `nano-banana-2`, you can also continue calling through the same Images API entry.
 </Note>
 
 ---
 
-## Most Practical Current Example
+## Request Parameters
 
-For the specific goal of getting image bytes directly, the easiest current model to handle is `nano-banana-2`:
+| Parameter | Type | Required | Description |
+|------|------|------|------|
+| `model` | string | Yes | `nano-banana`, `nano-banana-pro`, `nano-banana-2`, or the corresponding Gemini canonical name |
+| `prompt` | string | Yes | Generation or editing instruction |
+| `image_input` | string or string[] | No | Reference image URL; if omitted, generates from text |
+| `resolution` | string | No | `1K`, `2K`, or `4K` |
+| `aspect_ratio` | string | No | Such as `1:1`, `16:9`, `9:16`, `21:9`, `auto` |
+| `output_format` | string | No | `png`, `jpeg` / `jpg` |
+| `output_compression` | integer | No | `0-100`, used for JPEG compression quality |
+| `n` | integer | No | Number to generate, default is `1` |
+
+Do not send these upstream private fields: `generationConfig`, `imageConfig`, `imageOutputOptions`, `image_output_options`.
+
+## Request Example
 
 ```bash
-curl "https://api.crazyrouter.com/v1beta/models/nano-banana-2:generateContent?key=YOUR_API_KEY" \
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
-    "contents": [
-      {
-        "role": "user",
-        "parts": [
-          {"text": "Generate an IMAGE of a simple red square on a white background. Return image output."}
-        ]
-      }
-    ],
-    "generationConfig": {
-      "responseModalities": ["IMAGE"]
-    }
+    "model": "nano-banana-2",
+    "prompt": "A simple red square on a white background, clean vector style",
+    "resolution": "1K",
+    "aspect_ratio": "1:1",
+    "output_format": "png"
   }'
 ```
 
-Observed production response shape:
+The response maintains the OpenAI Images style:
 
 ```json
 {
-  "candidates": [
+  "created": 1778990000,
+  "data": [
     {
-      "content": {
-        "parts": [
-          {
-            "inlineData": {
-              "mimeType": "image/png",
-              "data": "iVBORw0KGgoAAA..."
-            }
-          }
-        ]
-      }
+      "url": "https://media.crazyrouter.com/task-artifacts/2026/05/17/sync-image/request-id-1.png"
     }
   ]
 }
@@ -72,27 +73,32 @@ Observed production response shape:
 
 ---
 
-## Other Observed Output Shapes
+## Reference Image Editing
 
-The same-day production check also showed these model-specific differences:
-
-- `nano-banana-pro`: `parts[0].text` looked like `![image](data:image/jpeg;base64,...)`
-- `nano-banana`: `parts[0].text` looked like `![image](data:image/png;base64,...)`
-- `nano-banana`: `parts[0].text` looked like `![Image](https://...)`
-
-If you need to support multiple Gemini image models, parse in this order:
-
-1. Check `inlineData` first
-2. Then check whether `text` contains `data:image/`
-3. Then check whether `text` contains a hosted image URL
+```bash
+curl -X POST https://api.crazyrouter.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "nano-banana-pro",
+    "prompt": "把参考图改成高级电商海报，保留主体，背景更简洁",
+    "image_input": [
+      "https://example.com/reference.png"
+    ],
+    "resolution": "1K",
+    "aspect_ratio": "1:1",
+    "output_format": "jpeg",
+    "output_compression": 85
+  }'
+```
 
 <Note>
-  This page no longer keeps aspect-ratio or multi-image parameter guidance, because those parameters were not revalidated in this production pass.
+  If you do need the native Gemini API format, please refer to [Gemini Native Format](/en/chat/gemini/native). But for image generation and editing, we recommend clients consistently use the Images API described on this page.
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## Related on crazyrouter.com
+## Related Pages
 
-- [Gemini 2.5 Flash price comparison: list vs Azure / Bedrock / Vertex vs Crazyrouter](https://crazyrouter.com/en/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash model page: live price, real samples, code](https://crazyrouter.com/en/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
-- [Gemini 2.5 Flash-Lite price comparison: list vs Azure / Bedrock / Vertex vs Crazyrouter](https://crazyrouter.com/en/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash Price Comparison: Official / Azure / Bedrock / Vertex vs Crazyrouter](https://crazyrouter.com/en/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash Model Page: Real-time Prices, Real Samples, Call Code](https://crazyrouter.com/en/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Gemini 2.5 Flash-Lite Price Comparison: Official / Azure / Bedrock / Vertex vs Crazyrouter](https://crazyrouter.com/en/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)

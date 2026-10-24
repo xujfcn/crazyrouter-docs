@@ -1,97 +1,97 @@
 ---
-title: 'OpenClaw Deployment Guide'
-description: 'Deploy OpenClaw with Crazyrouter on Linux or macOS, then finish WebUI, Telegram, and day-two operations setup'
-icon: 'rocket'
+title: "One-click Deployment of OpenClaw"
+description: "Quickly deploy OpenClaw with Crazyrouter on Linux or macOS, and complete WebUI, Telegram, and routine operation configurations."
+icon: "rocket"
 ---
-> Last updated: 2026-06-06
+> Content updated: 2026-06-09
 
-Use the one-click installer to deploy [OpenClaw](https://github.com/open-claw/open-claw) on Linux or macOS with Crazyrouter as the default backend. The installer writes a ready-to-run `~/.openclaw/openclaw.json`, registers the system service, and preloads a practical model set for chat, coding, and long-context work.
+Deploy the [OpenClaw](https://github.com/open-claw/open-claw) AI gateway on Linux or macOS using a one-click script, with Crazyrouter as the default backend. The installer will write a directly runnable `~/.openclaw/openclaw.json`, register a system service, and pre-configure a set of models suitable for chatting, coding, and long-context tasks.
 
 ## Overview
 
-OpenClaw is a good fit when you want a self-controlled local AI entrypoint backed by Crazyrouter:
+OpenClaw is suitable for turning Crazyrouter into your own controllable local AI access point:
 
-- local WebUI and gateway, default port `18789`
-- reusable access to your Crazyrouter models and quota
-- Telegram support out of the box, plus pre-enabled plugin entries for DingTalk, WeCom, QQ Bot, Discord, Slack, and Feishu
-- a good match for persistent personal bots, internal team assistants, home servers, and light self-hosted deployments
+- Local WebUI/gateway, listening by default on `18789`
+- Can directly reuse Crazyrouter's models and quota
+- Supports Telegram and pre-enables plugin entries for DingTalk, WeCom, QQ Bot, Discord, Slack, and Feishu
+- Suitable for personal always-on bots, team internal assistants, home servers, or lightweight self-hosted scenarios
 
-## Best For
+## Who is it for
 
-- connecting Crazyrouter to a local AI gateway with one command
-- running a Telegram bot on your own server
-- managing WebUI, chat, and IM entrypoints in one place
-- keeping an always-on assistant on a dev box or home mini server
+- Those who want to connect Crazyrouter to a local AI gateway with a single command
+- Those who want to run a Telegram Bot on their own server
+- Those who want to manage chat, WebUI, and IM entries centrally
+- Those who want to deploy a resident assistant on a dev machine or small home host
 
-## Protocol Used
+## Usage Agreement
 
-Recommended protocol: `OpenAI-compatible API`
+Recommended agreement: `OpenAI-compatible API`
 
-- the installer points the default `crazyrouter` provider at `https://api.crazyrouter.com/v1`
-- it also writes `crazyrouter-claude` and `crazyrouter-minimax` providers for native-compatible switching
-- OpenClaw itself exposes a local gateway and WebUI, authenticated with the generated `gateway.auth.token`
+- The installer by default points the `crazyrouter` provider to `https://api.crazyrouter.com/v1`
+- It will also write `crazyrouter-claude` and `crazyrouter-minimax` providers, making it easy to switch to the Anthropic Messages compatible path
+- OpenClaw itself exposes the local gateway and WebUI; authentication relies on the `gateway.auth.token` generated during installation
 
 <Note>
-If you later edit OpenClaw provider addresses manually, check [API Endpoints](https://docs.crazyrouter.com/en/api-endpoint) first so you know whether this client should use the root domain or the `/v1` path.
+If you need to manually adjust the OpenClaw provider address later, first refer to [API Endpoint documentation](https://docs.crazyrouter.com/en/api-endpoint) to confirm whether the current client should fill in the root domain or `/v1`.
 </Note>
 
 ## Prerequisites
 
-| Item | Notes |
-|------|-------|
-| Crazyrouter account | Create one at [crazyrouter.com](https://crazyrouter.com) |
-| Crazyrouter API key | Create a dedicated `sk-...` token for OpenClaw instead of reusing your IDE or CLI tokens |
-| OS | Linux or macOS, x64 / arm64 |
-| Network | The host needs outbound internet access; if you want remote WebUI access, allow the chosen gateway port |
-| Node.js | The installer tries to install Node.js 22+ for you |
-| Telegram bot token | Optional, only needed if you want Telegram |
+| Item | Description |
+|------|------|
+| Crazyrouter Account | Register first at [crazyrouter.com](https://crazyrouter.com) |
+| Crazyrouter API Key | It is recommended to create a dedicated token for OpenClaw, do not share it with Cursor or Claude Code |
+| Operating System | Linux or macOS, both x64/arm64 are supported |
+| Network | The server needs access to the public Internet; if you want to access the WebUI from other devices, also allow port `18789` |
+| Node.js | The installer will try to automatically install Node.js 22+ |
+| Telegram Bot Token | Optional, only needed if you want to connect Telegram |
 
 <Warning>
-The installer binds the gateway to LAN scope by default (`bind: lan`). If the machine is reachable from the public internet, protect it with firewall rules and keep the gateway login token private.
+The OpenClaw installer binds the gateway to the local network address (`bind: lan`) by default. If your host is directly exposed to the public, be sure to set up firewall restrictions and properly keep your gateway login token safe at the same time.
 </Warning>
 
-## Quick Start In 5 Minutes
+## 5-Minute Quick Start
 
 <Steps>
   <Step title="Create a dedicated Crazyrouter token">
-    In Crazyrouter, create a dedicated `sk-...` token for OpenClaw. Start with a small model allowlist such as `claude-opus-4-8`, `gpt-5.5`, and `gemini-3.1-pro`.
+    In Crazyrouter's backend, create a `sk-...` token dedicated for OpenClaw. It is recommended to only open up the models you plan to use in the gateway, such as `claude-opus-4-8`, `gpt-5.5`, `gemini-3.1-pro`.
   </Step>
-  <Step title="Run the installer">
+  <Step title="Run the installation script">
     ```bash
     curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-openclaw/main/install.sh | bash
     ```
-    To skip the language picker and API key prompt:
+    If you want to skip language selection and API Key input, you can also do this:
     ```bash
-    CRAZYROUTER_API_KEY=sk-xxx INSTALLER_LANG=en \
+    CRAZYROUTER_API_KEY=sk-xxx INSTALLER_LANG=zh \
       curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-openclaw/main/install.sh | bash
     ```
   </Step>
-  <Step title="Save the 3 values printed by the installer">
-    - WebUI URL: `http://<server-ip>:18789`
-    - auto-login URL: `http://<server-ip>:18789?token=<gateway_token>`
-    - config path: `~/.openclaw/openclaw.json`
+  <Step title="Note down the 3 values output by the installer">
+    - WebUI address: `http://<server IP>:18789`
+    - Auto-login address: `http://<server IP>:18789?token=<gateway_token>`
+    - Config file: `~/.openclaw/openclaw.json`
   </Step>
-  <Step title="Validate the first successful response">
-    Open the auto-login URL in a browser, confirm you can enter the OpenClaw control UI, and send a simple test prompt with the default model `claude-opus-4-8`, such as `Reply with ok`.
+  <Step title="Open the WebUI for the initial verification">
+    Visit the auto-login address with your browser, make sure you can access the OpenClaw console, and send a test message using the default model `claude-opus-4-8`, for example "Just reply ok".
   </Step>
-  <Step title="Optionally finish Telegram pairing">
-    The installer can set up Telegram immediately. If you choose that path, paste your Bot Token and then send any message to the bot so the first owner pairing can complete.
+  <Step title="Complete the Telegram pairing if needed">
+    The installer will ask if you want to immediately configure Telegram. If you choose to set up now, after entering the Bot Token, send your bot any message to complete the first owner pairing.
   </Step>
 </Steps>
 
-## Recommended Model Setup
+## Recommended Model Configurations
 
-The installer sets `claude-opus-4-8` as the default primary model. To change the day-to-day default, edit `agents.defaults.model.primary` in `~/.openclaw/openclaw.json`.
+The installer defaults the main model to `claude-opus-4-8`. If you want to change the everyday default model, just modify `~/.openclaw/openclaw.json`'s `agents.defaults.model.primary` directly.
 
-| Use case | Recommended model | Why |
-|----------|-------------------|-----|
-| Default daily assistant | `claude-opus-4-8` | Current default primary model for high-quality daily chat and controller workloads |
-| Coding / agent work | `gpt-5.5` | Latest OpenAI-compatible baseline for coding and agent-heavy workflows |
-| Cost-balanced fallback | `claude-opus-4-8` | Strong balance of quality, stability, and cost |
-| Gemini fallback path | `gemini-3.1-pro` | Useful as a second compatibility-validation path |
-| Heavy reasoning | `deepseek-v4-pro` | Useful when you want stronger reasoning behavior |
+| Scenario | Recommended Model | Reason |
+|------|----------|------|
+| Default daily chat | `claude-opus-4-8` | Current default main model, suitable as a high-quality daily chat and main control model |
+| Coding / Agent | `gpt-5.5` | Latest OpenAI-compatible main model, suitable as the baseline for coding and Agent |
+| High cost performance backup | `claude-opus-4-8` | Balanced in quality, stability and cost |
+| Gemini backup | `gemini-3.1-pro` | Suitable as a second compatibility verification path |
+| Deep reasoning | `claude-opus-4-8` | Suitable for scenarios requiring stronger reasoning chains |
 
-Example: switch the default model to `gpt-5.5`
+Example: Change the default model to `gpt-5.5`
 
 ```json
 {
@@ -105,7 +105,7 @@ Example: switch the default model to `gpt-5.5`
 }
 ```
 
-If you want to explicitly use the Claude-compatible provider instead:
+If you explicitly want to use the Claude-compatible provider, do it like this:
 
 ```json
 {
@@ -119,80 +119,80 @@ If you want to explicitly use the Claude-compatible provider instead:
 }
 ```
 
-## Token Setup Best Practices
+## Token Best Practices
 
-| Setting | Recommendation | Notes |
-|---------|----------------|-------|
-| Dedicated token | Required | Do not reuse the same token across OpenClaw, Cursor, and CLI tools |
-| Model allowlist | Recommended | Keep only the models OpenClaw should use |
-| IP restriction | Recommended on fixed-egress servers | Restrict the token to the server IP when possible |
-| Quota cap | Recommended | Give the bot its own daily or monthly budget |
-| Environment split | Recommended | Use separate tokens for production bots and test bots |
-| Leak response | Immediate rotation | If `openclaw.json`, logs, or shared links expose credentials, rotate both the Crazyrouter token and gateway token |
+| Setting | Recommendation | Description |
+|------|------|------|
+| Dedicated token | Must | Do not share the same token for OpenClaw and other IDE/CLI |
+| Model whitelist | Recommended to enable | Only keep models that OpenClaw will use to reduce misuse |
+| IP restriction | Recommended if server IP is fixed | If your host’s outbound IP is fixed, restrict the token to this server |
+| Quota limit | Recommended | Set a separate monthly or daily budget for the bot scenario |
+| Environment isolation | Recommended | Separate tokens for production and test bots |
+| Leak handling | Immediate rotation | If `openclaw.json`, logs, or share links exposed the token, reset Crazyrouter and gateway tokens immediately |
 
 <Tip>
-OpenClaw uses at least two credential types: the Crazyrouter `sk-...` API key for model calls, and the local gateway login token for WebUI access. Keep them separate.
+There are at least two types of credentials in OpenClaw: one is Crazyrouter’s `sk-...` API Key, used to call models; the other is OpenClaw’s local gateway login token, used for accessing the WebUI. Do not mix the two.
 </Tip>
 
-## Verification Checklist
+## First Successful Checklist
 
-- [ ] `http://<server-ip>:18789?token=<gateway_token>` opens successfully
-- [ ] the WebUI signs in without looping back to login
-- [ ] the default model returns the first response successfully
-- [ ] after a model change, a service restart still works
-- [ ] `journalctl --user -u openclaw -f` or `tail -f ~/.openclaw/openclaw.log` shows successful requests
-- [ ] if Telegram is enabled, the bot can reply to a test message
-- [ ] a backup of `~/.openclaw/openclaw.json` is saved
+- [ ] Browser can open `http://<server IP>:18789?token=<gateway_token>`
+- [ ] OpenClaw WebUI can enter normally, does not repeatedly ask for login
+- [ ] The default model can return the first message successfully
+- [ ] After changing the model, the service can still respond normally after restart
+- [ ] `journalctl --user -u openclaw -f` or `tail -f ~/.openclaw/openclaw.log` can see successful requests
+- [ ] If Telegram is enabled, messages sent to the bot can receive replies
+- [ ] `~/.openclaw/openclaw.json` backup has been saved
 
-## Key Files And Config Fields
+## Key Files and Configuration Items
 
 ### File Locations
 
-| Path | Purpose |
-|------|---------|
-| `~/.openclaw/openclaw.json` | main config file |
-| `~/.openclaw/start-gateway.sh` | launcher script used by the service |
-| `~/.openclaw/crash-guard.cjs` | stability patch written by the installer |
-| `~/.openclaw/credentials/.telegram-owner-paired` | marker file created after the first Telegram owner is paired |
+| Path | Usage |
+|------|------|
+| `~/.openclaw/openclaw.json` | Main configuration file |
+| `~/.openclaw/start-gateway.sh` | Startup script, called by the system service |
+| `~/.openclaw/crash-guard.cjs` | Stability patch written by the installer |
+| `~/.openclaw/credentials/.telegram-owner-paired` | Mark file after Telegram's first owner pairing is completed |
 | `~/.config/systemd/user/openclaw.service` | Linux user-level systemd service |
 | `~/Library/LaunchAgents/com.crazyrouter.openclaw.plist` | macOS launchd service |
-| `~/.openclaw/openclaw.log` | macOS runtime log |
+| `~/.openclaw/openclaw.log` | macOS general log |
 | `~/.openclaw/openclaw.err` | macOS error log |
 
-### Most Common Config Fields
+### Most Frequently Modified Config Items
 
-| JSON path | Purpose | Typical change |
-|-----------|---------|----------------|
-| `models.providers.crazyrouter.apiKey` | Crazyrouter OpenAI-compatible key | rotate API key |
-| `models.providers.crazyrouter.baseUrl` | OpenAI-compatible base URL | usually keep `https://api.crazyrouter.com/v1` |
-| `agents.defaults.model.primary` | default primary model | switch to `gpt-5.5`, `claude-opus-4-8`, and so on |
-| `gateway.port` | WebUI / gateway port | move to a different port |
-| `gateway.auth.token` | WebUI login token | rotate immediately if exposed |
-| `gateway.bind` | listener scope | default is `lan` |
-| `channels.telegram.botToken` | Telegram Bot Token | fill this when enabling Telegram |
-| `plugins.entries.*.enabled` | whether each IM plugin is enabled | disable unused plugins |
-| `env.vars.OPENAI_API_KEY` | API key reused by some internal capabilities | usually keep it aligned with the main key |
+| JSON Path | Function | Common Modification |
+|-----------|------|----------|
+| `models.providers.crazyrouter.apiKey` | Crazyrouter OpenAI-compatible key | Change API Key |
+| `models.providers.crazyrouter.baseUrl` | OpenAI-compatible base URL | Usually keep `https://api.crazyrouter.com/v1` |
+| `agents.defaults.model.primary` | Default main model | Switch to `gpt-5.5`, `claude-opus-4-8`, etc. |
+| `gateway.port` | WebUI/gateway port | Change to your own port |
+| `gateway.auth.token` | WebUI login token | Change immediately if leaked |
+| `gateway.bind` | Listening range | Default is `lan` |
+| `channels.telegram.botToken` | Telegram Bot Token | Fill when Telegram is enabled |
+| `plugins.entries.*.enabled` | Whether each IM plugin is enabled | Turn off unused plugins as needed |
+| `env.vars.OPENAI_API_KEY` | API Key for reuse by some internal capabilities | Usually keep same as main key |
 
-## IM Integrations
+## IM Integration
 
 ### Telegram
 
-Telegram is the most complete path supported by the installer and should be your first integration:
+This is the most fully supported channel by the installer, it is recommended to start with Telegram:
 
-1. Open Telegram and search for `@BotFather`
-2. Send `/newbot` and create your bot
-3. When the installer asks `Set up Telegram Bot now?`, choose `Y`
-4. Paste the Bot Token so the installer can write it into `~/.openclaw/openclaw.json`
-5. After the installer restarts the gateway, send any message to the bot
-6. The first sender is auto-paired as the owner
-7. If auto-pairing fails, run:
+1. Search `@BotFather` on Telegram
+2. Send `/newbot` to create a bot, and get the Bot Token
+3. When the installer asks `Set up Telegram Bot now?`, select `Y`
+4. Paste the Bot Token, the installer will write it into `~/.openclaw/openclaw.json`
+5. After the installer automatically restarts the gateway, send any message to the bot
+6. The first person to send a message will be automatically paired as the owner
+7. If automatic pairing fails, execute:
 
 ```bash
 openclaw pairing list
 openclaw pairing approve <code>
 ```
 
-If you need to add Telegram manually later, this is the structure the installer writes:
+When manually editing the Telegram config, refer to the structure written by the installer:
 
 ```json
 {
@@ -215,7 +215,7 @@ If you need to add Telegram manually later, this is the structure the installer 
 
 ### Other IM Platforms
 
-The installer pre-enables plugin entries for:
+The installer pre-enables these plugin entries:
 
 - `dingtalk`
 - `openclaw-wecom`
@@ -224,27 +224,27 @@ The installer pre-enables plugin entries for:
 - `slack`
 - `feishu`
 
-Those channels usually still require you to add your own platform credentials and the matching `channels.<name>` config. A safe rollout pattern is:
+However, these channels usually require you to fill in the platform credentials and corresponding `channels.<name>` config yourself. The recommended workflow is:
 
-1. create the bot or app in the target platform
-2. write the platform credentials into `~/.openclaw/openclaw.json`
-3. confirm `plugins.entries.<name>.enabled` is `true`
-4. restart the OpenClaw service
-5. validate the channel by checking logs and sending a test message
+1. First, create a bot or app on the relevant platform
+2. Write the platform credentials into `~/.openclaw/openclaw.json`
+3. Make sure the corresponding `plugins.entries.<name>.enabled` is `true`
+4. Restart the OpenClaw service
+5. Check the logs to verify if the channel was successfully loaded
 
-| Platform | Installer state | What you still need to do |
-|----------|-----------------|---------------------------|
-| Telegram | interactive setup supported | provide Bot Token and complete owner pairing |
-| DingTalk | plugin installs and is enabled | add robot credentials and channel config |
-| WeCom | plugin installs and is enabled | add enterprise app credentials and channel config |
-| QQ Bot | plugin installs and is enabled | add bot credentials and channel config |
-| Discord / Slack / Feishu | plugin entry is enabled | add the platform-specific channel credentials |
+| Platform | Installer Status | What You Still Need to Do |
+|------|------------|----------------|
+| Telegram | Supports interactive configuration | Fill in Bot Token, complete owner pairing |
+| DingTalk | Plugin will be installed and enabled | Fill in bot credentials and relevant channel config |
+| WeCom | Plugin will be installed and enabled | Fill in enterprise app credentials and channel config |
+| QQ Bot | Plugin will be installed and enabled | Fill in bot credentials and channel config |
+| Discord/Slack/Feishu | Plugin entry already enabled | Complete channel credentials as required by each bot |
 
 <Note>
-If OpenClaw will be connected to a team IM workspace, create a separate Crazyrouter token for that bot and enforce a tighter model allowlist and quota cap.
+If you are preparing to connect OpenClaw to team IM, it is strongly recommended to create a separate Crazyrouter token for the team bot, and set a stricter model whitelist and quota.
 </Note>
 
-## Service Management And Logs
+## Service Management and Logs
 
 <Tabs>
   <Tab title="Linux (systemd)">
@@ -256,7 +256,7 @@ If OpenClaw will be connected to a team IM workspace, create a separate Crazyrou
     journalctl --user -u openclaw -f
     ```
 
-    The installer also attempts `loginctl enable-linger $(whoami)` so the user-level service can keep running after you disconnect your SSH session.
+    Note: The installer will try to execute `loginctl enable-linger $(whoami)`, so that even if you exit SSH, user-level services outside the session can continue to run.
   </Tab>
   <Tab title="macOS (launchd)">
     ```bash
@@ -268,44 +268,44 @@ If OpenClaw will be connected to a team IM workspace, create a separate Crazyrou
     cat ~/.openclaw/openclaw.err
     ```
 
-    On macOS, `openclaw.log` is usually enough for runtime activity, while `openclaw.err` is the first place to look when startup fails.
+    Note: On macOS, `openclaw.log` is usually used for running logs, `openclaw.err` is better for troubleshooting startup failures.
   </Tab>
 </Tabs>
 
-## Performance And Cost Tips
+## Performance and Cost Recommendations
 
-- start with `claude-opus-4-8` until the whole flow is stable
-- keep routine bot traffic on `claude-opus-4-8` or move selected tasks to `gemini-3.1-pro` when cost matters more
-- use `gpt-5.5` for coding-heavy agent workflows
-- split WebUI, Telegram, and team IM usage across different tokens for better cost tracking
-- keep only the models and plugins you actually need
+- Use `claude-opus-4-8` by default first, then refine model separation after confirming the whole workflow
+- For high-frequency daily Q&A or bot notifications, switch back for cost to `claude-opus-4-8` or `gemini-3.1-pro`
+- Use `gpt-5.5` separately for coding workflows
+- In teams, assign Telegram / enterprise IM / WebUI different tokens for cost accounting and risk isolation
+- Keep only necessary plugins and models to reduce cost from misuse
 
 ## Upgrade Guide
 
-The safest upgrade path is to rerun the installer, because it refreshes the OpenClaw package, patches, and service script together:
+The most reliable way to upgrade is to rerun the installer, as it will update the OpenClaw package, patches, and service scripts together.
 
 <Steps>
-  <Step title="Back up the current config">
+  <Step title="Back up the current configuration">
     ```bash
     cp ~/.openclaw/openclaw.json ~/.openclaw/openclaw.json.bak
     ```
   </Step>
-  <Step title="Run the installer again">
+  <Step title="Execute the installation script again">
     ```bash
     curl -fsSL https://raw.githubusercontent.com/xujfcn/crazyrouter-openclaw/main/install.sh | bash
     ```
   </Step>
-  <Step title="Re-check custom settings">
-    If you manually added non-Telegram channels or changed the default model, compare the updated `openclaw.json` with your backup and re-apply the custom sections if needed.
+  <Step title="Check if custom configuration needs to be restored">
+    If you have manually added any channels other than Telegram or changed the default model, re-compare `openclaw.json` to make sure these custom settings are still present.
   </Step>
   <Step title="Restart and verify">
-    Open the WebUI again and confirm your models, logs, and IM channels still work.
+    Reopen the WebUI and confirm that the model, logs, and connected IM channels are working properly.
   </Step>
 </Steps>
 
-If you intentionally want to upgrade only the OpenClaw npm package, you can run `npm install -g openclaw@latest` and then restart the service, but that path will not re-apply installer-managed patches and script updates.
+If you clearly only want to upgrade the OpenClaw npm package, you can also execute `npm install -g openclaw@latest` first, then restart the service; but this method will not re-apply patches and script updates from the installer.
 
-## Uninstall Guide
+## Uninstallation Guide
 
 <Tabs>
   <Tab title="Linux">
@@ -328,45 +328,44 @@ If you intentionally want to upgrade only the OpenClaw npm package, you can run 
   </Tab>
 </Tabs>
 
-If Node.js was installed only for OpenClaw, you can remove Node.js afterward once you confirm nothing else on the machine depends on it.
+If you installed Node.js specifically for OpenClaw at the beginning, you can also manually remove Node.js after confirming that no other projects depend on it.
 
-## Common Errors And Fixes
+## Common Errors and Fixes
 
-| Symptom | Likely cause | Fix |
-|---------|--------------|-----|
-| WebUI does not open | service is down, port is busy, or firewall is blocking access | check service state first, then verify port `18789` and firewall rules |
-| The page opens but keeps asking for login | wrong `gateway.auth.token` or not using the auto-login URL | re-check the `?token=...` link printed by the installer and confirm `openclaw.json` |
-| `401 unauthorized` | invalid or expired Crazyrouter API key in `models.providers.*.apiKey` | update the API key and restart the service |
-| `403` or `model not allowed` | the requested model is not allowed by the Crazyrouter token | add that model to the token allowlist |
-| `429` or quota exhaustion | budget or rate limit reached | raise the budget, switch to a cheaper model, or split traffic across tokens |
-| The old model is still used after editing config | service was not restarted or the provider path is wrong | check `agents.defaults.model.primary`, then restart |
-| Telegram bot does not reply | missing `botToken`, owner pairing never completed, or service was not restarted | check `channels.telegram`, restart, and trigger pairing again |
-| Linux install says the service may not have started | user-level systemd service failed | inspect `journalctl --user -u openclaw -f` |
-| macOS install says the service may not have started | launchd startup failed | inspect `~/.openclaw/openclaw.err` |
+| Phenomenon | Common Cause | Fix |
+|------|----------|----------|
+| WebUI does not open | Service not started, port occupied, firewall not open on host | Check the service status first, then check `18789` port and firewall |
+| The page opens but keeps asking for login | `gateway.auth.token` is incorrect, or you are not using the auto-login address | Re-read the `?token=...` link output by the installer, and check `openclaw.json` if necessary |
+| 401 unauthorized | Crazyrouter key in `models.providers.*.apiKey` is invalid or expired | Update the API Key and restart the service |
+| 403 / model not allowed | The model OpenClaw is requesting is not in the Crazyrouter token whitelist | Allow the corresponding model in the token settings |
+| 429 / quota exhausted | Token overused or rate limit triggered | Increase quota, use a cheaper model, or split the token |
+| Old model is still used after model change | Service was not restarted, or wrong provider path was changed | Check `agents.defaults.model.primary`, then restart |
+| Telegram Bot doesn't reply | `botToken` not written, owner pairing not complete, or service not restarted | Check `channels.telegram`, restart the service, resend a message to trigger pairing |
+| After installing on Linux prompts that service might not be started | systemd user service failed | Run `journalctl --user -u openclaw -f` to see the error |
+| After installing on macOS prompts that service might not be started | launchd failed to start | Check `~/.openclaw/openclaw.err` |
 
 ## FAQ
 
-### Which Crazyrouter base URL should I keep?
+### Which address should be used as the Crazyrouter backend?
 
-Leave the installer defaults unless you are intentionally changing provider modes: `https://api.crazyrouter.com/v1` for the OpenAI-compatible provider, and `https://api.crazyrouter.com` for Claude / MiniMax native-compatible providers.
+Just keep the value set by the installer by default: OpenAI compatible provider uses `https://api.crazyrouter.com/v1`, Claude / MiniMax natively compatible providers use `https://api.crazyrouter.com`.
 
-### Which default model should I keep first?
+### Which default model should I keep?
 
-For most users, keep `claude-opus-4-8` first. If OpenClaw is mainly a coding assistant, switch to `gpt-5.5`.
+In most cases, keep `claude-opus-4-8` first. If you mainly use OpenClaw as a code assistant, then switch to `gpt-5.5`.
 
-### Why is my expected model missing?
+### Why can't I see the model I want to use in the model list?
 
-Usually the model is not allowed by the Crazyrouter token, or the config is pointing at the wrong provider prefix.
+Usually because your Crazyrouter token hasn’t allowed that model, or you changed to a wrong provider prefix.
 
-### Why does Telegram work in DM but not in groups?
+### Why do private Telegram chats work but group chats don't?
 
-The installer sets Telegram group policy to `allowlist` by default. Adjust the Telegram channel config if your rollout needs broader group behavior.
+The installer sets the default Telegram group policy to `allowlist`. You need to further adjust the Telegram channel configuration according to your usage needs.
 
-### What is the safest way to expose OpenClaw externally?
+### How do I open OpenClaw to the public most safely?
 
-At minimum: restrict inbound access, protect `gateway.auth.token`, and use a dedicated Crazyrouter token for OpenClaw. If the host is public, add a reverse proxy and extra access control.
+At a minimum, do three things: restrict source access, protect `gateway.auth.token`, and use a separate Crazyrouter token for OpenClaw. If exposing directly to the public internet, it’s recommended to add a reverse proxy and extra access control.
 
-<Card title="View the installer repository" icon="github" href="https://github.com/xujfcn/crazyrouter-openclaw">
-  Review the installer source, file issues, or audit the one-click setup yourself.
+<Card title="View the installation script repository" icon="github" href="https://github.com/xujfcn/crazyrouter-openclaw">
+  Check the installation script, submit issues, or manually review the one-click installation logic.
 </Card>
-

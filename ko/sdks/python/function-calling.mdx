@@ -1,12 +1,12 @@
 ---
-title: 'Python Function Calling'
-description: 'Python으로 구현하는 Function Calling 전체 예제'
+title: 'Python 함수 호출'
+description: '완전한 Python 함수 호출 예제'
 ---
-> 업데이트: 2026-06-06
+> 내용 업데이트: 2026-06-09
 
 ## 개요
 
-Function Calling은 모델이 사용자가 정의한 함수를 호출하여 외부 시스템과 상호작용할 수 있게 합니다. 모델은 함수를 직접 실행하지 않고, 함수명과 파라미터를 반환하며, 사용자의 코드가 이를 실행한 후 결과를 모델에 다시 전달합니다.
+함수 호출은 모델이 사용자가 정의한 함수를 호출할 수 있도록 하며, 외부 시스템과의 상호작용을 가능하게 합니다. 모델은 함수를 직접 실행하지 않고, 함수 이름과 인수를 반환하며, 이 값들을 여러분의 코드가 실행하고 결과를 모델에 다시 반환합니다.
 
 ## 전체 예제
 
@@ -16,24 +16,24 @@ from openai import OpenAI
 
 client = OpenAI(api_key="sk-xxx", base_url="https://api.crazyrouter.com/v1")
 
-# 1. 도구 정의
+# 1. Define tools
 tools = [
     {
         "type": "function",
         "function": {
             "name": "get_weather",
-            "description": "지정한 도시의 날씨 정보를 가져옵니다",
+            "description": "Get weather information for a specified city",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "city": {
                         "type": "string",
-                        "description": "도시명, 예: 베이징"
+                        "description": "City name, e.g.: New York"
                     },
                     "unit": {
                         "type": "string",
                         "enum": ["celsius", "fahrenheit"],
-                        "description": "온도 단위"
+                        "description": "Temperature unit"
                     }
                 },
                 "required": ["city"]
@@ -44,12 +44,12 @@ tools = [
         "type": "function",
         "function": {
             "name": "search_products",
-            "description": "상품을 검색합니다",
+            "description": "Search for products",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "query": {"type": "string", "description": "검색 키워드"},
-                    "max_price": {"type": "number", "description": "최고 가격"}
+                    "query": {"type": "string", "description": "Search keyword"},
+                    "max_price": {"type": "number", "description": "Maximum price"}
                 },
                 "required": ["query"]
             }
@@ -57,15 +57,15 @@ tools = [
     }
 ]
 
-# 2. 함수 구현 모의
+# 2. Mock function implementations
 def get_weather(city, unit="celsius"):
-    return {"city": city, "temperature": 22, "unit": unit, "condition": "맑음"}
+    return {"city": city, "temperature": 22, "unit": unit, "condition": "Sunny"}
 
 def search_products(query, max_price=None):
-    return [{"name": f"{query} 상품A", "price": 99}, {"name": f"{query} 상품B", "price": 199}]
+    return [{"name": f"{query} Product A", "price": 99}, {"name": f"{query} Product B", "price": 199}]
 
-# 3. 대화 루프
-messages = [{"role": "user", "content": "베이징 오늘 날씨 어때? 우산도 좀 검색해줘"}]
+# 3. Conversation loop
+messages = [{"role": "user", "content": "What's the weather like in New York today? Also search for umbrellas"}]
 
 response = client.chat.completions.create(
     model="gpt-5.5",
@@ -76,7 +76,7 @@ response = client.chat.completions.create(
 
 message = response.choices[0].message
 
-# 4. 도구 호출 처리
+# 4. Handle tool calls
 if message.tool_calls:
     messages.append(message)
 
@@ -95,7 +95,7 @@ if message.tool_calls:
             "content": json.dumps(result, ensure_ascii=False)
         })
 
-    # 5. 최종 응답 받기
+    # 5. Get final response
     final = client.chat.completions.create(
         model="gpt-5.5",
         messages=messages,
@@ -104,7 +104,7 @@ if message.tool_calls:
     print(final.choices[0].message.content)
 ```
 
-## 특정 함수 강제 호출
+## 특정 함수 호출 강제하기
 
 ```python
 response = client.chat.completions.create(
@@ -117,9 +117,9 @@ response = client.chat.completions.create(
 
 ## 지원 모델
 
-현재 문서의 OpenAI 호환 Function Calling 예제에서는 다음 검증된 모델을 우선 사용하는 것을 권장합니다:
+이 페이지의 OpenAI 호환 함수 호출 예시에서는 다음 검증된 기준 모델을 먼저 사용하세요:
 - `gpt-5.5`
 
 <Note>
-  `gpt-5.5`의 도구 호출은 2026년 3월 23일 Crazyrouter 프로덕션 환경에서 실측이 완료되었습니다. 다른 제조사 모델의 도구 호출 기능은 연동 형식과 지원 세부사항이 다를 수 있으므로 각 전용 페이지를 우선 참고하십시오.
+  `gpt-5.5` 도구 호출은 Crazyrouter 프로덕션에서 2026년 3월 23일에 검증되었습니다. 다른 벤더의 경우, 요청 형식과 지원 사항이 다를 수 있으므로 우선 해당 벤더의 전용 페이지를 확인하세요.
 </Note>

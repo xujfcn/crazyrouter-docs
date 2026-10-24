@@ -1,0 +1,139 @@
+---
+title: "Ideogram Versión Antigua"
+description: "Genera imágenes, mezcla, amplía y describe utilizando la API de la versión antigua de Ideogram"
+---
+> Contenido actualizado: 2026-06-09
+
+# Ideogram Versión Antigua
+
+La API de la versión antigua de Ideogram proporciona funciones básicas de generación de imágenes.
+
+<Note>
+  Se recomienda usar [Ideogram V3](/es/images/ideogram/v3) para obtener mejores resultados de generación.
+</Note>
+
+## Generar imágenes
+
+```
+POST /ideogram/generate
+```
+
+### Parámetros de solicitud
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `image_request` | object | Sí | Objeto de solicitud de imagen |
+| `image_request.prompt` | string | Sí | Texto de entrada (prompt) |
+| `image_request.model` | string | No | Versión del modelo: `V_2`, `V_2_TURBO` |
+| `image_request.aspect_ratio` | string | No | Relación de aspecto |
+| `image_request.magic_prompt_option` | string | No | Mejora de prompt |
+| `image_request.style_type` | string | No | Tipo de estilo |
+| `image_request.negative_prompt` | string | No | Prompt negativo |
+
+### Ejemplo de solicitud
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/ideogram/generate \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "image_request": {
+      "prompt": "A futuristic cityscape at night with neon lights",
+      "model": "V_2",
+      "aspect_ratio": "ASPECT_16_9",
+      "magic_prompt_option": "AUTO"
+    }
+  }'
+```
+
+### Ejemplo de respuesta
+
+```json
+{
+  "created": 1709123456,
+  "data": [
+    {
+      "url": "https://ideogram.ai/assets/image/...",
+      "prompt": "A futuristic cityscape at night with neon lights",
+      "resolution": "1344x768",
+      "seed": 67890
+    }
+  ]
+}
+```
+
+---
+
+## Mezcla Remix
+
+```
+POST /ideogram/remix
+```
+
+Genera variantes basadas en una imagen de referencia.
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/ideogram/remix \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "image_request": {
+      "prompt": "Same scene in anime style",
+      "model": "V_2"
+    },
+    "image_file": "https://example.com/photo.jpg"
+  }'
+```
+
+---
+
+## Ampliar imagen
+
+```
+POST /ideogram/upscale
+```
+
+Amplía la imagen a una resolución más alta.
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/ideogram/upscale \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "image_request": {
+      "prompt": "high quality detailed image"
+    },
+    "image_file": "https://example.com/photo.jpg"
+  }'
+```
+
+---
+
+## Describir imagen
+
+```
+POST /ideogram/describe
+```
+
+Permite que el modelo describa el contenido de la imagen y genere el prompt correspondiente.
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/ideogram/describe \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "image_file": "https://example.com/photo.jpg"
+  }'
+```
+
+### Ejemplo de respuesta
+
+```json
+{
+  "descriptions": [
+    {
+      "text": "A futuristic cityscape at night with vibrant neon lights reflecting off wet streets, tall skyscrapers with holographic advertisements"
+    }
+  ]
+}
+```

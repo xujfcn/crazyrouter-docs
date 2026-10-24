@@ -1,10 +1,11 @@
 ---
-title: 'Python OpenAI SDK'
-description: 'Connect to Crazyrouter using the OpenAI SDK, LangChain, and LlamaIndex'
+title: "Python OpenAI SDK"
+description: "OpenAI公式SDK、LangChain、LlamaIndex を使用して Crazyrouter に接続する"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-## OpenAI Official SDK
+
+## OpenAI 公式 SDK
 
 ```bash
 pip install openai
@@ -18,17 +19,17 @@ client = OpenAI(
     base_url="https://api.crazyrouter.com/v1"
 )
 
-# Synchronous call
+# 同步调用
 response = client.chat.completions.create(
     model="gpt-5.5",
-    messages=[{"role": "user", "content": "Hello"}],
+    messages=[{"role": "user", "content": "你好"}],
     temperature=0.7,
     max_tokens=1000
 )
 print(response.choices[0].message.content)
 ```
 
-### Async Call
+### 非同期呼び出し
 
 ```python
 from openai import AsyncOpenAI
@@ -42,14 +43,14 @@ client = AsyncOpenAI(
 async def main():
     response = await client.chat.completions.create(
         model="gpt-5.5",
-        messages=[{"role": "user", "content": "Hello"}]
+        messages=[{"role": "user", "content": "你好"}]
     )
     print(response.choices[0].message.content)
 
 asyncio.run(main())
 ```
 
-## LangChain Integration
+## LangChain 統合
 
 ```bash
 pip install langchain-openai
@@ -65,12 +66,12 @@ llm = ChatOpenAI(
     temperature=0.7
 )
 
-# Simple call
-response = llm.invoke("Write a quicksort in Python")
+# 简单调用
+response = llm.invoke("用 Python 写一个快速排序")
 print(response.content)
 ```
 
-### LangChain Chain
+### LangChain チェーン呼び出し
 
 ```python
 from langchain_openai import ChatOpenAI
@@ -83,16 +84,16 @@ llm = ChatOpenAI(
 )
 
 prompt = ChatPromptTemplate.from_messages([
-    ("system", "You are a {role}."),
+    ("system", "你是一个{role}。"),
     ("user", "{input}")
 ])
 
 chain = prompt | llm
-response = chain.invoke({"role": "Python expert", "input": "Explain decorators"})
+response = chain.invoke({"role": "Python 专家", "input": "解释装饰器"})
 print(response.content)
 ```
 
-### LangChain Embeddings
+### LangChain 埋め込み
 
 ```python
 from langchain_openai import OpenAIEmbeddings
@@ -103,11 +104,11 @@ embeddings = OpenAIEmbeddings(
     base_url="https://api.crazyrouter.com/v1"
 )
 
-vectors = embeddings.embed_documents(["Text one", "Text two"])
-print(f"Vector dimensions: {len(vectors[0])}")
+vectors = embeddings.embed_documents(["文本一", "文本二"])
+print(f"向量维度: {len(vectors[0])}")
 ```
 
-## LlamaIndex Integration
+## LlamaIndex 統合
 
 ```bash
 pip install llama-index-llms-openai llama-index-embeddings-openai
@@ -117,34 +118,34 @@ pip install llama-index-llms-openai llama-index-embeddings-openai
 from llama_index.llms.openai import OpenAI
 from llama_index.embeddings.openai import OpenAIEmbedding
 
-# LLM configuration
+# LLM 配置
 llm = OpenAI(
     model="gpt-5.5",
     api_key="sk-xxx",
     api_base="https://api.crazyrouter.com/v1"
 )
 
-response = llm.complete("What is RAG?")
+response = llm.complete("什么是 RAG？")
 print(response.text)
 
-# Embedding configuration
+# Embedding 配置
 embed_model = OpenAIEmbedding(
     model="text-embedding-3-large",
     api_key="sk-xxx",
     api_base="https://api.crazyrouter.com/v1"
 )
 
-vector = embed_model.get_text_embedding("Test text")
-print(f"Dimensions: {len(vector)}")
+vector = embed_model.get_text_embedding("测试文本")
+print(f"维度: {len(vector)}")
 ```
 
 <Note>
-  The chat examples above default to `gpt-5.5`, which was verified successfully in Crazyrouter production on March 23, 2026. If you replace the model, prefer other verified options such as `claude-opus-4-8`; the embedding examples should continue using `text-embedding-3-large`.
+  上記のチャット例は、デフォルトで2026年3月23日に本番環境で実際に成功を確認した `gpt-5.5` を使用しています。モデルを変更する場合は、まず同じく検証済みの `claude-opus-4-8` への置き換えを優先してください。Embedding の例では引き続き `text-embedding-3-large` を使用してください。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [GPT Image 1.5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [OpenAI の全モデルと料金](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [GPT Image 1.5 モデルページ：リアルタイム価格、実際のサンプル、呼び出しコード](https://crazyrouter.com/ja/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT Image 2 モデルページ：リアルタイム価格、実際のサンプル、呼び出しコード](https://crazyrouter.com/ja/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [OpenAI 全モデルと価格](https://crazyrouter.com/ja/models/openai?utm_source=docs&utm_medium=related)

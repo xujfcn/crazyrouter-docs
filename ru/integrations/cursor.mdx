@@ -1,168 +1,168 @@
 ---
-title: 'Cursor Setup Guide'
-description: 'Connect Crazyrouter to Cursor and understand the usable scope, limitations, and troubleshooting for BYOK mode'
+title: "Учебник по настройке Cursor"
+description: "Интегрируйте Crazyrouter в Cursor и узнайте доступный диапазон, ограничения и способы устранения неисправностей в режиме BYOK"
 ---
-> Дата обновления: 2026-06-23
+> Обновление содержания: 2026-06-09
 
-Cursor is a practical way to bring Crazyrouter into your day-to-day coding workflow for chat, code explanation, refactoring suggestions, and general editing help.
+Cursor подходит для интеграции Crazyrouter в ежедневный рабочий процесс программирования: для чата, объяснения кода, советов по рефакторингу и обычной помощи при редактировании.
 
-## Overview
+## Обзор
 
-With Cursor's BYOK (Bring Your Own Key) flow, you can route part of your chat-model traffic through Crazyrouter and pay against your own token instead of bundling everything into Cursor usage.
+Благодаря функции BYOK (Bring Your Own Key — используйте свой ключ) в Cursor вы можете перенаправить некоторые запросы чат-моделей на Crazyrouter и оплачивать их по своему токену.
 
-- recommended path: OpenAI-compatible mode
-- Crazyrouter base URL: `https://api.crazyrouter.com/v1`
-- auth format: `sk-...` token
-- best first-use features: Chat, Ask, and normal editing conversations
+- Рекомендуемый способ подключения: режим совместимости с OpenAI
+- Базовый URL Crazyrouter: `https://api.crazyrouter.com/v1`
+- Метод аутентификации: `sk-...` токен
+- Лучшая первая интеграция: Chat, Ask, обычные диалоги для редактирования
 
 <Warning>
-According to Cursor's official documentation, custom API keys only work with standard chat models. Features that depend on specialized models, such as Tab Completion, continue using Cursor's built-in models. That limitation comes from Cursor, not from Crazyrouter.
+Согласно официальной документации Cursor, `Custom API keys only work with standard chat models`, такие функции, как Tab Completion, которые зависят от специализированных моделей, продолжат использовать встроенные модели Cursor. Это ограничение связано с самим Cursor, а не с Crazyrouter.
 </Warning>
 
-## Best For
+## Для кого подходит
 
-- developers who want to use Crazyrouter tokens inside Cursor
-- teams that want better control over model choice, cost, and quota
-- users who want Cursor chat routed through Crazyrouter
-- setups where IDE, CLI, and automation tokens should be tracked separately
+- Разработчики, которые хотят использовать единый Crazyrouter токен в Cursor
+- Те, кто хочет контролировать выбор моделей, расходы и лимиты
+- Команды, желающие интегрировать чат-функции Cursor с Crazyrouter
+- Те, кто хочет разделить оплату и лимиты для разных IDE / CLI
 
-## Protocol Used
+## Используемый протокол
 
-Recommended protocol: `OpenAI-compatible API`
+Рекомендуемый протокол: `OpenAI-compatible API`
 
-When connecting Cursor to Crazyrouter, use this OpenAI-compatible base URL:
+В Cursor при интеграции Crazyrouter используйте базу, совместимую с OpenAI:
 
 ```text
 https://api.crazyrouter.com/v1
 ```
 
-Do not use:
+Не используйте:
 
 - `https://api.crazyrouter.com`
 - `https://api.crazyrouter.com/v1/chat/completions`
 
-## Prerequisites
+## Предварительные требования
 
-| Item | Notes |
-|------|-------|
-| Crazyrouter account | Create one at [crazyrouter.com](https://crazyrouter.com) |
-| Crazyrouter token | Create a dedicated `sk-...` token for Cursor |
-| Cursor desktop app | Update to a current stable version before setup |
-| Allowed models | Make sure the token allows at least 1 to 2 OpenAI-compatible chat models |
+| Проект | Описание |
+|------|------|
+| Аккаунт Crazyrouter | Сначала зарегистрируйтесь на [crazyrouter.com](https://crazyrouter.com) |
+| Токен Crazyrouter | Рекомендуется создать отдельный `sk-...` токен для использования в Cursor |
+| Десктопная версия Cursor | Рекомендуется обновить до последней стабильной версии перед настройкой |
+| Доступные модели | Минимум один-два совместимых с OpenAI чат-модели должны быть разрешены для токена |
 
-Recommended starter allowlist:
+Рекомендуется сначала разрешить одну из этих моделей:
 
 - `gpt-5.5`
 - `claude-opus-4-8`
 - `gemini-3.1-pro`
 
 <Tip>
-If you also plan to configure Claude Code, Codex, or Cline, do not share the same token with Cursor. Separate tokens make quota control and debugging much easier.
+Если вы также будете настраивать Claude Code, Codex, Cline, не используйте один токен для Cursor и этих моделей. Лучше создать отдельные токены — это облегчает диагностику и контроль расходов.
 </Tip>
 
-## Quick Start
+## Быстрый старт за 5 минут
 
 <Steps>
-  <Step title="Create a Cursor-specific token">
-    In Crazyrouter, create a new token and name it something obvious like `cursor`. Start with a small allowlist such as `gpt-5.5` and `claude-opus-4-8`.
+  <Step title="Создать специальный токен для Cursor">
+    В панели управления Crazyrouter создайте новый токен, желательно назвать его `cursor`. Сначала включите небольшой белый список моделей, например, `gpt-5.5` и `claude-opus-4-8`.
   </Step>
-  <Step title="Open Cursor settings">
-    Open Cursor and go to `Cursor Settings` → `Models`.
+  <Step title="Открыть настройки Cursor">
+    Откройте Cursor, зайдите в `Cursor Settings` → `Models`.
   </Step>
-  <Step title="Fill the OpenAI connection fields">
-    In the OpenAI-related section, enter:
-    - `OpenAI API Key`: your `sk-...`
+  <Step title="Ввести данные подключения OpenAI">
+    В разделе настройки, посвященном OpenAI, заполните:
+    - `OpenAI API Key`: ваш `sk-...`
     - `Override OpenAI Base URL`: `https://api.crazyrouter.com/v1`
 
-    If your Cursor build does not show `Override OpenAI Base URL`, your current version does not fully expose the custom OpenAI-compatible endpoint path yet. In that case, upgrade Cursor first or wait for improved support on the Cursor side.
+    Если в вашей версии Cursor нет `Override OpenAI Base URL`, значит, поддержка пользовательских совместимых с OpenAI endpoint'ов в текущей версии неполная. Обновите Cursor или дождитесь улучшения функционала.
   </Step>
-  <Step title="Verify the key and pick a model">
-    Click `Verify`. After it succeeds, enable one model for the first validation. `gpt-5.5` is the safest starting point.
+  <Step title="Проверить ключ и выбрать модель">
+    Кликните `Verify`. После этого выберите одну модель для первой проверки, рекомендуем `gpt-5.5`.
   </Step>
-  <Step title="Run the first test">
-    Open the chat panel and send a simple request such as `Reply with only OK`. If that succeeds, Crazyrouter is connected.
+  <Step title="Завершить первое тестирование">
+    Откройте чат-панель Cursor и отправьте простой запрос, например: `Reply with only OK`. Если ответ успешно получен — интеграция Crazyrouter работает.
   </Step>
 </Steps>
 
-## Recommended Model Setup
+## Рекомендуемая настройка моделей
 
-| Use case | Recommended model | Why |
-|----------|-------------------|-----|
-| default baseline | `gpt-5.5` | verified successfully in production on March 23, 2026, and stable for the main Cursor OpenAI-compatible path |
-| high-quality code and long-form work | `claude-opus-4-8` | stronger for complex explanation, summaries, and code assistance |
-| Gemini fallback path | `gemini-3.1-pro` | useful as a second compatibility-validation path |
+| Сценарий | Рекомендуемая модель | Причина |
+|----------|----------|------|
+| Основная рабочая | `gpt-5.5` | Проверено в продакшене 23 марта 2026 года, отличная основа для режима совместимости с OpenAI в Cursor |
+| Качественный код и длинные тексты | `claude-opus-4-8` | Лучше подходит для сложных объяснений, суммирования и помощи с кодом |
+| Запасной Gemini | `gemini-3.1-pro` | Хорош для второй линии проверки совместимости |
 
-Recommended rollout order: get `gpt-5.5` working first, then test `claude-opus-4-8` and `gemini-3.1-pro`.
+Рекомендуемый порядок: сначала настройте `gpt-5.5`, затем последовательно добавляйте `claude-opus-4-8` и `gemini-3.1-pro`.
 
-## Token Setup Best Practices
+## Лучшие практики настройки токена
 
-| Setting | Recommendation | Notes |
-|---------|----------------|-------|
-| dedicated token | Required | Do not share one token across Cursor and other tools |
-| model allowlist | Recommended | Keep only the models Cursor should actually use |
-| IP restriction | Situational | Usually avoid it on laptops with changing egress IPs; consider it on fixed office networks |
-| quota cap | Strongly recommended | Give Cursor its own budget |
-| env separation | Recommended | Use separate tokens for personal machines, team workstations, and CI |
-| rotation | Recommended | If screenshots, recordings, or sync accidentally expose the token, rotate it quickly |
+| Настройка | Рекомендация | Описание |
+|------|------|------|
+| Отдельный токен | Обязательно | Для Cursor должен быть отдельный токен, не используйте с другими инструментами |
+| Белый список моделей | Рекомендуется включить | Разрешайте только те модели, которые реально используются в Cursor |
+| Ограничение IP | По ситуации | Обычно не рекомендуется для нестабильных IP, для офисной сети можно включить |
+| Лимит квоты | Очень рекомендуется | Для Cursor установите отдельный бюджет, чтобы не расходовать всю квоту |
+| Разделение на разработку/продакшен | Рекомендуется | Для персональных, командных и CI машин используйте разные токены |
+| Регулярная смена | Рекомендуется периодически обновлять | Для предотвращения утечек токена при скриншотах, записях или синхронизации — сразу меняйте |
 
-## Verification Checklist
+## Чек-лист проверки
 
-- [ ] `Verify` succeeds in `Cursor Settings` → `Models`
-- [ ] `Override OpenAI Base URL` is set to `https://api.crazyrouter.com/v1`
-- [ ] at least one Crazyrouter-backed model is selected
-- [ ] the first chat request succeeds
-- [ ] the matching request appears in Crazyrouter logs
-- [ ] token quota and model allowlist match your intended setup
-- [ ] you understand that Tab Completion and similar features may still bypass Crazyrouter
+- [ ] `Cursor Settings` → `Models`: ключ работает через `Verify`
+- [ ] `Override OpenAI Base URL` установлен правильно как `https://api.crazyrouter.com/v1`
+- [ ] Успешно выбрана хотя бы одна модель от Crazyrouter
+- [ ] Первый запрос в чат-панели получен успешно
+- [ ] В логах Crazyrouter видны соответствующие запросы
+- [ ] Квота токена и белый список моделей соответствуют ожиданиям
+- [ ] Вы знаете, что Tab Completion и другие специализированные функции могут не работать через Crazyrouter
 
-## Common Errors And Fixes
+## Частые ошибки и решения
 
-| Symptom | Likely cause | Fix |
-|---------|--------------|-----|
-| `Verify` fails | wrong API key or wrong base URL | re-check the `sk-...` key and `https://api.crazyrouter.com/v1` |
-| `401 unauthorized` | invalid, expired, or badly pasted token | generate a new token and paste the raw value again |
-| `403` or `model not allowed` | the model is not in the token allowlist | allow that model in Crazyrouter token settings |
-| `404` | base URL was set to the root domain or a full endpoint path | use exactly `https://api.crazyrouter.com/v1` |
-| no models show up or the list looks wrong | Cursor BYOK refresh failed or the current version has compatibility issues | restart Cursor, verify again, and update to the latest stable build if needed |
-| chat works but Tab Completion does not use Crazyrouter | Cursor officially keeps specialized features on built-in models | expected behavior, not a Crazyrouter outage |
-| custom models do not behave correctly | Cursor's custom OpenAI-compatible endpoint support is still inconsistent | get `gpt-5.5` working first, then test other models gradually |
-| cost jumps unexpectedly | one token is shared across too many tools or the allowlist is too wide | narrow the model set and give Cursor its own quota cap |
+| Симптом | Причина | Способ исправления |
+|------|----------|----------|
+| `Verify` не удаётся | Неверный API Key или базовый URL | Проверьте `sk-...` и `https://api.crazyrouter.com/v1` |
+| 401 unauthorized | Токен недействителен, истёк или скопирован с лишним пробелом | Сгенерируйте новый токен и вставьте чистое значение |
+| 403 / model not allowed | Модель не включена в белый список токена | Разрешите нужную модель в настройках Crazyrouter токена |
+| 404 | Base URL введён как корневой домен или специфический путь | Используйте `https://api.crazyrouter.com/v1` |
+| Некорректный список моделей или отсутствие моделей | BYOK Cursor не обновился или несовместима версия | Перезапустите Cursor, повторите Verify, при необходимости обновите до последней версии |
+| Чат работает, Tab Completion не через Crazyrouter | Ограничение Cursor: специализированные функции используют встроенные модели | Это ожидаемое поведение, не ошибка Crazyrouter |
+| Не удаётся использовать пользовательские модели | Нестабильная поддержка пользовательских endpoint'ов совместимых с OpenAI в Cursor | Сначала проверьте работу с `gpt-5.5`, затем переходите к другим моделям |
+| Неожиданно высокие расходы | Множество функций используют один токен или слишком широкий белый список | Ограничьте набор моделей, установите отдельный лимит для Cursor |
 
-## Performance And Cost Tips
+## Советы по производительности и стоимости
 
-- start with only `gpt-5.5`
-- use `gpt-5.5` for the baseline coding and chat workflow
-- add `claude-opus-4-8` or `gemini-3.1-pro` only after the baseline path is stable
-- split Cursor, Claude Code, and Codex traffic across different tokens
-- if usage looks suspiciously high, inspect Crazyrouter logs and check whether long multi-turn context is driving costs
+- На первом этапе включите только `gpt-5.5`
+- Для объяснения сложного кода, суммирования и рефакторинга используйте `gpt-5.5`
+- Для мультивендорной проверки добавьте `claude-opus-4-8` и `gemini-3.1-pro`
+- Если одновременно используете Claude Code / Codex, обязательно разделяйте токены для учёта расходов
+- При подозрениях на высокое потребление, проверьте логи Crazyrouter — возможно причиной является многотуровый контекст Cursor
 
 ## FAQ
 
-### Which base URL should I enter in Cursor?
+### Какой Base URL нужно указывать в Cursor?
 
-Use `https://api.crazyrouter.com/v1`.
+Укажите: `https://api.crazyrouter.com/v1`
 
-### Why do some Cursor features still not go through Crazyrouter?
+### Почему после ввода Key некоторые функции всё равно не работают через Crazyrouter?
 
-Because Cursor officially limits custom API keys to standard chat models. Specialized features such as Tab Completion continue using Cursor-managed models.
+Потому что по официальной информации Cursor, пользовательский API key покрывает только стандартные чат-модели. Например, Tab Completion и специализированные функции используют внутренние модели Cursor.
 
-### Which model should I use first?
+### С какой моделью лучше начать?
 
-Start with `gpt-5.5`. It is the latest OpenAI-compatible baseline already verified in production.
+Используйте `gpt-5.5` — это самая актуальная проверенная база совместимости с OpenAI.
 
-### Can I use Claude or other non-OpenAI models directly?
+### Можно ли напрямую пользоваться Claude или другими моделями?
 
-You can try them, but first complete a clean OpenAI-compatible baseline setup. Whether a custom model works cleanly in your current Cursor version depends on Cursor's compatibility implementation.
+Можно попробовать, но желательно сначала пройти базовую проверку совместимости OpenAI. Возможность использовать некоторые пользовательские модели зависит от реализации Cursor.
 
-### Chat works, but model selection keeps getting weird. What should I do?
+### Чат работает нормально, а выбор моделей сбивается — что делать?
 
-Restart Cursor, verify again, and fall back to `gpt-5.5` as the known-good baseline before expanding the config.
+Перезапустите Cursor, повторите Verify. Если сохранится проблема — приоритетно откатитесь к `gpt-5.5` как к проверенной базовой модели.
 
 <Note>
-If your main goal is a stable coding workflow through Crazyrouter, Claude Code, Codex, and Cline are often more direct and controllable than Cursor's custom endpoint path. Cursor is best treated as a chat-first and general editing integration.
+Если ваша основная задача — стабильная интеграция Crazyrouter в рабочий процесс программирования, то Claude Code, Codex, Cline зачастую более контролируемы чем пользовательские endpoint'ы Cursor. Cursor лучше всего подходит для чата и обычной вспомогательной редакторской работы.
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [Руководство по интеграции Cursor](https://crazyrouter.com/en/integrations/cursor?utm_source=docs&utm_medium=related)
+- [Гайд по интеграции Cursor (скрипт, Base URL, рекомендуемые модели)](https://crazyrouter.com/zh/integrations/cursor?utm_source=docs&utm_medium=related)

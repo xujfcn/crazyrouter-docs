@@ -1,48 +1,48 @@
 ---
-title: "Jimeng"
-description: "Use the Jimeng API to generate videos"
+title: "即梦"
+description: "Jimeng APIを使用して動画を生成する"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-# Jimeng
+# 即梦
 
-Jimeng is ByteDance's video generation service. On Crazyrouter, the recommended public contract is the `/jimeng/*` family. We do not expose the upstream `Action + Version` form as the primary customer-facing API.
+即梦（Jimeng）は字节跳动の動画生成サービスです。Crazyrouterは現在、対顧客推奨ルートとして`/jimeng/*`のみを利用しており、上流の`Action + Version`を直接主要プロトコルとして公開していません。
 
-## Currently Verified Scope
+## 現在検証済みの範囲
 
-- `POST /jimeng/submit/videos` is verified for `jimeng-video-3.0` text-to-video
-- single-image input and single-image `recamera` are verified
-- the currently stable positive-sample mainline is concentrated on `1080P`
-- `720P / recamera` is still a `ch119` carrier-level follow-up and is not being expanded into the current public hard contract
-- query results prefer Crazyrouter archived media URLs such as `https://media.crazyrouter.com/...`
-- the `expired` re-probe path is closed, but naturally expired samples are still a passive background tail item and do not block the mainline contract
+- `POST /jimeng/submit/videos`は`jimeng-video-3.0`のテキストから動画生成の投稿が検証済みです
+- 単一画像入力と単一画像`recamera`は検証済みで利用可能です
+- 現在安定している正サンプルの主チェーンは`1080P`に集中しています
+- `720P / recamera`は引き続き`ch119`の、carrierレベルのフォローアップとなっており、現在公開されているハード契約拡張範囲には含まれません
+- 検索結果はまずCrazyrouterで保存されているメディアアドレス（例：`https://media.crazyrouter.com/...`）を優先的に返します
+- `expired`の候補タスク再取得ルートはクローズドループ化済みですが、自然期限切れサンプルはバックグラウンドでより長い保持期間を待っており、主チェーン接続には影響しません
 
-## Submit Video Task
+## 動画タスクの投稿
 
 ```
 POST /jimeng/submit/videos
 ```
 
-### Recommended Public Model
+### 現在の推奨モデル
 
-- `jimeng-video-3.0`: current primary public model
+- `jimeng-video-3.0`：現在、主に対顧客推奨されているモデルです
 
-### Request Parameters
+### リクエストパラメータ
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model` | string | Yes | Public model name. `jimeng-video-3.0` is recommended |
-| `prompt` | string | Conditionally | Strongly recommended for text-to-video; also recommended for `recamera` motion intent |
-| `duration` | integer | No | Recommended values: `5` or `10` |
-| `aspect_ratio` | string | No | Aspect ratio such as `16:9` or `9:16` |
-| `image_url` | string | No | Single-image URL input |
-| `binary_data_base64` | string[] | No | Single-image Base64 input |
-| `image_urls` | string[] | No | Compatibility array form; do not treat it as a public multi-reference hard contract |
-| `template_id` | string | No | Single-image `recamera` template, for example `handheld` |
-| `camera_strength` | string | No | Single-image `recamera` strength, for example `weak`, `medium`, `strong` |
-| `req_key` | string | No | Reserved for debugging or compatibility flows; not recommended for normal integration |
+| パラメータ | タイプ | 必須 | 説明 |
+|------|------|------|------|
+| `model` | string | 必須 | 顧客向けモデル名。現在の推奨は`jimeng-video-3.0`です |
+| `prompt` | string | 条件付き必須 | テキスト動画生成の場合は必須推奨；`recamera`も動作説明を補足することを推奨します |
+| `duration` | integer | 任意 | `5`または`10`の利用推奨 |
+| `aspect_ratio` | string | 任意 | 比例（例：`16:9`、`9:16`） |
+| `image_url` | string | 任意 | 単一画像URL入力 |
+| `binary_data_base64` | string[] | 任意 | 単一画像Base64入力 |
+| `image_urls` | string[] | 任意 | 配列書き方に対応；現状、複数参照画像用公開保証として扱わないでください |
+| `template_id` | string | 任意 | 単一画像`recamera`テンプレート（例：`handheld`） |
+| `camera_strength` | string | 任意 | 単一画像`recamera`強度（例：`weak`、`medium`、`strong`） |
+| `req_key` | string | 任意 | デバッグや互換シーンでの利用のみ。通常の接続では明示的な送信は推奨されません |
 
-### Text-to-Video Example
+### テキスト動画生成例
 
 <CodeGroup>
 
@@ -52,7 +52,7 @@ curl -X POST https://api.crazyrouter.com/jimeng/submit/videos \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "jimeng-video-3.0",
-    "prompt": "A gentle camera push-in on an orange cat yawning by the window in soft morning light",
+    "prompt": "镜头缓慢推进，一只橘猫在窗边打哈欠，晨光柔和",
     "duration": 5,
     "aspect_ratio": "9:16"
   }'
@@ -69,7 +69,7 @@ response = requests.post(
     },
     json={
         "model": "jimeng-video-3.0",
-        "prompt": "A gentle camera push-in on an orange cat yawning by the window in soft morning light",
+        "prompt": "镜头缓慢推进，一只橘猫在窗边打哈欠，晨光柔和",
         "duration": 5,
         "aspect_ratio": "9:16"
     }
@@ -80,12 +80,12 @@ print(response.json())
 
 </CodeGroup>
 
-### Single-Image `recamera` Example
+### 単一画像`recamera`例
 
 ```json
 {
   "model": "jimeng-video-3.0",
-  "prompt": "Natural handheld push-in while the subject slightly turns",
+  "prompt": "镜头自然手持推进，人物轻微转身",
   "image_url": "https://example.com/portrait.png",
   "duration": 5,
   "aspect_ratio": "9:16",
@@ -94,7 +94,7 @@ print(response.json())
 }
 ```
 
-### Successful Submit Response
+### 投稿成功時のレスポンス例
 
 ```json
 {
@@ -110,7 +110,7 @@ print(response.json())
 
 ---
 
-## Query Task
+## タスクの検索
 
 ```
 GET /jimeng/fetch/{task_id}
@@ -121,7 +121,7 @@ curl https://api.crazyrouter.com/jimeng/fetch/2526913314163451526 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-### Completed Response Example
+### レスポンス例（完了済み）
 
 ```json
 {
@@ -138,19 +138,19 @@ curl https://api.crazyrouter.com/jimeng/fetch/2526913314163451526 \
 }
 ```
 
-### Task Status
+### タスクの状態
 
-| Status | Description |
-|--------|-------------|
-| `queued` | submitted or waiting in queue |
-| `processing` | generation in progress |
-| `succeeded` | completed and ready to fetch from `url` |
-| `failed` | terminal failure |
+| 状態 | 説明 |
+|------|------|
+| `queued` | 投稿済みまたはキュー中 |
+| `processing` | 動画生成中 |
+| `succeeded` | 完了。`url`から直接取得可能 |
+| `failed` | 永続的な失敗 |
 
 <Note>
-  The current public docs only commit to single-image input and single-image `recamera`. Do not document `image_urls` as a public multi-reference hard contract, and do not recommend `frames` as a public parameter. Unsupported `frames` values may be accepted at submit time and then fail later at the upstream pipeline stage.
+  現在公開中のドキュメントでは、単一画像入力と単一画像`recamera`のみ保証しています。`image_urls`をJimengの複数参照画像ハード契約として誤記しないでください。また、`frames`を推奨公開パラメータとして扱わないでください；サポート外の`frames`値は、上流アルゴリズム段階で遅延的に失敗する可能性があります。
 </Note>
 
 <Note>
-  The public doc is intentionally constrained to the verified stable scope: `jimeng-video-3.0 + text-to-video / single-image input / single-image recamera`. Whether `720P / recamera` is expanded later depends on carrier-level sample follow-up rather than additional passthrough code.
+  現在公開中のドキュメントは、検証済み安定範囲（`jimeng-video-3.0 + テキストからビデオ生成 / 単一画像入力 / 単一画像 recamera`）に収束しています。`720P / recamera`の更なる公開可否は、今後のcarrierサンプル再検証により決まります。倉庫コードの透過送信可否では判断されません。
 </Note>

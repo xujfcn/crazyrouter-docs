@@ -1,0 +1,92 @@
+---
+title: "Claude reconocimiento de imágenes"
+description: "Comprensión de imágenes Claude validada en el entorno de producción de Crazyrouter el 2026-03-23"
+---
+> Contenido actualizado: 2026-06-09
+
+# Claude reconocimiento de imágenes
+
+Hasta el 23 de marzo de 2026, el entorno de producción Crazyrouter ha validado dos rutas de entrada visual Claude:
+
+- Nativo `POST /v1/messages` + `type: "image"` + PNG Base64
+- Compatible con OpenAI `POST /v1/chat/completions` + `type: "image_url"` + URL de datos
+
+---
+
+## Formato nativo: `/v1/messages`
+
+```bash
+curl https://api.crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-opus-4-8",
+    "max_tokens": 128,
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "image",
+            "source": {
+              "type": "base64",
+              "media_type": "image/png",
+              "data": "iVBORw0KGgoAAA..."
+            }
+          },
+          {
+            "type": "text",
+            "text": "What color is this image?"
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+La inspección del entorno de producción ha devuelto:
+
+- `model: "claude-opus-4-8"`
+- `content[0].type = "text"`
+
+---
+
+## Formato compatible con OpenAI: `/v1/chat/completions`
+
+```bash
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "claude-opus-4-8",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {"type": "text", "text": "What color is this image?"},
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "data:image/png;base64,iVBORw0KGgoAAA..."
+            }
+          }
+        ]
+      }
+    ],
+    "max_tokens": 128
+  }'
+```
+
+En las pruebas prácticas del entorno de producción del 2026-03-23, el `message.content` devuelto por el modelo es una cadena común, cuyo contenido es una descripción textual de los colores de la imagen.
+
+<Note>
+  Esta página solo conserva las dos formas de entrada visual ya comprobadas: PNG Base64 / URL de datos. URL remotas, más formatos de imagen y escenarios de imágenes múltiples más complejos no se han revisado uno por uno en esta ronda.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Comparación de precios Claude Fable 5: oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Página del modelo Claude Fable 5: precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Comparación de precios Claude Haiku 4.5: oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/claude-haiku-4-5?utm_source=docs&utm_medium=related)

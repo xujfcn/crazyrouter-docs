@@ -1,10 +1,11 @@
 ---
-title: 'Python Vision'
-description: 'Python image recognition with gpt-5.5 and Claude'
+title: "Python 画像認識"
+description: "Python で gpt-5.5 および Claude ビジュアル画像認識を実装する"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-09
 
-## gpt-5.5 Vision - URL Method
+
+## gpt-5.5 画像認識 - URL方式
 
 ```python
 from openai import OpenAI
@@ -16,7 +17,7 @@ response = client.chat.completions.create(
     messages=[{
         "role": "user",
         "content": [
-            {"type": "text", "text": "Describe the content of this image"},
+            {"type": "text", "text": "描述这张图片的内容"},
             {
                 "type": "image_url",
                 "image_url": {
@@ -30,7 +31,7 @@ response = client.chat.completions.create(
 print(response.choices[0].message.content)
 ```
 
-## gpt-5.5 Vision - Local Image
+## gpt-5.5 画像認識 - ローカル画像
 
 ```python
 import base64
@@ -38,7 +39,7 @@ from openai import OpenAI
 
 client = OpenAI(api_key="sk-xxx", base_url="https://api.crazyrouter.com/v1")
 
-# Read local image and convert to base64
+# 读取本地图片并转为 base64
 with open("photo.jpg", "rb") as f:
     image_data = base64.b64encode(f.read()).decode("utf-8")
 
@@ -47,7 +48,7 @@ response = client.chat.completions.create(
     messages=[{
         "role": "user",
         "content": [
-            {"type": "text", "text": "What's in this image?"},
+            {"type": "text", "text": "这张图片里有什么？"},
             {
                 "type": "image_url",
                 "image_url": {
@@ -61,7 +62,7 @@ response = client.chat.completions.create(
 print(response.choices[0].message.content)
 ```
 
-## Multi-Image Comparison
+## 複数画像の比較
 
 ```python
 response = client.chat.completions.create(
@@ -69,7 +70,7 @@ response = client.chat.completions.create(
     messages=[{
         "role": "user",
         "content": [
-            {"type": "text", "text": "Compare the differences between these two images"},
+            {"type": "text", "text": "对比这两张图片的区别"},
             {"type": "image_url", "image_url": {"url": "https://example.com/img1.jpg"}},
             {"type": "image_url", "image_url": {"url": "https://example.com/img2.jpg"}}
         ]
@@ -79,9 +80,9 @@ response = client.chat.completions.create(
 print(response.choices[0].message.content)
 ```
 
-## Claude Vision
+## Claude 画像認識
 
-Claude models also support vision through the OpenAI-compatible format:
+Claude モデルも OpenAI 互換フォーマットを用いて画像認識をサポートします：
 
 ```python
 response = client.chat.completions.create(
@@ -89,7 +90,7 @@ response = client.chat.completions.create(
     messages=[{
         "role": "user",
         "content": [
-            {"type": "text", "text": "Describe this image in detail"},
+            {"type": "text", "text": "详细描述这张图片"},
             {
                 "type": "image_url",
                 "image_url": {
@@ -104,20 +105,20 @@ response = client.chat.completions.create(
 print(response.choices[0].message.content)
 ```
 
-## Supported Vision Models
+## 対応している画像認識モデル
 
-| Model | Description |
-|-------|-------------|
-| `gpt-5.5` | OpenAI-compatible vision model verified successfully in production on March 23, 2026 |
-| `claude-opus-4-8` | Claude OpenAI-compatible vision model verified successfully in production |
+| モデル | 説明 |
+|------|------|
+| `gpt-5.5` | 2026年3月23日に本番環境で実証済みの OpenAI 互換ビジュアルモデル |
+| `claude-opus-4-8` | Claude OpenAI 互換ビジュアルモデルで実証済み |
 
 <Note>
-  Vision input with `gpt-5.5` and `claude-opus-4-8` was verified in Crazyrouter production on March 23, 2026. Image size should not exceed 20MB; base64 encoding adds approximately 33% to the payload size, so URL method is recommended for larger files.
+  `gpt-5.5` と `claude-opus-4-8` のビジュアル入力は、2026年3月23日に Crazyrouter 本番環境で検証が完了しました。画像サイズは20MB以下を推奨します；Base64 エンコードでは約33% データ量が増加するため、大きな画像は URL 利用を優先してください。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [GPT-5.5 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gpt-5-5?utm_source=docs&utm_medium=related)
-- [GPT-5.5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-5-5?utm_source=docs&utm_medium=related)
-- [OpenAI の全モデルと料金](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [GPT-5.5 価格比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/gpt-5-5?utm_source=docs&utm_medium=related)
+- [GPT-5.5 モデルページ：リアルタイム価格、実例、呼び出しコード](https://crazyrouter.com/ja/models/openai/gpt-5-5?utm_source=docs&utm_medium=related)
+- [OpenAI 全モデルと価格](https://crazyrouter.com/ja/models/openai?utm_source=docs&utm_medium=related)

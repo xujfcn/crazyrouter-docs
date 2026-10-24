@@ -1,0 +1,248 @@
+---
+title: "Seedance"
+description: "Genera videos usando la API nativa de Seedance"
+---
+> Contenido actualizado: 2026-06-30
+
+# Seedance
+
+Seedance es la familia de modelos de generación de video de ByteDance / Doubao. Actualmente, Crazyrouter mantiene para clientes el protocolo nativo de Volcano `/volc/v1/*` y ya no utiliza el anterior `doubao-seedance-2-0-fast` de la interfaz de video unificada como protocolo principal público.
+
+Si deseas ver **la lógica real de facturación de Seedance 2.0 / 2.0 Fast en Crazyrouter**, incluyendo "por qué se cobra según tokens después de completar la tarea" y "si los tokens y los segundos pueden convertirse a una tasa fija", consulta directamente la página temática: [Explicación de facturación de Seedance 2.0](/es/video/seedance-2-billing).
+
+## Modelos actualmente públicos
+
+| Modelo | Descripción actual pública |
+|------|------|
+| `doubao-seedance-1-0-lite-t2v` | Generación de video a partir de texto |
+| `doubao-seedance-1-0-lite-i2v` | Generación de video a partir de una sola imagen |
+| `doubao-seedance-1-0-pro` | Generación de video de alta calidad general |
+| `doubao-seedance-1-0-pro-fast` | Generación de video rápida general |
+| `doubao-seedance-1-5-pro` | Versión avanzada, con posibilidad de expandir parámetros de capacidad oficiales posteriormente |
+| `doubao-seedance-2-0` | Generación oficial de video multimodal Seedance 2.0 |
+| `doubao-seedance-2-0-fast` | Generación oficial de video multimodal Seedance 2.0 Fast |
+
+## Enviar una tarea de video
+
+```
+POST /volc/v1/contents/generations/tasks
+```
+
+### Parámetros de solicitud actualmente públicos
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `model` | string | Sí | Nombre de modelo para clientes. Usa el nombre canónico del modelo de la tabla anterior |
+| `content` | array | Sí | Arreglo de contenidos de entrada |
+| `content[].type` | string | Sí | Actualmente soporta `text`, `image_url`, `video_url`, `audio_url`, `draft_task` |
+| `content[].text` | string | Obligatorio condicional | Indica el prompt cuando utilices `type=text` |
+| `content[].image_url.url` | string | Obligatorio condicional | Indica la URL de la imagen cuando utilices `type=image_url` |
+| `content[].video_url.url` | string | Obligatorio condicional | Indica la URL del video de referencia cuando utilices `type=video_url` |
+| `content[].audio_url.url` | string | Obligatorio condicional | Indica la URL del audio de referencia cuando utilices `type=audio_url` |
+| `content[].role` | string | Opcional | Seedance 2.0 soporta `first_frame`, `last_frame`, `reference_image`, `reference_video`, `reference_audio` |
+| `generate_audio` | boolean | Opcional | Seedance 2.0 permite elegir si se genera audio o no |
+| `ratio` | string | Opcional | Proporción de salida, por ejemplo `16:9` |
+| `resolution` | string | Opcional | Seedance 2.0 / 2.0 fast actualmente solo soporta `480p` y `720p` |
+| `duration` | integer | Opcional | Seedance 2.0 / 2.0 fast soporta `4-15` o `-1` |
+| `watermark` | boolean | Opcional | Si se añade marca de agua |
+| `seed` | integer | Opcional | Semilla aleatoria |
+
+### Límites oficiales de capacidad de Seedance 2.0
+
+- Soporta entrada de cuatro modalidades: texto, imagen, video y audio.
+- Soporta referencias multimodales: máximo `9` imágenes, `3` videos, `3` audios, con un límite total de `12` archivos combinados.
+- Formatos de imagen: `jpeg`, `png`, `webp`, `bmp`, `tiff`, `gif`; tamaño máximo por imagen `< 30MB`.
+- Formatos de video: `mp4`, `mov`; hasta `3` videos de referencia, duración total recomendada `[2, 15]s`, tamaño total máximo de archivo `< 50MB`.
+- Formatos de audio: `mp3`, `wav`; hasta `3` referencias de audio, duración total `<= 15s`, tamaño total de archivo `< 15MB`.
+- El audio no puede ingresarse solo, se debe proporcionar al menos `1` referencias de imagen o video simultáneamente.
+- La duración de generación admite `4-15s`, y también permite usar `-1` para que la duración predeterminada la decida el sistema.
+- Soporta `480p`, `720p`; `1080p` actualmente no está disponible para Seedance 2.0 / 2.0 fast.
+- `frames` actualmente no está disponible para Seedance 2.0 / 2.0 fast.
+- `camera_fixed` actualmente no está disponible para Seedance 2.0 / 2.0 fast.
+- En cuanto al producto, Seedance 2.0 actualmente se divide en las entradas "fotograma inicial/final" y "referencia versátil"; en la API esto se refleja en `content[].role` y `content[].type` respectivamente.
+- Actualmente, los servicios upstream imponen restricciones de cumplimiento sobre la carga de materiales realistas de rostros humanos; cualquier imagen o video de referencia que contenga rostros humanos realistas y claros puede ser bloqueada directamente por los servicios upstream.
+
+### Tarifas oficiales verdaderas de Seedance 2.0
+
+| Modelo | Método oficial de facturación | Precio oficial |
+|------|------|------|
+| `doubao-seedance-2-0` | Facturación por tokens de salida | Con video de entrada `28 CNY / millón de tokens de salida`; sin video de entrada `46 CNY / millón de tokens de salida` |
+| `doubao-seedance-2-0-fast` | Facturación por tokens de salida | Con video de entrada `22 CNY / millón de tokens de salida`; sin video de entrada `37 CNY / millón de tokens de salida` |
+
+<Note>
+  El tipo MIME, duración y tamaño del material en URL remota será verificado finalmente por el servicio upstream; actualmente, Crazyrouter verifica previamente el número, parámetros de duración, que el audio no puede enviarse solo, y límites explícitos como 480p/720p/`frames`/`camera_fixed` antes de la entrega.
+</Note>
+
+### Ejemplo de generación de video a partir de texto
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/volc/v1/contents/generations/tasks \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "doubao-seedance-1-0-lite-t2v",
+    "content": [
+      {
+        "type": "text",
+        "text": "镜头缓慢推进，一只白色海鸥从海面掠过，日落金光反射在海浪上"
+      }
+    ]
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/volc/v1/contents/generations/tasks",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model": "doubao-seedance-1-0-lite-t2v",
+        "content": [
+            {
+                "type": "text",
+                "text": "镜头缓慢推进，一只白色海鸥从海面掠过，日落金光反射在海浪上"
+            }
+        ]
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### Ejemplo de video a partir de una sola imagen
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/volc/v1/contents/generations/tasks \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "doubao-seedance-1-0-lite-i2v",
+    "content": [
+      {
+        "type": "text",
+        "text": "人物自然转身，头发被风轻轻吹起"
+      },
+      {
+        "type": "image_url",
+        "image_url": {
+          "url": "https://example.com/portrait.png"
+        }
+      }
+    ]
+  }'
+```
+
+### Ejemplo multimodal Seedance 2.0
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/volc/v1/contents/generations/tasks \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "doubao-seedance-2-0",
+    "content": [
+      {
+        "type": "text",
+        "text": "海边女孩在日落时回头，镜头更有电影感，环境声自然"
+      },
+      {
+        "type": "image_url",
+        "image_url": {
+          "url": "https://example.com/first-frame.png"
+        },
+        "role": "reference_image"
+      },
+      {
+        "type": "video_url",
+        "video_url": {
+          "url": "https://example.com/reference-video.mp4"
+        },
+        "role": "reference_video"
+      },
+      {
+        "type": "audio_url",
+        "audio_url": {
+          "url": "https://example.com/reference-audio.mp3"
+        },
+        "role": "reference_audio"
+      }
+    ],
+    "generate_audio": true,
+    "ratio": "16:9",
+    "duration": 11,
+    "watermark": false
+  }'
+```
+
+### Ejemplo de respuesta exitosa al envío
+
+```json
+{
+  "id": "cgt_task_abc123",
+  "task_id": "cgt_task_abc123"
+}
+```
+
+---
+
+## Consultar tarea
+
+```
+GET /volc/v1/contents/generations/tasks/{task_id}
+```
+
+```bash cURL
+curl https://api.crazyrouter.com/volc/v1/contents/generations/tasks/cgt_task_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Ejemplo de respuesta (completada)
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "id": "cgt_task_abc123",
+    "task_id": "cgt_task_abc123",
+    "model": "doubao-seedance-2-0-fast",
+    "status": "SUCCESS",
+    "result_url": "https://media.crazyrouter.com/task-artifacts/2026/06/30/seedance/cgt_task_abc123.mp4",
+    "artifact_url": "https://media.crazyrouter.com/task-artifacts/2026/06/30/seedance/cgt_task_abc123.mp4",
+    "content": {
+      "video_url": "https://media.crazyrouter.com/task-artifacts/2026/06/30/seedance/cgt_task_abc123.mp4"
+    }
+  }
+}
+```
+
+### Estado de la tarea
+
+| Estado | Descripción |
+|------|------|
+| `NOT_START` | Enviado, esperando procesamiento por el servicio upstream |
+| `IN_PROGRESS` | En proceso de generación |
+| `SUCCESS` | Completado, el resultado se puede obtener desde `result_url`, `artifact_url` o `content.video_url` |
+| `FAILURE` | Fallo final |
+
+<Note>
+  La documentación pública actual solo garantiza la ruta nativa `/volc/v1/*` y el nombre canónico de modelo. El antiguo `doubao-seedance-2-0-fast` se mantiene únicamente como referencia histórica y ya no se utiliza como protocolo principal para clientes.
+</Note>
+
+<Note>
+  El valor real de los precios oficiales de Seedance se mantiene actualmente según `per_output_token`, no por segundo; si la página de precios posteriormente presenta los productos de forma unificada en la plataforma, se debe aclarar que eso corresponde al esquema de venta de la plataforma, no a la unidad oficial nativa.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Página del modelo Seedance 2.0: precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/bytedance/doubao-seedance-2-0?utm_source=docs&utm_medium=related)
+- [Todos los modelos y precios de ByteDance](https://crazyrouter.com/es/models/bytedance?utm_source=docs&utm_medium=related)

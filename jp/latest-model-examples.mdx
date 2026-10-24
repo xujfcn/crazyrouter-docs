@@ -1,0 +1,106 @@
+---
+title: "最新モデル利用例"
+description: "ローカル公開モデルインデックスに基づいてまとめた最新モデル呼び出し例"
+---
+> 内容更新日: 2026-10-22
+
+# 最新モデル利用例
+
+このページは `web/src/data/models/index.json` の公開モデルインデックスに従って整理されています。新しい利用例はこれらのモデルを優先して使用します。すでに終了または公開インデックスに含まれていないモデルは例として表示しません。
+
+## 推奨モデル簡易一覧
+
+| シーン | 推奨モデル |
+|------|----------|
+| デフォルトチャット、汎用推論 | `gpt-5.5` |
+| コスト重視チャット | `gpt-5-mini` |
+| Claude コーディングと長文コンテキスト | `claude-opus-4-8` |
+| Claude 高難度タスク | `claude-opus-4-8` |
+| Claude 低コスト軽タスク | `claude-opus-4-8` |
+| Gemini ネイティブマルチモーダル | `gemini-3.1-pro` |
+| Gemini 低遅延 | `gemini-3.1-flash-lite` |
+| DeepSeek 推論 | `deepseek-v4-pro` |
+| xAI 高速チャット | `grok-4.1-fast` |
+| MiniMax 長文コンテキスト | `MiniMax-M2.7` |
+| Qwen 視覚理解 | `qwen3-vl-235b-a22b-instruct` または `qwen2.5-vl-72b-instruct` |
+
+## Chat Completions
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "messages": [
+      {"role": "user", "content": "用三句话解释这个接口适合什么场景"}
+    ]
+  }'
+```
+
+## Responses API
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "input": "给出一个安全上线前的 API 文档检查清单"
+  }'
+```
+
+## Claude Messages
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/messages \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-opus-4-8",
+    "max_tokens": 256,
+    "messages": [
+      {"role": "user", "content": "请审查这段 API 变更说明是否清楚"}
+    ]
+  }'
+```
+
+## Gemini ネイティブ
+
+```bash cURL
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [{"text": "总结一下今天要验证的 API 文档重点"}]
+      }
+    ]
+  }'
+```
+
+## 視覚理解
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "qwen3-vl-235b-a22b-instruct",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {"type": "text", "text": "描述这张图片中的关键信息"},
+          {"type": "image_url", "image_url": {"url": "https://example.com/image.png"}}
+        ]
+      }
+    ]
+  }'
+```
+
+<Note>
+  実際に利用可能なモデルは、トークンホワイトリスト、チャネル状態、およびプラットフォーム更新の影響も受けます。運用導入前には、必ず [`GET /v1/models`](/jp/chat/openai/models) を呼び出して現在トークンで使用可能なモデルIDをご確認ください。
+</Note>

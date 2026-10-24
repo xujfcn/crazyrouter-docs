@@ -1,199 +1,199 @@
 ---
-title: 'Dify Setup Guide'
-description: 'Connect Crazyrouter to Dify for chat models, embeddings, and workflows, then finish provider setup, first-run validation, and troubleshooting'
+title: "Учебник по настройке Dify"
+description: "Подключение моделей чата, Embedding и рабочих процессов через Crazyrouter в Dify, настройка поставщика моделей, валидация и устранение неполадок"
 ---
-> Дата обновления: 2026-06-23
+> Обновление содержания: 2026-06-09
 
-Dify is a strong fit for workflows, agents, knowledge bases, and internal AI application platforms. When connecting it to Crazyrouter, the recommended rollout is to start with the OpenAI-compatible provider path, get one chat model working first, and only then add embeddings or other model types.
+Dify подходит для создания рабочих процессов, агентов, баз знаний и внутренних платформ ИИ-приложений. При интеграции с Crazyrouter рекомендуется сначала использовать путь OpenAI-совместимого поставщика моделей Dify — убедиться в успешной работе модели чата, затем постепенно добавить возможности Embedding и другие.
 
-## Overview
+## Обзор
 
-Using Dify's model provider configuration, you can add Crazyrouter as an OpenAI-compatible upstream:
+С помощью настройки поставщика моделей Dify вы можете подключить Crazyrouter как OpenAI-совместимый upstream:
 
-- Recommended protocol: `OpenAI-compatible API`
-- Recommended entry point: `Settings` → `Model Provider`
+- Рекомендуемый протокол: `OpenAI-compatible API`
+- Рекомендуемый вход: `Настройки / Settings` → `Поставщик модели / Model Provider`
 - Base URL: `https://api.crazyrouter.com/v1`
-- Auth method: `sk-...` token
-- Recommended first validation model: `gpt-5.5`
+- Способ аутентификации: `sk-...` token
+- Рекомендуемая модель для первой валидации: `gpt-5.5`
 
 <Tip>
-Depending on your Dify version or plugin-based distribution, the provider may appear as `OpenAI`, `OpenAI-API-compatible`, `OpenAI Compatible`, or something similar. Pick the OpenAI-compatible provider that lets you set a custom `API Base URL`.
+В разных версиях Dify или модульных релизах название поставщика может отображаться как `OpenAI`, `OpenAI-API-compatible`, `OpenAI Compatible` или подобное. Приоритет — выбрать OpenAI-совместимый вход с поддержкой пользовательского `API Base URL`.
 </Tip>
 
 <Note>
-Official Dify docs treat a custom `API Base URL` as an optional field for proxy or compatible-upstream scenarios. For Crazyrouter, that is exactly the intended pattern, so use `https://api.crazyrouter.com/v1` as the OpenAI-compatible upstream. Also, model-provider configuration is usually limited to workspace admins or owners; if you cannot see the entry, check your role first.
+Официальная документация Dify рассматривает пользовательский `API Base URL` как опциональный для сценариев proxy или совместимых upstream; при интеграции с Crazyrouter следует указать Crazyrouter в качестве такого upstream в `https://api.crazyrouter.com/v1`. Кроме того, настройка поставщика моделей требует прав администратора рабочего пространства или владельца; если не видно входа, проверьте роль текущей учетной записи.
 </Note>
 
-## Best For
+## Для кого подходит
 
-- teams building workflows, agents, or knowledge-base apps
-- orgs that want chat and embedding models on the same upstream
-- internal AI platforms with visual orchestration
-- environments that need clean dev, staging, and production separation
+- Для тех, кто хочет построить рабочие процессы, агента или приложения базы знаний
+- Для команд, которым нужно подключить модели чата и Embedding к Crazyrouter
+- Для тех, кто предоставляет бизнес-отделам платформу визуальной оркестрации ИИ
+- Для тех, кто хочет разделять тестовые и производственные модели по средам
 
-## Protocol Used
+## Протокол использования
 
-Recommended protocol: `OpenAI-compatible API`
+Рекомендованный протокол: `OpenAI-compatible API`
 
-When connecting Crazyrouter in Dify, the usual OpenAI-compatible base URL is:
+При интеграции Crazyrouter в Dify OpenAI-совместимый базовый адрес обычно указывается как:
 
 ```text
 https://api.crazyrouter.com/v1
 ```
 
-Do not enter:
+Не используйте такие значения:
 
 - `https://api.crazyrouter.com`
 - `https://api.crazyrouter.com/v1/chat/completions`
 
 <Tip>
-The exact UI label can move between `Model Provider`, `Providers`, localized labels, or plugin-related entry points across Dify versions. Keep the first-pass validation flow unchanged: save the provider first, add only one `LLM` model `gpt-5.5`, and validate with a minimal Chat app before adding anything else.
+В разных версиях Dify интерфейс может переключаться между `Model Provider`, `Поставщик модели`, `Providers` или входом через маркетплейс плагинов, но путь первой валидации должен оставаться прежним: сначала сохранить поставщика, затем добавить только одну модель `LLM` `gpt-5.5`, и только потом создать минимальное Chat-приложение для проверки.
 </Tip>
 
-## Prerequisites
+## Предварительные условия
 
-| Item | Details |
-|------|---------|
-| Crazyrouter account | Register first at [crazyrouter.com](https://crazyrouter.com) |
-| Crazyrouter token | Create a dedicated `sk-...` token for Dify |
-| Dify | Use a current stable version; provider labels may vary by release |
-| Available models | Allow at least one verified chat model such as `gpt-5.5` |
+| Проект | Описание |
+|------|------|
+| Аккаунт Crazyrouter | Сначала зарегистрируйтесь на [crazyrouter.com](https://crazyrouter.com) |
+| Crazyrouter token | Для Dify рекомендуется создать отдельный `sk-...` token |
+| Dify | Используйте актуальную стабильную версию; название входа может немного отличаться в разных версиях |
+| Доступная модель | Должна быть хотя бы одна проверенная сегодня чат-модель, например `gpt-5.5` |
 
-Recommended starting whitelist:
+Рекомендуемые модели для первичного белого списка:
 
 - `gpt-5.5`
 - `claude-opus-4-8`
 - `text-embedding-3-large`
 - `text-embedding-3-small`
 
-If you plan to use a knowledge base, prepare at least one chat model and one embedding model.
+Если вы создаёте базу знаний, рекомендуется подготовить как минимум одну чат-модель и одну модель Embedding.
 
-## 5-Minute Quick Start
+## Быстрый старт за 5 минут
 
 <Steps>
-  <Step title="Create a dedicated Dify token">
-    In the Crazyrouter dashboard, create a token named `dify`. For the first pass, allow `gpt-5.5` and one embedding model such as `text-embedding-3-large`.
+  <Step title="Создать специализированный токен Dify">
+    В панели Crazyrouter создайте новый token, в названии лучше указать `dify`. Для первой настройки откройте только `gpt-5.5` и одну модель Embedding, например `text-embedding-3-large`.
   </Step>
-  <Step title="Open the model provider settings">
-    Log in with a workspace admin-capable account and go to `Settings` → `Model Provider`.
+  <Step title="Войти в настройки поставщика модели">
+    Войдите в Dify с учетной записью, имеющей права управления рабочей зоной, перейдите в `Настройки / Settings` → `Поставщик модели / Model Provider`.
   </Step>
-  <Step title="Add an OpenAI-compatible provider">
-    Choose the `OpenAI` or `OpenAI-compatible` provider entry and fill in:
-    - `API Key`: your `sk-...`
+  <Step title="Добавить поставщика, совместимого с OpenAI">
+    Выберите вход для поставщика типа `OpenAI` или `OpenAI-compatible` и заполните:
+    - `API Key`: ваш `sk-...`
     - `API Base URL`: `https://api.crazyrouter.com/v1`
   </Step>
-  <Step title="Configure only one chat model first">
-    For the first rollout, add a single LLM such as:
-    - `Model`: `gpt-5.5`
-    - `Type`: `LLM`
+  <Step title="Сначала настройте только одну модель для чата">
+    Для первой настройки добавьте одну LLM, например:
+    - `Название модели / Model`: `gpt-5.5`
+    - `Тип модели / Type`: `LLM`
 
-    Then create a very simple Chat app or Workflow app for validation. Do not add chat, embeddings, rerank, and workflow tools all at once, or troubleshooting will get mixed together.
+    После сохранения создайте самое простое Chat-приложение или Workflow-приложение для проверки. Не добавляйте одновременно чат, embedding, rerank и workflow-инструменты — иначе диагностику будет сложно разделить.
   </Step>
-  <Step title="Run the first validation request">
-    In the app, send `Reply only OK`. If it succeeds and appears in the Crazyrouter logs, the chat path is working. Add embeddings only after that.
+  <Step title="Завершить первую проверку">
+    Отправьте в приложении фразу: `Reply only OK`. Если ответ вернулся и в Crazyrouter есть лог, значит канал чата работает. После этого добавляйте embedding и другие модели.
   </Step>
 </Steps>
 
-## Embeddings and Knowledge Base Guidance
+## Рекомендации по Embedding и базе знаний
 
-If you want to use Dify knowledge bases, RAG, or document retrieval, add an embedding model as the second step:
+Если вы используете базу знаний, RAG или поиск по документам в Dify, второй шаг — добавить модель Embedding:
 
-| Purpose | Recommended model | Notes |
-|---------|-------------------|-------|
-| Default embedding model | `text-embedding-3-large` | Strong quality for a first knowledge-base rollout |
-| Lower-cost embedding model | `text-embedding-3-small` | Better for budget-sensitive indexing |
+| Назначение | Рекомендуемая модель | Примечание |
+|------|----------|------|
+| Embedding по умолчанию | `text-embedding-3-large` | Стабильное качество, подходит для начала работы с базой знаний |
+| Embedding с низкой стоимостью | `text-embedding-3-small` | Экономно, подходит для больших объемов документов |
 
-Recommended order:
+Рекомендуемая последовательность:
 
-1. validate the chat model
-2. validate embeddings
-3. then import documents and tune retrieval
+1. Сначала проверить чат-модель
+2. Потом проверить Embedding
+3. После этого импортировать базу знаний и настраивать возврат данных
 
-That keeps troubleshooting much cleaner.
+Так диагностику проводить проще.
 
-## Recommended Model Setup
+## Рекомендации по настройке моделей
 
-| Use case | Recommended model | Why |
-|----------|-------------------|-----|
-| Default workflow chat model | `gpt-5.5` | Verified successfully in production on March 23, 2026, and suited for the main Dify baseline |
-| Higher-quality complex workflows | `claude-opus-4-8` | Better for complex explanations, summaries, and long text |
-| Gemini fallback path | `gemini-3.1-pro` | Useful as a second vendor-compatible validation path |
-| Default embedding model | `text-embedding-3-large` | More reliable knowledge-base quality |
-| Lower-cost embedding model | `text-embedding-3-small` | Good for budget-sensitive indexing |
+| Сценарий использования | Рекомендуемая модель | Причина |
+|----------|----------|------|
+| Чат-модель для workflow по умолчанию | `gpt-5.5` | Проверена сегодня, подходит для основной чат-линии Dify |
+| Сложные сценарии высокого качества | `claude-opus-4-8` | Лучше для сложных объяснений, резюмирования и длинных текстов |
+| Запасная Gemini | `gemini-3.1-pro` | Подходит для альтернативного сценария проверки совместимости |
+| Embedding по умолчанию | `text-embedding-3-large` | Более стабильное качество базы знаний |
+| Embedding с низкой стоимостью | `text-embedding-3-small` | Для бюджетных задач индексации |
 
-Recommended order: get the chat model working first, then add embeddings.
+Рекомендация: сначала проверить чат-модель, потом добавить embedding.
 
-## Token Setup Best Practices
+## Лучшие практики настройки token
 
-| Setting | Recommendation | Notes |
-|---------|----------------|-------|
-| Dedicated token | Required | Do not share it with chat frontends or CLI tools |
-| Model whitelist | Strongly recommended | Allow only the models Dify workflows actually need |
-| IP restriction | Recommended for fixed deployment egress | Use carefully in changing local-dev environments |
-| Quota cap | Strongly recommended | Workflows, batches, and knowledge-base imports can consume a lot quickly |
-| Environment separation | Required | Use different tokens for dev, staging, and production |
-| Split chat and embeddings | Recommended | Helpful for cost tracking and rate limiting in high-volume setups |
+| Настройка | Рекомендация | Примечание |
+|------|------|------|
+| Отдельный token | Обязательно | Не используйте один token для Dify, чат-фронта и CLI |
+| Белый список моделей | Очень рекомендуется | Откройте только те модели, которые реально нужны Dify workflow |
+| IP-ограничение | Включайте при фиксированной развернутой точке | Для локальной разработки используйте осторожно |
+| Лимит квоты | Очень рекомендуется | Workflow, пакетная обработка и импорт базы знаний могут быстро расходовать квоту |
+| Разделение сред | Обязательно | Для разработки, теста и творчества используйте разные token |
+| Разделение чата / embedding | Рекомендация | В высоконагруженных случаях разбейте на разные token для удобства тарификации и лимитов |
 
-## Verification Checklist
+## Чек-лист проверки
 
-- [ ] Crazyrouter is saved in `Model Provider`
-- [ ] `API Base URL` is set to `https://api.crazyrouter.com/v1`
-- [ ] at least one LLM is configured successfully
-- [ ] the first Dify app request succeeds
-- [ ] the request appears in the Crazyrouter logs
-- [ ] at least one embedding model is configured if you need knowledge-base features
-- [ ] token quota and model whitelist match your rollout plan
-- [ ] dev, staging, and production use separate tokens
+- [ ] Crazyrouter настроен и сохранен в `Поставщик модели / Model Provider`
+- [ ] `API Base URL` установлен в `https://api.crazyrouter.com/v1`
+- [ ] Как минимум одна LLM добавлена успешно
+- [ ] Первый запрос от Dify-приложения успешно возвращает ответ
+- [ ] В Crazyrouter есть соответствующий лог запроса
+- [ ] Если используется база знаний — хотя бы одна embedding-модель настроена
+- [ ] Квота token и белый список моделей соответствуют требованиям
+- [ ] Для dev, test, prod сред выполнено разделение token
 
-## Common Errors and Fixes
+## Частые ошибки и решения
 
-| Symptom | Likely cause | Fix |
-|---------|--------------|-----|
-| `Model Provider` is missing | your account is not a workspace admin or owner | switch to an account with the right role, or ask an admin to configure it |
-| the provider area exists but there is no obvious OpenAI-compatible option | your version names it differently, exposes it as a plugin, or requires the provider to be enabled first | look for `OpenAI`, `OpenAI Compatible`, or `OpenAI-API-compatible`, and check plugin or version docs if needed |
-| provider cannot be saved | wrong API key or wrong provider type without custom base URL support | switch to the OpenAI-compatible provider entry and re-enter the `sk-...` token |
-| 401 unauthorized | token expired, was removed, or was copied incorrectly | generate a new token and replace it |
-| 403 / model not allowed | Dify is trying to use a model that is not whitelisted | allow that model in Crazyrouter |
-| 404 | `API Base URL` was entered as the root domain or a full endpoint path | change it to `https://api.crazyrouter.com/v1` |
-| provider saves but the app still fails | wrong model name or bad app-level parameter choices | fall back to `gpt-5.5` for baseline validation |
-| knowledge-base import fails | the chat path works but embeddings were not configured correctly | validate the embedding model separately, then retry import |
-| workflow cost grows too quickly | batch runs, long context, or many apps share one token | split tokens, add quota caps, and narrow the whitelist |
-| some advanced models behave inconsistently in Dify | model-level parameter compatibility differs across nodes | validate on `gpt-5.5` first, then swap in stronger models gradually |
+| Проявление | Типичная причина | Решение |
+|------|----------|----------|
+| Нет входа `Поставщик модели / Model Provider` | Учетная запись не admin или owner рабочего пространства | Используйте аккаунт с правами или попросите admin выполнить настройку |
+| Есть вход поставщика, но нет OpenAI-совместимого варианта | В этой версии реализовано как плагин или другое название, либо сначала нужно включить этого поставщика | Ищите входы типа `OpenAI`, `OpenAI Compatible`, `OpenAI-API-compatible`, по необходимости проверяйте настройки плагинов и версии |
+| Поставщик не сохраняется | Неверный API Key или выбран неподдерживаемый тип с кастомным Base URL | Выберите OpenAI-совместимый вход и заполните `sk-...` |
+| 401 unauthorized | Token истёк, ошибочно скопирован или удален | Сгенерируйте новый token и обновите |
+| 403 / model not allowed | Модель, выбранная в Dify, отсутствует в белом списке token | Разрешите модель в панели Crazyrouter |
+| 404 | `API Base URL` записан как доменное имя или полный путь | Исправьте на `https://api.crazyrouter.com/v1` |
+| Чат-модель настроена, но приложение выдает ошибку | Название модели ошибочно или параметры контекста не подходят | Вернитесь на `gpt-5.5` для проверки основной линии |
+| Импорт базы знаний не работает | Чат-модель работает, но embedding не настроен | Сначала проверьте embedding отдельно, после этого повторите импорт |
+| Быстрый рост затрат workflow | Пакетная обработка, длинный контекст или несколько приложений используют один token | Разделите token, ограничьте квоту и сократите число моделей |
+| Непоследовательное поведение продвинутых моделей в Dify | Совместимость параметров у разных моделей не одинакова | Используйте `gpt-5.5` для проверки линии, после чего постепенно заменяйте модели |
 
-## Performance and Cost Tips
+## Рекомендации по производительности и стоимости
 
-- Keep `gpt-5.5` as the workflow baseline during initial validation
-- For the first knowledge-base launch, import a small document set before indexing everything
-- Track chat and embedding traffic separately so cost sources stay visible
-- Set tighter quota caps for batch jobs, scheduled jobs, and internal test environments
-- If usage spikes, check Crazyrouter logs first to see whether the cause is retries, imports, or multiple apps sharing one token
+- Для workflow по умолчанию протестируйте с `gpt-5.5`, после стабилизации дополняйте другими моделями
+- При первом запуске базы знаний — загружайте документы небольшими партиями и проверяйте качество результирующего поиска, после этого переходите к массовому импорту
+- Разделяйте учет затрат между чат-моделями и embedding-моделями — так легче анализировать источники расходов
+- Для пакетных, периодических задач и внутренней тестовой среды устанавливайте более строгие лимиты квоты
+- При высоком расходе сначала в Crazyrouter проверяйте лог — причина может быть в повторных workflow, импорте базы знаний или использовании одного token многими приложениями
 
 ## FAQ
 
-### Which Base URL should I use in Dify?
+### Какой Base URL надо указать в Dify?
 
-Use `https://api.crazyrouter.com/v1`.
+Укажите `https://api.crazyrouter.com/v1`.
 
-### Why should I not use only the root domain here?
+### Почему не рекомендуется указывать корневой домен?
 
-Because Dify's OpenAI-compatible provider usually expects the OpenAI-compatible base, not the root domain.
+Потому что OpenAI-совместимые поставщики Dify обычно требуют указания базового адреса OpenAI, а не домена.
 
-### Should I configure chat or embeddings first?
+### Сначала завести chat-модель или embedding?
 
-Configure chat first, confirm the app can answer, then add embeddings.
+Сначала завести chat-модель, убедиться, что приложение возвращает результат, потом добавить embedding.
 
-### Can I configure rerank models directly?
+### Можно сразу подключить модель Rerank?
 
-That depends on your Dify version and installed provider plugins. Get chat and embeddings working first, then decide whether you need rerank support.
+Зависит от вашей версии Dify и доступных плагинов. Рекомендуется для начала проверить чат и embedding, затем оценить необходимость подключения Rerank отдельно.
 
-### Why does this guide insist on starting with one chat model only?
+### Почему рекомендуется сначала добавить только одну чат-модель?
 
-Because Dify issues can come from the provider layer, model type, app configuration, or knowledge-base chain. Validating a single `gpt-5.5` chat app first makes isolation much easier.
+Потому что ошибки Dify часто бывают одновременно в поставщике, типе модели, параметрах приложения и базе знаний. На первом этапе добавьте только `gpt-5.5` для чата — это облегчит диагностику.
 
-### Should Dify use multiple tokens?
+### Нужно ли разбивать token в Dify?
 
-Yes. At minimum, separate dev and production. At higher volume, split chat and embeddings too.
+Рекомендуется. Хотя бы разделить dev и prod; при высоком потоке отдельно выделить chat и embedding.
 
 <Note>
-Dify is best treated as an application and workflow platform, not just a chat frontend. That is why dedicated tokens, whitelist control, and per-environment quota strategy matter much more here.
+Dify лучше всего размещать как "платформа приложений" или "платформа workflow". По сравнению с чат-фронтом, её основная особенность — это оркестрация процессов, работа с базами знаний и управление многими средами, а значит важны отдельный token, белый список моделей и стратегия квот.
 </Note>

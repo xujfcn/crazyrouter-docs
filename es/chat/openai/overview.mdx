@@ -1,0 +1,117 @@
+---
+title: "Objeto de Finalización de Chat"
+description: "Estructura central orientada a producción de los objetos Chat Completion y Chat Completion Chunk"
+---
+> Contenido actualizado: 2026-06-09
+
+# Objeto de Finalización de Chat
+
+`/v1/chat/completions` devuelve `chat.completion` para solicitudes no streaming y `chat.completion.chunk` para solicitudes streaming.
+
+Esta página se centra en la estructura de respuesta compatible con OpenAI más estable y útil en Crazyrouter actualmente.
+
+## Objeto no streaming
+
+Solicitud mínima para producción:
+
+```bash cURL
+curl https://api.crazyrouter.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Explain what a REST API is in one sentence."
+      }
+    ],
+    "max_tokens": 64
+  }'
+```
+
+Esqueleto típico de respuesta para producción:
+
+```json
+{
+  "id": "chatcmpl-xxx",
+  "object": "chat.completion",
+  "created": 1774177466,
+  "model": "gpt-5.5",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "...",
+        "reasoning_content": null,
+        "tool_calls": null
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}
+```
+
+### Cómo leerlo
+
+- `message.content` es la respuesta final en texto
+- `message.tool_calls` solo aparece cuando el modelo solicita la ejecución de herramientas
+- `message.reasoning_content` puede aparecer para algunos modelos o rutas, pero actualmente no debe considerarse un campo garantizado
+
+---
+
+## Objeto streaming
+
+Para solicitudes streaming, el servidor devuelve eventos SSE `chat.completion.chunk`:
+
+```json
+{
+  "id": "chatcmpl-xxx",
+  "object": "chat.completion.chunk",
+  "created": 1774177466,
+  "model": "gpt-5.5",
+  "choices": [
+    {
+      "index": 0,
+      "delta": {
+        "role": "assistant",
+        "content": "..."
+      },
+      "finish_reason": null
+    }
+  ]
+}
+```
+
+Forma común de SSE:
+
+```text
+data: {"object":"chat.completion.chunk",...}
+data: {"choices":[{"delta":{"content":"..."}}],...}
+data: [DONE]
+```
+
+---
+
+## Campos con los que usualmente te vas a preocupar
+
+| Campo | Significado |
+|-------|------------|
+| `object` | `chat.completion` para no streaming, `chat.completion.chunk` para streaming |
+| `model` | El modelo real usado para la respuesta |
+| `choices[].message.content` | Texto final no streaming |
+| `choices[].message.tool_calls` | Solicitudes de herramientas no streaming |
+| `choices[].delta.content` | Delta de texto streaming |
+| `choices[].finish_reason` | Razón de parada como `stop`, `length` o `tool_calls` |
+
+<Note>
+  Los modelos upstream pueden pasar campos extra. El código del cliente debe depender primero de los campos comunes y estables, en vez de asumir que todos los modelos exponen las mismas extensiones.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Relacionado en crazyrouter.com
+
+- [Página del modelo GPT Image 1.5: precio en vivo, muestras reales, código](https://crazyrouter.com/es/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Página del modelo GPT Image 2: precio en vivo, muestras reales, código](https://crazyrouter.com/es/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Todos los modelos de OpenAI con precios en vivo](https://crazyrouter.com/es/models/openai?utm_source=docs&utm_medium=related)

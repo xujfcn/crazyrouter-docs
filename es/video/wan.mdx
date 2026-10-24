@@ -1,0 +1,171 @@
+---
+title: "Wan Video"
+description: "Resumen de modelos de Wan Video. Para generación de video a partir de texto use /v1/video/generations; para los flujos de trabajo en formato Alibaba como video a partir de imagen, primeros y últimos cuadros y referencia de sujeto, utilice las rutas compatibles /alibailian/api/v1/*"
+---
+> Contenido actualizado: 2026-06-30
+
+# Wan Video
+
+La serie Wan actualmente utiliza diferentes protocolos orientados al cliente según la capacidad:
+
+- Generación de video a partir de texto (`wan2.5-t2v-preview`, `wan2.2-t2v-plus`): utiliza `POST /v1/video/generations`, y consulta a través de `GET /v1/video/generations/{task_id}`.
+- Generación de video a partir de imagen, primeros y últimos cuadros, generación de video por referencia de sujeto: utiliza la ruta compatible con Alibaba Bailian `POST /alibailian/api/v1/services/aigc/video-generation/video-synthesis`, y consulta mediante `GET /alibailian/api/v1/tasks/{task_id}`.
+
+<Warning>
+  No envíe `wan2.2-t2v-plus` a `/alibailian/api/v1/services/aigc/video-generation/video-synthesis`. El entorno de producción devolverá `invalid_request`, e indicará cambiar a `/v1/video/generations`.
+</Warning>
+
+Para el cuerpo de la solicitud y el formato de consulta de tareas completos del flujo de trabajo en formato Alibaba, consulte la [interfaz de video de Alibaba Bailian](/es/video/alibailian). Esta página reúne la primera tanda de modelos `Wan` abiertos al público, sus capacidades, criterios de facturación y protocolos recomendados.
+
+## Primeros modelos
+
+| Modelo | Capacidad hacia el cliente | Criterio de facturación oficial | Estado actual |
+|------|----------|--------------|----------|
+| `wan2.5-t2v-preview` | Generación de video a partir de texto | Por segundo | Verificado |
+| `wan2.5-i2v-preview` | Generación de video a partir de imagen | Por segundo | Verificado |
+| `wan2.2-t2v-plus` | Generación de video a partir de texto | Por segundo | Verificado |
+| `wan2.2-i2v-plus` | Generación de video a partir de imagen | Por segundo | Verificado |
+| `wan2.2-i2v-flash` | Generación de video a partir de imagen | Por segundo | Verificado |
+| `wan2.2-kf2v-flash` | Generación de video por primeros y últimos cuadros | Por segundo | Beta |
+| `wan2.2-s2v` | Generación de video por referencia de sujeto | Por segundo | Beta |
+
+<Note>
+  `wan2.2-kf2v-flash` y `wan2.2-s2v` ya han sido alineados en el código y el bucket de capacidades de cobro, pero el artifact live todavía se está completando, por lo que se mantiene la etiqueta Beta por ahora.
+</Note>
+
+## Capacidades y precios oficiales
+
+| Modelo | Bucket de capacidades | Resolución | Precio oficial unitario |
+|------|--------|--------|----------|
+| `wan2.5-t2v-preview` | Generación de video a partir de texto | `480P / 720P / 1080P` | `¥0.30 / ¥0.60 / ¥1.00 / segundo` |
+| `wan2.2-t2v-plus` | Generación de video a partir de texto | `480P / 1080P` | `¥0.14 / ¥0.70 / segundo` |
+| `wan2.2-i2v-plus` | Generación de video a partir de imagen | `480P / 1080P` | `¥0.14 / ¥0.70 / segundo` |
+| `wan2.2-i2v-flash` | Generación de video a partir de imagen | `480P / 720P / 1080P` | `¥0.10 / ¥0.20 / ¥0.48 / segundo` |
+| `wan2.2-kf2v-flash` | Generación de video por primeros y últimos cuadros | `480P / 720P / 1080P` | `¥0.10 / ¥0.20 / ¥0.48 / segundo` |
+| `wan2.2-s2v` | Generación de video por referencia de sujeto | `480P / 720P` | `¥0.50 / ¥0.90 / segundo` |
+
+## Acuerdos de protocolo
+
+### 1. Generación de video a partir de texto
+
+- Ruta de envío recomendada: `POST /v1/video/generations`
+- Ruta de consulta recomendada: `GET /v1/video/generations/{task_id}`
+- Campos clave: `model`, `prompt`, `seconds`, `size`
+- Modelos típicos: `wan2.5-t2v-preview`, `wan2.2-t2v-plus`
+
+### 2. Generación de video a partir de imagen
+
+- Campos clave: `input.img_url`
+- Modelos típicos: `wan2.5-i2v-preview`, `wan2.2-i2v-plus`, `wan2.2-i2v-flash`
+
+### 3. Generación de video por primeros y últimos cuadros
+
+- Campos clave: `input.first_frame_url`, `input.last_frame_url`
+- Modelo típico: `wan2.2-kf2v-flash`
+
+### 4. Generación de video por referencia de sujeto
+
+- Campo clave: `input.image_url`
+- Modelo típico: `wan2.2-s2v`
+
+## Ejemplos de solicitud
+
+### Generación de video a partir de texto: Wan 2.2 T2V Plus
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/video/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "wan2.2-t2v-plus",
+    "prompt": "一段平静的电影感山间云海镜头",
+    "seconds": "5",
+    "size": "480P"
+  }'
+```
+
+### Generación de video a partir de imagen
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/alibailian/api/v1/services/aigc/video-generation/video-synthesis \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "wan2.5-i2v-preview",
+    "input": {
+      "prompt": "让画面中的人物转头看向镜头",
+      "img_url": "https://example.com/first-frame.png"
+    },
+    "parameters": {
+      "resolution": "720P",
+      "duration": 5,
+      "prompt_extend": true,
+      "audio": true
+    }
+  }'
+```
+
+### Generación de video por primeros y últimos cuadros
+
+```json
+{
+  "model": "wan2.2-kf2v-flash",
+  "input": {
+    "prompt": "镜头从白天平滑过渡到夜晚",
+    "first_frame_url": "https://example.com/frame-start.png",
+    "last_frame_url": "https://example.com/frame-end.png"
+  },
+  "parameters": {
+    "resolution": "720P",
+    "duration": 5
+  }
+}
+```
+
+### Generación de video por referencia de sujeto
+
+```json
+{
+  "model": "wan2.2-s2v",
+  "input": {
+    "prompt": "让参考人物自然说话并有轻微头部动作",
+    "image_url": "https://example.com/portrait.png",
+    "audio_url": "https://example.com/voice.mp3"
+  },
+  "parameters": {
+    "resolution": "720P",
+    "duration": 5
+  }
+}
+```
+
+## Recuperación de tareas
+
+Actualmente, Wan sigue funcionando bajo un modelo de tareas asíncronas. Tras crear una tarea, los clientes deben consultar según el protocolo correspondiente:
+
+Generación de video a partir de texto:
+
+```http
+GET /v1/video/generations/{task_id}
+```
+
+Flujos de trabajo Alibaba compatibles para generación de video a partir de imagen, primeros y últimos cuadros y referencia de sujeto:
+
+```http
+GET /alibailian/api/v1/tasks/{task_id}
+```
+
+Cuando la consulta devuelve `status = SUCCESS`, obtenga el resultado final del video desde `result_url` o `artifact_url`.
+
+## Notas sobre límites
+
+- El protocolo recomendado actualmente para la generación de video a partir de texto en Wan es `/v1/video/generations`, no la ruta de envío compatible con Alibaba Bailian.
+- La ruta compatible con Alibaba Bailian se utiliza principalmente para generación de video a partir de imagen, primeros y últimos cuadros, generación de video por referencia de sujeto y otros escenarios de migración en formato Alibaba.
+- Crazyrouter internamente puede utilizar como proveedor el oficial, ApiPass, Kie u otros terceros, pero estos proveedores no definen protocolos de cliente de forma independiente.
+- Las filas en estado Beta pueden mostrarse al cliente; una vez en producción, se recomienda complementar las pruebas con los registros de tareas productivas y retirar la etiqueta Beta tras el cierre de ciclo exitoso.
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Página del modelo Wan 2.2 T2V Plus: precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/alibaba/wan2-2-t2v-plus?utm_source=docs&utm_medium=related)
+- [Todos los modelos y precios de Alibaba Cloud](https://crazyrouter.com/es/models/alibaba?utm_source=docs&utm_medium=related)

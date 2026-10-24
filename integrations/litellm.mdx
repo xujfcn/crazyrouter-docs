@@ -1,0 +1,193 @@
+---
+title: 'LiteLLM 接入指南'
+description: '将 Crazyrouter 接入 LiteLLM AI 网关：导出模型与价格配置，启动代理，验证请求并了解团队预算与兼容性边界'
+---
+> 内容更新: 2026-10-24
+
+
+LiteLLM 可以作为企业的统一 AI 网关：应用接入 LiteLLM，再由 LiteLLM 调用 Crazyrouter。项目、部门、虚拟密钥、预算和审计策略需要在你自己的 LiteLLM 部署中配置，不会因为填入 Crazyrouter API Key 自动启用。
+
+```text
+Application → LiteLLM Proxy → Crazyrouter → Model
+```
+
+## 接入架构与准备
+
+准备 Python 3.11、一个专用 Crazyrouter 推理密钥，以及该密钥可访问的模型。本文按 **LiteLLM 1.106.2** 验证，不代表它是最新版本。四个示例模型为 `claude-opus-5-5`、`gpt-6-astra`、`glm-5.3`、`deepseek-v4.1-flash`；请按实际可用模型调整。
+
+<Warning>
+`CRAZYROUTER_API_KEY` 是 LiteLLM 服务端调用 Crazyrouter 的凭据；`LITELLM_MASTER_KEY` 是你自己的 LiteLLM 管理员密钥。不要混用，也不要把管理员密钥发给部门或终端用户。真实密钥只保存在服务端环境或密钥管理器中，不要提交到 Git、文档或前端。
+</Warning>
+
+## 1. 安装与环境变量
+
+在一个新的工作目录运行以下命令。环境变量只作用于当前终端；已有网关应沿用安全管理的主密钥，不要随意重新生成。容器部署时，变量必须传入容器内部。Windows 如无法激活虚拟环境，可直接调用 `.venv\Scripts` 内的 `python.exe` 和 `litellm.exe`。
+
+<CodeGroup>
+```bash macOS / Linux
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install "litellm[proxy]==1.106.2"
+read -rsp 'Crazyrouter API key: ' CRAZYROUTER_API_KEY; echo
+export CRAZYROUTER_API_KEY
+export LITELLM_MASTER_KEY="$(python -c 'import secrets; print("sk-" + secrets.token_hex(32))')"
+```
+
+```powershell Windows PowerShell
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install "litellm[proxy]==1.106.2"
+$secret = Read-Host 'Crazyrouter API key' -AsSecureString
+$env:CRAZYROUTER_API_KEY = [System.Net.NetworkCredential]::new('', $secret).Password
+$env:LITELLM_MASTER_KEY = python -c "import secrets; print('sk-' + secrets.token_hex(32))"
+```
+</CodeGroup>
+
+## 2. 导出配置并启动
+
+推荐使用已鉴权的 `GET /v1/litellm/config`，获取模型及适用于当前凭据的价格快照。响应是一个包装对象：**只能将其中的 `config` 保存为 LiteLLM 配置**，不要把整个响应直接写进去。下面脚本保存为 `export_config.py`，使用 JSON（也是合法 YAML），保留 `model_info` 价格并引用环境变量，不写入真实密钥。
+
+```python export_config.py
+import json
+import os
+from pathlib import Path
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode
+from urllib.request import HTTPRedirectHandler, Request, build_opener
+
+
+class NoRedirect(HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+key = os.environ["CRAZYROUTER_API_KEY"]
+if not key:
+    raise SystemExit("CRAZYROUTER_API_KEY is empty")
+query = urlencode({
+    "provider": "openai",
+    "models": "claude-opus-5-5,gpt-6-astra,glm-5.3,deepseek-v4.1-flash",
+})
+request = Request(
+    "https://api.crazyrouter.com/v1/litellm/config?" + query,
+    headers={"Authorization": "Bearer " + key,
+             "User-Agent": "Crazyrouter-LiteLLM-Setup/1.0"},
+)
+try:
+    with build_opener(NoRedirect).open(request, timeout=30) as response:
+        payload = json.load(response)
+except HTTPError as error:
+    raise SystemExit(f"Export failed (HTTP {error.code}); no file written.")
+except URLError:
+    raise SystemExit("Export connection failed; no file written.")
+
+config = payload["config"]
+if not config.get("model_list"):
+    raise SystemExit("Export contains no models")
+config.setdefault("litellm_settings", {})["drop_params"] = False
+config.setdefault("general_settings", {})["master_key"] = "os.environ/LITELLM_MASTER_KEY"
+output = json.dumps(config, ensure_ascii=False, indent=2)
+if key in output:
+    raise SystemExit("Refusing to write a secret")
+with Path("crazyrouter.config.json").open("x", encoding="utf-8") as handle:
+    handle.write(output + "\n")
+print("Saved configuration. Import/reload it in LiteLLM explicitly.")
+```
+
+```shell
+python export_config.py
+litellm --config ./crazyrouter.config.json --host 127.0.0.1 --port 4100
+```
+
+<Note>
+脚本拒绝覆盖现有文件；更新时先备份并比较配置，再合并到现有网关并显式重载。`4100` 只是示例端口，如已占用请同时修改启动命令和验证地址。该命令仅监听本机，不会修改或重启现有服务。
+</Note>
+
+## 3. 验证本地网关
+
+保持代理终端运行，在另一个已安装相同环境的终端安全设置**同一个** `LITELLM_MASTER_KEY`，不要重新生成。保存以下脚本为 `verify_proxy.py`。本次管理员冒烟测试会产生正常模型用量；日常应用应改用受限虚拟密钥。
+
+```python verify_proxy.py
+import json
+import os
+from urllib.request import Request, urlopen
+
+base = "http://127.0.0.1:4100/v1"
+headers = {"Authorization": "Bearer " + os.environ["LITELLM_MASTER_KEY"],
+           "Content-Type": "application/json"}
+
+with urlopen(Request(base + "/models", headers=headers), timeout=30) as response:
+    models = json.load(response)["data"]
+assert any(model["id"] == "gpt-6-astra" for model in models), "Model not registered"
+
+body = {"model": "gpt-6-astra", "max_tokens": 1024,
+        "messages": [{"role": "user", "content": "Reply with exactly OK."}]}
+with urlopen(Request(base + "/chat/completions", headers=headers,
+                     data=json.dumps(body).encode()), timeout=120) as response:
+    result = json.load(response)
+choice = result["choices"][0]
+assert choice["finish_reason"] == "stop", "Incomplete response"
+assert (choice["message"].get("content") or "").strip() == "OK", "Check final answer"
+assert result.get("usage", {}).get("total_tokens", 0) > 0, "Missing usage"
+print("PASS: model registration, final answer, finish reason, usage")
+```
+
+```shell
+python verify_proxy.py
+```
+
+这是最小冒烟测试，不是完整兼容性认证。对每个实际模型继续验证普通与流式请求：检查最终正文、结束原因、SSE 的 `[DONE]` 和最终 usage；工具测试应检查参数并完成工具结果回传。仅有 HTTP 200、思考文本或 Markdown JSON 围栏不算通过。
+
+## 4. Claude 原生协议（可选）
+
+默认导出使用 `openai/<model>`，`api_base` 为 `https://api.crazyrouter.com/v1`。需要 Claude 原生缓存、thinking 等语义时，单独用 `provider=anthropic&models=claude-opus-5-5` 导出，使用 `anthropic/<model>` 和根地址 `https://api.crazyrouter.com`，不要追加 `/v1` 或 `/chat/completions`。
+
+```yaml
+model_list:
+  - model_name: claude-native
+    litellm_params:
+      model: anthropic/claude-opus-5-5
+      api_base: https://api.crazyrouter.com
+      api_key: os.environ/CRAZYROUTER_API_KEY
+litellm_settings:
+  drop_params: false
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+```
+
+上例仅展示连接结构，不含价格。实际使用时应合并原生导出项的 `model_info`。若与 OpenAI 适配器同时注册，给原生项使用 `claude-native` 这样的独立 `model_name`，客户端通过该别名调用，避免同名条目混合路由。
+
+## 兼容性与错误处理
+
+- 保持 `drop_params: false`，不静默丢弃不支持的参数。
+- 已验证 Claude 的 `json_schema`；`json_object` 明确不支持，不会自动转换为另一种输出保证。
+- 在本次已测 Claude 路径中，强制指定工具 / `required` 请求被明确拒绝：HTTP `400`，直连错误码 `unsupported_forced_tool_choice`。需要自动工具选择时，由客户端显式改用 `tool_choice: "auto"`；网关不会自动降级强制调用。
+- 对上述拒绝，客户端收到固定的安全英文说明，不返回内部服务配置或凭据。LiteLLM 1.106.2 的 OpenAI 适配器保留英文消息，但会把错误码包装为 `"400"`；不要只按原始错误码匹配。
+- Claude `cache_control` 的 `5m` / `1h` TTL 可透传；5m 创建与读取已测，1h 只验证了冷写入，不保证命中率或一小时后的读取。
+- 模型能力、可用性、视觉、长上下文、故障转移和企业预算需要分别验收，不能从模型名称或这份接入文档推断。
+
+## 团队、预算与生产安全
+
+- 按项目或部门创建 LiteLLM 团队和受限虚拟密钥，设置模型权限、预算及速率限制；不要共享主密钥。
+- 按 LiteLLM 官方要求配置数据库、认证、权限和持久化。本地无数据库启动只验证推理链路，不代表预算已生效；功能和授权要求以所用版本为准。
+- 上线前分别测试越权模型拒绝、预算耗尽、密钥吊销、限流和审计。保护日志中的提示词和个人信息，并明确保留期限。
+- 对外访问应配置 HTTPS 与访问控制，不要直接暴露本机演示服务或管理入口。
+- 导出的价格是快照。价格或折扣变化后需重新导出、导入并重载；不会自动推送。LiteLLM 成本估算不等同于 Crazyrouter 最终账单，应定期对账。
+
+## 常见问题
+
+| 现象 | 检查方向 |
+| --- | --- |
+| 导出返回 401 | 使用 Crazyrouter 推理密钥，而不是 LiteLLM 主密钥或控制台会话凭据。 |
+| 导出返回 404 | 检查模型 ID 和当前密钥允许访问的模型。 |
+| 导出返回 422 | 检查所选 provider 与价格是否可表达；不要用猜测的固定价格替代。 |
+| LiteLLM 返回 401 | 下游调用使用 LiteLLM 的主密钥（仅本地管理测试）或有效虚拟密钥。 |
+| 模型未注册 / 环境变量不存在 | 确认保存了 `config`，环境变量传入代理进程或容器，并已重载。 |
+| 强制工具返回 400 | 显式选择 `auto`，或使用已确认支持相应工具及 thinking 配置的模型。 |
+| 预算未限制请求 | 检查数据库、团队 / 虚拟密钥策略，并做真实的预算拒绝测试。 |
+
+## 官方参考
+
+- [LiteLLM Proxy configuration](https://docs.litellm.ai/docs/proxy/configs)
+- [LiteLLM virtual keys](https://docs.litellm.ai/docs/proxy/virtual_keys)
+- [LiteLLM budgets](https://docs.litellm.ai/docs/proxy/users)

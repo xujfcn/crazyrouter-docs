@@ -1,28 +1,29 @@
 ---
-title: 'GPTs Conversations'
-description: 'Call OpenAI GPTs applications via API'
+title: "GPTs 会話"
+description: "API経由でOpenAI GPTsアプリケーションを呼び出す"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-06
 
-## Overview
 
-Crazyrouter supports calling OpenAI GPTs (custom GPT applications) through the standard Chat Completions API. Simply set the model name to the GPTs-specific format.
+## 概要
 
-## Model Name Format
+Crazyrouterは標準のChat Completions APIを介してOpenAI GPTs（カスタムGPTアプリケーション）を呼び出すことをサポートしています。モデル名をGPTs特有の形式に設定するだけで利用できます。
+
+## モデル名の形式
 
 ```
 gpt-4-gizmo-{gizmo_id}
 ```
 
-The `gizmo_id` is the unique identifier for the GPT, which can be extracted from the GPTs URL.
+ここで、`gizmo_id`はGPTsの一意の識別子であり、GPTsのURLから取得できます。
 
-## Getting the Gizmo ID
+## Gizmo IDの取得方法
 
-1. Visit the [ChatGPT GPTs Store](https://chatgpt.com/gpts)
-2. Open the target GPT application
-3. Extract the ID from the URL: `https://chatgpt.com/g/g-B3hgivKK9-xxx` → ID is `g-B3hgivKK9`
+1. [ChatGPT GPTsストア](https://chatgpt.com/gpts)にアクセス
+2. 対象となるGPTアプリを開く
+3. URLからIDを抽出: `https://chatgpt.com/g/g-B3hgivKK9-xxx` → IDは`g-B3hgivKK9`
 
-## Code Examples
+## コード例
 
 <CodeGroup>
 
@@ -34,11 +35,11 @@ client = OpenAI(
     base_url="https://api.crazyrouter.com/v1"
 )
 
-# Chat with a GPT
+# 使用 GPTs 对话
 response = client.chat.completions.create(
     model="gpt-4-gizmo-g-B3hgivKK9",
     messages=[
-        {"role": "user", "content": "Hello, please introduce yourself"}
+        {"role": "user", "content": "你好，请介绍一下你自己"}
     ]
 )
 
@@ -52,7 +53,7 @@ curl -X POST https://api.crazyrouter.com/v1/chat/completions \
   -d '{
     "model": "gpt-4-gizmo-g-B3hgivKK9",
     "messages": [
-      {"role": "user", "content": "Hello, please introduce yourself"}
+      {"role": "user", "content": "你好，请介绍一下你自己"}
     ]
   }'
 ```
@@ -60,16 +61,16 @@ curl -X POST https://api.crazyrouter.com/v1/chat/completions \
 </CodeGroup>
 
 <Warning>
-  GPTs calls require upstream channel support. Not all GPTs are available - availability depends on channel configuration.
+  GPTsの呼び出しには上流チャネルのサポートが必要です。すべてのGPTsが利用できるわけではなく、チャネル設定によって異なります。
 </Warning>
 
 <Note>
-  GPTs conversations support streaming output by setting `stream: true`. Billing is calculated based on GPT-4 model pricing.
+  GPTs会話はストリーミング出力に対応しており、`stream: true`を設定するだけです。料金はGPT-4モデル価格に準じます。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [GPT Image 1.5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [OpenAI の全モデルと料金](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [GPT Image 1.5 モデルページ：リアルタイム価格、実例、呼び出しコード](https://crazyrouter.com/ja/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT Image 2 モデルページ：リアルタイム価格、実例、呼び出しコード](https://crazyrouter.com/ja/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [OpenAI 全モデルと価格一覧](https://crazyrouter.com/ja/models/openai?utm_source=docs&utm_medium=related)

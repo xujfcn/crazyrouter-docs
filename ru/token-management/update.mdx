@@ -1,72 +1,72 @@
 ---
-title: 'Update Token'
-description: 'Update the configuration of an existing token'
+title: "Изменить токен"
+description: "Обновить конфигурацию существующего токена"
 api: 'PUT /api/token/'
 ---
-> Дата обновления: 2026-07-20
+> Обновление содержания: 2026-07-20
 
-## Overview
+## Описание интерфейса
 
-Modify the name, quota, expiration time, model permissions, and other settings of an existing token.
+Изменяет имя, лимит, время истечения, права доступа к моделям и другие настройки существующего токена.
 
 <Note>
-  The `/api/token/*` endpoints are mainly for Crazyrouter dashboard automation around API key management. They require a user `access token` plus the `New-Api-User` header, and are not the normal interface for `sk-xxx` model calls. Use `https://crazyrouter.com` as the base URL; `https://api.crazyrouter.com` is reserved for model APIs and returns `404 api_only_endpoint` for management paths.
+  Эта группа интерфейсов `/api/token/*` предназначена в первую очередь для автоматизации управления API-ключами в консоли Crazyrouter. Для использования требуются `access token` и `New-Api-User` в заголовках запроса; интерфейсы не предназначены для прямого вызова обычными процессами вызова модели `sk-xxx`. В качестве базового адреса запроса необходимо использовать `https://crazyrouter.com`; `https://api.crazyrouter.com` предназначен как специальная точка входа для модели API, а вызовы по управленческому пути вернут `404 api_only_endpoint`.
 </Note>
 
-## Authentication
+## Способ аутентификации
 
-Use user-side authentication with these headers:
+Используйте пользовательскую аутентификацию, укажите в заголовке запроса:
 
 ```text
 Authorization: Bearer your_access_token
 New-Api-User: 1
 ```
 
-## Request Parameters
+## Параметры запроса
 
 <ParamField body="id" type="integer" required>
-  Token ID
+  Идентификатор токена
 </ParamField>
 
 <ParamField body="name" type="string">
-  Token name
+  Имя токена
 </ParamField>
 
 <ParamField body="remain_quota" type="integer">
-  Remaining quota
+  Оставшийся лимит
 </ParamField>
 
 <ParamField body="unlimited_quota" type="boolean">
-  Whether quota is unlimited
+  Неограниченный лимит
 </ParamField>
 
 <ParamField body="expired_time" type="integer">
-  Expiration timestamp, `-1` means never expires
+  Метка времени окончания действия; `-1` означает, что срок не ограничен
 </ParamField>
 
 <ParamField body="model_limits_enabled" type="boolean">
-  Whether to enable the model whitelist
+  Включить белый список моделей
 </ParamField>
 
 <ParamField body="model_limits" type="string">
-  Model restriction config string, for example `["gpt-5.5","claude-opus-4-8"]`
+  Строка конфигурации ограничений моделей, например `["gpt-5.5","claude-opus-4-8"]`
 </ParamField>
 
 <ParamField body="status" type="integer">
-  Status: 1=enabled, 2=disabled
+  Статус: 1=включён, 2=отключён
 </ParamField>
 
 <ParamField body="allow_ips" type="string">
-  IP whitelist string
+  Строка IP-белого списка
 </ParamField>
 
 <ParamField body="group" type="string">
-  Group
+  Группа
 </ParamField>
 
-## Response Format
+## Формат ответа
 
-The current endpoint returns the updated token object:
+Данный интерфейс возвращает объект обновлённого токена:
 
 ```json
 {
@@ -74,7 +74,7 @@ The current endpoint returns the updated token object:
   "message": "",
   "data": {
     "id": 10,
-    "name": "Production-Updated",
+    "name": "生产环境-已更新",
     "status": 1,
     "remain_quota": 200000,
     "unlimited_quota": false,
@@ -86,7 +86,7 @@ The current endpoint returns the updated token object:
 }
 ```
 
-## Code Examples
+## Пример кода
 
 <CodeGroup>
 
@@ -106,7 +106,7 @@ response = requests.put(
     headers=headers,
     json={
         "id": 10,
-        "name": "Production-Updated",
+        "name": "生产环境-已更新",
         "remain_quota": 200000,
         "model_limits_enabled": True,
         "model_limits": json.dumps(["gpt-5.5", "claude-opus-4-8"])
@@ -123,7 +123,7 @@ curl -X PUT https://crazyrouter.com/api/token/ \
   -H "Content-Type: application/json" \
   -d '{
     "id": 10,
-    "name": "Production-Updated",
+    "name": "生产环境-已更新",
     "remain_quota": 200000,
     "model_limits_enabled": true,
     "model_limits": "[\"gpt-5.5\"]"
@@ -133,5 +133,5 @@ curl -X PUT https://crazyrouter.com/api/token/ \
 </CodeGroup>
 
 <Warning>
-  Updating a token does not regenerate the API key. If you need a new key, delete the token and create a new one.
+  Изменение токена не приводит к перегенерации API-ключа. Если требуется сменить ключ, удалите токен и создайте его заново.
 </Warning>

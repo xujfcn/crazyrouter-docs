@@ -1,43 +1,43 @@
 ---
-title: 'Delete Token'
-description: 'Delete a specified API token'
+title: "トークンの削除"
+description: "指定された API トークンを削除します"
 api: 'DELETE /api/token/{id}'
 ---
-> 更新日: 2026-07-20
+> 内容更新日: 2026-07-20
 
-## Overview
+## インターフェース説明
 
-Permanently delete a specified API token. The token's API Key will be invalidated immediately after deletion.
+指定した API トークンを永久に削除します。削除後、そのトークンの API キーは直ちに無効になります。
 
 <Note>
-  The `/api/token/*` endpoints are mainly for Crazyrouter dashboard automation around API key management. They require a user `access token` plus the `New-Api-User` header, and are not the normal interface for `sk-xxx` model calls. Use `https://crazyrouter.com` as the base URL; `https://api.crazyrouter.com` is reserved for model APIs and returns `404 api_only_endpoint` for management paths.
+  この `/api/token/*` の一連のインターフェースは、Crazyrouter コンソールにおける API キー管理の自動化を主目的としています。利用には、ユーザー `access token` と `New-Api-User` リクエストヘッダーが必要で、一般的な `sk-xxx` モデル呼び出しフロー向けのインターフェースではありません。リクエストの基盤となるURLには `https://crazyrouter.com` を必ず使用してください。`https://api.crazyrouter.com` はモデルAPI専用の入り口であり、管理パスを呼び出すと `404 api_only_endpoint` が返されます。
 </Note>
 
-## Authentication
+## 認証方式
 
-Use user-side authentication with these headers:
+ユーザー側認証を使用します。リクエストヘッダーに以下を含めてください：
 
 ```text
 Authorization: Bearer your_access_token
 New-Api-User: 1
 ```
 
-## Path Parameters
+## パスパラメータ
 
 <ParamField path="id" type="integer" required>
-  ID of the token to delete
+  削除したいトークンID
 </ParamField>
 
-## Response Format
+## レスポンス形式
 
 ```json
 {
   "success": true,
-  "message": "Token deleted successfully"
+  "message": "令牌删除成功"
 }
 ```
 
-## Code Examples
+## コード例
 
 <CodeGroup>
 
@@ -68,5 +68,5 @@ curl -X DELETE https://crazyrouter.com/api/token/10 \
 </CodeGroup>
 
 <Warning>
-  This operation is irreversible. All applications using this Key will immediately lose API access.
+  削除操作は復元できません。削除後、このキーを使用する全てのアプリケーションは直ちにAPIを呼び出せなくなります。
 </Warning>

@@ -1,0 +1,120 @@
+---
+title: "Agregar token"
+description: "Crear un nuevo token de API"
+api: "POST /api/token/"
+---
+> Contenido actualizado: 2026-07-20
+
+## Descripción de la interfaz
+
+Crea un nuevo token de API (Token), utilizado para invocar la API del modelo de IA.
+
+<Note>
+  Este conjunto de interfaces `/api/token/*` se usa principalmente para la automatización de la gestión de claves API en el panel de Crazyrouter. Necesitan `access token` y `New-Api-User` en los encabezados de solicitud del usuario, no están diseñadas para usarse directamente en el flujo de invocación habitual del modelo `sk-xxx`. La base de la solicitud debe ser `https://crazyrouter.com`; `https://api.crazyrouter.com` es el canal exclusivo para las APIs de los modelos, y las rutas de gestión devolverán `404 api_only_endpoint`.
+</Note>
+
+## Método de autenticación
+
+Esta interfaz requiere autenticación por parte del usuario:
+
+```text
+Authorization: Bearer your_access_token
+New-Api-User: 1
+```
+
+## Parámetros de la solicitud
+
+<ParamField body="name" type="string" required>
+  Nombre del token, para facilitar la identificación de su propósito
+</ParamField>
+
+<ParamField body="remain_quota" type="integer" default="0">
+  Cuota inicial (unidad: valor interno de cuota). Si se establece en 0, debe usarse junto con `unlimited_quota`
+</ParamField>
+
+<ParamField body="unlimited_quota" type="boolean" default="false">
+  Definir si se configura con cuota ilimitada
+</ParamField>
+
+<ParamField body="expired_time" type="integer" default="-1">
+  Fecha de expiración (marca de tiempo Unix), `-1` significa que nunca expira
+</ParamField>
+
+<ParamField body="model_limits_enabled" type="boolean" default="false">
+  Establecer restricción de lista blanca de modelos
+</ParamField>
+
+<ParamField body="model_limits" type="string">
+  Configuración de restricción de modelos; el campo de esta interfaz es una cadena y normalmente se guarda como un JSON, por ejemplo `["gpt-5.5","claude-opus-4-8"]`
+</ParamField>
+
+<ParamField body="allow_ips" type="string">
+  Cadena de lista blanca de IPs. Puede ser una sola IP, o varias separadas por saltos de línea
+</ParamField>
+
+<ParamField body="group" type="string">
+  Grupo al que pertenece el token. Solo se puede definir grupos sobre los que el usuario actual tiene permisos de uso
+</ParamField>
+
+## Formato de respuesta
+
+Después de crear exitosamente en esta interfaz, solo se retorna el estado de éxito:
+
+```json
+{
+  "success": true,
+  "message": ""
+}
+```
+
+## Ejemplo de código
+
+<CodeGroup>
+
+```python Python
+import json
+import requests
+
+headers = {
+    "Authorization": "Bearer your_access_token",
+    "New-Api-User": "1",
+    "Content-Type": "application/json",
+    "User-Agent": "Mozilla/5.0"
+}
+
+response = requests.post(
+    "https://crazyrouter.com/api/token/",
+    headers=headers,
+    json={
+        "name": "生产环境",
+        "remain_quota": 100000,
+        "unlimited_quota": False,
+        "expired_time": -1,
+        "model_limits_enabled": True,
+        "model_limits": json.dumps(["gpt-5.5", "claude-opus-4-8"]),
+        "allow_ips": "203.0.113.10"
+    }
+)
+
+print(response.json())
+```
+
+```bash cURL
+curl -X POST https://crazyrouter.com/api/token/ \
+  -H "Authorization: Bearer your_access_token" \
+  -H "New-Api-User: 1" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "生产环境",
+    "remain_quota": 100000,
+    "expired_time": -1,
+    "model_limits_enabled": true,
+    "model_limits": "[\"gpt-5.5\"]"
+  }'
+```
+
+</CodeGroup>
+
+<Warning>
+  La interfaz de creación actual no devolverá el `key` completo generado en la respuesta. Si tu proceso requiere copiar inmediatamente la clave íntegra, se recomienda crearla y guardarla por medio del panel.
+</Warning>

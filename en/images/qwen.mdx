@@ -1,8 +1,8 @@
 ---
 title: "Qwen Image"
-description: "Use the Qwen Image family through the OpenAI Images-compatible public contract"
+description: "Use Qwen Image series models for text-to-image, and the client continues to use the OpenAI Images compatible protocol"
 ---
-> Last updated: 2026-06-06
+> Content updated: 2026-06-06
 
 # Qwen Image
 
@@ -10,31 +10,31 @@ description: "Use the Qwen Image family through the OpenAI Images-compatible pub
 POST /v1/images/generations
 ```
 
-Crazyrouter exposes the first batch of `Qwen Image` generation models through the OpenAI Images-compatible public contract. Clients keep using `/v1/images/generations`; Alibaba official and third-party channels stay internal as providers only.
+Crazyrouter currently opens to the public an OpenAI Images compatible protocol, `Qwen Image`, for the first batch of generation models. Customers continue to use the unified `/v1/images/generations`, and Alibaba official and third-party providers only serve as internal providers and do not expose client protocols separately.
 
-## Public Models
+## Models Currently Open
 
-| Model | Upstream execution shape | Customer-facing capability | Verification |
-|------|---------------------------|----------------------------|--------------|
-| `qwen-image-plus` | async generation | text-to-image | verified |
-| `qwen-image-max` | sync generation | text-to-image | verified |
-| `qwen-image-2.0` | sync generation | text-to-image | verified |
-| `qwen-image-2.0` | sync generation | text-to-image | Beta |
+| Model | Upstream Execution Mode | Current Client Capability | Verification Status |
+|------|------------------------|--------------------------|--------------------|
+| `qwen-image-plus` | Asynchronous Generation | Text-to-image | Verified |
+| `qwen-image-max` | Synchronous Generation | Text-to-image | Verified |
+| `qwen-image-2.0` | Synchronous Generation | Text-to-image | Verified |
+| `qwen-image-2.0` | Synchronous Generation | Text-to-image | Beta |
 
 <Note>
-  `qwen-image-2.0` is already aligned in protocol and code, but the production carrier evidence is still being closed, so it remains Beta for now.
+  `qwen-image-2.0` has now completed protocol and code alignment, but production evidence is still being supplemented, so it is temporarily marked as Beta.
 </Note>
 
-## Public Contract
+## Client Protocol
 
 ### Request Parameters
 
 | Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model` | string | Yes | `qwen-image-plus`, `qwen-image-max`, `qwen-image-2.0`, or `qwen-image-2.0` |
-| `prompt` | string | Yes | text-to-image prompt |
-| `size` | string | No | output size; use sizes currently exposed by the model page or playground |
-| `n` | integer | No | number of images, default `1` |
+|----------|------|----------|-------------|
+| `model` | string | Yes | `qwen-image-plus`, `qwen-image-max`, `qwen-image-2.0`, `qwen-image-2.0` |
+| `prompt` | string | Yes | Text-to-image prompt |
+| `size` | string | No | Output size. It is recommended to use supported sizes listed on the current model page or playground |
+| `n` | integer | No | Number of images generated, default is `1` |
 | `response_format` | string | No | `url` or `b64_json` |
 
 ### Request Example
@@ -47,7 +47,7 @@ curl -X POST https://api.crazyrouter.com/v1/images/generations \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "model": "qwen-image-max",
-    "prompt": "A premium perfume poster with soft studio lighting and the title Morning Mist in Chinese",
+    "prompt": "一张具有高级感的产品海报，主体是一瓶玻璃香水，柔和棚拍光线，中文标题“晨雾”",
     "size": "1024x1024",
     "n": 1,
     "response_format": "url"
@@ -64,7 +64,7 @@ client = OpenAI(
 
 response = client.images.generate(
     model="qwen-image-max",
-    prompt="A premium perfume poster with soft studio lighting and the title Morning Mist in Chinese",
+    prompt="一张具有高级感的产品海报，主体是一瓶玻璃香水，柔和棚拍光线，中文标题“晨雾”",
     size="1024x1024",
     n=1
 )
@@ -87,25 +87,25 @@ print(response.data[0].url)
 }
 ```
 
-## Official Billing Truth
+## Official Billing Standard
 
-The current official truth for Qwen Image is billing per successfully generated image, not input/output token display pricing.
+Currently, Qwen Image is officially billed based on the number of images successfully generated, not based on input/output token display.
 
-| Model | Official billing | Official price | Current doc state |
-|------|-------------------|----------------|-------------------|
-| `qwen-image-plus` | per image | `¥0.20 / image` | verified |
-| `qwen-image-max` | per image | `¥0.50 / image` | verified |
-| `qwen-image-2.0` | per image | `¥0.20 / image` | verified |
-| `qwen-image-2.0` | per image | `¥0.50 / image` | Beta |
+| Model | Official Standard | Official Unit Price | Current Documentation Status |
+|------|-------------------|---------------------|------------------------------|
+| `qwen-image-plus` | Per Image | `¥0.20 per image` | Verified |
+| `qwen-image-max` | Per Image | `¥0.50 per image` | Verified |
+| `qwen-image-2.0` | Per Image | `¥0.20 per image` | Verified |
+| `qwen-image-2.0` | Per Image | `¥0.50 per image` | Beta |
 
-## Scope Notes
+## Boundary Notes
 
-- This first batch commits only the public `text-to-image` capability. Additional upstream multimodal abilities are not exposed as separate customer protocols yet.
-- Providers may run async or sync upstream paths internally, but the customer-facing contract remains the same OpenAI Images request/response shape.
-- The edit model `qwen-image-plus` is not part of this first-batch generation closure. Treat editing as a separate capability decision.
+- This page only promises `Text to Image` client capability for the first batch; additional upstream multi-modal capabilities are not directly exposed in the client protocol.
+- Providers on `Qwen Image` may have asynchronous or synchronous differences, but the client side still uses the unified OpenAI Images request/response format.
+- The image editing model `qwen-image-plus` is not in the scope of “generation model convergence” for this batch on this page; if editing capability is required, please evaluate separately according to the currently open status of the editing model.
 
 {/* crazyrouter-model-links v2 */}
-## Related on crazyrouter.com
+## Related Pages
 
-- [Qwen Image 2.0 model page: live price, real samples, code](https://crazyrouter.com/en/models/alibaba/qwen-image-2-0?utm_source=docs&utm_medium=related)
-- [All Alibaba Cloud models with live prices](https://crazyrouter.com/en/models/alibaba?utm_source=docs&utm_medium=related)
+- [Qwen Image 2.0 Model Page: Real-time Price, Real Samples, Calling Code](https://crazyrouter.com/en/models/alibaba/qwen-image-2-0?utm_source=docs&utm_medium=related)
+- [Alibaba Cloud All Models and Prices](https://crazyrouter.com/en/models/alibaba?utm_source=docs&utm_medium=related)

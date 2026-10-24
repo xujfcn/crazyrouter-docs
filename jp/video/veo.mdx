@@ -1,65 +1,69 @@
 ---
 title: "Veo 3.1"
-description: "Use Veo 3.1 Fast and Veo 3.1 Quality through the Crazyrouter unified video API"
+description: "Crazyrouter を通じて統一動画 API で Veo 3.1 Fast と Veo 3.1 Quality を呼び出します"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-30
 
 # Veo 3.1
 
-The currently public Crazyrouter Veo 3.1 model names are:
+現在、Crazyrouterが顧客向けに公開している Veo 3.1 モデルは以下の通りです：
 
 - `veo-3.1-fast`
 - `veo-3.1-quality`
 
-These are customer-facing public aliases. Internal canonical provider names are not exposed to customers.
+これらの名称は顧客向けのパブリックエイリアスです。内部のカノニカルプロバイダー名称は、直接顧客に公開されません。
 
-## Via Unified Video API
+<Note>
+  `veo-3.1` は顧客が直接提出できる `model` 値ではありません。顧客のリクエストでは常に `veo-3.1-fast` または `veo-3.1-quality` をご利用ください。
+</Note>
+
+## 統一動画 API での呼び出し
 
 ```
 POST /v1/video/create
 ```
 
-This page only covers the public capability surface that is already released:
+このページでは、すでに顧客向けに提供されている機能のみを扱っています：
 
-- text-to-video
-- single-image image-to-video
+- テキストから動画生成
+- 画像から動画生成
 
-Provider-native `referenceImages`, style reference, and other Veo-specific modes are not part of the current public contract yet.
+Google公式ドキュメントに記載されている `referenceImages`、style reference、及びさらに詳細なプロバイダー固有モードは、現時点の公開契約には含まれていません。
 
-### Current Public Models
+### 現在利用可能なモデル
 
-| Model | Description |
-|-------|-------------|
-| `veo-3.1-fast` | Lower-latency option for getting the first usable result faster |
-| `veo-3.1-quality` | Quality-first option for the default public path |
+| モデル | 説明 |
+|------|------|
+| `veo-3.1-fast` | より低遅延、最初の利用可能な結果を素早く取得したい場合に適しています |
+| `veo-3.1-quality` | より高品質重視、デフォルトの主要表示に適しています |
 
-### Capability Status
+### 機能状況
 
-| Capability / Spec | Status | Notes |
-|-------|--------|-------|
-| text-to-video `720P / 1080P` | `Verified` | Closed in the current public contract |
-| single-image image-to-video `720P / 1080P` | `Verified` | Closed in the current public contract |
-| audio-enabled rows | `Beta` | The official capability exists, but the public artifact is still pending |
-| `start_end` | `Beta` | Not committed on the current public page |
-| `referenceImages` / reference assets | `Beta` | Not committed on the current public page |
-| `4K` | `Beta` | Not committed on the current public page |
+| 機能 / 仕様 | 状態 | 説明 |
+|------|------|------|
+| テキスト動画生成 `720P / 1080P` | `Verified` | 現在公開契約で対応済み |
+| 画像から動画生成 `720P / 1080P` | `Verified` | 現在公開契約で対応済み |
+| 音声対応行 | `Beta` | 公式機能は存在するが、現在公開アーティファクトはまだ追加予定 |
+| `start_end` | `Beta` | 現在公開ページでは未保証 |
+| `referenceImages` / reference assets | `Beta` | 現在公開ページでは未保証 |
+| `4K` | `Beta` | 現在公開ページでは未保証 |
 
 <Note>
-  The Pricing page and this doc use the same status language: `Verified` means there is a current minimal live artifact, while `Beta` means the official capability exists but the public validation set or edge coverage is still being completed.
+  プライシングページとこのドキュメントは同一のステータス基準を使用しています：`Verified` は現時点で最小のライブ閉ループがあることを示し、`Beta` は公式機能は存在するが現在公開検証または制約が追加されていることを示しています。
 </Note>
 
-### Request Parameters
+### リクエストパラメータ
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `model` | string | Yes | `veo-3.1-fast` or `veo-3.1-quality` |
-| `prompt` | string | Yes | Video prompt |
-| `aspect_ratio` | string | No | Publicly recommended: `16:9` or `9:16` |
-| `size` | string | No | Publicly recommended: `720P` or `1080P` |
-| `images` | array | No | Pass exactly one image URL for the current public image-to-video flow |
-| `duration` | integer | No | Common value: `8` |
+| パラメータ | 型 | 必須 | 説明 |
+|------|------|------|------|
+| `model` | string | はい | `veo-3.1-fast` または `veo-3.1-quality` |
+| `prompt` | string | はい | 動画説明プロンプト |
+| `aspect_ratio` | string | いいえ | 現在公開の推奨値は `16:9` または `9:16` |
+| `size` | string | いいえ | 現在公開の推奨値は `720P` または `1080P` |
+| `images` | array | いいえ | 画像から動画生成時は `1` 枚の画像URLを指定します |
+| `duration` | integer | いいえ | 一般的な値は `8` |
 
-### Request Examples
+### リクエスト例
 
 <CodeGroup>
 
@@ -90,25 +94,24 @@ response = requests.post(
     }
 )
 
-task_id = response.json()["id"]
-print(f"Task ID: {task_id}")
+task_id = response.json()["task_id"]
+print(f"任务 ID: {task_id}")
 ```
 
 </CodeGroup>
 
-### Response Example
+### レスポンス例
 
 ```json
 {
-  "id": "veo_task_abc123",
-  "status": "processing",
-  "status_update_time": 1709123456
+  "task_id": "veo_task_abc123",
+  "status": "processing"
 }
 ```
 
 ---
 
-## Single-Image Image-to-Video Example
+## 画像から動画生成例
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/video/create \
@@ -125,7 +128,7 @@ curl -X POST https://api.crazyrouter.com/v1/video/create \
 
 ---
 
-## Query Task
+## タスクの照会
 
 ```
 GET /v1/video/query?id={task_id}
@@ -136,22 +139,26 @@ curl "https://api.crazyrouter.com/v1/video/query?id=veo_task_abc123" \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-### Response Example (Completed)
+### レスポンス例（完了済み）
 
 ```json
 {
-  "id": "veo_task_abc123",
-  "status": "SUCCESS",
-  "status_update_time": 1709123520,
-  "artifact_url": "https://media.crazyrouter.com/task-artifacts/example.mp4",`r`n    "result_url": "https://media.crazyrouter.com/task-artifacts/example.mp4"
+  "code": "success",
+  "message": "",
+  "data": {
+    "task_id": "veo_task_abc123",
+    "status": "SUCCESS",
+    "url": "https://media.crazyrouter.com/task-artifacts/example.mp4",
+    "artifact_url": "https://media.crazyrouter.com/task-artifacts/example.mp4"
+  }
 }
 ```
 
 <Note>
-  Google's official Veo 3.1 docs also describe `reference asset images` and other provider-native capability details. The current Crazyrouter public page intentionally stays narrower: it only commits to text-to-video and single-image image-to-video under `veo-3.1-fast` and `veo-3.1-quality`. Additional Veo capability pages should be published only after the public route and validation artifacts are ready.
+  Google公式ドキュメントでは Veo 3.1 の `reference asset images`、及びより詳細なプロバイダー固有の機能境界について説明されています。現時点でCrazyrouterの公開ページでは `veo-3.1-fast` / `veo-3.1-quality` 下のテキスト動画生成および画像から動画生成のみ対応保証しています。今後さらにVeoの第一級機能を公開する場合、別途ドキュメント及び検証記録を追加します。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [Google の全モデルと料金](https://crazyrouter.com/en/models/google?utm_source=docs&utm_medium=related)
+- [Google 全モデルと料金](https://crazyrouter.com/ja/models/google?utm_source=docs&utm_medium=related)

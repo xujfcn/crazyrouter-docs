@@ -1,34 +1,60 @@
 ---
-title: 'AI ツール向けドキュメント入口'
-description: 'Codex、Claude Code、ChatGPT、Cursor などが Crazyrouter ドキュメントを読むための入口'
+title: "AIツールによるドキュメント読込み"
+description: "Codex、Claude Code、ChatGPT、Cursor などのAIツール向けCrazyrouterドキュメント入口"
 ---
-> 更新日: 2026-07-20
+> 内容更新日: 2026-07-20
 
-AI ツールに Crazyrouter ドキュメントを読ませる場合は、次の安定した入口を使ってください。
+このページはCrazyrouterのドキュメントをAIツールで読み込むためのものです。下記の安定した入口を優先的にご利用ください。
 
-## 推奨入口
+## 推奨の入口
 
 <CardGroup cols={2}>
   <Card title="ドキュメント索引 llms.txt" icon="list" href="https://docs.crazyrouter.com/llms.txt">
-    重要ページと概要のコンパクトな索引です。AI が次に読むページを判断する用途に向いています。
+    簡易インデックス。重要なページと説明を列挙しており、AIがどのドキュメントを読むべきか判断しやすくなっています。
   </Card>
-  <Card title="完全版 llms-full.txt" icon="file-text" href="https://docs.crazyrouter.com/llms-full.txt">
-    全ドキュメントを 1 ファイルにまとめた AI 向けコンテキストです。
+  <Card title="完全なコンテキスト llms-full.txt" icon="file-text" href="https://docs.crazyrouter.com/llms-full.txt">
+    完全集約版ドキュメント。AIツールが全コンテキストを一度に読み込む際に便利です。
   </Card>
-  <Card title="Sitemap" icon="sitemap" href="https://docs.crazyrouter.com/sitemap.xml">
-    検索エンジン、クローラー、自前のインデックス処理向けの標準 sitemap です。
+  <Card title="サイトマップ" icon="sitemap" href="https://docs.crazyrouter.com/sitemap.xml">
+    標準のサイトマップ。検索エンジンやクローラー、自作インデックスプログラムに適しています。
   </Card>
-  <Card title="Markdown ページ" icon="markdown" href="https://docs.crazyrouter.com/jp/quickstart.md">
-    各ドキュメント URL に `.md` を付けると Markdown 版を取得できます。
+  <Card title="Markdownページ" icon="markdown" href="https://docs.crazyrouter.com/quickstart.md">
+    単一ページのドキュメントはURLに`.md`を付加してMarkdownバージョンの取得が可能です。
   </Card>
 </CardGroup>
 
-## AI ツール用プロンプト
+## AIツール向けプロンプト
 
 ```text
-まず https://docs.crazyrouter.com/llms.txt を読んで関連ページを判断してください。
-完全な文脈が必要な場合は https://docs.crazyrouter.com/llms-full.txt を読んでください。
-OpenAI 互換クライアントでは base_url に https://api.crazyrouter.com/v1 または https://api.crazyrouter.com/v1 を使います。
-Claude Code / Anthropic native クライアントではルートドメインを使い、/v1 を追加しません。
-`/api/user/self`、`/api/token/*`、`/api/log/*` などのアカウント・管理 API は https://crazyrouter.com を使用してください。API 専用ドメインでは 404 api_only_endpoint が返されます。
+请先读取 https://docs.crazyrouter.com/llms.txt 判断相关页面。
+如果需要完整上下文，再读取 https://docs.crazyrouter.com/llms-full.txt。
+模型名称、价格和计费方式必须以 https://crazyrouter.com/pricing 为准。
+如需确认当前 API Key 实际可用模型，请调用 GET https://api.crazyrouter.com/v1/models。
+接入 OpenAI 兼容客户端时 base_url 使用 https://api.crazyrouter.com/v1。
+接入 Claude Code / Anthropic 原生客户端时使用根域名 https://api.crazyrouter.com，不要追加 /v1。
+东亚地区优先使用 https://cn.crazyrouter.com；OpenAI 兼容客户端对应 https://cn.crazyrouter.com/v1。
+账户与管理接口（如 `/api/user/self`、`/api/token/*`、`/api/log/*`）必须使用 https://crazyrouter.com；发送到 API-only 域名会返回 404 api_only_endpoint。
 ```
+
+## よく利用されるドキュメント
+
+| シナリオ | ドキュメント |
+| --- | --- |
+| 初回導入 | [クイックスタート](/jp/quickstart) |
+| Base URLと通信経路 | [APIエンドポイント](/jp/api-endpoint) |
+| APIキー | [認証方式](/jp/authentication) |
+| Claude Code | [Claude Code導入](/jp/integrations/claude-code) |
+| Codex CLI | [Codex CLI導入](/jp/integrations/codex) |
+| OpenAI Chat | [Chat Completion作成](/jp/chat/openai/completions) |
+| Claude Messages | [Claudeネイティブフォーマット](/jp/chat/anthropic/messages) |
+| Gemini Native | [Geminiネイティブフォーマット](/jp/chat/gemini/native) |
+| 画像生成 | [GPTイメージ](/jp/images/gpt-image) |
+| 動画 | [統一動画インターフェース](/jp/video/unified) |
+
+## 方針及び注意点
+
+- `llms.txt`は全モデルリストではありません。
+- モデル・価格・課金方式は[Pricingページ](https://crazyrouter.com/pricing)に従ってください。
+- 現在のトークンで利用可能なモデルは`GET https://api.crazyrouter.com/v1/models`の返却結果が基準となります。
+- 東アジア地域では`https://cn.crazyrouter.com`を優先利用し、OpenAI互換クライアントは`https://cn.crazyrouter.com/v1`を利用してください。
+- コード生成の際は、各モデルドキュメントに記載された検証済みエンドポイント例を優先的に用いてください。

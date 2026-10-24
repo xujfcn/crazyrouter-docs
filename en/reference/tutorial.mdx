@@ -1,25 +1,25 @@
 ---
-title: 'Getting Started'
-description: 'Production-revalidated starter paths for connecting to Crazyrouter from OpenAI, Anthropic, and Gemini'
+title: "Access Tutorial"
+description: "Based on production environment review, the getting started path for integrating OpenAI, Anthropic, and Gemini into Crazyrouter"
 ---
-> Last updated: 2026-06-23
+> Content updated: 2026-06-09
 
-# Getting Started
+# Access Tutorial
 
-This page only documents starter paths that were revalidated against Crazyrouter production on `2026-03-23`.
+This page only records the getting started paths `2026-03-23` that have already been reviewed in the production environment of Crazyrouter.
 
-For the fastest start, separate the integration styles first:
+If you want to get started the fastest, first distinguish three access types:
 
-- OpenAI-compatible: `https://api.crazyrouter.com/v1`
-- Anthropic native: `https://api.crazyrouter.com`
-- Gemini native: `https://api.crazyrouter.com/v1beta/models/...`
+- OpenAI Compatible: `https://api.crazyrouter.com/v1`
+- Anthropic Native: `https://api.crazyrouter.com`
+- Gemini Native: `https://api.crazyrouter.com/v1beta/models/...`
 
-## Shortest migration rule
+## Shortest Migration Principle
 
-When migrating from an OpenAI-compatible client, you usually only change two things:
+To migrate from an OpenAI compatible client to Crazyrouter, usually only two changes are needed:
 
-1. set `base_url` to `https://api.crazyrouter.com/v1`
-2. replace the key with your Crazyrouter `sk-xxx`
+1. Change `base_url` to `https://api.crazyrouter.com/v1`
+2. Change `api_key` to Crazyrouter's `sk-xxx`
 
 ---
 
@@ -40,10 +40,10 @@ response = client.chat.completions.create(
 )
 ```
 
-This production recheck confirmed that:
+Production review in this round confirms:
 
-- `gpt-5.5` works through `/v1/chat/completions`
-- if you need reasoning summaries or OpenAI-style web search, you should prefer `/v1/responses`
+- `gpt-5.5` can return normally through `/v1/chat/completions`
+- If you need reasoning summaries or OpenAI-style web search, it is preferred to switch to `/v1/responses`
 
 Related pages:
 
@@ -54,7 +54,7 @@ Related pages:
 
 ## Migrating from Anthropic
 
-### Option A: stay on the OpenAI-compatible layer
+### Option A: Continue Using the OpenAI Compatible Layer
 
 ```python
 from openai import OpenAI
@@ -71,7 +71,7 @@ response = client.chat.completions.create(
 )
 ```
 
-### Option B: use native Anthropic Messages
+### Option B: Use Anthropic Native Messages
 
 ```python
 import anthropic
@@ -88,12 +88,12 @@ response = client.messages.create(
 )
 ```
 
-If you need:
+If you want to:
 
-- standard Claude chat: prefer `claude-opus-4-8`
-- an explicit thinking block: prefer `claude-opus-4-8`
+- Standard Claude conversations: Prefer `claude-opus-4-8`
+- Explicitly need thinking block: Prefer `claude-opus-4-8`
 
-Related page:
+Related pages:
 
 - [Claude Native Format](/en/chat/anthropic/messages)
 
@@ -101,7 +101,7 @@ Related page:
 
 ## Migrating from Gemini
 
-### Option A: OpenAI-compatible layer
+### Option A: OpenAI Compatible Layer
 
 ```python
 from openai import OpenAI
@@ -118,7 +118,7 @@ response = client.chat.completions.create(
 )
 ```
 
-### Option B: Gemini native
+### Option B: Gemini Native
 
 ```bash
 curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
@@ -135,21 +135,21 @@ curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?k
   }'
 ```
 
-If you need:
+If you want to:
 
-- simple reuse of existing OpenAI SDK code: start with the compatibility layer
-- structured outputs, Google Search, or thinking: prefer Gemini native
+- Only reuse existing OpenAI SDK code: Start with the compatible layer
+- Need structured output, Google Search, thinking: Prefer Gemini native
 
 Related pages:
 
-- [Gemini OpenAI-Compatible Format](/en/chat/gemini/openai-compat)
+- [Gemini OpenAI Compatible Format](/en/chat/gemini/openai-compat)
 - [Gemini Native Format](/en/chat/gemini/native)
 
 ---
 
-## Environment variables
+## Environment Variable Method
 
-If you use the OpenAI-compatible route, a good default is:
+If you use the OpenAI compatible layer, it is recommended to first configure:
 
 <Tabs>
   <Tab title="Linux / macOS">
@@ -166,7 +166,7 @@ If you use the OpenAI-compatible route, a good default is:
   </Tab>
 </Tabs>
 
-Then your code can be:
+Then in your code, you can directly:
 
 ```python
 from openai import OpenAI
@@ -175,18 +175,17 @@ client = OpenAI()
 
 ---
 
-## Starter recommendations
+## Getting Started Recommendations
 
-| Goal | Recommended starting path |
-|------|---------------------------|
-| Fastest GPT integration | OpenAI-compatible + `gpt-5.5` |
-| Fastest Claude integration | Anthropic native + `claude-opus-4-8` |
-| Fastest Gemini integration | OpenAI-compatible or Gemini native + `gemini-3.1-pro` |
-| Need reasoning summaries | Responses API |
-| Need a Claude thinking block | `claude-opus-4-8` |
-| Need Gemini Google Search / thinking / responseSchema | Gemini native |
+| Target | Recommended Start Method |
+|--------|--------------------------|
+| Fastest access to GPT | OpenAI Compatible + `gpt-5.5` |
+| Fastest access to Claude | Anthropic Native + `claude-opus-4-8` |
+| Fastest access to Gemini | OpenAI Compatible or Gemini Native + `gemini-3.1-pro` |
+| Need reasoning summary | Responses API |
+| Need Claude thinking block | `claude-opus-4-8` |
+| Need Gemini Google Search / thinking / responseSchema | Gemini Native |
 
 <Note>
-  Crazyrouter supports OpenAI, Anthropic, and Gemini protocols at the same time. In practice, the more reliable approach is usually not forcing every model through one protocol, but choosing the route that best matches the capability you need.
+  Crazyrouter supports OpenAI, Anthropic, and Gemini protocols simultaneously. A more robust approach is usually not "forcing all models to use the same protocol," but to choose the most suitable entry based on capabilities.
 </Note>
-

@@ -1,0 +1,195 @@
+---
+title: "Guía de configuración de NextChat"
+description: "En NextChat, conecta modelos compatibles con OpenAI mediante Crazyrouter y completa los ajustes en línea, auto-despliegue, lista de modelos y configuración para resolución de problemas"
+---
+> Contenido actualizado: 2026-06-09
+
+NextChat (anteriormente ChatGPT Next Web) es ideal para desplegar rápidamente un frontend de chat ligero, rápido y fácil de auto-desplegar. Al conectar con Crazyrouter, se recomienda seguir la ruta compatible por defecto con OpenAI y apuntar la dirección del servicio al dominio raíz de Crazyrouter.
+
+## Resumen
+
+A través de las opciones de configuración de OpenAI en NextChat, puedes enviar solicitudes a Crazyrouter:
+
+- Protocolo recomendado: `OpenAI-compatible API`
+- Método recomendado: Ruta OpenAI por defecto en NextChat
+- URL Base: `https://api.crazyrouter.com`
+- Método de autenticación: `sk-...` token
+- Modelo recomendado para la primera validación: `gpt-5.5`
+
+<Note>
+La documentación oficial de NextChat define `BASE_URL` como la URL base para solicitudes OpenAI API; el ejemplo también usa estilo dominio raíz. Además, la `http://127.0.0.1:4000/api/status` local revela `server_address` como dirección raíz. Por ello, al conectar a Crazyrouter, la primera verificación debe hacerse rellenando `https://api.crazyrouter.com`; si tu versión personalizada requiere una ruta más específica, ajusta según esa documentación.
+</Note>
+
+## ¿Para quién está pensado?
+
+- Personas que quieran desplegar rápidamente un frontend de chat ligero
+- Quienes deseen usar Crazyrouter para chat web personal o de pequeños equipos
+- Quienes necesiten fijar modelos y upstream por defecto mediante variables de entorno
+- Quienes busquen la configuración mínima para hacer funcionar la ruta compatible con OpenAI
+
+## Protocolo de uso
+
+Protocolo recomendado: `OpenAI-compatible API`
+
+Al conectar NextChat con Crazyrouter, rellena primero:
+
+```text
+https://api.crazyrouter.com
+```
+
+No rellenes como:
+
+- `https://api.crazyrouter.com/v1/chat/completions`
+- `https://api.crazyrouter.com/v1/models`
+
+Si alguna versión histórica de NextChat requiere especificar el host API, ajusta según esa versión; para la primera conexión, usa siempre el dominio raíz como validación inicial.
+
+<Tip>
+Dependiendo de cómo hayas desplegado NextChat, la entrada puede variar: en uso en línea suele rellenarse en la página de configuración; en auto-despliegue, se suele usar directamente variables de entorno. Independientemente de la interfaz, la primera validación será con la configuración más mínima: `API Key` + dominio raíz `BASE_URL` + un solo modelo `gpt-5.5`.
+</Tip>
+
+## Requisitos previos
+
+| Elemento               | Descripción                                                        |
+|-----------------------|-------------------------------------------------------------------|
+| Cuenta Crazyrouter    | Primero regístrate en [crazyrouter.com](https://crazyrouter.com)           |
+| Token de Crazyrouter  | Se recomienda crear un token `sk-...` solo para NextChat    |
+| NextChat              | Versiones online o auto-desplegadas están OK, recomendado usar versión estable actual |
+| Modelos disponibles   | Autoriza al menos un modelo de chat compatible con OpenAI que hayas probado ese día, como `gpt-5.5` |
+
+Lista inicial de modelos recomendados:
+
+- `gpt-5.5`
+- `claude-opus-4-8`
+- `gemini-3.1-pro`
+
+## Comienza en 5 minutos
+
+<Steps>
+  <Step title="Crear token exclusivo para NextChat">
+    En el panel de Crazyrouter, crea un nuevo token, en el nombre pon `nextchat`. Al principio sólo autoriza modelos base como `gpt-5.5` y `claude-opus-4-8`.
+  </Step>
+  <Step title="Abrir configuración de NextChat">
+    Entra en NextChat, haz clic en el icono inferior izquierdo `Ajustes` o la entrada `Settings`.
+  </Step>
+  <Step title="Rellenar la dirección de la API y la clave">
+    En los ajustes relacionados con OpenAI completa:
+    - `API Key`: Tu `sk-...`
+    - `Dirección de la API / Base URL`: `https://api.crazyrouter.com`
+  </Step>
+  <Step title="Especificar modelo">
+    En `Modelo / Model` ingresa o selecciona manualmente `gpt-5.5`. Si tu versión permite lista de modelos personalizada, añade los que necesites.
+  </Step>
+  <Step title="Completar la primera verificación">
+    Crea una nueva conversación y envía `Reply only OK`. Tras recibir respuesta, añade modelos progresivamente.
+  </Step>
+</Steps>
+
+## Configuración rápida para auto-despliegue
+
+En Docker, una configuración típica sería:
+
+```yaml
+services:
+  nextchat:
+    image: yidadaa/chatgpt-next-web
+    ports:
+      - "3000:3000"
+    environment:
+      - OPENAI_API_KEY=sk-xxx
+      - BASE_URL=https://api.crazyrouter.com
+      - CUSTOM_MODELS=+gpt-5.5,+claude-opus-4-8,+gemini-3.1-pro
+      - HIDE_USER_API_KEY=1
+```
+
+Explicación de variables de entorno habituales:
+
+| Variable           | Valor recomendado   | Descripción                                                 |
+|--------------------|--------------------|-------------------------------------------------------------|
+| `OPENAI_API_KEY`    | `sk-xxx`    | Token Crazyrouter por defecto                               |
+| `BASE_URL`    | `https://api.crazyrouter.com`    | Según `BASE_URL` oficial, primero el dominio raíz para validación inicial |
+| `CUSTOM_MODELS`    | `+gpt-5.5,+claude-opus-4-8,+gemini-3.1-pro`    | Modelos opcionales para el frontend                         |
+| `HIDE_USER_API_KEY`    | `1`    | No permitir a usuarios ingresar otras claves                |
+
+## Modelos recomendados
+
+| Escenario de uso        | Modelo recomendado | Motivo                                                             |
+|------------------------|-------------------|--------------------------------------------------------------------|
+| Modelo de chat por defecto   | `gpt-5.5`     | Probado con éxito ese día, recomendable como base en NextChat      |
+| Texto largo y explicaciones  | `claude-opus-4-8`     | Mejor para textos largos y explicaciones complejas                 |
+| Alternativa Gemini          | `gemini-3.1-pro`     | Buena opción para probar segunda ruta de compatibilidad            |
+
+Secuencia recomendada: primero haz funcionar `gpt-5.5`, luego extiende la lista con `CUSTOM_MODELS`.
+
+## Mejores prácticas para configurar tokens
+
+| Configuración         | Recomendación    | Descripción                                                    |
+|----------------------|------------------|----------------------------------------------------------------|
+| Token dedicado       | Obligatorio      | NextChat no debe usar el mismo token que LobeChat, Cursor, Codex |
+| Lista blanca de modelos | Muy recomendado | Solo autoriza modelos que se mostrarán realmente en el frontend   |
+| Restricción IP       | Solo si IP fija  | Úsalo con precaución en entornos con redes cambiantes             |
+| Límite de cuotas     | Muy recomendado  | En chats webs de varios usuarios el consumo puede subir rápido    |
+| Aislamiento de entorno | Recomendado      | Usa distintos tokens para demo, pruebas y producción              |
+| Clave personalizada de usuario | Mejor desactivar | Si quieres unificar upstream y facturación, configura `HIDE_USER_API_KEY=1` |
+
+## Checklist de validación
+
+- [ ] `API Key` guardado correctamente
+- [ ] `Base URL` establecido como `https://api.crazyrouter.com`
+- [ ] Primer modelo configurado como `gpt-5.5`
+- [ ] Primer mensaje de conversación retorna respuesta correctamente
+- [ ] Si auto-desplegado, `CUSTOM_MODELS` está activo
+- [ ] Salida streaming funciona normalmente
+- [ ] Logs del panel Crazyrouter reflejan la solicitud
+- [ ] Cuota de token y lista blanca de modelos cumplen lo esperado
+
+## Errores frecuentes y solución
+
+| Síntoma                                      | Causa habitual                                     | Cómo solucionarlo                                               |
+|----------------------------------------------|----------------------------------------------------|-----------------------------------------------------------------|
+| 401 unauthorized                            | Token errado, caducado o copiado con espacios      | Genera token nuevo y reemplázalo                                |
+| 403 / model not allowed                     | Modelo no está en lista blanca                     | Autoriza modelo en ajustes de token Crazyrouter                 |
+| 404                                         | Usaste ruta completa o nombre de variable incorrecta| Cambia a `https://api.crazyrouter.com` y comprueba si tu versión usa `BASE_URL` u otro nombre |
+| No se ven los ajustes en frontend tras auto-despliegue | Configuración fijada en variables, no en la interfaz| Revisa en deployment `OPENAI_API_KEY`, `BASE_URL`, `CUSTOM_MODELS` |
+| No aparecen modelos en la web                | No configuraste `CUSTOM_MODELS` o caché antigua    | Ingresa `gpt-5.5` para prueba, refresca y revisa variables |
+| El envío funciona, pero el modelo da error   | Modelo defecto erróneo, o modelo indisponible      | Vuelve a `gpt-5.5` para validación base                   |
+| Usuarios aún pueden usar su propia clave     | No activaste `HIDE_USER_API_KEY=1`                      | Añade la variable en tu entorno                                 |
+| El coste sube muy rápido                     | Muchos usuarios con un token de alto privilegio    | Separa los tokens, restringe la white list, agrega límites       |
+
+## Sugerencias de rendimiento y coste
+
+- Por defecto solo habilita `gpt-5.5`
+- Elimina modelos caros de la lista por defecto, agrega solo según demanda
+- Si despliegas públicamente, oculta la opción de claves personalizadas
+- Usa tokens distintos para demo y producción, así el tráfico de pruebas no agota la cuota real
+- Si hay consumo anómalo, revisa logs de Crazyrouter para ver si es por conversaciones largas o uso compartido
+
+## FAQ
+
+### ¿Qué dirección debe rellenar NextChat?
+
+Primero pon `https://api.crazyrouter.com`.
+
+### ¿Por qué aquí no se recomienda rellenar directamente `/v1`?
+
+Porque la documentación oficial de NextChat da ejemplos con `BASE_URL` usando el dominio raíz; además, al combinarlo con la versión local `4000` que retorna `server_address`, comenzar con el dominio raíz es más fiable.
+
+### ¿Cuál es el primer modelo recomendado?
+
+Primero usa `gpt-5.5`.
+
+### ¿Tengo que configurar `CUSTOM_MODELS`?
+
+No es obligatorio. Puedes primero ingresar `gpt-5.5` manualmente para validar, y luego agregar más modelos.
+
+### ¿Por qué en algunos despliegues solo se puede cambiar variables, no desde la página?
+
+Porque la entrada de configuración depende de cómo desplegaste NextChat. Algunas instancias fijas upstream, modelos y claves en variables de entorno; el frontend solo usa, no edita.
+
+### ¿Debería ocultar el campo de clave personalizada en auto-despliegue?
+
+Si quieres controlar upstream y costes, se recomienda ocultarlo.
+
+<Note>
+Si buscas un frontend de chat muy ligero y de bajo coste, NextChat es una elección excelente; si necesitas colaboración y funciones avanzadas, considera expandir con LobeChat o Dify.
+</Note>

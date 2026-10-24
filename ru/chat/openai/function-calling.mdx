@@ -1,20 +1,21 @@
 ---
-title: "Function Calling"
-description: "Chat Completions tool calling verified against Crazyrouter production on 2026-03-23"
+title: "Вызов функций"
+description: "Вызов инструментов Chat Completions проверен на Crazyrouter в рабочем режиме 23.03.2026"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Function Calling
+
+# Вызов функций
 
 ```
 POST /v1/chat/completions
 ```
 
-As of March 23, 2026, Crazyrouter production has verified that `gpt-5.5` on the Chat Completions path returns `tool_calls`.
+На 23 марта 2026 года в рабочем окружении Crazyrouter подтверждено, что `gpt-5.5` на пути Chat Completions возвращает `tool_calls`.
 
 ---
 
-## Step 1: Define the Tool
+## Шаг 1: Определите инструмент
 
 ```bash
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -45,7 +46,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-Observed production response shape:
+Зафиксированная структура ответа в производстве:
 
 ```json
 {
@@ -74,9 +75,9 @@ Observed production response shape:
 
 ---
 
-## Step 2: Return the Tool Result
+## Шаг 2: Верните результат инструмента
 
-Once you receive `tool_calls`, send your tool result back as a `role: "tool"` message:
+После получения `tool_calls` отправьте результат работы инструмента обратно как сообщение `role: "tool"`:
 
 ```json
 {
@@ -124,12 +125,12 @@ Once you receive `tool_calls`, send your tool result back as a `role: "tool"` me
 ```
 
 <Note>
-  This production pass confirmed the primary `tool_calls` path. It also observed that `message.reasoning_content` may appear as a key, but it should not be treated as a stable dependency for tool-calling flows.
+  Этот проход в рабочем окружении подтвердил основной путь `tool_calls`. Также было замечено, что `message.reasoning_content` может появиться как ключ, однако не стоит рассматривать его как стабильную зависимость для потоков вызова инструментов.
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанное на crazyrouter.com
 
-- [GPT Image 1.5: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [Все модели OpenAI с актуальными ценами](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [Страница GPT Image 1.5: текущая цена, реальные примеры, код](https://crazyrouter.com/ru/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Страница GPT Image 2: текущая цена, реальные примеры, код](https://crazyrouter.com/ru/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Все модели OpenAI с текущими ценами](https://crazyrouter.com/ru/models/openai?utm_source=docs&utm_medium=related)

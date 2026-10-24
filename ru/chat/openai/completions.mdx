@@ -1,46 +1,47 @@
 ---
-title: "Create Chat Completion"
-description: "Production-oriented usage of POST /v1/chat/completions based on current live behavior"
+title: "Создать автодополнение чата"
+description: "На основе текущего производственного поведения используйте POST /v1/chat/completions для создания автодополнения чата"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Create Chat Completion
+
+# Создать автодополнение чата
 
 ```
 POST /v1/chat/completions
 ```
 
-Generates model responses from a message list and supports both non-streaming and streaming output.
+Генерирует ответ модели на основе переданного списка сообщений, поддерживаются как нестриминговые, так и стриминговые ответы.
 
-This page only documents common behavior revalidated against Crazyrouter production on `2026-03-23`.
+На этой странице отражено только такое поведение, которое было проверено в производственной среде Crazyrouter — см. `2026-03-23`.
 
-## Authentication
+## Аутентификация
 
 ```text
 Authorization: Bearer YOUR_API_KEY
 ```
 
-## Core parameters
+## Основные параметры
 
-| Parameter | Type | Required | Meaning |
-|-----------|------|----------|---------|
-| `model` | string | Yes | Model name such as `gpt-5.5`, `claude-opus-4-8`, or `gemini-3.1-pro` |
-| `messages` | array | Yes | Message list |
-| `stream` | boolean | No | Whether to stream output |
-| `max_tokens` | integer | No | Maximum output tokens |
-| `temperature` | number | No | Sampling temperature |
-| `response_format` | object | No | Structured output constraint |
-| `tools` | array | No | Tool list |
-| `tool_choice` | string\|object | No | Tool-selection strategy |
-| `stream_options` | object | No | Streaming extras such as `include_usage` |
+| Параметр | Тип | Обязателен | Описание |
+|------|------|------|------|
+| `model` | string | Да | Имя модели, например `gpt-5.5`, `claude-opus-4-8`, `gemini-3.1-pro` |
+| `messages` | array | Да | Список сообщений |
+| `stream` | boolean | Нет | Включить стриминговый вывод |
+| `max_tokens` | integer | Нет | Максимальное количество выходных токенов |
+| `temperature` | number | Нет | Температура сэмплирования |
+| `response_format` | object | Нет | Ограничения формата структурированного вывода |
+| `tools` | array | Нет | Список инструментов |
+| `tool_choice` | string\|object | Нет | Стратегия выбора инструментов |
+| `stream_options` | object | Нет | Стриминговые дополнительные опции, например `include_usage` |
 
 <Note>
-  Optional parameter support varies by model. Client code should rely on the stable common fields first rather than assuming every model supports the same advanced options.
+  У разных моделей разные уровни поддержки опциональных параметров. При написании клиента следует опираться на стандартные поля и не предполагать, что все модели одинаково поддерживают одну и ту же группу расширенных параметров.
 </Note>
 
 ---
 
-## Non-streaming request
+## Нестрингинговый запрос
 
 ```bash cURL
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -62,7 +63,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-Typical production shape:
+Типичная структура ответа, возвращаемая в производстве на данный момент:
 
 ```json
 {
@@ -82,15 +83,15 @@ Typical production shape:
 }
 ```
 
-### Important interpretation
+### Особенности и замечания
 
-- `message.content` is the most stable final-text field
-- `message.tool_calls` only appears when the model is requesting tool execution
-- `message.reasoning_content` may exist as a key, but should not currently be treated as guaranteed usable content
+- `message.content` — самое стабильное финальное текстовое поле
+- `message.tool_calls` появляется только при вызове инструмента
+- `message.reasoning_content` может присутствовать как ключ, но сейчас его не стоит считать стабильно обязательным содержимым
 
 ---
 
-## Streaming request
+## Стриминговый запрос
 
 ```bash cURL
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -112,13 +113,13 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-This production recheck confirmed that:
+На этом этапе производственной проверки подтверждено:
 
-- streaming returns `chat.completion.chunk`
-- SSE chunks are sent as `data: ...`
-- the stream still ends with `data: [DONE]`
+- При стриминге возвращается `chat.completion.chunk`
+- SSE отправляется по частям в формате `data: ...`
+- Конец потока также — `data: [DONE]`
 
-Observed SSE shape:
+На данный момент получаемые фрагменты SSE выглядят так:
 
 ```text
 data: {"object":"chat.completion.chunk","model":"gpt-5.5","choices":[{"delta":{"role":"assistant","content":"AI","reasoning_content":null,"tool_calls":null}}]}
@@ -130,7 +131,7 @@ data: [DONE]
 
 ---
 
-## Python example
+## Пример на Python
 
 ```python Python
 from openai import OpenAI
@@ -158,21 +159,21 @@ for chunk in stream:
 
 ---
 
-## Current recommendation
+## Текущие рекомендации
 
-- For normal text chat, use `/v1/chat/completions`
-- For reasoning summaries or OpenAI-style web search, prefer `/v1/responses`
-- For more specific capability guarantees, use the dedicated capability pages rather than this generic endpoint page
+- Обычный текстовый диалог: `/v1/chat/completions`
+- Для reasoning-резюме или веб-поиска в стиле OpenAI: в первую очередь `/v1/responses`
+- Для более сложных оценок способностей сначала см. соответствующую страницу способностей, не ограничиваясь только этой инструкцией
 
-Related pages:
+Связанные страницы:
 
-- [Chat Completion Object](/ru/chat/openai/overview)
-- [Reasoning Models](/ru/chat/openai/reasoning)
-- [Web Search](/ru/chat/openai/web-search)
+- [Объект завершения чата](/ru/chat/openai/overview)
+- [Модель рассуждения](/ru/chat/openai/reasoning)
+- [Веб-поиск](/ru/chat/openai/web-search)
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные страницы
 
-- [GPT Image 1.5: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2: страница модели — цена, примеры, код](https://crazyrouter.com/en/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [Все модели OpenAI с актуальными ценами](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [Страница GPT Image 1.5: актуальная цена, примеры, код вызова](https://crazyrouter.com/ru/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Страница GPT Image 2: актуальная цена, примеры, код вызова](https://crazyrouter.com/ru/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Все модели и цены OpenAI](https://crazyrouter.com/ru/models/openai?utm_source=docs&utm_medium=related)

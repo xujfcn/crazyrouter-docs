@@ -1,0 +1,71 @@
+---
+title: "Guía de configuración de GPT Academic"
+description: "Configura la API de Crazyrouter en GPT Academic y cambia al modelo más reciente validado actualmente"
+---
+> Contenido actualizado: 2026-06-09
+
+## Descripción general
+
+GPT Academic (versión académica de GPT) está orientado a escenarios como corrección de artículos, traducción y explicación de código. Al integrarlo con Crazyrouter, se recomienda continuar utilizando su método de redirección de URL de OpenAI, pero se debe cambiar el modelo predeterminado al modelo más reciente disponible validado en el entorno de producción.
+
+## Métodos de configuración
+
+### Modificar el archivo de configuración
+
+Edita `config.py` o `config_private.py`:
+
+```python
+API_KEY = "sk-xxx"
+API_URL_REDIRECT = {
+    "https://api.openai.com/v1/chat/completions": "https://api.crazyrouter.com/v1/chat/completions"
+}
+
+# 或者直接设置
+LLM_MODEL = "gpt-5.5"
+AVAIL_LLM_MODELS = [
+    "gpt-5.5",
+    "claude-opus-4-8",
+    "gemini-3.1-pro"
+]
+```
+
+### Método de variables de entorno
+
+```bash
+export API_KEY=sk-xxx
+export API_URL_REDIRECT='{"https://api.openai.com/v1/chat/completions": "https://api.crazyrouter.com/v1/chat/completions"}'
+export LLM_MODEL=gpt-5.5
+```
+
+### Despliegue con Docker
+
+```yaml
+services:
+  gpt-academic:
+    image: ghcr.io/binary-husky/gpt_academic
+    ports:
+      - "22303:22303"
+    environment:
+      - API_KEY=sk-xxx
+      - LLM_MODEL=gpt-5.5
+      - API_URL_REDIRECT={"https://api.openai.com/v1/chat/completions": "https://api.crazyrouter.com/v1/chat/completions"}
+```
+
+## Modelos recomendados
+
+| Escenario | Modelo | Descripción |
+|------|------|------|
+| Verificación inicial de asistente académico | `gpt-5.5` | Validado con éxito en entorno de producción el 23 de marzo de 2026, ideal como referencia compatible con OpenAI |
+| Resumen de textos largos de alta calidad | `claude-opus-4-8` | Más adecuado para explicaciones complejas, reescritura y resúmenes de textos largos |
+| Alternativa Gemini | `gemini-3.1-pro` | Apropiada para validar la compatibilidad con rutas de proveedores adicionales |
+
+<Note>
+  La capacidad de redirección de URL de GPT Academic puede enviar solicitudes de OpenAI directamente a Crazyrouter. Se recomienda usar primero `gpt-5.5` para ejecutar una sesión mínima, y luego agregar gradualmente la lista de modelos y funcionalidades de plugins complejos.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Página del modelo GPT Imagen 1.5: precios en tiempo real, ejemplos reales, código de uso](https://crazyrouter.com/es/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Página del modelo GPT Imagen 2: precios en tiempo real, ejemplos reales, código de uso](https://crazyrouter.com/es/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Todos los modelos de OpenAI y precios](https://crazyrouter.com/es/models/openai?utm_source=docs&utm_medium=related)

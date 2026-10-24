@@ -1,24 +1,25 @@
 ---
-title: "Responses Function Calling"
-description: "Responses tool calling verified against Crazyrouter production on 2026-03-23"
+title: "Вызов функций Ответов"
+description: "Вызов инструментов Ответов проверен на Crazyrouter в промышленной эксплуатации 23.03.2026"
 ---
-> Дата обновления: 2026-06-06
+> Обновление содержания: 2026-06-09
 
-# Responses Function Calling
+
+# Вызов функций Ответов
 
 ```
 POST /v1/responses
 ```
 
-As of March 23, 2026, Crazyrouter production has verified that `gpt-5.5` on the Responses API reliably returns `function_call`.
+По состоянию на 23 марта 2026 года в промышленной эксплуатации Crazyrouter подтверждено, что `gpt-5.5` в API Ответов стабильно возвращает `function_call`.
 
 <Note>
-  Claude does not currently support `POST /v1/responses`. If you need Claude tool calling, use `POST /v1/messages` or `POST /v1/chat/completions`.
+  Claude сейчас не поддерживает `POST /v1/responses`. Если вам нужна активация инструментов Claude, используйте `POST /v1/messages` или `POST /v1/chat/completions`.
 </Note>
 
 ---
 
-## Step 1: Let the Model Produce a Function Call
+## Шаг 1: Позвольте модели сгенерировать вызов функции
 
 ```bash
 curl https://api.crazyrouter.com/v1/responses \
@@ -45,7 +46,7 @@ curl https://api.crazyrouter.com/v1/responses \
   }'
 ```
 
-Observed production response shape:
+Тип производственного ответа, наблюдаемый:
 
 ```json
 {
@@ -61,9 +62,9 @@ Observed production response shape:
 
 ---
 
-## Step 2: Return the Tool Result
+## Шаг 2: Вернуть результат инструмента
 
-Once you receive the `function_call`, send your actual tool result back as `function_call_output`:
+Как только вы получите `function_call`, отправьте фактический результат активации инструмента обратно как `function_call_output`:
 
 ```json
 {
@@ -100,10 +101,10 @@ Once you receive the `function_call`, send your actual tool result back as `func
 ```
 
 <Note>
-  This page keeps only the `function_call` path that was reproduced in production. For more complex multi-tool chains or streamed argument deltas, revalidate on the same day before depending on them.
+  Эта страница сохраняет только путь `function_call`, который был воспроизведён на производстве. Для более сложных цепочек инструментов или потоковых изменений аргументов повторно проверьте их в тот же день перед тем, как использовать.
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## См. также на crazyrouter.com
+## Связанные материалы на crazyrouter.com
 
-- [Все модели OpenAI с актуальными ценами](https://crazyrouter.com/en/models/openai?utm_source=docs&utm_medium=related)
+- [Все модели OpenAI с актуальными ценами](https://crazyrouter.com/ru/models/openai?utm_source=docs&utm_medium=related)

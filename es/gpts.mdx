@@ -1,0 +1,75 @@
+---
+title: "Conversación GPTs"
+description: "Llama aplicaciones OpenAI GPTs usando la API"
+---
+> Contenido actualizado: 2026-06-06
+
+## Descripción general
+
+Crazyrouter permite llamar aplicaciones OpenAI GPTs (aplicaciones GPT personalizadas) usando la API estándar Chat Completions. Solo necesitas establecer el nombre del modelo al formato específico de los GPTs.
+
+## Formato del nombre del modelo
+
+```
+gpt-4-gizmo-{gizmo_id}
+```
+
+`gizmo_id` es el identificador único de los GPTs y puedes obtenerlo desde la URL de los GPTs.
+
+## Cómo obtener el Gizmo ID
+
+1. Accede a la [tienda de ChatGPT GPTs](https://chatgpt.com/gpts)
+2. Abre la aplicación GPT deseada
+3. Extrae el ID de la URL: `https://chatgpt.com/g/g-B3hgivKK9-xxx` → El ID será `g-B3hgivKK9`
+
+## Ejemplo de código
+
+<CodeGroup>
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxx",
+    base_url="https://api.crazyrouter.com/v1"
+)
+
+# 使用 GPTs 对话
+response = client.chat.completions.create(
+    model="gpt-4-gizmo-g-B3hgivKK9",
+    messages=[
+        {"role": "user", "content": "你好，请介绍一下你自己"}
+    ]
+)
+
+print(response.choices[0].message.content)
+```
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/v1/chat/completions \
+  -H "Authorization: Bearer sk-xxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4-gizmo-g-B3hgivKK9",
+    "messages": [
+      {"role": "user", "content": "你好，请介绍一下你自己"}
+    ]
+  }'
+```
+
+</CodeGroup>
+
+<Warning>
+  Para llamar GPTs, necesitas que el canal upstream lo soporte. No todos los GPTs están disponibles; depende de la configuración del canal.
+</Warning>
+
+<Note>
+  La conversación de GPTs permite salida de flujo; solo activa `stream: true`. El coste se calcula según el precio del modelo GPT-4.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Página modelo GPT Image 1.5: Precio en tiempo real, ejemplos reales, código de uso](https://crazyrouter.com/es/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [Página modelo GPT Image 2: Precio en tiempo real, ejemplos reales, código de uso](https://crazyrouter.com/es/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [Todos los modelos y precios de OpenAI](https://crazyrouter.com/es/models/openai?utm_source=docs&utm_medium=related)

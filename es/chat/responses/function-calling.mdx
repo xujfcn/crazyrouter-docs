@@ -1,0 +1,109 @@
+---
+title: "Llamada de Funciones de Respuestas"
+description: "La verificación de llamadas a herramientas de Respuestas realizada en producción de Crazyrouter el 2026-03-23"
+---
+> Contenido actualizado: 2026-06-09
+
+# Llamada de Funciones de Respuestas
+
+```
+POST /v1/responses
+```
+
+A partir del 23 de marzo de 2026, Crazyrouter en producción ha verificado que `gpt-5.5` en la API de Respuestas devuelve de manera confiable `function_call`.
+
+<Note>
+  Claude actualmente no es compatible con `POST /v1/responses`. Si necesitas la llamada de herramientas de Claude, utiliza `POST /v1/messages` o `POST /v1/chat/completions`.
+</Note>
+
+---
+
+## Paso 1: Permite que el modelo produzca una llamada de función
+
+```bash
+curl https://api.crazyrouter.com/v1/responses \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-5.5",
+    "input": "What is the weather in Beijing? Use the tool.",
+    "tools": [
+      {
+        "type": "function",
+        "name": "get_weather",
+        "description": "Get weather info for a city",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "city": {"type": "string"}
+          },
+          "required": ["city"],
+          "additionalProperties": false
+        }
+      }
+    ]
+  }'
+```
+
+Forma observada de la respuesta en producción:
+
+```json
+{
+  "output": [
+    {
+      "type": "function_call",
+      "name": "get_weather",
+      "arguments": "{\"city\":\"Beijing\"}"
+    }
+  ]
+}
+```
+
+---
+
+## Paso 2: Devuelve el resultado de la herramienta
+
+Una vez que recibas `function_call`, envía tu resultado real de la herramienta como `function_call_output`:
+
+```json
+{
+  "model": "gpt-5.5",
+  "input": [
+    {
+      "type": "function_call",
+      "call_id": "call_123",
+      "name": "get_weather",
+      "arguments": "{\"city\":\"Beijing\"}"
+    },
+    {
+      "type": "function_call_output",
+      "call_id": "call_123",
+      "output": "{\"temperature\":22,\"condition\":\"sunny\"}"
+    }
+  ],
+  "tools": [
+    {
+      "type": "function",
+      "name": "get_weather",
+      "description": "Get weather info for a city",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "city": {"type": "string"}
+        },
+        "required": ["city"],
+        "additionalProperties": false
+      }
+    }
+  ]
+}
+```
+
+<Note>
+  Esta página sólo mantiene la ruta `function_call` que se reprodujo en producción. Para cadenas más complejas de múltiples herramientas o deltas de argumentos transmitidos, vuelve a validar el mismo día antes de depender de ellas.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Relacionado en crazyrouter.com
+
+- [Todos los modelos de OpenAI con precios en vivo](https://crazyrouter.com/es/models/openai?utm_source=docs&utm_medium=related)

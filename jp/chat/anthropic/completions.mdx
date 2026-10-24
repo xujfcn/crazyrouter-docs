@@ -1,25 +1,29 @@
 ---
-title: "Claude OpenAI-Compatible Chat"
-description: "Claude Chat Completions compatibility path verified against Crazyrouter production on 2026-03-23"
+title: "Claude OpenAI 互換フォーマット"
+description: "2026-03-23 Crazyrouter 本番環境の検証に基づく Claude Chat Completions 互換パス"
 ---
-> 更新日: 2026-06-06
+> 内容更新日: 2026-06-23
 
-# Claude OpenAI-Compatible Chat
+# Claude OpenAI 互換フォーマット
 
 ```
 POST /v1/chat/completions
 ```
 
-As of March 23, 2026, Crazyrouter production has verified:
+2026年3月23日時点、Crazyrouter 本番環境にて検証済み：
 
-- non-stream `claude-opus-4-8` requests return `object: "chat.completion"`
-- the current `message` reliably includes `role` and `content`
-- streaming requests return `chat.completion.chunk`
-- the SSE stream still ends with `data: [DONE]`
+- `claude-opus-4-8` 非ストリーミングリクエストは `object: "chat.completion"` を返します
+- `message` 現行の安定版には `role`、`content` を含みます
+- ストリーミングリクエストは `chat.completion.chunk` を返します
+- SSE は引き続き `data: [DONE]` で終了します
+
+<Warning>
+本ページは Claude が OpenAI Chat Completions 互換フォーマットでの一般的な対話パスについて説明しています。Claude のネイティブ `tool_use`、Claude Code、ならびにツール呼び出しを伴うエージェントプログラミングシナリオにおいては、[Claude ネイティブフォーマット](/jp/chat/anthropic/messages) の `POST /v1/messages` を優先的にご利用ください。OpenAI 互換フォーマットでは Claude ネイティブのツールブロックを同等にサポートする保証はありません。
+</Warning>
 
 ---
 
-## Non-Streaming Request
+## 非ストリーミングリクエスト
 
 ```bash
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -36,7 +40,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-Observed response shape:
+主なレスポンス形式：
 
 ```json
 {
@@ -55,7 +59,7 @@ Observed response shape:
 
 ---
 
-## Streaming Request
+## ストリーミングリクエスト
 
 ```bash
 curl https://api.crazyrouter.com/v1/chat/completions \
@@ -71,7 +75,7 @@ curl https://api.crazyrouter.com/v1/chat/completions \
   }'
 ```
 
-The 2026-03-23 production streaming probe began like this:
+2026-03-23 の本番環境におけるストリーミングプローブの冒頭部分は以下の通りです：
 
 ```text
 data: {"object":"chat.completion.chunk","model":"claude-opus-4-8","choices":[{"delta":{"role":"assistant"}}]}
@@ -80,12 +84,12 @@ data: [DONE]
 ```
 
 <Note>
-  If you need Claude-native `thinking`, native tool blocks, or document inputs, prefer [Claude Messages](/chat/anthropic/messages).
+  Claude のネイティブ `thinking`、ネイティブツールブロックまたはドキュメント入力が必要な場合は、[Claude Messages](/jp/chat/anthropic/messages) のご利用を優先してください。
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## 関連ページ（crazyrouter.com）
+## 関連ページ
 
-- [Claude Fable 5 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
-- [Claude Fable 5 モデルページ：料金・サンプル・コード](https://crazyrouter.com/en/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
-- [Claude Haiku 4.5 料金比較：公式 / Azure / Bedrock / Vertex と Crazyrouter](https://crazyrouter.com/ja/pricing/claude-haiku-4-5?utm_source=docs&utm_medium=related)
+- [Claude Fable 5 価格比較：公式 / Azure / Bedrock / Vertex および Crazyrouter](https://crazyrouter.com/ja/pricing/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Claude Fable 5 モデルページ：リアルタイム価格、実際のサンプル、呼び出しコード](https://crazyrouter.com/ja/models/anthropic/claude-fable-5?utm_source=docs&utm_medium=related)
+- [Claude Haiku 4.5 価格比較：公式 / Azure / Bedrock / Vertex および Crazyrouter](https://crazyrouter.com/ja/pricing/claude-haiku-4-5?utm_source=docs&utm_medium=related)

@@ -1,200 +1,199 @@
 ---
-title: 'Immersive Translate Setup Guide'
-description: 'Connect Crazyrouter to the Immersive Translate browser extension through the OpenAI service path, with custom API URL, model, rate, validation, and troubleshooting guidance'
+title: "Immersive Translation Configuration Tutorial"
+description: "How to connect Crazyrouter via OpenAI services in the Immersive Translation browser extension, plus filling in custom API address, model, frequency control, authentication, and troubleshooting instructions."
 ---
-> Last updated: 2026-06-23
+> Content updated: 2026-06-09
 
-Immersive Translate is a strong browser extension for webpage translation, bilingual reading, text-selection translation, and document translation. For Crazyrouter, the most reliable route is the extension's officially supported `OpenAI` service path, using the `More Settings` section to enter a custom API address.
+Immersive Translation is a browser extension ideal for everyday web page translation, bilingual reading, selected text translation, and document translation. When integrating with Crazyrouter, the most reliable way is to use the officially-supported `OpenAI` service configuration, and fill in your custom API address in `More settings`.
 
 ## Overview
 
-With Immersive Translate's OpenAI service setup, you can send requests to Crazyrouter with:
+By configuring Immersive Translation's OpenAI service, you can send requests to Crazyrouter:
 
-- recommended protocol: `OpenAI-compatible API`
-- service type: `OpenAI`
-- API key: your `sk-...`
-- custom API URL: `https://api.crazyrouter.com/v1/chat/completions`
-- recommended first validation model: `gpt-5.5`
+- Recommended protocol: `OpenAI-compatible API`
+- Service type: `OpenAI`
+- API Key: your `sk-...`
+- Custom API address: `https://api.crazyrouter.com/v1/chat/completions`
+- Recommended initial verification model: `gpt-5.5`
 
 <Tip>
-The most important difference between Immersive Translate and ChatBox is this: here you should usually start with the full endpoint path, not just the root domain.
+The biggest difference between Immersive Translation and ChatBox is that you usually need to fill in the complete API path here, not just the root domain name.
 </Tip>
 
-## Why This Guide Uses The Full Endpoint Path
+## Why the complete path should be filled in here
 
-According to Immersive Translate's official OpenAI service docs, the extension supports customizing the OpenAI API address in `More Settings`. For Crazyrouter, the safer first-pass value is therefore:
+According to the Immersive Translation official OpenAI service documentation, it supports customizing the OpenAI API address in `More settings`. So, for Crazyrouter, it's generally more reliable to write the full address:
 
 ```text
 https://api.crazyrouter.com/v1/chat/completions
 ```
 
 <Warning>
-Do not start by entering only the root domain such as `https://api.crazyrouter.com`, and do not stop at `/v1`. For Immersive Translate's OpenAI-style path, the safest first validation is the full `/v1/chat/completions` endpoint.
+Don't enter just the root domain `https://api.crazyrouter.com` here, and don't only write up to `/v1`. For this kind of connection, it's best to use the full `/v1/chat/completions` path for the first round of verification.
 </Warning>
 
-## Best For
+## Who is this suitable for
 
-- users who want high-quality AI webpage translation
-- users who want Crazyrouter-based control over translation costs
-- users who want separate budgets by browser or device
-- users who prefer an OpenAI-compatible route for a browser translation extension
+- People who want high-quality AI translation on web pages
+- Those wanting to use their own Crazyrouter token to manage translation costs
+- People who want to separately control quotas for different browsers or devices
+- Users preferring OpenAI-compatible methods to integrate with browser translation extensions
 
-## Prerequisites
+## System Requirements and Prerequisites
 
-| Item | Notes |
-|------|-------|
-| Crazyrouter account | Create one at [crazyrouter.com](https://crazyrouter.com) |
-| Crazyrouter token | Create a dedicated token for Immersive Translate |
-| Browser | Chrome, Edge, Firefox, or another supported browser |
-| Immersive Translate extension | Use a current stable release |
-| Allowed models | Allow at least one translation-friendly model |
+| Item | Description |
+|------|------|
+| Crazyrouter account | Register at [crazyrouter.com](https://crazyrouter.com) first |
+| Crazyrouter token | It's recommended to create a separate token for Immersive Translation |
+| Browser | Chrome, Edge, Firefox, or other browsers supported by the extension |
+| Immersive Translation Extension | Recommended current stable version |
+| Available model | Allow at least one translation model |
 
-Suggested starter allowlist:
+Suggested initial whitelist:
 
 - `gpt-5.5`
 - `claude-opus-4-8`
 
-## Install And Setup Path
+## Installation and Configuration Path
 
 ### Chrome / Edge Path
 
-1. install Immersive Translate from the extension store
-2. open the extension settings
-3. go to `Translation Services`
-4. choose `OpenAI`
-5. open `More Settings`
-6. enter the Crazyrouter key and full custom API URL
+1. Install Immersive Translation from the extension store
+2. Open extension settings
+3. Go to `Translation service`
+4. Choose `OpenAI`
+5. Open `More settings`
+6. Enter Crazyrouter key and the full custom address
 
 ### Firefox Path
 
-1. install Immersive Translate from Firefox Add-ons
-2. open the settings page
-3. go to `Translation Services`
-4. choose `OpenAI`
-5. open `More Settings`
-6. enter the Crazyrouter settings
+1. Install Immersive Translation from Firefox Add-ons
+2. Open the settings page
+3. Go to `Translation service`
+4. Choose `OpenAI`
+5. Enter `More settings`
+6. Fill in Crazyrouter parameters
 
-## Detailed Setup
+## Complete configuration from scratch
 
 <Steps>
   <Step title="Step 1: Install the extension">
-    Install Immersive Translate from the official extension store for your browser.
+    Install "Immersive Translation" from the official extension store.
   </Step>
 
-  <Step title="Step 2: Create a dedicated Crazyrouter token">
-    For the first pass, allow only:
+  <Step title="Step 2: Create a dedicated token in Crazyrouter">
+    For your first setup, only allow:
 
     - `gpt-5.5`
     - `claude-opus-4-8`
 
-    Do not start by allowing a wide model set in a translation scenario.
+    Don't add too many models to the translation scenario right away.
   </Step>
 
   <Step title="Step 3: Open the OpenAI service configuration">
-    In the extension UI, go to:
+    After clicking the extension icon, go to:
 
     - `Settings`
-    - `Translation Services`
-    - choose `OpenAI`
+    - `Translation service`
+    - Choose `OpenAI`
   </Step>
 
-  <Step title="Step 4: Enter the API key and custom URL">
+  <Step title="Step 4: Enter the API Key and custom address">
     Fill in:
 
     - `API Key`: your `sk-...`
-    - `Custom API URL`: `https://api.crazyrouter.com/v1/chat/completions`
+    - `Custom API endpoint address`: `https://api.crazyrouter.com/v1/chat/completions`
     - `Model`: start with `gpt-5.5`
 
-    If some fields are hidden by default, expand `More Settings` first.
+    If some parameters are collapsed by default in the interface, remember to expand `More settings` to view all fields.
   </Step>
 
-  <Step title="Step 5: Lower the request rate for the first pass">
-    Immersive Translate's official OpenAI docs explicitly warn about rate limits. On the first Crazyrouter validation, keep the request rate conservative, especially for long webpages or ebooks.
+  <Step title="Step 5: First, reduce the request frequency">
+    The Immersive Translation official documentation has a special note about frequency limits for OpenAI connections. When connecting to Crazyrouter for the first time, it's recommended to lower the request frequency, especially for long texts or eBooks.
 
-    Safe starter pattern:
+    A conservative initial approach is recommended, such as:
 
-    - keep requests-per-second low
-    - validate with a small page or selected text first
-    - only raise the rate after the setup is already stable
+    - Don't set too high a request rate per second
+    - Test with smaller pages or selected text first
+    - Gradually increase after successful connection
   </Step>
 
-  <Step title="Step 6: Run the smallest practical validation">
+  <Step title="Step 6: Complete the first minimal verification">
     Recommended order:
 
-    1. translate a short selected paragraph
-    2. translate a short webpage
-    3. only then try full-page or longer-document translation
+    1. First translate a small selected text
+    2. Then translate a short web page
+    3. Finally, test a full page or longer document
 
-    That makes it much easier to tell whether the issue is config-related or simply request-volume-related.
+    This makes it easier to distinguish "API configuration error" from "unstable due to too much request volume."
   </Step>
 </Steps>
 
-## Recommended Model Setup
+## Recommended Model Configuration
 
-| Use case | Recommended model | Why |
-|----------|-------------------|-----|
-| first-pass minimal validation | `gpt-5.5` | verified successfully in production on March 23, 2026, and best for proving the OpenAI-compatible route works |
-| higher-quality translation | `claude-opus-4-8` | better for long-form explanation, refinement, and more quality-sensitive content |
-| Gemini fallback path | `gemini-3.1-pro` | useful as a second compatibility-validation path after the baseline is already stable |
+| Scenario | Recommended Model | Reason |
+|----------|----------|------|
+| Minimal initial verification | `gpt-5.5` | Successfully tested in production on March 23, 2026; suitable for initial testing of OpenAI-compatible translation workflow |
+| Higher quality translation | `claude-opus-4-8` | More suitable for long text explanations, polishing, and higher quality demands |
+| Gemini backup | `gemini-3.1-pro` | Compatible as a secondary verification path, but recommended to get the main workflow running first |
 
-## Token Setup Best Practices
+## Best Practices for Token Settings
 
-| Setting | Recommendation | Notes |
-|---------|----------------|-------|
-| dedicated token | Required | do not share browser translation tokens with IDE or CLI tools |
-| model allowlist | Strongly recommended | start with only 1 to 2 translation models |
-| quota cap | Strongly recommended | full-page and ebook translation can spend much faster than normal chat |
-| device split | Recommended | separate tokens by browser or machine if needed |
-| leak response | Rotate immediately | recordings, screenshots, or browser sync leaks should trigger a key rotation |
+| Setting | Recommendation | Description |
+|------|------|------|
+| Dedicated token | Mandatory | Don't share tokens between browser translation extensions and IDE/CLI tools |
+| Model whitelist | Highly recommended | Start by only allowing 1-2 translation models |
+| Quota cap | Highly recommended | Whole-page or eBook translation consumes quota much faster than ordinary conversations |
+| Device isolation | Recommended | Use different tokens for different browsers or devices |
+| Leak handling | Rotate immediately | Replace the key immediately after leaks via screen recording, screenshots, or browser sync |
 
 ## Verification Checklist
 
-- [ ] the extension is installed correctly
-- [ ] `OpenAI` is selected as the translation service
-- [ ] `API Key` is entered correctly
-- [ ] `Custom API URL` is `https://api.crazyrouter.com/v1/chat/completions`
-- [ ] the first model is `gpt-5.5` or another allowed model
-- [ ] a short selected paragraph translates successfully
-- [ ] a short webpage translates successfully
-- [ ] Crazyrouter logs show the matching request
+- [ ] Extension installed correctly
+- [ ] `OpenAI` translation service selected
+- [ ] `API Key` filled in correctly
+- [ ] `Custom API endpoint address` set as `https://api.crazyrouter.com/v1/chat/completions`
+- [ ] First model set as `gpt-5.5` or other allowed model
+- [ ] Small segment of selected text translated successfully
+- [ ] Short webpage translated successfully
+- [ ] Corresponding requests seen in Crazyrouter backend logs
 
-## Common Errors And Fixes
+## Common Errors & Fixes
 
-| Symptom | Likely cause | Fix |
-|---------|--------------|-----|
-| `404` | the API URL is missing `/chat/completions`, or only the root domain was entered | switch to the full `https://api.crazyrouter.com/v1/chat/completions` URL |
-| `401 unauthorized` | wrong, expired, or incomplete API key | generate a new token and paste it again |
-| `403` or `model not allowed` | the token does not allow the selected model | allow that model in Crazyrouter token settings |
-| `429` or unstable behavior | the request rate is too high | lower the request rate and validate on smaller text first |
-| long pages fail more often | concurrency or rate is too high | reduce scope first, then increase gradually |
-| cost rises too fast | you started with full-page or full-document translation immediately | begin with `gpt-5.5` on a smaller scope first |
+| Issue | Common Cause | Solution |
+|------|----------|----------|
+| 404 | Missing `/chat/completions` in API address, or only the root domain entered | Change to full address `https://api.crazyrouter.com/v1/chat/completions` |
+| 401 unauthorized | API Key incorrect, expired, or incomplete copy | Regenerate token and refill |
+| 403/model not allowed | Token not allowed for current model | Allow model in Crazyrouter token settings |
+| 429/unstable | Request frequency too high | Lower request frequency, start with small texts |
+| Higher failure rate for long texts | Too many concurrent or overly frequent requests | Reduce translation range first, then gradually increase |
+| Costs rising too fast | Directly translating whole pages, sites, or eBooks | Use `gpt-5.5` for small-scale validation first and control translation range |
 
-## Cost Tips
+## Money-saving Tips
 
-- default to `gpt-5.5`
-- translate selected text first instead of full pages immediately
-- sample long content first before translating all of it
-- if you install the extension on multiple browsers, separate the tokens for cleaner cost tracking
+- Use `gpt-5.5` by default
+- Prefer translating selected areas instead of whole pages
+- Sample quality on long documents before deciding on full translation
+- If you have the extension on multiple browsers, use separate tokens for cost accounting
 
 ## FAQ
 
-### What API URL should I enter in Immersive Translate?
+### What API address should be entered in Immersive Translation?
 
-Use the full path: `https://api.crazyrouter.com/v1/chat/completions`.
+Enter the full path: `https://api.crazyrouter.com/v1/chat/completions`.
 
-### Why is this different from ChatBox, where the guide starts from the root domain?
+### Why is this different from ChatBox, and root domain only entry not recommended?
 
-Because Immersive Translate's official OpenAI custom-address path is better aligned with a full endpoint URL, which makes the first validation more reliable.
+Because Immersive Translation's official OpenAI custom address entry is more suitable for the full interface path, first validation is more reliable.
 
-### Which model should I try first?
+### What's the first recommended model?
 
 Start with `gpt-5.5`.
 
-### Why not translate full pages or ebooks immediately?
+### Why is it not recommended to directly translate whole pages or eBooks at first?
 
-Because that amplifies configuration mistakes, rate-limit issues, and cost at the same time. Small text first is the fastest debugging pattern.
+Because it magnifies configuration, frequency limit, and cost issues all at once. Translating small segments first helps troubleshoot faster.
 
 <Note>
-If your goal is to manage browser AI translation cost through Crazyrouter, Immersive Translate is one of the most important browser-extension guides to keep detailed and accurate.
+If your goal is "to use Crazyrouter to manage AI translation costs for web pages," Immersive Translation is a browser extension very worth supplementing with detailed instructions.
 </Note>
-

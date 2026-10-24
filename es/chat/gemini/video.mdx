@@ -1,0 +1,83 @@
+---
+title: "Gemini comprensión de vídeo"
+description: "Gemini comprensión nativa de vídeo basada en la experiencia de solicitudes exitosas en Crazyrouter de este sitio el 2026-04-08"
+---
+> Contenido actualizado: 2026-06-09
+
+# Gemini comprensión de vídeo
+
+```text
+POST /v1beta/models/{model}:generateContent
+```
+
+Hasta `2026-04-08`, la comprobación repetida entre este sitio Crazyrouter y el puerto local `4000` muestra:
+
+- `gemini-3.1-pro` puede leer `video/mp4`
+- La ruta principal que ya funciona de manera estable es `fileData.fileUri`
+- El archivo de vídeo debe ser una URL pública a la que Gemini de upstream pueda acceder
+
+---
+
+## Solicitud mínima verificada
+
+```bash
+curl "https://api.crazyrouter.com/v1beta/models/gemini-3.1-pro:generateContent?key=YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          {
+            "fileData": {
+              "mimeType": "video/mp4",
+              "fileUri": "https://example.com/demo.mp4"
+            }
+          },
+          {
+            "text": "请用一句中文回答：视频里的主体是什么，如何运动，镜头是否固定。"
+          }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "maxOutputTokens": 512
+    }
+  }'
+```
+
+La forma clave de retorno exitoso en ambientes de producción similares:
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "视频里的主体是一个红色小球，它从左向右滚动，镜头是固定的。"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+## Puntos clave de la solicitud
+
+- Actualmente, la forma principal recomendada para la comprensión de vídeo es `fileData.fileUri`
+- `mimeType` debe completarse según el archivo real, por ejemplo `video/mp4`
+- `fileUri` debe ser accesible por Gemini de upstream
+- Si el archivo está en una red privada, requiere autenticación, o la URL no es directamente accesible, es fácil que falle actualmente
+
+<Note>
+  Para la comprensión de imágenes, prioriza `inlineData`. No copies directamente la forma exitosa de imágenes para vídeo. Para imágenes, consulta [Gemini comprensión de imágenes](/es/chat/gemini/vision).
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Comparativa de precios de Gemini 2.5 Flash: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Página del modelo Gemini 2.5 Flash: Precios en tiempo real, ejemplos reales, código de invocación](https://crazyrouter.com/es/models/google/gemini-2-5-flash?utm_source=docs&utm_medium=related)
+- [Comparativa de precios de Gemini 2.5 Flash-Lite: Oficial / Azure / Bedrock / Vertex y Crazyrouter](https://crazyrouter.com/es/pricing/gemini-2-5-flash-lite?utm_source=docs&utm_medium=related)

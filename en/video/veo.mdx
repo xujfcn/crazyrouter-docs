@@ -1,69 +1,69 @@
 ---
 title: "Veo 3.1"
-description: "Use Veo 3.1 Fast and Veo 3.1 Quality through the Crazyrouter unified video API"
+description: "Call Veo 3.1 Fast and Veo 3.1 Quality through Crazyrouter's unified video API"
 ---
-> Last updated: 2026-06-06
+> Content updated: 2026-06-30
 
 # Veo 3.1
 
-The currently public Crazyrouter Veo 3.1 model names are:
+Currently, the Veo 3.1 models publicly available to customers via Crazyrouter are:
 
 - `veo-3.1-fast`
 - `veo-3.1-quality`
 
-These are customer-facing public aliases. Internal canonical provider names are not exposed to customers.
+These two names are public aliases for customers. The internal canonical provider names will not be directly exposed to customers.
 
 <Note>
-  `veo-3.1` is not a public `model` value. Always submit `veo-3.1-fast` or `veo-3.1-quality` to `/v1/video/create`.
+  `veo-3.1` is not a `model` value that can be directly submitted by customers. For customer requests, please always use `veo-3.1-fast` or `veo-3.1-quality`.
 </Note>
 
-## Via Unified Video API
+## Calling through the unified video API
 
 ```
 POST /v1/video/create
 ```
 
-This page only covers the public capability surface that is already released:
+This page only covers features that have already been made available to customers:
 
-- text-to-video
-- single-image image-to-video
+- Text-to-video generation
+- Single-image-to-video generation
 
-Provider-native `referenceImages`, style reference, and other Veo-specific modes are not part of the current public contract yet.
+The `referenceImages`, style reference, and more granular provider-native modes in Google's official documentation are not covered by the current public contract.
 
-### Current Public Models
+### Currently Available Models
 
 | Model | Description |
-|-------|-------------|
-| `veo-3.1-fast` | Lower-latency option for getting the first usable result faster |
-| `veo-3.1-quality` | Quality-first option for the default public path |
+|------|------|
+| `veo-3.1-fast` | Lower latency, suitable for getting the first available result faster |
+| `veo-3.1-quality` | More quality-focused, suitable as the main default display |
 
-### Capability Status
+### Feature Status
 
-| Capability / Spec | Status | Notes |
-|-------|--------|-------|
-| text-to-video `720P / 1080P` | `Verified` | Closed in the current public contract |
-| single-image image-to-video `720P / 1080P` | `Verified` | Closed in the current public contract |
-| audio-enabled rows | `Beta` | The official capability exists, but the public artifact is still pending |
-| `start_end` | `Beta` | Not committed on the current public page |
-| `referenceImages` / reference assets | `Beta` | Not committed on the current public page |
-| `4K` | `Beta` | Not committed on the current public page |
+| Feature / Specification | Status | Description |
+|------|------|------|
+| Text-to-video `720P / 1080P` | `Verified` | The current public contract is finalized |
+| Single-image-to-video `720P / 1080P` | `Verified` | The current public contract is finalized |
+| Audio activation line | `Beta` | The official capability exists, but the current public artifact still needs to be supplemented |
+| `start_end` | `Beta` | No commitment yet on the current public page |
+| `referenceImages` / reference assets | `Beta` | No commitment yet on the current public page |
+| `4K` | `Beta` | No commitment yet on the current public page |
 
 <Note>
-  The Pricing page and this doc use the same status language: `Verified` means there is a current minimal live artifact, while `Beta` means the official capability exists but the public validation set or edge coverage is still being completed.
+  The Pricing page and this documentation use the same status definitions: `Verified` indicates that the minimal live feedback loop is already available, `Beta` means the official capability exists but public verification or boundary conditions are still being supplemented.
 </Note>
 
 ### Request Parameters
 
 | Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
+|------|------|------|------|
 | `model` | string | Yes | `veo-3.1-fast` or `veo-3.1-quality` |
-| `prompt` | string | Yes | Video prompt |
-| `aspect_ratio` | string | No | Publicly recommended: `16:9` or `9:16` |
-| `size` | string | No | Publicly recommended: `720P` or `1080P` |
-| `images` | array | No | Pass exactly one image URL for the current public image-to-video flow |
-| `duration` | integer | No | Common value: `8` |
+| `prompt` | string | Yes | Video description prompt |
+| `aspect_ratio` | string | No | It is currently recommended to use `16:9` or `9:16` |
+| `size` | string | No | It is currently recommended to use `720P` or `1080P` |
+| `images` | array | No | Submit `1` image URLs for single-image-to-video generation |
+| `duration` | integer | No | Common value is `8` |
 
-### Request Examples
+### Request Example
 
 <CodeGroup>
 
@@ -94,8 +94,8 @@ response = requests.post(
     }
 )
 
-task_id = response.json()["id"]
-print(f"Task ID: {task_id}")
+task_id = response.json()["task_id"]
+print(f"任务 ID: {task_id}")
 ```
 
 </CodeGroup>
@@ -104,15 +104,14 @@ print(f"Task ID: {task_id}")
 
 ```json
 {
-  "id": "veo_task_abc123",
-  "status": "processing",
-  "status_update_time": 1709123456
+  "task_id": "veo_task_abc123",
+  "status": "processing"
 }
 ```
 
 ---
 
-## Single-Image Image-to-Video Example
+## Single-Image-to-Video Example
 
 ```bash cURL
 curl -X POST https://api.crazyrouter.com/v1/video/create \
@@ -144,18 +143,22 @@ curl "https://api.crazyrouter.com/v1/video/query?id=veo_task_abc123" \
 
 ```json
 {
-  "id": "veo_task_abc123",
-  "status": "completed",
-  "status_update_time": 1709123520,
-  "video_url": "https://crazyrouter.com/files/veo_abc123.mp4"
+  "code": "success",
+  "message": "",
+  "data": {
+    "task_id": "veo_task_abc123",
+    "status": "SUCCESS",
+    "url": "https://media.crazyrouter.com/task-artifacts/example.mp4",
+    "artifact_url": "https://media.crazyrouter.com/task-artifacts/example.mp4"
+  }
 }
 ```
 
 <Note>
-  Google's official Veo 3.1 docs also describe `reference asset images` and other provider-native capability details. The current Crazyrouter public page intentionally stays narrower: it only commits to text-to-video and single-image image-to-video under `veo-3.1-fast` and `veo-3.1-quality`. Additional Veo capability pages should be published only after the public route and validation artifacts are ready.
+  Google's official documentation also describes Veo 3.1's `reference asset images` and more detailed provider-native feature boundaries. Currently, Crazyrouter’s public page only commits to the text-to-video and single-image-to-video features under `veo-3.1-fast` / `veo-3.1-quality`; if more primary Veo features are opened in the future, the documentation and verification records will be supplemented separately.
 </Note>
 
 {/* crazyrouter-model-links v2 */}
-## Related on crazyrouter.com
+## Related Pages
 
-- [All Google models with live prices](https://crazyrouter.com/en/models/google?utm_source=docs&utm_medium=related)
+- [All Google Models and Pricing](https://crazyrouter.com/en/models/google?utm_source=docs&utm_medium=related)

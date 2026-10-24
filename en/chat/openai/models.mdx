@@ -2,7 +2,7 @@
 title: "List Models"
 description: "Production-revalidated GET /v1/models usage for listing models available to the current token"
 ---
-> Last updated: 2026-06-06
+> Content updated: 2026-06-30
 
 # List Models
 
@@ -131,7 +131,7 @@ In the `2026-04-14` production recheck:
 
 ## Pricing information
 
-If you also need public pricing data, use the [Pricing page](/en/pricing). For programmatic confirmation of currently visible models, keep using `GET /v1/models`.
+If you also need public pricing data, use the [Pricing page](https://crazyrouter.com/en/pricing). For programmatic confirmation of currently visible models, keep using `GET /v1/models`.
 
 <Note>
   `supported_endpoint_types` on `GET /v1/models` only describes the interface styles the current model supports. `openai` maps to `POST /v1/chat/completions`, `anthropic` maps to `POST /v1/messages`, and only `openai-response` maps to `POST /v1/responses`. Claude currently exposes `openai` + `anthropic`, not `openai-response`.

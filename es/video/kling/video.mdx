@@ -1,0 +1,308 @@
+---
+title: "Generación de video Kling"
+description: "Genera videos estándar y videos Omni con Crazyrouter según el protocolo oficial Kling"
+---
+> Contenido actualizado: 2026-06-30
+
+# Generación de video Kling
+
+Actualmente, Crazyrouter ha descompuesto la familia de videos Kling públicos para clientes en dos familias de modelos de acuerdo con el protocolo oficial:
+
+| Familia de rutas | Ruta de envío | Ruta de consulta | Modelos actualmente públicos |
+|------|------|------|------|
+| Video Kling estándar | `POST /kling/v1/videos/text2video` `POST /kling/v1/videos/image2video` `POST /kling/v1/videos/multi-image2video` | `GET /kling/v1/videos/text2video/{task_id}` `GET /kling/v1/videos/image2video/{task_id}` `GET /kling/v1/videos/multi-image2video/{task_id}` | `kling-v2-5-turbo` `kling-v2-6` `kling-v3` |
+| Video Kling Omni | `POST /kling/v1/videos/omni-video` | `GET /kling/v1/videos/omni-video/{task_id}` | `kling-v3` `kling-v3` |
+
+Todas las tareas son asíncronas. Los resultados de las consultas priorizarán la devolución de la dirección de archivo de Crazyrouter, por ejemplo, `https://media.crazyrouter.com/...`.
+
+## Primeros 5 modelos y capacidades
+
+| Modelo | Familia de rutas | Capacidades actuales para clientes | Estado de validación | Resumen de dimensiones de cobro |
+|------|------|------|------|------|
+| `kling-v2-5-turbo` | Video Kling estándar | Generación de video desde texto, desde imagen, cuadro inicial/final, generación de video basado en imagen de referencia | `Beta` | `mode + duration` |
+| `kling-v2-6` | Video Kling estándar | Generación de video desde texto, desde imagen, cuadro inicial/final, generación de video de referencia, sonido, control de voz, control de acciones | `Beta` | `mode + duration + sound + voice control` |
+| `kling-v3` | Video Kling estándar | Generación de video desde texto, desde imagen, cuadro inicial/final, generación de video de referencia, control de acciones, referencia de elementos estándar de ruta | `Beta` | `mode + duration + sound`; el control de acciones se cobra en un grupo separado |
+| `kling-v3` | Video Kling Omni | Video Omni, referencia de imagen/elementos/video/sonido | `Beta` | `mode + duration + sound + video input` |
+
+<Note>
+  Las capacidades para clientes y los nombres de los campos se rigen por el protocolo oficial Kling; Crazyrouter solo considera los canales de terceros como proveedores internos y no expone su protocolo a los clientes. Los precios se rigen por la página de precios en tiempo real.
+</Note>
+
+<Note>
+  Los primeros 5 modelos Kling ya están alineados con la matriz oficial de campos y precios, pero el estado de capacidad se marcará provisionalmente como `Beta`. Una vez lanzados, actualizaremos su estado uno por uno basándonos en el análisis estadístico de scripts y bitácoras de producción.
+</Note>
+
+## Video Kling estándar
+
+```
+POST /kling/v1/videos/text2video
+POST /kling/v1/videos/image2video
+POST /kling/v1/videos/multi-image2video
+```
+
+### Modelos recomendados actualmente
+
+- `kling-v2-5-turbo`
+- `kling-v2-6`
+- `kling-v3`
+
+### Parámetros para generación de video desde texto
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `model_name` | string | Sí | Modelo estándar de video Kling |
+| `prompt` | string | Sí | Palabra clave para la descripción del video |
+| `image_urls` | array[string] | No | Cuadro inicial/oficial o inicial/final oficiales. Se recomienda especificar explícitamente al referenciar `@element_name` |
+| `negative_prompt` | string | No | Palabras clave negativas |
+| `duration` | string/integer | No | Uso común: `5` o `10` |
+| `aspect_ratio` | string | No | Por ejemplo: `16:9`, `9:16`, `1:1` |
+| `mode` | string | No | Modo de generación, como `std`, `pro` |
+| `sound` | string / boolean | No | Se recomienda usar los valores oficiales `on` / `off` |
+| `multi_shots` | boolean | No | Control oficial de múltiples escenas; compatible con alias `multi_shot` |
+| `multi_prompt` | array | Obligatorio bajo ciertas condiciones | Descripción de escenas, máximo 5 por tarea |
+| `kling_elements` | array | No | Referencia estándar de elementos de ruta `kling-v3`, usar con `@element_name` en el prompt |
+| `cfg_scale` | number | No | Intensidad de la orientación |
+| `camera_control` | object | No | Parámetros de control de cámara |
+| `callback_url` | string | No | Dirección de callback |
+| `external_task_id` | string | No | ID de tarea personalizado del cliente |
+
+### Ejemplo de solicitud
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/kling/v1/videos/text2video \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model_name": "kling-v2-5-turbo",
+    "prompt": "一只猫咪在花园里追蝴蝶，阳光明媚，电影级画质",
+    "negative_prompt": "模糊, 低质量, 变形",
+    "duration": "5",
+    "aspect_ratio": "16:9",
+    "mode": "std"
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://api.crazyrouter.com/kling/v1/videos/text2video",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY"
+    },
+    json={
+        "model_name": "kling-v2-5-turbo",
+        "prompt": "一只猫咪在花园里追蝴蝶，阳光明媚",
+        "duration": "5",
+        "aspect_ratio": "16:9",
+        "mode": "std"
+    }
+)
+
+print(response.json())
+```
+
+</CodeGroup>
+
+### Ejemplo de respuesta exitosa a la solicitud
+
+```json
+{
+  "code": "success",
+  "message": "",
+  "data": {
+    "id": "866168216002236456",
+    "task_id": "866168216002236456",
+    "model": "kling-v2-5-turbo",
+    "status": "queued"
+  }
+}
+```
+
+---
+
+### Parámetros para generación de video desde imagen
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `model_name` | string | Sí | Modelo estándar de video Kling |
+| `image_urls` | array[string] | Recomendado | Cuadro inicial/oficial o inicial/final oficiales; la longitud `1` indica cuadro inicial, la longitud `2` indica cuadro inicial y final |
+| `image` | string | Compatible | Alias compatible, equivalente a `image_urls[0]` |
+| `prompt` | string | No | Descripción de acción o cámara |
+| `image_tail` | string | Compatible | Alias compatible, equivalente a `image_urls[1]` |
+| `negative_prompt` | string | No | Palabras clave negativas |
+| `duration` | string/integer | No | Uso común: `5` o `10` |
+| `aspect_ratio` | string | No | Relación de aspecto de la salida |
+| `mode` | string | No | Modo de generación |
+| `sound` | string / boolean | No | Se recomienda usar los valores oficiales `on` / `off` |
+| `multi_shots` | boolean | No | Control oficial de múltiples escenas; compatible con alias `multi_shot` |
+| `multi_prompt` | array | Obligatorio bajo ciertas condiciones | Descripción de escenas |
+| `kling_elements` | array | No | Referencias estándar de elementos de ruta `kling-v3` |
+| `cfg_scale` | number | No | Intensidad de la orientación |
+| `camera_control` | object | No | Parámetros de control de cámara |
+| `callback_url` | string | No | Dirección de callback |
+| `external_task_id` | string | No | ID de tarea personalizado del cliente |
+
+### Ejemplo de generación de video desde imagen
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/kling/v1/videos/image2video \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model_name": "kling-v3",
+    "prompt": "图片中的人物开始微笑并缓缓转头",
+    "image": "https://example.com/portrait.jpg",
+    "duration": "5",
+    "mode": "std"
+  }'
+```
+
+El campo prioritario oficial es `image_urls`. `image + image_tail` aún puede usarse como alias compatible para cuadro inicial o inicial/final. Las tareas de video son asíncronas, obtén el resultado final mediante [consulta de tarea](/es/video/kling/query).
+
+### Generar video después de cargar una imagen de referencia local
+
+Si tu referencia está en local, primero usa un hosting temporal para obtener una URL pública y luego envíala a Kling. Las imágenes temporales se guardan por 72 horas por defecto, sin cobro extra diario dentro de este periodo.
+
+```bash cURL
+UPLOAD_RESPONSE=$(curl -sS -X POST https://api.crazyrouter.com/v1/files/uploads \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "file=@./portrait.png" \
+  -F "purpose=model_input")
+
+IMAGE_URL=$(python -c "import json,sys; print(json.load(sys.stdin)['url'])" <<< "$UPLOAD_RESPONSE")
+
+curl -X POST https://api.crazyrouter.com/kling/v1/videos/image2video \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d "{
+    \"model_name\": \"kling-v3\",
+    \"prompt\": \"图片中的人物缓缓转头并微笑，镜头轻微推进，电影级光影\",
+    \"image_urls\": [\"$IMAGE_URL\"],
+    \"duration\": \"5\",
+    \"mode\": \"std\"
+  }"
+```
+
+---
+
+### Parámetros para generación de video basado en imagen de referencia
+
+```
+POST /kling/v1/videos/multi-image2video
+```
+
+Esta ruta corresponde a la capacidad `Reference` oficial de Kling estándar. Es diferente de `image2video`: no usa `image` / `image_tail`, sino el oficial `image_list` como entrada de material de referencia.
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `model_name` | string | Sí | Modelo estándar de video Kling |
+| `prompt` | string | Sí | Descripción de coherencia y acción respecto a la imagen de referencia |
+| `image_list` | array | Sí | Lista oficial de imágenes de referencia |
+| `negative_prompt` | string | No | Palabras clave negativas |
+| `duration` | string/integer | No | Uso común: `5` o `10` |
+| `aspect_ratio` | string | No | Relación de aspecto de la salida |
+| `mode` | string | No | Modo de generación |
+| `sound` | string / boolean | No | Se recomienda usar los valores oficiales `on` / `off` |
+| `multi_shots` | boolean | No | Control oficial de múltiples escenas; compatible con alias `multi_shot` |
+| `multi_prompt` | array | Obligatorio bajo ciertas condiciones | Descripción de escenas |
+| `cfg_scale` | number | No | Intensidad de la orientación |
+| `camera_control` | object | No | Parámetros de control de cámara |
+| `callback_url` | string | No | Dirección de callback |
+| `external_task_id` | string | No | ID de tarea personalizado del cliente |
+
+### Ejemplo de generación de video con imagen de referencia
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/kling/v1/videos/multi-image2video \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model_name": "kling-v3",
+    "prompt": "保持同一只柴犬的形象，在草地上向前奔跑",
+    "duration": "5",
+    "aspect_ratio": "16:9",
+    "mode": "pro",
+    "image_list": [
+      {
+        "image_id": 1,
+        "image_url": "https://example.com/reference-1.png"
+      },
+      {
+        "image_id": 2,
+        "image_url": "https://example.com/reference-2.png"
+      }
+    ]
+  }'
+```
+
+<Note>
+  `multi-image2video` es la entrada para la capacidad de imagen de referencia estándar de la familia Kling; si tu entrada es solo cuadro inicial o cuadro inicial/final, usa `image2video`. Para consultar la tarea utiliza `GET /kling/v1/videos/multi-image2video/{task_id}`.
+</Note>
+
+---
+
+## Video Kling Omni
+
+```
+POST /kling/v1/videos/omni-video
+```
+
+### Modelos públicos actuales
+
+- `kling-v3`
+
+### Parámetros de la solicitud
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|------|------|------|------|
+| `model_name` | string | Sí | Solo se admite `kling-v3` |
+| `prompt` | string | Sí | Palabra clave Omni oficial; puede hacer referencia a objetos en `image_list`, `element_list`, `video_list`, `voice_list` |
+| `sound` | string | No | Valores oficiales usando `on` / `off` |
+| `duration` | string/integer | No | Uso común: `5`, límites específicos según la documentación oficial del modelo correspondiente |
+| `aspect_ratio` | string | No | Por ejemplo: `16:9`, `9:16`, `1:1` |
+| `mode` | string | No | Modo de generación, por ejemplo `std`, `pro` |
+| `multi_shots` | boolean | No | Control oficial de múltiples escenas; compatible con alias `multi_shot` |
+| `multi_prompt` | array | Obligatorio bajo ciertas condiciones | Descripción de escenas |
+| `image_list` | array | No | Lista oficial de imágenes de referencia |
+| `element_list` | array | No | Lista oficial de elementos de referencia |
+| `video_list` | array | No | Lista oficial de videos de referencia |
+| `voice_list` | array | No | Lista oficial de sonidos de referencia |
+| `callback_url` | string | No | Dirección de callback |
+| `external_task_id` | string | No | ID de tarea personalizado del cliente |
+
+### Ejemplo de solicitud Omni
+
+```bash cURL
+curl -X POST https://api.crazyrouter.com/kling/v1/videos/omni-video \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model_name": "kling-v3",
+    "prompt": "<<<image_1>>> 在雨夜巷子里向镜头走来",
+    "sound": "on",
+    "duration": "5",
+    "aspect_ratio": "16:9",
+    "mode": "pro",
+    "image_list": [
+      {
+        "image_id": 1,
+        "image_url": "https://example.com/reference.png"
+      }
+    ]
+  }'
+```
+
+<Note>
+  Para la ruta Omni, se recomienda usar la oficial `element_list`; es compatible con el alias `kling_elements`. Para consultar la tarea, usa `GET /kling/v1/videos/omni-video/{task_id}` de la misma familia de ruta que la de envío.
+</Note>
+
+{/* crazyrouter-model-links v2 */}
+## Páginas relacionadas
+
+- [Página de modelo Kling 2.6: precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/kling/aigc-video-kling-2-6?utm_source=docs&utm_medium=related)
+- [Página de modelo Kling 3.0: precios en tiempo real, ejemplos reales, código de llamada](https://crazyrouter.com/es/models/kling/aigc-video-kling-3-0?utm_source=docs&utm_medium=related)
+- [Todos los modelos y precios de Kling AI](https://crazyrouter.com/es/models/kling?utm_source=docs&utm_medium=related)

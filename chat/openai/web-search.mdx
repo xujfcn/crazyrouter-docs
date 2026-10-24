@@ -1,25 +1,25 @@
 ---
-title: "Web 搜索"
-description: "基于生产环境复核，使用 Crazyrouter 的 OpenAI 风格联网搜索能力"
+title: "网页搜索"
+description: "在Crazyrouter上已生产验证的OpenAI风格网页搜索"
 ---
-> 更新日期：2026-06-06
+> 内容更新: 2026-06-09
 
-# Web 搜索
+# 网页搜索
 
-本文页只写入 `2026-03-22` 已在 Crazyrouter 生产环境复核过的 OpenAI 风格 Web Search 用法。
+本页仅记录了在`2026-03-22`上针对Crazyrouter生产环境重新验证过的OpenAI风格网页搜索行为。
 
-当前主推荐路径：
+当前主要路径为：
 
 - `gpt-5.5`
 - `POST /v1/responses`
 - `tools: [{ "type": "web_search_preview" }]`
 
-## 当前主结论
+## 当前结论
 
-在今天的生产复核里：
+在今天对生产环境的复查中：
 
-- `gpt-5.5` 通过 Responses API 可以稳定返回 `web_search_call`
-- 旧式 Chat Completions `tools: [{ "type": "web_search" }]` 探针请求虽然返回 `200`，但本轮没有拿到可验证的搜索触发信号，因此这里不把它写成主示例
+- `gpt-5.5` 通过 Responses API 稳定地返回了 `web_search_call`
+- 老版本的 Chat Completions 探针使用 `tools: [{ "type": "web_search" }]` 返回了 `200`，但未能提供一个稳定、可验证的搜索触发信号，因此未作为主要文档记录的模式使用
 
 ---
 
@@ -40,13 +40,13 @@ curl https://api.crazyrouter.com/v1/responses \
   }'
 ```
 
-当前生产验证返回的关键 `output.type`：
+已验证 `output.type` 的值：
 
 ```json
 ["web_search_call", "message"]
 ```
 
-这说明搜索步骤和最终回答是分开返回的。
+这表明，搜索步骤和最终答案是分别返回的。
 
 ---
 
@@ -73,29 +73,29 @@ print(response.output_text)
 
 ---
 
-## 如何判断是否真的触发了搜索
+## 如何确认实际执行了搜索
 
-推荐直接检查 `response.output`：
+请直接检查 `response.output`：
 
 ```python Python
 for item in response.output:
     print(item.type)
 ```
 
-如果输出里出现：
+如果你看到：
 
 ```text
 web_search_call
 message
 ```
 
-就说明模型先做了搜索，再返回最终回答。
+那么模型先进行了搜索，然后给出了答案。
 
 ---
 
-## 不建议继续把它写成主示例的旧写法
+## 不推荐作为主要方案的旧模式
 
-本轮生产探针还检查了 Chat Completions 的旧写法：
+这次生产复查还测试了旧版 Chat Completions 结构：
 
 ```json
 {
@@ -107,21 +107,21 @@ message
 }
 ```
 
-结果是：
+结果：
 
-- 请求返回 `200`
-- 但未拿到稳定可验证的搜索触发标志
+- 请求返回了 `200`
+- 但未能观测到稳定、可验证的搜索触发标记
 
-因此当前 Crazyrouter 文档里，OpenAI 风格 Web Search 应优先按 Responses API 来写。
+因此，在 Crazyrouter 文档中，OpenAI 风格的网页搜索目前应首先通过 Responses API 记录。
 
 相关页面：
 
-- [Responses Web 搜索](/chat/responses/web-search)
-- [核心能力：Web Search](/features/web-search)
+- [Responses Web Search](/chat/responses/web-search)
+- [Feature Hub: Web Search](/features/web-search)
 
 {/* crazyrouter-model-links v2 */}
-## 相关页面
+## crazyrouter.com 相关内容
 
-- [GPT Image 1.5 模型页：实时价格、真实样例、调用代码](https://crazyrouter.com/zh/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
-- [GPT Image 2 模型页：实时价格、真实样例、调用代码](https://crazyrouter.com/zh/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
-- [OpenAI 全部模型与价格](https://crazyrouter.com/zh/models/openai?utm_source=docs&utm_medium=related)
+- [GPT Image 1.5模型页面：实时价格、真实样例、代码](https://crazyrouter.com/zh/models/openai/gpt-image-1-5?utm_source=docs&utm_medium=related)
+- [GPT Image 2模型页面：实时价格、真实样例、代码](https://crazyrouter.com/zh/models/openai/gpt-image-2?utm_source=docs&utm_medium=related)
+- [所有OpenAI模型的实时价格](https://crazyrouter.com/zh/models/openai?utm_source=docs&utm_medium=related)
